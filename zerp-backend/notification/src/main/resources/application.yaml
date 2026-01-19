@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: Notification
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://127.0.0.1:5432/zerp
+    username: postgres
+    password: 1234
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+server:
+  port: 1212
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+#logging:
+#  level:
+#    org:
+#      springframework:
+#        mail: DEBUG
+#        boot:
+#          autoconfigure:
+#            mail: DEBUG
+logging:
+  config: classpath:log4j2.xml
+
+kafka:
+  url: localhost:29092
+  topic:
+    email: email-notifications

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration status="WARN">
+
+    <Properties>
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %p [%t] %c - %m%n
+        </Property>
+        <Property name="LOG_DIR">
+<!--            /home/ubuntu/Desktop/logs/notification/-->
+            /app/logs/notification/
+        </Property>
+        <Property name="FILE_SIZE_ROOT">10MB</Property>
+        <Property name="FILE_SIZE_TRACE">5MB</Property>
+        <Property name="MAX_FILE">5</Property>
+    </Properties>
+
+    <Appenders>
+        <RollingFile name="RollingFile"
+                     fileName="${LOG_DIR}notification.log"
+                     filePattern="${LOG_DIR}notification-%d{dd-MM-yyyy}-%i.log.gz"
+                     ignoreExceptions="false">
+
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="${FILE_SIZE_ROOT}"/>
+            </Policies>
+
+            <DefaultRolloverStrategy max="${MAX_FILE}">
+                <Delete basePath="${LOG_DIR}" maxDepth="2">
+                    <IfFileName glob="*notification*.log.gz"/>
+                    <IfLastModified age="P30D"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+
+        <RollingFile name="RollingFileTrace"
+                     fileName="${LOG_DIR}notification-trace.log"
+                     filePattern="${LOG_DIR}notification-trace-%d{dd-MM-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="${FILE_SIZE_TRACE}"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${MAX_FILE}">
+                <Delete basePath="${LOG_DIR}" maxDepth="2">
+                    <IfFileName glob="*notification-trace*.log.gz"/>
+                    <IfLastModified age="P30D"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.zerp.notification.config.AspectLogger" level="trace" additivity="false">
+            <AppenderRef ref="RollingFileTrace"/>
+        </Logger>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
