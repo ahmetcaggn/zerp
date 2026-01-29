@@ -1,0 +1,15 @@
+include: package:very_good_analysis/analysis_options.10.0.0.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - lib/debug/**
+    - lib/**/*.g.dart
+    - test/test_config/hive/hive_common.dart
+
+linter:
+  rules:
+    sort_pub_dependencies: false
+    require_trailing_commas: false
+    cascade_invocations: false
+    public_member_api_docs: false

@@ -1,0 +1,2 @@
+# generated environment files must be ignored due to sensitive information
+app_env.g.dart
