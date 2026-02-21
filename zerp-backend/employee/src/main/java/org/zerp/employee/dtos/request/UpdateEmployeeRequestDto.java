@@ -3,8 +3,7 @@ package org.zerp.employee.dtos.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.Data;
-import org.zerp.common.model.EmploymentStatus;
-import org.zerp.common.model.Role;
+import org.zerp.common.entity.employee.EmploymentStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,8 +15,6 @@ public class UpdateEmployeeRequestDto {
     private String firstName;
 
     private String lastName;
-
-    private String employeeCode;
 
     @Email(message = "Please enter a valid email address")
     private String email;
@@ -37,11 +34,7 @@ public class UpdateEmployeeRequestDto {
 
     private Long managerId;
 
-    private Role role;
-
     private BigDecimal salary;
-
-    private Boolean isActive;
 
     private List<EmployeeContactDto> contacts;
 }

@@ -1,8 +1,11 @@
-package org.zerp.common.model;
+package org.zerp.common.entity.employee;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+import org.zerp.common.entity.base.BaseEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,8 +16,9 @@ import java.util.List;
 @Table(name = "employees")
 @Getter
 @Setter
+@SQLDelete(sql = "UPDATE employees SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLRestriction("deleted = false")
 public class Employee extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

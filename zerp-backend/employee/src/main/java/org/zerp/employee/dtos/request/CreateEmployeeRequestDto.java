@@ -5,8 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.Data;
-import org.zerp.common.model.EmploymentStatus;
-import org.zerp.common.model.Role;
+import org.zerp.common.entity.employee.EmploymentStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -20,9 +19,6 @@ public class CreateEmployeeRequestDto {
 
     @NotBlank(message = "Last name cannot be blank")
     private String lastName;
-
-    @NotBlank(message = "Employee code cannot be blank")
-    private String employeeCode;
 
     @NotBlank(message = "Email cannot be blank")
     @Email(message = "Please enter a valid email address")
@@ -41,9 +37,6 @@ public class CreateEmployeeRequestDto {
     private EmploymentStatus status;
 
     private Long managerId;
-
-    @NotNull(message = "Role cannot be null")
-    private Role role;
 
     private BigDecimal salary;
 

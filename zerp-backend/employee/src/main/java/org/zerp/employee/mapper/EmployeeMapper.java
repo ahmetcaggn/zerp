@@ -1,8 +1,8 @@
 package org.zerp.employee.mapper;
 
 import org.springframework.stereotype.Component;
-import org.zerp.common.model.Employee;
-import org.zerp.common.model.EmployeeContact;
+import org.zerp.common.entity.employee.Employee;
+import org.zerp.common.entity.employee.EmployeeContact;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.EmployeeContactDto;
 import org.zerp.employee.dtos.response.EmployeeContactResponseDto;
@@ -20,16 +20,13 @@ public class EmployeeMapper {
         Employee employee = new Employee();
         employee.setFirstName(dto.getFirstName());
         employee.setLastName(dto.getLastName());
-        employee.setEmployeeCode(dto.getEmployeeCode());
         employee.setEmail(dto.getEmail());
         employee.setPhoneNumber(dto.getPhoneNumber());
         employee.setNationalId(dto.getNationalId());
         employee.setDateOfBirth(dto.getDateOfBirth());
         employee.setHireDate(dto.getHireDate());
         employee.setStatus(dto.getStatus());
-        employee.setRole(dto.getRole());
         employee.setSalary(dto.getSalary());
-        employee.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : true);
         return employee;
     }
 
@@ -38,7 +35,6 @@ public class EmployeeMapper {
         dto.setId(employee.getId());
         dto.setFirstName(employee.getFirstName());
         dto.setLastName(employee.getLastName());
-        dto.setEmployeeCode(employee.getEmployeeCode());
         dto.setEmail(employee.getEmail());
         dto.setPhoneNumber(employee.getPhoneNumber());
         dto.setNationalId(employee.getNationalId());
@@ -46,9 +42,7 @@ public class EmployeeMapper {
         dto.setHireDate(employee.getHireDate());
         dto.setTerminationDate(employee.getTerminationDate());
         dto.setStatus(employee.getStatus());
-        dto.setRole(employee.getRole());
         dto.setSalary(employee.getSalary());
-        dto.setIsActive(employee.getIsActive());
         dto.setCreatedAt(employee.getCreatedAt());
         dto.setUpdatedAt(employee.getUpdatedAt());
 
@@ -70,12 +64,9 @@ public class EmployeeMapper {
         dto.setId(employee.getId());
         dto.setFirstName(employee.getFirstName());
         dto.setLastName(employee.getLastName());
-        dto.setEmployeeCode(employee.getEmployeeCode());
         dto.setEmail(employee.getEmail());
         dto.setPhoneNumber(employee.getPhoneNumber());
         dto.setStatus(employee.getStatus());
-        dto.setRole(employee.getRole());
-        dto.setIsActive(employee.getIsActive());
         return dto;
     }
 
@@ -84,7 +75,6 @@ public class EmployeeMapper {
         dto.setId(manager.getId());
         dto.setFirstName(manager.getFirstName());
         dto.setLastName(manager.getLastName());
-        dto.setEmployeeCode(manager.getEmployeeCode());
         dto.setEmail(manager.getEmail());
         return dto;
     }
@@ -96,7 +86,6 @@ public class EmployeeMapper {
         contact.setValue(dto.getValue());
         contact.setContactPersonName(dto.getContactPersonName());
         contact.setRelationship(dto.getRelationship());
-        contact.setPrimary(dto.isPrimary());
         return contact;
     }
 
@@ -107,7 +96,6 @@ public class EmployeeMapper {
         dto.setValue(contact.getValue());
         dto.setContactPersonName(contact.getContactPersonName());
         dto.setRelationship(contact.getRelationship());
-        dto.setPrimary(contact.isPrimary());
         return dto;
     }
 

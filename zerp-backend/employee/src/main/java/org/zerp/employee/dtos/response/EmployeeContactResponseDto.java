@@ -1,7 +1,7 @@
 package org.zerp.employee.dtos.response;
 
 import lombok.Data;
-import org.zerp.common.model.ContactType;
+import org.zerp.common.entity.employee.ContactType;
 
 @Data
 public class EmployeeContactResponseDto {
@@ -15,6 +15,4 @@ public class EmployeeContactResponseDto {
     private String contactPersonName;
 
     private String relationship;
-
-    private boolean isPrimary;
 }

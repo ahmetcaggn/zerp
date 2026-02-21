@@ -11,7 +11,5 @@ public class ManagerDto {
 
     private String lastName;
 
-    private String employeeCode;
-
     private String email;
 }

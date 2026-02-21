@@ -6,10 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.zerp.common.model.Employee;
-import org.zerp.common.model.EmployeeContact;
-import org.zerp.common.model.EmploymentStatus;
-import org.zerp.common.model.Role;
+import org.zerp.common.entity.employee.Employee;
+import org.zerp.common.entity.employee.EmployeeContact;
+import org.zerp.common.entity.employee.EmploymentStatus;
 import org.zerp.employee.Exception.DuplicateResourceException;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.EmployeeContactDto;
@@ -29,7 +28,7 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeResponseDto createEmployee(CreateEmployeeRequestDto dto) {
-        validateUniqueConstraints(dto.getEmail(), dto.getEmployeeCode(), dto.getNationalId(), null);
+        validateUniqueConstraints(dto.getEmail(), dto.getNationalId(), null);
 
         Employee employee = employeeMapper.toEntity(dto);
 
@@ -82,12 +81,6 @@ public class EmployeeService {
     }
 
     @Transactional(readOnly = true)
-    public List<EmployeeListResponseDto> getEmployeesByRole(Role role) {
-        List<Employee> employees = employeeRepository.findByRoleAndNotDeleted(role);
-        return employeeMapper.toListResponseDtoList(employees);
-    }
-
-    @Transactional(readOnly = true)
     public List<EmployeeListResponseDto> getEmployeesByManager(Long managerId) {
         List<Employee> employees = employeeRepository.findByManagerIdAndNotDeleted(managerId);
         return employeeMapper.toListResponseDtoList(employees);
@@ -104,7 +97,7 @@ public class EmployeeService {
         Employee employee = employeeRepository.findByIdWithContactsAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
 
-        validateUniqueConstraints(dto.getEmail(), dto.getEmployeeCode(), dto.getNationalId(), id);
+        validateUniqueConstraints(dto.getEmail(), dto.getNationalId(), id);
 
         updateEmployeeFields(employee, dto);
 
@@ -133,39 +126,8 @@ public class EmployeeService {
     public void deleteEmployee(Long id) {
         Employee employee = employeeRepository.findByIdAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
-        
-        // Use soft delete from BaseEntity
-        employee.softDelete(null); // TODO: Pass actual user ID when security is implemented
-        employeeRepository.save(employee);
-    }
 
-    /**
-     * Permanently delete an employee from the database.
-     * Use with caution - this action cannot be undone.
-     */
-    @Transactional
-    public void hardDeleteEmployee(Long id) {
-        if (!employeeRepository.existsById(id)) {
-            throw new EntityNotFoundException("Employee not found: " + id);
-        }
-        employeeRepository.deleteById(id);
-    }
-
-    /**
-     * Restore a soft-deleted employee.
-     */
-    @Transactional
-    public EmployeeResponseDto restoreEmployee(Long id) {
-        Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
-        
-        if (!employee.getIsDeleted()) {
-            throw new IllegalArgumentException("Employee is not deleted");
-        }
-        
-        employee.restore();
-        Employee savedEmployee = employeeRepository.save(employee);
-        return employeeMapper.toResponseDto(savedEmployee);
+        employeeRepository.delete(employee);
     }
 
     /**
@@ -190,7 +152,6 @@ public class EmployeeService {
     public EmployeeResponseDto deactivateEmployee(Long id) {
         Employee employee = employeeRepository.findByIdAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
-        employee.setIsActive(false);
         employee.setStatus(EmploymentStatus.TERMINATED);
         Employee savedEmployee = employeeRepository.save(employee);
         return employeeMapper.toResponseDto(savedEmployee);
@@ -200,32 +161,23 @@ public class EmployeeService {
     public EmployeeResponseDto activateEmployee(Long id) {
         Employee employee = employeeRepository.findByIdAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
-        employee.setIsActive(true);
         employee.setStatus(EmploymentStatus.ACTIVE);
         Employee savedEmployee = employeeRepository.save(employee);
         return employeeMapper.toResponseDto(savedEmployee);
     }
 
-    private void validateUniqueConstraints(String email, String employeeCode, String nationalId, Long excludeId) {
+    private void validateUniqueConstraints(String email, String nationalId, Long excludeId) {
         if (email != null) {
             employeeRepository.findByEmailAndNotDeleted(email).ifPresent(existing -> {
-                if (excludeId == null || !existing.getId().equals(excludeId)) {
+                if (!existing.getId().equals(excludeId)) {
                     throw new DuplicateResourceException("This email address is already in use: " + email);
-                }
-            });
-        }
-
-        if (employeeCode != null) {
-            employeeRepository.findByEmployeeCodeAndNotDeleted(employeeCode).ifPresent(existing -> {
-                if (excludeId == null || !existing.getId().equals(excludeId)) {
-                    throw new DuplicateResourceException("This employee code is already in use: " + employeeCode);
                 }
             });
         }
 
         if (nationalId != null) {
             employeeRepository.findByNationalIdAndNotDeleted(nationalId).ifPresent(existing -> {
-                if (excludeId == null || !existing.getId().equals(excludeId)) {
+                if (!existing.getId().equals(excludeId)) {
                     throw new DuplicateResourceException("This national ID is already in use: " + nationalId);
                 }
             });
@@ -235,7 +187,6 @@ public class EmployeeService {
     private void updateEmployeeFields(Employee employee, UpdateEmployeeRequestDto dto) {
         if (dto.getFirstName() != null) employee.setFirstName(dto.getFirstName());
         if (dto.getLastName() != null) employee.setLastName(dto.getLastName());
-        if (dto.getEmployeeCode() != null) employee.setEmployeeCode(dto.getEmployeeCode());
         if (dto.getEmail() != null) employee.setEmail(dto.getEmail());
         if (dto.getPhoneNumber() != null) employee.setPhoneNumber(dto.getPhoneNumber());
         if (dto.getNationalId() != null) employee.setNationalId(dto.getNationalId());
@@ -243,9 +194,7 @@ public class EmployeeService {
         if (dto.getHireDate() != null) employee.setHireDate(dto.getHireDate());
         if (dto.getTerminationDate() != null) employee.setTerminationDate(dto.getTerminationDate());
         if (dto.getStatus() != null) employee.setStatus(dto.getStatus());
-        if (dto.getRole() != null) employee.setRole(dto.getRole());
         if (dto.getSalary() != null) employee.setSalary(dto.getSalary());
-        if (dto.getIsActive() != null) employee.setIsActive(dto.getIsActive());
     }
 
     private void updateContacts(Employee employee, List<EmployeeContactDto> contactDtos) {

@@ -11,8 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.zerp.common.context.RequestContext;
 import org.zerp.common.dto.ApiResponse;
-import org.zerp.common.model.EmploymentStatus;
-import org.zerp.common.model.Role;
+import org.zerp.common.entity.employee.EmploymentStatus;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.UpdateEmployeeRequestDto;
 import org.zerp.employee.dtos.response.EmployeeListResponseDto;
@@ -59,12 +58,6 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<List<EmployeeListResponseDto>>> getEmployeesByStatus(
             @PathVariable EmploymentStatus status) {
         List<EmployeeListResponseDto> employees = employeeService.getEmployeesByStatus(status);
-        return ResponseEntity.ok(buildResponse(employees, "Employees retrieved successfully"));
-    }
-
-    @GetMapping("/role/{role}")
-    public ResponseEntity<ApiResponse<List<EmployeeListResponseDto>>> getEmployeesByRole(@PathVariable Role role) {
-        List<EmployeeListResponseDto> employees = employeeService.getEmployeesByRole(role);
         return ResponseEntity.ok(buildResponse(employees, "Employees retrieved successfully"));
     }
 
@@ -126,22 +119,6 @@ public class EmployeeController {
     // =============================================
     // Soft Delete Management Endpoints
     // =============================================
-
-    @PatchMapping("/{id}/restore")
-    public ResponseEntity<ApiResponse<EmployeeResponseDto>> restoreEmployee(@PathVariable Long id) {
-        EmployeeResponseDto employee = employeeService.restoreEmployee(id);
-        return ResponseEntity.ok(buildResponse(employee, "Employee restored successfully"));
-    }
-
-    @DeleteMapping("/{id}/hard")
-    public ResponseEntity<ApiResponse<Void>> hardDeleteEmployee(@PathVariable Long id) {
-        employeeService.hardDeleteEmployee(id);
-        ApiResponse<Void> response = ApiResponse.<Void>noContent()
-                .withDurationMs(RequestContext.endTiming())
-                .withVersion(appVersion);
-        response.setMessage("Employee permanently deleted");
-        return ResponseEntity.ok(response);
-    }
 
     @GetMapping("/deleted")
     public ResponseEntity<ApiResponse<List<EmployeeListResponseDto>>> getDeletedEmployees() {

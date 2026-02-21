@@ -1,4 +1,4 @@
-package org.zerp.common;
+package org.zerp.common.entity.employee;
 
 public enum ErrorType {
     FATAL,

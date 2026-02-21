@@ -1,8 +1,7 @@
 package org.zerp.employee.dtos.response;
 
 import lombok.Data;
-import org.zerp.common.model.EmploymentStatus;
-import org.zerp.common.model.Role;
+import org.zerp.common.entity.employee.EmploymentStatus;
 
 @Data
 public class EmployeeListResponseDto {
@@ -13,15 +12,9 @@ public class EmployeeListResponseDto {
 
     private String lastName;
 
-    private String employeeCode;
-
     private String email;
 
     private String phoneNumber;
 
     private EmploymentStatus status;
-
-    private Role role;
-
-    private Boolean isActive;
 }
