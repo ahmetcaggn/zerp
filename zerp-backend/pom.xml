@@ -21,6 +21,7 @@
         <module>gateway</module>
         <module>notification</module>
         <module>crm</module>
+        <module>employee</module>
     </modules>
 
     <properties>

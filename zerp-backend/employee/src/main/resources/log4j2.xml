@@ -7,7 +7,7 @@
             %d{yyyy-MM-dd HH:mm:ss.SSS} %p [%t] %c - %m%n
         </Property>
         <Property name="LOG_DIR">
-            logs/notification/
+            logs/employee/
         </Property>
         <Property name="FILE_SIZE_ROOT">10MB</Property>
         <Property name="FILE_SIZE_TRACE">5MB</Property>
@@ -16,8 +16,8 @@
 
     <Appenders>
         <RollingFile name="RollingFile"
-                     fileName="${LOG_DIR}notification.log"
-                     filePattern="${LOG_DIR}notification-%d{dd-MM-yyyy}-%i.log.gz"
+                     fileName="${LOG_DIR}employee.log"
+                     filePattern="${LOG_DIR}employee-%d{dd-MM-yyyy}-%i.log.gz"
                      ignoreExceptions="false">
 
             <PatternLayout>
@@ -31,7 +31,7 @@
 
             <DefaultRolloverStrategy max="${MAX_FILE}">
                 <Delete basePath="${LOG_DIR}" maxDepth="2">
-                    <IfFileName glob="*notification*.log.gz"/>
+                    <IfFileName glob="*employee*.log.gz"/>
                     <IfLastModified age="P30D"/>
                 </Delete>
             </DefaultRolloverStrategy>
@@ -42,8 +42,8 @@
         </Console>
 
         <RollingFile name="RollingFileTrace"
-                     fileName="${LOG_DIR}notification-trace.log"
-                     filePattern="${LOG_DIR}notification-trace-%d{dd-MM-yyyy}-%i.log.gz">
+                     fileName="${LOG_DIR}employee-trace.log"
+                     filePattern="${LOG_DIR}employee-trace-%d{dd-MM-yyyy}-%i.log.gz">
             <PatternLayout>
                 <Pattern>${LOG_PATTERN}</Pattern>
             </PatternLayout>
@@ -53,7 +53,7 @@
             </Policies>
             <DefaultRolloverStrategy max="${MAX_FILE}">
                 <Delete basePath="${LOG_DIR}" maxDepth="2">
-                    <IfFileName glob="*notification-trace*.log.gz"/>
+                    <IfFileName glob="*employee-trace*.log.gz"/>
                     <IfLastModified age="P30D"/>
                 </Delete>
             </DefaultRolloverStrategy>

@@ -62,7 +62,7 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="org.zerp.notification.config.AspectLogger" level="trace" additivity="false">
+        <Logger name="org.zerp.employee.config.AspectLogger" level="trace" additivity="false">
             <AppenderRef ref="RollingFileTrace"/>
         </Logger>
         <Root level="info">
