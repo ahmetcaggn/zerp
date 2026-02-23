@@ -70,20 +70,8 @@ public class EmployeeService {
     }
 
     @Transactional(readOnly = true)
-    public List<EmployeeListResponseDto> getActiveEmployees() {
-        List<Employee> employees = employeeRepository.findByIsActiveTrueAndNotDeleted();
-        return employeeMapper.toListResponseDtoList(employees);
-    }
-
-    @Transactional(readOnly = true)
     public List<EmployeeListResponseDto> getEmployeesByStatus(EmploymentStatus status) {
         List<Employee> employees = employeeRepository.findByStatusAndNotDeleted(status);
-        return employeeMapper.toListResponseDtoList(employees);
-    }
-
-    @Transactional(readOnly = true)
-    public List<EmployeeListResponseDto> getEmployeesByRole(Role role) {
-        List<Employee> employees = employeeRepository.findByRoleAndNotDeleted(role);
         return employeeMapper.toListResponseDtoList(employees);
     }
 
@@ -186,39 +174,12 @@ public class EmployeeService {
                 .map(employeeMapper::toListResponseDto);
     }
 
-    @Transactional
-    public EmployeeResponseDto deactivateEmployee(Long id) {
-        Employee employee = employeeRepository.findByIdAndNotDeleted(id)
-                .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
-        employee.setIsActive(false);
-        employee.setStatus(EmploymentStatus.TERMINATED);
-        Employee savedEmployee = employeeRepository.save(employee);
-        return employeeMapper.toResponseDto(savedEmployee);
-    }
-
-    @Transactional
-    public EmployeeResponseDto activateEmployee(Long id) {
-        Employee employee = employeeRepository.findByIdAndNotDeleted(id)
-                .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
-        employee.setIsActive(true);
-        employee.setStatus(EmploymentStatus.ACTIVE);
-        Employee savedEmployee = employeeRepository.save(employee);
-        return employeeMapper.toResponseDto(savedEmployee);
-    }
 
     private void validateUniqueConstraints(String email, String employeeCode, String nationalId, Long excludeId) {
         if (email != null) {
             employeeRepository.findByEmailAndNotDeleted(email).ifPresent(existing -> {
                 if (excludeId == null || !existing.getId().equals(excludeId)) {
                     throw new DuplicateResourceException("This email address is already in use: " + email);
-                }
-            });
-        }
-
-        if (employeeCode != null) {
-            employeeRepository.findByEmployeeCodeAndNotDeleted(employeeCode).ifPresent(existing -> {
-                if (excludeId == null || !existing.getId().equals(excludeId)) {
-                    throw new DuplicateResourceException("This employee code is already in use: " + employeeCode);
                 }
             });
         }
@@ -235,7 +196,6 @@ public class EmployeeService {
     private void updateEmployeeFields(Employee employee, UpdateEmployeeRequestDto dto) {
         if (dto.getFirstName() != null) employee.setFirstName(dto.getFirstName());
         if (dto.getLastName() != null) employee.setLastName(dto.getLastName());
-        if (dto.getEmployeeCode() != null) employee.setEmployeeCode(dto.getEmployeeCode());
         if (dto.getEmail() != null) employee.setEmail(dto.getEmail());
         if (dto.getPhoneNumber() != null) employee.setPhoneNumber(dto.getPhoneNumber());
         if (dto.getNationalId() != null) employee.setNationalId(dto.getNationalId());
@@ -243,9 +203,7 @@ public class EmployeeService {
         if (dto.getHireDate() != null) employee.setHireDate(dto.getHireDate());
         if (dto.getTerminationDate() != null) employee.setTerminationDate(dto.getTerminationDate());
         if (dto.getStatus() != null) employee.setStatus(dto.getStatus());
-        if (dto.getRole() != null) employee.setRole(dto.getRole());
         if (dto.getSalary() != null) employee.setSalary(dto.getSalary());
-        if (dto.getIsActive() != null) employee.setIsActive(dto.getIsActive());
     }
 
     private void updateContacts(Employee employee, List<EmployeeContactDto> contactDtos) {

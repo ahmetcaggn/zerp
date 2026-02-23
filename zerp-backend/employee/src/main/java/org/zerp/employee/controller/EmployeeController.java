@@ -49,22 +49,10 @@ public class EmployeeController {
         return ResponseEntity.ok(buildResponse(employee, "Employee retrieved successfully"));
     }
 
-    @GetMapping("/active")
-    public ResponseEntity<ApiResponse<List<EmployeeListResponseDto>>> getActiveEmployees() {
-        List<EmployeeListResponseDto> employees = employeeService.getActiveEmployees();
-        return ResponseEntity.ok(buildResponse(employees, "Active employees retrieved successfully"));
-    }
-
     @GetMapping("/status/{status}")
     public ResponseEntity<ApiResponse<List<EmployeeListResponseDto>>> getEmployeesByStatus(
             @PathVariable EmploymentStatus status) {
         List<EmployeeListResponseDto> employees = employeeService.getEmployeesByStatus(status);
-        return ResponseEntity.ok(buildResponse(employees, "Employees retrieved successfully"));
-    }
-
-    @GetMapping("/role/{role}")
-    public ResponseEntity<ApiResponse<List<EmployeeListResponseDto>>> getEmployeesByRole(@PathVariable Role role) {
-        List<EmployeeListResponseDto> employees = employeeService.getEmployeesByRole(role);
         return ResponseEntity.ok(buildResponse(employees, "Employees retrieved successfully"));
     }
 
@@ -109,18 +97,6 @@ public class EmployeeController {
                 .withVersion(appVersion);
         response.setMessage("Employee deleted successfully");
         return ResponseEntity.ok(response);
-    }
-
-    @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<ApiResponse<EmployeeResponseDto>> deactivateEmployee(@PathVariable Long id) {
-        EmployeeResponseDto employee = employeeService.deactivateEmployee(id);
-        return ResponseEntity.ok(buildResponse(employee, "Employee deactivated successfully"));
-    }
-
-    @PatchMapping("/{id}/activate")
-    public ResponseEntity<ApiResponse<EmployeeResponseDto>> activateEmployee(@PathVariable Long id) {
-        EmployeeResponseDto employee = employeeService.activateEmployee(id);
-        return ResponseEntity.ok(buildResponse(employee, "Employee activated successfully"));
     }
 
     // =============================================
