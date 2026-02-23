@@ -17,37 +17,37 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     // Soft Delete Aware Queries (exclude deleted records)
     // =============================================
 
-    @Query("SELECT e FROM Employee e WHERE e.id = :id AND e.isDeleted = false")
+    @Query("SELECT e FROM Employee e WHERE e.id = :id AND e.deleted = false")
     Optional<Employee> findByIdAndNotDeleted(@Param("id") Long id);
 
-    @Query("SELECT e FROM Employee e LEFT JOIN FETCH e.contacts WHERE e.id = :id AND e.isDeleted = false")
+    @Query("SELECT e FROM Employee e LEFT JOIN FETCH e.contacts WHERE e.id = :id AND e.deleted = false")
     Optional<Employee> findByIdWithContactsAndNotDeleted(@Param("id") Long id);
 
-    @Query("SELECT e FROM Employee e WHERE e.email = :email AND e.isDeleted = false")
+    @Query("SELECT e FROM Employee e WHERE e.email = :email AND e.deleted = false")
     Optional<Employee> findByEmailAndNotDeleted(@Param("email") String email);
 
-    @Query("SELECT e FROM Employee e WHERE e.nationalId = :nationalId AND e.isDeleted = false")
+    @Query("SELECT e FROM Employee e WHERE e.nationalId = :nationalId AND e.deleted = false")
     Optional<Employee> findByNationalIdAndNotDeleted(@Param("nationalId") String nationalId);
 
-    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Employee e WHERE e.email = :email AND e.isDeleted = false")
+    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Employee e WHERE e.email = :email AND e.deleted = false")
     boolean existsByEmailAndNotDeleted(@Param("email") String email);
 
-    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Employee e WHERE e.nationalId = :nationalId AND e.isDeleted = false")
+    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Employee e WHERE e.nationalId = :nationalId AND e.deleted = false")
     boolean existsByNationalIdAndNotDeleted(@Param("nationalId") String nationalId);
 
-    @Query("SELECT e FROM Employee e WHERE e.isDeleted = false")
+    @Query("SELECT e FROM Employee e WHERE e.deleted = false")
     List<Employee> findAllNotDeleted();
 
-    @Query("SELECT e FROM Employee e WHERE e.isDeleted = false")
+    @Query("SELECT e FROM Employee e WHERE e.deleted = false")
     Page<Employee> findAllNotDeleted(Pageable pageable);
 
-    @Query("SELECT e FROM Employee e WHERE e.status = :status AND e.isDeleted = false")
+    @Query("SELECT e FROM Employee e WHERE e.status = :status AND e.deleted = false")
     List<Employee> findByStatusAndNotDeleted(@Param("status") EmploymentStatus status);
 
-    @Query("SELECT e FROM Employee e WHERE e.manager.id = :managerId AND e.isDeleted = false")
+    @Query("SELECT e FROM Employee e WHERE e.manager.id = :managerId AND e.deleted = false")
     List<Employee> findByManagerIdAndNotDeleted(@Param("managerId") Long managerId);
 
-    @Query("SELECT e FROM Employee e WHERE e.isDeleted = false AND (" +
+    @Query("SELECT e FROM Employee e WHERE e.deleted = false AND (" +
             "LOWER(e.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(e.lastName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(e.email) LIKE LOWER(CONCAT('%', :keyword, '%')) )")
@@ -57,10 +57,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     // Include Deleted Records (for admin/audit purposes)
     // =============================================
 
-    @Query("SELECT e FROM Employee e WHERE e.isDeleted = true")
+    @Query("SELECT e FROM Employee e WHERE e.deleted = true")
     List<Employee> findAllDeleted();
 
-    @Query("SELECT e FROM Employee e WHERE e.isDeleted = true")
+    @Query("SELECT e FROM Employee e WHERE e.deleted = true")
     Page<Employee> findAllDeleted(Pageable pageable);
 
     // =============================================
