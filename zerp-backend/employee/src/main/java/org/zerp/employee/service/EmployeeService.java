@@ -6,10 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.zerp.common.model.Employee;
-import org.zerp.common.model.EmployeeContact;
-import org.zerp.common.model.EmploymentStatus;
-import org.zerp.common.model.Role;
+import org.zerp.common.entity.employee.Employee;
+import org.zerp.common.entity.employee.EmployeeContact;
+import org.zerp.common.entity.employee.EmploymentStatus;
 import org.zerp.employee.Exception.DuplicateResourceException;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.EmployeeContactDto;
@@ -29,7 +28,7 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeResponseDto createEmployee(CreateEmployeeRequestDto dto) {
-        validateUniqueConstraints(dto.getEmail(), dto.getEmployeeCode(), dto.getNationalId(), null);
+        validateUniqueConstraints(dto.getEmail(), dto.getNationalId(), null);
 
         Employee employee = employeeMapper.toEntity(dto);
 
@@ -92,7 +91,7 @@ public class EmployeeService {
         Employee employee = employeeRepository.findByIdWithContactsAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
 
-        validateUniqueConstraints(dto.getEmail(), dto.getEmployeeCode(), dto.getNationalId(), id);
+        validateUniqueConstraints(dto.getEmail(), dto.getNationalId(), id);
 
         updateEmployeeFields(employee, dto);
 
@@ -121,39 +120,8 @@ public class EmployeeService {
     public void deleteEmployee(Long id) {
         Employee employee = employeeRepository.findByIdAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
-        
-        // Use soft delete from BaseEntity
-        employee.softDelete(null); // TODO: Pass actual user ID when security is implemented
-        employeeRepository.save(employee);
-    }
 
-    /**
-     * Permanently delete an employee from the database.
-     * Use with caution - this action cannot be undone.
-     */
-    @Transactional
-    public void hardDeleteEmployee(Long id) {
-        if (!employeeRepository.existsById(id)) {
-            throw new EntityNotFoundException("Employee not found: " + id);
-        }
-        employeeRepository.deleteById(id);
-    }
-
-    /**
-     * Restore a soft-deleted employee.
-     */
-    @Transactional
-    public EmployeeResponseDto restoreEmployee(Long id) {
-        Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
-        
-        if (!employee.getIsDeleted()) {
-            throw new IllegalArgumentException("Employee is not deleted");
-        }
-        
-        employee.restore();
-        Employee savedEmployee = employeeRepository.save(employee);
-        return employeeMapper.toResponseDto(savedEmployee);
+        employeeRepository.delete(employee);
     }
 
     /**
@@ -175,10 +143,10 @@ public class EmployeeService {
     }
 
 
-    private void validateUniqueConstraints(String email, String employeeCode, String nationalId, Long excludeId) {
+    private void validateUniqueConstraints(String email, String nationalId, Long excludeId) {
         if (email != null) {
             employeeRepository.findByEmailAndNotDeleted(email).ifPresent(existing -> {
-                if (excludeId == null || !existing.getId().equals(excludeId)) {
+                if (!existing.getId().equals(excludeId)) {
                     throw new DuplicateResourceException("This email address is already in use: " + email);
                 }
             });
@@ -186,7 +154,7 @@ public class EmployeeService {
 
         if (nationalId != null) {
             employeeRepository.findByNationalIdAndNotDeleted(nationalId).ifPresent(existing -> {
-                if (excludeId == null || !existing.getId().equals(excludeId)) {
+                if (!existing.getId().equals(excludeId)) {
                     throw new DuplicateResourceException("This national ID is already in use: " + nationalId);
                 }
             });

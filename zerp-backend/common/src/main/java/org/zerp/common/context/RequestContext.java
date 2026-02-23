@@ -1,12 +1,14 @@
 package org.zerp.common.context;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 /**
  * Thread-local context for storing timing information across the request lifecycle.
  */
 public class RequestContext {
-
     private static final ThreadLocal<RequestContextData> context = ThreadLocal.withInitial(RequestContextData::new);
 
     public static void startTiming(String methodName) {
@@ -27,28 +29,10 @@ public class RequestContext {
         return java.time.Duration.between(data.getStartTime(), endTime).toMillis();
     }
 
-    public static void clear() {
-        context.remove();
-    }
-
+    @Setter
+    @Getter
     public static class RequestContextData {
         private LocalDateTime startTime;
         private String methodName;
-
-        public LocalDateTime getStartTime() {
-            return startTime;
-        }
-
-        public void setStartTime(LocalDateTime startTime) {
-            this.startTime = startTime;
-        }
-
-        public String getMethodName() {
-            return methodName;
-        }
-
-        public void setMethodName(String methodName) {
-            this.methodName = methodName;
-        }
     }
 }

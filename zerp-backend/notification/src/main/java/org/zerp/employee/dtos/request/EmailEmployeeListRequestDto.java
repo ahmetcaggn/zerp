@@ -1,6 +1,6 @@
 package org.zerp.employee.dtos.request;
 
-import org.zerp.common.ErrorType;
+import org.zerp.common.entity.employee.ErrorType;
 import lombok.Data;
 
 import java.util.Set;

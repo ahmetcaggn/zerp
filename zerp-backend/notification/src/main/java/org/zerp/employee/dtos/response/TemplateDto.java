@@ -1,6 +1,6 @@
 package org.zerp.employee.dtos.response;
 
-import org.zerp.common.ErrorType;
+import org.zerp.common.entity.employee.ErrorType;
 import org.zerp.employee.dtos.request.EmailEmployeeListRequestDto;
 import lombok.Data;
 

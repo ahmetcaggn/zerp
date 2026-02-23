@@ -1,4 +1,4 @@
-package org.zerp.common.entity;
+package org.zerp.common.entity.crm;
 
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+import org.zerp.common.entity.base.BaseEntity;
 
 @Entity
 @Table(name = "ticket_assignment")
@@ -13,8 +16,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TicketAssignmentEntity {
-    
+@SQLDelete(sql = "UPDATE ticket_assignment SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLRestriction("deleted = false")
+public class TicketAssignmentEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

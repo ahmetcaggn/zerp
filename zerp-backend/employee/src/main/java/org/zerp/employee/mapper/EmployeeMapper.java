@@ -1,8 +1,8 @@
 package org.zerp.employee.mapper;
 
 import org.springframework.stereotype.Component;
-import org.zerp.common.model.Employee;
-import org.zerp.common.model.EmployeeContact;
+import org.zerp.common.entity.employee.Employee;
+import org.zerp.common.entity.employee.EmployeeContact;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.EmployeeContactDto;
 import org.zerp.employee.dtos.response.EmployeeContactResponseDto;

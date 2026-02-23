@@ -1,13 +1,18 @@
-package org.zerp.common.model;
+package org.zerp.common.entity.employee;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+import org.zerp.common.entity.base.BaseEntity;
 
 @Entity
 @Table(name = "employee_contacts")
 @Getter
 @Setter
+@SQLDelete(sql = "UPDATE employee_contacts SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLRestriction("deleted = false")
 public class EmployeeContact extends BaseEntity {
 
     @Id

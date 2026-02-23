@@ -1,8 +1,7 @@
 package org.zerp.employee.dtos.response;
 
 import lombok.Data;
-import org.zerp.common.model.EmploymentStatus;
-import org.zerp.common.model.Role;
+import org.zerp.common.entity.employee.EmploymentStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,8 +16,6 @@ public class EmployeeResponseDto {
     private String firstName;
 
     private String lastName;
-
-    private String employeeCode;
 
     private String email;
 
@@ -36,11 +33,7 @@ public class EmployeeResponseDto {
 
     private ManagerDto manager;
 
-    private Role role;
-
     private BigDecimal salary;
-
-    private Boolean isActive;
 
     private List<EmployeeContactResponseDto> contacts;
 

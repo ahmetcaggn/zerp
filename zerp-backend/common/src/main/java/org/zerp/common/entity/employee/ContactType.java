@@ -1,4 +1,4 @@
-package org.zerp.common.model;
+package org.zerp.common.entity.employee;
 
 public enum ContactType {
     WORK_PHONE,       // İş Telefonu

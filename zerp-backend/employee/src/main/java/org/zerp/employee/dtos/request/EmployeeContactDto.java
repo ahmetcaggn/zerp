@@ -3,7 +3,7 @@ package org.zerp.employee.dtos.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import org.zerp.common.model.ContactType;
+import org.zerp.common.entity.employee.ContactType;
 
 @Data
 public class EmployeeContactDto {
@@ -19,6 +19,4 @@ public class EmployeeContactDto {
     private String contactPersonName;
 
     private String relationship;
-
-    private boolean isPrimary = false;
 }
