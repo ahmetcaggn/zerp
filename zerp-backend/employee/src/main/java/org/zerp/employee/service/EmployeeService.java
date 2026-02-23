@@ -69,12 +69,6 @@ public class EmployeeService {
     }
 
     @Transactional(readOnly = true)
-    public List<EmployeeListResponseDto> getActiveEmployees() {
-        List<Employee> employees = employeeRepository.findByIsActiveTrueAndNotDeleted();
-        return employeeMapper.toListResponseDtoList(employees);
-    }
-
-    @Transactional(readOnly = true)
     public List<EmployeeListResponseDto> getEmployeesByStatus(EmploymentStatus status) {
         List<Employee> employees = employeeRepository.findByStatusAndNotDeleted(status);
         return employeeMapper.toListResponseDtoList(employees);
@@ -148,23 +142,6 @@ public class EmployeeService {
                 .map(employeeMapper::toListResponseDto);
     }
 
-    @Transactional
-    public EmployeeResponseDto deactivateEmployee(Long id) {
-        Employee employee = employeeRepository.findByIdAndNotDeleted(id)
-                .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
-        employee.setStatus(EmploymentStatus.TERMINATED);
-        Employee savedEmployee = employeeRepository.save(employee);
-        return employeeMapper.toResponseDto(savedEmployee);
-    }
-
-    @Transactional
-    public EmployeeResponseDto activateEmployee(Long id) {
-        Employee employee = employeeRepository.findByIdAndNotDeleted(id)
-                .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
-        employee.setStatus(EmploymentStatus.ACTIVE);
-        Employee savedEmployee = employeeRepository.save(employee);
-        return employeeMapper.toResponseDto(savedEmployee);
-    }
 
     private void validateUniqueConstraints(String email, String nationalId, Long excludeId) {
         if (email != null) {

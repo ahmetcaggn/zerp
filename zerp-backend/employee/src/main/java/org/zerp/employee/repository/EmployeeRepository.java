@@ -41,26 +41,17 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Query("SELECT e FROM Employee e WHERE e.isDeleted = false")
     Page<Employee> findAllNotDeleted(Pageable pageable);
 
-    @Query(value = "SELECT e FROM Employee e WHERE e.isActive = true AND e.isDeleted = false")
-    List<Employee> findByIsActiveTrueAndNotDeleted();
-
     @Query("SELECT e FROM Employee e WHERE e.status = :status AND e.isDeleted = false")
     List<Employee> findByStatusAndNotDeleted(@Param("status") EmploymentStatus status);
 
     @Query("SELECT e FROM Employee e WHERE e.manager.id = :managerId AND e.isDeleted = false")
     List<Employee> findByManagerIdAndNotDeleted(@Param("managerId") Long managerId);
 
-    @Query(value = "SELECT e FROM Employee e WHERE e.isActive = true AND e.status = :status AND e.isDeleted = false")
-    List<Employee> findActiveByStatusAndNotDeleted(@Param("status") EmploymentStatus status);
-
     @Query("SELECT e FROM Employee e WHERE e.isDeleted = false AND (" +
-           "LOWER(e.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(e.lastName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(e.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+            "LOWER(e.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(e.lastName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(e.email) LIKE LOWER(CONCAT('%', :keyword, '%')) )")
     Page<Employee> searchEmployeesNotDeleted(@Param("keyword") String keyword, Pageable pageable);
-
-    @Query("SELECT e FROM Employee e WHERE e.isActive = :isActive AND e.isDeleted = false")
-    Page<Employee> findByIsActiveAndNotDeleted(@Param("isActive") Boolean isActive, Pageable pageable);
 
     // =============================================
     // Include Deleted Records (for admin/audit purposes)
@@ -78,34 +69,22 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     Optional<Employee> findByEmail(String email);
 
-    Optional<Employee> findByEmployeeCode(String employeeCode);
-
     Optional<Employee> findByNationalId(String nationalId);
 
     boolean existsByEmail(String email);
 
-    boolean existsByEmployeeCode(String employeeCode);
-
     boolean existsByNationalId(String nationalId);
-
-    List<Employee> findByIsActiveTrue();
 
     List<Employee> findByStatus(EmploymentStatus status);
 
     List<Employee> findByManagerId(Long managerId);
 
-    @Query("SELECT e FROM Employee e WHERE e.isActive = true AND e.status = :status")
-    List<Employee> findActiveByStatus(@Param("status") EmploymentStatus status);
-
     @Query("SELECT e FROM Employee e LEFT JOIN FETCH e.contacts WHERE e.id = :id")
     Optional<Employee> findByIdWithContacts(@Param("id") Long id);
 
     @Query("SELECT e FROM Employee e WHERE " +
-           "LOWER(e.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(e.lastName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(e.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(e.employeeCode) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+            "LOWER(e.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(e.lastName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(e.email) LIKE LOWER(CONCAT('%', :keyword, '%')) ")
     Page<Employee> searchEmployees(@Param("keyword") String keyword, Pageable pageable);
-
-    Page<Employee> findByIsActive(Boolean isActive, Pageable pageable);
 }
