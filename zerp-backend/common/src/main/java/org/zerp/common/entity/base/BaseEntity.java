@@ -33,7 +33,7 @@ public class BaseEntity implements Serializable {
     protected Long createdBy;
 
     @LastModifiedBy
-    @Column(name = "created_by", updatable = false)
+    @Column(name = "updated_by", updatable = false)
     protected Long updatedBy;
 
     @Column(name = "deleted_at")
