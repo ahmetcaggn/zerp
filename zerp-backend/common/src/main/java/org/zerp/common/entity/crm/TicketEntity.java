@@ -22,56 +22,59 @@ import java.util.List;
 @SQLDelete(sql = "UPDATE ticket SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("deleted = false")
 public class TicketEntity extends BaseEntity {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    
+
     @Column(nullable = false)
     private String title;
-    
+
     @Column(columnDefinition = "TEXT")
     private String description;
-    
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TicketStatus status;
-    
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TicketPriority priority;
-    
+
+    @Column(name = "tenant_id", nullable = false)
+    private Integer tenantId;
+
     @Column(name = "created_by_party_id", nullable = false)
     private Integer createdByPartyId;
-    
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-    
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    
+
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;
-    
+
     @Column(name = "closed_at")
     private LocalDateTime closedAt;
-    
+
     @OneToOne(mappedBy = "ticket")
     private TicketAssignmentEntity currentAssignment;
 
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TicketCommentEntity> comments = new ArrayList<>();
-    
+
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TicketHistoryEntity> history = new ArrayList<>();
-    
+
     @OneToOne(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private TicketSlaTrackingEntity slaTracking;
-    
+
     public enum TicketStatus {
         OPEN, IN_PROGRESS, WAITING_CUSTOMER, RESOLVED, CLOSED, CANCELLED
     }
-    
+
     public enum TicketPriority {
         LOW, MEDIUM, HIGH, CRITICAL
     }

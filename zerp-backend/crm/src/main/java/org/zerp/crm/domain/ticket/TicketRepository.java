@@ -2,56 +2,55 @@ package org.zerp.crm.domain.ticket;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
- * Port (DDD) - Domain katmanında interface, Adapter katmanında implementation
- * Ticket aggregate'i için repository contract'ı
+ * Port (DDD) — Domain layer interface, Adapter layer implementation
+ * Repository contract for the Ticket aggregate
  */
 public interface TicketRepository {
-    
+
     /**
-     * Yeni ticket'ı kaydeder
+     * Saves a new or updated ticket
      */
     Ticket save(Ticket ticket);
-    
+
     /**
-     * Ticket'ı ID'ye göre bulur
+     * Finds a ticket by its ID
      */
     Optional<Ticket> findById(TicketId ticketId);
-    
+
     /**
-     * Müşteriye ait tüm ticket'ları bulur
+     * Finds all tickets created by a customer
      */
-    List<Ticket> findByCustomerId(UUID customerId);
-    
+    List<Ticket> findByCustomerId(Integer customerId);
+
     /**
-     * Agent'a atanmış ticket'ları bulur
+     * Finds tickets assigned to a specific agent
      */
-    List<Ticket> findByAssignedTo(UUID agentId);
-    
+    List<Ticket> findByAssignedAgentId(Integer agentPartyId);
+
     /**
-     * Takıma atanmış ticket'ları bulur
+     * Finds tickets assigned to a specific team
      */
-    List<Ticket> findByTeamId(UUID teamId);
-    
+    List<Ticket> findByTeamId(Integer teamId);
+
     /**
-     * Belirli duruma sahip ticket'ları bulur
+     * Finds tickets with a specific status
      */
     List<Ticket> findByStatus(TicketStatus status);
-    
+
     /**
-     * SLA ihlali olan ticket'ları bulur
+     * Finds tickets with SLA breaches
      */
     List<Ticket> findSlaBreachedTickets();
-    
+
     /**
-     * Ticket'ı siler (soft delete olabilir)
+     * Deletes a ticket (soft delete)
      */
     void delete(TicketId ticketId);
-    
+
     /**
-     * Ticket'ın var olup olmadığını kontrol eder
+     * Checks whether a ticket exists
      */
     boolean exists(TicketId ticketId);
 }
