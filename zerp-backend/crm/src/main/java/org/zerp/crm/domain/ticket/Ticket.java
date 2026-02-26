@@ -30,7 +30,7 @@ public class Ticket {
 
     // Private constructor for creation — includes side-effects (history, SLA init)
     private Ticket(String title, String description, Integer tenantId, Integer createdByPartyId,
-            TicketPriority priority) {
+                   TicketPriority priority) {
         this.id = TicketId.of(0);
         this.title = validateTitle(title);
         this.description = description;
@@ -50,11 +50,11 @@ public class Ticket {
 
     // Private constructor for reconstitution — no side-effects
     private Ticket(TicketId id, String title, String description, TicketStatus status,
-            TicketPriority priority, Integer tenantId, Integer createdByPartyId,
-            LocalDateTime createdAt, LocalDateTime updatedAt,
-            LocalDateTime resolvedAt, LocalDateTime closedAt,
-            List<Comment> comments, List<History> historyEntries,
-            SlaTracking slaTracking, TicketAssignment assignment) {
+                   TicketPriority priority, Integer tenantId, Integer createdByPartyId,
+                   LocalDateTime createdAt, LocalDateTime updatedAt,
+                   LocalDateTime resolvedAt, LocalDateTime closedAt,
+                   List<Comment> comments, List<History> historyEntries,
+                   SlaTracking slaTracking, TicketAssignment assignment) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -81,7 +81,7 @@ public class Ticket {
 
     // Factory method - Ticket creation
     public static Ticket create(String title, String description, Integer tenantId, Integer createdByPartyId,
-            TicketPriority priority) {
+                                TicketPriority priority) {
         return new Ticket(title, description, tenantId, createdByPartyId, priority);
     }
 
@@ -109,6 +109,7 @@ public class Ticket {
 
     // Business Rules - Add Comment to Ticket
     public void addComment(Integer authorId, Comment.AuthorType authorType, String content, boolean isInternal) {
+        validateCommentable();
         Comment comment = Comment.create(authorId, authorType, content, isInternal);
         this.comments.add(comment);
         this.updatedAt = LocalDateTime.now();
@@ -175,10 +176,16 @@ public class Ticket {
                 String.format("Priority changed from %s to %s", oldPriority, newPriority)));
     }
 
-    // Business Rules - Validation for Assignment
+    // Helper methods - Validation for Assignment
     private void validateAssignable() {
         if (this.status == TicketStatus.CLOSED || this.status == TicketStatus.CANCELLED) {
             throw new IllegalStateException("Cannot assign a closed or cancelled ticket");
+        }
+    }
+
+    private void validateCommentable() {
+        if (this.status == TicketStatus.CLOSED || this.status == TicketStatus.CANCELLED) {
+            throw new IllegalStateException("Cannot make a comment or cancelled ticket");
         }
     }
 
@@ -278,12 +285,6 @@ public class Ticket {
         }
     }
 
-    // Business Rules - Close Ticket
-    public void closeTicket(Integer actorId) {
-        if (this.status != TicketStatus.CLOSED) {
-            changeStatus(TicketStatus.CLOSED, actorId);
-        }
-    }
 
     // Business Rules - SLA pause
     public void pauseSla(int minutes) {

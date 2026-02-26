@@ -77,7 +77,7 @@ public class TicketService {
 
     public TicketResponse closeTicket(Integer ticketId, Integer actorId) {
         Ticket ticket = findOrThrow(ticketId);
-        ticket.closeTicket(actorId);
+        ticket.changeStatus(TicketStatus.CLOSED,actorId);
         Ticket saved = ticketRepository.save(ticket);
         return toResponse(saved);
     }

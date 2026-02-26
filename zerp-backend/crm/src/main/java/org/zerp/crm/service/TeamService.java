@@ -72,19 +72,6 @@ public class TeamService {
         return toResponse(saved);
     }
 
-    public TeamResponse addTenant(Integer teamId, Integer tenantId) {
-        Team team = findOrThrow(teamId);
-        team.addTenant(tenantId);
-        Team saved = teamRepository.save(team);
-        return toResponse(saved);
-    }
-
-    public TeamResponse removeTenant(Integer teamId, Integer tenantId) {
-        Team team = findOrThrow(teamId);
-        team.removeTenant(tenantId);
-        Team saved = teamRepository.save(team);
-        return toResponse(saved);
-    }
 
     // ─── Helpers ───
 
@@ -104,7 +91,6 @@ public class TeamService {
                 team.getName(),
                 team.getDescription(),
                 team.isActive(),
-                memberResponses,
-                team.getTenantIds());
+                memberResponses);
     }
 }

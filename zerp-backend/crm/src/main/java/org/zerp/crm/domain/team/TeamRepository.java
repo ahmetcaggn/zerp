@@ -20,11 +20,6 @@ public interface TeamRepository {
     Optional<Team> findById(TeamId teamId);
 
     /**
-     * Finds all teams belonging to a tenant
-     */
-    List<Team> findByTenantId(Integer tenantId);
-
-    /**
      * Finds all teams that a user is a member of
      */
     List<Team> findByMemberUserId(Integer userId);

@@ -3,7 +3,6 @@ package org.zerp.crm.adapter.persistence;
 import org.springframework.stereotype.Repository;
 import org.zerp.common.entity.crm.TeamEntity;
 import org.zerp.common.entity.crm.TeamMemberEntity;
-import org.zerp.common.entity.crm.TeamTenantEntity;
 import org.zerp.crm.domain.team.*;
 
 import java.util.*;
@@ -44,12 +43,6 @@ public class TeamRepositoryAdapter implements TeamRepository {
     }
 
     @Override
-    public List<Team> findByTenantId(Integer tenantId) {
-        // TODO: Add custom query when needed
-        return List.of();
-    }
-
-    @Override
     public List<Team> findByMemberUserId(Integer userId) {
         // TODO: Add custom query when needed
         return List.of();
@@ -75,10 +68,6 @@ public class TeamRepositoryAdapter implements TeamRepository {
             entity.getMembers().add(toNewMemberEntity(m, entity));
         }
 
-        for (Integer tenantId : team.getTenantIds()) {
-            entity.getTenants().add(toNewTenantEntity(tenantId, entity));
-        }
-
         return entity;
     }
 
@@ -87,7 +76,6 @@ public class TeamRepositoryAdapter implements TeamRepository {
     private void mergeIntoEntity(Team team, TeamEntity entity) {
         applyScalarFields(team, entity);
         mergeMembers(team, entity);
-        mergeTenants(team, entity);
     }
 
     private void applyScalarFields(Team team, TeamEntity entity) {
@@ -124,24 +112,6 @@ public class TeamRepositoryAdapter implements TeamRepository {
         }
     }
 
-    private void mergeTenants(Team team, TeamEntity entity) {
-        // Index existing by tenantId
-        Map<Integer, TeamTenantEntity> existingByTenantId = entity.getTenants().stream()
-                .collect(Collectors.toMap(TeamTenantEntity::getTenantId, Function.identity()));
-
-        Set<Integer> domainTenantIds = new HashSet<>(team.getTenantIds());
-
-        // Remove tenants no longer in domain
-        entity.getTenants().removeIf(te -> !domainTenantIds.contains(te.getTenantId()));
-
-        // Add new tenants
-        for (Integer tenantId : team.getTenantIds()) {
-            if (!existingByTenantId.containsKey(tenantId)) {
-                entity.getTenants().add(toNewTenantEntity(tenantId, entity));
-            }
-        }
-    }
-
     // ─── Factory methods for new child entities ───
 
     private TeamMemberEntity toNewMemberEntity(TeamMember member, TeamEntity team) {
@@ -150,13 +120,6 @@ public class TeamRepositoryAdapter implements TeamRepository {
         entity.setUserId(member.getUserId());
         entity.setRole(TeamMemberEntity.TeamMemberRole.valueOf(member.getRole().name()));
         entity.setJoinedAt(member.getJoinedAt());
-        return entity;
-    }
-
-    private TeamTenantEntity toNewTenantEntity(Integer tenantId, TeamEntity team) {
-        TeamTenantEntity entity = new TeamTenantEntity();
-        entity.setTeam(team);
-        entity.setTenantId(tenantId);
         return entity;
     }
 
@@ -174,19 +137,12 @@ public class TeamRepositoryAdapter implements TeamRepository {
             }
         }
 
-        List<Integer> tenantIds = new ArrayList<>();
-        if (entity.getTenants() != null) {
-            for (TeamTenantEntity te : entity.getTenants()) {
-                tenantIds.add(te.getTenantId());
-            }
-        }
 
         return Team.reconstitute(
                 TeamId.of(entity.getId()),
                 entity.getName(),
                 entity.getDescription(),
                 entity.getIsActive(),
-                members,
-                tenantIds);
+                members);
     }
 }
