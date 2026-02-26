@@ -37,7 +37,4 @@ public class TeamEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TeamMemberEntity> members = new ArrayList<>();
-
-    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TeamTenantEntity> tenants = new ArrayList<>();
 }

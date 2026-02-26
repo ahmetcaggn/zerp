@@ -15,7 +15,6 @@ public class Team {
     private String description;
     private boolean isActive;
     private final List<TeamMember> members;
-    private final List<Integer> tenantIds;
 
     // Private constructor for creation — includes defaults
     private Team(TeamId id, String name, String description) {
@@ -24,23 +23,18 @@ public class Team {
         this.description = description;
         this.isActive = true;
         this.members = new ArrayList<>();
-        this.tenantIds = new ArrayList<>();
     }
 
     // Private constructor for reconstitution — no defaults, no side-effects
     private Team(TeamId id, String name, String description, boolean isActive,
-            List<TeamMember> members, List<Integer> tenantIds) {
+            List<TeamMember> members) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.isActive = isActive;
         this.members = new ArrayList<>();
-        this.tenantIds = new ArrayList<>();
         if (members != null) {
             this.members.addAll(members);
-        }
-        if (tenantIds != null) {
-            this.tenantIds.addAll(tenantIds);
         }
     }
 
@@ -55,31 +49,8 @@ public class Team {
             String name,
             String description,
             boolean isActive,
-            List<TeamMember> members,
-            List<Integer> tenantIds) {
-        return new Team(id, name, description, isActive, members, tenantIds);
-    }
-
-    // ─── Tenant Management ───
-
-    public void addTenant(Integer tenantId) {
-        if (tenantIds.contains(tenantId)) {
-            throw new IllegalArgumentException(
-                    String.format("Tenant %d is already associated with this team", tenantId));
-        }
-        tenantIds.add(tenantId);
-    }
-
-    public void removeTenant(Integer tenantId) {
-        boolean removed = tenantIds.remove(tenantId);
-        if (!removed) {
-            throw new IllegalArgumentException(
-                    String.format("Tenant %d is not associated with this team", tenantId));
-        }
-    }
-
-    public boolean servesTenant(Integer tenantId) {
-        return tenantIds.contains(tenantId);
+            List<TeamMember> members) {
+        return new Team(id, name, description, isActive, members);
     }
 
     // ─── Member Management ───
@@ -182,10 +153,6 @@ public class Team {
 
     public List<TeamMember> getMembers() {
         return Collections.unmodifiableList(members);
-    }
-
-    public List<Integer> getTenantIds() {
-        return Collections.unmodifiableList(tenantIds);
     }
 
     // Package-private setter (for reconstitution)

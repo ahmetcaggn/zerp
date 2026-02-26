@@ -7,6 +7,5 @@ public record TeamResponse(
         String name,
         String description,
         boolean isActive,
-        List<TeamMemberResponse> members,
-        List<Integer> tenantIds) {
+        List<TeamMemberResponse> members) {
 }

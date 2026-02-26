@@ -72,20 +72,4 @@ public class TeamController {
         TeamResponse response = teamService.changeMemberRole(id, userId, request);
         return ResponseEntity.ok(response);
     }
-
-    @PostMapping("/{id}/tenants/{tenantId}")
-    public ResponseEntity<TeamResponse> addTenant(
-            @PathVariable Integer id,
-            @PathVariable Integer tenantId) {
-        TeamResponse response = teamService.addTenant(id, tenantId);
-        return ResponseEntity.ok(response);
-    }
-
-    @DeleteMapping("/{id}/tenants/{tenantId}")
-    public ResponseEntity<TeamResponse> removeTenant(
-            @PathVariable Integer id,
-            @PathVariable Integer tenantId) {
-        TeamResponse response = teamService.removeTenant(id, tenantId);
-        return ResponseEntity.ok(response);
-    }
 }
