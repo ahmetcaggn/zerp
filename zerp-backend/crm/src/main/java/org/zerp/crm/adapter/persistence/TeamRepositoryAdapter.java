@@ -43,12 +43,6 @@ public class TeamRepositoryAdapter implements TeamRepository {
     }
 
     @Override
-    public List<Team> findByTenantId(Integer tenantId) {
-        // TODO: Add custom query when needed
-        return List.of();
-    }
-
-    @Override
     public List<Team> findByMemberUserId(Integer userId) {
         // TODO: Add custom query when needed
         return List.of();

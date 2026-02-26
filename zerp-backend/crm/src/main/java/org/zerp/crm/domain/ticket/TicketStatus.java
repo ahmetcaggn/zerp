@@ -27,11 +27,10 @@ public enum TicketStatus {
     public boolean canTransitionTo(TicketStatus newStatus) {
         return switch (this) {
             case OPEN -> newStatus == IN_PROGRESS || newStatus == CANCELLED;
-            case IN_PROGRESS -> newStatus == WAITING_CUSTOMER || newStatus == RESOLVED || newStatus == CANCELLED;
-            case WAITING_CUSTOMER -> newStatus == IN_PROGRESS || newStatus == RESOLVED || newStatus == CANCELLED;
+            case IN_PROGRESS -> newStatus == WAITING_CUSTOMER || newStatus == RESOLVED || newStatus == CANCELLED || newStatus == OPEN;
+            case WAITING_CUSTOMER -> newStatus == IN_PROGRESS || newStatus == RESOLVED || newStatus == CANCELLED || newStatus == OPEN;
             case RESOLVED -> newStatus == CLOSED || newStatus == OPEN;
-            case CLOSED -> newStatus == OPEN;
-            case CANCELLED -> false;
+            case CLOSED, CANCELLED -> false;
         };
     }
 }
