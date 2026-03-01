@@ -4,94 +4,75 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.zerp.common.context.RequestContext;
-import org.zerp.common.dto.ApiResponse;
-import org.zerp.common.dto.ErrorDetails;
 
+import java.net.URI;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
 @Log4j2
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Value("${app.version:0.0.1-SNAPSHOT}")
     private String appVersion;
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleEntityNotFoundException(EntityNotFoundException exception) {
+    public ResponseEntity<ProblemDetail> handleEntityNotFoundException(EntityNotFoundException exception) {
         log.error(exception.getMessage(), exception);
-        
-        ApiResponse<Void> response = ApiResponse.<Void>error(
-                HttpStatus.NOT_FOUND.value(),
-                exception.getMessage(),
-                ErrorDetails.of("NOT_FOUND", exception.getMessage())
-        ).withDurationMs(RequestContext.endTiming()).withVersion(appVersion);
-        
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(buildProblem(HttpStatus.NOT_FOUND, "NOT_FOUND", exception.getMessage()));
     }
 
     @ExceptionHandler(DuplicateResourceException.class)
-    public ResponseEntity<ApiResponse<Void>> handleDuplicateResourceException(DuplicateResourceException exception) {
+    public ResponseEntity<ProblemDetail> handleDuplicateResourceException(DuplicateResourceException exception) {
         log.error(exception.getMessage(), exception);
-        
-        ApiResponse<Void> response = ApiResponse.<Void>error(
-                HttpStatus.CONFLICT.value(),
-                exception.getMessage(),
-                ErrorDetails.of("DUPLICATE_RESOURCE", exception.getMessage())
-        ).withDurationMs(RequestContext.endTiming()).withVersion(appVersion);
-        
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(buildProblem(HttpStatus.CONFLICT, "DUPLICATE_RESOURCE", exception.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handleValidationExceptions(MethodArgumentNotValidException exception) {
+    public ResponseEntity<ProblemDetail> handleValidationExceptions(MethodArgumentNotValidException exception) {
         log.error("Validation error", exception);
-        
         Map<String, String> fieldErrors = new HashMap<>();
-        exception.getBindingResult().getAllErrors().forEach((error) -> {
+        exception.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            fieldErrors.put(fieldName, errorMessage);
+            fieldErrors.put(fieldName, error.getDefaultMessage());
         });
-        
-        ApiResponse<Void> response = ApiResponse.<Void>error(
-                HttpStatus.BAD_REQUEST.value(),
-                "Validation failed",
-                ErrorDetails.withFieldErrors(fieldErrors)
-        ).withDurationMs(RequestContext.endTiming()).withVersion(appVersion);
-        
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        ProblemDetail problem = buildProblem(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Validation failed");
+        problem.setProperty("fieldErrors", fieldErrors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException exception) {
+    public ResponseEntity<ProblemDetail> handleIllegalArgumentException(IllegalArgumentException exception) {
         log.error(exception.getMessage(), exception);
-        
-        ApiResponse<Void> response = ApiResponse.<Void>error(
-                HttpStatus.BAD_REQUEST.value(),
-                exception.getMessage(),
-                ErrorDetails.of("BAD_REQUEST", exception.getMessage())
-        ).withDurationMs(RequestContext.endTiming()).withVersion(appVersion);
-        
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(buildProblem(HttpStatus.BAD_REQUEST, "BAD_REQUEST", exception.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception exception) {
+    public ResponseEntity<ProblemDetail> handleGenericException(Exception exception) {
         log.error("Unexpected error occurred", exception);
-        
-        ApiResponse<Void> response = ApiResponse.<Void>error(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "An unexpected error occurred",
-                ErrorDetails.of("INTERNAL_ERROR", exception.getMessage())
-        ).withDurationMs(RequestContext.endTiming()).withVersion(appVersion);
-        
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(buildProblem(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "An unexpected error occurred"));
+    }
+
+    private ProblemDetail buildProblem(HttpStatus status, String errorCode, String detail) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
+        problem.setType(URI.create("https://zerp.org/errors/" + errorCode.toLowerCase().replace('_', '-')));
+        problem.setProperty("errorCode", errorCode);
+        problem.setProperty("timestamp", Instant.now());
+        problem.setProperty("durationMs", RequestContext.endTiming());
+        problem.setProperty("version", appVersion);
+        return problem;
     }
 }
