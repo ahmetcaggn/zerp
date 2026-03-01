@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.slf4j.MDC;
 
 import java.time.Instant;
 import java.util.List;
@@ -22,6 +23,7 @@ public class ApiResponse<T> {
     private T data;
     private Meta meta;
     private List<Parameter> parameters;
+    private static final String CORRELATION_ID_MDC_KEY = "correlationId";
 
     public static <T> ApiResponse<T> success(T data) {
         return ApiResponse.<T>builder()
@@ -29,7 +31,7 @@ public class ApiResponse<T> {
                 .statusCode(200)
                 .message("Success")
                 .data(data)
-                .meta(Meta.builder().timestamp(Instant.now()).build())
+                .meta(defaultMeta())
                 .build();
     }
 
@@ -39,7 +41,7 @@ public class ApiResponse<T> {
                 .statusCode(200)
                 .message(message)
                 .data(data)
-                .meta(Meta.builder().timestamp(Instant.now()).build())
+                .meta(defaultMeta())
                 .build();
     }
 
@@ -49,7 +51,7 @@ public class ApiResponse<T> {
                 .statusCode(201)
                 .message("Created successfully")
                 .data(data)
-                .meta(Meta.builder().timestamp(Instant.now()).build())
+                .meta(defaultMeta())
                 .build();
     }
 
@@ -58,7 +60,7 @@ public class ApiResponse<T> {
                 .success(true)
                 .statusCode(204)
                 .message("No content")
-                .meta(Meta.builder().timestamp(Instant.now()).build())
+                .meta(defaultMeta())
                 .build();
     }
 
@@ -96,5 +98,16 @@ public class ApiResponse<T> {
             this.meta = new Meta();
         }
     }
-}
 
+    private static Meta defaultMeta() {
+        String correlationId = MDC.get(CORRELATION_ID_MDC_KEY);
+        return Meta.builder()
+                .timestamp(Instant.now())
+                .traceId(hasText(correlationId) ? correlationId : null)
+                .build();
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.trim().isEmpty();
+    }
+}

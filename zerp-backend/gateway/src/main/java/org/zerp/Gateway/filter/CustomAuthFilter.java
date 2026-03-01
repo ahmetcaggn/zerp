@@ -12,6 +12,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Objects;
@@ -52,6 +53,19 @@ public class CustomAuthFilter extends AbstractGatewayFilterFactory<CustomAuthFil
             }
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.set("Authorization", authHeader);
+            String correlationId = exchange.getRequest().getHeaders().getFirst(RequestContextWebFilter.CORRELATION_ID_HEADER);
+            if (StringUtils.hasText(correlationId)) {
+                httpHeaders.set(RequestContextWebFilter.CORRELATION_ID_HEADER, correlationId);
+            }
+            String clientIp = exchange.getRequest().getHeaders().getFirst(RequestContextWebFilter.CLIENT_IP_HEADER);
+            if (StringUtils.hasText(clientIp)) {
+                httpHeaders.set(RequestContextWebFilter.CLIENT_IP_HEADER, clientIp);
+            }
+            String gatewayRequestStartMs = exchange.getRequest().getHeaders()
+                    .getFirst(RequestContextWebFilter.GATEWAY_REQUEST_START_MS_HEADER);
+            if (StringUtils.hasText(gatewayRequestStartMs)) {
+                httpHeaders.set(RequestContextWebFilter.GATEWAY_REQUEST_START_MS_HEADER, gatewayRequestStartMs);
+            }
             String token = authHeader.substring(7);
             HttpEntity<TokenValidateDto> httpRequest = new HttpEntity<>(new TokenValidateDto(token), httpHeaders);
             String urlValidate = serviceInstance.getUri() + "/security/validateToken";
