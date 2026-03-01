@@ -28,7 +28,7 @@ public class ServiceTimingAspect {
         LocalDateTime startTime = LocalDateTime.now();
         
         log.debug("Entering service method: {} at {}", methodName, startTime);
-        RequestContext.startTiming(methodName);
+        RequestContext.startTimingIfAbsent(methodName);
 
         try {
             Object result = joinPoint.proceed();
