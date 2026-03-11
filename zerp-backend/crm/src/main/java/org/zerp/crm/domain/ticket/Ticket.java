@@ -1,17 +1,23 @@
 package org.zerp.crm.domain.ticket;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * Ticket Aggregate Root
  * Encapsulates business rules and ticket behaviors.
  */
+@Getter
+@SuppressWarnings("FieldMayBeFinal")
 public class Ticket {
-
+    @Setter(AccessLevel.PACKAGE)
     private TicketId id;
+
     private String title;
     private String description;
     private TicketStatus status;
@@ -307,71 +313,5 @@ public class Ticket {
             throw new IllegalArgumentException("Ticket title is too long (max 200 characters)");
         }
         return title.trim();
-    }
-
-    // Getters
-    public TicketId getId() {
-        return id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public TicketStatus getStatus() {
-        return status;
-    }
-
-    public TicketPriority getPriority() {
-        return priority;
-    }
-
-    public Integer getTenantId() {
-        return tenantId;
-    }
-
-    public Integer getCreatedByPartyId() {
-        return createdByPartyId;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public LocalDateTime getResolvedAt() {
-        return resolvedAt;
-    }
-
-    public LocalDateTime getClosedAt() {
-        return closedAt;
-    }
-
-    public TicketAssignment getCurrentAssignment() {
-        return currentAssignment;
-    }
-
-    public List<Comment> getComments() {
-        return Collections.unmodifiableList(comments);
-    }
-
-    public List<History> getHistoryEntries() {
-        return Collections.unmodifiableList(historyEntries);
-    }
-
-    public SlaTracking getSlaTracking() {
-        return slaTracking;
-    }
-
-    // Package-private setters (for reconstitution)
-    void setId(TicketId id) {
-        this.id = id;
     }
 }

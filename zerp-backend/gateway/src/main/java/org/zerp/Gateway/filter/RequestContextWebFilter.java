@@ -1,6 +1,8 @@
 package org.zerp.Gateway.filter;
 
 import lombok.extern.log4j.Log4j2;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -25,6 +27,7 @@ public class RequestContextWebFilter implements WebFilter, Ordered {
     private static final String CLIENT_IP_MDC_KEY = "clientIp";
 
     @Override
+    @NullMarked
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String existingCorrelationId = exchange.getRequest().getHeaders().getFirst(CORRELATION_ID_HEADER);
         String correlationId = StringUtils.hasText(existingCorrelationId) ? existingCorrelationId : UUID.randomUUID().toString();

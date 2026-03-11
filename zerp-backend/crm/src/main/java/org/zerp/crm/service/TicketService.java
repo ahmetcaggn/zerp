@@ -104,6 +104,7 @@ public class TicketService {
                         c.getContent(), c.isInternal(), c.getCreatedAt()))
                 .collect(Collectors.toList());
 
+        //noinspection ExtractMethodRecommender
         TicketResponse.SlaTrackingResponse slaResponse = null;
         if (ticket.getSlaTracking() != null) {
             SlaTracking s = ticket.getSlaTracking();

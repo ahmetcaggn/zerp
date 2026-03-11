@@ -322,6 +322,7 @@ public class TicketRepositoryAdapter implements TicketRepository {
         }
 
         // Map assignment
+        //noinspection ExtractMethodRecommender
         TicketAssignment assignment = null;
         if (entity.getCurrentAssignment() != null) {
             TicketAssignmentEntity ae = entity.getCurrentAssignment();

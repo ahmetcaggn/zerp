@@ -1,5 +1,6 @@
 package org.zerp.Gateway.filter;
 
+import org.jspecify.annotations.NullMarked;
 import org.zerp.Gateway.dto.TokenValidateDto;
 import org.zerp.Gateway.exception.CustomForbiddenException;
 import org.zerp.Gateway.exception.InvalidJwtTokenException;
@@ -32,13 +33,15 @@ public class CustomAuthFilter extends AbstractGatewayFilterFactory<CustomAuthFil
     }
 
     @Override
+    @NullMarked
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
-            if (!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
+            if (!exchange.getRequest().getHeaders().containsHeader(HttpHeaders.AUTHORIZATION)) {
                 throw new InvalidJwtTokenException("No authorization header");
             }
 
-            String authHeader = Objects.requireNonNull(exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION)).get(0);
+            String authHeader = Objects.requireNonNull(
+                    exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION)).getFirst();
 
             if (!authHeader.startsWith("Bearer ")) {
                 throw new InvalidJwtTokenException("Authorization header must start with Bearer");
@@ -47,7 +50,7 @@ public class CustomAuthFilter extends AbstractGatewayFilterFactory<CustomAuthFil
             ServiceInstance serviceInstance;
             String serviceName = "SECURITY";
             try {
-                serviceInstance = discoveryClient.getInstances(serviceName).get(0);
+                serviceInstance = discoveryClient.getInstances(serviceName).getFirst();
             } catch (Exception e) {
                 throw new NoSuchServiceException(serviceName + " service is not available");
             }
