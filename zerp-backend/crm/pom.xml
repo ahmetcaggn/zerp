@@ -16,8 +16,7 @@
     <dependencies>
         <dependency>
             <groupId>org.zerp</groupId>
-            <artifactId>Common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <artifactId>common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -97,6 +97,11 @@
                 <artifactId>spring-boot-starter-aop</artifactId>
                 <version>4.0.0-M2</version>
             </dependency>
+            <dependency>
+                <groupId>org.zerp</groupId>
+                <artifactId>common</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
