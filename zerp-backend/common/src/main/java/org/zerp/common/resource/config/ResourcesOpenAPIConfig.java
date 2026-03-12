@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @see org.springdoc.core.customizers.OpenApiCustomizer
  */
 @AutoConfiguration
+@SuppressWarnings("GrazieInspection")
 public class ResourcesOpenAPIConfig {
     private static final String GENERIC_TAG = "Objects";
 
