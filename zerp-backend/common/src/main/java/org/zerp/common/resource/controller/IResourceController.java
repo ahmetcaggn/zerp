@@ -6,23 +6,23 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.zerp.common.dto.ApiResponse;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * Interface defining REST endpoints compatible with ra-spring-data-provider.
- * This controller provides a unified API for CRUD operations that seamlessly integrates
- * with ra-spring-data-provider's expectations, including support for pagination,
+ * This controller provides a unified API for CRUD operations including support for pagination,
  * sorting, filtering, and bulk operations.
  *
  * @param <T>  the Response DTO type for this resource
+ * @param <LT> the Response DTO type for getList and getManyReference operation.
  * @param <C>  the Create DTO type for this resource
  * @param <ID> the type of the entity's identifier
  */
-@Tag(name = "RA Controller", description = "Generic REST controller for ra-spring-data-provider compatibility" +
-        "Add @Tag annotation to your controller implementation to provide API documentation details specific to your resource.")
-public interface IRAController<T, C, ID> {
+@Tag(name = "Objects", description = "Generic REST controller. Add @Tag annotation to your " +
+        "controller implementation to provide API documentation details specific to your resource.")
+public interface IResourceController<T, LT, C, ID> {
     /**
      * Retrieves a paginated list of entities with support for sorting and filtering.
      * This endpoint implements ra-spring-data-provider's <b>getList</b> operation.
@@ -71,7 +71,7 @@ public interface IRAController<T, C, ID> {
             operationId = "getList"
     )
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<T>> getList(
+    ResponseEntity<ApiResponse<List<LT>>> getList(
             @Parameter(description = "Starting index for pagination (0-based, inclusive)", required = true, example = "0")
             @RequestParam(name = "_start") int _start,
             @Parameter(description = "Ending index for pagination (0-based, exclusive)", required = true, example = "10")
@@ -125,7 +125,7 @@ public interface IRAController<T, C, ID> {
             operationId = "getMany"
     )
     @GetMapping(value = "/many", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<T>> getMany(
+    ResponseEntity<ApiResponse<List<T>>> getMany(
             @Parameter(description = "List of entity IDs to retrieve", required = true, example = "[1, 5, 12]")
             @RequestParam(name = "id") List<ID> id
     );
@@ -183,7 +183,7 @@ public interface IRAController<T, C, ID> {
             operationId = "getManyReference"
     )
     @GetMapping(value = "/of/{target}/{targetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<T>> getManyReference(
+    ResponseEntity<ApiResponse<List<LT>>> getManyReference(
             @Parameter(description = "Name of the field that references the target entity", required = true, example = "userId")
             @PathVariable(name = "target") String target,
             @Parameter(description = "ID of the target entity being referenced", required = true, example = "123")
@@ -217,7 +217,7 @@ public interface IRAController<T, C, ID> {
                     """
     )
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<T> getOne(
+    ResponseEntity<ApiResponse<T>> getOne(
             @Parameter(description = "Unique identifier of the entity to retrieve", required = true, example = "1")
             @PathVariable(name = "id") ID id
     );
@@ -239,7 +239,7 @@ public interface IRAController<T, C, ID> {
                     """
     )
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<T> create(
+    ResponseEntity<ApiResponse<T>> create(
             @Parameter(description = "Entity data to create", required = true)
             @RequestBody C data
     );
@@ -261,7 +261,7 @@ public interface IRAController<T, C, ID> {
                     """
     )
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<T> update(
+    ResponseEntity<ApiResponse<T>> update(
             @Parameter(description = "Unique identifier of the entity to update", required = true, example = "1")
             @PathVariable(name = "id") ID id,
             @Parameter(description = "Map of field names to new values for partial update", required = true)
@@ -283,7 +283,7 @@ public interface IRAController<T, C, ID> {
                     """
     )
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<Void> delete(
+    ResponseEntity<ApiResponse<Void>> delete(
             @Parameter(description = "Unique identifier of the entity to delete", required = true, example = "1")
             @PathVariable(name = "id") ID id
     );
@@ -309,7 +309,7 @@ public interface IRAController<T, C, ID> {
                     """
     )
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<ID>> updateMany(
+    ResponseEntity<ApiResponse<List<ID>>> updateMany(
             @Parameter(description = "List of entity IDs to update", example = "[1, 2, 3]")
             @RequestParam(name = "id", required = false) List<ID> id,
             @Parameter(description = "Map of field names to new values for bulk update", required = true)
@@ -332,7 +332,7 @@ public interface IRAController<T, C, ID> {
                     """
     )
     @DeleteMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<ID>> deleteMany(
+    ResponseEntity<ApiResponse<List<ID>>> deleteMany(
             @Parameter(description = "List of entity IDs to delete", example = "[1, 2, 3]")
             @RequestParam(name = "id", required = false) List<ID> id
     );

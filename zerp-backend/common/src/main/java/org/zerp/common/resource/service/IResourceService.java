@@ -15,7 +15,7 @@ import java.util.Map;
  * @param <ID> The type of the entity's identifier.
  */
 @SuppressWarnings("UnusedReturnValue")
-public interface IRAService<T, C, ID> {
+public interface IResourceService<T, LT, C, ID> {
     /**
      * Finds entities matching the given filters and global search query.
      *
@@ -23,7 +23,7 @@ public interface IRAService<T, C, ID> {
      * @param pageable Pagination and sorting information.
      * @return A page of entities.
      */
-    Page<T> findWithFilters(Map<String, String> filters, Pageable pageable);
+    Page<LT> findWithFilters(Map<String, String> filters, Pageable pageable);
 
     /**
      * Finds entities that reference another entity, based on a target field and ID, along with additional filters.
@@ -34,7 +34,7 @@ public interface IRAService<T, C, ID> {
      * @param pageable Pagination and sorting information.
      * @return A page of entities referencing the target entity and matching the filters.
      */
-    Page<T> findWithTargetAndFilters(String target,
+    Page<LT> findWithTargetAndFilters(String target,
                                      String targetId,
                                      Map<String, String> filters,
                                      Pageable pageable);

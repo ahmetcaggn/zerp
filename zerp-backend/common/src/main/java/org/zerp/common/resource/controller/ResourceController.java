@@ -2,6 +2,7 @@ package org.zerp.common.resource.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +11,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
-import org.zerp.common.resource.service.IRAService;
+import org.zerp.common.context.RequestContext;
+import org.zerp.common.dto.ApiResponse;
+import org.zerp.common.resource.service.IResourceService;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,20 +26,24 @@ import java.util.Map;
  * Extend this class and implement the {@link #getService()} method to provide the specific service for your resource.
  *
  * @param <T>  the Response DTO type for this resource
+ * @param <LT> the Response DTO type for getList and getManyReference operation.
  * @param <C>  the Create DTO type for this resource
  * @param <ID> the type of the entity's identifier
  */
-public abstract class RAController<T, C, ID> implements IRAController<T, C, ID> {
-    private static final Log log = LogFactory.getLog(RAController.class);
+public abstract class ResourceController<T, LT, C, ID> implements IResourceController<T, LT, C, ID> {
+    private static final Log log = LogFactory.getLog(ResourceController.class);
 
-    protected abstract IRAService<T, C, ID> getService();
+    protected abstract IResourceService<T, LT, C, ID> getService();
 
     private static final List<String> RESERVED_PARAMS = List.of(
             "_start", "_end", "_sort", "_order", "_embed"
     );
 
+    @Value("${app.version:0.0.1-SNAPSHOT}")
+    private String appVersion;
+
     @Override
-    public ResponseEntity<List<T>> getList(
+    public ResponseEntity<ApiResponse<List<LT>>> getList(
             int _start,
             int _end,
             String _sort,
@@ -66,27 +73,27 @@ public abstract class RAController<T, C, ID> implements IRAController<T, C, ID> 
 
         // Refine params and fetch Data
         RESERVED_PARAMS.forEach(allParams.keySet()::remove);
-        Page<T> pageResult = getService().findWithFilters(allParams, pageable);
+        Page<LT> pageResult = getService().findWithFilters(allParams, pageable);
 
         // Set Headers
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(pageResult.getTotalElements()));
         headers.add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "X-Total-Count");
 
-        return new ResponseEntity<>(pageResult.getContent(), headers, HttpStatus.OK);
+        return new ResponseEntity<>(buildResponse(pageResult.getContent()), headers, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<T>> getMany(List<ID> id) {
+    public ResponseEntity<ApiResponse<List<T>>> getMany(List<ID> id) {
         if (id == null || id.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "id parameter is null or empty. This parameter is required for `getMany` operation.");
         }
-        return ResponseEntity.ok(getService().findAllById(id));
+        return ResponseEntity.ok(buildResponse(getService().findAllById(id)));
     }
 
     @Override
-    public ResponseEntity<List<T>> getManyReference(
+    public ResponseEntity<ApiResponse<List<LT>>> getManyReference(
             String target,
             String targetId,
             int _start,
@@ -118,48 +125,70 @@ public abstract class RAController<T, C, ID> implements IRAController<T, C, ID> 
 
         // Refine params and fetch Data
         RESERVED_PARAMS.forEach(allParams.keySet()::remove);
-        Page<T> pageResult = getService().findWithTargetAndFilters(target, targetId, allParams, pageable);
+        Page<LT> pageResult = getService().findWithTargetAndFilters(target, targetId, allParams, pageable);
 
         // Set Headers
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(pageResult.getTotalElements()));
         headers.add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "X-Total-Count");
 
-        return new ResponseEntity<>(pageResult.getContent(), headers, HttpStatus.OK);
+        return new ResponseEntity<>(buildResponse(pageResult.getContent()), headers, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<T> getOne(ID id) {
-        return ResponseEntity.ok(getService().findById(id));
+    public ResponseEntity<ApiResponse<T>> getOne(ID id) {
+        return ResponseEntity.ok(buildResponse(getService().findById(id)));
     }
 
     @Override
-    public ResponseEntity<T> create(C data) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(getService().create(data));
+    public ResponseEntity<ApiResponse<T>> create(C data) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(buildResponse(getService().create(data)));
     }
 
     @Override
-    public ResponseEntity<T> update(ID id, Map<String, Object> fields) {
-        return ResponseEntity.ok(getService().update(id, fields));
+    public ResponseEntity<ApiResponse<T>> update(ID id, Map<String, Object> fields) {
+        return ResponseEntity.ok(buildResponse(getService().update(id, fields)));
     }
 
     @Override
-    public ResponseEntity<List<ID>> updateMany(List<ID> id, Map<String, Object> fields) {
+    public ResponseEntity<ApiResponse<List<ID>>> updateMany(List<ID> id, Map<String, Object> fields) {
         List<ID> ids = id != null ? id : Collections.emptyList();
         List<ID> updatedIds = getService().updateMany(ids, fields);
-        return ResponseEntity.ok(updatedIds);
+        return ResponseEntity.ok(buildResponse(updatedIds));
     }
 
     @Override
-    public ResponseEntity<Void> delete(ID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(ID id) {
         getService().deleteById(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(buildResponse());
     }
 
     @Override
-    public ResponseEntity<List<ID>> deleteMany(List<ID> id) {
+    public ResponseEntity<ApiResponse<List<ID>>> deleteMany(List<ID> id) {
         List<ID> ids = id != null ? id : Collections.emptyList();
         List<ID> deletedIds = getService().deleteMany(ids);
-        return ResponseEntity.ok(deletedIds);
+        return ResponseEntity.ok(buildResponse(deletedIds));
+    }
+
+    protected <R> ApiResponse<R> buildResponse() {
+        Long durationMs = RequestContext.endTiming();
+        return ApiResponse.<R>noContent()
+                .withDurationMs(durationMs)
+                .withVersion(appVersion);
+    }
+
+    protected <R> ApiResponse<R> buildResponse(R data) {
+        Long durationMs = RequestContext.endTiming();
+        return ApiResponse.success(data)
+                .withDurationMs(durationMs)
+                .withVersion(appVersion);
+    }
+
+    protected <R> ApiResponse<R> buildResponse(R data, String message) {
+        Long durationMs = RequestContext.endTiming();
+        return ApiResponse.success(data, message)
+                .withDurationMs(durationMs)
+                .withVersion(appVersion);
     }
 }
