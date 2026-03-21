@@ -15,7 +15,7 @@ import java.util.Map;
  * @param <ID> The type of the entity's identifier.
  */
 @SuppressWarnings("UnusedReturnValue")
-public interface IResourceService<T, LT, C, ID> {
+public interface IResourceService<T, LT, C, U, ID> {
     /**
      * Finds entities matching the given filters and global search query.
      *
@@ -35,9 +35,9 @@ public interface IResourceService<T, LT, C, ID> {
      * @return A page of entities referencing the target entity and matching the filters.
      */
     Page<LT> findWithTargetAndFilters(String target,
-                                     String targetId,
-                                     Map<String, String> filters,
-                                     Pageable pageable);
+                                      String targetId,
+                                      Map<String, String> filters,
+                                      Pageable pageable);
 
     /**
      * Retrieves all entities by their IDs.
@@ -66,11 +66,20 @@ public interface IResourceService<T, LT, C, ID> {
     /**
      * Updates specific fields of an existing entity.
      *
-     * @param id     The ID of the entity to update.
-     * @param fields A map of field names to their new values.
+     * @param id   The ID of the entity to update.
+     * @param data A map of field names to their new values to update on the entity.
      * @return The updated entity.
      */
-    T update(ID id, Map<String, Object> fields);
+    T patch(ID id, Map<String, Object> data);
+
+    /**
+     * Updates all fields of an existing entity.
+     *
+     * @param id   The ID of the entity to update.
+     * @param data The dto of field names to their new values to update on the entity.
+     * @return The updated entity.
+     */
+    T update(ID id, U data);
 
     /**
      * Updates multiple entities with the same field values.
@@ -79,7 +88,7 @@ public interface IResourceService<T, LT, C, ID> {
      * @param fields A map of field names to their new values to apply to all entities.
      * @return A list of IDs of the updated entities.
      */
-    List<ID> updateMany(Iterable<ID> ids, Map<String, Object> fields);
+    List<ID> patchMany(Iterable<ID> ids, Map<String, Object> fields);
 
     /**
      * Deletes an entity by its ID.

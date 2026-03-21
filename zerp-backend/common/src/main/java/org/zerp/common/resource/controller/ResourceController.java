@@ -30,10 +30,10 @@ import java.util.Map;
  * @param <C>  the Create DTO type for this resource
  * @param <ID> the type of the entity's identifier
  */
-public abstract class ResourceController<T, LT, C, ID> implements IResourceController<T, LT, C, ID> {
+public abstract class ResourceController<T, LT, C, U, ID> implements IResourceController<T, LT, C, U, ID> {
     private static final Log log = LogFactory.getLog(ResourceController.class);
 
-    protected abstract IResourceService<T, LT, C, ID> getService();
+    protected abstract IResourceService<T, LT, C, U, ID> getService();
 
     private static final List<String> RESERVED_PARAMS = List.of(
             "_start", "_end", "_sort", "_order", "_embed"
@@ -147,14 +147,19 @@ public abstract class ResourceController<T, LT, C, ID> implements IResourceContr
     }
 
     @Override
-    public ResponseEntity<ApiResponse<T>> update(ID id, Map<String, Object> fields) {
-        return ResponseEntity.ok(buildResponse(getService().update(id, fields)));
+    public ResponseEntity<ApiResponse<T>> patch(ID id, Map<String, Object> fields) {
+        return ResponseEntity.ok(buildResponse(getService().patch(id, fields)));
     }
 
     @Override
-    public ResponseEntity<ApiResponse<List<ID>>> updateMany(List<ID> id, Map<String, Object> fields) {
+    public ResponseEntity<ApiResponse<T>> update(ID id, U data) {
+        return ResponseEntity.ok(buildResponse(getService().update(id, data)));
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<List<ID>>> patchMany(List<ID> id, Map<String, Object> fields) {
         List<ID> ids = id != null ? id : Collections.emptyList();
-        List<ID> updatedIds = getService().updateMany(ids, fields);
+        List<ID> updatedIds = getService().patchMany(ids, fields);
         return ResponseEntity.ok(buildResponse(updatedIds));
     }
 

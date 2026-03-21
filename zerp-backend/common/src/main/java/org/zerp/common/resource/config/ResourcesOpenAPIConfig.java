@@ -43,6 +43,7 @@ public class ResourcesOpenAPIConfig {
     private static final Set<String> SINGULAR_OPERATION_IDS = Set.of(
             "get",
             "create",
+            "patch",
             "update",
             "delete"
     );

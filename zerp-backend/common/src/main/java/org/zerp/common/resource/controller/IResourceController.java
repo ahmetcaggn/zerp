@@ -18,11 +18,12 @@ import java.util.Map;
  * @param <T>  the Response DTO type for this resource
  * @param <LT> the Response DTO type for getList and getManyReference operation.
  * @param <C>  the Create DTO type for this resource
+ * @param <U>  the Update DTO type for this resource (if needed, otherwise can be same as C)
  * @param <ID> the type of the entity's identifier
  */
 @Tag(name = "Objects", description = "Generic REST controller. Add @Tag annotation to your " +
         "controller implementation to provide API documentation details specific to your resource.")
-public interface IResourceController<T, LT, C, ID> {
+public interface IResourceController<T, LT, C, U, ID> {
     /**
      * Retrieves a paginated list of entities with support for sorting and filtering.
      * This endpoint implements ra-spring-data-provider's <b>getList</b> operation.
@@ -260,12 +261,36 @@ public interface IResourceController<T, LT, C, ID> {
                     Only the fields provided in the request body will be updated.
                     """
     )
-    @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<ApiResponse<T>> update(
+    @PatchMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<ApiResponse<T>> patch(
             @Parameter(description = "Unique identifier of the entity to update", required = true, example = "1")
             @PathVariable(name = "id") ID id,
             @Parameter(description = "Map of field names to new values for partial update", required = true)
             @RequestBody Map<String, Object> fields
+    );
+
+    /**
+     * Updates an existing entity with the provided fields.
+     * This endpoint implements ra-spring-data-provider's update operation with support for partial updates.
+     *
+     * @param id     the unique identifier of the entity to update
+     * @param data   the request body containing the fields to update; only provided fields should be updated
+     * @return ResponseEntity containing the updated entity
+     */
+    @Operation(
+            summary = "Update: Update an existing entity",
+            description = """
+                    Updates an existing entity with the provided field values.
+                    Implements ra-spring-data-provider's update operation with support for partial updates.
+                    Only the fields provided in the request body will be updated.
+                    """
+    )
+    @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<ApiResponse<T>> update(
+            @Parameter(description = "Unique identifier of the entity to update", required = true, example = "1")
+            @PathVariable(name = "id") ID id,
+            @Parameter(description = "Map of field names to new values for update", required = true)
+            @RequestBody U data
     );
 
     /**
@@ -308,8 +333,8 @@ public interface IResourceController<T, LT, C, ID> {
                     Returns a list of updated entity IDs.
                     """
     )
-    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<ApiResponse<List<ID>>> updateMany(
+    @PatchMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<ApiResponse<List<ID>>> patchMany(
             @Parameter(description = "List of entity IDs to update", example = "[1, 2, 3]")
             @RequestParam(name = "id", required = false) List<ID> id,
             @Parameter(description = "Map of field names to new values for bulk update", required = true)
