@@ -1,6 +1,8 @@
 package org.zerp.common.entity.crm;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,10 +33,10 @@ public class TicketAssignmentEntity extends BaseEntity {
     private Integer teamId;
 
     @Column(name = "agent_party_id")
-    private Integer agentPartyId;
+    private UUID agentPartyId;
 
     @Column(name = "assigned_by_party_id", nullable = false)
-    private Integer assignedByPartyId;
+    private UUID assignedByPartyId;
 
     @Column(name = "is_active", nullable = false)
     private Boolean active = true;

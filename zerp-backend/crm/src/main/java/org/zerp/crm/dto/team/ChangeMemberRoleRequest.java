@@ -1,7 +1,7 @@
 package org.zerp.crm.dto.team;
 
-import org.zerp.crm.domain.team.TeamRole;
+import org.zerp.common.entity.crm.TeamMemberEntity.TeamMemberRole;
 
 public record ChangeMemberRoleRequest(
-        TeamRole role) {
+        TeamMemberRole role) {
 }

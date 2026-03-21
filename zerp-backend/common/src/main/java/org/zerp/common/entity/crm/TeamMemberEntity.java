@@ -10,6 +10,7 @@ import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "team_member")
@@ -30,7 +31,7 @@ public class TeamMemberEntity extends BaseEntity {
     private TeamEntity team;
 
     @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    private UUID userId;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

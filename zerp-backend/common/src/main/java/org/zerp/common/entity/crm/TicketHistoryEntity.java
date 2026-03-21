@@ -10,6 +10,7 @@ import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "ticket_history")
@@ -34,7 +35,7 @@ public class TicketHistoryEntity extends BaseEntity {
     private EventType eventType;
 
     @Column(name = "actor_party_id", nullable = false)
-    private Integer actorPartyId;
+    private UUID actorPartyId;
 
     @Column(name = "reference_type")
     private String referenceType;

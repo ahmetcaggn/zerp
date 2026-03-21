@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EntityScan(basePackages = { "org.zerp.common.entity", "org.zerp.crm" })
-@EnableJpaRepositories(basePackages = "org.zerp.crm")
+@EnableJpaRepositories(basePackages = "org.zerp.crm.repository")
 @EnableJpaAuditing
 public class CrmApplication {
     static void main(String[] args) {
