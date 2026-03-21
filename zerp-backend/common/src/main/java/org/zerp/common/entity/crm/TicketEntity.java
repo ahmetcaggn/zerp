@@ -10,8 +10,10 @@ import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "ticket")
@@ -41,11 +43,15 @@ public class TicketEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TicketPriority priority;
 
-    @Column(name = "tenant_id", nullable = false)
-    private Integer tenantId;
+    @Column(name = "account_id")
+    private UUID tenantId;
 
-    @Column(name = "created_by_party_id", nullable = false)
-    private Integer createdByPartyId;
+    @Column(name = "reporter_id")
+    private UUID reporterId;
+
+    @Column(name = "ticket_type")
+    @Enumerated(EnumType.STRING)
+    private TicketType type;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -71,11 +77,70 @@ public class TicketEntity extends BaseEntity {
     @OneToOne(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private TicketSlaTrackingEntity slaTracking;
 
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TicketWatcherEntity> watchers = new HashSet<>();
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TicketAttachmentEntity> attachments = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "ticket_tags", joinColumns = @JoinColumn(name = "ticket_id"))
+    @Column(name = "tag")
+    private Set<String> tags = new HashSet<>();
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "custom_attributes", columnDefinition = "jsonb")
+    private Map<String, Object> customAttributes = new HashMap<>();
+
     public enum TicketStatus {
-        OPEN, IN_PROGRESS, WAITING_CUSTOMER, RESOLVED, CLOSED, CANCELLED
+        OPEN("Open", true),
+        IN_PROGRESS("In Progress", true),
+        WAITING_CUSTOMER("Waiting for Customer", true),
+        RESOLVED("Resolved", false),
+        CLOSED("Closed", false),
+        CANCELLED("Cancelled", false);
+
+        private final String displayName;
+        private final boolean active;
+
+        TicketStatus(String displayName, boolean active) {
+            this.displayName = displayName;
+            this.active = active;
+        }
+
+        public String getDisplayName() { return displayName; }
+        public boolean isActive() { return active; }
+
+        public boolean canTransitionTo(TicketStatus newStatus) {
+            return switch (this) {
+                case OPEN -> newStatus == IN_PROGRESS || newStatus == CANCELLED;
+                case IN_PROGRESS -> newStatus == WAITING_CUSTOMER || newStatus == RESOLVED || newStatus == CANCELLED || newStatus == OPEN;
+                case WAITING_CUSTOMER -> newStatus == IN_PROGRESS || newStatus == RESOLVED || newStatus == CANCELLED || newStatus == OPEN;
+                case RESOLVED -> newStatus == CLOSED || newStatus == OPEN;
+                case CLOSED, CANCELLED -> false;
+            };
+        }
     }
 
     public enum TicketPriority {
-        LOW, MEDIUM, HIGH, CRITICAL
+        LOW("Low", 480),
+        MEDIUM("Medium", 240),
+        HIGH("High", 120),
+        CRITICAL("Critical", 60);
+
+        private final String displayName;
+        private final int defaultResponseTimeMinutes;
+
+        TicketPriority(String displayName, int defaultResponseTimeMinutes) {
+            this.displayName = displayName;
+            this.defaultResponseTimeMinutes = defaultResponseTimeMinutes;
+        }
+
+        public String getDisplayName() { return displayName; }
+        public int getDefaultResponseTimeMinutes() { return defaultResponseTimeMinutes; }
+    }
+
+    public enum TicketType {
+        BUG, FEATURE_REQUEST, QUESTION, INCIDENT
     }
 }

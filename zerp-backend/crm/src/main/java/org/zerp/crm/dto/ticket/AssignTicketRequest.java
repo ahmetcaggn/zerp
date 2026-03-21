@@ -1,6 +1,8 @@
 package org.zerp.crm.dto.ticket;
 
+import java.util.UUID;
+
 public record AssignTicketRequest(
         Integer teamId,
-        Integer agentPartyId) {
+        UUID agentPartyId) {
 }

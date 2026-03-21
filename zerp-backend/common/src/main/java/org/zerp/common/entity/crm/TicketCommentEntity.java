@@ -10,6 +10,9 @@ import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "ticket_comment")
@@ -29,7 +32,7 @@ public class TicketCommentEntity extends BaseEntity {
     private TicketEntity ticket;
     
     @Column(name = "author_id", nullable = false)
-    private Integer authorId;
+    private UUID authorId;
     
     @Column(name = "author_type", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -43,6 +46,9 @@ public class TicketCommentEntity extends BaseEntity {
     
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+    
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TicketAttachmentEntity> attachments = new ArrayList<>();
     
     public enum AuthorType {
         CUSTOMER, AGENT, SYSTEM

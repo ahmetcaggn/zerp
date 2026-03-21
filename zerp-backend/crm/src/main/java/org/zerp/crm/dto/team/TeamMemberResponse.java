@@ -1,10 +1,11 @@
 package org.zerp.crm.dto.team;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record TeamMemberResponse(
         Integer id,
-        Integer userId,
+        UUID userId,
         String role,
         LocalDateTime joinedAt) {
 }

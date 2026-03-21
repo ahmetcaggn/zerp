@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.*;
 import org.zerp.crm.dto.ticket.*;
 import org.zerp.crm.service.TicketService;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/tickets")
 @Tag(name = "Tickets", description = "APIs for managing support tickets")
 public class TicketController {
-    private static final Integer CURRENT_USER_ID = 1;
+    private static final UUID CURRENT_USER_ID = UUID.randomUUID();
 
     private final TicketService ticketService;
 

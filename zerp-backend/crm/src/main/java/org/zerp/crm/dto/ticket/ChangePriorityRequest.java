@@ -1,6 +1,6 @@
 package org.zerp.crm.dto.ticket;
 
-import org.zerp.crm.domain.ticket.TicketPriority;
+import org.zerp.common.entity.crm.TicketEntity.TicketPriority;
 
 public record ChangePriorityRequest(
         TicketPriority priority) {
