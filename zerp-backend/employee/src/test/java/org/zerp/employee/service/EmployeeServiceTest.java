@@ -414,7 +414,7 @@ class EmployeeServiceTest {
             when(employeeRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
             when(employeeMapper.toResponseDto(any())).thenReturn(buildResponseDto(1L, "a@example.com"));
 
-            List<Long> updated = employeeService.updateMany(List.of(1L, 2L), Map.of("status", "SUSPENDED"));
+            List<Long> updated = employeeService.patchMany(List.of(1L, 2L), Map.of("status", "SUSPENDED"));
 
             assertThat(updated).containsExactlyInAnyOrder(1L, 2L);
         }
@@ -428,14 +428,14 @@ class EmployeeServiceTest {
             when(employeeRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
             when(employeeMapper.toResponseDto(any())).thenReturn(buildResponseDto(1L, "a@example.com"));
 
-            List<Long> updated = employeeService.updateMany(List.of(1L, 99L), Map.of("status", "SUSPENDED"));
+            List<Long> updated = employeeService.patchMany(List.of(1L, 99L), Map.of("status", "SUSPENDED"));
 
             assertThat(updated).containsExactly(1L);
         }
 
         @Test
         void returnsEmptyListForEmptyInput() {
-            assertThat(employeeService.updateMany(List.of(), Map.of())).isEmpty();
+            assertThat(employeeService.patchMany(List.of(), Map.of())).isEmpty();
         }
     }
 

@@ -12,9 +12,11 @@ import org.zerp.common.entity.employee.Employee;
 import org.zerp.common.entity.employee.EmployeeContact;
 import org.zerp.common.entity.employee.EmploymentStatus;
 import org.zerp.common.resource.service.IResourceService;
+import org.zerp.common.resource.util.FilterType;
 import org.zerp.employee.Exception.DuplicateResourceException;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.EmployeeContactDto;
+import org.zerp.employee.dtos.request.UpdateEmployeeRequestDto;
 import org.zerp.employee.dtos.response.EmployeeListResponseDto;
 import org.zerp.employee.dtos.response.EmployeeResponseDto;
 import org.zerp.employee.mapper.EmployeeMapper;
@@ -28,8 +30,8 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class EmployeeService
-        implements IResourceService<EmployeeResponseDto, EmployeeListResponseDto, CreateEmployeeRequestDto, Long> {
+public class EmployeeService implements IResourceService<EmployeeResponseDto, EmployeeListResponseDto,
+        CreateEmployeeRequestDto, UpdateEmployeeRequestDto, Long> {
     private final EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
 
@@ -103,8 +105,14 @@ public class EmployeeService
     }
 
     @Override
+    public EmployeeResponseDto update(Long aLong, UpdateEmployeeRequestDto data) {
+        // TODO: Ahmet can.
+        return null;
+    }
+
+    @Override
     @Transactional
-    public EmployeeResponseDto update(Long id, Map<String, Object> fields) {
+    public EmployeeResponseDto patch(Long id, Map<String, Object> fields) {
         Employee employee = employeeRepository.findByIdWithContactsAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
 
@@ -135,11 +143,11 @@ public class EmployeeService
 
     @Override
     @Transactional
-    public List<Long> updateMany(Iterable<Long> ids, Map<String, Object> fields) {
+    public List<Long> patchMany(Iterable<Long> ids, Map<String, Object> fields) {
         List<Long> updated = new ArrayList<>();
         for (Long id : ids) {
             try {
-                update(id, fields);
+                patch(id, fields);
                 updated.add(id);
             } catch (EntityNotFoundException ignored) {
             }
@@ -179,13 +187,17 @@ public class EmployeeService
                 .map(employeeMapper::toListResponseDto);
     }
 
-    /** Get all soft-deleted employees for admin/audit purposes. */
+    /**
+     * Get all soft-deleted employees for admin/audit purposes.
+     */
     @Transactional(readOnly = true)
     public List<EmployeeListResponseDto> getDeletedEmployees() {
         return employeeMapper.toListResponseDtoList(employeeRepository.findAllDeleted());
     }
 
-    /** Get all soft-deleted employees with pagination. */
+    /**
+     * Get all soft-deleted employees with pagination.
+     */
     @Transactional(readOnly = true)
     public Page<EmployeeListResponseDto> getDeletedEmployeesPaginated(Pageable pageable) {
         return employeeRepository.findAllDeleted(pageable).map(employeeMapper::toListResponseDto);
@@ -262,26 +274,5 @@ public class EmployeeService
             });
         }
         return spec;
-    }
-
-    private enum FilterType {
-        EQUAL("eq"),
-        NOT_EQUAL("neq"),
-        GREATER_THAN_OR_EQUAL("gte"),
-        LESS_THAN_OR_EQUAL("lte"),
-        LIKE("like");
-
-        private final String code;
-
-        FilterType(String code) {
-            this.code = code;
-        }
-
-        public static FilterType fromCode(String code) {
-            for (FilterType type : values()) {
-                if (type.code.equalsIgnoreCase(code)) return type;
-            }
-            return null;
-        }
     }
 }
