@@ -1,52 +1,141 @@
 package org.zerp.crm.service;
 
+import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.crm.TeamEntity;
 import org.zerp.common.entity.crm.TeamMemberEntity;
-
+import org.zerp.common.resource.service.IResourceService;
+import org.zerp.common.resource.util.FilterType;
 import org.zerp.crm.dto.team.*;
 import org.zerp.crm.repository.TeamRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Log4j2
 @Service
 @Transactional
-public class TeamService {
-
+public class TeamService implements IResourceService<TeamResponse, TeamResponse,
+        CreateTeamRequest, UpdateTeamRequest, Integer> {
     private final TeamRepository teamRepository;
 
     public TeamService(TeamRepository teamRepository) {
         this.teamRepository = teamRepository;
     }
 
-    public TeamResponse createTeam(CreateTeamRequest request) {
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TeamResponse> findWithFilters(Map<String, String> filters, Pageable pageable) {
+        Specification<TeamEntity> specification = buildSpecificationFromFilters(filters);
+        return teamRepository.findAll(specification, pageable).map(this::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TeamResponse> findWithTargetAndFilters(String target, String targetId, Map<String, String> filters, Pageable pageable) {
+        Specification<TeamEntity> specification = buildSpecificationFromFilters(filters)
+                .and(buildTargetSpecification(target, targetId));
+        return teamRepository.findAll(specification, pageable).map(this::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TeamResponse> findAllById(Iterable<Integer> ids) {
+        return teamRepository.findAllById(ids).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TeamResponse findById(Integer id) {
+        TeamEntity entity = findOrThrow(id);
+        return toResponse(entity);
+    }
+
+    @Override
+    public TeamResponse create(CreateTeamRequest data) {
         TeamEntity entity = new TeamEntity();
-        entity.setName(validateName(request.name()));
-        entity.setDescription(request.description());
+        entity.setName(validateName(data.name()));
+        entity.setDescription(data.description());
         entity.setIsActive(true);
 
         TeamEntity saved = teamRepository.save(entity);
         return toResponse(saved);
     }
 
-    @Transactional(readOnly = true)
-    public TeamResponse getTeam(Integer teamId) {
-        TeamEntity entity = findOrThrow(teamId);
-        return toResponse(entity);
-    }
+    @Override
+    public TeamResponse patch(Integer id, Map<String, Object> data) {
+        TeamEntity entity = findOrThrow(id);
 
-    public TeamResponse updateTeam(Integer teamId, UpdateTeamRequest request) {
-        TeamEntity entity = findOrThrow(teamId);
-        entity.setName(validateName(request.name()));
-        entity.setDescription(request.description());
+        if (data.containsKey("name")) {
+            entity.setName(validateName(String.valueOf(data.get("name"))));
+        }
+        if (data.containsKey("description")) {
+            Object description = data.get("description");
+            entity.setDescription(description == null ? null : String.valueOf(description));
+        }
+        if (data.containsKey("isActive")) {
+            entity.setIsActive(parseBoolean(data.get("isActive"), "isActive"));
+        }
 
         TeamEntity saved = teamRepository.save(entity);
         return toResponse(saved);
     }
+
+    @Override
+    public TeamResponse update(Integer id, UpdateTeamRequest data) {
+        TeamEntity entity = findOrThrow(id);
+        entity.setName(validateName(data.name()));
+        entity.setDescription(data.description());
+
+        TeamEntity saved = teamRepository.save(entity);
+        return toResponse(saved);
+    }
+
+    @Override
+    public List<Integer> patchMany(Iterable<Integer> ids, Map<String, Object> fields) {
+        List<Integer> updated = new ArrayList<>();
+        for (Integer id : ids) {
+            try {
+                patch(id, fields);
+                updated.add(id);
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        return updated;
+    }
+
+    @Override
+    public void deleteById(Integer id) {
+        TeamEntity entity = findOrThrow(id);
+        teamRepository.delete(entity);
+    }
+
+    @Override
+    public List<Integer> deleteMany(Iterable<Integer> ids) {
+        List<Integer> deleted = new ArrayList<>();
+        for (Integer id : ids) {
+            try {
+                deleteById(id);
+                deleted.add(id);
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        return deleted;
+    }
+
+    // -- others --
 
     public TeamResponse deactivateTeam(Integer teamId) {
         TeamEntity entity = findOrThrow(teamId);
@@ -127,7 +216,7 @@ public class TeamService {
 
     private TeamEntity findOrThrow(Integer teamId) {
         return teamRepository.findById(teamId)
-                .orElseThrow(() -> new IllegalArgumentException("Team not found: " + teamId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found: " + teamId));
     }
 
     private String validateName(String name) {
@@ -152,5 +241,98 @@ public class TeamService {
                 entity.getDescription(),
                 Boolean.TRUE.equals(entity.getIsActive()),
                 memberResponses);
+    }
+
+    private Specification<TeamEntity> buildSpecificationFromFilters(Map<String, String> filters) {
+        Specification<TeamEntity> specification = Specification.unrestricted();
+
+        if (filters == null || filters.isEmpty()) {
+            return specification;
+        }
+
+        for (Map.Entry<String, String> entry : filters.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            if ("q".equalsIgnoreCase(key) && value != null && !value.isBlank()) {
+                specification = specification.and((root, _, cb) -> cb.or(
+                        cb.like(cb.lower(root.get("name")), "%" + value.toLowerCase() + "%"),
+                        cb.like(cb.lower(root.get("description")), "%" + value.toLowerCase() + "%")
+                ));
+                log.debug("Applied global search filter (q): {}", value);
+                continue;
+            }
+
+            int separatorIndex = key.lastIndexOf('.');
+            if (separatorIndex < 0 || separatorIndex == key.length() - 1) {
+                log.warn("Invalid filter key format (missing filter type): {}", key);
+                continue;
+            }
+
+            String field = key.substring(0, separatorIndex);
+            FilterType filterType = FilterType.fromCode(key.substring(separatorIndex + 1));
+            if (filterType == null) {
+                log.warn("Unsupported filter type in key: {}", key);
+                continue;
+            }
+
+            specification = specification.and((root, _, cb) -> {
+                if ("isActive".equals(field)) {
+                    Boolean boolValue = parseBoolean(value, key);
+                    return filterType == FilterType.NOT_EQUAL
+                            ? cb.notEqual(root.get(field), boolValue)
+                            : cb.equal(root.get(field), boolValue);
+                }
+
+                if ("name".equals(field) || "description".equals(field)) {
+                    if (filterType == FilterType.EQUAL) {
+                        return cb.equal(root.get(field), value);
+                    }
+                    if (filterType == FilterType.NOT_EQUAL) {
+                        return cb.notEqual(root.get(field), value);
+                    }
+                    if (filterType == FilterType.LIKE) {
+                        return cb.like(cb.lower(root.get(field)), "%" + value.toLowerCase() + "%");
+                    }
+                }
+
+                log.warn("Unsupported filter field or type for key: {}. This filter will be ignored.", key);
+                return cb.conjunction();
+            });
+        }
+
+        return specification;
+    }
+
+    private Specification<TeamEntity> buildTargetSpecification(String target, String targetId) {
+        if ("id".equalsIgnoreCase(target)) {
+            Integer teamId = Integer.valueOf(targetId);
+            return (root, _, cb) -> cb.equal(root.get("id"), teamId);
+        }
+
+        if ("userId".equalsIgnoreCase(target) || "members.userId".equalsIgnoreCase(target)) {
+            UUID memberUserId = UUID.fromString(targetId);
+            return (root, query, cb) -> {
+                query.distinct(true);
+                return cb.equal(root.join("members").get("userId"), memberUserId);
+            };
+        }
+
+        throw new IllegalArgumentException("Unsupported target: " + target);
+    }
+
+    private Boolean parseBoolean(Object rawValue, String fieldName) {
+        if (rawValue instanceof Boolean boolValue) {
+            return boolValue;
+        }
+
+        if (rawValue != null) {
+            String text = String.valueOf(rawValue).trim();
+            if ("true".equalsIgnoreCase(text) || "false".equalsIgnoreCase(text)) {
+                return Boolean.parseBoolean(text);
+            }
+        }
+
+        throw new IllegalArgumentException("Invalid boolean value for " + fieldName + ": " + rawValue);
     }
 }

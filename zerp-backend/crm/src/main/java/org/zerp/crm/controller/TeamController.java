@@ -1,7 +1,6 @@
 package org.zerp.crm.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.zerp.common.resource.controller.ResourceController;
@@ -11,31 +10,17 @@ import org.zerp.crm.service.TeamService;
 @RestController
 @RequestMapping("/api/teams")
 @Tag(name = "Teams", description = "APIs for managing teams and their members")
-public class TeamController {
+public class TeamController extends ResourceController<TeamResponse, TeamResponse,
+        CreateTeamRequest, UpdateTeamRequest, Integer> {
     private final TeamService teamService;
 
     public TeamController(TeamService teamService) {
         this.teamService = teamService;
     }
 
-    @PostMapping
-    public ResponseEntity<TeamResponse> createTeam(@RequestBody CreateTeamRequest request) {
-        TeamResponse response = teamService.createTeam(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<TeamResponse> getTeam(@PathVariable Integer id) {
-        TeamResponse response = teamService.getTeam(id);
-        return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<TeamResponse> updateTeam(
-            @PathVariable Integer id,
-            @RequestBody UpdateTeamRequest request) {
-        TeamResponse response = teamService.updateTeam(id, request);
-        return ResponseEntity.ok(response);
+    @Override
+    protected TeamService getService() {
+        return teamService;
     }
 
     @PostMapping("/{id}/deactivate")
