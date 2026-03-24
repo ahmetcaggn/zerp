@@ -13,7 +13,7 @@ import java.util.UUID;
 @RequestMapping("/api/tickets")
 @Tag(name = "Tickets", description = "APIs for managing support tickets")
 public class TicketController {
-    private static final UUID CURRENT_USER_ID = UUID.randomUUID();
+    private static final UUID CURRENT_USER_ID = UUID.fromString("2b9de1ef-3cda-4226-b1e7-e23a178cdb7e");
 
     private final TicketService ticketService;
 

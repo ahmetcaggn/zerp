@@ -184,27 +184,27 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         return toResponse(saved);
     }
 
-    public TeamResponse removeMember(Integer teamId, Integer userId) {
+    public TeamResponse removeMember(Integer teamId, UUID userId) {
         TeamEntity entity = findOrThrow(teamId);
 
-        boolean removed = entity.getMembers().removeIf(m -> m.getId() != null && m.getId().equals(userId));
+        boolean removed = entity.getMembers().removeIf(m -> m.getUserId() != null && m.getUserId().equals(userId));
         if (!removed) {
             throw new IllegalArgumentException(
-                    String.format("User %d is not a member of this team", userId));
+                    String.format("User %s is not a member of this team", userId));
         }
 
         TeamEntity saved = teamRepository.save(entity);
         return toResponse(saved);
     }
 
-    public TeamResponse changeMemberRole(Integer teamId, Integer userId, ChangeMemberRoleRequest request) {
+    public TeamResponse changeMemberRole(Integer teamId, UUID userId, ChangeMemberRoleRequest request) {
         TeamEntity entity = findOrThrow(teamId);
 
         TeamMemberEntity member = entity.getMembers().stream()
-                .filter(m -> m.getId() != null && m.getId().equals(userId))
+                .filter(m -> m.getUserId() != null && m.getUserId().equals(userId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
-                        String.format("User %d is not a member of this team", userId)));
+                        String.format("User %s is not a member of this team", userId)));
 
         member.setRole(request.role());
 

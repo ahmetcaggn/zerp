@@ -7,6 +7,8 @@ import org.zerp.common.resource.controller.ResourceController;
 import org.zerp.crm.dto.team.*;
 import org.zerp.crm.service.TeamService;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/teams")
 @Tag(name = "Teams", description = "APIs for managing teams and their members")
@@ -46,7 +48,7 @@ public class TeamController extends ResourceController<TeamResponse, TeamRespons
     @DeleteMapping("/{id}/members/{userId}")
     public ResponseEntity<TeamResponse> removeTeamMember(
             @PathVariable Integer id,
-            @PathVariable Integer userId) {
+            @PathVariable UUID userId) {
         TeamResponse response = teamService.removeMember(id, userId);
         return ResponseEntity.ok(response);
     }
@@ -54,7 +56,7 @@ public class TeamController extends ResourceController<TeamResponse, TeamRespons
     @PatchMapping("/{id}/members/{userId}/role")
     public ResponseEntity<TeamResponse> changeTeamMemberRole(
             @PathVariable Integer id,
-            @PathVariable Integer userId,
+            @PathVariable UUID userId,
             @RequestBody ChangeMemberRoleRequest request) {
         TeamResponse response = teamService.changeMemberRole(id, userId, request);
         return ResponseEntity.ok(response);

@@ -21,7 +21,7 @@ import org.hibernate.type.SqlTypes;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@SQLDelete(sql = "UPDATE ticket SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE ticket SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? and version = ?")
 @SQLRestriction("deleted = false")
 public class TicketEntity extends BaseEntity {
 

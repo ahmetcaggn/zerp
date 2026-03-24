@@ -16,7 +16,7 @@ import java.util.List;
 @Table(name = "employees")
 @Getter
 @Setter
-@SQLDelete(sql = "UPDATE employees SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE employees SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? and version = ?")
 @SQLRestriction("deleted = false")
 public class Employee extends BaseEntity {
     @Id
