@@ -1,0 +1,28 @@
+export const themeTokens = {
+  light: {
+    primary: '#0f766e',
+    secondary: '#2563eb',
+    backgroundDefault: '#f3f6fb',
+    backgroundPaper: '#ffffff',
+    textPrimary: '#0f172a',
+    textSecondary: '#475569',
+    divider: 'rgba(15, 23, 42, 0.12)',
+    appBar: 'rgba(248, 250, 252, 0.72)',
+    appBg1: '#f8fafc',
+    appBg2: '#eaf2ff',
+    appGrid: 'rgba(15, 23, 42, 0.05)',
+  },
+  dark: {
+    primary: '#5eead4',
+    secondary: '#93c5fd',
+    backgroundDefault: '#0b1220',
+    backgroundPaper: '#131d31',
+    textPrimary: '#e5edf9',
+    textSecondary: '#9aacc6',
+    divider: 'rgba(148, 163, 184, 0.24)',
+    appBar: 'rgba(11, 18, 32, 0.78)',
+    appBg1: '#080f1d',
+    appBg2: '#111c33',
+    appGrid: 'rgba(148, 163, 184, 0.12)',
+  },
+} as const
