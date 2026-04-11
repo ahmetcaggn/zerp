@@ -17,9 +17,8 @@ class AuthService {
   static const String _discoveryUrl =
       'https://auth.femrek.dev/realms/zerp/.well-known/openid-configuration';
   static const String _clientId = 'public';
-  static const String _redirectUrl = 'org.zerp.zerp_tenant://callback';
-  static const String _postLogoutRedirectUrl =
-      'org.zerp.zerp_tenant://callback';
+  static const String _redirectUrl = 'org.zerp.tenant://callback';
+  static const String _postLogoutRedirectUrl = 'org.zerp.tenant://callback';
   static const List<String> _scopes = ['openid', 'profile', 'email'];
 
   final FlutterAppAuth _appAuth;
@@ -27,7 +26,7 @@ class AuthService {
   final AuthClaimsOperator _authClaimsOperator;
 
   /// Login using Keycloak authorization code flow.
-  Future<bool> login() async {
+  Future<AuthClaims?> login() async {
     try {
       final result = await _appAuth.authorizeAndExchangeCode(
         AuthorizationTokenRequest(
@@ -41,16 +40,23 @@ class AuthService {
       );
 
       await _saveAuthTokensResponse(result);
-      return true;
-    } on Object catch (_) {
+
+      if (!await isAccessTokenValid) {
+        await _clearTokens();
+        throw Exception('Access token is invalid after login');
+      }
+
+      return await _authClaims;
+    } on Object catch (e, s) {
+      print('$e\n$s');
       // a todo log
-      return false;
+      return null;
     }
   }
 
   /// Sign up using Keycloak registration flow.
   /// Uses kc_action=register to trigger Keycloak's registration page.
-  Future<bool> signUp() async {
+  Future<AuthClaims?> signUp() async {
     try {
       final result = await _appAuth.authorizeAndExchangeCode(
         AuthorizationTokenRequest(
@@ -64,10 +70,17 @@ class AuthService {
       );
 
       await _saveAuthTokensResponse(result);
-      return true;
-    } on Object catch (_) {
+
+      if (!await isAccessTokenValid) {
+        await _clearTokens();
+        throw Exception('Access token is invalid after sign up');
+      }
+
+      return await _authClaims;
+    } on Object catch (e, s) {
+      print('$e\n$s');
       // a todo log
-      return false;
+      return null;
     }
   }
 
@@ -87,12 +100,13 @@ class AuthService {
         );
       }
 
-      await _clearTokens();
       return true;
-    } on Object catch (_) {
+    } on Object catch (e, s) {
+      print('$e\n$s');
       // a todo log
-      await _clearTokens();
       return true;
+    } finally {
+      await _clearTokens();
     }
   }
 
@@ -122,7 +136,20 @@ class AuthService {
     }
   }
 
-  Future<AuthClaims?> get authClaims async {
+  Future<bool> get isAccessTokenValid async {
+    final accessToken = await _authTokenOperator.accessToken;
+    return accessToken != null && !JwtDecoder.isExpired(accessToken);
+  }
+
+  Future<AuthClaims?> get authClaimsIfValid async {
+    final accessToken = await _authTokenOperator.accessToken;
+    if (accessToken != null && !JwtDecoder.isExpired(accessToken)) {
+      return _authClaims;
+    }
+    return null;
+  }
+
+  Future<AuthClaims?> get _authClaims async {
     final authClaimsModel = await _authClaimsOperator.get();
     return authClaimsModel?.authClaims;
   }

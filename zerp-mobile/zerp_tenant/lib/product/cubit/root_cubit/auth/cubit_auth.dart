@@ -10,11 +10,24 @@ class CubitAuth extends BaseCubit<StateAuth> {
   final AuthService _authService;
 
   Future<void> checkAuth() async {
-    final claims = await _authService.authClaims;
+    final claims = await _authService.authClaimsIfValid;
     if (claims != null) {
       emit(StateAuthAuthenticated(username: claims.preferredUsername));
     } else {
       emit(const StateAuthUnauthenticated());
     }
+  }
+
+  Future<void> redirectLogin() async {
+    final claims = await _authService.login();
+    if (claims != null) {
+      emit(StateAuthAuthenticated(username: claims.preferredUsername));
+    } else {
+      emit(const StateAuthError(message: 'Login failed'));
+    }
+  }
+
+  Future<void> redirectSignUp() async {
+    await _authService.signUp();
   }
 }

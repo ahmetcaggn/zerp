@@ -19,10 +19,10 @@ class AuthGuard extends AutoRouteGuard {
       return;
     }
 
-    if (await _authService.authClaims != null) {
+    if (await _authService.authClaimsIfValid != null) {
       resolver.next();
       return;
     }
-    resolver.redirectUntil(const RouteAuth());
+    resolver.redirectUntil(RouteAuth(callerRoute: resolver.route.path));
   }
 }

@@ -32,7 +32,7 @@
     <string>Editor</string>
     <key>CFBundleURLSchemes</key>
     <array>
-        <string>org.zerp.zerp_tenant</string>
+        <string>org.zerp.tenant</string>
     </array>
 </dict>
 </plist>

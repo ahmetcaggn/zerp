@@ -9,6 +9,7 @@ part 'auth_token.storage_model.g.dart';
 abstract class AuthTokenStorageModel extends StorageBaseModel
     with _$AuthTokenStorageModel {
   const factory AuthTokenStorageModel({
+    @JsonKey(fromJson: _authTokensFromJson, toJson: _authTokensToJson)
     required AuthTokens authTokens,
   }) = _AuthTokenStorageModel;
 
@@ -17,6 +18,11 @@ abstract class AuthTokenStorageModel extends StorageBaseModel
   factory AuthTokenStorageModel.fromJson(Map<String, dynamic> json) =>
       _$AuthTokenStorageModelFromJson(json);
 }
+
+AuthTokens _authTokensFromJson(Map<String, dynamic> json) =>
+    AuthTokens.fromJson(json);
+
+Map<String, dynamic> _authTokensToJson(AuthTokens value) => value.toJson();
 
 class AuthTokenStorageModelFactory
     implements StorageModelFactory<AuthTokenStorageModel> {

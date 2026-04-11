@@ -17,3 +17,11 @@ final class StateAuthAuthenticated extends StateAuth {
 final class StateAuthUnauthenticated extends StateAuth {
   const StateAuthUnauthenticated();
 }
+
+final class StateAuthError extends StateAuth {
+  const StateAuthError({
+    required this.message,
+  });
+
+  final String message;
+}

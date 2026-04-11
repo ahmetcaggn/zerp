@@ -17,4 +17,13 @@ abstract class AuthClaims with _$AuthClaims {
 
   factory AuthClaims.fromJson(Map<String, dynamic> json) =>
       _$AuthClaimsFromJson(json);
+
+  @override
+  String toString() {
+    return 'AuthClaims(sub: $sub, preferredUsername: $preferredUsername, '
+        'firstName: $firstName, lastName: $lastName, others: '
+        '{accessTokenClaims: ${accessTokenClaims.keys.toList()}, '
+        'refreshTokenClaims: ${refreshTokenClaims.keys.toList()}, '
+        'idTokenClaims: ${idTokenClaims.keys.toList()}})';
+  }
 }

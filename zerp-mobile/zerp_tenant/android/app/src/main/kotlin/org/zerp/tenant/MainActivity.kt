@@ -1,4 +1,4 @@
-package org.zerp.zerp_tenant
+package org.zerp.tenant
 
 import io.flutter.embedding.android.FlutterActivity
 

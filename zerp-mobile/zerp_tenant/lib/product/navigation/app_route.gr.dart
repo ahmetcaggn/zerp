@@ -10,6 +10,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i9;
+import 'package:flutter/material.dart' as _i10;
 import 'package:zerp_tenant/feature/auth/view/screen_auth.dart' as _i1;
 import 'package:zerp_tenant/feature/dashboard/view/screen_dashboard.dart'
     as _i2;
@@ -22,18 +23,65 @@ import 'package:zerp_tenant/feature/store/view/screen_store.dart' as _i8;
 
 /// generated route for
 /// [_i1.ScreenAuth]
-class RouteAuth extends _i9.PageRouteInfo<void> {
-  const RouteAuth({List<_i9.PageRouteInfo>? children})
-    : super(RouteAuth.name, initialChildren: children);
+class RouteAuth extends _i9.PageRouteInfo<RouteAuthArgs> {
+  RouteAuth({
+    _i10.Key? key,
+    _i1.AfterAuthCallback? afterAuthCallback,
+    String? callerRoute,
+    List<_i9.PageRouteInfo>? children,
+  }) : super(
+         RouteAuth.name,
+         args: RouteAuthArgs(
+           key: key,
+           afterAuthCallback: afterAuthCallback,
+           callerRoute: callerRoute,
+         ),
+         initialChildren: children,
+       );
 
   static const String name = 'RouteAuth';
 
   static _i9.PageInfo page = _i9.PageInfo(
     name,
     builder: (data) {
-      return const _i1.ScreenAuth();
+      final args = data.argsAs<RouteAuthArgs>(
+        orElse: () => const RouteAuthArgs(),
+      );
+      return _i1.ScreenAuth(
+        key: args.key,
+        afterAuthCallback: args.afterAuthCallback,
+        callerRoute: args.callerRoute,
+      );
     },
   );
+}
+
+class RouteAuthArgs {
+  const RouteAuthArgs({this.key, this.afterAuthCallback, this.callerRoute});
+
+  final _i10.Key? key;
+
+  final _i1.AfterAuthCallback? afterAuthCallback;
+
+  final String? callerRoute;
+
+  @override
+  String toString() {
+    return 'RouteAuthArgs{key: $key, afterAuthCallback: $afterAuthCallback, callerRoute: $callerRoute}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! RouteAuthArgs) return false;
+    return key == other.key &&
+        afterAuthCallback == other.afterAuthCallback &&
+        callerRoute == other.callerRoute;
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^ afterAuthCallback.hashCode ^ callerRoute.hashCode;
 }
 
 /// generated route for
