@@ -1,0 +1,3 @@
+[submodule "zerp-mobile/zerp_tenant/modules/remote_logging"]
+	path = zerp-mobile/zerp_tenant/modules/remote_logging
+	url = git@github.com:femrek/remote_logging.git
