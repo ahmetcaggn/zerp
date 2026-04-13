@@ -1,0 +1,48 @@
+PODS:
+  - AppAuth (2.0.0):
+    - AppAuth/Core (= 2.0.0)
+    - AppAuth/ExternalUserAgent (= 2.0.0)
+  - AppAuth/Core (2.0.0)
+  - AppAuth/ExternalUserAgent (2.0.0):
+    - AppAuth/Core
+  - flutter_appauth (0.0.1):
+    - AppAuth (= 2.0.0)
+    - FlutterMacOS
+  - flutter_secure_storage_darwin (10.0.0):
+    - Flutter
+    - FlutterMacOS
+  - FlutterMacOS (1.0.0)
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+
+DEPENDENCIES:
+  - flutter_appauth (from `Flutter/ephemeral/.symlinks/plugins/flutter_appauth/macos`)
+  - flutter_secure_storage_darwin (from `Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_darwin/darwin`)
+  - FlutterMacOS (from `Flutter/ephemeral`)
+  - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
+
+SPEC REPOS:
+  trunk:
+    - AppAuth
+
+EXTERNAL SOURCES:
+  flutter_appauth:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_appauth/macos
+  flutter_secure_storage_darwin:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_darwin/darwin
+  FlutterMacOS:
+    :path: Flutter/ephemeral
+  shared_preferences_foundation:
+    :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
+
+SPEC CHECKSUMS:
+  AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
+  flutter_appauth: 28f8f40e5ca2bd20dcc386d4fd3936da82b189f0
+  flutter_secure_storage_darwin: 557817588b80e60213cbecb573c45c76b788018d
+  FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
+  shared_preferences_foundation: 5086985c1d43c5ba4d5e69a4e8083a389e2909e6
+
+PODFILE CHECKSUM: 54d867c82ac51cbd61b565781b9fada492027009
+
+COCOAPODS: 1.14.3

@@ -28,5 +28,11 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>CFBundleTypeRole</key>
+    <string>Editor</string>
+    <key>CFBundleURLSchemes</key>
+    <array>
+        <string>org.zerp.tenant</string>
+    </array>
 </dict>
 </plist>
