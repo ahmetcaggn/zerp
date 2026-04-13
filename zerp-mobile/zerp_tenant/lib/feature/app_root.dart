@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
@@ -14,13 +12,7 @@ class AppRoot extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<CubitAuth>(
-          create: (_) {
-            final cubit = getIt<CubitAuth>();
-            unawaited(cubit.checkAuth());
-            return cubit;
-          },
-        ),
+        BlocProvider.value(value: getIt<CubitAuth>()),
       ],
       child: MaterialApp.router(
         title: 'Zerp Tenant',
