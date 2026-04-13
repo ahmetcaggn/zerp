@@ -5,7 +5,7 @@ sealed class StorageBaseOperator {}
 
 abstract class SingleStorageOperator<T extends StorageBaseModel>
     implements StorageBaseOperator {
-  Future<void> put(T value);
+  Future<T> put(T value);
 
   Future<T?> get();
 
@@ -14,7 +14,7 @@ abstract class SingleStorageOperator<T extends StorageBaseModel>
 
 abstract class StorageOperator<T extends StorageBaseModel>
     implements StorageBaseOperator {
-  Future<void> put(StorageModel<T> value);
+  Future<T> put(StorageModel<T> value);
 
   Future<StorageModel<T>?> get(String key);
 
@@ -25,7 +25,7 @@ abstract class StorageOperator<T extends StorageBaseModel>
 
 abstract class FullStorageOperator<T extends StorageBaseModel>
     implements StorageOperator<T> {
-  Future<void> putAll(
+  Future<Map<String, T>> putAll(
     Map<String, StorageModel<T>> entries,
   );
 

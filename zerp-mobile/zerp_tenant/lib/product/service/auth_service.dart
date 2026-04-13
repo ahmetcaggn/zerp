@@ -1,15 +1,16 @@
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:injectable/injectable.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/model/auth_claims.dart';
 import 'package:zerp_tenant/product/model/auth_tokens.dart';
 import 'package:zerp_tenant/product/storage/model/auth_claims.storage_model.dart';
 import 'package:zerp_tenant/product/storage/model/auth_token.storage_model.dart';
-import 'package:zerp_tenant/product/storage/operator/auth_claims_operator.dart';
-import 'package:zerp_tenant/product/storage/operator/auth_token_operator.dart';
+import 'package:zerp_tenant/product/storage/operator/auth_claims.operator.dart';
+import 'package:zerp_tenant/product/storage/operator/auth_token.operator.dart';
 
 @injectable
-class AuthService {
+class AuthService with LoggerMixin<AuthService> {
   AuthService(this._appAuth, this._authTokenOperator, this._authClaimsOperator);
 
   // Keycloak configuration
@@ -48,8 +49,7 @@ class AuthService {
 
       return await _authClaims;
     } on Object catch (e, s) {
-      print('$e\n$s');
-      // a todo log
+      log.severe('Login failed', e, s);
       return null;
     }
   }
@@ -78,8 +78,7 @@ class AuthService {
 
       return await _authClaims;
     } on Object catch (e, s) {
-      print('$e\n$s');
-      // a todo log
+      log.severe('Sign up failed', e, s);
       return null;
     }
   }
@@ -102,8 +101,7 @@ class AuthService {
 
       return true;
     } on Object catch (e, s) {
-      print('$e\n$s');
-      // a todo log
+      log.warning('Logout failed (still removing tokens)', e, s);
       return true;
     } finally {
       await _clearTokens();
@@ -130,7 +128,7 @@ class AuthService {
       await _saveTokenResponse(result);
       return true;
     } on Object catch (_) {
-      // a todo log
+      log.shout('Failed to refresh token silently, clearing stored tokens');
       await _clearTokens();
       return false;
     }

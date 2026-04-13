@@ -41,10 +41,12 @@ class AuthTokenOperator extends SingleStorageOperator<AuthTokenStorageModel> {
   }
 
   @override
-  Future<void> put(AuthTokenStorageModel value) async {
+  Future<AuthTokenStorageModel> put(AuthTokenStorageModel value) async {
     await _s.write(key: _keyAccessToken, value: value.authTokens.accessToken);
     await _s.write(key: _keyRefreshToken, value: value.authTokens.refreshToken);
     await _s.write(key: _keyIdToken, value: value.authTokens.idToken);
+
+    return value;
   }
 
   Future<String?> get accessToken async => _s.read(key: _keyAccessToken);
