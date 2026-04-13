@@ -28,6 +28,7 @@ class AuthService with LoggerMixin<AuthService> {
 
   /// Login using Keycloak authorization code flow.
   Future<AuthClaims?> login() async {
+    log.fine('Starting login process');
     try {
       final result = await _appAuth.authorizeAndExchangeCode(
         AuthorizationTokenRequest(
@@ -42,14 +43,19 @@ class AuthService with LoggerMixin<AuthService> {
 
       await _saveAuthTokensResponse(result);
 
-      if (!await isAccessTokenValid) {
+      if (result.accessToken == null ||
+          JwtDecoder.isExpired(result.accessToken!)) {
         await _clearTokens();
-        throw Exception('Access token is invalid after login');
+        throw Exception(
+          'Access token is invalid or expired immediately after login',
+        );
       }
 
-      return await _authClaims;
+      final claims = await _authClaims;
+      log.info('Login successful for user: ${claims?.preferredUsername}');
+      return claims;
     } on Object catch (e, s) {
-      log.severe('Login failed', e, s);
+      log.severe('Login process failed', e, s);
       return null;
     }
   }
@@ -57,6 +63,8 @@ class AuthService with LoggerMixin<AuthService> {
   /// Sign up using Keycloak registration flow.
   /// Uses kc_action=register to trigger Keycloak's registration page.
   Future<AuthClaims?> signUp() async {
+    log.fine('Starting sign-up process');
+
     try {
       final result = await _appAuth.authorizeAndExchangeCode(
         AuthorizationTokenRequest(
@@ -71,20 +79,27 @@ class AuthService with LoggerMixin<AuthService> {
 
       await _saveAuthTokensResponse(result);
 
-      if (!await isAccessTokenValid) {
+      if (result.accessToken == null ||
+          JwtDecoder.isExpired(result.accessToken!)) {
         await _clearTokens();
-        throw Exception('Access token is invalid after sign up');
+        throw Exception(
+          'Access token is invalid or expired immediately after sign-up',
+        );
       }
 
-      return await _authClaims;
+      final claims = await _authClaims;
+      log.info('Sign-up successful for user: ${claims?.preferredUsername}');
+      return claims;
     } on Object catch (e, s) {
-      log.severe('Sign up failed', e, s);
+      log.severe('Sign-up process failed', e, s);
       return null;
     }
   }
 
   /// Logout from Keycloak and clear stored tokens.
   Future<bool> logout() async {
+    log.fine('Starting logout process');
+
     try {
       final idToken = await _authTokenOperator.idToken;
 
@@ -99,9 +114,14 @@ class AuthService with LoggerMixin<AuthService> {
         );
       }
 
+      log.info('Remote logout successful');
       return true;
     } on Object catch (e, s) {
-      log.warning('Logout failed (still removing tokens)', e, s);
+      log.warning(
+        'Remote logout failed, proceeding to clear local tokens anyway',
+        e,
+        s,
+      );
       return true;
     } finally {
       await _clearTokens();
@@ -110,9 +130,14 @@ class AuthService with LoggerMixin<AuthService> {
 
   /// Try to refresh the access token silently using the stored refresh token.
   Future<bool> tryRefreshToken() async {
+    log.fine('Attempting to refresh access token silently');
+
     try {
       final refreshToken = await _authTokenOperator.refreshToken;
-      if (refreshToken == null) return false;
+      if (refreshToken == null) {
+        log.fine('No refresh token found in storage. Aborting refresh.');
+        return false;
+      }
 
       final result = await _appAuth.token(
         TokenRequest(
@@ -126,10 +151,11 @@ class AuthService with LoggerMixin<AuthService> {
       );
 
       await _saveTokenResponse(result);
+      log.info('Silent token refresh successful');
       return true;
-    } on Object catch (_) {
-      log.shout('Failed to refresh token silently, clearing stored tokens');
+    } on Object catch (e, s) {
       await _clearTokens();
+      log.warning('Silent token refresh failed. Local tokens cleared.', e, s);
       return false;
     }
   }
@@ -140,8 +166,7 @@ class AuthService with LoggerMixin<AuthService> {
   }
 
   Future<AuthClaims?> get authClaimsIfValid async {
-    final accessToken = await _authTokenOperator.accessToken;
-    if (accessToken != null && !JwtDecoder.isExpired(accessToken)) {
+    if (await isAccessTokenValid) {
       return _authClaims;
     }
     return null;
@@ -197,12 +222,9 @@ class AuthService with LoggerMixin<AuthService> {
       idToken: idToken,
     );
     final claims = _extractAllClaims(tokens);
-    await _authTokenOperator.put(
-      AuthTokenStorageModel(authTokens: tokens),
-    );
-    await _authClaimsOperator.put(
-      AuthClaimsStorageModel(authClaims: claims),
-    );
+
+    await _authTokenOperator.put(AuthTokenStorageModel(authTokens: tokens));
+    await _authClaimsOperator.put(AuthClaimsStorageModel(authClaims: claims));
   }
 
   Future<void> _clearTokens() async {

@@ -27,6 +27,6 @@ abstract final class AppInitializer {
     );
     unawaited(loggerHelper.start(getIt<NetworkManager>().remoteLogInvoker));
 
-    logger('AppInitializer').info(() => 'App initialization complete');
+    logger('AppInitializer').config(() => 'App initialization complete');
   }
 }
