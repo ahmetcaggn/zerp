@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:injectable/injectable.dart';
 import 'package:zerp_tenant/product/cubit/base_cubit.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/state_auth.dart';
@@ -5,7 +7,9 @@ import 'package:zerp_tenant/product/service/auth_service.dart';
 
 @injectable
 class CubitAuth extends BaseCubit<StateAuth> {
-  CubitAuth(this._authService) : super(const StateAuthInitial());
+  CubitAuth(this._authService) : super(const StateAuthInitial()) {
+    unawaited(checkAuth());
+  }
 
   final AuthService _authService;
 

@@ -52,6 +52,48 @@ public class GatewayConfig {
 
         return routeLocatorBuilder.routes()
                 .route(r -> r
+                                .path("/email/v3/api-docs/**")
+                                .filters(f -> f
+                                                .rewritePath("/email/v3/api-docs(?<segment>/?.*)", "/v3/api-docs${segment}")
+                                )
+                                .uri("lb://NOTIFICATION")
+                )
+                .route(r -> r
+                                .path("/email/swagger-ui/**")
+                                .filters(f -> f
+                                                .rewritePath("/email/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
+                                )
+                                .uri("lb://NOTIFICATION")
+                )
+                .route(r -> r
+                                .path("/employee/v3/api-docs/**")
+                                .filters(f -> f
+                                                .rewritePath("/employee/v3/api-docs(?<segment>/?.*)", "/v3/api-docs${segment}")
+                                )
+                                .uri("lb://EMPLOYEE")
+                )
+                .route(r -> r
+                                .path("/employee/swagger-ui/**")
+                                .filters(f -> f
+                                                .rewritePath("/employee/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
+                                )
+                                .uri("lb://EMPLOYEE")
+                )
+                .route(r -> r
+                                .path("/crm/v3/api-docs/**")
+                                .filters(f -> f
+                                                .rewritePath("/crm/v3/api-docs(?<segment>/?.*)", "/v3/api-docs${segment}")
+                                )
+                                .uri("lb://CRM")
+                )
+                .route(r -> r
+                                .path("/crm/swagger-ui/**")
+                                .filters(f -> f
+                                                .rewritePath("/crm/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
+                                )
+                                .uri("lb://CRM")
+                )
+                .route(r -> r
                                 .path("/email/**")
                                 .filters(f -> f
                                                 .modifyResponseBody(String.class, String.class, this::attachGatewayDurationToResponseBody)
