@@ -47,3 +47,7 @@ app.*.map.json
 # Auto generated dart files
 **/*.g.dart
 **/*.freezed.dart
+
+# OpenAPI generators
+openapi-generator-cli-*.jar
+openapi-dart-network-codegen-*.jar

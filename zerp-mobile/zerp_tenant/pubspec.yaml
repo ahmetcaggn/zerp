@@ -26,6 +26,12 @@ dependencies:
   jwt_decoder: ^2.0.1
   logging: ^1.3.0
   meta: any
+  openapi_crm:
+    path: modules/openapi_crm
+  openapi_employee:
+    path: modules/openapi_employee
+  openapi_notification:
+    path: modules/openapi_notification
   path_provider: ^2.1.5
   remote_logging:
     path: modules/remote_logging
