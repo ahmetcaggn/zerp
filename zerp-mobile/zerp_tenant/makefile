@@ -3,13 +3,6 @@ OPENAPI_CODEGEN_JAR := ./openapi-generator-cli-$(OPENAPI_CODEGEN_VERSION).jar
 CUSTOM_CODEGEN_VERSION := 0.1.9
 CUSTOM_CODEGEN_JAR := ./openapi-dart-network-codegen-$(CUSTOM_CODEGEN_VERSION).jar
 GENERATOR := dart-network
-
-# Legacy spec file (kept for backward compatibility)
-SPEC_FILE_NAME := ./openapi-spec.json
-SPEC_FILE_URL := https://dummyapi.femrek.dev/v3/api-docs
-
-# API configurations
-APIS := crm employee notification
 SPECS_DIR := ./openapi-specs
 
 CRM_SPEC_URL := http://localhost:8080/crm/v3/api-docs
