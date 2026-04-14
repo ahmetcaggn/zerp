@@ -22,7 +22,7 @@
         <module>notification</module>
         <module>crm</module>
         <module>employee</module>
-        <module>socket_service</module>
+        <!--        <module>socket_service</module>-->
     </modules>
 
     <properties>

@@ -18,6 +18,7 @@ import org.zerp.common.entity.employee.Employee;
 import org.zerp.common.entity.employee.EmploymentStatus;
 import org.zerp.employee.Exception.DuplicateResourceException;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
+import org.zerp.employee.dtos.request.UpdateEmployeeRequestDto;
 import org.zerp.employee.dtos.response.EmployeeListResponseDto;
 import org.zerp.employee.dtos.response.EmployeeResponseDto;
 import org.zerp.employee.mapper.EmployeeMapper;
@@ -322,17 +323,17 @@ class EmployeeServiceTest {
             Employee emp = buildEmployee(1L, "old@example.com");
             Employee saved = buildEmployee(1L, "new@example.com");
             EmployeeResponseDto responseDto = buildResponseDto(1L, "new@example.com");
+            UpdateEmployeeRequestDto updateDto = new UpdateEmployeeRequestDto();
+            updateDto.setFirstName("Updated");
+            updateDto.setEmail("new@example.com");
+            updateDto.setSalary(new BigDecimal("6000"));
 
             when(employeeRepository.findByIdWithContactsAndNotDeleted(1L)).thenReturn(Optional.of(emp));
             when(employeeRepository.findByEmailAndNotDeleted("new@example.com")).thenReturn(Optional.empty());
             when(employeeRepository.save(emp)).thenReturn(saved);
             when(employeeMapper.toResponseDto(saved)).thenReturn(responseDto);
 
-            EmployeeResponseDto result = employeeService.update(1L, Map.of(
-                    "firstName", "Updated",
-                    "email", "new@example.com",
-                    "salary", "6000"
-            ));
+            EmployeeResponseDto result = employeeService.update(1L, updateDto);
 
             assertThat(result.getEmail()).isEqualTo("new@example.com");
             assertThat(emp.getFirstName()).isEqualTo("Updated");
@@ -343,7 +344,10 @@ class EmployeeServiceTest {
         void throwsEntityNotFoundWhenEmployeeMissing() {
             when(employeeRepository.findByIdWithContactsAndNotDeleted(99L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> employeeService.update(99L, Map.of("firstName", "X")))
+            UpdateEmployeeRequestDto updateDto = new UpdateEmployeeRequestDto();
+            updateDto.setFirstName("X");
+
+            assertThatThrownBy(() -> employeeService.update(99L, updateDto))
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessageContaining("99");
         }
@@ -353,7 +357,10 @@ class EmployeeServiceTest {
             Employee emp = buildEmployee(1L, "e@example.com");
             when(employeeRepository.findByIdWithContactsAndNotDeleted(1L)).thenReturn(Optional.of(emp));
 
-            assertThatThrownBy(() -> employeeService.update(1L, Map.of("managerId", "1")))
+            UpdateEmployeeRequestDto updateDto = new UpdateEmployeeRequestDto();
+            updateDto.setManagerId(1L);
+
+            assertThatThrownBy(() -> employeeService.update(1L, updateDto))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -361,11 +368,13 @@ class EmployeeServiceTest {
         void throwsDuplicateExceptionOnEmailAlreadyTaken() {
             Employee emp = buildEmployee(1L, "old@example.com");
             Employee other = buildEmployee(2L, "taken@example.com");
+            UpdateEmployeeRequestDto updateDto = new UpdateEmployeeRequestDto();
+            updateDto.setEmail("taken@example.com");
 
             when(employeeRepository.findByIdWithContactsAndNotDeleted(1L)).thenReturn(Optional.of(emp));
             when(employeeRepository.findByEmailAndNotDeleted("taken@example.com")).thenReturn(Optional.of(other));
 
-            assertThatThrownBy(() -> employeeService.update(1L, Map.of("email", "taken@example.com")))
+            assertThatThrownBy(() -> employeeService.update(1L, updateDto))
                     .isInstanceOf(DuplicateResourceException.class)
                     .hasMessageContaining("taken@example.com");
         }
@@ -375,13 +384,15 @@ class EmployeeServiceTest {
             Employee emp = buildEmployee(1L, "emp@example.com");
             Employee manager = buildEmployee(2L, "mgr@example.com");
             Employee saved = buildEmployee(1L, "emp@example.com");
+            UpdateEmployeeRequestDto updateDto = new UpdateEmployeeRequestDto();
+            updateDto.setManagerId(2L);
 
             when(employeeRepository.findByIdWithContactsAndNotDeleted(1L)).thenReturn(Optional.of(emp));
             when(employeeRepository.findByIdAndNotDeleted(2L)).thenReturn(Optional.of(manager));
             when(employeeRepository.save(emp)).thenReturn(saved);
             when(employeeMapper.toResponseDto(saved)).thenReturn(buildResponseDto(1L, "emp@example.com"));
 
-            employeeService.update(1L, Map.of("managerId", "2"));
+            employeeService.update(1L, updateDto);
 
             assertThat(emp.getManager()).isEqualTo(manager);
         }
@@ -389,11 +400,13 @@ class EmployeeServiceTest {
         @Test
         void throwsEntityNotFoundWhenNewManagerNotFound() {
             Employee emp = buildEmployee(1L, "emp@example.com");
+            UpdateEmployeeRequestDto updateDto = new UpdateEmployeeRequestDto();
+            updateDto.setManagerId(50L);
 
             when(employeeRepository.findByIdWithContactsAndNotDeleted(1L)).thenReturn(Optional.of(emp));
             when(employeeRepository.findByIdAndNotDeleted(50L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> employeeService.update(1L, Map.of("managerId", "50")))
+            assertThatThrownBy(() -> employeeService.update(1L, updateDto))
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessageContaining("50");
         }

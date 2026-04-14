@@ -105,9 +105,38 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
     }
 
     @Override
-    public EmployeeResponseDto update(Long aLong, UpdateEmployeeRequestDto data) {
-        // TODO: Ahmet can.
-        return null;
+    @Transactional
+    public EmployeeResponseDto update(Long id, UpdateEmployeeRequestDto data) {
+        Employee employee = employeeRepository.findByIdWithContactsAndNotDeleted(id)
+                .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
+
+        validateUniqueConstraints(data.getEmail(), data.getNationalId(), id);
+
+        if (data.getFirstName() != null) employee.setFirstName(data.getFirstName());
+        if (data.getLastName() != null) employee.setLastName(data.getLastName());
+        if (data.getEmail() != null) employee.setEmail(data.getEmail());
+        if (data.getPhoneNumber() != null) employee.setPhoneNumber(data.getPhoneNumber());
+        if (data.getNationalId() != null) employee.setNationalId(data.getNationalId());
+        if (data.getDateOfBirth() != null) employee.setDateOfBirth(data.getDateOfBirth());
+        if (data.getHireDate() != null) employee.setHireDate(data.getHireDate());
+        if (data.getTerminationDate() != null) employee.setTerminationDate(data.getTerminationDate());
+        if (data.getStatus() != null) employee.setStatus(data.getStatus());
+        if (data.getSalary() != null) employee.setSalary(data.getSalary());
+
+        if (data.getManagerId() != null) {
+            if (data.getManagerId().equals(id)) {
+                throw new IllegalArgumentException("Employee cannot be their own manager");
+            }
+            Employee manager = employeeRepository.findByIdAndNotDeleted(data.getManagerId())
+                    .orElseThrow(() -> new EntityNotFoundException("Manager not found: " + data.getManagerId()));
+            employee.setManager(manager);
+        }
+
+        if (data.getContacts() != null) {
+            updateContacts(employee, data.getContacts());
+        }
+
+        return employeeMapper.toResponseDto(employeeRepository.save(employee));
     }
 
     @Override
