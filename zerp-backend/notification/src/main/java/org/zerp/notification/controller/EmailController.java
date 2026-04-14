@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/email")
+@RequestMapping("/notification/email")
 @RequiredArgsConstructor
 public class EmailController {
     private final EmailService emailService;

@@ -52,16 +52,16 @@ public class GatewayConfig {
 
         return routeLocatorBuilder.routes()
                 .route(r -> r
-                                .path("/email/v3/api-docs/**")
+                                .path("/notification/v3/api-docs/**")
                                 .filters(f -> f
-                                                .rewritePath("/email/v3/api-docs(?<segment>/?.*)", "/v3/api-docs${segment}")
+                                                .rewritePath("/notification/v3/api-docs(?<segment>/?.*)", "/v3/api-docs${segment}")
                                 )
                                 .uri("lb://NOTIFICATION")
                 )
                 .route(r -> r
-                                .path("/email/swagger-ui/**")
+                                .path("/notification/swagger-ui/**")
                                 .filters(f -> f
-                                                .rewritePath("/email/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
+                                                .rewritePath("/notification/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
                                 )
                                 .uri("lb://NOTIFICATION")
                 )
@@ -94,7 +94,7 @@ public class GatewayConfig {
                                 .uri("lb://CRM")
                 )
                 .route(r -> r
-                                .path("/email/**")
+                                .path("/notification/**")
                                 .filters(f -> f
                                                 .modifyResponseBody(String.class, String.class, this::attachGatewayDurationToResponseBody)
 //                                .filter(authFilter.apply(new CustomAuthFilter.Config()))
