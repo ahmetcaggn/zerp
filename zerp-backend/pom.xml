@@ -23,6 +23,7 @@
         <module>crm</module>
         <module>employee</module>
         <!--        <module>socket_service</module>-->
+        <module>aggregated</module>
     </modules>
 
     <properties>
