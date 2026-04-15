@@ -9,6 +9,10 @@ import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.zerp.crm.CrmApplication;
 import org.zerp.employee.EmployeeApplication;
 import org.zerp.notification.NotificationApplication;
+import org.zerp.resource.ResourceApplication;
+import org.zerp.sale.SaleApplication;
+import org.zerp.suggestion.SuggestionApplication;
+
 
 /**
  * The Java app to run all feature services on only one jvm. use only for development and testing, not for production.
@@ -24,35 +28,38 @@ public class AggregatedApplication {
         System.setProperty("spring.jmx.enabled", "false");
 
         new SpringApplicationBuilder()
-                // 1. Parent Context (No Web Server)
+                // 0. Parent Context (No Web Server)
                 .sources(HostConfig.class).web(WebApplicationType.NONE)
 
-                // 2. CRM Context
+                // 1. CRM Context
                 .child(CrmApplication.class).web(WebApplicationType.SERVLET)
                 .properties(
-                        "server.port=8081",
-                        "spring.application.name=crm-service",
-                        // Safely loads the specific properties file from your local CRM module
-                        "spring.config.additional-location=optional:file:./crm/src/main/resources/"
-                )
+                        "spring.config.additional-location=optional:file:./crm/src/main/resources/")
 
-                // 3. Employee Context
+                // 2. Employee Context
                 .sibling(EmployeeApplication.class).web(WebApplicationType.SERVLET)
                 .properties(
-                        "server.port=8082",
-                        "spring.application.name=employee-service",
-                        // Safely loads the specific properties file from your local Employee module
-                        "spring.config.additional-location=optional:file:./employee/src/main/resources/"
-                )
+                        "spring.config.additional-location=optional:file:./employee/src/main/resources/")
 
-                // 4. Notification Context
+                // 3. Notification Context
                 .sibling(NotificationApplication.class).web(WebApplicationType.SERVLET)
                 .properties(
-                        "server.port=8083",
-                        "spring.application.name=notification-service",
-                        // Safely loads the specific properties file from your local Notification module
-                        "spring.config.additional-location=optional:file:./notification/src/main/resources/"
-                )
+                        "spring.config.additional-location=optional:file:./notification/src/main/resources/")
+
+                // 4. Resource Context
+                .sibling(ResourceApplication.class).web(WebApplicationType.SERVLET)
+                .properties(
+                        "spring.config.additional-location=optional:file:./resource/src/main/resources/")
+
+                // 5. Sale Context
+                .sibling(SaleApplication.class).web(WebApplicationType.SERVLET)
+                .properties(
+                        "spring.config.additional-location=optional:file:./sale/src/main/resources/")
+
+                // 6. Suggestion Context
+                .sibling(SuggestionApplication.class).web(WebApplicationType.SERVLET)
+                .properties(
+                        "spring.config.additional-location=optional:file:./suggestion/src/main/resources/")
 
                 .run(args);
     }

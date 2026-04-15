@@ -142,6 +142,87 @@ public class GatewayConfig {
                                 )
                                 .uri("lb://CRM")
                 )
+                .route(r -> r
+                                .path("/resource/v3/api-docs/**")
+                                .filters(f -> f
+                                                .rewritePath("/resource/v3/api-docs(?<segment>/?.*)", "/v3/api-docs${segment}")
+                                )
+                                .uri("lb://RESOURCE")
+                )
+                .route(r -> r
+                                .path("/resource/swagger-ui/**")
+                                .filters(f -> f
+                                                .rewritePath("/resource/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
+                                )
+                                .uri("lb://RESOURCE")
+                )
+                .route(r -> r
+                                .path("/resource/**")
+                                .filters(f -> f
+                                                .modifyResponseBody(String.class, String.class, this::attachGatewayDurationToResponseBody)
+//                                .filter(authFilter.apply(new CustomAuthFilter.Config()))
+                                                .retry(retryConfig -> retryConfig
+                                                        .setRetries(3)
+                                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
+                                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
+                                                )
+                                )
+                                .uri("lb://RESOURCE")
+                )
+                .route(r -> r
+                                .path("/sale/v3/api-docs/**")
+                                .filters(f -> f
+                                                .rewritePath("/sale/v3/api-docs(?<segment>/?.*)", "/v3/api-docs${segment}")
+                                )
+                                .uri("lb://SALE")
+                )
+                .route(r -> r
+                                .path("/sale/swagger-ui/**")
+                                .filters(f -> f
+                                                .rewritePath("/sale/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
+                                )
+                                .uri("lb://SALE")
+                )
+                .route(r -> r
+                                .path("/sale/**")
+                                .filters(f -> f
+                                                .modifyResponseBody(String.class, String.class, this::attachGatewayDurationToResponseBody)
+//                                .filter(authFilter.apply(new CustomAuthFilter.Config()))
+                                                .retry(retryConfig -> retryConfig
+                                                        .setRetries(3)
+                                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
+                                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
+                                                )
+                                )
+                                .uri("lb://SALE")
+                )
+                .route(r -> r
+                                .path("/suggestion/v3/api-docs/**")
+                                .filters(f -> f
+                                                .rewritePath("/suggestion/v3/api-docs(?<segment>/?.*)", "/v3/api-docs${segment}")
+                                )
+                                .uri("lb://SUGGESTION")
+                )
+                .route(r -> r
+                                .path("/suggestion/swagger-ui/**")
+                                .filters(f -> f
+                                                .rewritePath("/suggestion/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
+                                )
+                                .uri("lb://SUGGESTION")
+                )
+                .route(r -> r
+                                .path("/suggestion/**")
+                                .filters(f -> f
+                                                .modifyResponseBody(String.class, String.class, this::attachGatewayDurationToResponseBody)
+//                                .filter(authFilter.apply(new CustomAuthFilter.Config()))
+                                                .retry(retryConfig -> retryConfig
+                                                        .setRetries(3)
+                                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
+                                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
+                                                )
+                                )
+                                .uri("lb://SUGGESTION")
+                )
                 .build();
     }
 

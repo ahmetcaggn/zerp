@@ -16,13 +16,21 @@
     <packaging>pom</packaging>
 
     <modules>
+        <!-- essential -->
         <module>common</module>
         <module>eureka</module>
         <module>gateway</module>
+
+        <!-- feature -->
         <module>notification</module>
         <module>crm</module>
         <module>employee</module>
-        <!--        <module>socket_service</module>-->
+        <module>resource</module>
+        <module>sale</module>
+        <module>suggestion</module>
+        <!--  <module>socket_service</module>-->
+
+        <!-- debug -->
         <module>aggregated</module>
     </modules>
 
