@@ -1,7 +1,6 @@
 package org.pomocra.socket_service.listener;
 
 import lombok.extern.log4j.Log4j2;
-import org.pomocra.common.friendship.PresenceStatus;
 import org.pomocra.socket_service.service.Notification;
 import org.pomocra.socket_service.service.PresenceService;
 import org.springframework.context.event.EventListener;

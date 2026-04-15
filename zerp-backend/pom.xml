@@ -28,7 +28,7 @@
         <module>resource</module>
         <module>sale</module>
         <module>suggestion</module>
-        <!--  <module>socket_service</module>-->
+<!--          <module>socket_service</module>-->
 
         <!-- debug -->
         <module>aggregated</module>
