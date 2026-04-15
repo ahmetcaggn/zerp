@@ -48,7 +48,7 @@ export 'requests/teams/delete_team_command.dart';
 export 'requests/teams/get_list_command.dart';
 export 'requests/teams/get_many_reference_command.dart';
 export 'requests/teams/get_many_teams_command.dart';
-export 'requests/teams/get_one_command.dart';
+export 'requests/teams/get_one_team_command.dart';
 export 'requests/teams/patch_many_command.dart';
 export 'requests/teams/patch_team_command.dart';
 export 'requests/teams/remove_team_member_command.dart';

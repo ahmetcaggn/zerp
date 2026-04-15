@@ -18,8 +18,8 @@ import '../../model/api_response_team_response.dart';
 /// Retrieves a single entity by its unique identifier. Implements ra-spring-data-provider's getOne operation. 
 ///
 /// GET /api/teams/{id}
-class GetOneCommand extends OpenapiDefinitionBaseRequest<ApiResponseTeamResponse> {
-  GetOneCommand({
+class GetOneTeamCommand extends OpenapiDefinitionBaseRequest<ApiResponseTeamResponse> {
+  GetOneTeamCommand({
     required this.id,
   });
 

@@ -1,19 +1,19 @@
-# openapi_employee.api.EmployeesGetOneApi
+# openapi_employee.api.EmployeesGetOneEmployeeApi
 
 ## Load the API package
 ```dart
 import 'package:openapi_employee/api.dart';
 ```
 
-All URIs are relative to *http://192.168.0.103:8082*
+All URIs are relative to *http://192.168.0.112:8082*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**getOne**](EmployeesGetOneApi.md#) | **GET** /employee/{id} | GetOne: Get single entity by ID
+[**getOneEmployee**](EmployeesGetOneEmployeeApi.md#) | **GET** /employee/{id} | GetOne: Get single entity by ID
 
 
-# **getOne**
-> ApiResponseEmployeeResponseDto getOne(id)
+# **getOneEmployee**
+> ApiResponseEmployeeResponseDto getOneEmployee(id)
 
 GetOne: Get single entity by ID
 
@@ -23,14 +23,14 @@ Retrieves a single entity by its unique identifier. Implements ra-spring-data-pr
 ```dart
 import 'package:openapi_employee/api.dart';
 
-final api_instance = EmployeesGetOneApi();
+final api_instance = EmployeesGetOneEmployeeApi();
 final id = 1; // int | Unique identifier of the entity to retrieve
 
 try {
-    final result = api_instance.getOne(id);
+    final result = api_instance.getOneEmployee(id);
     print(result);
 } catch (e) {
-    print('Exception when calling EmployeesGetOneApi->getOne: $e\n');
+    print('Exception when calling EmployeesGetOneEmployeeApi->getOneEmployee: $e\n');
 }
 ```
 

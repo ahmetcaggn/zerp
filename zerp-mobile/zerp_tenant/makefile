@@ -5,6 +5,11 @@ CUSTOM_CODEGEN_JAR := ./openapi-dart-network-codegen-$(CUSTOM_CODEGEN_VERSION).j
 GENERATOR := dart-network
 SPECS_DIR := ./openapi-specs
 
+MERGED_SPEC_URL=http://localhost:8080/gateway/v3/api-docs/merged
+MERGED_SPEC_FILE=$(SPECS_DIR)/merged-api-spec.json
+MERGED_PUB_NAME=openapi_merged
+MERGED_OUTPUT_DIR=./modules/$(MERGED_PUB_NAME)
+
 CRM_SPEC_URL := http://localhost:8080/crm/v3/api-docs
 CRM_SPEC_FILE := $(SPECS_DIR)/crm-api-spec.json
 CRM_PUB_NAME := openapi_crm
@@ -41,10 +46,9 @@ download-codegen-if-not-exists:
 ensure-specs-dir:
 	mkdir -p $(SPECS_DIR)
 
-download-openapi-spec: ensure-specs-dir
-	# Check if the OpenAPI spec file exists, and download it if it doesn't
-	echo "OpenAPI spec file Downloading..."; \
-	curl -fL -o $(SPEC_FILE_NAME) $(SPEC_FILE_URL); \
+download-merged-spec: ensure-specs-dir
+	echo "Downloading merged API spec..."; \
+	curl -fL -o $(MERGED_SPEC_FILE) $(MERGED_SPEC_URL); \
 
 download-crm-spec: ensure-specs-dir
 	echo "Downloading CRM API spec..."; \
@@ -60,15 +64,18 @@ download-notification-spec: ensure-specs-dir
 
 download-all-specs: download-crm-spec download-employee-spec download-notification-spec
 
-generate: download-openapi-cli-if-not-exists download-codegen-if-not-exists download-openapi-spec
-	$(eval OUTPUT_DIR := ./modules/openapi)
-	rm -rf $(OUTPUT_DIR)
-	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
-	   -i $(SPEC_FILE_NAME) \
-	   -g $(GENERATOR) \
-	   -o $(OUTPUT_DIR)
+# generate
 
-generate-crm-api: download-openapi-cli-if-not-exists download-codegen-if-not-exists download-crm-spec
+generate-merged-api: download-openapi-cli-if-not-exists download-codegen-if-not-exists
+	echo "Generating merged API code..."
+	rm -rf $(MERGED_OUTPUT_DIR)
+	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
+	   -i $(MERGED_SPEC_FILE) \
+	   -g $(GENERATOR) \
+	   -p pubName=$(MERGED_PUB_NAME) \
+	   -o $(MERGED_OUTPUT_DIR)
+
+generate-crm-api: download-openapi-cli-if-not-exists download-codegen-if-not-exists
 	echo "Generating CRM API code..."
 	rm -rf $(CRM_OUTPUT_DIR)
 	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
@@ -77,7 +84,7 @@ generate-crm-api: download-openapi-cli-if-not-exists download-codegen-if-not-exi
 	   -p pubName=$(CRM_PUB_NAME) \
 	   -o $(CRM_OUTPUT_DIR)
 
-generate-employee-api: download-openapi-cli-if-not-exists download-codegen-if-not-exists download-employee-spec
+generate-employee-api: download-openapi-cli-if-not-exists download-codegen-if-not-exists
 	echo "Generating Employee API code..."
 	rm -rf $(EMPLOYEE_OUTPUT_DIR)
 	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
@@ -86,7 +93,7 @@ generate-employee-api: download-openapi-cli-if-not-exists download-codegen-if-no
 	   -p pubName=$(EMPLOYEE_PUB_NAME) \
 	   -o $(EMPLOYEE_OUTPUT_DIR)
 
-generate-notification-api: download-openapi-cli-if-not-exists download-codegen-if-not-exists download-notification-spec
+generate-notification-api: download-openapi-cli-if-not-exists download-codegen-if-not-exists
 	echo "Generating Notification API code..."
 	rm -rf $(NOTIFICATION_OUTPUT_DIR)
 	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
@@ -95,12 +102,33 @@ generate-notification-api: download-openapi-cli-if-not-exists download-codegen-i
 	   -p pubName=$(NOTIFICATION_PUB_NAME) \
 	   -o $(NOTIFICATION_OUTPUT_DIR)
 
+# fetch and generate and pub get
+
+fetch-and-generate-merged-api-and: download-merged-spec generate-merged-api
+	cd $(MERGED_OUTPUT_DIR) && flutter pub get
+
+fetch-and-generate-crm-api: download-crm-spec generate-crm-api
+	cd $(CRM_OUTPUT_DIR) && flutter pub get
+
+fetch-and-generate-employee-api: download-employee-spec generate-employee-api
+	cd $(EMPLOYEE_OUTPUT_DIR) && flutter pub get
+
+fetch-and-generate-notification-api: download-notification-spec generate-notification-api
+	cd $(NOTIFICATION_OUTPUT_DIR) && flutter pub get
+
+fetch-and-generate-all-apis: download-all-specs generate-all-apis
+	cd $(CRM_OUTPUT_DIR) && flutter pub get
+	cd $(EMPLOYEE_OUTPUT_DIR) && flutter pub get
+	cd $(NOTIFICATION_OUTPUT_DIR) && flutter pub get
+	echo "All APIs fetched, generated, and dependencies installed!"
+
+# generate and pub get
+
+generate-merged-api-and-pub-get: generate-merged-api
+	cd $(MERGED_OUTPUT_DIR) && flutter pub get
+
 generate-all-apis: generate-crm-api generate-employee-api generate-notification-api
 	echo "All API code generated successfully!"
-
-generate-and-pub-get: generate
-	$(eval OUTPUT_DIR := ./modules/openapi)
-	cd $(OUTPUT_DIR) && flutter pub get
 
 generate-crm-api-and-pub-get: generate-crm-api
 	cd $(CRM_OUTPUT_DIR) && flutter pub get

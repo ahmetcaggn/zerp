@@ -55,7 +55,7 @@ try {
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://192.168.0.103:8083*
+All URIs are relative to *http://192.168.0.112:8083*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------

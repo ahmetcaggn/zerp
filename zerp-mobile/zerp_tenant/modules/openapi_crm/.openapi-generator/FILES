@@ -31,7 +31,7 @@ doc/TeamsDeleteTeamApi.md
 doc/TeamsGetListApi.md
 doc/TeamsGetManyReferenceApi.md
 doc/TeamsGetManyTeamsApi.md
-doc/TeamsGetOneApi.md
+doc/TeamsGetOneTeamApi.md
 doc/TeamsPatchManyApi.md
 doc/TeamsPatchTeamApi.md
 doc/TeamsRemoveTeamMemberApi.md
@@ -84,7 +84,7 @@ lib/requests/teams/delete_team_command.dart
 lib/requests/teams/get_list_command.dart
 lib/requests/teams/get_many_reference_command.dart
 lib/requests/teams/get_many_teams_command.dart
-lib/requests/teams/get_one_command.dart
+lib/requests/teams/get_one_team_command.dart
 lib/requests/teams/patch_many_command.dart
 lib/requests/teams/patch_team_command.dart
 lib/requests/teams/remove_team_member_command.dart
@@ -127,7 +127,7 @@ test/teams/delete_team_command_test.dart
 test/teams/get_list_command_test.dart
 test/teams/get_many_reference_command_test.dart
 test/teams/get_many_teams_command_test.dart
-test/teams/get_one_command_test.dart
+test/teams/get_one_team_command_test.dart
 test/teams/patch_many_command_test.dart
 test/teams/patch_team_command_test.dart
 test/teams/remove_team_member_command_test.dart

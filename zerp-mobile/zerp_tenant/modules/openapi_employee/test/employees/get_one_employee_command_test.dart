@@ -7,21 +7,21 @@
 // ignore_for_file: constant_identifier_names
 // ignore_for_file: lines_longer_than_80_chars
 
-import 'package:openapi_crm/api.dart';
+import 'package:openapi_employee/api.dart';
 import 'package:test/test.dart';
 
 
-/// tests for TeamsGetOneApi
+/// tests for EmployeesGetOneEmployeeApi
 void main() {
-  // final instance = TeamsGetOneApi();
+  // final instance = EmployeesGetOneEmployeeApi();
 
-  group('tests for TeamsGetOneApi', () {
+  group('tests for EmployeesGetOneEmployeeApi', () {
     // GetOne: Get single entity by ID
     //
     // Retrieves a single entity by its unique identifier. Implements ra-spring-data-provider's getOne operation. 
     //
-    //Future<ApiResponseTeamResponse> getOne(int id) async
-    test('test getOne', () async {
+    //Future<ApiResponseEmployeeResponseDto> getOneEmployee(int id) async
+    test('test getOneEmployee', () async {
       // TODO
     });
 

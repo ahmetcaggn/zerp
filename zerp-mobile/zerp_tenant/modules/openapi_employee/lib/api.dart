@@ -42,7 +42,7 @@ export 'requests/employees/get_deleted_employees_paginated_command.dart';
 export 'requests/employees/get_list_command.dart';
 export 'requests/employees/get_many_employees_command.dart';
 export 'requests/employees/get_many_reference_command.dart';
-export 'requests/employees/get_one_command.dart';
+export 'requests/employees/get_one_employee_command.dart';
 export 'requests/employees/patch_employee_command.dart';
 export 'requests/employees/patch_many_command.dart';
 export 'requests/employees/search_employees_command.dart';

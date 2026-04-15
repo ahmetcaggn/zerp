@@ -15,11 +15,6 @@ void main() {
   // final instance = PageableObject();
 
   group('test PageableObject', () {
-    // bool unpaged
-    test('to test the property `unpaged`', () async {
-      // TODO
-    });
-
     // bool paged
     test('to test the property `paged`', () async {
       // TODO
@@ -37,6 +32,11 @@ void main() {
 
     // SortObject sort
     test('to test the property `sort`', () async {
+      // TODO
+    });
+
+    // bool unpaged
+    test('to test the property `unpaged`', () async {
       // TODO
     });
 

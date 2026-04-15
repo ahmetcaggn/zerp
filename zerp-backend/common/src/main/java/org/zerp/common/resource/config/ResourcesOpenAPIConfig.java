@@ -41,7 +41,7 @@ public class ResourcesOpenAPIConfig {
      * be singularized (e.g., tag "Posts" → "Post", so the ID becomes "getPost").
      */
     private static final Set<String> SINGULAR_OPERATION_IDS = Set.of(
-            "get",
+            "getOne",
             "create",
             "patch",
             "update",

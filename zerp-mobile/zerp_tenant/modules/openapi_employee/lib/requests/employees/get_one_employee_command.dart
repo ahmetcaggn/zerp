@@ -18,8 +18,8 @@ import '../../model/api_response_employee_response_dto.dart';
 /// Retrieves a single entity by its unique identifier. Implements ra-spring-data-provider's getOne operation. 
 ///
 /// GET /employee/{id}
-class GetOneCommand extends OpenapiDefinitionBaseRequest<ApiResponseEmployeeResponseDto> {
-  GetOneCommand({
+class GetOneEmployeeCommand extends OpenapiDefinitionBaseRequest<ApiResponseEmployeeResponseDto> {
+  GetOneEmployeeCommand({
     required this.id,
   });
 

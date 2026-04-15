@@ -13,21 +13,13 @@ import 'sort_object.dart';
 class PageableObject extends Schema {
   /// Returns a new [PageableObject] instance.
   PageableObject({
-    this.unpaged,
     this.paged,
     this.pageNumber,
     this.pageSize,
     this.sort,
+    this.unpaged,
     this.offset,
   });
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  final bool? unpaged;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -67,6 +59,14 @@ class PageableObject extends Schema {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
+  final bool? unpaged;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
   final int? offset;
 
   /// The factory instance for creating [PageableObject] from JSON.
@@ -74,33 +74,28 @@ class PageableObject extends Schema {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is PageableObject &&
-    other.unpaged == unpaged &&
     other.paged == paged &&
     other.pageNumber == pageNumber &&
     other.pageSize == pageSize &&
     other.sort == sort &&
+    other.unpaged == unpaged &&
     other.offset == offset;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (unpaged == null ? 0 : unpaged!.hashCode) +
     (paged == null ? 0 : paged!.hashCode) +
     (pageNumber == null ? 0 : pageNumber!.hashCode) +
     (pageSize == null ? 0 : pageSize!.hashCode) +
     (sort == null ? 0 : sort!.hashCode) +
+    (unpaged == null ? 0 : unpaged!.hashCode) +
     (offset == null ? 0 : offset!.hashCode);
 
   @override
-  String toString() => 'PageableObject[unpaged=$unpaged, paged=$paged, pageNumber=$pageNumber, pageSize=$pageSize, sort=$sort, offset=$offset]';
+  String toString() => 'PageableObject[paged=$paged, pageNumber=$pageNumber, pageSize=$pageSize, sort=$sort, unpaged=$unpaged, offset=$offset]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.unpaged != null) {
-      json[r'unpaged'] = this.unpaged;
-    } else {
-      json[r'unpaged'] = null;
-    }
     if (this.paged != null) {
       json[r'paged'] = this.paged;
     } else {
@@ -120,6 +115,11 @@ class PageableObject extends Schema {
       json[r'sort'] = this.sort;
     } else {
       json[r'sort'] = null;
+    }
+    if (this.unpaged != null) {
+      json[r'unpaged'] = this.unpaged;
+    } else {
+      json[r'unpaged'] = null;
     }
     if (this.offset != null) {
       json[r'offset'] = this.offset;
@@ -148,11 +148,11 @@ class PageableObject extends Schema {
       }());
 
       return PageableObject(
-        unpaged: json[r'unpaged'] is bool ? json[r'unpaged'] as bool : null,
         paged: json[r'paged'] is bool ? json[r'paged'] as bool : null,
         pageNumber: json[r'pageNumber'] is int ? json[r'pageNumber'] as int : null,
         pageSize: json[r'pageSize'] is int ? json[r'pageSize'] as int : null,
         sort: SortObject.fromJson(json[r'sort']),
+        unpaged: json[r'unpaged'] is bool ? json[r'unpaged'] as bool : null,
         offset: json[r'offset'] is int ? json[r'offset'] as int : null,
       );
     }

@@ -39,7 +39,7 @@ public class GatewayConfig {
         config.setAllowedOrigins(List.of("http://localhost:3000"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true); // Eğer Cookie ile çalışıyorsan bu önemli
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
@@ -49,8 +49,17 @@ public class GatewayConfig {
 
     @Bean
     public RouteLocator gatewayRouter(RouteLocatorBuilder routeLocatorBuilder, CustomAuthFilter authFilter) {
-
         return routeLocatorBuilder.routes()
+                .route(r -> r
+                                .path("/gateway/**")
+                                .filters(f -> f.retry(retryConfig -> retryConfig
+                                                .setRetries(3)
+                                                .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
+                                                .setMethods(HttpMethod.GET)
+                                        )
+                                )
+                                .uri("http://localhost:8080")
+                )
                 .route(r -> r
                                 .path("/notification/v3/api-docs/**")
                                 .filters(f -> f

@@ -21,7 +21,7 @@ doc/EmployeesGetDeletedEmployeesPaginatedApi.md
 doc/EmployeesGetListApi.md
 doc/EmployeesGetManyEmployeesApi.md
 doc/EmployeesGetManyReferenceApi.md
-doc/EmployeesGetOneApi.md
+doc/EmployeesGetOneEmployeeApi.md
 doc/EmployeesPatchEmployeeApi.md
 doc/EmployeesPatchManyApi.md
 doc/EmployeesSearchEmployeesApi.md
@@ -64,7 +64,7 @@ lib/requests/employees/get_deleted_employees_paginated_command.dart
 lib/requests/employees/get_list_command.dart
 lib/requests/employees/get_many_employees_command.dart
 lib/requests/employees/get_many_reference_command.dart
-lib/requests/employees/get_one_command.dart
+lib/requests/employees/get_one_employee_command.dart
 lib/requests/employees/patch_employee_command.dart
 lib/requests/employees/patch_many_command.dart
 lib/requests/employees/search_employees_command.dart
@@ -89,7 +89,7 @@ test/employees/get_deleted_employees_paginated_command_test.dart
 test/employees/get_list_command_test.dart
 test/employees/get_many_employees_command_test.dart
 test/employees/get_many_reference_command_test.dart
-test/employees/get_one_command_test.dart
+test/employees/get_one_employee_command_test.dart
 test/employees/patch_employee_command_test.dart
 test/employees/patch_many_command_test.dart
 test/employees/search_employees_command_test.dart

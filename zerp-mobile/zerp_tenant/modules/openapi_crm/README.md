@@ -55,7 +55,7 @@ try {
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://192.168.0.103:8081*
+All URIs are relative to *http://192.168.0.112:8081*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
@@ -69,7 +69,7 @@ Class | Method | HTTP request | Description
 *TeamsGetListApi* | [**getList**](doc//TeamsGetListApi.md#) | **GET** /api/teams | GetList: Get paginated list of entities with filtering
 *TeamsGetManyReferenceApi* | [**getManyReference**](doc//TeamsGetManyReferenceApi.md#) | **GET** /api/teams/of/{target}/{targetId} | GetManyReference: Get entities that reference another entity
 *TeamsGetManyTeamsApi* | [**getManyTeams**](doc//TeamsGetManyTeamsApi.md#) | **GET** /api/teams/many | GetMany: Get multiple entities by IDs
-*TeamsGetOneApi* | [**getOne**](doc//TeamsGetOneApi.md#) | **GET** /api/teams/{id} | GetOne: Get single entity by ID
+*TeamsGetOneTeamApi* | [**getOneTeam**](doc//TeamsGetOneTeamApi.md#) | **GET** /api/teams/{id} | GetOne: Get single entity by ID
 *TeamsPatchManyApi* | [**patchMany**](doc//TeamsPatchManyApi.md#) | **PATCH** /api/teams | UpdateMany: Update multiple entities
 *TeamsPatchTeamApi* | [**patchTeam**](doc//TeamsPatchTeamApi.md#) | **PATCH** /api/teams/{id} | Update: Update an existing entity
 *TeamsRemoveTeamMemberApi* | [**removeTeamMember**](doc//TeamsRemoveTeamMemberApi.md#) | **DELETE** /api/teams/{id}/members/{userId} | 

@@ -5,7 +5,7 @@
 import 'package:openapi_notification/api.dart';
 ```
 
-All URIs are relative to *http://192.168.0.103:8083*
+All URIs are relative to *http://192.168.0.112:8083*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
