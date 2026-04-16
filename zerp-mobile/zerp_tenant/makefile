@@ -25,6 +25,21 @@ NOTIFICATION_SPEC_FILE := $(SPECS_DIR)/notification-api-spec.json
 NOTIFICATION_PUB_NAME := openapi_notification
 NOTIFICATION_OUTPUT_DIR := ./modules/$(NOTIFICATION_PUB_NAME)
 
+RESOURCE_SPEC_URL := http://localhost:8080/resource/v3/api-docs
+RESOURCE_SPEC_FILE := $(SPECS_DIR)/resource-api-spec.json
+RESOURCE_PUB_NAME := openapi_resource
+RESOURCE_OUTPUT_DIR := ./modules/$(RESOURCE_PUB_NAME)
+
+SALE_SPEC_URL := http://localhost:8080/sale/v3/api-docs
+SALE_SPEC_FILE := $(SPECS_DIR)/sale-api-spec.json
+SALE_PUB_NAME := openapi_sale
+SALE_OUTPUT_DIR := ./modules/$(SALE_PUB_NAME)
+
+SUGGESTION_SPEC_URL := http://localhost:8080/suggestion/v3/api-docs
+SUGGESTION_SPEC_FILE := $(SPECS_DIR)/suggestion-api-spec.json
+SUGGESTION_PUB_NAME := openapi_suggestion
+SUGGESTION_OUTPUT_DIR := ./modules/$(SUGGESTION_PUB_NAME)
+
 download-openapi-cli-if-not-exists:
 	# Check if the OpenAPI Generator CLI jar file exists, and download it if it doesn't
 	if [ ! -f $(OPENAPI_CODEGEN_JAR) ]; then \
@@ -62,7 +77,20 @@ download-notification-spec: ensure-specs-dir
 	echo "Downloading Notification API spec..."; \
 	curl -fL -o $(NOTIFICATION_SPEC_FILE) $(NOTIFICATION_SPEC_URL); \
 
-download-all-specs: download-crm-spec download-employee-spec download-notification-spec
+download-resource-spec: ensure-specs-dir
+	echo "Downloading Resource API spec..."; \
+	curl -fL -o $(RESOURCE_SPEC_FILE) $(RESOURCE_SPEC_URL); \
+
+download-sale-spec: ensure-specs-dir
+	echo "Downloading Sale API spec..."; \
+	curl -fL -o $(SALE_SPEC_FILE) $(SALE_SPEC_URL); \
+
+download-suggestion-spec: ensure-specs-dir
+	echo "Downloading Suggestion API spec..."; \
+	curl -fL -o $(SUGGESTION_SPEC_FILE) $(SUGGESTION_SPEC_URL); \
+
+download-all-specs: download-crm-spec download-employee-spec download-notification-spec download-resource-spec download-sale-spec download-suggestion-spec
+	echo "All API specs downloaded successfully!"
 
 # generate
 
@@ -102,32 +130,39 @@ generate-notification-api: download-openapi-cli-if-not-exists download-codegen-i
 	   -p pubName=$(NOTIFICATION_PUB_NAME) \
 	   -o $(NOTIFICATION_OUTPUT_DIR)
 
-# fetch and generate and pub get
+generate-resource-api: download-openapi-cli-if-not-exists download-codegen-if-not-exists
+	echo "Generating Resource API code..."
+	rm -rf $(RESOURCE_OUTPUT_DIR)
+	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
+	   -i $(RESOURCE_SPEC_FILE) \
+	   -g $(GENERATOR) \
+	   -p pubName=$(RESOURCE_PUB_NAME) \
+	   -o $(RESOURCE_OUTPUT_DIR)
 
-fetch-and-generate-merged-api-and: download-merged-spec generate-merged-api
-	cd $(MERGED_OUTPUT_DIR) && flutter pub get
+generate-sale-api: download-openapi-cli-if-not-exists download-codegen-if-not-exists
+	echo "Generating Sale API code..."
+	rm -rf $(SALE_OUTPUT_DIR)
+	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
+	   -i $(SALE_SPEC_FILE) \
+	   -g $(GENERATOR) \
+	   -p pubName=$(SALE_PUB_NAME) \
+	   -o $(SALE_OUTPUT_DIR)
 
-fetch-and-generate-crm-api: download-crm-spec generate-crm-api
-	cd $(CRM_OUTPUT_DIR) && flutter pub get
-
-fetch-and-generate-employee-api: download-employee-spec generate-employee-api
-	cd $(EMPLOYEE_OUTPUT_DIR) && flutter pub get
-
-fetch-and-generate-notification-api: download-notification-spec generate-notification-api
-	cd $(NOTIFICATION_OUTPUT_DIR) && flutter pub get
-
-fetch-and-generate-all-apis: download-all-specs generate-all-apis
-	cd $(CRM_OUTPUT_DIR) && flutter pub get
-	cd $(EMPLOYEE_OUTPUT_DIR) && flutter pub get
-	cd $(NOTIFICATION_OUTPUT_DIR) && flutter pub get
-	echo "All APIs fetched, generated, and dependencies installed!"
+generate-suggestion-api: download-openapi-cli-if-not-exists download-codegen-if-not-exists
+	echo "Generating Suggestion API code..."
+	rm -rf $(SUGGESTION_OUTPUT_DIR)
+	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
+	   -i $(SUGGESTION_SPEC_FILE) \
+	   -g $(GENERATOR) \
+	   -p pubName=$(SUGGESTION_PUB_NAME) \
+	   -o $(SUGGESTION_OUTPUT_DIR)
 
 # generate and pub get
 
 generate-merged-api-and-pub-get: generate-merged-api
 	cd $(MERGED_OUTPUT_DIR) && flutter pub get
 
-generate-all-apis: generate-crm-api generate-employee-api generate-notification-api
+generate-all-apis: generate-crm-api generate-employee-api generate-notification-api generate-resource-api generate-sale-api generate-suggestion-api
 	echo "All API code generated successfully!"
 
 generate-crm-api-and-pub-get: generate-crm-api
@@ -139,8 +174,53 @@ generate-employee-api-and-pub-get: generate-employee-api
 generate-notification-api-and-pub-get: generate-notification-api
 	cd $(NOTIFICATION_OUTPUT_DIR) && flutter pub get
 
+generate-resource-api-and-pub-get: generate-resource-api
+	cd $(RESOURCE_OUTPUT_DIR) && flutter pub get
+
+generate-sale-api-and-pub-get: generate-sale-api
+	cd $(SALE_OUTPUT_DIR) && flutter pub get
+
+generate-suggestion-api-and-pub-get: generate-suggestion-api
+	cd $(SUGGESTION_OUTPUT_DIR) && flutter pub get
+
 generate-all-apis-and-pub-get: generate-all-apis
 	cd $(CRM_OUTPUT_DIR) && flutter pub get
 	cd $(EMPLOYEE_OUTPUT_DIR) && flutter pub get
 	cd $(NOTIFICATION_OUTPUT_DIR) && flutter pub get
+	cd $(RESOURCE_OUTPUT_DIR) && flutter pub get
+	cd $(SALE_OUTPUT_DIR) && flutter pub get
+	cd $(SUGGESTION_OUTPUT_DIR) && flutter pub get
 	echo "All APIs generated and dependencies installed!"
+
+# fetch and generate and pub get
+
+fetch-and-generate-merged-api-and-pub-get: download-merged-spec generate-merged-api
+	cd $(MERGED_OUTPUT_DIR) && flutter pub get
+
+fetch-and-generate-crm-api-and-pub-get: download-crm-spec generate-crm-api
+	cd $(CRM_OUTPUT_DIR) && flutter pub get
+
+fetch-and-generate-employee-api-and-pub-get: download-employee-spec generate-employee-api
+	cd $(EMPLOYEE_OUTPUT_DIR) && flutter pub get
+
+fetch-and-generate-notification-api-and-pub-get: download-notification-spec generate-notification-api
+	cd $(NOTIFICATION_OUTPUT_DIR) && flutter pub get
+
+fetch-and-generate-resource-api-and-pub-get: download-resource-spec generate-resource-api
+	cd $(RESOURCE_OUTPUT_DIR) && flutter pub get
+
+fetch-and-generate-sale-api-and-pub-get: download-sale-spec generate-sale-api
+	cd $(SALE_OUTPUT_DIR) && flutter pub get
+
+fetch-and-generate-suggestion-api-and-pub-get: download-suggestion-spec generate-suggestion-api
+	cd $(SUGGESTION_OUTPUT_DIR) && flutter pub get
+
+fetch-and-generate-all-apis-and-pub-get: download-all-specs generate-all-apis
+	cd $(CRM_OUTPUT_DIR) && flutter pub get
+	cd $(EMPLOYEE_OUTPUT_DIR) && flutter pub get
+	cd $(NOTIFICATION_OUTPUT_DIR) && flutter pub get
+	cd $(RESOURCE_OUTPUT_DIR) && flutter pub get
+	cd $(SALE_OUTPUT_DIR) && flutter pub get
+	cd $(SUGGESTION_OUTPUT_DIR) && flutter pub get
+	echo "All APIs fetched, generated, and dependencies installed!"
+

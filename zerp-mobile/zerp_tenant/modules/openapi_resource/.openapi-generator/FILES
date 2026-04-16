@@ -1,0 +1,8 @@
+.gitignore
+.openapi-generator-ignore
+README.md
+analysis_options.yaml
+lib/api.dart
+lib/base/api_config.dart
+lib/base/base_request.dart
+pubspec.yaml
