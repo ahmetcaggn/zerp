@@ -2,8 +2,8 @@ import type { NextAuthOptions } from 'next-auth'
 import type { JWT } from 'next-auth/jwt'
 import KeycloakProvider from 'next-auth/providers/keycloak'
 
-import { getClientEnv } from '@/core/config/env.client'
 import { getServerEnv } from '@/core/config/env.server'
+import { DEFAULT_LOCALE } from '@/core/constants/locales'
 import type { AppRole } from '@/core/types/common'
 
 import { decryptTokens, encryptTokens } from './token-crypto'
@@ -15,7 +15,8 @@ function getAuthCookieName(): string {
   const isHttps = nextAuthUrl.startsWith('https://')
   const isProduction = process.env.NODE_ENV === 'production'
 
-  return isHttps || isProduction ? '__Secure-zerp.session-token' : 'zerp.session-token'
+  const variant = 'admin'
+  return isHttps || isProduction ? `__Secure-zerp.session-token.${variant}` : `zerp.session-token.${variant}`
 }
 
 function parseRolesFromIdToken(idToken?: string): AppRole[] {
@@ -58,17 +59,7 @@ function isAppRole(value: string): value is AppRole {
 }
 
 function defaultRoleByVariant(): AppRole[] {
-  const { appVariant } = getClientEnv()
-
-  if (appVariant === 'admin') {
-    return ['admin_super']
-  }
-
-  if (appVariant === 'client') {
-    return ['client_user']
-  }
-
-  return ['tenant_owner']
+  return ['admin_super']
 }
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
@@ -125,7 +116,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: '/tr/login',
+    signIn: `/${DEFAULT_LOCALE}/login`,
   },
   session: {
     strategy: 'jwt',

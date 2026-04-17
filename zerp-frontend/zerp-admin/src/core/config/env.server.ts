@@ -6,7 +6,7 @@ const serverEnvSchema = z.object({
   NEXTAUTH_SECRET: z.string().min(10),
   KEYCLOAK_ISSUER: z.url(),
   KEYCLOAK_CLIENT_ID: z.string().min(1),
-  KEYCLOAK_CLIENT_SECRET: z.string().min(1),
+  KEYCLOAK_CLIENT_SECRET: z.string().optional().default(''),
   JWE_SECRET: z.string().min(32),
   SESSION_COOKIE_DOMAIN: z.string().optional(),
 })

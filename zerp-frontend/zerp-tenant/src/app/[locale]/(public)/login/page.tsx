@@ -1,7 +1,7 @@
 'use client'
 
 import { CircularProgress, Container, Stack, Typography } from '@mui/material'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 
@@ -12,13 +12,14 @@ export default function LoginPage() {
   const { status } = useSession()
   const params = useParams<{ locale: string }>()
   const searchParams = useSearchParams()
+  const router = useRouter()
   const { t } = useI18n()
 
   useEffect(() => {
     const locale = params.locale || 'tr'
 
     if (status === 'authenticated') {
-      window.location.href = `/${locale}/dashboard`
+      router.replace(`/${locale}/dashboard`)
       return
     }
 
@@ -26,7 +27,7 @@ export default function LoginPage() {
       const callbackUrl = searchParams.get('callbackUrl') || `/${locale}/dashboard`
       void signIn('keycloak', { callbackUrl })
     }
-  }, [params.locale, searchParams, status])
+  }, [params.locale, router, searchParams, status])
 
   return (
     <Container maxWidth="sm" sx={responsivePageSx.centeredContainer}>

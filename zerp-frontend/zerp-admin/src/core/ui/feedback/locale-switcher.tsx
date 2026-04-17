@@ -2,6 +2,7 @@
 
 import TranslateRoundedIcon from '@mui/icons-material/TranslateRounded'
 import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material'
+import type { Route } from 'next'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -34,7 +35,7 @@ export function LocaleSwitcher({ locale }: { locale: 'tr' | 'en' }) {
             selected={item === locale}
             onClick={() => {
               setAnchorEl(null)
-              router.push(toLocalizedPath(item, currentPathWithoutLocale))
+              router.push(toLocalizedPath(item, currentPathWithoutLocale) as Route)
             }}
           >
             {item.toUpperCase()}

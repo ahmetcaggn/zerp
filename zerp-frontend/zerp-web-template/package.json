@@ -4,9 +4,9 @@
   "private": true,
   "packageManager": "pnpm@10.1.0",
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_OPTIONS='--max-http-header-size=32768' next dev -p 3003",
     "build": "next build",
-    "start": "next start",
+    "start": "NODE_OPTIONS='--max-http-header-size=32768' next start -p 3003",
     "lint": "eslint .",
     "format": "prettier --check .",
     "format:write": "prettier --write .",

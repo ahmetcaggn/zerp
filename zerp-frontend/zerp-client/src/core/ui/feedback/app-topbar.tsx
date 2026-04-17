@@ -9,7 +9,6 @@ import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
 import {
   AppBar,
   Button,
-  Chip,
   Divider,
   Drawer,
   IconButton,
@@ -98,7 +97,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
     setDrawerOpen(false)
 
     if (action.id === 'logout') {
-      void signOut({ callbackUrl: `/${locale}/login` })
+      void signOut({ callbackUrl: '/api/sso-logout' })
       return
     }
 
@@ -142,13 +141,6 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
             >
               {appConfig.app.name}
             </Typography>
-            <Chip
-              label={appConfig.app.variant.toUpperCase()}
-              size="small"
-              color="primary"
-              variant="outlined"
-              sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
-            />
           </Stack>
 
           {isMobile ? (

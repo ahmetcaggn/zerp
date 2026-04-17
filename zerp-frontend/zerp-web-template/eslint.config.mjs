@@ -6,6 +6,9 @@ const eslintConfig = [
   ...nextVitals,
   eslintConfigPrettier,
   {
+    ignores: ['src/modules/generated/**/dist/**'],
+  },
+  {
     plugins: {
       'simple-import-sort': simpleImportSort,
     },

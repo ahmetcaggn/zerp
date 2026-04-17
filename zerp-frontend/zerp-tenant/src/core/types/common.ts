@@ -1,5 +1,3 @@
-export type AppVariant = 'tenant' | 'client' | 'admin'
-
 export type Locale = 'tr' | 'en'
 
 export type AppRole =

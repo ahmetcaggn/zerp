@@ -1,19 +1,50 @@
-import { Button, Container, Stack, Typography } from '@mui/material'
+import LockRoundedIcon from '@mui/icons-material/LockRounded'
+import { Box, Button, Paper, Stack, Typography } from '@mui/material'
 
-import { responsiveLayout, responsivePageSx } from '@/core/theme/layout'
+export default async function UnauthorizedPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
 
-export default function UnauthorizedPage({ params }: { params: { locale: string } }) {
   return (
-    <Container maxWidth="sm" sx={responsivePageSx.centeredContainer}>
-      <Stack spacing={responsiveLayout.sectionGap} textAlign="center">
-        <Typography variant="h3">Unauthorized</Typography>
-        <Typography color="text.secondary">
-          You do not have permission to view this page.
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: { xs: 2, sm: 4 },
+      }}
+    >
+      <Paper
+        elevation={0}
+        sx={{ p: { xs: 4, sm: 6 }, maxWidth: 440, width: '100%', textAlign: 'center', borderRadius: 3 }}
+      >
+        <Typography
+          sx={{
+            fontSize: { xs: '5.5rem', sm: '7rem' },
+            fontWeight: 800,
+            lineHeight: 1,
+            color: 'warning.main',
+            letterSpacing: '-0.05em',
+            mb: 1.5,
+          }}
+        >
+          403
         </Typography>
-        <Button href={`/${params.locale}`} variant="contained">
+        <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.75} mb={1.5}>
+          <LockRoundedIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+          <Typography variant="h3">Access Denied</Typography>
+        </Stack>
+        <Typography color="text.secondary" mb={4}>
+          You don&apos;t have permission to view this page.
+        </Typography>
+        <Button href={`/${locale}`} variant="contained" size="large" fullWidth>
           Return Home
         </Button>
-      </Stack>
-    </Container>
+      </Paper>
+    </Box>
   )
 }

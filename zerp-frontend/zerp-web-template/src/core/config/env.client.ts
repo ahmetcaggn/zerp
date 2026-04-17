@@ -1,9 +1,8 @@
 import { z } from 'zod'
 
-import type { AppVariant, Locale } from '@/core/types/common'
+import type { Locale } from '@/core/types/common'
 
 const clientEnvSchema = z.object({
-  NEXT_PUBLIC_APP_VARIANT: z.enum(['tenant', 'client', 'admin']).default('tenant'),
   NEXT_PUBLIC_BASE_URL: z.url().default('http://localhost:3000'),
   NEXT_PUBLIC_DEFAULT_LOCALE: z.enum(['tr', 'en']).default('tr'),
   NEXT_PUBLIC_SUPPORTED_LOCALES: z.string().default('tr,en'),
@@ -11,7 +10,6 @@ const clientEnvSchema = z.object({
 })
 
 export interface ClientEnv {
-  appVariant: AppVariant
   baseUrl: string
   defaultLocale: Locale
   supportedLocales: Locale[]
@@ -26,7 +24,6 @@ export function getClientEnv(): ClientEnv {
   }
 
   const parsed = clientEnvSchema.parse({
-    NEXT_PUBLIC_APP_VARIANT: process.env.NEXT_PUBLIC_APP_VARIANT,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
     NEXT_PUBLIC_DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE,
     NEXT_PUBLIC_SUPPORTED_LOCALES: process.env.NEXT_PUBLIC_SUPPORTED_LOCALES,
@@ -38,7 +35,6 @@ export function getClientEnv(): ClientEnv {
     .filter((item): item is Locale => item === 'tr' || item === 'en')
 
   cachedClientEnv = {
-    appVariant: parsed.NEXT_PUBLIC_APP_VARIANT,
     baseUrl: parsed.NEXT_PUBLIC_BASE_URL,
     defaultLocale: parsed.NEXT_PUBLIC_DEFAULT_LOCALE,
     supportedLocales: supportedLocales.length ? supportedLocales : ['tr', 'en'],

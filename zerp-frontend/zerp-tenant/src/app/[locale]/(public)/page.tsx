@@ -33,10 +33,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             {messages.nav.login}
           </Button>
         </Stack>
-
-        <Typography color="text.secondary" variant="body2">
-          Active variant: {appConfig.app.variant.toUpperCase()}
-        </Typography>
       </Stack>
     </Container>
   )

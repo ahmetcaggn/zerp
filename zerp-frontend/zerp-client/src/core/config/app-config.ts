@@ -1,5 +1,4 @@
 import { getClientEnv } from '@/core/config/env.client'
-import { VARIANT_ALLOWED_ROLES } from '@/core/constants/roles'
 
 export const appConfig = (() => {
   const env = getClientEnv()
@@ -7,7 +6,6 @@ export const appConfig = (() => {
   return {
     app: {
       name: 'ZERP',
-      variant: env.appVariant,
       baseUrl: env.baseUrl,
     },
     locale: {
@@ -21,7 +19,7 @@ export const appConfig = (() => {
       browserBasePath: '/api',
     },
     access: {
-      dashboardRoles: VARIANT_ALLOWED_ROLES[env.appVariant],
+      dashboardRoles: ['client_user'],
     },
     seo: {
       titleTemplate: '%s | ZERP',

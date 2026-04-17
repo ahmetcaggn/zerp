@@ -1,3 +1,4 @@
+import type { Route } from 'next'
 import { redirect } from 'next/navigation'
 
 import { getAuthSession } from '@/core/auth/server/session'
@@ -16,12 +17,12 @@ export async function requireRole(options: {
   if (!session) {
     const loginPath = withLocale(locale, '/login')
     const callbackUrl = encodeURIComponent(withLocale(locale, callbackPath))
-    redirect(`${loginPath}?callbackUrl=${callbackUrl}`)
+    redirect(`${loginPath}?callbackUrl=${callbackUrl}` as Route)
   }
 
   const userRoles = session?.user?.roles ?? []
   if (!hasAnyRole(userRoles, requiredRoles)) {
-    redirect(withLocale(locale, '/unauthorized'))
+    redirect(withLocale(locale, '/unauthorized') as Route)
   }
 
   return session

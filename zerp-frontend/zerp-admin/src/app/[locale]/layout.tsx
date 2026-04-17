@@ -6,7 +6,6 @@ import { getMessages } from '@/core/i18n/messages'
 import { AppProviders } from '@/core/providers/app-providers'
 import { buildMetadata } from '@/core/seo/metadata'
 import type { Locale } from '@/core/types/common'
-import { AppTopbar } from '@/core/ui/feedback/app-topbar'
 
 export async function generateMetadata({
   params,
@@ -44,7 +43,6 @@ export default async function LocaleLayout({
 
   return (
     <AppProviders locale={safeLocale} messages={messages}>
-      <AppTopbar locale={safeLocale} />
       {children}
     </AppProviders>
   )
