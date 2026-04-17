@@ -190,7 +190,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
         }}
       >
         <Stack direction="row" alignItems="center" justifyContent="space-between" px={1.5} py={1}>
-          <Typography fontWeight={700}>Menu</Typography>
+          <Typography fontWeight={700}>{t('nav.menu')}</Typography>
           <IconButton aria-label="Close menu" size="small" onClick={() => setDrawerOpen(false)}>
             <CloseRoundedIcon />
           </IconButton>

@@ -11,6 +11,7 @@ export const enMessages = {
     dashboard: 'Dashboard',
     logout: 'Logout',
     language: 'Language',
+    menu: 'Menu',
   },
   home: {
     title: 'ZERP Frontend Template',

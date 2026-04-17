@@ -10,7 +10,7 @@ export interface EncryptedTokens {
 
 function getEncryptionKey(): Uint8Array {
   const { jweSecret } = getServerEnv()
-  return new TextEncoder().encode(jweSecret.padEnd(32, '0').slice(0, 32))
+  return new TextEncoder().encode(jweSecret.slice(0, 32))
 }
 
 export async function encryptTokens(tokens: EncryptedTokens): Promise<string> {

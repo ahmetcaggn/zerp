@@ -113,6 +113,11 @@ export const authOptions: NextAuthOptions = {
       issuer: getServerEnv().keycloakIssuer,
       clientId: getServerEnv().keycloakClientId,
       clientSecret: getServerEnv().keycloakClientSecret,
+      client: {
+        token_endpoint_auth_method: 'none', // public client — no secret sent to token endpoint
+      },
+      checks: ['pkce', 'state'],
+      authorization: { params: { scope: 'openid profile email' } },
     }),
   ],
   pages: {
@@ -147,7 +152,11 @@ export const authOptions: NextAuthOptions = {
         return token
       }
 
-      const tokenSub = token.sub ?? 'anonymous'
+      const tokenSub = token.sub
+      if (!tokenSub) {
+        return refreshAccessToken(token)
+      }
+
       if (activeRefreshPromises.has(tokenSub)) {
         return activeRefreshPromises.get(tokenSub)!
       }
@@ -176,9 +185,10 @@ export const authOptions: NextAuthOptions = {
       }
 
       const { keycloakIssuer } = getServerEnv()
-      const logoutUrl = `${keycloakIssuer}/protocol/openid-connect/logout?id_token_hint=${idToken}`
+      const logoutUrl = new URL(`${keycloakIssuer}/protocol/openid-connect/logout`)
+      logoutUrl.searchParams.set('id_token_hint', idToken)
 
-      await fetch(logoutUrl, { method: 'GET' }).catch(() => undefined)
+      await fetch(logoutUrl.toString(), { method: 'GET' }).catch(() => undefined)
     },
   },
   cookies: {

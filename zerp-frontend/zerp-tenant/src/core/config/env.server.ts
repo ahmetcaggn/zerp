@@ -3,7 +3,7 @@ import { z } from 'zod'
 const serverEnvSchema = z.object({
   INTERNAL_API_URL: z.url().default('http://localhost:8080'),
   NEXTAUTH_URL: z.url(),
-  NEXTAUTH_SECRET: z.string().min(10),
+  NEXTAUTH_SECRET: z.string().min(32),
   KEYCLOAK_ISSUER: z.url(),
   KEYCLOAK_CLIENT_ID: z.string().min(1),
   KEYCLOAK_CLIENT_SECRET: z.string().optional().default(''),

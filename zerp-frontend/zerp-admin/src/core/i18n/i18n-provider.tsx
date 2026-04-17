@@ -9,12 +9,16 @@ import type { MessageDictionary } from './messages'
 interface I18nContextValue {
   locale: Locale
   messages: MessageDictionary
-  t: (key: string) => string
+  t: (key: string, params?: Record<string, string | number>) => string
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null)
 
-function resolveMessage(dictionary: MessageDictionary, key: string): string {
+function resolveMessage(
+  dictionary: MessageDictionary,
+  key: string,
+  params?: Record<string, string | number>,
+): string {
   const chunks = key.split('.')
   let current: unknown = dictionary
 
@@ -26,7 +30,15 @@ function resolveMessage(dictionary: MessageDictionary, key: string): string {
     current = (current as Record<string, unknown>)[chunk]
   }
 
-  return typeof current === 'string' ? current : key
+  let message = typeof current === 'string' ? current : key
+
+  if (params) {
+    for (const [k, v] of Object.entries(params)) {
+      message = message.replaceAll(`{${k}}`, String(v))
+    }
+  }
+
+  return message
 }
 
 export function I18nProvider({
@@ -42,7 +54,7 @@ export function I18nProvider({
     () => ({
       locale,
       messages,
-      t: (key: string) => resolveMessage(messages, key),
+      t: (key: string, params?: Record<string, string | number>) => resolveMessage(messages, key, params),
     }),
     [locale, messages],
   )

@@ -9,6 +9,7 @@ import { DEFAULT_LOCALE } from '@/core/constants/locales'
 export async function GET(req: NextRequest) {
   const { sessionCookieDomain } = getServerEnv()
   const domain = sessionCookieDomain || undefined
+  const isSecure = req.url.startsWith('https://')
 
   const loginUrl = new URL(`/${DEFAULT_LOCALE}/login`, req.url)
   const response = NextResponse.redirect(loginUrl)
@@ -18,6 +19,7 @@ export async function GET(req: NextRequest) {
     httpOnly: true,
     sameSite: 'lax',
     maxAge: 60,
+    secure: isSecure,
     domain,
   })
 

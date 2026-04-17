@@ -28,15 +28,27 @@ export class BaseHttpClient {
       throw new ApiError('Session expired', 401)
     }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options.headers ?? {}),
-      },
-    }).catch(() => {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10_000)
+
+    let response: Response
+    try {
+      response = await fetch(`${this.baseUrl}${endpoint}`, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(options.headers ?? {}),
+        },
+        signal: options.signal ?? controller.signal,
+      })
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        throw new ApiError('Request timeout', 408)
+      }
       throw new ApiError('Service unavailable', 503)
-    })
+    } finally {
+      clearTimeout(timeoutId)
+    }
 
     if (response.status === 401 && !options._retry) {
       const refreshed = await this.tryRefreshSession()

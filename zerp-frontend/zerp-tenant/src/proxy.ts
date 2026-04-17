@@ -6,7 +6,10 @@ import { decryptTokens } from '@/core/auth/server/token-crypto'
 import { DEFAULT_LOCALE, isLocale } from '@/core/constants/locales'
 import { isAuthPath, isProtectedPath } from '@/core/utils/route-helpers'
 
-const INTERNAL_API_URL = process.env.INTERNAL_API_URL || 'http://gateway:8080'
+const INTERNAL_API_URL = process.env.INTERNAL_API_URL ?? 'http://gateway:8080'
+const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET
+const NEXTAUTH_URL = process.env.NEXTAUTH_URL ?? ''
+const SESSION_COOKIE_DOMAIN = process.env.SESSION_COOKIE_DOMAIN
 
 // Stale default NextAuth cookie names that should be cleaned up
 const STALE_NEXTAUTH_COOKIES = [
@@ -15,17 +18,17 @@ const STALE_NEXTAUTH_COOKIES = [
 ]
 
 function getAuthCookieName(): string {
-  const nextAuthUrl = process.env.NEXTAUTH_URL || ''
-  const isHttps = nextAuthUrl.startsWith('https://')
+  const isHttps = NEXTAUTH_URL.startsWith('https://')
   const isProduction = process.env.NODE_ENV === 'production'
 
-  const variant = 'admin'
+  const variant = 'tenant'
   return isHttps || isProduction ? `__Secure-zerp.session-token.${variant}` : `zerp.session-token.${variant}`
 }
 
 function extractLocale(pathname: string): string | null {
-  const firstSegment = pathname.split('/')[1]
-  return isLocale(firstSegment) ? firstSegment : null
+  const normalizedPath = pathname.replace(/\/+/g, '/')
+  const firstSegment = normalizedPath.split('/')[1]
+  return firstSegment && isLocale(firstSegment) ? firstSegment : null
 }
 
 function stripLocale(pathname: string, locale: string): string {
@@ -63,14 +66,15 @@ async function proxyApiRequest(req: NextRequest, accessToken: string): Promise<N
     }
   }
 
-  const response = await fetch(backendUrl, {
+  const fetchOptions: RequestInit & { duplex?: 'half' } = {
     method: req.method,
     headers,
     body: requestBody,
-    // @ts-expect-error — duplex is required for streaming bodies in some runtimes
-    duplex: hasBody ? 'half' : undefined,
-  }).catch((err: unknown) => {
-    console.error('[middleware] backend unavailable', {
+    ...(hasBody && { duplex: 'half' as const }),
+  }
+
+  const response = await fetch(backendUrl, fetchOptions).catch((err: unknown) => {
+    console.error('[proxy] backend unavailable', {
       url: backendUrl,
       method: req.method,
       error: err instanceof Error ? err.message : String(err),
@@ -89,7 +93,7 @@ async function proxyApiRequest(req: NextRequest, accessToken: string): Promise<N
   })
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl
 
   // NextAuth internal routes and SSO logout — always pass through
@@ -100,8 +104,8 @@ export async function middleware(req: NextRequest) {
   // Global SSO logout — if another app set the logout signal, clear this app's session too
   if (!pathname.startsWith('/api') && req.cookies.has('zerp.global-logout')) {
     const authCookieName = getAuthCookieName()
-    const isSecure = (process.env.NEXTAUTH_URL || '').startsWith('https://')
-    const domain = process.env.SESSION_COOKIE_DOMAIN || undefined
+    const isSecure = NEXTAUTH_URL.startsWith('https://')
+    const domain = SESSION_COOKIE_DOMAIN
     if (req.cookies.has(authCookieName)) {
       const locale = extractLocale(pathname) ?? DEFAULT_LOCALE
       const redirectUrl = req.nextUrl.clone()
@@ -123,7 +127,7 @@ export async function middleware(req: NextRequest) {
   if (pathname.startsWith('/api')) {
     const token = await getToken({
       req,
-      secret: process.env.NEXTAUTH_SECRET,
+      secret: NEXTAUTH_SECRET,
       cookieName: getAuthCookieName(),
     }).catch(() => null)
 
@@ -131,19 +135,16 @@ export async function middleware(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const encryptedTokens = token.encryptedTokens as string | undefined
-    if (!encryptedTokens) {
+    const encryptedTokens = token.encryptedTokens
+    if (typeof encryptedTokens !== 'string') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     try {
       const decrypted = await decryptTokens(encryptedTokens)
       return proxyApiRequest(req, decrypted.accessToken)
-    } catch (err) {
-      console.error('[middleware] token decryption failed', {
-        pathname,
-        error: err instanceof Error ? err.message : String(err),
-      })
+    } catch {
+      console.error('[proxy] token decryption failed', { pathname })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
   }
@@ -165,7 +166,7 @@ export async function middleware(req: NextRequest) {
 
   const token = await getToken({
     req,
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: NEXTAUTH_SECRET,
     cookieName: getAuthCookieName(),
   }).catch(() => null)
 

@@ -15,6 +15,7 @@ export interface MessageDictionary {
     dashboard: string
     logout: string
     language: string
+    menu: string
   }
   home: {
     title: string

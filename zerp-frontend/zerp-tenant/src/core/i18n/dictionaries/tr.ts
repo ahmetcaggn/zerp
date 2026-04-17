@@ -11,6 +11,7 @@ export const trMessages = {
     dashboard: 'Panel',
     logout: 'Cikis',
     language: 'Dil',
+    menu: 'Menü',
   },
   home: {
     title: 'ZERP Frontend Template',
