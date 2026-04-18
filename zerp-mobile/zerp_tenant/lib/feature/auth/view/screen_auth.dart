@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/state_auth.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 typedef AfterAuthCallback = void Function();
 
@@ -64,14 +65,14 @@ class _ScreenAuthState extends State<ScreenAuth> {
                 onPressed: () async {
                   await context.read<CubitAuth>().redirectLogin();
                 },
-                child: const Text('Login'),
+                child: Text(context.t.auth.login),
               ),
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () async {
                   await context.read<CubitAuth>().redirectSignUp();
                 },
-                child: const Text('Sign Up'),
+                child: Text(context.t.auth.signUp),
               ),
             ],
           ),

@@ -5,6 +5,7 @@ import 'package:zerp_tenant/product/config/device_id_generator.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/network/network_manager.dart';
 import 'package:zerp_tenant/product/storage/storage_initializer.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 abstract final class AppInitializer {
   const AppInitializer._();
@@ -12,6 +13,8 @@ abstract final class AppInitializer {
   static Future<void> initialize() async {
     configureDependencies();
     await StorageInitializer.initialize();
+    LocaleSettings.useDeviceLocaleSync();
+
     final loggerHelper = await RemoteLogging.init(
       remoteLoggingConfig: const RemoteLoggingConfig(
         // ignore: avoid_redundant_argument_values readability

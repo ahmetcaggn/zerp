@@ -1,0 +1,5 @@
+base_locale: en
+input_directory: assets/i18n
+input_format: json
+input_file_pattern: .i18n.json
+output_directory: lib/product/ui/localization/gen

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide RouteSettings;
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({
@@ -25,7 +26,7 @@ class AppDrawer extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  'Zerp Tenant',
+                  context.t.app.name,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -33,7 +34,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Menu',
+                  context.t.app.menu,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.white70,
                   ),
@@ -43,42 +44,42 @@ class AppDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.dashboard),
-            title: const Text('Dashboard'),
+            title: Text(context.t.shell.dashboard),
             selected: activeIndex == 0,
             selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
             onTap: () => onSelectSection(0),
           ),
           ListTile(
             leading: const Icon(Icons.people),
-            title: const Text('Employees'),
+            title: Text(context.t.shell.employees),
             selected: activeIndex == 1,
             selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
             onTap: () => onSelectSection(1),
           ),
           ListTile(
             leading: const Icon(Icons.restaurant_menu),
-            title: const Text('Menu'),
+            title: Text(context.t.shell.menu),
             selected: activeIndex == 2,
             selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
             onTap: () => onSelectSection(2),
           ),
           ListTile(
             leading: const Icon(Icons.shopping_cart),
-            title: const Text('Sales'),
+            title: Text(context.t.shell.sales),
             selected: activeIndex == 3,
             selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
             onTap: () => onSelectSection(3),
           ),
           ListTile(
             leading: const Icon(Icons.inventory),
-            title: const Text('Stock'),
+            title: Text(context.t.shell.stock),
             selected: activeIndex == 4,
             selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
             onTap: () => onSelectSection(4),
           ),
           ListTile(
             leading: const Icon(Icons.store),
-            title: const Text('Store'),
+            title: Text(context.t.shell.store),
             selected: activeIndex == 5,
             selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
             onTap: () => onSelectSection(5),
@@ -86,7 +87,7 @@ class AppDrawer extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
+            title: Text(context.t.shell.settings),
             onTap: onTapSettings,
           ),
         ],

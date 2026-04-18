@@ -1,0 +1,41 @@
+{
+  "app": {
+    "name": "Zerp Tenant",
+    "menu": "Menu"
+  },
+  "shell": {
+    "dashboard": "Dashboard",
+    "employees": "Employees",
+    "menu": "Menu",
+    "sales": "Sales",
+    "stock": "Stock",
+    "store": "Store",
+    "settings": "Settings"
+  },
+  "auth": {
+    "login": "Login",
+    "signUp": "Sign Up",
+    "success": "Logged in successfully",
+    "fail": "Logged in failed"
+  },
+  "feature": {
+    "dashboard": "Dashboard",
+    "employee": "Employee",
+    "menu": "Menu",
+    "sale": "Sale",
+    "stock": "Stock",
+    "store": "Store",
+    "settings": "Settings"
+  },
+  "section": {
+    "employee": "Employee Section",
+    "menu": "Menu Section",
+    "sale": "Sale Section",
+    "stock": "Stock Section",
+    "store": "Store Section"
+  },
+  "common": {
+    "hello": "Hello $name",
+    "save": "Save"
+  }
+}

@@ -34,5 +34,10 @@
     <array>
         <string>org.zerp.tenant</string>
     </array>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>tr</string>
+	</array>
 </dict>
 </plist>

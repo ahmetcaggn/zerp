@@ -12,12 +12,13 @@ dependencies:
   dart_network_layer_dio: ^1.0.0-dev9
   device_info_plus: ^12.4.0
   dio: ^5.9.0
-  easy_localization: ^3.0.8
   equatable: ^2.0.7
   flutter:
     sdk: flutter
   flutter_appauth: ^12.0.0
   flutter_bloc: ^9.1.1
+  flutter_localizations:
+    sdk: flutter
   flutter_secure_storage: ^10.0.0
   freezed_annotation: ^3.1.0
   get_it: ^9.1.0
@@ -36,6 +37,8 @@ dependencies:
   remote_logging:
     path: modules/remote_logging
   sembast: ^3.8.6
+  slang: ^4.14.0
+  slang_flutter: ^4.14.0
   uuid: ^4.5.3
 
 dev_dependencies:
@@ -46,6 +49,7 @@ dev_dependencies:
   freezed: ^3.2.5
   injectable_generator: ^2.12.1
   json_serializable: ^6.13.1
+  slang_build_runner: ^4.14.0
   very_good_analysis: ^10.2.0
 
 flutter:
