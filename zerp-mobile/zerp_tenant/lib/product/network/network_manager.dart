@@ -1,11 +1,13 @@
 import 'package:dart_network_layer_dio/dart_network_layer_dio.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/auth/state_auth.dart';
 import 'package:zerp_tenant/product/service/auth_service.dart';
 
 @injectable
 class NetworkManager {
-  NetworkManager(this._authService)
+  NetworkManager(this._authService, this._cubitAuth)
     : apiInvoker = DioNetworkInvoker.fromDio(
         Dio(
           BaseOptions(
@@ -32,6 +34,7 @@ class NetworkManager {
   final DioNetworkInvoker remoteLogInvoker;
 
   final AuthService _authService;
+  final CubitAuth _cubitAuth;
 
   Future<void>? _ongoingUnauthorizedCheck;
 
@@ -47,6 +50,7 @@ class NetworkManager {
         .then((status) async {
           if (status == AuthSessionOnlineStatus.invalid) {
             await _authService.logout();
+            _cubitAuth.emit(const StateAuthUnauthenticated());
           }
         })
         .whenComplete(() {

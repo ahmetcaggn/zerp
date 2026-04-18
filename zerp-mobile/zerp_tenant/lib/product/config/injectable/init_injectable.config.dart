@@ -57,7 +57,7 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i84.AuthGuard>(() => _i84.AuthGuard(gh<_i300.AuthService>()));
     gh.factory<_i475.NetworkManager>(
-      () => _i475.NetworkManager(gh<_i300.AuthService>()),
+      () => _i475.NetworkManager(gh<_i300.AuthService>(), gh<_i200.CubitAuth>()),
     );
     gh.singleton<_i795.AppRoute>(() => _i795.AppRoute(gh<_i84.AuthGuard>()));
     return this;
