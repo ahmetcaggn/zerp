@@ -40,7 +40,7 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
     try {
       final claims = await _authService.login();
       if (claims != null) {
-        log.info('Login successful, claims: $claims');
+        log.info('Login successful');
         emit(StateAuthAuthenticated(username: claims.preferredUsername));
       } else {
         log.warning('Login failed: No claims returned');
