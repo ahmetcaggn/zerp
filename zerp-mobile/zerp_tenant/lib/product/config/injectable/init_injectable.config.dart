@@ -33,7 +33,6 @@ extension GetItInjectableX on _i174.GetIt {
   }) {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final serviceModule = _$ServiceModule();
-    gh.factory<_i475.NetworkManager>(() => _i475.NetworkManager());
     gh.factory<_i301.AuthClaimsOperator>(() => _i301.AuthClaimsOperator());
     gh.factory<_i447.DeviceIdOperator>(() => _i447.DeviceIdOperator());
     gh.lazySingleton<_i337.FlutterAppAuth>(() => serviceModule.appAuth);
@@ -53,8 +52,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i301.AuthClaimsOperator>(),
       ),
     );
-    gh.factory<_i200.CubitAuth>(() => _i200.CubitAuth(gh<_i300.AuthService>()));
+    gh.lazySingleton<_i200.CubitAuth>(
+      () => _i200.CubitAuth(gh<_i300.AuthService>()),
+    );
     gh.factory<_i84.AuthGuard>(() => _i84.AuthGuard(gh<_i300.AuthService>()));
+    gh.factory<_i475.NetworkManager>(
+      () => _i475.NetworkManager(gh<_i300.AuthService>()),
+    );
     gh.singleton<_i795.AppRoute>(() => _i795.AppRoute(gh<_i84.AuthGuard>()));
     return this;
   }
