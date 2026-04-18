@@ -17,7 +17,7 @@ class AuthService with LoggerMixin<AuthService> {
   static const String _issuer = 'https://auth.femrek.dev/realms/zerp';
   static const String _discoveryUrl =
       'https://auth.femrek.dev/realms/zerp/.well-known/openid-configuration';
-  static const String _clientId = 'public';
+  static const String _clientId = 'zerp-tenant';
   static const String _redirectUrl = 'org.zerp.tenant://callback';
   static const String _postLogoutRedirectUrl = 'org.zerp.tenant://callback';
   static const List<String> _scopes = ['openid', 'profile', 'email'];
