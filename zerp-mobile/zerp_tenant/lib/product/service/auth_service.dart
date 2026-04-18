@@ -266,7 +266,11 @@ class AuthService with LoggerMixin<AuthService> {
   Future<AuthClaims?> get authClaimsIfValid async {
     if (await isAccessTokenValid) {
       final claims = await _authClaims;
-      log.fine('Access token is valid. Retrieving auth claims.');
+      log.fine(
+        () =>
+            'Access token is valid. Retrieving auth claims for user: '
+            '${claims?.preferredUsername}',
+      );
       return claims;
     }
     log.fine('Access token is invalid or expired. No auth claims available.');
