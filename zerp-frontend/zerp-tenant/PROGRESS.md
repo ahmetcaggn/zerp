@@ -29,14 +29,17 @@
 
 ---
 
-## Faz 3 — Destek Talepleri
+## Faz 3 — Destek Talepleri ✓
 
-- [ ] **3.1** `src/modules/tenant/types/ticket.ts` — tip tanımları
-- [ ] **3.2** `src/modules/tenant/api/ticket-client.ts` — ticket client (elle yazılır)
-- [ ] **3.3** `src/modules/tenant/hooks/use-tickets.ts` — React Query hook'ları
-- [ ] **3.4** `src/app/[locale]/(protected)/tickets/page.tsx` + `ticket-list.tsx`
-- [ ] **3.5** `src/app/[locale]/(protected)/tickets/[id]/page.tsx` + `ticket-detail.tsx`
-- [ ] **3.6** `src/modules/tenant/ui/ticket-create-form.tsx`
+- [x] **3.1** `src/modules/tenant/types/ticket.ts` — tip tanımları
+- [x] **3.2** `src/modules/tenant/api/ticket-client.ts` — ticket client (elle yazılır)
+- [x] **3.3** `src/modules/tenant/hooks/use-tickets.ts` — React Query hook'ları
+- [x] **3.4** `src/app/[locale]/(protected)/tickets/page.tsx` + `ticket-list.tsx`
+- [x] **3.5** `src/app/[locale]/(protected)/tickets/[id]/page.tsx` + `ticket-detail.tsx`
+- [x] **3.6** `src/modules/tenant/ui/ticket-create-dialog.tsx`
+
+> Not: Typecheck'te 2 hata mevcut — her ikisi de Faz 3 öncesinden gelen önceden var olan hatalar
+> (`layout.tsx` role type uyuşmazlığı, `unauthorized-page.test.tsx` locale Promise tipi).
 
 ---
 

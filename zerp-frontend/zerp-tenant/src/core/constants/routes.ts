@@ -7,6 +7,7 @@ export const ROUTES = {
   dashboard: '/dashboard',
   unauthorized: '/unauthorized',
   employees: '/employees',
+  tickets: '/tickets',
 } as const
 
 export const PUBLIC_PATHS = [ROUTES.root, ROUTES.login, ROUTES.register] as const
