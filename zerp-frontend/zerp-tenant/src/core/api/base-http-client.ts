@@ -1,6 +1,7 @@
 import { sessionManager } from '@/core/auth/session-manager'
 import type { ApiEnvelope, ApiErrorPayload } from '@/core/types/api'
 import { ApiError } from '@/core/types/api'
+import type { RaListResult } from './resource-types'
 
 interface RequestOptions extends RequestInit {
   _retry?: boolean
@@ -23,7 +24,12 @@ export function parseApiEnvelope<T>(payload: unknown): T {
 export class BaseHttpClient {
   constructor(private readonly baseUrl = '/api') {}
 
-  async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+  // ─── Temel fetch — tüm public metodlar bunu kullanır ─────────────────────────
+
+  private async rawFetch(
+    endpoint: string,
+    options: RequestOptions = {},
+  ): Promise<{ payload: unknown; response: Response }> {
     if (sessionManager.isSessionExpired) {
       throw new ApiError('Session expired', 401)
     }
@@ -56,11 +62,7 @@ export class BaseHttpClient {
         sessionManager.forceLogout()
         throw new ApiError('Session expired', 401)
       }
-
-      return this.request<T>(endpoint, {
-        ...options,
-        _retry: true,
-      })
+      return this.rawFetch(endpoint, { ...options, _retry: true })
     }
 
     const payload = await this.safeJson(response)
@@ -71,16 +73,82 @@ export class BaseHttpClient {
       throw new ApiError(message, response.status, apiPayload ?? undefined)
     }
 
+    return { payload, response }
+  }
+
+  // ─── Mevcut imza — geriye dönük uyumlu ───────────────────────────────────────
+
+  async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+    const { payload } = await this.rawFetch(endpoint, options)
     return parseApiEnvelope<T>(payload)
   }
 
+  // ─── React Admin getList / getManyReference için ──────────────────────────────
+
+  async requestList<T>(
+    endpoint: string,
+    options: RequestOptions = {},
+  ): Promise<RaListResult<T>> {
+    const { payload, response } = await this.rawFetch(endpoint, {
+      ...options,
+      method: 'GET',
+    })
+    const data = parseApiEnvelope<T[]>(payload)
+    const total = Number(response.headers.get('X-Total-Count') ?? 0)
+    return { data, total }
+  }
+
+  // ─── HTTP kısayolları ─────────────────────────────────────────────────────────
+
+  get<T>(endpoint: string, options?: Omit<RequestOptions, 'method' | 'body'>): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'GET' })
+  }
+
+  post<T>(
+    endpoint: string,
+    body: unknown,
+    options?: Omit<RequestOptions, 'method' | 'body'>,
+  ): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
+  }
+
+  put<T>(
+    endpoint: string,
+    body: unknown,
+    options?: Omit<RequestOptions, 'method' | 'body'>,
+  ): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'PUT',
+      body: JSON.stringify(body),
+    })
+  }
+
+  patch<T>(
+    endpoint: string,
+    body: unknown,
+    options?: Omit<RequestOptions, 'method' | 'body'>,
+  ): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    })
+  }
+
+  del<T>(endpoint: string, options?: Omit<RequestOptions, 'method' | 'body'>): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'DELETE' })
+  }
+
+  // ─── Yardımcılar ──────────────────────────────────────────────────────────────
+
   private async safeJson(response: Response): Promise<unknown> {
     const text = await response.text()
-
-    if (!text) {
-      return null
-    }
-
+    if (!text) return null
     try {
       return JSON.parse(text)
     } catch {
@@ -94,9 +162,7 @@ export class BaseHttpClient {
       cache: 'no-store',
     }).catch(() => null)
 
-    if (!response?.ok) {
-      return false
-    }
+    if (!response?.ok) return false
 
     const session = (await this.safeJson(response)) as { error?: string } | null
     return !session?.error

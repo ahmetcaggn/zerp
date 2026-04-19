@@ -31,6 +31,37 @@ export interface MessageDictionary {
     title: string
     subtitle: string
   }
+  employees: {
+    title: string
+    createButton: string
+    editButton: string
+    deleteButton: string
+    emptyState: string
+    searchPlaceholder: string
+    deletedTitle: string
+    restoreButton: string
+  }
+  tickets: {
+    title: string
+    createButton: string
+    emptyState: string
+    addComment: string
+    closeTicket: string
+    commentPlaceholder: string
+  }
+  teams: {
+    title: string
+    emptyState: string
+    membersLabel: string
+  }
+  notifications: {
+    title: string
+    sendButton: string
+    recipientsLabel: string
+    subjectLabel: string
+    bodyLabel: string
+    sentSuccess: string
+  }
 }
 
 export const messagesByLocale: Record<Locale, MessageDictionary> = {
