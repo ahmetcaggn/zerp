@@ -9,6 +9,18 @@ import 'package:zerp_tenant/product/storage/model/auth_token.storage_model.dart'
 import 'package:zerp_tenant/product/storage/operator/auth_claims.operator.dart';
 import 'package:zerp_tenant/product/storage/operator/auth_token.operator.dart';
 
+enum AuthSessionOnlineStatus {
+  valid,
+  invalid,
+  unknown,
+}
+
+enum _RefreshAttemptStatus {
+  refreshed,
+  invalidSession,
+  transientFailure,
+}
+
 @injectable
 class AuthService with LoggerMixin<AuthService> {
   AuthService(this._appAuth, this._authTokenOperator, this._authClaimsOperator);
@@ -17,7 +29,7 @@ class AuthService with LoggerMixin<AuthService> {
   static const String _issuer = 'https://auth.femrek.dev/realms/zerp';
   static const String _discoveryUrl =
       'https://auth.femrek.dev/realms/zerp/.well-known/openid-configuration';
-  static const String _clientId = 'public';
+  static const String _clientId = 'zerp-tenant';
   static const String _redirectUrl = 'org.zerp.tenant://callback';
   static const String _postLogoutRedirectUrl = 'org.zerp.tenant://callback';
   static const List<String> _scopes = ['openid', 'profile', 'email'];
@@ -56,7 +68,7 @@ class AuthService with LoggerMixin<AuthService> {
       return claims;
     } on Object catch (e, s) {
       log.severe('Login process failed', e, s);
-      return null;
+      rethrow;
     }
   }
 
@@ -92,7 +104,7 @@ class AuthService with LoggerMixin<AuthService> {
       return claims;
     } on Object catch (e, s) {
       log.severe('Sign-up process failed', e, s);
-      return null;
+      rethrow;
     }
   }
 
@@ -130,13 +142,18 @@ class AuthService with LoggerMixin<AuthService> {
 
   /// Try to refresh the access token silently using the stored refresh token.
   Future<bool> tryRefreshToken() async {
+    final refreshStatus = await _tryRefreshTokenInternal();
+    return refreshStatus == _RefreshAttemptStatus.refreshed;
+  }
+
+  Future<_RefreshAttemptStatus> _tryRefreshTokenInternal() async {
     log.fine('Attempting to refresh access token silently');
 
     try {
       final refreshToken = await _authTokenOperator.refreshToken;
       if (refreshToken == null) {
         log.fine('No refresh token found in storage. Aborting refresh.');
-        return false;
+        return _RefreshAttemptStatus.invalidSession;
       }
 
       final result = await _appAuth.token(
@@ -152,23 +169,111 @@ class AuthService with LoggerMixin<AuthService> {
 
       await _saveTokenResponse(result);
       log.info('Silent token refresh successful');
-      return true;
+      return _RefreshAttemptStatus.refreshed;
+    } on FlutterAppAuthPlatformException catch (e, s) {
+      if (_isAuthorizationFailure(e)) {
+        await _clearTokens();
+        log.info(
+          () =>
+              'Silent token refresh detected an invalid remote session '
+              '(${e.platformErrorDetails.error}: '
+              '${e.platformErrorDetails.errorDescription}). '
+              'Local tokens cleared.',
+        );
+        return _RefreshAttemptStatus.invalidSession;
+      }
+
+      log.warning(
+        'Silent token refresh failed due to transient/non-auth error. '
+        'Keeping local tokens.',
+        e,
+        s,
+      );
+      return _RefreshAttemptStatus.transientFailure;
     } on Object catch (e, s) {
-      await _clearTokens();
-      log.warning('Silent token refresh failed. Local tokens cleared.', e, s);
-      return false;
+      log.warning(
+        'Silent token refresh failed due to unknown error. '
+        'Keeping local tokens.',
+        e,
+        s,
+      );
+      return _RefreshAttemptStatus.transientFailure;
+    }
+  }
+
+  bool _isAuthorizationFailure(FlutterAppAuthPlatformException exception) {
+    final oauthError = exception.platformErrorDetails.error;
+    return oauthError == FlutterAppAuthOAuthError.invalidGrant ||
+        oauthError == FlutterAppAuthOAuthError.invalidClient ||
+        oauthError == FlutterAppAuthOAuthError.unauthorizedClient;
+  }
+
+  /// Validate session against the auth server
+  ///
+  /// Return true if session is valid and access token is still valid after
+  /// refresh attempt. Returns false if refresh failed or access token is still
+  /// invalid after refresh.
+  ///
+  /// Removes local tokens if refresh fails or access token is still invalid
+  /// after refresh, but does not perform remote logout since session is already
+  /// invalid.
+  Future<bool> checkSessionOnline() async {
+    final status = await checkSessionOnlineStatus();
+    return status == AuthSessionOnlineStatus.valid;
+  }
+
+  /// Check session status against identity provider.
+  ///
+  /// - [AuthSessionOnlineStatus.valid]: remote check succeeds
+  ///   and token is valid.
+  /// - [AuthSessionOnlineStatus.invalid]: identity provider confirms
+  ///   session/token is invalid.
+  /// - [AuthSessionOnlineStatus.unknown]: connectivity/transient error.
+  Future<AuthSessionOnlineStatus> checkSessionOnlineStatus() async {
+    log.fine('Checking session status online');
+
+    final refreshStatus = await _tryRefreshTokenInternal();
+    switch (refreshStatus) {
+      case _RefreshAttemptStatus.refreshed:
+        return await isAccessTokenValid
+            ? AuthSessionOnlineStatus.valid
+            : AuthSessionOnlineStatus.invalid;
+      case _RefreshAttemptStatus.invalidSession:
+        return AuthSessionOnlineStatus.invalid;
+      case _RefreshAttemptStatus.transientFailure:
+        return AuthSessionOnlineStatus.unknown;
     }
   }
 
   Future<bool> get isAccessTokenValid async {
     final accessToken = await _authTokenOperator.accessToken;
-    return accessToken != null && !JwtDecoder.isExpired(accessToken);
+    if (accessToken == null) {
+      log.fine('No access token found in storage');
+      return false;
+    } else if (JwtDecoder.isExpired(accessToken)) {
+      log.fine(
+        () =>
+            'Access token is expired. Expiration date: '
+            '${JwtDecoder.getExpirationDate(accessToken)}',
+      );
+      return false;
+    } else {
+      log.fine('Access token is valid');
+      return true;
+    }
   }
 
   Future<AuthClaims?> get authClaimsIfValid async {
     if (await isAccessTokenValid) {
-      return _authClaims;
+      final claims = await _authClaims;
+      log.fine(
+        () =>
+            'Access token is valid. Retrieving auth claims for user: '
+            '${claims?.preferredUsername}',
+      );
+      return claims;
     }
+    log.fine('Access token is invalid or expired. No auth claims available.');
     return null;
   }
 

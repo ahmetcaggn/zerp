@@ -1,8 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/auth/state_auth.dart';
 import 'package:zerp_tenant/product/navigation/app_route.dart';
+import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 import 'package:zerp_tenant/product/ui/theme/app_theme.dart';
 
 class AppRoot extends StatelessWidget {
@@ -10,16 +16,50 @@ class AppRoot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider.value(value: getIt<CubitAuth>()),
-      ],
-      child: MaterialApp.router(
-        title: 'Zerp Tenant',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light(),
-        darkTheme: AppTheme.dark(),
-        routerConfig: getIt<AppRoute>().config(),
+    final appRouter = getIt<AppRoute>();
+
+    return TranslationProvider(
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: getIt<CubitAuth>()),
+        ],
+        child: BlocListener<CubitAuth, StateAuth>(
+          listenWhen: (previous, current) =>
+              current is StateAuthAuthenticated ||
+              current is StateAuthUnauthenticated,
+          listener: (context, state) {
+            final currentPath = appRouter.current.path;
+            final currentRouteName = appRouter.current.name;
+
+            if (state is StateAuthAuthenticated &&
+                currentRouteName != RouteShell.name) {
+              unawaited(appRouter.replaceAll([const RouteShell()]));
+            }
+
+            if (state is StateAuthUnauthenticated &&
+                currentRouteName != RouteAuth.name) {
+              unawaited(
+                appRouter.replaceAll([
+                  RouteAuth(callerRoute: currentPath),
+                ]),
+              );
+            }
+          },
+          child: Builder(
+            builder: (context) {
+              return MaterialApp.router(
+                locale: TranslationProvider.of(context).flutterLocale,
+                supportedLocales: AppLocaleUtils.supportedLocales,
+                localizationsDelegates: GlobalMaterialLocalizations.delegates,
+                onGenerateTitle: (context) => context.t.app.name,
+                debugShowCheckedModeBanner: false,
+                theme: AppTheme.light(),
+                darkTheme: AppTheme.dark(),
+                routerConfig: appRouter.config(),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

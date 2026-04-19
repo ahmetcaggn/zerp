@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'auth_claims.freezed.dart';
 part 'auth_claims.g.dart';
 
-@freezed
+@Freezed(toStringOverride: true)
 abstract class AuthClaims with _$AuthClaims {
   const factory AuthClaims({
     required Map<String, dynamic> accessTokenClaims,

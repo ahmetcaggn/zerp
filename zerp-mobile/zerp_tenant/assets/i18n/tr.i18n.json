@@ -1,0 +1,47 @@
+{
+  "app": {
+    "name": "Zerp Tenant",
+    "menu": "Menü"
+  },
+  "shell": {
+    "dashboard": "Panel",
+    "employees": "Çalışanlar",
+    "menu": "Menü",
+    "sales": "Satışlar",
+    "stock": "Stok",
+    "store": "Mağaza",
+    "settings": "Ayarlar"
+  },
+  "auth": {
+    "login": "Giriş Yap",
+    "signUp": "Kayıt Ol",
+    "success": "Başarıyla giriş yapıldı",
+    "fail": "Giriş başarısız oldu",
+    "errors": {
+      "checkFailed": "Kimlik doğrulama kontrolü başarısız oldu. Lütfen tekrar deneyin.",
+      "loginNoClaims": "Giriş başarısız oldu. Lütfen bilgilerinizi kontrol edip tekrar deneyin.",
+      "loginFailed": "Giriş başarısız oldu. Lütfen tekrar deneyin.",
+      "signUpFailed": "Kayıt işlemi başarısız oldu. Lütfen tekrar deneyin."
+    }
+  },
+  "feature": {
+    "dashboard": "Panel",
+    "employee": "Çalışan",
+    "menu": "Menü",
+    "sale": "Satış",
+    "stock": "Stok",
+    "store": "Mağaza",
+    "settings": "Ayarlar"
+  },
+  "section": {
+    "employee": "Çalışan Bölümü",
+    "menu": "Menü Bölümü",
+    "sale": "Satış Bölümü",
+    "stock": "Stok Bölümü",
+    "store": "Mağaza Bölümü"
+  },
+  "common": {
+    "hello": "Merhaba $name",
+    "save": "Kaydet"
+  }
+}

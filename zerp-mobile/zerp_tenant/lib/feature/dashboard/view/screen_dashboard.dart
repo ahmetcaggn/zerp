@@ -1,19 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @RoutePage()
-class ScreenDashboard extends StatefulWidget {
+class ScreenDashboard extends StatelessWidget {
   const ScreenDashboard({super.key});
 
   @override
-  State<ScreenDashboard> createState() => _ScreenDashboardState();
-}
-
-class _ScreenDashboardState extends State<ScreenDashboard> {
-  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Dashboard')),
-    );
+    return Center(child: Text(context.t.feature.dashboard));
   }
 }

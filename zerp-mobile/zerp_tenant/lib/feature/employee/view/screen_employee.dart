@@ -1,19 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @RoutePage()
-class ScreenEmployee extends StatefulWidget {
+class ScreenEmployee extends StatelessWidget {
   const ScreenEmployee({super.key});
 
   @override
-  State<ScreenEmployee> createState() => _ScreenEmployeeState();
-}
-
-class _ScreenEmployeeState extends State<ScreenEmployee> {
-  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Employee')),
-    );
+    return Center(child: Text(context.t.feature.employee));
   }
 }

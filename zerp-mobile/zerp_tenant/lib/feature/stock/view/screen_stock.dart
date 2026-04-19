@@ -1,19 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @RoutePage()
-class ScreenStock extends StatefulWidget {
+class ScreenStock extends StatelessWidget {
   const ScreenStock({super.key});
 
   @override
-  State<ScreenStock> createState() => _ScreenStockState();
-}
-
-class _ScreenStockState extends State<ScreenStock> {
-  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Stock')),
-    );
+    return Center(child: Text(context.t.feature.stock));
   }
 }

@@ -14,19 +14,22 @@ class AppRoute extends RootStackRouter {
 
   @override
   List<AutoRoute> get routes => [
-    // home
-    AutoRoute(page: RouteDashboard.page, initial: true),
+    AutoRoute(
+      page: RouteShell.page,
+      initial: true,
+      children: [
+        AutoRoute(page: RouteDashboard.page, initial: true),
+        AutoRoute(page: RouteEmployee.page),
+        AutoRoute(page: RouteMenu.page),
+        AutoRoute(page: RouteSale.page),
+        AutoRoute(page: RouteStock.page),
+        AutoRoute(page: RouteStore.page),
+      ],
+    ),
 
-    // misc
+    // standalone routes
     AutoRoute(page: RouteAuth.page),
     AutoRoute(page: RouteSettings.page),
-
-    // features
-    AutoRoute(page: RouteEmployee.page),
-    AutoRoute(page: RouteMenu.page),
-    AutoRoute(page: RouteSale.page),
-    AutoRoute(page: RouteStock.page),
-    AutoRoute(page: RouteStore.page),
   ];
 
   @override

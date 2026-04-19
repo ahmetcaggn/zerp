@@ -1,0 +1,47 @@
+{
+  "app": {
+    "name": "Zerp Tenant",
+    "menu": "Menu"
+  },
+  "shell": {
+    "dashboard": "Dashboard",
+    "employees": "Employees",
+    "menu": "Menu",
+    "sales": "Sales",
+    "stock": "Stock",
+    "store": "Store",
+    "settings": "Settings"
+  },
+  "auth": {
+    "login": "Login",
+    "signUp": "Sign Up",
+    "success": "Logged in successfully",
+    "fail": "Login failed",
+    "errors": {
+      "checkFailed": "Authentication check failed. Please try again.",
+      "loginNoClaims": "Login failed. Please check your credentials and try again.",
+      "loginFailed": "Login failed. Please try again.",
+      "signUpFailed": "Sign up failed. Please try again."
+    }
+  },
+  "feature": {
+    "dashboard": "Dashboard",
+    "employee": "Employee",
+    "menu": "Menu",
+    "sale": "Sale",
+    "stock": "Stock",
+    "store": "Store",
+    "settings": "Settings"
+  },
+  "section": {
+    "employee": "Employee Section",
+    "menu": "Menu Section",
+    "sale": "Sale Section",
+    "stock": "Stock Section",
+    "store": "Store Section"
+  },
+  "common": {
+    "hello": "Hello $name",
+    "save": "Save"
+  }
+}
