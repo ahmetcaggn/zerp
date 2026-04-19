@@ -17,15 +17,15 @@
 
 ---
 
-## Faz 2 — Çalışan Yönetimi
+## Faz 2 — Çalışan Yönetimi ✓
 
-- [ ] **2.1** `src/modules/tenant/types/employee.ts` — tip tanımları
-- [ ] **2.2** `src/modules/tenant/api/employee-client.ts` — resource client + ek endpoint'ler
-- [ ] **2.3** `src/modules/tenant/hooks/use-employees.ts` — React Query hook'ları
-- [ ] **2.4** `src/app/[locale]/(protected)/employees/page.tsx` + `employee-list.tsx`
-- [ ] **2.5** `src/app/[locale]/(protected)/employees/[id]/page.tsx` + `employee-detail.tsx`
-- [ ] **2.6** `src/modules/tenant/ui/employee-form.tsx` — oluştur/güncelle formu
-- [ ] **2.7** `src/modules/tenant/ui/deleted-employees.tsx` — silinmiş çalışanlar
+- [x] **2.1** `src/modules/tenant/types/employee.ts` — tip tanımları
+- [x] **2.2** `src/modules/tenant/api/employee-client.ts` — resource client + ek endpoint'ler
+- [x] **2.3** `src/modules/tenant/hooks/use-employees.ts` — React Query hook'ları
+- [x] **2.4** `src/app/[locale]/(protected)/employees/page.tsx` + `employee-list.tsx`
+- [x] **2.5** `src/app/[locale]/(protected)/employees/[id]/page.tsx` + `employee-detail.tsx`
+- [x] **2.6** `src/modules/tenant/ui/employee-form-dialog.tsx` — oluştur/güncelle formu
+- [x] **2.7** `src/modules/tenant/ui/deleted-employees.tsx` — silinmiş çalışanlar
 
 ---
 
