@@ -1,7 +1,6 @@
 package org.zerp.employee.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.criteria.Path;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,22 +47,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
 
     @Override
     @Transactional(readOnly = true)
-    public Page<EmployeeListResponseDto> findWithTargetAndFilters(String target, String targetId,
-                                                                  Map<String, String> filters, Pageable pageable) {
-        Specification<Employee> spec = buildSpecificationFromFilters(filters);
-        spec = spec.and((root, _, cb) -> {
-            Path<?> path = root;
-            for (String part : target.split("\\.")) {
-                path = path.get(part);
-            }
-            return cb.equal(path, targetId);
-        });
-        return employeeRepository.findAll(spec, pageable).map(employeeMapper::toListResponseDto);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<EmployeeResponseDto> findAllById(Iterable<Long> ids) {
+    public List<EmployeeResponseDto> findAllById(List<Long> ids) {
         List<EmployeeResponseDto> result = new ArrayList<>();
         for (Long id : ids) {
             employeeRepository.findByIdWithContactsAndNotDeleted(id)
@@ -172,7 +156,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
 
     @Override
     @Transactional
-    public List<Long> patchMany(Iterable<Long> ids, Map<String, Object> fields) {
+    public List<Long> patchMany(List<Long> ids, Map<String, Object> fields) {
         List<Long> updated = new ArrayList<>();
         for (Long id : ids) {
             try {
@@ -194,7 +178,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
 
     @Override
     @Transactional
-    public List<Long> deleteMany(Iterable<Long> ids) {
+    public List<Long> deleteMany(List<Long> ids) {
         List<Long> deleted = new ArrayList<>();
         for (Long id : ids) {
             try {

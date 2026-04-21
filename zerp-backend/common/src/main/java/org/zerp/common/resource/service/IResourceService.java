@@ -26,26 +26,12 @@ public interface IResourceService<T, LT, C, U, ID> {
     Page<LT> findWithFilters(Map<String, String> filters, Pageable pageable);
 
     /**
-     * Finds entities that reference another entity, based on a target field and ID, along with additional filters.
-     *
-     * @param target   The name of the field that references the target entity (e.g., "userId").
-     * @param targetId The ID of the target entity to match (e.g., 123).
-     * @param filters  Additional filters to apply (e.g., "status" -> "active").
-     * @param pageable Pagination and sorting information.
-     * @return A page of entities referencing the target entity and matching the filters.
-     */
-    Page<LT> findWithTargetAndFilters(String target,
-                                      String targetId,
-                                      Map<String, String> filters,
-                                      Pageable pageable);
-
-    /**
      * Retrieves all entities by their IDs.
      *
      * @param ids The collection of entity IDs to retrieve.
      * @return A list of entities matching the given IDs.
      */
-    List<T> findAllById(Iterable<ID> ids);
+    List<T> findAllById(List<ID> ids);
 
     /**
      * Retrieves a single entity by its ID.
@@ -88,7 +74,7 @@ public interface IResourceService<T, LT, C, U, ID> {
      * @param fields A map of field names to their new values to apply to all entities.
      * @return A list of IDs of the updated entities.
      */
-    List<ID> patchMany(Iterable<ID> ids, Map<String, Object> fields);
+    List<ID> patchMany(List<ID> ids, Map<String, Object> fields);
 
     /**
      * Deletes an entity by its ID.
@@ -103,5 +89,5 @@ public interface IResourceService<T, LT, C, U, ID> {
      * @param ids The collection of entity IDs to delete.
      * @return A list of IDs of the deleted entities.
      */
-    List<ID> deleteMany(Iterable<ID> ids);
+    List<ID> deleteMany(List<ID> ids);
 }

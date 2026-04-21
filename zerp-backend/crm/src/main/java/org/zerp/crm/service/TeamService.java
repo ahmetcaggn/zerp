@@ -42,15 +42,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
     @Override
     @Transactional(readOnly = true)
-    public Page<TeamResponse> findWithTargetAndFilters(String target, String targetId, Map<String, String> filters, Pageable pageable) {
-        Specification<TeamEntity> specification = buildSpecificationFromFilters(filters)
-                .and(buildTargetSpecification(target, targetId));
-        return teamRepository.findAll(specification, pageable).map(this::toResponse);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<TeamResponse> findAllById(Iterable<Integer> ids) {
+    public List<TeamResponse> findAllById(List<Integer> ids) {
         return teamRepository.findAllById(ids).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -104,7 +96,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     }
 
     @Override
-    public List<Integer> patchMany(Iterable<Integer> ids, Map<String, Object> fields) {
+    public List<Integer> patchMany(List<Integer> ids, Map<String, Object> fields) {
         List<Integer> updated = new ArrayList<>();
         for (Integer id : ids) {
             try {
@@ -123,7 +115,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     }
 
     @Override
-    public List<Integer> deleteMany(Iterable<Integer> ids) {
+    public List<Integer> deleteMany(List<Integer> ids) {
         List<Integer> deleted = new ArrayList<>();
         for (Integer id : ids) {
             try {
@@ -302,23 +294,6 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         }
 
         return specification;
-    }
-
-    private Specification<TeamEntity> buildTargetSpecification(String target, String targetId) {
-        if ("id".equalsIgnoreCase(target)) {
-            Integer teamId = Integer.valueOf(targetId);
-            return (root, _, cb) -> cb.equal(root.get("id"), teamId);
-        }
-
-        if ("userId".equalsIgnoreCase(target) || "members.userId".equalsIgnoreCase(target)) {
-            UUID memberUserId = UUID.fromString(targetId);
-            return (root, query, cb) -> {
-                query.distinct(true);
-                return cb.equal(root.join("members").get("userId"), memberUserId);
-            };
-        }
-
-        throw new IllegalArgumentException("Unsupported target: " + target);
     }
 
     private Boolean parseBoolean(Object rawValue, String fieldName) {
