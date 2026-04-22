@@ -133,39 +133,6 @@ class EmployeeServiceTest {
         }
     }
 
-    // ── findWithTargetAndFilters ──────────────────────────────────────────────
-
-    @Nested
-    class FindWithTargetAndFilters {
-
-        @Test
-        void returnsPageFilteredByTarget() {
-            Pageable pageable = PageRequest.of(0, 10);
-            Employee emp = buildEmployee(2L, "emp@example.com");
-            EmployeeListResponseDto dto = buildListDto(2L, "emp@example.com");
-            Page<Employee> repoPage = new PageImpl<>(List.of(emp), pageable, 1);
-
-            when(employeeRepository.findAll(ArgumentMatchers.<Specification<Employee>>any(), eq(pageable))).thenReturn(repoPage);
-            when(employeeMapper.toListResponseDto(emp)).thenReturn(dto);
-
-            Page<EmployeeListResponseDto> result =
-                    employeeService.findWithTargetAndFilters("manager.id", "1", Map.of(), pageable);
-
-            assertThat(result.getContent()).containsExactly(dto);
-        }
-
-        @Test
-        void combinesTargetWithExtraFilters() {
-            Pageable pageable = PageRequest.of(0, 10);
-            when(employeeRepository.findAll(ArgumentMatchers.<Specification<Employee>>any(), eq(pageable))).thenReturn(Page.empty(pageable));
-
-            Page<EmployeeListResponseDto> result =
-                    employeeService.findWithTargetAndFilters("id", "1", Map.of("status.eq", "ACTIVE"), pageable);
-
-            assertThat(result).isNotNull();
-        }
-    }
-
     // ── findAllById ───────────────────────────────────────────────────────────
 
     @Nested

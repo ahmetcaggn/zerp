@@ -93,49 +93,6 @@ public abstract class ResourceController<T, LT, C, U, ID> implements IResourceCo
     }
 
     @Override
-    public ResponseEntity<ApiResponse<List<LT>>> getManyReference(
-            String target,
-            String targetId,
-            int _start,
-            int _end,
-            String _sort,
-            String _order,
-            String _embed,
-            Map<String, String> allParams
-    ) {
-        // Validate Pagination Parameters if "getManyReference"
-        if (_start < 0 || _end < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "_start and _end parameters are null or smaller than 0. These parameters are required for `getManyReference` operation.");
-        } else if (_end <= _start) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "_end parameter must be greater than _start parameter.");
-        }
-
-        // Calculate Pagination
-        int pageSize = _end - _start;
-        int pageNumber = _start / pageSize;
-        Sort sort = Sort.by(Sort.Direction.fromString(_order), _sort);
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-
-        // Handle _embed Parameter
-        if (_embed != null) {
-            log.warn("_embed parameter is not supported and will be ignored.");
-        }
-
-        // Refine params and fetch Data
-        RESERVED_PARAMS.forEach(allParams.keySet()::remove);
-        Page<LT> pageResult = getService().findWithTargetAndFilters(target, targetId, allParams, pageable);
-
-        // Set Headers
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Total-Count", String.valueOf(pageResult.getTotalElements()));
-        headers.add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "X-Total-Count");
-
-        return new ResponseEntity<>(buildResponse(pageResult.getContent()), headers, HttpStatus.OK);
-    }
-
-    @Override
     public ResponseEntity<ApiResponse<T>> getOne(ID id) {
         return ResponseEntity.ok(buildResponse(getService().findById(id)));
     }

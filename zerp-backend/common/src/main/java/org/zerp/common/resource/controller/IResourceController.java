@@ -132,78 +132,6 @@ public interface IResourceController<T, LT, C, U, ID> {
     );
 
     /**
-     * Retrieves a paginated list of entities that reference another specific entity.
-     * This endpoint implements ra-spring-data-provider's <b>getManyReference</b> operation.
-     *
-     * <p>This operation is used to fetch entities related to a specific record. For example,
-     * retrieving all comments for a particular post, or all orders for a specific customer.
-     * Unlike getList, the filter is based on a reference relationship rather than arbitrary criteria.</p>
-     *
-     * <p><b>Example request:</b></p>
-     * <pre>GET /api/comments/of/postId/123?_start=0&amp;_end=10&amp;_sort=createdAt&amp;_order=DESC</pre>
-     *
-     * <p>This would retrieve comments where the postId field equals 123, paginated and sorted.</p>
-     *
-     * <p>The response must include an <code>X-Total-Count</code> header containing the total number
-     * of entities that reference the specified target entity. This is essential for pagination
-     * in the React Admin interface.</p>
-     *
-     * <p><b>Response headers:</b></p>
-     * <ul>
-     *   <li><code>X-Total-Count</code>: Total number of entities referencing the target entity</li>
-     *   <li><code>Access-Control-Expose-Headers</code>: Must include "X-Total-Count"</li>
-     * </ul>
-     *
-     * @param target    the name of the field that references the target entity (e.g., "postId", "userId")
-     * @param targetId  the ID of the target entity being referenced (e.g., "123")
-     * @param _start    the starting index for pagination (0-based, inclusive)
-     * @param _end      the ending index for pagination (0-based, exclusive)
-     * @param _sort     the field name to sort by (default: "id")
-     * @param _order    the sort direction, either "ASC" or "DESC" (default: "ASC")
-     * @param _embed    optional parameter to embed related resources (implementation-specific)
-     * @param allParams map containing all query parameters, which may include additional filters
-     * @return ResponseEntity containing a paginated list of entities that reference the target entity,
-     * with X-Total-Count header
-     */
-    @Operation(
-            summary = "GetManyReference: Get entities that reference another entity",
-            description = """
-                    Retrieves a paginated list of entities that reference another specific entity.
-                    Implements ra-spring-data-provider's getManyReference operation.
-                    
-                    This operation is used to fetch entities related to a specific record. For example,
-                    retrieving all comments for a particular post, or all orders for a specific customer.
-                    Unlike getList, the filter is based on a reference relationship rather than arbitrary criteria.
-                    
-                    The response includes an X-Total-Count header containing the total number of entities
-                    that reference the specified target entity. This is essential for pagination in React Admin.
-                    
-                    Example: GET /api/comments/of/postId/123?_start=0&_end=10&_sort=createdAt&_order=DESC
-                    This retrieves comments where the postId field equals 123, paginated and sorted.
-                    """,
-            operationId = "getManyReference"
-    )
-    @GetMapping(value = "/of/{target}/{targetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<ApiResponse<List<LT>>> getManyReference(
-            @Parameter(description = "Name of the field that references the target entity", required = true, example = "userId")
-            @PathVariable(name = "target") String target,
-            @Parameter(description = "ID of the target entity being referenced", required = true, example = "123")
-            @PathVariable(name = "targetId") String targetId,
-            @Parameter(description = "Starting index for pagination (0-based, inclusive)", required = true, example = "0")
-            @RequestParam(name = "_start") int _start,
-            @Parameter(description = "Ending index for pagination (0-based, exclusive)", required = true, example = "10")
-            @RequestParam(name = "_end") int _end,
-            @Parameter(description = "Field name to sort by", example = "id")
-            @RequestParam(name = "_sort", required = false, defaultValue = "id") String _sort,
-            @Parameter(description = "Sort direction (ASC or DESC)", example = "DESC")
-            @RequestParam(name = "_order", required = false, defaultValue = "ASC") String _order,
-            @Parameter(description = "Optional parameter to embed related resources (implementation-specific)")
-            @RequestParam(name = "_embed", required = false) String _embed,
-            @Parameter(description = "Additional query parameters for filtering")
-            @RequestParam Map<String, String> allParams
-    );
-
-    /**
      * Retrieves a single entity by its identifier.
      * This endpoint implements ra-spring-data-provider's getOne operation.
      *
@@ -273,8 +201,8 @@ public interface IResourceController<T, LT, C, U, ID> {
      * Updates an existing entity with the provided fields.
      * This endpoint implements ra-spring-data-provider's update operation with support for partial updates.
      *
-     * @param id     the unique identifier of the entity to update
-     * @param data   the request body containing the fields to update; only provided fields should be updated
+     * @param id   the unique identifier of the entity to update
+     * @param data the request body containing the fields to update; only provided fields should be updated
      * @return ResponseEntity containing the updated entity
      */
     @Operation(
