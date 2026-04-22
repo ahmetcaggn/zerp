@@ -19,7 +19,6 @@ public class Permission {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne(optional = false)
     private Long employeeId;
 
     @Enumerated(EnumType.STRING)
