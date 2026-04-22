@@ -28,6 +28,7 @@
         <module>resource</module>
         <module>sale</module>
         <module>suggestion</module>
+        <module>user</module>
 <!--          <module>socket_service</module>-->
 
         <!-- debug -->
