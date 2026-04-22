@@ -26,6 +26,9 @@ public class AggregatedApplication {
 
         // Disable JMX globally to prevent HikariCP pool name clashes
         System.setProperty("spring.jmx.enabled", "false");
+        // Disable Spring Boot admin MBean registration to avoid duplicate ObjectName
+        // when multiple sibling ApplicationContexts run in the same JVM.
+        System.setProperty("spring.application.admin.enabled", "false");
 
         new SpringApplicationBuilder()
                 // 0. Parent Context (No Web Server)

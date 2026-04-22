@@ -16,7 +16,7 @@ import org.zerp.user.repository.UserRepository;
 @RequiredArgsConstructor
 public class FeignUserService {
     private final UserRepository repository;
-    private final UserMapper userMapper;
+    private final UserMapper mapper;
 
     /**
      * Check if user with given id exists, if not create new user with given info
@@ -36,14 +36,14 @@ public class FeignUserService {
 
         // create new
         log.info("User with id {} does not exist, creating new user", request.getId());
-        AppUser newUser = userMapper.toAppUser(request);
+        AppUser newUser = mapper.toEntity(request);
         try {
             repository.save(newUser);
             log.info("Created new user with id {}", request.getId());
         } catch (Exception e) {
             log.error("Failed to create user with id {}: {}", request.getId(), e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Failed to create user");
+                    "Failed to create user", e);
         }
         return UserCheckResponseDTO.builder().valid(false).build();
     }

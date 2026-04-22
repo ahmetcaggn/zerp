@@ -21,7 +21,11 @@ public class RequestContextWebFilter implements WebFilter, Ordered {
     public static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
     public static final String CLIENT_IP_HEADER = "X-Client-Ip";
     public static final String GATEWAY_REQUEST_START_MS_HEADER = "X-Gateway-Request-Start-Ms";
-    public static final String GATEWAY_DURATION_MS_HEADER = "X-Gateway-Duration-Ms";
+
+    // Uncomment if you want to track total time spent in the gateway (including downstream calls) instead of just
+    // request processing time in the gateway.
+    // public static final String GATEWAY_DURATION_MS_HEADER = "X-Gateway-Duration-Ms";
+
     private static final String CORRELATION_ID_MDC_KEY = "correlationId";
     private static final String CLIENT_IP_MDC_KEY = "clientIp";
 
@@ -33,7 +37,6 @@ public class RequestContextWebFilter implements WebFilter, Ordered {
         String gatewayRequestStartMs = resolveRequestStartMs(
                 exchange.getRequest().getHeaders().getFirst(GATEWAY_REQUEST_START_MS_HEADER)
         );
-        long gatewayStartEpochMs = Long.parseLong(gatewayRequestStartMs);
         String clientIp = resolveClientIp(exchange);
 
         ServerHttpRequest mutatedRequest = exchange.getRequest()
@@ -48,12 +51,6 @@ public class RequestContextWebFilter implements WebFilter, Ordered {
                 .build();
 
         ServerWebExchange mutatedExchange = exchange.mutate().request(mutatedRequest).build();
-        mutatedExchange.getResponse().getHeaders().set(CORRELATION_ID_HEADER, correlationId);
-        mutatedExchange.getResponse().beforeCommit(() -> {
-            long gatewayDurationMs = Math.max(System.currentTimeMillis() - gatewayStartEpochMs, 0L);
-            mutatedExchange.getResponse().getHeaders().set(GATEWAY_DURATION_MS_HEADER, String.valueOf(gatewayDurationMs));
-            return Mono.empty();
-        });
 
         MDC.put(CORRELATION_ID_MDC_KEY, correlationId);
         if (StringUtils.hasText(clientIp)) {
@@ -61,7 +58,7 @@ public class RequestContextWebFilter implements WebFilter, Ordered {
         }
 
         return chain.filter(mutatedExchange)
-                .doFinally(signalType -> {
+                .doFinally(_ -> {
                     MDC.remove(CORRELATION_ID_MDC_KEY);
                     MDC.remove(CLIENT_IP_MDC_KEY);
                 });

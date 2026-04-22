@@ -18,9 +18,9 @@ public interface UserMapper {
     /**
      * Convert UserCreateIfNotExistRequestDTO to AppUser entity
      */
-    AppUser toAppUser(UserCreateIfNotExistRequestDTO dto);
+    AppUser toEntity(UserCreateIfNotExistRequestDTO dto);
 
-    /**dj
+    /**
      * Convert list of AppUser entities to list of UserCheckResponseDTOs
      */
     List<UserCheckResponseDTO> toUserCheckResponseDTOs(List<AppUser> appUsers);
@@ -28,5 +28,5 @@ public interface UserMapper {
     /**
      * Update an existing AppUser entity from UserCreateIfNotExistRequestDTO
      */
-    void updateAppUserFromDTO(UserCreateIfNotExistRequestDTO dto, @MappingTarget AppUser appUser);
+    void updateEntityFromDTO(UserCreateIfNotExistRequestDTO dto, @MappingTarget AppUser appUser);
 }

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration status="WARN">
+
+    <Properties>
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %p [%t] [correlationId=%X{correlationId}] [clientIp=%X{clientIp}] %c - %m%n
+        </Property>
+        <Property name="LOG_DIR">
+            logs/user/
+        </Property>
+        <Property name="FILE_SIZE_ROOT">10MB</Property>
+        <Property name="MAX_FILE">5</Property>
+    </Properties>
+
+    <Appenders>
+        <RollingFile name="RollingFile"
+                     fileName="${LOG_DIR}user.log"
+                     filePattern="${LOG_DIR}user-%d{dd-MM-yyyy}-%i.log.gz"
+                     ignoreExceptions="false">
+
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="${FILE_SIZE_ROOT}"/>
+            </Policies>
+
+            <DefaultRolloverStrategy max="${MAX_FILE}">
+                <Delete basePath="${LOG_DIR}" maxDepth="2">
+                    <IfFileName glob="*user*.log.gz"/>
+                    <IfLastModified age="P30D"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+    </Loggers>
+</Configuration>

@@ -1,32 +1,22 @@
 package org.zerp.gateway.config;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
-import org.zerp.gateway.filter.CustomAuthFilter;
-import org.zerp.gateway.filter.RequestContextWebFilter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
-import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
 public class GatewayConfig {
-
-    private final ObjectMapper objectMapper;
 
     @Bean
     public RestTemplate restTemplate() {
@@ -48,229 +38,179 @@ public class GatewayConfig {
     }
 
     @Bean
-    public RouteLocator gatewayRouter(RouteLocatorBuilder routeLocatorBuilder, CustomAuthFilter authFilter) {
+    public RouteLocator gatewayRouter(RouteLocatorBuilder routeLocatorBuilder) {
         return routeLocatorBuilder.routes()
                 .route(r -> r
-                                .path("/gateway/**")
-                                .filters(f -> f.retry(retryConfig -> retryConfig
-                                                .setRetries(3)
-                                                .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
-                                                .setMethods(HttpMethod.GET)
-                                        )
+                        .path("/gateway/**")
+                        .filters(f -> f.retry(retryConfig -> retryConfig
+                                        .setRetries(3)
+                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
+                                        .setMethods(HttpMethod.GET)
                                 )
-                                .uri("http://localhost:8080")
+                        )
+                        .uri("http://localhost:8080")
                 )
                 .route(r -> r
-                                .path("/notification/v3/api-docs/**")
-                                .filters(f -> f
-                                                .rewritePath("/notification/v3/api-docs(?<segment>/?.*)", "/v3/api-docs${segment}")
-                                )
-                                .uri("lb://NOTIFICATION")
+                        .path("/v3/api-docs/notification/**")
+                        .filters(f -> f
+                                .rewritePath("/v3/api-docs/notification(?<segment>/?.*)", "/v3/api-docs${segment}")
+                        )
+                        .uri("lb://NOTIFICATION")
                 )
                 .route(r -> r
-                                .path("/notification/swagger-ui/**")
-                                .filters(f -> f
-                                                .rewritePath("/notification/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
-                                )
-                                .uri("lb://NOTIFICATION")
+                        .path("/notification/swagger-ui/**")
+                        .filters(f -> f
+                                .rewritePath("/notification/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
+                        )
+                        .uri("lb://NOTIFICATION")
                 )
                 .route(r -> r
-                                .path("/employee/v3/api-docs/**")
-                                .filters(f -> f
-                                                .rewritePath("/employee/v3/api-docs(?<segment>/?.*)", "/v3/api-docs${segment}")
-                                )
-                                .uri("lb://EMPLOYEE")
+                        .path("/v3/api-docs/employee/**")
+                        .filters(f -> f
+                                .rewritePath("/v3/api-docs/employee(?<segment>/?.*)", "/v3/api-docs${segment}")
+                        )
+                        .uri("lb://EMPLOYEE")
                 )
                 .route(r -> r
-                                .path("/employee/swagger-ui/**")
-                                .filters(f -> f
-                                                .rewritePath("/employee/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
-                                )
-                                .uri("lb://EMPLOYEE")
+                        .path("/employee/swagger-ui/**")
+                        .filters(f -> f
+                                .rewritePath("/employee/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
+                        )
+                        .uri("lb://EMPLOYEE")
                 )
                 .route(r -> r
-                                .path("/crm/v3/api-docs/**")
-                                .filters(f -> f
-                                                .rewritePath("/crm/v3/api-docs(?<segment>/?.*)", "/v3/api-docs${segment}")
-                                )
-                                .uri("lb://CRM")
+                        .path("/v3/api-docs/crm/**")
+                        .filters(f -> f
+                                .rewritePath("/v3/api-docs/crm(?<segment>/?.*)", "/v3/api-docs${segment}")
+                        )
+                        .uri("lb://CRM")
                 )
                 .route(r -> r
-                                .path("/crm/swagger-ui/**")
-                                .filters(f -> f
-                                                .rewritePath("/crm/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
-                                )
-                                .uri("lb://CRM")
+                        .path("/crm/swagger-ui/**")
+                        .filters(f -> f
+                                .rewritePath("/crm/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
+                        )
+                        .uri("lb://CRM")
                 )
                 .route(r -> r
-                                .path("/notification/**")
-                                .filters(f -> f
-                                                .modifyResponseBody(String.class, String.class, this::attachGatewayDurationToResponseBody)
-//                                .filter(authFilter.apply(new CustomAuthFilter.Config()))
-                                                .retry(retryConfig -> retryConfig
-                                                        .setRetries(3)
-                                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
-                                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
-                                                )
+                        .path("/notification/**")
+                        .filters(f -> f
+                                .retry(retryConfig -> retryConfig
+                                        .setRetries(3)
+                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
+                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
                                 )
-                                .uri("lb://NOTIFICATION")
+                        )
+                        .uri("lb://NOTIFICATION")
                 )
                 .route(r -> r
-                                .path("/employee/**")
-                                .filters(f -> f
-                                                .modifyResponseBody(String.class, String.class, this::attachGatewayDurationToResponseBody)
-//                                .filter(authFilter.apply(new CustomAuthFilter.Config()))
-                                                .retry(retryConfig -> retryConfig
-                                                        .setRetries(3)
-                                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
-                                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
-                                                )
+                        .path("/employee/**")
+                        .filters(f -> f
+                                .retry(retryConfig -> retryConfig
+                                        .setRetries(3)
+                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
+                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
                                 )
-                                .uri("lb://EMPLOYEE")
+                        )
+                        .uri("lb://EMPLOYEE")
                 )
                 .route(r -> r
-                                .path("/crm/**")
+                        .path("/crm/**")
 
-                                .filters(f -> f
-                                                .modifyResponseBody(String.class, String.class, this::attachGatewayDurationToResponseBody)
-//                                .filter(authFilter.apply(new CustomAuthFilter.Config()))
-                                                .retry(retryConfig -> retryConfig
-                                                        .setRetries(3)
-                                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
-                                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
-                                                )
+                        .filters(f -> f
+                                .retry(retryConfig -> retryConfig
+                                        .setRetries(3)
+                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
+                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
                                 )
-                                .uri("lb://CRM")
+                        )
+                        .uri("lb://CRM")
                 )
                 .route(r -> r
-                                .path("/resource/v3/api-docs/**")
-                                .filters(f -> f
-                                                .rewritePath("/resource/v3/api-docs(?<segment>/?.*)", "/v3/api-docs${segment}")
-                                )
-                                .uri("lb://RESOURCE")
+                        .path("/v3/api-docs/resource/**")
+                        .filters(f -> f
+                                .rewritePath("/v3/api-docs/resource(?<segment>/?.*)", "/v3/api-docs${segment}")
+                        )
+                        .uri("lb://RESOURCE")
                 )
                 .route(r -> r
-                                .path("/resource/swagger-ui/**")
-                                .filters(f -> f
-                                                .rewritePath("/resource/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
-                                )
-                                .uri("lb://RESOURCE")
+                        .path("/resource/swagger-ui/**")
+                        .filters(f -> f
+                                .rewritePath("/resource/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
+                        )
+                        .uri("lb://RESOURCE")
                 )
                 .route(r -> r
-                                .path("/resource/**")
-                                .filters(f -> f
-                                                .modifyResponseBody(String.class, String.class, this::attachGatewayDurationToResponseBody)
-//                                .filter(authFilter.apply(new CustomAuthFilter.Config()))
-                                                .retry(retryConfig -> retryConfig
-                                                        .setRetries(3)
-                                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
-                                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
-                                                )
+                        .path("/resource/**")
+                        .filters(f -> f
+                                .retry(retryConfig -> retryConfig
+                                        .setRetries(3)
+                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
+                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
                                 )
-                                .uri("lb://RESOURCE")
+                        )
+                        .uri("lb://RESOURCE")
                 )
                 .route(r -> r
-                                .path("/sale/v3/api-docs/**")
-                                .filters(f -> f
-                                                .rewritePath("/sale/v3/api-docs(?<segment>/?.*)", "/v3/api-docs${segment}")
-                                )
-                                .uri("lb://SALE")
+                        .path("/v3/api-docs/sale/**")
+                        .filters(f -> f
+                                .rewritePath("/v3/api-docs/sale(?<segment>/?.*)", "/v3/api-docs${segment}")
+                        )
+                        .uri("lb://SALE")
                 )
                 .route(r -> r
-                                .path("/sale/swagger-ui/**")
-                                .filters(f -> f
-                                                .rewritePath("/sale/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
-                                )
-                                .uri("lb://SALE")
+                        .path("/sale/swagger-ui/**")
+                        .filters(f -> f
+                                .rewritePath("/sale/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
+                        )
+                        .uri("lb://SALE")
                 )
                 .route(r -> r
-                                .path("/sale/**")
-                                .filters(f -> f
-                                                .modifyResponseBody(String.class, String.class, this::attachGatewayDurationToResponseBody)
-//                                .filter(authFilter.apply(new CustomAuthFilter.Config()))
-                                                .retry(retryConfig -> retryConfig
-                                                        .setRetries(3)
-                                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
-                                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
-                                                )
+                        .path("/sale/**")
+                        .filters(f -> f
+                                .retry(retryConfig -> retryConfig
+                                        .setRetries(3)
+                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
+                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
                                 )
-                                .uri("lb://SALE")
+                        )
+                        .uri("lb://SALE")
                 )
                 .route(r -> r
-                                .path("/suggestion/v3/api-docs/**")
-                                .filters(f -> f
-                                                .rewritePath("/suggestion/v3/api-docs(?<segment>/?.*)", "/v3/api-docs${segment}")
-                                )
-                                .uri("lb://SUGGESTION")
+                        .path("/v3/api-docs/suggestion/**")
+                        .filters(f -> f
+                                .rewritePath("/v3/api-docs/suggestion(?<segment>/?.*)", "/v3/api-docs${segment}")
+                        )
+                        .uri("lb://SUGGESTION")
                 )
                 .route(r -> r
-                                .path("/suggestion/swagger-ui/**")
-                                .filters(f -> f
-                                                .rewritePath("/suggestion/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
-                                )
-                                .uri("lb://SUGGESTION")
+                        .path("/suggestion/swagger-ui/**")
+                        .filters(f -> f
+                                .rewritePath("/suggestion/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
+                        )
+                        .uri("lb://SUGGESTION")
                 )
                 .route(r -> r
-                                .path("/suggestion/**")
-                                .filters(f -> f
-                                                .modifyResponseBody(String.class, String.class, this::attachGatewayDurationToResponseBody)
-//                                .filter(authFilter.apply(new CustomAuthFilter.Config()))
-                                                .retry(retryConfig -> retryConfig
-                                                        .setRetries(3)
-                                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
-                                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
-                                                )
+                        .path("/suggestion/**")
+                        .filters(f -> f
+                                .retry(retryConfig -> retryConfig
+                                        .setRetries(3)
+                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
+                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
                                 )
-                                .uri("lb://SUGGESTION")
+                        )
+                        .uri("lb://SUGGESTION")
+                )
+                .route(r -> r
+                        .path("/user/**")
+                        .filters(f -> f
+                                .retry(retryConfig -> retryConfig
+                                        .setRetries(3)
+                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
+                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
+                                )
+                        ).uri("lb://USER")
                 )
                 .build();
-    }
-
-    private Mono<String> attachGatewayDurationToResponseBody(ServerWebExchange exchange, String responseBody) {
-        if (!StringUtils.hasText(responseBody)) {
-            return Mono.just(responseBody);
-        }
-
-        Long gatewayDurationMs = calculateGatewayDurationMs(exchange);
-        if (gatewayDurationMs == null) {
-            return Mono.just(responseBody);
-        }
-
-        try {
-            JsonNode rootNode = objectMapper.readTree(responseBody);
-            if (!rootNode.isObject()) {
-                return Mono.just(responseBody);
-            }
-
-            JsonNode metaNode = rootNode.get("meta");
-            if (!(metaNode instanceof ObjectNode metaObjectNode)) {
-                return Mono.just(responseBody);
-            }
-
-            metaObjectNode.put("durationMs", gatewayDurationMs);
-            return Mono.just(objectMapper.writeValueAsString(rootNode));
-        } catch (Exception ignored) {
-            return Mono.just(responseBody);
-        }
-    }
-
-    private Long calculateGatewayDurationMs(ServerWebExchange exchange) {
-        String startHeader = exchange.getRequest().getHeaders()
-                .getFirst(RequestContextWebFilter.GATEWAY_REQUEST_START_MS_HEADER);
-        if (!StringUtils.hasText(startHeader)) {
-            return null;
-        }
-
-        try {
-            long startEpochMs = Long.parseLong(startHeader.trim());
-            if (startEpochMs <= 0) {
-                return null;
-            }
-
-            long durationMs = System.currentTimeMillis() - startEpochMs;
-            return Math.max(durationMs, 0L);
-        } catch (NumberFormatException ignored) {
-            return null;
-        }
     }
 }
