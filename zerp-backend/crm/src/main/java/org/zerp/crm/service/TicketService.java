@@ -1,30 +1,202 @@
 package org.zerp.crm.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.zerp.common.entity.crm.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.crm.TicketAssignmentEntity;
+import org.zerp.common.entity.crm.TicketCommentEntity;
+import org.zerp.common.entity.crm.TicketEntity;
+import org.zerp.common.entity.crm.TicketHistoryEntity;
+import org.zerp.common.entity.crm.TicketSlaTrackingEntity;
 import org.zerp.common.entity.crm.TicketEntity.TicketPriority;
 import org.zerp.common.entity.crm.TicketEntity.TicketStatus;
 import org.zerp.common.entity.crm.TicketEntity.TicketType;
-import org.zerp.common.entity.crm.TicketCommentEntity.AuthorType;
-import org.zerp.crm.dto.ticket.*;
+import org.zerp.common.resource.service.IResourceService;
+import org.zerp.crm.dto.ticket.AddCommentRequest;
+import org.zerp.crm.dto.ticket.AssignTicketRequest;
+import org.zerp.crm.dto.ticket.ChangePriorityRequest;
+import org.zerp.crm.dto.ticket.ChangeStatusRequest;
+import org.zerp.crm.dto.ticket.CreateTicketRequest;
+import org.zerp.crm.dto.ticket.TicketResponse;
+import org.zerp.crm.dto.ticket.UpdateTicketRequest;
 import org.zerp.crm.repository.TicketRepository;
+import org.zerp.crm.service.ticket.TicketResponseMapper;
+import org.zerp.crm.service.ticket.TicketSpecificationBuilder;
+import org.zerp.crm.service.ticket.TicketValueParser;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class TicketService {
+public class TicketService implements IResourceService<TicketResponse, TicketResponse,
+        CreateTicketRequest, UpdateTicketRequest, Integer> {
+
+    private static final UUID SYSTEM_ACTOR_ID = UUID.fromString("2b9de1ef-3cda-4226-b1e7-e23a178cdb7e");
 
     private final TicketRepository ticketRepository;
+    private final TicketResponseMapper ticketResponseMapper;
+    private final TicketSpecificationBuilder ticketSpecificationBuilder;
+    private final TicketValueParser ticketValueParser;
 
-    public TicketService(TicketRepository ticketRepository) {
+    public TicketService(
+            TicketRepository ticketRepository,
+            TicketResponseMapper ticketResponseMapper,
+            TicketSpecificationBuilder ticketSpecificationBuilder,
+            TicketValueParser ticketValueParser
+    ) {
         this.ticketRepository = ticketRepository;
+        this.ticketResponseMapper = ticketResponseMapper;
+        this.ticketSpecificationBuilder = ticketSpecificationBuilder;
+        this.ticketValueParser = ticketValueParser;
     }
+
+    // -- Resource service methods --
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TicketResponse> findWithFilters(Map<String, String> filters, Pageable pageable) {
+        Specification<TicketEntity> specification = ticketSpecificationBuilder.build(filters);
+        return ticketRepository.findAll(specification, pageable).map(ticketResponseMapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TicketResponse> findAllById(List<Integer> ids) {
+        return ticketRepository.findAllById(ids).stream()
+                .map(ticketResponseMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TicketResponse findById(Integer id) {
+        return ticketResponseMapper.toResponse(findOrThrow(id));
+    }
+
+    @Override
+    public TicketResponse create(CreateTicketRequest data) {
+        return createTicket(data, SYSTEM_ACTOR_ID);
+    }
+
+    @Override
+    public TicketResponse patch(Integer id, Map<String, Object> data) {
+        TicketEntity entity = findOrThrow(id);
+        boolean changed = false;
+
+        if (data.containsKey("title")) {
+            entity.setTitle(validateTitle(String.valueOf(data.get("title"))));
+            changed = true;
+        }
+
+        if (data.containsKey("description")) {
+            Object description = data.get("description");
+            entity.setDescription(description == null ? null : String.valueOf(description));
+            changed = true;
+        }
+
+        if (data.containsKey("status")) {
+            TicketStatus requestedStatus = ticketValueParser.parseStatus(data.get("status"), "status");
+            if (entity.getStatus() != requestedStatus) {
+                changeStatusInternal(entity, requestedStatus, SYSTEM_ACTOR_ID);
+                changed = true;
+            }
+        }
+
+        if (data.containsKey("priority")) {
+            TicketPriority oldPriority = entity.getPriority();
+            TicketPriority newPriority = ticketValueParser.parsePriority(data.get("priority"), "priority");
+
+            if (oldPriority != newPriority) {
+                entity.setPriority(newPriority);
+                entity.setUpdatedAt(LocalDateTime.now());
+                addHistory(entity, TicketHistoryEntity.EventType.PRIORITY_CHANGED, SYSTEM_ACTOR_ID,
+                        String.format("Priority changed from %s to %s", oldPriority, newPriority));
+                changed = true;
+            }
+        }
+
+        if (data.containsKey("type")) {
+            Object typeValue = data.get("type");
+            entity.setType(typeValue == null ? null : ticketValueParser.parseType(typeValue, "type"));
+            changed = true;
+        }
+
+        if (data.containsKey("tenantId")) {
+            entity.setTenantId(ticketValueParser.parseNullableUuid(data.get("tenantId"), "tenantId"));
+            changed = true;
+        }
+
+        if (data.containsKey("tags")) {
+            entity.setTags(ticketValueParser.parseStringSet(data.get("tags"), "tags"));
+            changed = true;
+        }
+
+        if (data.containsKey("customAttributes")) {
+            entity.setCustomAttributes(ticketValueParser.parseMap(data.get("customAttributes"), "customAttributes"));
+            changed = true;
+        }
+
+        if (changed) {
+            entity.setUpdatedAt(LocalDateTime.now());
+        }
+
+        TicketEntity saved = ticketRepository.save(entity);
+        return ticketResponseMapper.toResponse(saved);
+    }
+
+    @Override
+    public TicketResponse update(Integer id, UpdateTicketRequest data) {
+        TicketEntity entity = findOrThrow(id);
+        entity.setTitle(validateTitle(data.title()));
+        entity.setDescription(data.description());
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        TicketEntity saved = ticketRepository.save(entity);
+        return ticketResponseMapper.toResponse(saved);
+    }
+
+    @Override
+    public List<Integer> patchMany(List<Integer> ids, Map<String, Object> fields) {
+        List<Integer> updated = new ArrayList<>();
+        for (Integer id : ids) {
+            try {
+                patch(id, fields);
+                updated.add(id);
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        return updated;
+    }
+
+    @Override
+    public void deleteById(Integer id) {
+        TicketEntity entity = findOrThrow(id);
+        ticketRepository.delete(entity);
+    }
+
+    @Override
+    public List<Integer> deleteMany(List<Integer> ids) {
+        List<Integer> deleted = new ArrayList<>();
+        for (Integer id : ids) {
+            try {
+                deleteById(id);
+                deleted.add(id);
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        return deleted;
+    }
+
+    // -- compatibility and business methods --
 
     public TicketResponse createTicket(CreateTicketRequest request, UUID actorId) {
         TicketPriority priority = request.priority() != null ? request.priority() : TicketPriority.MEDIUM;
@@ -40,21 +212,17 @@ public class TicketService {
         entity.setReporterId(actorId);
         entity.setCreatedAt(LocalDateTime.now());
 
-        // SLA initialization
         initializeSla(entity, priority);
-
-        // History: created
         addHistory(entity, TicketHistoryEntity.EventType.CREATED, actorId,
                 String.format("Ticket created with priority: %s", priority));
 
         TicketEntity saved = ticketRepository.save(entity);
-        return toResponse(saved);
+        return ticketResponseMapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
     public TicketResponse getTicket(Integer ticketId) {
-        TicketEntity entity = findOrThrow(ticketId);
-        return toResponse(entity);
+        return findById(ticketId);
     }
 
     public TicketResponse changeStatus(Integer ticketId, ChangeStatusRequest request, UUID actorId) {
@@ -63,7 +231,7 @@ public class TicketService {
         TicketStatus oldStatus = entity.getStatus();
 
         if (oldStatus == newStatus) {
-            return toResponse(entity);
+            return ticketResponseMapper.toResponse(entity);
         }
 
         if (!oldStatus.canTransitionTo(newStatus)) {
@@ -74,7 +242,6 @@ public class TicketService {
         entity.setStatus(newStatus);
         entity.setUpdatedAt(LocalDateTime.now());
 
-        // Special cases
         if (newStatus == TicketStatus.RESOLVED) {
             entity.setResolvedAt(LocalDateTime.now());
             recordSlaResolution(entity);
@@ -89,7 +256,7 @@ public class TicketService {
                 String.format("Status changed from %s to %s", oldStatus, newStatus));
 
         TicketEntity saved = ticketRepository.save(entity);
-        return toResponse(saved);
+        return ticketResponseMapper.toResponse(saved);
     }
 
     public TicketResponse changePriority(Integer ticketId, ChangePriorityRequest request, UUID actorId) {
@@ -98,7 +265,7 @@ public class TicketService {
         TicketPriority newPriority = request.priority();
 
         if (oldPriority == newPriority) {
-            return toResponse(entity);
+            return ticketResponseMapper.toResponse(entity);
         }
 
         entity.setPriority(newPriority);
@@ -108,7 +275,7 @@ public class TicketService {
                 String.format("Priority changed from %s to %s", oldPriority, newPriority));
 
         TicketEntity saved = ticketRepository.save(entity);
-        return toResponse(saved);
+        return ticketResponseMapper.toResponse(saved);
     }
 
     public TicketResponse assignTicket(Integer ticketId, AssignTicketRequest request, UUID actorId) {
@@ -118,7 +285,6 @@ public class TicketService {
         boolean isReassignment = entity.getCurrentAssignment() != null
                 && Boolean.TRUE.equals(entity.getCurrentAssignment().getActive());
 
-        // Deactivate existing assignment
         if (isReassignment) {
             TicketAssignmentEntity old = entity.getCurrentAssignment();
             old.setActive(false);
@@ -131,7 +297,6 @@ public class TicketService {
                     String.format("Reassigned to %s", target));
         }
 
-        // Create new assignment
         TicketAssignmentEntity assignment = new TicketAssignmentEntity();
         assignment.setTicket(entity);
         assignment.setTeamId(request.teamId());
@@ -142,7 +307,6 @@ public class TicketService {
         assignment.setAssignedAt(LocalDateTime.now());
         entity.setCurrentAssignment(assignment);
 
-        // First assignment audit
         if (!isReassignment) {
             String target = request.agentPartyId() != null
                     ? String.format("Assigned to agent %s", request.agentPartyId())
@@ -150,14 +314,13 @@ public class TicketService {
             addHistory(entity, TicketHistoryEntity.EventType.ASSIGNED, actorId, target);
         }
 
-        // Auto-transition to IN_PROGRESS
         if (entity.getStatus() == TicketStatus.OPEN) {
             changeStatusInternal(entity, TicketStatus.IN_PROGRESS, actorId);
         }
         entity.setUpdatedAt(LocalDateTime.now());
 
         TicketEntity saved = ticketRepository.save(entity);
-        return toResponse(saved);
+        return ticketResponseMapper.toResponse(saved);
     }
 
     public TicketResponse unassignTicket(Integer ticketId, UUID actorId) {
@@ -182,7 +345,7 @@ public class TicketService {
         }
 
         TicketEntity saved = ticketRepository.save(entity);
-        return toResponse(saved);
+        return ticketResponseMapper.toResponse(saved);
     }
 
     public TicketResponse addComment(Integer ticketId, AddCommentRequest request, UUID actorId) {
@@ -194,7 +357,7 @@ public class TicketService {
         TicketCommentEntity comment = new TicketCommentEntity();
         comment.setTicket(entity);
         comment.setAuthorId(actorId);
-        comment.setAuthorType(AuthorType.AGENT);
+        comment.setAuthorType(TicketCommentEntity.AuthorType.AGENT);
         comment.setContent(request.content());
         comment.setIsInternal(isInternal);
         comment.setCreatedAt(LocalDateTime.now());
@@ -202,7 +365,6 @@ public class TicketService {
         entity.getComments().add(comment);
         entity.setUpdatedAt(LocalDateTime.now());
 
-        // SLA First Response Tracking
         if (!isInternal && entity.getSlaTracking() != null
                 && entity.getSlaTracking().getFirstResponseAt() == null) {
             entity.getSlaTracking().setFirstResponseAt(LocalDateTime.now());
@@ -211,10 +373,10 @@ public class TicketService {
         }
 
         addHistory(entity, TicketHistoryEntity.EventType.COMMENT_ADDED, actorId,
-                String.format("Comment added by %s", AuthorType.AGENT));
+                String.format("Comment added by %s", TicketCommentEntity.AuthorType.AGENT));
 
         TicketEntity saved = ticketRepository.save(entity);
-        return toResponse(saved);
+        return ticketResponseMapper.toResponse(saved);
     }
 
     public TicketResponse closeTicket(Integer ticketId, UUID actorId) {
@@ -234,14 +396,16 @@ public class TicketService {
                 String.format("Status changed from %s to %s", oldStatus, TicketStatus.CLOSED));
 
         TicketEntity saved = ticketRepository.save(entity);
-        return toResponse(saved);
+        return ticketResponseMapper.toResponse(saved);
     }
 
-    // ─── Internal Helpers ───
+    // -- Internal Helpers --
 
     private void changeStatusInternal(TicketEntity entity, TicketStatus newStatus, UUID actorId) {
         TicketStatus oldStatus = entity.getStatus();
-        if (oldStatus == newStatus) return;
+        if (oldStatus == newStatus) {
+            return;
+        }
 
         if (!oldStatus.canTransitionTo(newStatus)) {
             throw new IllegalStateException(
@@ -267,7 +431,7 @@ public class TicketService {
 
     private TicketEntity findOrThrow(Integer ticketId) {
         return ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new IllegalArgumentException("Ticket not found: " + ticketId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found: " + ticketId));
     }
 
     private void validateAssignable(TicketEntity entity) {
@@ -278,7 +442,7 @@ public class TicketService {
 
     private void validateCommentable(TicketEntity entity) {
         if (entity.getStatus() == TicketStatus.CLOSED || entity.getStatus() == TicketStatus.CANCELLED) {
-            throw new IllegalStateException("Cannot make a comment or cancelled ticket");
+            throw new IllegalStateException("Cannot make a comment on a closed or cancelled ticket");
         }
     }
 
@@ -322,68 +486,5 @@ public class TicketService {
         history.setPayload(payload);
         history.setOccurredAt(LocalDateTime.now());
         entity.getHistory().add(history);
-    }
-
-    // ─── Response Mapping ───
-
-    private TicketResponse toResponse(TicketEntity entity) {
-        TicketAssignmentResponse assignmentResponse = null;
-        if (entity.getCurrentAssignment() != null) {
-            TicketAssignmentEntity a = entity.getCurrentAssignment();
-            assignmentResponse = new TicketAssignmentResponse(
-                    a.getId(), a.getTeamId(), a.getAgentPartyId(),
-                    Boolean.TRUE.equals(a.getActive()), a.getAssignedAt());
-        }
-
-        Set<WatcherResponse> watcherResponses = entity.getWatchers().stream()
-                .map(w -> new WatcherResponse(w.getWatcherId(), w.getAddedAt()))
-                .collect(Collectors.toSet());
-
-        List<AttachmentResponse> attachmentResponses = entity.getAttachments().stream()
-                .map(a -> new AttachmentResponse(a.getId(), a.getFileName(), a.getFileSize(),
-                        a.getContentType(), a.getStorageKey(), a.getUploadedBy(), a.getUploadedAt()))
-                .collect(Collectors.toList());
-
-        List<CommentResponse> commentResponses = entity.getComments().stream()
-                .map(c -> new CommentResponse(
-                        c.getId(), c.getAuthorId(), c.getAuthorType().name(),
-                        c.getContent(), c.getIsInternal(), c.getCreatedAt(),
-                        c.getAttachments().stream()
-                                .map(a -> new AttachmentResponse(a.getId(), a.getFileName(), a.getFileSize(),
-                                        a.getContentType(), a.getStorageKey(), a.getUploadedBy(), a.getUploadedAt()))
-                                .collect(Collectors.toList())))
-                .collect(Collectors.toList());
-
-        TicketResponse.SlaTrackingResponse slaResponse = null;
-        if (entity.getSlaTracking() != null) {
-            TicketSlaTrackingEntity s = entity.getSlaTracking();
-            slaResponse = new TicketResponse.SlaTrackingResponse(
-                    s.getFirstResponseDueAt(), s.getFirstResponseAt(),
-                    Boolean.TRUE.equals(s.getIsFirstResponseBreached()),
-                    s.getResolutionDueAt(), s.getResolutionAt(),
-                    Boolean.TRUE.equals(s.getIsResolutionBreached()),
-                    s.getTotalPausedTimeMinutes() != null ? s.getTotalPausedTimeMinutes() : 0);
-        }
-
-        return new TicketResponse(
-                entity.getId(),
-                entity.getTitle(),
-                entity.getDescription(),
-                entity.getStatus().name(),
-                entity.getPriority().name(),
-                entity.getType() != null ? entity.getType().name() : null,
-                entity.getTenantId(),
-                entity.getReporterId(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt(),
-                entity.getResolvedAt(),
-                entity.getClosedAt(),
-                entity.getTags(),
-                entity.getCustomAttributes(),
-                watcherResponses,
-                attachmentResponses,
-                assignmentResponse,
-                commentResponses,
-                slaResponse);
     }
 }

@@ -5,9 +5,11 @@ import org.zerp.common.entity.crm.*;
 import org.zerp.common.entity.crm.TicketEntity.TicketPriority;
 import org.zerp.common.entity.crm.TicketEntity.TicketStatus;
 import org.zerp.common.entity.crm.TicketEntity.TicketType;
-import org.zerp.common.entity.crm.TicketCommentEntity.AuthorType;
 import org.zerp.crm.dto.ticket.*;
 import org.zerp.crm.repository.TicketRepository;
+import org.zerp.crm.service.ticket.TicketResponseMapper;
+import org.zerp.crm.service.ticket.TicketSpecificationBuilder;
+import org.zerp.crm.service.ticket.TicketValueParser;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -27,7 +29,10 @@ public class TicketServiceTest {
     @BeforeEach
     void setUp() {
         ticketRepository = mock(TicketRepository.class);
-        ticketService = new TicketService(ticketRepository);
+        TicketValueParser ticketValueParser = new TicketValueParser();
+        TicketSpecificationBuilder ticketSpecificationBuilder = new TicketSpecificationBuilder(ticketValueParser);
+        TicketResponseMapper ticketResponseMapper = new TicketResponseMapper();
+        ticketService = new TicketService(ticketRepository, ticketResponseMapper, ticketSpecificationBuilder, ticketValueParser);
 
         defaultTenantId = UUID.randomUUID();
         defaultUserId = UUID.randomUUID();

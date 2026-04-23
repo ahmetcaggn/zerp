@@ -1,9 +1,9 @@
 package org.zerp.crm.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.zerp.common.resource.controller.ResourceController;
 import org.zerp.crm.dto.ticket.*;
 import org.zerp.crm.service.TicketService;
 
@@ -12,7 +12,8 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/tickets")
 @Tag(name = "Tickets", description = "APIs for managing support tickets")
-public class TicketController {
+public class TicketController extends ResourceController<TicketResponse, TicketResponse,
+        CreateTicketRequest, UpdateTicketRequest, Integer> {
     private static final UUID CURRENT_USER_ID = UUID.fromString("2b9de1ef-3cda-4226-b1e7-e23a178cdb7e");
 
     private final TicketService ticketService;
@@ -21,16 +22,9 @@ public class TicketController {
         this.ticketService = ticketService;
     }
 
-    @PostMapping
-    public ResponseEntity<TicketResponse> createTicket(@RequestBody CreateTicketRequest request) {
-        TicketResponse response = ticketService.createTicket(request, CURRENT_USER_ID);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<TicketResponse> getTicket(@PathVariable Integer id) {
-        TicketResponse response = ticketService.getTicket(id);
-        return ResponseEntity.ok(response);
+    @Override
+    protected TicketService getService() {
+        return ticketService;
     }
 
     @PatchMapping("/{id}/status")
