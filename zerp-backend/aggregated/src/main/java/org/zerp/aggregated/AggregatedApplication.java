@@ -12,6 +12,7 @@ import org.zerp.notification.NotificationApplication;
 import org.zerp.resource.ResourceApplication;
 import org.zerp.sale.SaleApplication;
 import org.zerp.suggestion.SuggestionApplication;
+import org.zerp.user.UserApplication;
 
 
 /**
@@ -63,6 +64,11 @@ public class AggregatedApplication {
                 .sibling(SuggestionApplication.class).web(WebApplicationType.SERVLET)
                 .properties(
                         "spring.config.additional-location=optional:file:./suggestion/src/main/resources/")
+
+                // 7. User context
+                .sibling(UserApplication.class).web(WebApplicationType.SERVLET)
+                .properties(
+                        "spring.config.additional-location=optional:file:./user/src/main/resources/")
 
                 .run(args);
     }

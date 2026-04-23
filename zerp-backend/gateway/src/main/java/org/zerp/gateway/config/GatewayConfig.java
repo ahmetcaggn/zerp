@@ -202,6 +202,20 @@ public class GatewayConfig {
                         .uri("lb://SUGGESTION")
                 )
                 .route(r -> r
+                        .path("/v3/api-docs/user/**")
+                        .filters(f -> f
+                                .rewritePath("/v3/api-docs/user(?<segment>/?.*)", "/v3/api-docs${segment}")
+                        )
+                        .uri("lb://USER")
+                )
+                .route(r -> r
+                        .path("/user/swagger-ui/**")
+                        .filters(f -> f
+                                .rewritePath("/user/swagger-ui(?<segment>/?.*)", "/swagger-ui${segment}")
+                        )
+                        .uri("lb://USER")
+                )
+                .route(r -> r
                         .path("/user/**")
                         .filters(f -> f
                                 .retry(retryConfig -> retryConfig

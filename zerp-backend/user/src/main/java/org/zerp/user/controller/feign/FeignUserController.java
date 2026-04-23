@@ -1,5 +1,7 @@
 package org.zerp.user.controller.feign;
 
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,8 @@ import org.zerp.user.service.FeignUserService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/feign/users")
+@Hidden
+@Tag(name = "Feign User API", description = "API for checking user existence and creating if not exist, used by other services via Feign client")
 public class FeignUserController {
     private final FeignUserService service;
 

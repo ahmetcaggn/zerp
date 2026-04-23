@@ -9,5 +9,6 @@ cat notification.properties.template >> notification.properties
 cat resource.properties.template >> resource.properties
 cat sale.properties.template >> sale.properties
 cat suggestion.properties.template >> suggestion.properties
+cat user.properties.template >> user.properties
 cat socket.properties.template >> socket.properties
 ```
