@@ -12,7 +12,6 @@ import org.zerp.employee.dtos.response.EmployeeResponseDto;
 import org.zerp.employee.dtos.response.ManagerDto;
 
 import java.util.List;
-import java.util.UUID;
 
 @Mapper(componentModel = "spring")
 public interface EmployeeMapper {

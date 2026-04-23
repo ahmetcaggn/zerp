@@ -267,18 +267,16 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
     // =============================================
 
     private void validateUniqueConstraints(String email, String nationalId, UUID excludeId) {
-        final UUID excludeEmployeeUuid = excludeId == null ? null : excludeId;
-
         if (email != null) {
             employeeRepository.findByEmailAndNotDeleted(email).ifPresent(existing -> {
-                if (!existing.getId().equals(excludeEmployeeUuid)) {
+                if (!existing.getId().equals(excludeId)) {
                     throw new DuplicateResourceException("This email address is already in use: " + email);
                 }
             });
         }
         if (nationalId != null) {
             employeeRepository.findByNationalIdAndNotDeleted(nationalId).ifPresent(existing -> {
-                if (!existing.getId().equals(excludeEmployeeUuid)) {
+                if (!existing.getId().equals(excludeId)) {
                     throw new DuplicateResourceException("This national ID is already in use: " + nationalId);
                 }
             });
