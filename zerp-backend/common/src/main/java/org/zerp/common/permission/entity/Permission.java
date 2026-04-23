@@ -19,7 +19,7 @@ public class Permission {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private Long employeeId;
+    private UUID userId;
 
     @Enumerated(EnumType.STRING)
     private PermissionTargetType targetType;
@@ -33,7 +33,7 @@ public class Permission {
     public String toString() {
         return "Permission{" +
                 "id=" + id +
-                ", user=" + employeeId +
+                ", user=" + userId +
                 ", targetType=" + targetType +
                 ", targetId=" + targetId +
                 ", action=" + action +

@@ -17,10 +17,10 @@ import java.util.UUID;
 public class PermittableService {
     private final PermissionRepository permissionRepository;
 
-    public Set<UUID> getAllPermitted(Long employeeId, PermissionTargetType type, PermissionAction action) {
-        log.trace("getAllPermitted: employee={}, type={}, action={}", employeeId, type, action);
+    public Set<UUID> getAllPermitted(UUID userId, PermissionTargetType type, PermissionAction action) {
+        log.trace("getAllPermitted: user={}, type={}, action={}", userId, type, action);
         Set<UUID> result = new HashSet<>(permissionRepository
-                .findTargetIdsByUserAndTargetTypeAndAction(employeeId, type, action));
+                .findTargetIdsByUserAndTargetTypeAndAction(userId, type, action));
         log.trace("getAllPermitted result size: {}", result.size());
         return result;
     }

@@ -5,8 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.security.CurrentUserIdResolver;
 import org.zerp.common.entity.employee.Employee;
 import org.zerp.common.entity.employee.EmployeeContact;
 import org.zerp.common.entity.employee.EmploymentStatus;
@@ -19,6 +22,7 @@ import org.zerp.employee.dtos.request.UpdateEmployeeRequestDto;
 import org.zerp.employee.dtos.response.EmployeeListResponseDto;
 import org.zerp.employee.dtos.response.EmployeeResponseDto;
 import org.zerp.employee.mapper.EmployeeMapper;
+import org.zerp.employee.permission.EmployeePermissionEvaluator;
 import org.zerp.employee.repository.EmployeeRepository;
 
 import java.math.BigDecimal;
@@ -26,13 +30,16 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class EmployeeService implements IResourceService<EmployeeResponseDto, EmployeeListResponseDto,
-        CreateEmployeeRequestDto, UpdateEmployeeRequestDto, Long> {
+        CreateEmployeeRequestDto, UpdateEmployeeRequestDto, UUID> {
     private final EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
+    private final EmployeePermissionEvaluator permissionEvaluator;
+    private final CurrentUserIdResolver currentUserIdResolver;
 
     // =============================================
     // IResourceService overrides
@@ -41,16 +48,23 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
     @Override
     @Transactional(readOnly = true)
     public Page<EmployeeListResponseDto> findWithFilters(Map<String, String> filters, Pageable pageable) {
+        UUID userId = resolveCurrentUserId();
         Specification<Employee> spec = buildSpecificationFromFilters(filters);
+        spec = permissionEvaluator.filterRead(userId).and(spec);
         return employeeRepository.findAll(spec, pageable).map(employeeMapper::toListResponseDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<EmployeeResponseDto> findAllById(List<Long> ids) {
+    public List<EmployeeResponseDto> findAllById(List<UUID> ids) {
+        UUID userId = resolveCurrentUserId();
         List<EmployeeResponseDto> result = new ArrayList<>();
-        for (Long id : ids) {
+        for (UUID id : ids) {
             employeeRepository.findByIdWithContactsAndNotDeleted(id)
+                    .filter(employee -> permissionEvaluator.canRead(
+                            userId,
+                            new EmployeePermissionEvaluator.EmployeeTarget(employee.getId(), employee.getTenant().getId())
+                    ))
                     .map(employeeMapper::toResponseDto)
                     .ifPresent(result::add);
         }
@@ -59,18 +73,31 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
 
     @Override
     @Transactional(readOnly = true)
-    public EmployeeResponseDto findById(Long id) {
+    public EmployeeResponseDto findById(UUID id) {
+        UUID userId = resolveCurrentUserId();
         Employee employee = employeeRepository.findByIdWithContactsAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
+
+        if (!permissionEvaluator.canRead(userId,
+                new EmployeePermissionEvaluator.EmployeeTarget(employee.getId(), employee.getTenant().getId()))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Employee");
+        }
+
         return employeeMapper.toResponseDto(employee);
     }
 
     @Override
     @Transactional
     public EmployeeResponseDto create(CreateEmployeeRequestDto dto) {
+        UUID userId = resolveCurrentUserId();
         validateUniqueConstraints(dto.getEmail(), dto.getNationalId(), null);
 
         Employee employee = employeeMapper.toEntity(dto);
+
+        if (!permissionEvaluator.canCreate(userId,
+                new EmployeePermissionEvaluator.TenantParent(employee.getTenant().getId()))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Employee");
+        }
 
         if (dto.getManagerId() != null) {
             Employee manager = employeeRepository.findByIdAndNotDeleted(dto.getManagerId())
@@ -90,9 +117,15 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
 
     @Override
     @Transactional
-    public EmployeeResponseDto update(Long id, UpdateEmployeeRequestDto data) {
+    public EmployeeResponseDto update(UUID id, UpdateEmployeeRequestDto data) {
+        UUID userId = resolveCurrentUserId();
         Employee employee = employeeRepository.findByIdWithContactsAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
+
+        if (!permissionEvaluator.canUpdate(userId,
+                new EmployeePermissionEvaluator.EmployeeTarget(employee.getId(), employee.getTenant().getId()))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Employee");
+        }
 
         validateUniqueConstraints(data.getEmail(), data.getNationalId(), id);
 
@@ -125,9 +158,15 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
 
     @Override
     @Transactional
-    public EmployeeResponseDto patch(Long id, Map<String, Object> fields) {
+    public EmployeeResponseDto patch(UUID id, Map<String, Object> fields) {
+        UUID userId = resolveCurrentUserId();
         Employee employee = employeeRepository.findByIdWithContactsAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
+
+        if (!permissionEvaluator.canPatch(userId,
+                new EmployeePermissionEvaluator.EmployeeTarget(employee.getId(), employee.getTenant().getId()))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to patch Employee");
+        }
 
         String email = fields.containsKey("email") ? (String) fields.get("email") : null;
         String nationalId = fields.containsKey("nationalId") ? (String) fields.get("nationalId") : null;
@@ -136,7 +175,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
         applyFieldUpdates(employee, fields);
 
         if (fields.containsKey("managerId")) {
-            Long managerId = Long.valueOf(fields.get("managerId").toString());
+            UUID managerId = UUID.fromString(fields.get("managerId").toString());
             if (managerId.equals(id)) {
                 throw new IllegalArgumentException("Employee cannot be their own manager");
             }
@@ -156,9 +195,9 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
 
     @Override
     @Transactional
-    public List<Long> patchMany(List<Long> ids, Map<String, Object> fields) {
-        List<Long> updated = new ArrayList<>();
-        for (Long id : ids) {
+    public List<UUID> patchMany(List<UUID> ids, Map<String, Object> fields) {
+        List<UUID> updated = new ArrayList<>();
+        for (UUID id : ids) {
             try {
                 patch(id, fields);
                 updated.add(id);
@@ -170,17 +209,24 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
 
     @Override
     @Transactional
-    public void deleteById(Long id) {
+    public void deleteById(UUID id) {
+        UUID userId = resolveCurrentUserId();
         Employee employee = employeeRepository.findByIdAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
+
+        if (!permissionEvaluator.canDelete(userId,
+                new EmployeePermissionEvaluator.EmployeeTarget(employee.getId(), employee.getTenant().getId()))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Employee");
+        }
+
         employeeRepository.delete(employee);
     }
 
     @Override
     @Transactional
-    public List<Long> deleteMany(List<Long> ids) {
-        List<Long> deleted = new ArrayList<>();
-        for (Long id : ids) {
+    public List<UUID> deleteMany(List<UUID> ids) {
+        List<UUID> deleted = new ArrayList<>();
+        for (UUID id : ids) {
             try {
                 deleteById(id);
                 deleted.add(id);
@@ -220,17 +266,19 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
     // Private helpers
     // =============================================
 
-    private void validateUniqueConstraints(String email, String nationalId, Long excludeId) {
+    private void validateUniqueConstraints(String email, String nationalId, UUID excludeId) {
+        final UUID excludeEmployeeUuid = excludeId == null ? null : excludeId;
+
         if (email != null) {
             employeeRepository.findByEmailAndNotDeleted(email).ifPresent(existing -> {
-                if (!existing.getId().equals(excludeId)) {
+                if (!existing.getId().equals(excludeEmployeeUuid)) {
                     throw new DuplicateResourceException("This email address is already in use: " + email);
                 }
             });
         }
         if (nationalId != null) {
             employeeRepository.findByNationalIdAndNotDeleted(nationalId).ifPresent(existing -> {
-                if (!existing.getId().equals(excludeId)) {
+                if (!existing.getId().equals(excludeEmployeeUuid)) {
                     throw new DuplicateResourceException("This national ID is already in use: " + nationalId);
                 }
             });
@@ -287,5 +335,9 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
             });
         }
         return spec;
+    }
+
+    private UUID resolveCurrentUserId() {
+        return currentUserIdResolver.resolve();
     }
 }

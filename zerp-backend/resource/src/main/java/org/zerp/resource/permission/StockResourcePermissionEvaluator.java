@@ -19,16 +19,18 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class StockResourcePermissionEvaluator {
+    public record StockResourceTarget(UUID stockResourceId, UUID tenantId) {
+    }
+
+    public record TenantParent(UUID tenantId) {
+    }
+
     private final PermissionRepository permissionRepository;
     private final PermittableService permittableService;
 
-    public boolean canRead(Long userId, UUID... idChainFromTargetId) {
-        if (idChainFromTargetId.length != 2) {
-            log.error("Invalid id chain length for canRead: expected 2, got {}", idChainFromTargetId.length);
-            return false;
-        }
-        final UUID stockResourceId = idChainFromTargetId[0];
-        final UUID tenantId = idChainFromTargetId[1];
+    public boolean canRead(UUID userId, StockResourceTarget target) {
+        final UUID stockResourceId = target.stockResourceId();
+        final UUID tenantId = target.tenantId();
 
         log.trace("Checking canRead permission - userId: {}, stockResourceId: {}, tenantId: {}",
                 userId, stockResourceId, tenantId);
@@ -46,12 +48,8 @@ public class StockResourcePermissionEvaluator {
         return canRead;
     }
 
-    public boolean canCreate(Long userId, UUID... idChainFromParentId) {
-        if (idChainFromParentId.length != 1) {
-            log.error("Invalid id chain length for canCreate: expected 1, got {}", idChainFromParentId.length);
-            return false;
-        }
-        final UUID tenantId = idChainFromParentId[0];
+    public boolean canCreate(UUID userId, TenantParent parent) {
+        final UUID tenantId = parent.tenantId();
 
         log.trace("Checking canCreate permission - userId: {}, tenantId: {}", userId, tenantId);
 
@@ -68,13 +66,9 @@ public class StockResourcePermissionEvaluator {
         return canCreate;
     }
 
-    public boolean canUpdate(Long userId, UUID... idChainFromTargetId) {
-        if (idChainFromTargetId.length != 2) {
-            log.error("Invalid id chain length for canUpdate: expected 2, got {}", idChainFromTargetId.length);
-            return false;
-        }
-        final UUID stockResourceId = idChainFromTargetId[0];
-        final UUID tenantId = idChainFromTargetId[1];
+    public boolean canUpdate(UUID userId, StockResourceTarget target) {
+        final UUID stockResourceId = target.stockResourceId();
+        final UUID tenantId = target.tenantId();
 
         log.trace("Checking canUpdate permission - userId: {}, stockResourceId: {}, tenantId: {}",
                 userId, stockResourceId, tenantId);
@@ -92,13 +86,9 @@ public class StockResourcePermissionEvaluator {
         return canUpdate;
     }
 
-    public boolean canPatch(Long userId, UUID... idChainFromTargetId) {
-        if (idChainFromTargetId.length != 2) {
-            log.error("Invalid id chain length for canPatch: expected 2, got {}", idChainFromTargetId.length);
-            return false;
-        }
-        final UUID stockResourceId = idChainFromTargetId[0];
-        final UUID tenantId = idChainFromTargetId[1];
+    public boolean canPatch(UUID userId, StockResourceTarget target) {
+        final UUID stockResourceId = target.stockResourceId();
+        final UUID tenantId = target.tenantId();
 
         log.trace("Checking canPatch permission - userId: {}, stockResourceId: {}, tenantId: {}",
                 userId, stockResourceId, tenantId);
@@ -116,13 +106,9 @@ public class StockResourcePermissionEvaluator {
         return canPatch;
     }
 
-    public boolean canDelete(Long userId, UUID... idChainFromTargetId) {
-        if (idChainFromTargetId.length != 2) {
-            log.error("Invalid id chain length for canDelete: expected 2, got {}", idChainFromTargetId.length);
-            return false;
-        }
-        final UUID stockResourceId = idChainFromTargetId[0];
-        final UUID tenantId = idChainFromTargetId[1];
+    public boolean canDelete(UUID userId, StockResourceTarget target) {
+        final UUID stockResourceId = target.stockResourceId();
+        final UUID tenantId = target.tenantId();
 
         log.trace("Checking canDelete permission - userId: {}, stockResourceId: {}, tenantId: {}",
                 userId, stockResourceId, tenantId);
@@ -140,7 +126,7 @@ public class StockResourcePermissionEvaluator {
         return canDelete;
     }
 
-    public Specification<StockResource> filterRead(Long userId) {
+    public Specification<StockResource> filterRead(UUID userId) {
         log.trace("Creating filterRead specification for userId: {}", userId);
 
         Set<UUID> permittedStockResourceIds = permittableService.getAllPermitted(

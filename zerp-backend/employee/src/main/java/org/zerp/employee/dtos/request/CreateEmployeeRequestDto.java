@@ -10,6 +10,7 @@ import org.zerp.common.entity.employee.EmploymentStatus;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class CreateEmployeeRequestDto {
@@ -36,7 +37,7 @@ public class CreateEmployeeRequestDto {
 
     private EmploymentStatus status;
 
-    private Long managerId;
+    private UUID managerId;
 
     private BigDecimal salary;
 

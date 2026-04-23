@@ -14,7 +14,6 @@ import org.zerp.sale.SaleApplication;
 import org.zerp.suggestion.SuggestionApplication;
 import org.zerp.user.UserApplication;
 
-
 /**
  * The Java app to run all feature services on only one jvm. use only for development and testing, not for production.
  */

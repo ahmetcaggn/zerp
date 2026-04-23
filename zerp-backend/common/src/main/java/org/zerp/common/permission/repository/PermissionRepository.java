@@ -15,7 +15,7 @@ import java.util.UUID;
 public interface PermissionRepository extends JpaRepository<Permission, Long> {
     @Query("""
             SELECT p FROM Permission p
-              WHERE p.employeeId = :employeeId
+              WHERE p.userId = :userId
                 AND p.action = :action
                 AND (
                      (:stockResourceId IS NOT NULL AND p.targetType = 'STOCK_RESOURCE' AND p.targetId = :stockResourceId)
@@ -23,15 +23,31 @@ public interface PermissionRepository extends JpaRepository<Permission, Long> {
                 )
             """)
     List<Permission> findAllByUserAndStockResourceHierarchy(
-            @Param("employeeId") Long employeeId,
+            @Param("userId") UUID userId,
             @Param("action") PermissionAction action,
             @Param("stockResourceId") UUID stockResourceId,
             @Param("tenantId") UUID tenantId
     );
 
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
+                     (:employeeId IS NOT NULL AND p.targetType = 'EMPLOYEE' AND p.targetId = :employeeId)
+                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                )
+            """)
+    List<Permission> findAllByUserAndEmployeeHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("employeeId") UUID employeeId,
+            @Param("tenantId") UUID tenantId
+    );
+
     @Query("SELECT p.targetId FROM Permission p " +
-            "WHERE p.employeeId = :employeeId AND p.targetType = :type AND p.action = :action")
-    List<UUID> findTargetIdsByUserAndTargetTypeAndAction(@Param("employeeId") Long employeeId,
+            "WHERE p.userId = :userId AND p.targetType = :type AND p.action = :action")
+    List<UUID> findTargetIdsByUserAndTargetTypeAndAction(@Param("userId") UUID userId,
                                                          @Param("type") PermissionTargetType type,
                                                          @Param("action") PermissionAction action);
 }

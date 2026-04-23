@@ -14,14 +14,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.mockito.ArgumentMatchers;
+import org.zerp.common.entity.Tenant;
 import org.zerp.common.entity.employee.Employee;
 import org.zerp.common.entity.employee.EmploymentStatus;
+import org.zerp.common.security.CurrentUserIdResolver;
 import org.zerp.employee.Exception.DuplicateResourceException;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.UpdateEmployeeRequestDto;
 import org.zerp.employee.dtos.response.EmployeeListResponseDto;
 import org.zerp.employee.dtos.response.EmployeeResponseDto;
 import org.zerp.employee.mapper.EmployeeMapper;
+import org.zerp.employee.permission.EmployeePermissionEvaluator;
 import org.zerp.employee.repository.EmployeeRepository;
 
 import java.math.BigDecimal;
@@ -29,6 +32,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -45,14 +49,46 @@ class EmployeeServiceTest {
     @Mock
     private EmployeeMapper employeeMapper;
 
+    @Mock
+    private EmployeePermissionEvaluator permissionEvaluator;
+
+    @Mock
+    private CurrentUserIdResolver currentUserIdResolver;
+
     @InjectMocks
     private EmployeeService employeeService;
 
+    @BeforeEach
+    void commonStubs() {
+        lenient().when(currentUserIdResolver.resolve()).thenReturn(uuidOf(999));
+        lenient().when(permissionEvaluator.filterRead(any())).thenReturn(Specification.unrestricted());
+        lenient().when(permissionEvaluator.canRead(any(), any())).thenReturn(true);
+        lenient().when(permissionEvaluator.canCreate(any(), any())).thenReturn(true);
+        lenient().when(permissionEvaluator.canUpdate(any(), any())).thenReturn(true);
+        lenient().when(permissionEvaluator.canPatch(any(), any())).thenReturn(true);
+        lenient().when(permissionEvaluator.canDelete(any(), any())).thenReturn(true);
+    }
+
     // ── Fixture helpers ──────────────────────────────────────────────────────
 
-    private Employee buildEmployee(Long id, String email) {
+    /**
+     * Converts an integer to a deterministic UUID for testing.
+     * This ensures tests are reproducible while using UUID entity IDs.
+     */
+    private UUID uuidOf(int num) {
+        return new UUID(0L, num);
+    }
+
+    private Tenant buildTenant() {
+        Tenant tenant = new Tenant();
+        tenant.setId(uuidOf(500));
+        return tenant;
+    }
+
+    private Employee buildEmployee(Integer id, String email) {
         Employee emp = new Employee();
-        emp.setId(id);
+        emp.setId(id == null ? null : uuidOf(id));
+        emp.setTenant(buildTenant());
         emp.setFirstName("John");
         emp.setLastName("Doe");
         emp.setEmail(email);
@@ -62,18 +98,18 @@ class EmployeeServiceTest {
         return emp;
     }
 
-    private EmployeeResponseDto buildResponseDto(Long id, String email) {
+    private EmployeeResponseDto buildResponseDto(Integer id, String email) {
         EmployeeResponseDto dto = new EmployeeResponseDto();
-        dto.setId(id);
+        dto.setId(id == null ? null : uuidOf(id));
         dto.setFirstName("John");
         dto.setLastName("Doe");
         dto.setEmail(email);
         return dto;
     }
 
-    private EmployeeListResponseDto buildListDto(Long id, String email) {
+    private EmployeeListResponseDto buildListDto(Integer id, String email) {
         EmployeeListResponseDto dto = new EmployeeListResponseDto();
-        dto.setId(id);
+        dto.setId(id == null ? null : uuidOf(id));
         dto.setFirstName("John");
         dto.setLastName("Doe");
         dto.setEmail(email);
@@ -89,8 +125,8 @@ class EmployeeServiceTest {
         @Test
         void returnsPageOfEmployees() {
             Pageable pageable = PageRequest.of(0, 10);
-            Employee emp = buildEmployee(1L, "john@example.com");
-            EmployeeListResponseDto dto = buildListDto(1L, "john@example.com");
+            Employee emp = buildEmployee(1, "john@example.com");
+            EmployeeListResponseDto dto = buildListDto(1, "john@example.com");
             Page<Employee> repoPage = new PageImpl<>(List.of(emp), pageable, 1);
 
             when(employeeRepository.findAll(ArgumentMatchers.<Specification<Employee>>any(), eq(pageable))).thenReturn(repoPage);
@@ -140,31 +176,31 @@ class EmployeeServiceTest {
 
         @Test
         void returnsAllMatchingEmployees() {
-            Employee emp1 = buildEmployee(1L, "a@example.com");
-            Employee emp2 = buildEmployee(2L, "b@example.com");
-            EmployeeResponseDto dto1 = buildResponseDto(1L, "a@example.com");
-            EmployeeResponseDto dto2 = buildResponseDto(2L, "b@example.com");
+            Employee emp1 = buildEmployee(1, "a@example.com");
+            Employee emp2 = buildEmployee(2, "b@example.com");
+            EmployeeResponseDto dto1 = buildResponseDto(1, "a@example.com");
+            EmployeeResponseDto dto2 = buildResponseDto(2, "b@example.com");
 
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(1L)).thenReturn(Optional.of(emp1));
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(2L)).thenReturn(Optional.of(emp2));
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(1))).thenReturn(Optional.of(emp1));
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(2))).thenReturn(Optional.of(emp2));
             when(employeeMapper.toResponseDto(emp1)).thenReturn(dto1);
             when(employeeMapper.toResponseDto(emp2)).thenReturn(dto2);
 
-            List<EmployeeResponseDto> result = employeeService.findAllById(List.of(1L, 2L));
+            List<EmployeeResponseDto> result = employeeService.findAllById(List.of(uuidOf(1), uuidOf(2)));
 
             assertThat(result).containsExactlyInAnyOrder(dto1, dto2);
         }
 
         @Test
         void skipsIdsNotFound() {
-            Employee emp = buildEmployee(1L, "a@example.com");
-            EmployeeResponseDto dto = buildResponseDto(1L, "a@example.com");
+            Employee emp = buildEmployee(1, "a@example.com");
+            EmployeeResponseDto dto = buildResponseDto(1, "a@example.com");
 
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(1L)).thenReturn(Optional.of(emp));
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(99L)).thenReturn(Optional.empty());
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(1))).thenReturn(Optional.of(emp));
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(99))).thenReturn(Optional.empty());
             when(employeeMapper.toResponseDto(emp)).thenReturn(dto);
 
-            List<EmployeeResponseDto> result = employeeService.findAllById(List.of(1L, 99L));
+            List<EmployeeResponseDto> result = employeeService.findAllById(List.of(uuidOf(1), uuidOf(99)));
 
             assertThat(result).containsExactly(dto);
         }
@@ -182,22 +218,22 @@ class EmployeeServiceTest {
 
         @Test
         void returnsEmployeeWhenFound() {
-            Employee emp = buildEmployee(1L, "john@example.com");
-            EmployeeResponseDto dto = buildResponseDto(1L, "john@example.com");
+            Employee emp = buildEmployee(1, "john@example.com");
+            EmployeeResponseDto dto = buildResponseDto(1, "john@example.com");
 
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(1L)).thenReturn(Optional.of(emp));
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(1))).thenReturn(Optional.of(emp));
             when(employeeMapper.toResponseDto(emp)).thenReturn(dto);
 
-            assertThat(employeeService.findById(1L)).isEqualTo(dto);
+            assertThat(employeeService.findById(uuidOf(1))).isEqualTo(dto);
         }
 
         @Test
         void throwsEntityNotFoundWhenMissing() {
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(99L)).thenReturn(Optional.empty());
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(99))).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> employeeService.findById(99L))
+            assertThatThrownBy(() -> employeeService.findById(uuidOf(99)))
                     .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessageContaining("99");
+                    .hasMessageContaining(uuidOf(99).toString());
         }
     }
 
@@ -221,8 +257,8 @@ class EmployeeServiceTest {
         @Test
         void createsEmployeeWithoutManager() {
             Employee entity = buildEmployee(null, "jane@example.com");
-            Employee saved = buildEmployee(1L, "jane@example.com");
-            EmployeeResponseDto responseDto = buildResponseDto(1L, "jane@example.com");
+            Employee saved = buildEmployee(1, "jane@example.com");
+            EmployeeResponseDto responseDto = buildResponseDto(1, "jane@example.com");
 
             when(employeeRepository.findByEmailAndNotDeleted("jane@example.com")).thenReturn(Optional.empty());
             when(employeeMapper.toEntity(dto)).thenReturn(entity);
@@ -231,22 +267,22 @@ class EmployeeServiceTest {
 
             EmployeeResponseDto result = employeeService.create(dto);
 
-            assertThat(result.getId()).isEqualTo(1L);
+            assertThat(result.getId()).isEqualTo(uuidOf(1));
             verify(employeeRepository).save(entity);
         }
 
         @Test
         void setsManagerWhenManagerIdProvided() {
-            dto.setManagerId(10L);
-            Employee manager = buildEmployee(10L, "manager@example.com");
+            dto.setManagerId(uuidOf(10));
+            Employee manager = buildEmployee(10, "manager@example.com");
             Employee entity = buildEmployee(null, "jane@example.com");
-            Employee saved = buildEmployee(1L, "jane@example.com");
+            Employee saved = buildEmployee(1, "jane@example.com");
 
             when(employeeRepository.findByEmailAndNotDeleted("jane@example.com")).thenReturn(Optional.empty());
             when(employeeMapper.toEntity(dto)).thenReturn(entity);
-            when(employeeRepository.findByIdAndNotDeleted(10L)).thenReturn(Optional.of(manager));
+            when(employeeRepository.findByIdAndNotDeleted(uuidOf(10))).thenReturn(Optional.of(manager));
             when(employeeRepository.save(entity)).thenReturn(saved);
-            when(employeeMapper.toResponseDto(saved)).thenReturn(buildResponseDto(1L, "jane@example.com"));
+            when(employeeMapper.toResponseDto(saved)).thenReturn(buildResponseDto(1, "jane@example.com"));
 
             employeeService.create(dto);
 
@@ -255,7 +291,7 @@ class EmployeeServiceTest {
 
         @Test
         void throwsDuplicateExceptionOnDuplicateEmail() {
-            Employee existing = buildEmployee(5L, "jane@example.com");
+            Employee existing = buildEmployee(5, "jane@example.com");
             when(employeeRepository.findByEmailAndNotDeleted("jane@example.com")).thenReturn(Optional.of(existing));
 
             assertThatThrownBy(() -> employeeService.create(dto))
@@ -267,16 +303,16 @@ class EmployeeServiceTest {
 
         @Test
         void throwsEntityNotFoundWhenManagerNotFound() {
-            dto.setManagerId(999L);
+            dto.setManagerId(uuidOf(999));
             Employee entity = buildEmployee(null, "jane@example.com");
 
             when(employeeRepository.findByEmailAndNotDeleted("jane@example.com")).thenReturn(Optional.empty());
             when(employeeMapper.toEntity(dto)).thenReturn(entity);
-            when(employeeRepository.findByIdAndNotDeleted(999L)).thenReturn(Optional.empty());
+            when(employeeRepository.findByIdAndNotDeleted(uuidOf(999))).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> employeeService.create(dto))
                     .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessageContaining("999");
+                    .hasMessageContaining(uuidOf(999).toString());
         }
     }
 
@@ -287,20 +323,20 @@ class EmployeeServiceTest {
 
         @Test
         void updatesScalarFields() {
-            Employee emp = buildEmployee(1L, "old@example.com");
-            Employee saved = buildEmployee(1L, "new@example.com");
-            EmployeeResponseDto responseDto = buildResponseDto(1L, "new@example.com");
+            Employee emp = buildEmployee(1, "old@example.com");
+            Employee saved = buildEmployee(1, "new@example.com");
+            EmployeeResponseDto responseDto = buildResponseDto(1, "new@example.com");
             UpdateEmployeeRequestDto updateDto = new UpdateEmployeeRequestDto();
             updateDto.setFirstName("Updated");
             updateDto.setEmail("new@example.com");
             updateDto.setSalary(new BigDecimal("6000"));
 
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(1L)).thenReturn(Optional.of(emp));
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(1))).thenReturn(Optional.of(emp));
             when(employeeRepository.findByEmailAndNotDeleted("new@example.com")).thenReturn(Optional.empty());
             when(employeeRepository.save(emp)).thenReturn(saved);
             when(employeeMapper.toResponseDto(saved)).thenReturn(responseDto);
 
-            EmployeeResponseDto result = employeeService.update(1L, updateDto);
+            EmployeeResponseDto result = employeeService.update(uuidOf(1), updateDto);
 
             assertThat(result.getEmail()).isEqualTo("new@example.com");
             assertThat(emp.getFirstName()).isEqualTo("Updated");
@@ -309,73 +345,73 @@ class EmployeeServiceTest {
 
         @Test
         void throwsEntityNotFoundWhenEmployeeMissing() {
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(99L)).thenReturn(Optional.empty());
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(99))).thenReturn(Optional.empty());
 
             UpdateEmployeeRequestDto updateDto = new UpdateEmployeeRequestDto();
             updateDto.setFirstName("X");
 
-            assertThatThrownBy(() -> employeeService.update(99L, updateDto))
+            assertThatThrownBy(() -> employeeService.update(uuidOf(99), updateDto))
                     .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessageContaining("99");
+                    .hasMessageContaining(uuidOf(99).toString());
         }
 
         @Test
         void throwsWhenEmployeeAssignsItselfAsManager() {
-            Employee emp = buildEmployee(1L, "e@example.com");
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(1L)).thenReturn(Optional.of(emp));
+            Employee emp = buildEmployee(1, "e@example.com");
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(1))).thenReturn(Optional.of(emp));
 
             UpdateEmployeeRequestDto updateDto = new UpdateEmployeeRequestDto();
-            updateDto.setManagerId(1L);
+            updateDto.setManagerId(uuidOf(1));
 
-            assertThatThrownBy(() -> employeeService.update(1L, updateDto))
+            assertThatThrownBy(() -> employeeService.update(uuidOf(1), updateDto))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         void throwsDuplicateExceptionOnEmailAlreadyTaken() {
-            Employee emp = buildEmployee(1L, "old@example.com");
-            Employee other = buildEmployee(2L, "taken@example.com");
+            Employee emp = buildEmployee(1, "old@example.com");
+            Employee other = buildEmployee(2, "taken@example.com");
             UpdateEmployeeRequestDto updateDto = new UpdateEmployeeRequestDto();
             updateDto.setEmail("taken@example.com");
 
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(1L)).thenReturn(Optional.of(emp));
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(1))).thenReturn(Optional.of(emp));
             when(employeeRepository.findByEmailAndNotDeleted("taken@example.com")).thenReturn(Optional.of(other));
 
-            assertThatThrownBy(() -> employeeService.update(1L, updateDto))
+            assertThatThrownBy(() -> employeeService.update(uuidOf(1), updateDto))
                     .isInstanceOf(DuplicateResourceException.class)
                     .hasMessageContaining("taken@example.com");
         }
 
         @Test
         void updatesManagerSuccessfully() {
-            Employee emp = buildEmployee(1L, "emp@example.com");
-            Employee manager = buildEmployee(2L, "mgr@example.com");
-            Employee saved = buildEmployee(1L, "emp@example.com");
+            Employee emp = buildEmployee(1, "emp@example.com");
+            Employee manager = buildEmployee(2, "mgr@example.com");
+            Employee saved = buildEmployee(1, "emp@example.com");
             UpdateEmployeeRequestDto updateDto = new UpdateEmployeeRequestDto();
-            updateDto.setManagerId(2L);
+            updateDto.setManagerId(uuidOf(2));
 
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(1L)).thenReturn(Optional.of(emp));
-            when(employeeRepository.findByIdAndNotDeleted(2L)).thenReturn(Optional.of(manager));
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(1))).thenReturn(Optional.of(emp));
+            when(employeeRepository.findByIdAndNotDeleted(uuidOf(2))).thenReturn(Optional.of(manager));
             when(employeeRepository.save(emp)).thenReturn(saved);
-            when(employeeMapper.toResponseDto(saved)).thenReturn(buildResponseDto(1L, "emp@example.com"));
+            when(employeeMapper.toResponseDto(saved)).thenReturn(buildResponseDto(1, "emp@example.com"));
 
-            employeeService.update(1L, updateDto);
+            employeeService.update(uuidOf(1), updateDto);
 
             assertThat(emp.getManager()).isEqualTo(manager);
         }
 
         @Test
         void throwsEntityNotFoundWhenNewManagerNotFound() {
-            Employee emp = buildEmployee(1L, "emp@example.com");
+            Employee emp = buildEmployee(1, "emp@example.com");
             UpdateEmployeeRequestDto updateDto = new UpdateEmployeeRequestDto();
-            updateDto.setManagerId(50L);
+            updateDto.setManagerId(uuidOf(50));
 
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(1L)).thenReturn(Optional.of(emp));
-            when(employeeRepository.findByIdAndNotDeleted(50L)).thenReturn(Optional.empty());
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(1))).thenReturn(Optional.of(emp));
+            when(employeeRepository.findByIdAndNotDeleted(uuidOf(50))).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> employeeService.update(1L, updateDto))
+            assertThatThrownBy(() -> employeeService.update(uuidOf(1), updateDto))
                     .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessageContaining("50");
+                    .hasMessageContaining(uuidOf(50).toString());
         }
     }
 
@@ -386,31 +422,31 @@ class EmployeeServiceTest {
 
         @Test
         void returnsUpdatedIds() {
-            Employee emp1 = buildEmployee(1L, "a@example.com");
-            Employee emp2 = buildEmployee(2L, "b@example.com");
+            Employee emp1 = buildEmployee(1, "a@example.com");
+            Employee emp2 = buildEmployee(2, "b@example.com");
 
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(1L)).thenReturn(Optional.of(emp1));
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(2L)).thenReturn(Optional.of(emp2));
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(1))).thenReturn(Optional.of(emp1));
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(2))).thenReturn(Optional.of(emp2));
             when(employeeRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-            when(employeeMapper.toResponseDto(any())).thenReturn(buildResponseDto(1L, "a@example.com"));
+            when(employeeMapper.toResponseDto(any())).thenReturn(buildResponseDto(1, "a@example.com"));
 
-            List<Long> updated = employeeService.patchMany(List.of(1L, 2L), Map.of("status", "SUSPENDED"));
+            List<UUID> updated = employeeService.patchMany(List.of(uuidOf(1), uuidOf(2)), Map.of("status", "SUSPENDED"));
 
-            assertThat(updated).containsExactlyInAnyOrder(1L, 2L);
+            assertThat(updated).containsExactlyInAnyOrder(uuidOf(1), uuidOf(2));
         }
 
         @Test
         void skipsNotFoundIdsWithoutFailing() {
-            Employee emp = buildEmployee(1L, "a@example.com");
+            Employee emp = buildEmployee(1, "a@example.com");
 
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(1L)).thenReturn(Optional.of(emp));
-            when(employeeRepository.findByIdWithContactsAndNotDeleted(99L)).thenReturn(Optional.empty());
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(1))).thenReturn(Optional.of(emp));
+            when(employeeRepository.findByIdWithContactsAndNotDeleted(uuidOf(99))).thenReturn(Optional.empty());
             when(employeeRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-            when(employeeMapper.toResponseDto(any())).thenReturn(buildResponseDto(1L, "a@example.com"));
+            when(employeeMapper.toResponseDto(any())).thenReturn(buildResponseDto(1, "a@example.com"));
 
-            List<Long> updated = employeeService.patchMany(List.of(1L, 99L), Map.of("status", "SUSPENDED"));
+            List<UUID> updated = employeeService.patchMany(List.of(uuidOf(1), uuidOf(99)), Map.of("status", "SUSPENDED"));
 
-            assertThat(updated).containsExactly(1L);
+            assertThat(updated).containsExactly(uuidOf(1));
         }
 
         @Test
@@ -426,21 +462,21 @@ class EmployeeServiceTest {
 
         @Test
         void deletesEmployee() {
-            Employee emp = buildEmployee(1L, "john@example.com");
-            when(employeeRepository.findByIdAndNotDeleted(1L)).thenReturn(Optional.of(emp));
+            Employee emp = buildEmployee(1, "john@example.com");
+            when(employeeRepository.findByIdAndNotDeleted(uuidOf(1))).thenReturn(Optional.of(emp));
 
-            employeeService.deleteById(1L);
+            employeeService.deleteById(uuidOf(1));
 
             verify(employeeRepository).delete(emp);
         }
 
         @Test
         void throwsEntityNotFoundWhenMissing() {
-            when(employeeRepository.findByIdAndNotDeleted(99L)).thenReturn(Optional.empty());
+            when(employeeRepository.findByIdAndNotDeleted(uuidOf(99))).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> employeeService.deleteById(99L))
+            assertThatThrownBy(() -> employeeService.deleteById(uuidOf(99)))
                     .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessageContaining("99");
+                    .hasMessageContaining(uuidOf(99).toString());
 
             verify(employeeRepository, never()).delete(any(Employee.class));
         }
@@ -453,28 +489,28 @@ class EmployeeServiceTest {
 
         @Test
         void returnsDeletedIds() {
-            Employee emp1 = buildEmployee(1L, "a@example.com");
-            Employee emp2 = buildEmployee(2L, "b@example.com");
+            Employee emp1 = buildEmployee(1, "a@example.com");
+            Employee emp2 = buildEmployee(2, "b@example.com");
 
-            when(employeeRepository.findByIdAndNotDeleted(1L)).thenReturn(Optional.of(emp1));
-            when(employeeRepository.findByIdAndNotDeleted(2L)).thenReturn(Optional.of(emp2));
+            when(employeeRepository.findByIdAndNotDeleted(uuidOf(1))).thenReturn(Optional.of(emp1));
+            when(employeeRepository.findByIdAndNotDeleted(uuidOf(2))).thenReturn(Optional.of(emp2));
 
-            List<Long> deleted = employeeService.deleteMany(List.of(1L, 2L));
+            List<UUID> deleted = employeeService.deleteMany(List.of(uuidOf(1), uuidOf(2)));
 
-            assertThat(deleted).containsExactlyInAnyOrder(1L, 2L);
+            assertThat(deleted).containsExactlyInAnyOrder(uuidOf(1), uuidOf(2));
             verify(employeeRepository, times(2)).delete(any(Employee.class));
         }
 
         @Test
         void skipsNotFoundIdsWithoutFailing() {
-            Employee emp = buildEmployee(1L, "a@example.com");
+            Employee emp = buildEmployee(1, "a@example.com");
 
-            when(employeeRepository.findByIdAndNotDeleted(1L)).thenReturn(Optional.of(emp));
-            when(employeeRepository.findByIdAndNotDeleted(99L)).thenReturn(Optional.empty());
+            when(employeeRepository.findByIdAndNotDeleted(uuidOf(1))).thenReturn(Optional.of(emp));
+            when(employeeRepository.findByIdAndNotDeleted(uuidOf(99))).thenReturn(Optional.empty());
 
-            List<Long> deleted = employeeService.deleteMany(List.of(1L, 99L));
+            List<UUID> deleted = employeeService.deleteMany(List.of(uuidOf(1), uuidOf(99)));
 
-            assertThat(deleted).containsExactly(1L);
+            assertThat(deleted).containsExactly(uuidOf(1));
             verify(employeeRepository, times(1)).delete(any(Employee.class));
         }
 
@@ -492,8 +528,8 @@ class EmployeeServiceTest {
         @Test
         void returnsMatchingPage() {
             Pageable pageable = PageRequest.of(0, 10);
-            Employee emp = buildEmployee(1L, "john@example.com");
-            EmployeeListResponseDto dto = buildListDto(1L, "john@example.com");
+            Employee emp = buildEmployee(1, "john@example.com");
+            EmployeeListResponseDto dto = buildListDto(1, "john@example.com");
             Page<Employee> repoPage = new PageImpl<>(List.of(emp), pageable, 1);
 
             when(employeeRepository.searchEmployeesNotDeleted("john", pageable)).thenReturn(repoPage);
@@ -521,8 +557,8 @@ class EmployeeServiceTest {
 
         @Test
         void returnsAllDeletedEmployees() {
-            Employee deleted = buildEmployee(5L, "del@example.com");
-            EmployeeListResponseDto dto = buildListDto(5L, "del@example.com");
+            Employee deleted = buildEmployee(5, "del@example.com");
+            EmployeeListResponseDto dto = buildListDto(5, "del@example.com");
 
             when(employeeRepository.findAllDeleted()).thenReturn(List.of(deleted));
             when(employeeMapper.toListResponseDtoList(List.of(deleted))).thenReturn(List.of(dto));
@@ -547,8 +583,8 @@ class EmployeeServiceTest {
         @Test
         void returnsPageOfDeletedEmployees() {
             Pageable pageable = PageRequest.of(0, 10);
-            Employee deleted = buildEmployee(5L, "del@example.com");
-            EmployeeListResponseDto dto = buildListDto(5L, "del@example.com");
+            Employee deleted = buildEmployee(5, "del@example.com");
+            EmployeeListResponseDto dto = buildListDto(5, "del@example.com");
             Page<Employee> repoPage = new PageImpl<>(List.of(deleted), pageable, 1);
 
             when(employeeRepository.findAllDeleted(pageable)).thenReturn(repoPage);

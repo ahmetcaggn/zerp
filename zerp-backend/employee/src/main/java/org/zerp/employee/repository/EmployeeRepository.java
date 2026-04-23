@@ -11,18 +11,19 @@ import org.zerp.common.entity.employee.EmploymentStatus;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSpecificationExecutor<Employee> {
+public interface EmployeeRepository extends JpaRepository<Employee, UUID>, JpaSpecificationExecutor<Employee> {
 
     // =============================================
     // Soft Delete Aware Queries (exclude deleted records)
     // =============================================
 
     @Query("SELECT e FROM Employee e WHERE e.id = :id AND e.deleted = false")
-    Optional<Employee> findByIdAndNotDeleted(@Param("id") Long id);
+    Optional<Employee> findByIdAndNotDeleted(@Param("id") UUID id);
 
     @Query("SELECT e FROM Employee e LEFT JOIN FETCH e.contacts WHERE e.id = :id AND e.deleted = false")
-    Optional<Employee> findByIdWithContactsAndNotDeleted(@Param("id") Long id);
+    Optional<Employee> findByIdWithContactsAndNotDeleted(@Param("id") UUID id);
 
     @Query("SELECT e FROM Employee e WHERE e.email = :email AND e.deleted = false")
     Optional<Employee> findByEmailAndNotDeleted(@Param("email") String email);
@@ -46,7 +47,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
     List<Employee> findByStatusAndNotDeleted(@Param("status") EmploymentStatus status);
 
     @Query("SELECT e FROM Employee e WHERE e.manager.id = :managerId AND e.deleted = false")
-    List<Employee> findByManagerIdAndNotDeleted(@Param("managerId") Long managerId);
+    List<Employee> findByManagerIdAndNotDeleted(@Param("managerId") UUID managerId);
 
     @Query("SELECT e FROM Employee e WHERE e.deleted = false AND (" +
             "LOWER(e.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
@@ -78,10 +79,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
 
     List<Employee> findByStatus(EmploymentStatus status);
 
-    List<Employee> findByManagerId(Long managerId);
+    List<Employee> findByManagerId(UUID managerId);
 
     @Query("SELECT e FROM Employee e LEFT JOIN FETCH e.contacts WHERE e.id = :id")
-    Optional<Employee> findByIdWithContacts(@Param("id") Long id);
+    Optional<Employee> findByIdWithContacts(@Param("id") UUID id);
 
     @Query("SELECT e FROM Employee e WHERE " +
             "LOWER(e.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +

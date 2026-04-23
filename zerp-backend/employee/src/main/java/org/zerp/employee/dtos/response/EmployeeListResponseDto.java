@@ -3,10 +3,12 @@ package org.zerp.employee.dtos.response;
 import lombok.Data;
 import org.zerp.common.entity.employee.EmploymentStatus;
 
+import java.util.UUID;
+
 @Data
 public class EmployeeListResponseDto {
 
-    private Long id;
+    private UUID id;
 
     private String firstName;
 

@@ -14,7 +14,6 @@ import org.zerp.common.entity.base.BaseEntity;
 @SQLDelete(sql = "UPDATE employee_contacts SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? and version = ?")
 @SQLRestriction("deleted = false")
 public class EmployeeContact extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

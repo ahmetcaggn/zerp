@@ -2,7 +2,17 @@ package org.zerp.common.permission.entity;
 
 public enum PermissionTargetType {
     TENANT,
+
     STOCK_RESOURCE,
+
+    EMPLOYEE,
+
+    // ticket
+    TICKET,
+    TICKET_HISTORY,
+
+
+    SHOP,
     ;
 
     static PermissionTargetType fromType(Class<Permittable> type) {

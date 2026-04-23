@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.resource.StockResource;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.FilterType;
+import org.zerp.common.security.CurrentUserIdResolver;
 import org.zerp.resource.dto.resource.StockResourceCreateDTO;
 import org.zerp.resource.dto.resource.StockResourceDTO;
 import org.zerp.resource.dto.resource.StockResourceUpdateDTO;
@@ -32,14 +33,16 @@ public class StockResourceService implements
     private final StockResourcePermissionEvaluator permissionEvaluator;
     private final StockResourceRepository repository;
     private final StockResourceMapper mapper;
+    private final CurrentUserIdResolver currentUserIdResolver;
 
     @Override
     @Transactional(readOnly = true)
     public Page<StockResourceDTO> findWithFilters(Map<String, String> filters, Pageable pageable) {
         log.trace("Finding StockResources with filters: {} and pageable: {}", filters, pageable);
+        UUID userId = resolveCurrentUserId();
 
         Specification<StockResource> spec = buildSpecificationFromFilters(filters);
-        spec = permissionEvaluator.filterRead(null).and(spec);
+        spec = permissionEvaluator.filterRead(userId).and(spec);
         Page<StockResourceDTO> results = repository.findAll(spec, pageable)
                 .map(mapper::toDTO);
 
@@ -51,12 +54,16 @@ public class StockResourceService implements
     @Transactional(readOnly = true)
     public List<StockResourceDTO> findAllById(List<UUID> uuids) {
         log.trace("Finding all StockResources by IDs");
+        UUID userId = resolveCurrentUserId();
 
         List<StockResourceDTO> results = new ArrayList<>();
         for (UUID id : uuids) {
             repository.findById(id).ifPresent(stockResource -> {
-                log.trace("Fetched StockResource with id: {}", id);
-                results.add(mapper.toDTO(stockResource));
+                if (permissionEvaluator.canRead(userId,
+                        new StockResourcePermissionEvaluator.StockResourceTarget(id, stockResource.getTenant().getId()))) {
+                    log.trace("Fetched StockResource with id: {}", id);
+                    results.add(mapper.toDTO(stockResource));
+                }
             });
         }
 
@@ -68,15 +75,17 @@ public class StockResourceService implements
     @Transactional(readOnly = true)
     public StockResourceDTO findById(UUID uuid) {
         log.trace("Finding StockResource by id: {}", uuid);
+        UUID userId = resolveCurrentUserId();
 
         StockResource stockResource = repository.findById(uuid).orElseThrow(() -> {
             log.warn("StockResource not found with id: {}", uuid);
             return new ResponseStatusException(HttpStatus.NOT_FOUND, "StockResource not found");
         });
 
-        if (!permissionEvaluator.canRead(null, uuid, stockResource.getTenant().getId())) {
+        if (!permissionEvaluator.canRead(userId,
+                new StockResourcePermissionEvaluator.StockResourceTarget(uuid, stockResource.getTenant().getId()))) {
             log.warn("Permission denied for reading StockResource with id: {}", uuid);
-            return null;
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read StockResource");
         }
 
         log.debug("Successfully retrieved StockResource with id: {}", uuid);
@@ -87,10 +96,12 @@ public class StockResourceService implements
     @Transactional
     public StockResourceDTO create(StockResourceCreateDTO data) {
         log.trace("Creating new StockResource with data: {}", data);
+        UUID userId = resolveCurrentUserId();
 
         StockResource stockResource = mapper.toEntity(data);
 
-        if (!permissionEvaluator.canCreate(null, stockResource.getTenant().getId())) {
+        if (!permissionEvaluator.canCreate(userId,
+                new StockResourcePermissionEvaluator.TenantParent(stockResource.getTenant().getId()))) {
             log.warn("Permission denied for creating StockResource in tenant: {}",
                     stockResource.getTenant().getId());
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create StockResource");
@@ -106,13 +117,15 @@ public class StockResourceService implements
     @Transactional
     public StockResourceDTO patch(UUID uuid, Map<String, Object> data) {
         log.trace("Patching StockResource with id: {} and data: {}", uuid, data);
+        UUID userId = resolveCurrentUserId();
 
         StockResource stockResource = repository.findById(uuid).orElseThrow(() -> {
             log.warn("StockResource not found with id: {} for patching", uuid);
             return new ResponseStatusException(HttpStatus.NOT_FOUND, "StockResource not found");
         });
 
-        if (!permissionEvaluator.canPatch(null, uuid, stockResource.getTenant().getId())) {
+        if (!permissionEvaluator.canPatch(userId,
+                new StockResourcePermissionEvaluator.StockResourceTarget(uuid, stockResource.getTenant().getId()))) {
             log.warn("Permission denied for patching StockResource with id: {}", uuid);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to patch StockResource");
         }
@@ -129,13 +142,15 @@ public class StockResourceService implements
     @Transactional
     public StockResourceDTO update(UUID uuid, StockResourceUpdateDTO data) {
         log.trace("Updating StockResource with id: {} and data: {}", uuid, data);
+        UUID userId = resolveCurrentUserId();
 
         StockResource stockResource = repository.findById(uuid).orElseThrow(() -> {
             log.warn("StockResource not found with id: {} for updating", uuid);
             return new ResponseStatusException(HttpStatus.NOT_FOUND, "StockResource not found");
         });
 
-        if (!permissionEvaluator.canUpdate(null, uuid, stockResource.getTenant().getId())) {
+        if (!permissionEvaluator.canUpdate(userId,
+                new StockResourcePermissionEvaluator.StockResourceTarget(uuid, stockResource.getTenant().getId()))) {
             log.warn("Permission denied for updating StockResource with id: {}", uuid);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update StockResource");
         }
@@ -171,13 +186,15 @@ public class StockResourceService implements
     @Transactional
     public void deleteById(UUID uuid) {
         log.trace("Deleting StockResource with id: {}", uuid);
+        UUID userId = resolveCurrentUserId();
 
         StockResource stockResource = repository.findById(uuid).orElseThrow(() -> {
             log.warn("StockResource not found with id: {} for deletion", uuid);
             return new ResponseStatusException(HttpStatus.NOT_FOUND, "StockResource not found");
         });
 
-        if (!permissionEvaluator.canDelete(null, uuid, stockResource.getTenant().getId())) {
+        if (!permissionEvaluator.canDelete(userId,
+                new StockResourcePermissionEvaluator.StockResourceTarget(uuid, stockResource.getTenant().getId()))) {
             log.warn("Permission denied for deleting StockResource with id: {}", uuid);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete StockResource");
         }
@@ -272,5 +289,9 @@ public class StockResourceService implements
 
         log.debug("Specification built with {} filter conditions", filters.size());
         return spec;
+    }
+
+    private UUID resolveCurrentUserId() {
+        return currentUserIdResolver.resolve();
     }
 }

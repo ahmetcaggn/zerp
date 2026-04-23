@@ -16,6 +16,7 @@ import org.zerp.employee.dtos.response.EmployeeResponseDto;
 import org.zerp.employee.service.EmployeeService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/employee")
@@ -23,7 +24,7 @@ import java.util.List;
 @Tag(name = "Employees", description = "API for managing employees. " +
         "Supports CRUD operations, searching, and retrieval of deleted employees.")
 public class EmployeeController extends ResourceController<EmployeeResponseDto, EmployeeListResponseDto,
-        CreateEmployeeRequestDto, UpdateEmployeeRequestDto, Long> {
+        CreateEmployeeRequestDto, UpdateEmployeeRequestDto, UUID> {
     private final EmployeeService employeeService;
 
     @Override

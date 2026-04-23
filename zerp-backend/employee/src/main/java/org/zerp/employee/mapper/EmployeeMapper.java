@@ -1,6 +1,7 @@
 package org.zerp.employee.mapper;
 
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.zerp.common.entity.employee.Employee;
 import org.zerp.common.entity.employee.EmployeeContact;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
@@ -11,103 +12,43 @@ import org.zerp.employee.dtos.response.EmployeeResponseDto;
 import org.zerp.employee.dtos.response.ManagerDto;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
-@Component
-public class EmployeeMapper {
+@Mapper(componentModel = "spring")
+public interface EmployeeMapper {
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "manager", ignore = true)
+    @Mapping(target = "contacts", ignore = true)
+    @Mapping(target = "terminationDate", ignore = true)
+    @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "deletedAt", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "version", ignore = true)
+    Employee toEntity(CreateEmployeeRequestDto dto);
 
-    public Employee toEntity(CreateEmployeeRequestDto dto) {
-        Employee employee = new Employee();
-        employee.setFirstName(dto.getFirstName());
-        employee.setLastName(dto.getLastName());
-        employee.setEmail(dto.getEmail());
-        employee.setPhoneNumber(dto.getPhoneNumber());
-        employee.setNationalId(dto.getNationalId());
-        employee.setDateOfBirth(dto.getDateOfBirth());
-        employee.setHireDate(dto.getHireDate());
-        employee.setStatus(dto.getStatus());
-        employee.setSalary(dto.getSalary());
-        return employee;
-    }
+    EmployeeResponseDto toResponseDto(Employee employee);
 
-    public EmployeeResponseDto toResponseDto(Employee employee) {
-        EmployeeResponseDto dto = new EmployeeResponseDto();
-        dto.setId(employee.getId());
-        dto.setFirstName(employee.getFirstName());
-        dto.setLastName(employee.getLastName());
-        dto.setEmail(employee.getEmail());
-        dto.setPhoneNumber(employee.getPhoneNumber());
-        dto.setNationalId(employee.getNationalId());
-        dto.setDateOfBirth(employee.getDateOfBirth());
-        dto.setHireDate(employee.getHireDate());
-        dto.setTerminationDate(employee.getTerminationDate());
-        dto.setStatus(employee.getStatus());
-        dto.setSalary(employee.getSalary());
-        dto.setCreatedAt(employee.getCreatedAt());
-        dto.setUpdatedAt(employee.getUpdatedAt());
+    EmployeeListResponseDto toListResponseDto(Employee employee);
 
-        if (employee.getManager() != null) {
-            dto.setManager(toManagerDto(employee.getManager()));
-        }
+    ManagerDto toManagerDto(Employee manager);
 
-        if (employee.getContacts() != null) {
-            dto.setContacts(employee.getContacts().stream()
-                    .map(this::toContactResponseDto)
-                    .collect(Collectors.toList()));
-        }
+    @Mapping(target = "employee", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "deletedAt", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "version", ignore = true)
+    EmployeeContact toContactEntity(EmployeeContactDto dto);
 
-        return dto;
-    }
+    EmployeeContactResponseDto toContactResponseDto(EmployeeContact contact);
 
-    public EmployeeListResponseDto toListResponseDto(Employee employee) {
-        EmployeeListResponseDto dto = new EmployeeListResponseDto();
-        dto.setId(employee.getId());
-        dto.setFirstName(employee.getFirstName());
-        dto.setLastName(employee.getLastName());
-        dto.setEmail(employee.getEmail());
-        dto.setPhoneNumber(employee.getPhoneNumber());
-        dto.setStatus(employee.getStatus());
-        return dto;
-    }
+    List<EmployeeResponseDto> toResponseDtoList(List<Employee> employees);
 
-    public ManagerDto toManagerDto(Employee manager) {
-        ManagerDto dto = new ManagerDto();
-        dto.setId(manager.getId());
-        dto.setFirstName(manager.getFirstName());
-        dto.setLastName(manager.getLastName());
-        dto.setEmail(manager.getEmail());
-        return dto;
-    }
-
-    public EmployeeContact toContactEntity(EmployeeContactDto dto) {
-        EmployeeContact contact = new EmployeeContact();
-        contact.setId(dto.getId());
-        contact.setType(dto.getType());
-        contact.setValue(dto.getValue());
-        contact.setContactPersonName(dto.getContactPersonName());
-        contact.setRelationship(dto.getRelationship());
-        return contact;
-    }
-
-    public EmployeeContactResponseDto toContactResponseDto(EmployeeContact contact) {
-        EmployeeContactResponseDto dto = new EmployeeContactResponseDto();
-        dto.setId(contact.getId());
-        dto.setType(contact.getType());
-        dto.setValue(contact.getValue());
-        dto.setContactPersonName(contact.getContactPersonName());
-        dto.setRelationship(contact.getRelationship());
-        return dto;
-    }
-
-    public List<EmployeeResponseDto> toResponseDtoList(List<Employee> employees) {
-        return employees.stream()
-                .map(this::toResponseDto)
-                .collect(Collectors.toList());
-    }
-
-    public List<EmployeeListResponseDto> toListResponseDtoList(List<Employee> employees) {
-        return employees.stream()
-                .map(this::toListResponseDto)
-                .collect(Collectors.toList());
-    }
+    List<EmployeeListResponseDto> toListResponseDtoList(List<Employee> employees);
 }
