@@ -6,6 +6,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.permission.entity.Permittable;
 
 import java.util.UUID;
@@ -15,13 +16,25 @@ import java.util.UUID;
 @Table(name= "tenants")
 @SQLDelete(sql = "UPDATE tenants SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("deleted = false")
-public class Tenant implements Permittable {
+public class Tenant extends BaseEntity implements Permittable {
     @Id
-    UUID id;
+    private UUID id;
+
+    private String name;
+    private String description;
+    private String imageUrl;
+
+    private String address;
+    private String city;
+    private String state;
+    private String country;
+    private String postalCode;
+    private String phone;
+    private String email;
+    private String website;
 
     @Override
     public Permittable getParent() {
-        // in permittable hierarchy, tenant is the root, so it has no parent
-        return null;
+        return TenantRoot.INSTANCE;
     }
 }
