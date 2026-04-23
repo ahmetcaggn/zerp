@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record TicketAssignmentResponse(
-        Integer id,
-        Integer teamId,
+        UUID id,
+        UUID teamId,
         UUID agentPartyId,
         boolean active,
         LocalDateTime assignedAt) {

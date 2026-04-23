@@ -1,9 +1,10 @@
 package org.zerp.crm.dto.team;
 
 import java.util.List;
+import java.util.UUID;
 
 public record TeamResponse(
-        Integer id,
+        UUID id,
         String name,
         String description,
         boolean isActive,

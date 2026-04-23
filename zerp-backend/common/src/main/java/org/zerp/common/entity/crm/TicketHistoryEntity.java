@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
+import org.zerp.common.entity.user.AppUser;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -23,8 +24,8 @@ import java.util.UUID;
 public class TicketHistoryEntity extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_id", nullable = false)
@@ -34,14 +35,15 @@ public class TicketHistoryEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private EventType eventType;
 
-    @Column(name = "actor_party_id", nullable = false)
-    private UUID actorPartyId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "actor_party_id", nullable = false)
+    private AppUser actorParty;
 
     @Column(name = "reference_type")
     private String referenceType;
 
     @Column(name = "reference_id")
-    private Integer referenceId;
+    private UUID referenceId;
 
     @Column(columnDefinition = "TEXT")
     private String payload;

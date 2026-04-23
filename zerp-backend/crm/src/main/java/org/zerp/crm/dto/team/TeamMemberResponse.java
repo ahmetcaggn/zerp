@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record TeamMemberResponse(
-        Integer id,
+        UUID id,
         UUID userId,
         String role,
         LocalDateTime joinedAt) {

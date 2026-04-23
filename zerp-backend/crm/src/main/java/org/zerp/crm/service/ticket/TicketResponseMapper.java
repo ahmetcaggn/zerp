@@ -12,26 +12,34 @@ import org.zerp.crm.dto.ticket.WatcherResponse;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
 public class TicketResponseMapper {
 
     public TicketResponse toResponse(TicketEntity entity) {
+        UUID tenantId = entity.getTenant() != null ? entity.getTenant().getId() : null;
+        UUID reporterId = entity.getReporter() != null ? entity.getReporter().getId() : null;
+
         TicketAssignmentResponse assignmentResponse = null;
         if (entity.getCurrentAssignment() != null) {
             TicketAssignmentEntity assignment = entity.getCurrentAssignment();
+            UUID teamId = assignment.getTeam() != null ? assignment.getTeam().getId() : null;
+            UUID agentPartyId = assignment.getAgentParty() != null ? assignment.getAgentParty().getId() : null;
             assignmentResponse = new TicketAssignmentResponse(
                     assignment.getId(),
-                    assignment.getTeamId(),
-                    assignment.getAgentPartyId(),
+                    teamId,
+                    agentPartyId,
                     Boolean.TRUE.equals(assignment.getActive()),
                     assignment.getAssignedAt()
             );
         }
 
         Set<WatcherResponse> watcherResponses = entity.getWatchers().stream()
-                .map(watcher -> new WatcherResponse(watcher.getWatcherId(), watcher.getAddedAt()))
+                .map(watcher -> new WatcherResponse(
+                        watcher.getWatcher() != null ? watcher.getWatcher().getId() : null,
+                        watcher.getAddedAt()))
                 .collect(Collectors.toSet());
 
         List<AttachmentResponse> attachmentResponses = entity.getAttachments().stream()
@@ -48,7 +56,7 @@ public class TicketResponseMapper {
         List<CommentResponse> commentResponses = entity.getComments().stream()
                 .map(comment -> new CommentResponse(
                         comment.getId(),
-                        comment.getAuthorId(),
+                        comment.getAuthor() != null ? comment.getAuthor().getId() : null,
                         comment.getAuthorType().name(),
                         comment.getContent(),
                         comment.getIsInternal(),
@@ -86,8 +94,8 @@ public class TicketResponseMapper {
                 entity.getStatus().name(),
                 entity.getPriority().name(),
                 entity.getType() != null ? entity.getType().name() : null,
-                entity.getTenantId(),
-                entity.getReporterId(),
+                tenantId,
+                reporterId,
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
                 entity.getResolvedAt(),

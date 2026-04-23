@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.zerp.common.entity.Tenant;
 import org.zerp.common.entity.base.BaseEntity;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import java.util.*;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.zerp.common.entity.user.AppUser;
 
 @Entity
 @Table(name = "ticket")
@@ -26,8 +28,8 @@ import org.hibernate.type.SqlTypes;
 public class TicketEntity extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false)
     private String title;
@@ -43,11 +45,13 @@ public class TicketEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TicketPriority priority;
 
-    @Column(name = "account_id")
-    private UUID tenantId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tenant_id")
+    private Tenant tenant;
 
-    @Column(name = "reporter_id")
-    private UUID reporterId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reporter_id")
+    private AppUser reporter;
 
     @Column(name = "ticket_type")
     @Enumerated(EnumType.STRING)

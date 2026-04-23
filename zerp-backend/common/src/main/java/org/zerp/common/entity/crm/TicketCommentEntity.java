@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
+import org.zerp.common.entity.user.AppUser;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,16 +25,17 @@ import java.util.UUID;
 @SQLRestriction("deleted = false")
 public class TicketCommentEntity extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_id", nullable = false)
     private TicketEntity ticket;
-    
-    @Column(name = "author_id", nullable = false)
-    private UUID authorId;
-    
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
+    private AppUser author;
+
     @Column(name = "author_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private AuthorType authorType;

@@ -99,13 +99,23 @@ public class TicketSpecificationBuilder {
                     }
                 }
 
-                if ("tenantId".equals(field) || "reporterId".equals(field)) {
+                if ("tenantId".equals(field)) {
                     UUID uuid = ticketValueParser.parseRequiredUuid(value, key);
                     if (filterType == FilterType.NOT_EQUAL) {
-                        return cb.notEqual(root.get(field), uuid);
+                        return cb.notEqual(root.get("tenant").get("id"), uuid);
                     }
                     if (filterType == FilterType.EQUAL) {
-                        return cb.equal(root.get(field), uuid);
+                        return cb.equal(root.get("tenant").get("id"), uuid);
+                    }
+                }
+
+                if ("reporterId".equals(field)) {
+                    UUID uuid = ticketValueParser.parseRequiredUuid(value, key);
+                    if (filterType == FilterType.NOT_EQUAL) {
+                        return cb.notEqual(root.get("reporter").get("id"), uuid);
+                    }
+                    if (filterType == FilterType.EQUAL) {
+                        return cb.equal(root.get("reporter").get("id"), uuid);
                     }
                 }
 

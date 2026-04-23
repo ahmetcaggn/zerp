@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public record TicketResponse(
-                Integer id,
+                UUID id,
                 String title,
                 String description,
                 String status,

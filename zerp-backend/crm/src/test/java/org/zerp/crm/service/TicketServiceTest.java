@@ -1,10 +1,13 @@
 package org.zerp.crm.service;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
+import org.zerp.common.entity.Tenant;
 import org.zerp.common.entity.crm.*;
 import org.zerp.common.entity.crm.TicketEntity.TicketPriority;
 import org.zerp.common.entity.crm.TicketEntity.TicketStatus;
 import org.zerp.common.entity.crm.TicketEntity.TicketType;
+import org.zerp.common.entity.user.AppUser;
 import org.zerp.crm.dto.ticket.*;
 import org.zerp.crm.repository.TicketRepository;
 import org.zerp.crm.service.ticket.TicketResponseMapper;
@@ -21,6 +24,7 @@ import static org.mockito.Mockito.*;
 public class TicketServiceTest {
 
     private TicketRepository ticketRepository;
+    private EntityManager entityManager;
     private TicketService ticketService;
 
     private UUID defaultTenantId;
@@ -29,10 +33,17 @@ public class TicketServiceTest {
     @BeforeEach
     void setUp() {
         ticketRepository = mock(TicketRepository.class);
+        entityManager = mock(EntityManager.class);
         TicketValueParser ticketValueParser = new TicketValueParser();
         TicketSpecificationBuilder ticketSpecificationBuilder = new TicketSpecificationBuilder(ticketValueParser);
         TicketResponseMapper ticketResponseMapper = new TicketResponseMapper();
-        ticketService = new TicketService(ticketRepository, ticketResponseMapper, ticketSpecificationBuilder, ticketValueParser);
+        ticketService = new TicketService(
+                ticketRepository,
+                ticketResponseMapper,
+                ticketSpecificationBuilder,
+                ticketValueParser,
+                entityManager
+        );
 
         defaultTenantId = UUID.randomUUID();
         defaultUserId = UUID.randomUUID();
@@ -41,9 +52,30 @@ public class TicketServiceTest {
         when(ticketRepository.save(any(TicketEntity.class))).thenAnswer(invocation -> {
             TicketEntity saved = invocation.getArgument(0);
             if (saved.getId() == null) {
-                saved.setId(1);
+                saved.setId(UUID.randomUUID());
             }
             return saved;
+        });
+
+        when(entityManager.getReference(eq(Tenant.class), any(UUID.class))).thenAnswer(invocation -> {
+            UUID id = invocation.getArgument(1);
+            Tenant tenant = new Tenant();
+            tenant.setId(id);
+            return tenant;
+        });
+
+        when(entityManager.getReference(eq(AppUser.class), any(UUID.class))).thenAnswer(invocation -> {
+            UUID id = invocation.getArgument(1);
+            AppUser appUser = new AppUser();
+            appUser.setId(id);
+            return appUser;
+        });
+
+        when(entityManager.getReference(eq(TeamEntity.class), any(UUID.class))).thenAnswer(invocation -> {
+            UUID id = invocation.getArgument(1);
+            TeamEntity team = new TeamEntity();
+            team.setId(id);
+            return team;
         });
     }
 
@@ -53,14 +85,14 @@ public class TicketServiceTest {
 
     private TicketEntity createSavedEntity() {
         TicketEntity entity = new TicketEntity();
-        entity.setId(1);
+        entity.setId(UUID.randomUUID());
         entity.setTitle("Test Ticket");
         entity.setDescription("Description");
         entity.setStatus(TicketStatus.OPEN);
         entity.setPriority(TicketPriority.MEDIUM);
         entity.setType(TicketType.QUESTION);
-        entity.setTenantId(defaultTenantId);
-        entity.setReporterId(defaultUserId);
+        entity.setTenant(tenant(defaultTenantId));
+        entity.setReporter(reporter(defaultUserId));
         entity.setCreatedAt(LocalDateTime.now());
 
         // SLA
@@ -78,12 +110,24 @@ public class TicketServiceTest {
         TicketHistoryEntity h = new TicketHistoryEntity();
         h.setTicket(entity);
         h.setEventType(TicketHistoryEntity.EventType.CREATED);
-        h.setActorPartyId(defaultUserId);
+        h.setActorParty(reporter(defaultUserId));
         h.setPayload("Ticket created with priority: MEDIUM");
         h.setOccurredAt(LocalDateTime.now());
         entity.getHistory().add(h);
 
         return entity;
+    }
+
+    private Tenant tenant(UUID id) {
+        Tenant tenant = new Tenant();
+        tenant.setId(id);
+        return tenant;
+    }
+
+    private AppUser reporter(UUID id) {
+        AppUser appUser = new AppUser();
+        appUser.setId(id);
+        return appUser;
     }
 
     @Nested
@@ -94,9 +138,10 @@ public class TicketServiceTest {
         @DisplayName("Should record first response when agent adds public comment")
         void should_Record_First_Response_When_Agent_Adds_Public_Comment() {
             TicketEntity entity = createSavedEntity();
-            when(ticketRepository.findById(1)).thenReturn(Optional.of(entity));
+            UUID ticketId = entity.getId();
+            when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
-            ticketService.addComment(1, new AddCommentRequest("Agent reply", false), UUID.randomUUID());
+            ticketService.addComment(ticketId, new AddCommentRequest("Agent reply", false), UUID.randomUUID());
 
             Assertions.assertNotNull(entity.getSlaTracking().getFirstResponseAt(),
                     "First response should be recorded when an agent adds a public comment.");
@@ -108,9 +153,10 @@ public class TicketServiceTest {
         @DisplayName("Should not record first response when comment is internal")
         void should_Not_Record_First_Response_When_Internal_Comment() {
             TicketEntity entity = createSavedEntity();
-            when(ticketRepository.findById(1)).thenReturn(Optional.of(entity));
+            UUID ticketId = entity.getId();
+            when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
-            ticketService.addComment(1, new AddCommentRequest("Internal note", true), UUID.randomUUID());
+            ticketService.addComment(ticketId, new AddCommentRequest("Internal note", true), UUID.randomUUID());
 
             Assertions.assertNull(entity.getSlaTracking().getFirstResponseAt(),
                     "First response should not be recorded for internal comments.");
@@ -126,10 +172,11 @@ public class TicketServiceTest {
         void should_Not_Change_Closed_Ticket_Status() {
             TicketEntity entity = createSavedEntity();
             entity.setStatus(TicketStatus.CLOSED);
-            when(ticketRepository.findById(1)).thenReturn(Optional.of(entity));
+            UUID ticketId = entity.getId();
+            when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
             Assertions.assertThrows(IllegalStateException.class, () ->
-                    ticketService.changeStatus(1, new ChangeStatusRequest(TicketStatus.OPEN), defaultUserId),
+                    ticketService.changeStatus(ticketId, new ChangeStatusRequest(TicketStatus.OPEN), defaultUserId),
                     "Changing status of a closed ticket should throw an exception.");
         }
 
@@ -138,10 +185,11 @@ public class TicketServiceTest {
         void should_Not_Change_Cancelled_Ticket_Status() {
             TicketEntity entity = createSavedEntity();
             entity.setStatus(TicketStatus.CANCELLED);
-            when(ticketRepository.findById(1)).thenReturn(Optional.of(entity));
+            UUID ticketId = entity.getId();
+            when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
             Assertions.assertThrows(IllegalStateException.class, () ->
-                    ticketService.changeStatus(1, new ChangeStatusRequest(TicketStatus.OPEN), defaultUserId),
+                    ticketService.changeStatus(ticketId, new ChangeStatusRequest(TicketStatus.OPEN), defaultUserId),
                     "Changing status of a cancelled ticket should throw an exception.");
         }
 
@@ -150,10 +198,11 @@ public class TicketServiceTest {
         void should_Allow_Resolved_Ticket_To_Be_Reopened() {
             TicketEntity entity = createSavedEntity();
             entity.setStatus(TicketStatus.RESOLVED);
-            when(ticketRepository.findById(1)).thenReturn(Optional.of(entity));
+            UUID ticketId = entity.getId();
+            when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
             Assertions.assertDoesNotThrow(() ->
-                    ticketService.changeStatus(1, new ChangeStatusRequest(TicketStatus.OPEN), defaultUserId),
+                    ticketService.changeStatus(ticketId, new ChangeStatusRequest(TicketStatus.OPEN), defaultUserId),
                     "Changing status of a resolved ticket to open should not throw an exception.");
         }
 
@@ -162,10 +211,11 @@ public class TicketServiceTest {
         void should_Allow_Resolved_Ticket_To_Be_Closed() {
             TicketEntity entity = createSavedEntity();
             entity.setStatus(TicketStatus.RESOLVED);
-            when(ticketRepository.findById(1)).thenReturn(Optional.of(entity));
+            UUID ticketId = entity.getId();
+            when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
             Assertions.assertDoesNotThrow(() ->
-                    ticketService.changeStatus(1, new ChangeStatusRequest(TicketStatus.CLOSED), defaultUserId),
+                    ticketService.changeStatus(ticketId, new ChangeStatusRequest(TicketStatus.CLOSED), defaultUserId),
                     "Changing status of a resolved ticket to closed should not throw an exception.");
         }
     }
@@ -179,10 +229,11 @@ public class TicketServiceTest {
         void should_Not_Allow_Comment_Addition_To_Closed_Ticket() {
             TicketEntity entity = createSavedEntity();
             entity.setStatus(TicketStatus.CLOSED);
-            when(ticketRepository.findById(1)).thenReturn(Optional.of(entity));
+            UUID ticketId = entity.getId();
+            when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
             Assertions.assertThrows(IllegalStateException.class, () ->
-                    ticketService.addComment(1, new AddCommentRequest("Test", false), UUID.randomUUID()),
+                    ticketService.addComment(ticketId, new AddCommentRequest("Test", false), UUID.randomUUID()),
                     "Adding a comment to a closed ticket should throw an exception.");
         }
 
@@ -191,10 +242,11 @@ public class TicketServiceTest {
         void should_Not_Allow_Comment_Addition_To_Cancelled_Ticket() {
             TicketEntity entity = createSavedEntity();
             entity.setStatus(TicketStatus.CANCELLED);
-            when(ticketRepository.findById(1)).thenReturn(Optional.of(entity));
+            UUID ticketId = entity.getId();
+            when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
             Assertions.assertThrows(IllegalStateException.class, () ->
-                    ticketService.addComment(1, new AddCommentRequest("Test", false), UUID.randomUUID()),
+                    ticketService.addComment(ticketId, new AddCommentRequest("Test", false), UUID.randomUUID()),
                     "Adding a comment to a cancelled ticket should throw an exception.");
         }
     }
@@ -223,9 +275,10 @@ public class TicketServiceTest {
         void should_Track_History_Of_Status_Changes() {
             TicketEntity entity = createSavedEntity();
             int initialHistorySize = entity.getHistory().size();
-            when(ticketRepository.findById(1)).thenReturn(Optional.of(entity));
+            UUID ticketId = entity.getId();
+            when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
-            ticketService.changeStatus(1, new ChangeStatusRequest(TicketStatus.IN_PROGRESS), defaultUserId);
+            ticketService.changeStatus(ticketId, new ChangeStatusRequest(TicketStatus.IN_PROGRESS), defaultUserId);
 
             Assertions.assertTrue(entity.getHistory().size() > initialHistorySize,
                     "Status change should add history entry");
@@ -239,9 +292,10 @@ public class TicketServiceTest {
         void should_Track_History_Of_Priority_Changes() {
             TicketEntity entity = createSavedEntity();
             int initialHistorySize = entity.getHistory().size();
-            when(ticketRepository.findById(1)).thenReturn(Optional.of(entity));
+            UUID ticketId = entity.getId();
+            when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
-            ticketService.changePriority(1, new ChangePriorityRequest(TicketPriority.CRITICAL), defaultUserId);
+            ticketService.changePriority(ticketId, new ChangePriorityRequest(TicketPriority.CRITICAL), defaultUserId);
 
             Assertions.assertTrue(entity.getHistory().size() > initialHistorySize,
                     "Priority change should add history entry");
@@ -254,10 +308,11 @@ public class TicketServiceTest {
         @DisplayName("Should track history of ticket assignment to agent")
         void should_Track_History_Of_Ticket_Assignment_To_Agent() {
             TicketEntity entity = createSavedEntity();
-            when(ticketRepository.findById(1)).thenReturn(Optional.of(entity));
+            UUID ticketId = entity.getId();
+            when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
             UUID agentId = UUID.randomUUID();
-            ticketService.assignTicket(1, new AssignTicketRequest(400, agentId), defaultUserId);
+            ticketService.assignTicket(ticketId, new AssignTicketRequest(UUID.randomUUID(), agentId), defaultUserId);
 
             boolean hasAssigned = entity.getHistory().stream()
                     .anyMatch(h -> h.getEventType() == TicketHistoryEntity.EventType.ASSIGNED);
@@ -271,17 +326,20 @@ public class TicketServiceTest {
             // Set up an existing active assignment
             TicketAssignmentEntity assignment = new TicketAssignmentEntity();
             assignment.setTicket(entity);
-            assignment.setTeamId(400);
-            assignment.setAgentPartyId(UUID.randomUUID());
-            assignment.setAssignedByPartyId(defaultUserId);
+            TeamEntity team = new TeamEntity();
+            team.setId(UUID.randomUUID());
+            assignment.setTeam(team);
+            assignment.setAgentParty(reporter(UUID.randomUUID()));
+            assignment.setAssignedByParty(reporter(defaultUserId));
             assignment.setActive(true);
             assignment.setAssignedAt(LocalDateTime.now());
             entity.setCurrentAssignment(assignment);
             entity.setStatus(TicketStatus.IN_PROGRESS);
 
-            when(ticketRepository.findById(1)).thenReturn(Optional.of(entity));
+            UUID ticketId = entity.getId();
+            when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
-            ticketService.unassignTicket(1, UUID.randomUUID());
+            ticketService.unassignTicket(ticketId, UUID.randomUUID());
 
             boolean hasUnassigned = entity.getHistory().stream()
                     .anyMatch(h -> h.getEventType() == TicketHistoryEntity.EventType.UNASSIGNED);

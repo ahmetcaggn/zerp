@@ -1,5 +1,6 @@
 package org.zerp.crm.service;
 
+import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -7,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.Tenant;
+import org.zerp.common.entity.crm.TeamEntity;
 import org.zerp.common.entity.crm.TicketAssignmentEntity;
 import org.zerp.common.entity.crm.TicketCommentEntity;
 import org.zerp.common.entity.crm.TicketEntity;
@@ -15,6 +18,7 @@ import org.zerp.common.entity.crm.TicketSlaTrackingEntity;
 import org.zerp.common.entity.crm.TicketEntity.TicketPriority;
 import org.zerp.common.entity.crm.TicketEntity.TicketStatus;
 import org.zerp.common.entity.crm.TicketEntity.TicketType;
+import org.zerp.common.entity.user.AppUser;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.crm.dto.ticket.AddCommentRequest;
 import org.zerp.crm.dto.ticket.AssignTicketRequest;
@@ -38,7 +42,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class TicketService implements IResourceService<TicketResponse, TicketResponse,
-        CreateTicketRequest, UpdateTicketRequest, Integer> {
+        CreateTicketRequest, UpdateTicketRequest, UUID> {
 
     private static final UUID SYSTEM_ACTOR_ID = UUID.fromString("2b9de1ef-3cda-4226-b1e7-e23a178cdb7e");
 
@@ -46,17 +50,20 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     private final TicketResponseMapper ticketResponseMapper;
     private final TicketSpecificationBuilder ticketSpecificationBuilder;
     private final TicketValueParser ticketValueParser;
+    private final EntityManager entityManager;
 
     public TicketService(
             TicketRepository ticketRepository,
             TicketResponseMapper ticketResponseMapper,
             TicketSpecificationBuilder ticketSpecificationBuilder,
-            TicketValueParser ticketValueParser
+            TicketValueParser ticketValueParser,
+            EntityManager entityManager
     ) {
         this.ticketRepository = ticketRepository;
         this.ticketResponseMapper = ticketResponseMapper;
         this.ticketSpecificationBuilder = ticketSpecificationBuilder;
         this.ticketValueParser = ticketValueParser;
+        this.entityManager = entityManager;
     }
 
     // -- Resource service methods --
@@ -70,7 +77,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
 
     @Override
     @Transactional(readOnly = true)
-    public List<TicketResponse> findAllById(List<Integer> ids) {
+    public List<TicketResponse> findAllById(List<UUID> ids) {
         return ticketRepository.findAllById(ids).stream()
                 .map(ticketResponseMapper::toResponse)
                 .collect(Collectors.toList());
@@ -78,7 +85,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
 
     @Override
     @Transactional(readOnly = true)
-    public TicketResponse findById(Integer id) {
+    public TicketResponse findById(UUID id) {
         return ticketResponseMapper.toResponse(findOrThrow(id));
     }
 
@@ -88,7 +95,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     @Override
-    public TicketResponse patch(Integer id, Map<String, Object> data) {
+    public TicketResponse patch(UUID id, Map<String, Object> data) {
         TicketEntity entity = findOrThrow(id);
         boolean changed = false;
 
@@ -131,7 +138,12 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         }
 
         if (data.containsKey("tenantId")) {
-            entity.setTenantId(ticketValueParser.parseNullableUuid(data.get("tenantId"), "tenantId"));
+            entity.setTenant(toTenantReference(ticketValueParser.parseNullableUuid(data.get("tenantId"), "tenantId")));
+            changed = true;
+        }
+
+        if (data.containsKey("reporterId")) {
+            entity.setReporter(toAppUserReference(ticketValueParser.parseNullableUuid(data.get("reporterId"), "reporterId")));
             changed = true;
         }
 
@@ -154,7 +166,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     @Override
-    public TicketResponse update(Integer id, UpdateTicketRequest data) {
+    public TicketResponse update(UUID id, UpdateTicketRequest data) {
         TicketEntity entity = findOrThrow(id);
         entity.setTitle(validateTitle(data.title()));
         entity.setDescription(data.description());
@@ -165,9 +177,9 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     @Override
-    public List<Integer> patchMany(List<Integer> ids, Map<String, Object> fields) {
-        List<Integer> updated = new ArrayList<>();
-        for (Integer id : ids) {
+    public List<UUID> patchMany(List<UUID> ids, Map<String, Object> fields) {
+        List<UUID> updated = new ArrayList<>();
+        for (UUID id : ids) {
             try {
                 patch(id, fields);
                 updated.add(id);
@@ -178,15 +190,15 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     @Override
-    public void deleteById(Integer id) {
+    public void deleteById(UUID id) {
         TicketEntity entity = findOrThrow(id);
         ticketRepository.delete(entity);
     }
 
     @Override
-    public List<Integer> deleteMany(List<Integer> ids) {
-        List<Integer> deleted = new ArrayList<>();
-        for (Integer id : ids) {
+    public List<UUID> deleteMany(List<UUID> ids) {
+        List<UUID> deleted = new ArrayList<>();
+        for (UUID id : ids) {
             try {
                 deleteById(id);
                 deleted.add(id);
@@ -208,8 +220,8 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         entity.setStatus(TicketStatus.OPEN);
         entity.setPriority(priority);
         entity.setType(type);
-        entity.setTenantId(request.tenantId());
-        entity.setReporterId(actorId);
+        entity.setTenant(toTenantReference(request.tenantId()));
+        entity.setReporter(toAppUserReference(actorId));
         entity.setCreatedAt(LocalDateTime.now());
 
         initializeSla(entity, priority);
@@ -221,11 +233,11 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     @Transactional(readOnly = true)
-    public TicketResponse getTicket(Integer ticketId) {
+    public TicketResponse getTicket(UUID ticketId) {
         return findById(ticketId);
     }
 
-    public TicketResponse changeStatus(Integer ticketId, ChangeStatusRequest request, UUID actorId) {
+    public TicketResponse changeStatus(UUID ticketId, ChangeStatusRequest request, UUID actorId) {
         TicketEntity entity = findOrThrow(ticketId);
         TicketStatus newStatus = request.status();
         TicketStatus oldStatus = entity.getStatus();
@@ -259,7 +271,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         return ticketResponseMapper.toResponse(saved);
     }
 
-    public TicketResponse changePriority(Integer ticketId, ChangePriorityRequest request, UUID actorId) {
+    public TicketResponse changePriority(UUID ticketId, ChangePriorityRequest request, UUID actorId) {
         TicketEntity entity = findOrThrow(ticketId);
         TicketPriority oldPriority = entity.getPriority();
         TicketPriority newPriority = request.priority();
@@ -278,7 +290,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         return ticketResponseMapper.toResponse(saved);
     }
 
-    public TicketResponse assignTicket(Integer ticketId, AssignTicketRequest request, UUID actorId) {
+    public TicketResponse assignTicket(UUID ticketId, AssignTicketRequest request, UUID actorId) {
         TicketEntity entity = findOrThrow(ticketId);
         validateAssignable(entity);
 
@@ -299,9 +311,9 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
 
         TicketAssignmentEntity assignment = new TicketAssignmentEntity();
         assignment.setTicket(entity);
-        assignment.setTeamId(request.teamId());
-        assignment.setAgentPartyId(request.agentPartyId());
-        assignment.setAssignedByPartyId(actorId);
+        assignment.setTeam(toTeamReference(request.teamId()));
+        assignment.setAgentParty(toAppUserReference(request.agentPartyId()));
+        assignment.setAssignedByParty(toAppUserReference(actorId));
         assignment.setActive(true);
         assignment.setReason(request.agentPartyId() != null ? "Assigned to agent" : "Assigned to team");
         assignment.setAssignedAt(LocalDateTime.now());
@@ -323,16 +335,16 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         return ticketResponseMapper.toResponse(saved);
     }
 
-    public TicketResponse unassignTicket(Integer ticketId, UUID actorId) {
+    public TicketResponse unassignTicket(UUID ticketId, UUID actorId) {
         TicketEntity entity = findOrThrow(ticketId);
 
         if (entity.getCurrentAssignment() != null
                 && Boolean.TRUE.equals(entity.getCurrentAssignment().getActive())) {
             TicketAssignmentEntity assignment = entity.getCurrentAssignment();
 
-            String assignmentTarget = assignment.getAgentPartyId() != null
-                    ? "agent " + assignment.getAgentPartyId()
-                    : "team " + assignment.getTeamId();
+            String assignmentTarget = assignment.getAgentParty() != null
+                    ? "agent " + assignment.getAgentParty().getId()
+                    : assignment.getTeam() != null ? "team " + assignment.getTeam().getId() : "team";
 
             assignment.setActive(false);
             assignment.setUnassignedAt(LocalDateTime.now());
@@ -348,7 +360,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         return ticketResponseMapper.toResponse(saved);
     }
 
-    public TicketResponse addComment(Integer ticketId, AddCommentRequest request, UUID actorId) {
+    public TicketResponse addComment(UUID ticketId, AddCommentRequest request, UUID actorId) {
         TicketEntity entity = findOrThrow(ticketId);
         validateCommentable(entity);
 
@@ -356,7 +368,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
 
         TicketCommentEntity comment = new TicketCommentEntity();
         comment.setTicket(entity);
-        comment.setAuthorId(actorId);
+        comment.setAuthor(toAppUserReference(actorId));
         comment.setAuthorType(TicketCommentEntity.AuthorType.AGENT);
         comment.setContent(request.content());
         comment.setIsInternal(isInternal);
@@ -379,7 +391,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         return ticketResponseMapper.toResponse(saved);
     }
 
-    public TicketResponse closeTicket(Integer ticketId, UUID actorId) {
+    public TicketResponse closeTicket(UUID ticketId, UUID actorId) {
         TicketEntity entity = findOrThrow(ticketId);
         TicketStatus oldStatus = entity.getStatus();
 
@@ -429,9 +441,30 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
                 String.format("Status changed from %s to %s", oldStatus, newStatus));
     }
 
-    private TicketEntity findOrThrow(Integer ticketId) {
+    private TicketEntity findOrThrow(UUID ticketId) {
         return ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found: " + ticketId));
+    }
+
+    private Tenant toTenantReference(UUID tenantId) {
+        if (tenantId == null) {
+            return null;
+        }
+        return entityManager.getReference(Tenant.class, tenantId);
+    }
+
+    private TeamEntity toTeamReference(UUID teamId) {
+        if (teamId == null) {
+            return null;
+        }
+        return entityManager.getReference(TeamEntity.class, teamId);
+    }
+
+    private AppUser toAppUserReference(UUID userId) {
+        if (userId == null) {
+            return null;
+        }
+        return entityManager.getReference(AppUser.class, userId);
     }
 
     private void validateAssignable(TicketEntity entity) {
@@ -482,7 +515,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         TicketHistoryEntity history = new TicketHistoryEntity();
         history.setTicket(entity);
         history.setEventType(eventType);
-        history.setActorPartyId(actorId);
+        history.setActorParty(toAppUserReference(actorId));
         history.setPayload(payload);
         history.setOccurredAt(LocalDateTime.now());
         entity.getHistory().add(history);

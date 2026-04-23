@@ -13,7 +13,7 @@ import java.util.UUID;
 @RequestMapping("/api/teams")
 @Tag(name = "Teams", description = "APIs for managing teams and their members")
 public class TeamController extends ResourceController<TeamResponse, TeamResponse,
-        CreateTeamRequest, UpdateTeamRequest, Integer> {
+        CreateTeamRequest, UpdateTeamRequest, UUID> {
     private final TeamService teamService;
 
     public TeamController(TeamService teamService) {
@@ -26,20 +26,20 @@ public class TeamController extends ResourceController<TeamResponse, TeamRespons
     }
 
     @PostMapping("/{id}/deactivate")
-    public ResponseEntity<TeamResponse> deactivateTeam(@PathVariable Integer id) {
+    public ResponseEntity<TeamResponse> deactivateTeam(@PathVariable UUID id) {
         TeamResponse response = teamService.deactivateTeam(id);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{id}/activate")
-    public ResponseEntity<TeamResponse> activateTeam(@PathVariable Integer id) {
+    public ResponseEntity<TeamResponse> activateTeam(@PathVariable UUID id) {
         TeamResponse response = teamService.activateTeam(id);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{id}/members")
     public ResponseEntity<TeamResponse> addTeamMember(
-            @PathVariable Integer id,
+            @PathVariable UUID id,
             @RequestBody AddMemberRequest request) {
         TeamResponse response = teamService.addMember(id, request);
         return ResponseEntity.ok(response);
@@ -47,7 +47,7 @@ public class TeamController extends ResourceController<TeamResponse, TeamRespons
 
     @DeleteMapping("/{id}/members/{userId}")
     public ResponseEntity<TeamResponse> removeTeamMember(
-            @PathVariable Integer id,
+            @PathVariable UUID id,
             @PathVariable UUID userId) {
         TeamResponse response = teamService.removeMember(id, userId);
         return ResponseEntity.ok(response);
@@ -55,7 +55,7 @@ public class TeamController extends ResourceController<TeamResponse, TeamRespons
 
     @PatchMapping("/{id}/members/{userId}/role")
     public ResponseEntity<TeamResponse> changeTeamMemberRole(
-            @PathVariable Integer id,
+            @PathVariable UUID id,
             @PathVariable UUID userId,
             @RequestBody ChangeMemberRoleRequest request) {
         TeamResponse response = teamService.changeMemberRole(id, userId, request);

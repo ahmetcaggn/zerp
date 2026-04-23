@@ -1,5 +1,6 @@
 package org.zerp.crm.service;
 
+import jakarta.persistence.EntityManager;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.crm.TeamEntity;
 import org.zerp.common.entity.crm.TeamMemberEntity;
+import org.zerp.common.entity.user.AppUser;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.FilterType;
 import org.zerp.crm.dto.team.*;
@@ -26,11 +28,13 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class TeamService implements IResourceService<TeamResponse, TeamResponse,
-        CreateTeamRequest, UpdateTeamRequest, Integer> {
+        CreateTeamRequest, UpdateTeamRequest, UUID> {
     private final TeamRepository teamRepository;
+    private final EntityManager entityManager;
 
-    public TeamService(TeamRepository teamRepository) {
+    public TeamService(TeamRepository teamRepository, EntityManager entityManager) {
         this.teamRepository = teamRepository;
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -42,7 +46,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
     @Override
     @Transactional(readOnly = true)
-    public List<TeamResponse> findAllById(List<Integer> ids) {
+    public List<TeamResponse> findAllById(List<UUID> ids) {
         return teamRepository.findAllById(ids).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -50,7 +54,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
     @Override
     @Transactional(readOnly = true)
-    public TeamResponse findById(Integer id) {
+    public TeamResponse findById(UUID id) {
         TeamEntity entity = findOrThrow(id);
         return toResponse(entity);
     }
@@ -67,7 +71,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     }
 
     @Override
-    public TeamResponse patch(Integer id, Map<String, Object> data) {
+    public TeamResponse patch(UUID id, Map<String, Object> data) {
         TeamEntity entity = findOrThrow(id);
 
         if (data.containsKey("name")) {
@@ -86,7 +90,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     }
 
     @Override
-    public TeamResponse update(Integer id, UpdateTeamRequest data) {
+    public TeamResponse update(UUID id, UpdateTeamRequest data) {
         TeamEntity entity = findOrThrow(id);
         entity.setName(validateName(data.name()));
         entity.setDescription(data.description());
@@ -96,9 +100,9 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     }
 
     @Override
-    public List<Integer> patchMany(List<Integer> ids, Map<String, Object> fields) {
-        List<Integer> updated = new ArrayList<>();
-        for (Integer id : ids) {
+    public List<UUID> patchMany(List<UUID> ids, Map<String, Object> fields) {
+        List<UUID> updated = new ArrayList<>();
+        for (UUID id : ids) {
             try {
                 patch(id, fields);
                 updated.add(id);
@@ -109,15 +113,15 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     }
 
     @Override
-    public void deleteById(Integer id) {
+    public void deleteById(UUID id) {
         TeamEntity entity = findOrThrow(id);
         teamRepository.delete(entity);
     }
 
     @Override
-    public List<Integer> deleteMany(List<Integer> ids) {
-        List<Integer> deleted = new ArrayList<>();
-        for (Integer id : ids) {
+    public List<UUID> deleteMany(List<UUID> ids) {
+        List<UUID> deleted = new ArrayList<>();
+        for (UUID id : ids) {
             try {
                 deleteById(id);
                 deleted.add(id);
@@ -129,7 +133,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
     // -- others --
 
-    public TeamResponse deactivateTeam(Integer teamId) {
+    public TeamResponse deactivateTeam(UUID teamId) {
         TeamEntity entity = findOrThrow(teamId);
         if (!Boolean.TRUE.equals(entity.getIsActive())) {
             throw new IllegalStateException("Team is already inactive");
@@ -140,7 +144,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         return toResponse(saved);
     }
 
-    public TeamResponse activateTeam(Integer teamId) {
+    public TeamResponse activateTeam(UUID teamId) {
         TeamEntity entity = findOrThrow(teamId);
         if (Boolean.TRUE.equals(entity.getIsActive())) {
             throw new IllegalStateException("Team is already active");
@@ -151,7 +155,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         return toResponse(saved);
     }
 
-    public TeamResponse addMember(Integer teamId, AddMemberRequest request) {
+    public TeamResponse addMember(UUID teamId, AddMemberRequest request) {
         TeamEntity entity = findOrThrow(teamId);
 
         if (!Boolean.TRUE.equals(entity.getIsActive())) {
@@ -159,7 +163,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         }
 
         boolean alreadyMember = entity.getMembers().stream()
-                .anyMatch(m -> m.getUserId().equals(request.userId()));
+                .anyMatch(m -> m.getUser() != null && request.userId().equals(m.getUser().getId()));
         if (alreadyMember) {
             throw new IllegalArgumentException(
                     String.format("User %s is already a member of this team", request.userId()));
@@ -167,7 +171,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
         TeamMemberEntity member = new TeamMemberEntity();
         member.setTeam(entity);
-        member.setUserId(request.userId());
+        member.setUser(toUserReference(request.userId()));
         member.setRole(request.role());
         member.setJoinedAt(LocalDateTime.now());
         entity.getMembers().add(member);
@@ -176,10 +180,12 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         return toResponse(saved);
     }
 
-    public TeamResponse removeMember(Integer teamId, UUID userId) {
+    public TeamResponse removeMember(UUID teamId, UUID userId) {
         TeamEntity entity = findOrThrow(teamId);
 
-        boolean removed = entity.getMembers().removeIf(m -> m.getUserId() != null && m.getUserId().equals(userId));
+        boolean removed = entity.getMembers().removeIf(
+                m -> m.getUser() != null && userId.equals(m.getUser().getId())
+        );
         if (!removed) {
             throw new IllegalArgumentException(
                     String.format("User %s is not a member of this team", userId));
@@ -189,11 +195,11 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         return toResponse(saved);
     }
 
-    public TeamResponse changeMemberRole(Integer teamId, UUID userId, ChangeMemberRoleRequest request) {
+    public TeamResponse changeMemberRole(UUID teamId, UUID userId, ChangeMemberRoleRequest request) {
         TeamEntity entity = findOrThrow(teamId);
 
         TeamMemberEntity member = entity.getMembers().stream()
-                .filter(m -> m.getUserId() != null && m.getUserId().equals(userId))
+                .filter(m -> m.getUser() != null && userId.equals(m.getUser().getId()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
                         String.format("User %s is not a member of this team", userId)));
@@ -206,7 +212,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
     // ─── Helpers ───
 
-    private TeamEntity findOrThrow(Integer teamId) {
+    private TeamEntity findOrThrow(UUID teamId) {
         return teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found: " + teamId));
     }
@@ -224,7 +230,10 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     private TeamResponse toResponse(TeamEntity entity) {
         List<TeamMemberResponse> memberResponses = entity.getMembers().stream()
                 .map(m -> new TeamMemberResponse(
-                        m.getId(), m.getUserId(), m.getRole().name(), m.getJoinedAt()))
+                        m.getId(),
+                        m.getUser() != null ? m.getUser().getId() : null,
+                        m.getRole().name(),
+                        m.getJoinedAt()))
                 .collect(Collectors.toList());
 
         return new TeamResponse(
@@ -233,6 +242,13 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
                 entity.getDescription(),
                 Boolean.TRUE.equals(entity.getIsActive()),
                 memberResponses);
+    }
+
+    private AppUser toUserReference(UUID userId) {
+        if (userId == null) {
+            return null;
+        }
+        return entityManager.getReference(AppUser.class, userId);
     }
 
     private Specification<TeamEntity> buildSpecificationFromFilters(Map<String, String> filters) {
