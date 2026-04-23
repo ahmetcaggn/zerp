@@ -9,8 +9,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.entity.user.AppUser;
+import org.zerp.common.permission.entity.Permittable;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -23,7 +23,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SQLDelete(sql = "UPDATE ticket_comment SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? and version = ?")
 @SQLRestriction("deleted = false")
-public class TicketCommentEntity extends BaseEntity {
+public class TicketCommentEntity extends BaseEntity implements Permittable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -46,12 +46,14 @@ public class TicketCommentEntity extends BaseEntity {
     @Column(name = "is_internal", nullable = false)
     private Boolean isInternal;
     
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-    
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TicketAttachmentEntity> attachments = new ArrayList<>();
-    
+
+    @Override
+    public Permittable getParent() {
+        return ticket;
+    }
+
     public enum AuthorType {
         CUSTOMER, AGENT, SYSTEM
     }

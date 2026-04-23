@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
+import org.zerp.common.permission.entity.Permittable;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -20,7 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SQLDelete(sql = "UPDATE ticket_sla_tracker SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? and version = ?")
 @SQLRestriction("deleted = false")
-public class TicketSlaTrackingEntity extends BaseEntity {
+public class TicketSlaTrackingEntity extends BaseEntity implements Permittable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -56,4 +57,9 @@ public class TicketSlaTrackingEntity extends BaseEntity {
     
     @Column(name = "total_paused_time_minutes")
     private Integer totalPausedTimeMinutes = 0;
+
+    @Override
+    public Permittable getParent() {
+        return ticket;
+    }
 }

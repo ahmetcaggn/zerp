@@ -9,7 +9,7 @@ import java.util.UUID;
 public class TenantRoot implements Permittable {
     private TenantRoot() {};
 
-    static final TenantRoot INSTANCE = new TenantRoot();
+    public static final TenantRoot INSTANCE = new TenantRoot();
 
     private final UUID id = new UUID(0L, 0L);
 

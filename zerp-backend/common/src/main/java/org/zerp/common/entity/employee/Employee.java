@@ -7,6 +7,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.Tenant;
 import org.zerp.common.entity.base.BaseEntity;
+import org.zerp.common.entity.user.AppUser;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 import org.zerp.common.permission.entity.Permittable;

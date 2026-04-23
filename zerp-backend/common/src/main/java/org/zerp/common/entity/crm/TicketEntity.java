@@ -16,6 +16,7 @@ import java.util.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.zerp.common.entity.user.AppUser;
+import org.zerp.common.permission.entity.Permittable;
 
 @Entity
 @Table(name = "ticket")
@@ -25,7 +26,7 @@ import org.zerp.common.entity.user.AppUser;
 @AllArgsConstructor
 @SQLDelete(sql = "UPDATE ticket SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? and version = ?")
 @SQLRestriction("deleted = false")
-public class TicketEntity extends BaseEntity {
+public class TicketEntity extends BaseEntity implements Permittable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -56,12 +57,6 @@ public class TicketEntity extends BaseEntity {
     @Column(name = "ticket_type")
     @Enumerated(EnumType.STRING)
     private TicketType type;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;
@@ -95,6 +90,11 @@ public class TicketEntity extends BaseEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "custom_attributes", columnDefinition = "jsonb")
     private Map<String, Object> customAttributes = new HashMap<>();
+
+    @Override
+    public Permittable getParent() {
+        return tenant;
+    }
 
     public enum TicketStatus {
         OPEN("Open", true),

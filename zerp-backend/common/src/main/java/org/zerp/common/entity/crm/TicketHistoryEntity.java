@@ -9,6 +9,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.entity.user.AppUser;
+import org.zerp.common.permission.entity.Permittable;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,7 +22,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SQLDelete(sql = "UPDATE ticket_history SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? and version = ?")
 @SQLRestriction("deleted = false")
-public class TicketHistoryEntity extends BaseEntity {
+public class TicketHistoryEntity extends BaseEntity implements Permittable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -50,6 +51,11 @@ public class TicketHistoryEntity extends BaseEntity {
 
     @Column(name = "occurred_at", nullable = false)
     private LocalDateTime occurredAt;
+
+    @Override
+    public Permittable getParent() {
+        return ticket;
+    }
 
     public enum EventType {
         CREATED, STATUS_CHANGED, PRIORITY_CHANGED, ASSIGNED, UNASSIGNED, REASSIGNED,

@@ -10,6 +10,15 @@ public enum PermissionTargetType {
     // ticket
     TICKET,
     TICKET_HISTORY,
+    TICKET_COMMENT,
+    TICKET_ASSIGNMENT,
+    TICKET_ATTACHMENT,
+    TICKET_SLA_TRACKING,
+    TICKET_WATCHER,
+
+    // team
+    TEAM,
+    TEAM_MEMBER,
 
 
     SHOP,

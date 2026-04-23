@@ -9,6 +9,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.entity.user.AppUser;
+import org.zerp.common.permission.entity.Permittable;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,7 +22,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SQLDelete(sql = "UPDATE team_member SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? and version = ?")
 @SQLRestriction("deleted = false")
-public class TeamMemberEntity extends BaseEntity {
+public class TeamMemberEntity extends BaseEntity implements Permittable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -41,6 +42,11 @@ public class TeamMemberEntity extends BaseEntity {
 
     @Column(name = "joined_at", nullable = false)
     private LocalDateTime joinedAt;
+
+    @Override
+    public Permittable getParent() {
+        return team;
+    }
 
     public enum TeamMemberRole {
         LEADER, MEMBER

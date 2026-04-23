@@ -12,6 +12,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.entity.user.AppUser;
+import org.zerp.common.permission.entity.Permittable;
 
 @Entity
 @Table(name = "ticket_assignment")
@@ -21,7 +22,7 @@ import org.zerp.common.entity.user.AppUser;
 @AllArgsConstructor
 @SQLDelete(sql = "UPDATE ticket_assignment SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? and version = ?")
 @SQLRestriction("deleted = false")
-public class TicketAssignmentEntity extends BaseEntity {
+public class TicketAssignmentEntity extends BaseEntity implements Permittable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -53,4 +54,9 @@ public class TicketAssignmentEntity extends BaseEntity {
 
     @Column(name = "unassigned_at")
     private LocalDateTime unassignedAt;
+
+    @Override
+    public Permittable getParent() {
+        return ticket;
+    }
 }

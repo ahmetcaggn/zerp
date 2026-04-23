@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.entity.user.AppUser;
+import org.zerp.common.permission.entity.Permittable;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,7 +18,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TicketWatcherEntity {
+public class TicketWatcherEntity extends BaseEntity implements Permittable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -32,4 +34,9 @@ public class TicketWatcherEntity {
 
     @Column(name = "added_at", nullable = false)
     private LocalDateTime addedAt;
+
+    @Override
+    public Permittable getParent() {
+        return ticket;
+    }
 }

@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.zerp.common.entity.base.BaseEntity;
+import org.zerp.common.permission.entity.Permittable;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -14,12 +17,13 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TicketAttachmentEntity {
+public class TicketAttachmentEntity extends BaseEntity implements Permittable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    //todo there is no need ticket rel in here
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_id", nullable = false)
     private TicketEntity ticket;
@@ -45,4 +49,9 @@ public class TicketAttachmentEntity {
 
     @Column(name = "uploaded_at", nullable = false)
     private LocalDateTime uploadedAt;
+
+    @Override
+    public Permittable getParent() {
+        return comment;
+    }
 }
