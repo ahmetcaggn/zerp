@@ -1,4 +1,4 @@
-import { TenantDashboard } from '@/modules/admin/ui/admin-dashboard'
+import { TenantDashboard } from '@/modules/tenant/ui/tenant-dashboard'
 
 export default function DashboardPage() {
   return <TenantDashboard />

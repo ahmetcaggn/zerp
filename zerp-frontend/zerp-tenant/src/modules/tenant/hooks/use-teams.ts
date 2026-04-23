@@ -1,0 +1,76 @@
+'use client'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { queryKeys } from '@/core/api/query-keys'
+import { createResourceHooks } from '@/core/api/resource-hooks'
+import { teamClient } from '../api/team-client'
+import type { AddMemberRequest, ChangeMemberRoleRequest } from '../types/team'
+
+const {
+  useList: useTeams,
+  useOne: useTeam,
+  useCreate: useCreateTeam,
+  useUpdate: useUpdateTeam,
+  usePatch: usePatchTeam,
+  useDelete: useDeleteTeam,
+  useDeleteMany: useDeleteManyTeams,
+} = createResourceHooks(queryKeys.tenant.teams, teamClient)
+
+export {
+  useTeams,
+  useTeam,
+  useCreateTeam,
+  useUpdateTeam,
+  usePatchTeam,
+  useDeleteTeam,
+  useDeleteManyTeams,
+}
+
+export function useActivateTeam() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => teamClient.activate(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.tenant.teams }),
+  })
+}
+
+export function useDeactivateTeam() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => teamClient.deactivate(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.tenant.teams }),
+  })
+}
+
+export function useAddTeamMember() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, body }: { id: number; body: AddMemberRequest }) =>
+      teamClient.addMember(id, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.tenant.teams }),
+  })
+}
+
+export function useRemoveTeamMember() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, userId }: { id: number; userId: string }) =>
+      teamClient.removeMember(id, userId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.tenant.teams }),
+  })
+}
+
+export function useChangeTeamMemberRole() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      id,
+      userId,
+      body,
+    }: {
+      id: number
+      userId: string
+      body: ChangeMemberRoleRequest
+    }) => teamClient.changeMemberRole(id, userId, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.tenant.teams }),
+  })
+}

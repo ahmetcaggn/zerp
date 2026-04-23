@@ -30,6 +30,15 @@ export interface MessageDictionary {
   dashboard: {
     title: string
     subtitle: string
+    totalEmployees: string
+    totalTeams: string
+    activeTeams: string
+    recentEmployeesTitle: string
+    quickActionsTitle: string
+    addEmployeeAction: string
+    manageTeamsAction: string
+    sendNotificationAction: string
+    newTicketAction: string
   }
   employees: {
     title: string
@@ -51,8 +60,19 @@ export interface MessageDictionary {
   }
   teams: {
     title: string
+    createButton: string
+    editButton: string
+    deleteButton: string
+    activateButton: string
+    deactivateButton: string
+    addMemberButton: string
+    removeMemberButton: string
     emptyState: string
     membersLabel: string
+    activeLabel: string
+    inactiveLabel: string
+    roleLeader: string
+    roleMember: string
   }
   notifications: {
     title: string
@@ -61,6 +81,9 @@ export interface MessageDictionary {
     subjectLabel: string
     bodyLabel: string
     sentSuccess: string
+    htmlModeLabel: string
+    htmlBodyLabel: string
+    recipientPlaceholder: string
   }
 }
 
