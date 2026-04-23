@@ -2,6 +2,7 @@ package org.zerp.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,8 +25,7 @@ public class FeignUserService {
      */
     public UserCheckResponseDTO checkUserExists(UserCreateIfNotExistRequestDTO request) {
         log.trace("Checking if user with id {} exists", request.getId());
-        AppUser user = repository.findById(request.getId()).orElse(null);
-        boolean exist = user != null;
+        boolean exist = repository.existsById(request.getId());
         log.trace("User with id {} exists: {}", request.getId(), exist);
 
         // return true if already exist
@@ -40,6 +40,16 @@ public class FeignUserService {
         try {
             repository.save(newUser);
             log.info("Created new user with id {}", request.getId());
+        } catch (DataIntegrityViolationException e) {
+            // Another request may create the same user between exists-check and save.
+            if (repository.existsById(request.getId())) {
+                log.info("User with id {} was created concurrently, treating as already existing", request.getId());
+                return UserCheckResponseDTO.builder().valid(true).build();
+            }
+
+            log.error("Unique constraint violation while creating user with id {}: {}", request.getId(), e.getMessage());
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "User already exists with conflicting unique fields", e);
         } catch (Exception e) {
             log.error("Failed to create user with id {}: {}", request.getId(), e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
