@@ -18,23 +18,17 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TicketWatcherEntity extends BaseEntity implements Permittable {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+@Inheritance(strategy = InheritanceType.JOINED)
+public class TicketWatcherEntity extends AppUser implements Permittable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_id", nullable = false)
     private TicketEntity ticket;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "watcher_id", nullable = false)
-    private AppUser watcher;
-
     @Column(name = "added_at", nullable = false)
     private LocalDateTime addedAt;
 
+    // TODO appUser'a gore servisleri guncelle.
     @Override
     public Permittable getParent() {
         return ticket;

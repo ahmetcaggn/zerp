@@ -22,19 +22,12 @@ import java.util.UUID;
 @AllArgsConstructor
 @SQLDelete(sql = "UPDATE team_member SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? and version = ?")
 @SQLRestriction("deleted = false")
-public class TeamMemberEntity extends BaseEntity implements Permittable {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+@Inheritance(strategy = InheritanceType.JOINED)
+public class TeamMemberEntity extends AppUser implements Permittable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id", nullable = false)
     private TeamEntity team;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private AppUser user;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -42,6 +35,8 @@ public class TeamMemberEntity extends BaseEntity implements Permittable {
 
     @Column(name = "joined_at", nullable = false)
     private LocalDateTime joinedAt;
+
+    // TODO appUser'a gore servisleri guncelle.
 
     @Override
     public Permittable getParent() {

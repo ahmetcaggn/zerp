@@ -1,23 +1,32 @@
 package org.zerp.common.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
+import org.zerp.common.entity.sale.ShopTable;
 import org.zerp.common.permission.entity.Permittable;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Data
-@Table(name= "tenants")
-@SQLDelete(sql = "UPDATE tenants SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@Table(name= "shops")
+@SQLDelete(sql = "UPDATE shops SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("deleted = false")
-public class Tenant extends BaseEntity implements Permittable {
+public class Shop extends BaseEntity implements Permittable {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String name;
@@ -33,8 +42,18 @@ public class Tenant extends BaseEntity implements Permittable {
     private String email;
     private String website;
 
+    @ManyToOne
+    @JoinColumn(name = "tenant_id")
+    private Tenant tenant;
+
+    @OneToOne
+    @JoinColumn(name = "legal_profile_id")
+    private LegalProfile legalProfile;
+
+    @OneToMany(mappedBy = "shop")
+    private List<ShopTable> tables;
     @Override
     public Permittable getParent() {
-        return TenantRoot.INSTANCE;
+        return tenant;
     }
 }

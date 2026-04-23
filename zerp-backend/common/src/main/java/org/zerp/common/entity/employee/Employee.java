@@ -25,19 +25,14 @@ import java.util.UUID;
 @SQLDelete(sql = "UPDATE employees SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? and version = ?")
 @SQLRestriction("deleted = false")
 @PermissionTargetTypeAnnotation(type = PermissionTargetType.EMPLOYEE)
-public class Employee extends BaseEntity implements Permittable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+@Inheritance(strategy = InheritanceType.JOINED)
+public class Employee extends AppUser implements Permittable {
 
     @Column(nullable = false)
     private String firstName;
 
     @Column(nullable = false)
     private String lastName;
-
-    @Column(unique = true, nullable = false)
-    private String email;
 
     private String phoneNumber;
 
@@ -63,9 +58,6 @@ public class Employee extends BaseEntity implements Permittable {
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EmployeeContact> contacts = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "tenant_id")
-    private Tenant tenant;
 
     public void addContact(EmployeeContact contact) {
         contacts.add(contact);
