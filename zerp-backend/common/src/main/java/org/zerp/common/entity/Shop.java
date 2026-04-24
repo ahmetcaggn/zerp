@@ -10,6 +10,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
@@ -19,8 +20,9 @@ import org.zerp.common.permission.entity.Permittable;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
 @Data
+@EqualsAndHashCode(callSuper = true)
+@Entity
 @Table(name= "shops")
 @SQLDelete(sql = "UPDATE shops SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("deleted = false")
@@ -43,7 +45,7 @@ public class Shop extends BaseEntity implements Permittable {
     private String website;
 
     @ManyToOne
-    @JoinColumn(name = "tenant_id")
+    @JoinColumn(name = "tenant_id", insertable = false, updatable = false)
     private Tenant tenant;
 
     @OneToOne

@@ -21,7 +21,7 @@ public class StockResource implements Permittable {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "tenant_id")
+    @JoinColumn(name = "tenant_id", insertable = false, updatable = false)
     private Tenant tenant;
 
     private String name;

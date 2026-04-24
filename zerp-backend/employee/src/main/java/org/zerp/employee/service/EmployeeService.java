@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import org.zerp.common.security.CurrentUserIdResolver;
+import org.zerp.common.util.CurrentUserIdResolver;
 import org.zerp.common.entity.employee.Employee;
 import org.zerp.common.entity.employee.EmployeeContact;
 import org.zerp.common.entity.employee.EmploymentStatus;

@@ -1,5 +1,6 @@
 package org.zerp.crm.service.ticket;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import org.zerp.common.entity.crm.TicketAssignmentEntity;
 import org.zerp.common.entity.crm.TicketEntity;
@@ -22,24 +23,12 @@ public class TicketResponseMapper {
         UUID tenantId = entity.getTenant() != null ? entity.getTenant().getId() : null;
         UUID reporterId = entity.getReporter() != null ? entity.getReporter().getId() : null;
 
-        TicketAssignmentResponse assignmentResponse = null;
-        if (entity.getCurrentAssignment() != null) {
-            TicketAssignmentEntity assignment = entity.getCurrentAssignment();
-            UUID teamId = assignment.getTeam() != null ? assignment.getTeam().getId() : null;
-            UUID agentPartyId = assignment.getAgentParty() != null ? assignment.getAgentParty().getId() : null;
-            assignmentResponse = new TicketAssignmentResponse(
-                    assignment.getId(),
-                    teamId,
-                    agentPartyId,
-                    Boolean.TRUE.equals(assignment.getActive()),
-                    assignment.getAssignedAt()
-            );
-        }
+        TicketAssignmentResponse assignmentResponse = getTicketAssignmentResponse(entity);
 
         Set<WatcherResponse> watcherResponses = entity.getWatchers().stream()
                 .map(watcher -> new WatcherResponse(
-                        watcher.getWatcher() != null ? watcher.getWatcher().getId() : null,
-                        watcher.getAddedAt()))
+                        watcher != null ? watcher.getId() : null,
+                        watcher != null ? watcher.getAddedAt() : null))
                 .collect(Collectors.toSet());
 
         List<AttachmentResponse> attachmentResponses = entity.getAttachments().stream()
@@ -73,19 +62,7 @@ public class TicketResponseMapper {
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
 
-        TicketResponse.SlaTrackingResponse slaResponse = null;
-        if (entity.getSlaTracking() != null) {
-            TicketSlaTrackingEntity slaTracking = entity.getSlaTracking();
-            slaResponse = new TicketResponse.SlaTrackingResponse(
-                    slaTracking.getFirstResponseDueAt(),
-                    slaTracking.getFirstResponseAt(),
-                    Boolean.TRUE.equals(slaTracking.getIsFirstResponseBreached()),
-                    slaTracking.getResolutionDueAt(),
-                    slaTracking.getResolutionAt(),
-                    Boolean.TRUE.equals(slaTracking.getIsResolutionBreached()),
-                    slaTracking.getTotalPausedTimeMinutes() != null ? slaTracking.getTotalPausedTimeMinutes() : 0
-            );
-        }
+        TicketResponse.SlaTrackingResponse slaResponse = getSlaTrackingResponse(entity);
 
         return new TicketResponse(
                 entity.getId(),
@@ -108,5 +85,40 @@ public class TicketResponseMapper {
                 commentResponses,
                 slaResponse
         );
+    }
+
+    private TicketResponse.@Nullable SlaTrackingResponse getSlaTrackingResponse(TicketEntity entity) {
+        TicketResponse.SlaTrackingResponse slaResponse = null;
+        if (entity.getSlaTracking() != null) {
+            TicketSlaTrackingEntity slaTracking = entity.getSlaTracking();
+            slaResponse = new TicketResponse.SlaTrackingResponse(
+                    slaTracking.getFirstResponseDueAt(),
+                    slaTracking.getFirstResponseAt(),
+                    Boolean.TRUE.equals(slaTracking.getIsFirstResponseBreached()),
+                    slaTracking.getResolutionDueAt(),
+                    slaTracking.getResolutionAt(),
+                    Boolean.TRUE.equals(slaTracking.getIsResolutionBreached()),
+                    slaTracking.getTotalPausedTimeMinutes() != null ? slaTracking.getTotalPausedTimeMinutes() : 0
+            );
+        }
+        return slaResponse;
+    }
+
+    @Nullable
+    private TicketAssignmentResponse getTicketAssignmentResponse(TicketEntity entity) {
+        TicketAssignmentResponse assignmentResponse = null;
+        if (entity.getCurrentAssignment() != null) {
+            TicketAssignmentEntity assignment = entity.getCurrentAssignment();
+            UUID teamId = assignment.getTeam() != null ? assignment.getTeam().getId() : null;
+            UUID agentPartyId = assignment.getAgentParty() != null ? assignment.getAgentParty().getId() : null;
+            assignmentResponse = new TicketAssignmentResponse(
+                    assignment.getId(),
+                    teamId,
+                    agentPartyId,
+                    Boolean.TRUE.equals(assignment.getActive()),
+                    assignment.getAssignedAt()
+            );
+        }
+        return assignmentResponse;
     }
 }

@@ -5,14 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
-import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.entity.user.AppUser;
 import org.zerp.common.permission.entity.Permittable;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "team_member")
@@ -20,9 +16,6 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@SQLDelete(sql = "UPDATE team_member SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? and version = ?")
-@SQLRestriction("deleted = false")
-@Inheritance(strategy = InheritanceType.JOINED)
 public class TeamMemberEntity extends AppUser implements Permittable {
 
     @ManyToOne(fetch = FetchType.LAZY)

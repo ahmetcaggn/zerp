@@ -28,6 +28,7 @@ import java.util.Map;
  * @param <T>  the Response DTO type for this resource
  * @param <LT> the Response DTO type for getList and getManyReference operation.
  * @param <C>  the Create DTO type for this resource
+ * @param <U>  the Update DTO type for this resource (if needed, otherwise can be same as C)
  * @param <ID> the type of the entity's identifier
  */
 public abstract class ResourceController<T, LT, C, U, ID> implements IResourceController<T, LT, C, U, ID> {

@@ -5,12 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.entity.user.AppUser;
 import org.zerp.common.permission.entity.Permittable;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "ticket_watcher")
@@ -18,7 +16,6 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Inheritance(strategy = InheritanceType.JOINED)
 public class TicketWatcherEntity extends AppUser implements Permittable {
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -11,8 +11,11 @@ import java.util.Map;
  * <p>
  * Use an implementation of this interface in your controller implementations to handle standard data operations.
  *
- * @param <T>  The entity type.
- * @param <ID> The type of the entity's identifier.
+ * @param <T>  the Response DTO type for this resource
+ * @param <LT> the Response DTO type for getList and getManyReference operation.
+ * @param <C>  the Create DTO type for this resource
+ * @param <U>  the Update DTO type for this resource (if needed, otherwise can be same as C)
+ * @param <ID> the type of the entity's identifier
  */
 @SuppressWarnings("UnusedReturnValue")
 public interface IResourceService<T, LT, C, U, ID> {
