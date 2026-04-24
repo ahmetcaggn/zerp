@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.resource.StockResource;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.FilterType;
-import org.zerp.common.security.CurrentUserIdResolver;
+import org.zerp.common.util.CurrentUserIdResolver;
 import org.zerp.resource.dto.resource.StockResourceCreateDTO;
 import org.zerp.resource.dto.resource.StockResourceDTO;
 import org.zerp.resource.dto.resource.StockResourceUpdateDTO;

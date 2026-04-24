@@ -3,6 +3,8 @@ package org.zerp.common.permission.entity;
 public enum PermissionTargetType {
     TENANT,
 
+    USER,
+
     STOCK_RESOURCE,
 
     EMPLOYEE,
@@ -19,7 +21,6 @@ public enum PermissionTargetType {
     // team
     TEAM,
     TEAM_MEMBER,
-
 
     SHOP,
     ;

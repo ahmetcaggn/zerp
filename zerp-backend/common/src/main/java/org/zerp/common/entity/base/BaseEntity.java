@@ -14,12 +14,16 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public class BaseEntity implements Serializable {
+    @Column(name = "tenant_id", nullable = false, updatable = false)
+    protected UUID tenantId;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     protected LocalDateTime createdAt;

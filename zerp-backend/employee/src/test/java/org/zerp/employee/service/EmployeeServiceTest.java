@@ -17,7 +17,7 @@ import org.mockito.ArgumentMatchers;
 import org.zerp.common.entity.Tenant;
 import org.zerp.common.entity.employee.Employee;
 import org.zerp.common.entity.employee.EmploymentStatus;
-import org.zerp.common.security.CurrentUserIdResolver;
+import org.zerp.common.util.CurrentUserIdResolver;
 import org.zerp.employee.Exception.DuplicateResourceException;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.UpdateEmployeeRequestDto;

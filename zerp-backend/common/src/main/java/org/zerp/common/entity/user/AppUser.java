@@ -1,23 +1,23 @@
 package org.zerp.common.entity.user;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.zerp.common.entity.Tenant;
 import org.zerp.common.entity.base.BaseEntity;
+import org.zerp.common.permission.entity.PermissionTargetType;
+import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
+import org.zerp.common.permission.entity.Permittable;
 
 import java.util.UUID;
 
 @Entity
 @Table
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
-public class AppUser extends BaseEntity {
+@PermissionTargetTypeAnnotation(type = PermissionTargetType.USER)
+public class AppUser extends BaseEntity implements Permittable {
     @Id
     protected UUID id;
 
@@ -28,6 +28,11 @@ public class AppUser extends BaseEntity {
     protected String email;
 
     @ManyToOne
-    @JoinColumn(name = "tenant_id")
+    @JoinColumn(name = "tenant_id", insertable = false, updatable = false)
     protected Tenant tenant;
+
+    @Override
+    public Permittable getParent() {
+        return tenant;
+    }
 }

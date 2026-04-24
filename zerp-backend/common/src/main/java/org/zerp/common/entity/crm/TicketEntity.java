@@ -47,7 +47,7 @@ public class TicketEntity extends BaseEntity implements Permittable {
     private TicketPriority priority;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tenant_id")
+    @JoinColumn(name = "tenant_id", insertable = false, updatable = false)
     private Tenant tenant;
 
     @ManyToOne(fetch = FetchType.LAZY)
