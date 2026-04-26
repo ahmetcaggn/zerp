@@ -10,5 +10,5 @@ export default async function EmployeeDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  return <EmployeeDetail id={Number(id)} />
+  return <EmployeeDetail id={id} />
 }

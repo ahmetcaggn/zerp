@@ -34,7 +34,7 @@ export function DeletedEmployees() {
   const rows = data?.data ?? []
   const total = data?.total ?? 0
 
-  function handleRestore(id: number) {
+  function handleRestore(id: string) {
     patchEmployee(
       { id, fields: { isActive: true } },
       {
@@ -82,7 +82,7 @@ export function DeletedEmployees() {
                   size="small"
                   variant="outlined"
                   startIcon={<RestoreIcon />}
-                  onClick={() => emp.id !== undefined && handleRestore(emp.id)}
+                  onClick={() => emp.id !== undefined && handleRestore(String(emp.id))}
                 >
                   {t('employees.restoreButton')}
                 </Button>

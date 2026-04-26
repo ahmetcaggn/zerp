@@ -15,7 +15,7 @@ const base = createResourceClient<
   EmployeeListResponseDto,
   CreateEmployeeRequestDto,
   UpdateEmployeeRequestDto,
-  number
+  string
 >('/employee')
 
 export const employeeClient = {

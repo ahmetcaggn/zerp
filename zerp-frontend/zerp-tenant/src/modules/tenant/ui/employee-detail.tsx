@@ -21,7 +21,7 @@ import { useEmployee } from '../hooks/use-employees'
 import { EmployeeFormDialog } from './employee-form-dialog'
 
 interface Props {
-  id: number
+  id: String
 }
 
 export function EmployeeDetail({ id }: Props) {
@@ -110,7 +110,7 @@ export function EmployeeDetail({ id }: Props) {
             <Typography variant="caption" color="text.secondary" display="block">
               {label}
             </Typography>
-            <Typography variant="body2">{value}</Typography>
+            <Typography variant="body2" component="div">{value}</Typography>
           </Grid>
         ))}
       </Grid>
