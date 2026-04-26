@@ -6,21 +6,35 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.zerp.common.entity.user.AppUser;
+import org.zerp.common.permission.entity.PermissionTargetType;
+import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 import org.zerp.common.permission.entity.Permittable;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
-@Table(name = "team_member")
+@Table(name = "team_member", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_team_member_team_user", columnNames = {"team_id", "user_id"})
+})
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TeamMemberEntity extends AppUser implements Permittable {
+@PermissionTargetTypeAnnotation(type = PermissionTargetType.TEAM_MEMBER)
+public class TeamMemberEntity implements Permittable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id", nullable = false)
     private TeamEntity team;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private AppUser user;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -28,8 +42,6 @@ public class TeamMemberEntity extends AppUser implements Permittable {
 
     @Column(name = "joined_at", nullable = false)
     private LocalDateTime joinedAt;
-
-    // TODO appUser'a gore servisleri guncelle.
 
     @Override
     public Permittable getParent() {
