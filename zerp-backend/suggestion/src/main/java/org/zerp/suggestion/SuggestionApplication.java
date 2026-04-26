@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"org.zerp.suggestion", "org.zerp.common.permission.service"})
+@ComponentScan(basePackages = {"org.zerp.crm", "org.zerp.common"})
 @EntityScan("org.zerp.common")
 @EnableJpaRepositories(basePackages = {"org.zerp.suggestion.repository", "org.zerp.common.permission.repository"})
 @EnableJpaAuditing

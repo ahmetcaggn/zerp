@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"org.zerp.crm", "org.zerp.common.permission.service"})
-@EntityScan(basePackages = { "org.zerp.common", "org.zerp.crm" })
+@ComponentScan(basePackages = {"org.zerp.crm", "org.zerp.common"})
+@EntityScan(basePackages = {"org.zerp.common", "org.zerp.crm"})
 @EnableJpaRepositories(basePackages = {"org.zerp.crm.repository", "org.zerp.common.permission.repository"})
 @EnableJpaAuditing
 public class CrmApplication {
