@@ -161,6 +161,15 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         if (!Boolean.TRUE.equals(entity.getIsActive())) {
             throw new IllegalStateException("Cannot add member to an inactive team");
         }
+        if (request.userId() == null) {
+            throw new IllegalArgumentException("userId cannot be null");
+        }
+        if (request.role() == null) {
+            throw new IllegalArgumentException("role cannot be null");
+        }
+        if (!appUserExists(request.userId())) {
+            throw new IllegalArgumentException("User not found: " + request.userId());
+        }
 
         boolean alreadyMember = entity.getMembers().stream()
                 .anyMatch(m -> m.getUser() != null && request.userId().equals(m.getUser().getId()));
@@ -182,6 +191,9 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
     public TeamResponse removeMember(UUID teamId, UUID userId) {
         TeamEntity entity = findOrThrow(teamId);
+        if (userId == null) {
+            throw new IllegalArgumentException("userId cannot be null");
+        }
 
         boolean removed = entity.getMembers().removeIf(
                 m -> m.getUser() != null && userId.equals(m.getUser().getId())
@@ -197,6 +209,12 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
     public TeamResponse changeMemberRole(UUID teamId, UUID userId, ChangeMemberRoleRequest request) {
         TeamEntity entity = findOrThrow(teamId);
+        if (userId == null) {
+            throw new IllegalArgumentException("userId cannot be null");
+        }
+        if (request.role() == null) {
+            throw new IllegalArgumentException("role cannot be null");
+        }
 
         TeamMemberEntity member = entity.getMembers().stream()
                 .filter(m -> m.getUser() != null && userId.equals(m.getUser().getId()))
@@ -242,6 +260,10 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
                 entity.getDescription(),
                 Boolean.TRUE.equals(entity.getIsActive()),
                 memberResponses);
+    }
+
+    private boolean appUserExists(UUID userId) {
+        return entityManager.find(AppUser.class, userId) != null;
     }
 
     private AppUser toUserReference(UUID userId) {

@@ -27,7 +27,7 @@ public class TicketResponseMapper {
 
         Set<WatcherResponse> watcherResponses = entity.getWatchers().stream()
                 .map(watcher -> new WatcherResponse(
-                        watcher != null ? watcher.getId() : null,
+                        watcher != null && watcher.getUser() != null ? watcher.getUser().getId() : null,
                         watcher != null ? watcher.getAddedAt() : null))
                 .collect(Collectors.toSet());
 

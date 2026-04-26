@@ -46,6 +46,108 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
             @Param("tenantId") UUID tenantId
     );
 
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND p.targetType = 'TENANT_ROOT'
+                AND p.targetId = :tenantRootId
+            """)
+    List<Permission> findAllByUserAndTenantRootPermission(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("tenantRootId") UUID tenantRootId
+    );
+
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
+                     (:ticketId IS NOT NULL AND p.targetType = 'TICKET' AND p.targetId = :ticketId)
+                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                )
+            """)
+    List<Permission> findAllByUserAndTicketHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("ticketId") UUID ticketId,
+            @Param("tenantId") UUID tenantId
+    );
+
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
+                     (:teamId IS NOT NULL AND p.targetType = 'TEAM' AND p.targetId = :teamId)
+                  OR (:tenantRootId IS NOT NULL AND p.targetType = 'TENANT_ROOT' AND p.targetId = :tenantRootId)
+                )
+            """)
+    List<Permission> findAllByUserAndTeamHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("teamId") UUID teamId,
+            @Param("tenantRootId") UUID tenantRootId
+    );
+
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
+                     (:teamMemberId IS NOT NULL AND p.targetType = 'TEAM_MEMBER' AND p.targetId = :teamMemberId)
+                  OR (:teamId IS NOT NULL AND p.targetType = 'TEAM' AND p.targetId = :teamId)
+                  OR (:tenantRootId IS NOT NULL AND p.targetType = 'TENANT_ROOT' AND p.targetId = :tenantRootId)
+                )
+            """)
+    List<Permission> findAllByUserAndTeamMemberHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("teamMemberId") UUID teamMemberId,
+            @Param("teamId") UUID teamId,
+            @Param("tenantRootId") UUID tenantRootId
+    );
+
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
+                     (:childId IS NOT NULL AND p.targetType = :childType AND p.targetId = :childId)
+                  OR (:ticketId IS NOT NULL AND p.targetType = 'TICKET' AND p.targetId = :ticketId)
+                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                )
+            """)
+    List<Permission> findAllByUserAndTicketChildHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("childType") PermissionTargetType childType,
+            @Param("childId") UUID childId,
+            @Param("ticketId") UUID ticketId,
+            @Param("tenantId") UUID tenantId
+    );
+
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
+                     (:attachmentId IS NOT NULL AND p.targetType = 'TICKET_ATTACHMENT' AND p.targetId = :attachmentId)
+                  OR (:commentId IS NOT NULL AND p.targetType = 'TICKET_COMMENT' AND p.targetId = :commentId)
+                  OR (:ticketId IS NOT NULL AND p.targetType = 'TICKET' AND p.targetId = :ticketId)
+                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                )
+            """)
+    List<Permission> findAllByUserAndTicketAttachmentHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("attachmentId") UUID attachmentId,
+            @Param("commentId") UUID commentId,
+            @Param("ticketId") UUID ticketId,
+            @Param("tenantId") UUID tenantId
+    );
+
     @Query("SELECT p.targetId FROM Permission p " +
             "WHERE p.userId = :userId AND p.targetType = :type AND p.action = :action")
     List<UUID> findTargetIdsByUserAndTargetTypeAndAction(@Param("userId") UUID userId,

@@ -1,6 +1,8 @@
 package org.zerp.common.permission.entity;
 
 public enum PermissionTargetType {
+    TENANT_ROOT,
+
     TENANT,
 
     USER,
