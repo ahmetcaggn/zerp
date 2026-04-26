@@ -37,6 +37,7 @@ public class FeignUserService {
         // create new
         log.info("User with id {} does not exist, creating new user", request.getId());
         AppUser newUser = mapper.toEntity(request);
+        newUser.setTenantId(request.getTenantId());
         try {
             repository.save(newUser);
             log.info("Created new user with id {}", request.getId());

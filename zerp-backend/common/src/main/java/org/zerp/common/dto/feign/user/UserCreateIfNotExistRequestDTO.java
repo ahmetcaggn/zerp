@@ -15,4 +15,5 @@ public class UserCreateIfNotExistRequestDTO {
     private UUID id;
     private String username;
     private String email;
+    private UUID tenantId;
 }

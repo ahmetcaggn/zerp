@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.util.CurrentTenantIdResolver;
 import org.zerp.common.util.CurrentUserIdResolver;
 import org.zerp.common.entity.employee.Employee;
 import org.zerp.common.entity.employee.EmployeeContact;
@@ -40,6 +41,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
     private final EmployeeMapper employeeMapper;
     private final EmployeePermissionEvaluator permissionEvaluator;
     private final CurrentUserIdResolver currentUserIdResolver;
+    private final CurrentTenantIdResolver currentTenantIdResolver;
 
     // =============================================
     // IResourceService overrides
@@ -90,12 +92,23 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
     @Transactional
     public EmployeeResponseDto create(CreateEmployeeRequestDto dto) {
         UUID userId = resolveCurrentUserId();
+        UUID tenantId = resolveCurrentTenantId();
         validateUniqueConstraints(dto.getEmail(), dto.getNationalId(), null);
 
+        // TODO bu ileride keycloak'a istek atilip kullanici kayit edilecek sekidle duzenlenecek.
+        UUID tempEmployeeId = UUID.randomUUID();
+
         Employee employee = employeeMapper.toEntity(dto);
+        employee.setId(tempEmployeeId);
+        employee.setTenantId(tenantId);
+        // TODO bu ileride keycloak'a istek atilip kullanici kayit edilecek sekidle duzenlenecek.'
+        employee.setUsername("test-username");
+//        employee.setVersion(0L);
+
+        // TODO ileride temp sifre de input olarak alinacak.
 
         if (!permissionEvaluator.canCreate(userId,
-                new EmployeePermissionEvaluator.TenantParent(employee.getTenant().getId()))) {
+                new EmployeePermissionEvaluator.TenantParent(tenantId))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Employee");
         }
 
@@ -337,5 +350,8 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
 
     private UUID resolveCurrentUserId() {
         return currentUserIdResolver.resolve();
+    }
+    private UUID resolveCurrentTenantId() {
+        return currentTenantIdResolver.resolve();
     }
 }

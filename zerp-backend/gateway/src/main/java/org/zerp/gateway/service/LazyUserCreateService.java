@@ -21,6 +21,7 @@ public class LazyUserCreateService {
 
     public Mono<CheckUserResult> checkUser(Jwt jwt) {
         final UUID id;
+        final UUID tenantId;
         try {
             id = UUID.fromString(jwt.getSubject());
         } catch (RuntimeException ex) {
@@ -30,11 +31,21 @@ public class LazyUserCreateService {
                     "JWT subject must be a valid UUID"
             ));
         }
+        try {
+            tenantId = UUID.fromString(jwt.getClaimAsString("tenant_id"));
+        } catch (RuntimeException ex) {
+            return Mono.just(CheckUserResult.failure(
+                    HttpStatus.BAD_REQUEST,
+                    "INVALID_TENANT_ID",
+                    "JWT tenant_id claim must be a valid UUID"
+            ));
+        }
 
         UserCreateIfNotExistRequestDTO userCreateRequest = UserCreateIfNotExistRequestDTO.builder()
                 .id(id)
                 .email(jwt.getClaimAsString("email"))
                 .username(jwt.getClaimAsString("preferred_username"))
+                .tenantId(tenantId)
                 .build();
 
         return userServiceClient.createUserIfNotExists(userCreateRequest)

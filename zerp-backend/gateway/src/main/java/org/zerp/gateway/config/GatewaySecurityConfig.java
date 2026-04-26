@@ -32,6 +32,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static org.zerp.common.util.CurrentTenantIdResolver.TENANT_ID_HEADER;
+import static org.zerp.common.util.CurrentUserIdResolver.USER_ID_HEADER;
+
 @Configuration
 @EnableWebFluxSecurity
 @RequiredArgsConstructor
@@ -124,6 +127,8 @@ public class GatewaySecurityConfig {
                             .map(r -> r.startsWith("ROLE_") ? r.substring(5) : r)
                             .collect(Collectors.joining(","));
 
+                    String tenantId = jwt.getClaimAsString("tenant_id");
+
                     return lazyUserCreateService.checkUser(jwt)
                             .flatMap(result -> {
                                 if (!result.isSuccess()) {
@@ -131,9 +136,10 @@ public class GatewaySecurityConfig {
                                 }
 
                                 ServerHttpRequest mutated = exchange.getRequest().mutate()
-                                        .header("X-User-Id", String.valueOf(result.getUserId()))
+                                        .header(USER_ID_HEADER, String.valueOf(result.getUserId()))
                                         .header("X-User-Email", result.getEmail() != null ? result.getEmail() : (email != null ? email : ""))
                                         .header("X-User-Roles", roles)
+                                        .header(TENANT_ID_HEADER, tenantId != null ? tenantId : "")
                                         .build();
                                 return chain.filter(exchange.mutate().request(mutated).build()).thenReturn(Boolean.TRUE);
                             });
@@ -196,13 +202,13 @@ public class GatewaySecurityConfig {
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers("/swagger-ui/**").permitAll()
                         .pathMatchers("/v3/api-docs/**").permitAll()
-                        .pathMatchers("/employee/**").authenticated()
-                        .pathMatchers("/notification/**").authenticated()
-                        .pathMatchers("/resource/**").authenticated()
-                        .pathMatchers("/sale/**").authenticated()
-                        .pathMatchers("/user/**").authenticated()
-                        .pathMatchers("/suggestion/**").authenticated()
-                        .pathMatchers("/crm/**").authenticated()
+                        .pathMatchers("/employee", "/employee/**").authenticated()
+                        .pathMatchers("/notification", "/notification/**").authenticated()
+                        .pathMatchers("/resource", "/resource/**").authenticated()
+                        .pathMatchers("/sale", "/sale/**").authenticated()
+                        .pathMatchers("/user", "/user/**").authenticated()
+                        .pathMatchers("/suggestion", "/suggestion/**").authenticated()
+                        .pathMatchers("/crm", "/crm/**").authenticated()
                         .anyExchange().denyAll()
                 );
 

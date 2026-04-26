@@ -10,7 +10,7 @@ import java.util.UUID;
 @Log4j2
 @Component
 public class CurrentTenantIdResolver {
-    private static final String TENANT_ID_HEADER = "x-tenant-id";
+    public static final String TENANT_ID_HEADER = "X-Tenant-Id";
 
     public UUID resolve() {
         Object attrs = RequestContextHolder.getRequestAttributes();

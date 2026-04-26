@@ -12,6 +12,8 @@ import java.util.UUID;
 @Log4j2
 @Component
 public class CurrentUserIdResolver {
+    public static final String USER_ID_HEADER = "X-User-Id";
+
     public UUID resolve() {
         Object attrs = RequestContextHolder.getRequestAttributes();
         if (attrs == null) {
@@ -27,7 +29,7 @@ public class CurrentUserIdResolver {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing request context");
             }
             rawUserId = (String) request.getClass().getMethod("getHeader", String.class)
-                    .invoke(request, "X-User-Id");
+                    .invoke(request, USER_ID_HEADER);
         } catch (ReflectiveOperationException ex) {
             log.error("error resolving user ID from request", ex);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing request context", ex);
