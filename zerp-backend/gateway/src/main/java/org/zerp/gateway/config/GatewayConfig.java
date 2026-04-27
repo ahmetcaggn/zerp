@@ -75,6 +75,17 @@ public class GatewayConfig {
                         .uri("lb://CRM")
                 )
                 .route(r -> r
+                        .path("/teams", "/teams/**")
+                        .filters(f -> f
+                                .retry(retryConfig -> retryConfig
+                                        .setRetries(3)
+                                        .setStatuses(HttpStatus.SERVICE_UNAVAILABLE)
+                                        .setMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
+                                )
+                        )
+                        .uri("lb://CRM")
+                )
+                .route(r -> r
                         .path("/notification/**")
                         .filters(f -> f
                                 .retry(retryConfig -> retryConfig

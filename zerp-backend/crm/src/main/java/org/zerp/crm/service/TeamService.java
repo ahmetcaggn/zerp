@@ -1,6 +1,7 @@
 package org.zerp.crm.service;
 
 import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,8 @@ import org.zerp.common.entity.crm.TeamMemberEntity;
 import org.zerp.common.entity.user.AppUser;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.FilterType;
+import org.zerp.common.util.CurrentTenantIdResolver;
+import org.zerp.common.util.CurrentUserIdResolver;
 import org.zerp.crm.dto.team.*;
 import org.zerp.crm.repository.TeamRepository;
 
@@ -27,15 +30,13 @@ import java.util.stream.Collectors;
 @Log4j2
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         CreateTeamRequest, UpdateTeamRequest, UUID> {
     private final TeamRepository teamRepository;
     private final EntityManager entityManager;
-
-    public TeamService(TeamRepository teamRepository, EntityManager entityManager) {
-        this.teamRepository = teamRepository;
-        this.entityManager = entityManager;
-    }
+    private final CurrentTenantIdResolver currentTenantIdResolver;
+    private final CurrentUserIdResolver currentUserIdResolver;
 
     @Override
     @Transactional(readOnly = true)
@@ -61,10 +62,16 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
     @Override
     public TeamResponse create(CreateTeamRequest data) {
+        UUID tenantId = resolveCurrentTenantId();
+        if(tenantId == null){
+            throw new IllegalStateException("Tenant not found");
+        }
+
         TeamEntity entity = new TeamEntity();
         entity.setName(validateName(data.name()));
         entity.setDescription(data.description());
         entity.setIsActive(true);
+        entity.setTenantId(tenantId);
 
         TeamEntity saved = teamRepository.save(entity);
         return toResponse(saved);
@@ -347,5 +354,11 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         }
 
         throw new IllegalArgumentException("Invalid boolean value for " + fieldName + ": " + rawValue);
+    }
+    private UUID resolveCurrentUserId() {
+        return currentUserIdResolver.resolve();
+    }
+    private UUID resolveCurrentTenantId() {
+        return currentTenantIdResolver.resolve();
     }
 }
