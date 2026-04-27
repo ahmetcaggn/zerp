@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -22,5 +24,5 @@ public class KeycloakCreateUserRequestDTO {
     private String tempPassword;
 
     @NotBlank(message = "Tenant ID cannot be blank")
-    private String tenantId;
+    private UUID tenantId;
 }

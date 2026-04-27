@@ -1,6 +1,5 @@
 package org.zerp.user.controller.feign;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,10 +14,11 @@ import org.zerp.common.dto.feign.user.UserCheckResponseDTO;
 import org.zerp.common.dto.feign.user.UserCreateIfNotExistRequestDTO;
 import org.zerp.user.service.FeignUserService;
 
-@Hidden
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/feign/users")
+@Tag(name = "Feign User", description = "API for checking user existence and creating if not exist, used by other " +
+        "services via Feign client")
 public class FeignUserController {
     private final FeignUserService service;
 
