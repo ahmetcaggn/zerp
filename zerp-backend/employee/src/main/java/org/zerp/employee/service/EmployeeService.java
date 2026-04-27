@@ -231,8 +231,8 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
                 new EmployeePermissionEvaluator.EmployeeTarget(employee.getId(), employee.getTenant().getId()))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Employee");
         }
-
-        employeeRepository.delete(employee);
+        employee.deleteEmployee();
+        employeeRepository.save(employee);
     }
 
     @Override

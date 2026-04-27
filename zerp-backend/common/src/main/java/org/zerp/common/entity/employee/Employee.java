@@ -10,6 +10,7 @@ import org.zerp.common.permission.entity.Permittable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,5 +65,13 @@ public class Employee extends AppUser implements Permittable {
     @Override
     public Permittable getParent() {
         return tenant;
+    }
+
+    public void deleteEmployee(){
+        LocalDateTime now = LocalDateTime.now();
+        this.status = EmploymentStatus.DELETED;
+        this.terminationDate = now.toLocalDate();
+        this.deleted = true;
+        this.deletedAt = now;
     }
 }

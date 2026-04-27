@@ -21,6 +21,14 @@ const base = createResourceClient<
 export const employeeClient = {
   ...base,
 
+  // getList: (params: RaListParams = {}): Promise<RaListResult<EmployeeListResponseDto>> => {
+  //   const merged: RaListParams = {
+  //     ...params,
+  //     filter: { 'deleted.eq': 'true', ...params.filter },
+  //   }
+  //   return base.getList(merged)
+  // },
+
   search: async (
     keyword: string,
     params: RaListParams = {},
