@@ -33,7 +33,9 @@ public class UsernameService {
 
     public UsernameCheckResponseDTO isUsernameAvailable(String username) {
         boolean isAvailable = !isUserExists(username);
-        return UsernameCheckResponseDTO.builder().available(isAvailable).build();
+        return UsernameCheckResponseDTO.builder()
+                .username(username)
+                .available(isAvailable).build();
     }
 
     public boolean isUserExists(String username) {

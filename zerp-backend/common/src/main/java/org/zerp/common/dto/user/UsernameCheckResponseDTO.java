@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UsernameCheckResponseDTO {
+    private String username;
     private Boolean available;
 }

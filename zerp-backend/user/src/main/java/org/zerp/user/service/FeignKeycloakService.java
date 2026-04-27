@@ -39,7 +39,7 @@ public class FeignKeycloakService {
         Map<String, List<String>> attributes = new HashMap<>();
         if (data.getTenantId() != null) {
             log.debug("Setting tenant_id attribute: {} for user: {}", data.getTenantId(), data.getUsername());
-            attributes.put(KEYCLOAK_TENANT_ID_ATTRIBUTE, Collections.singletonList(data.getTenantId()));
+            attributes.put(KEYCLOAK_TENANT_ID_ATTRIBUTE, Collections.singletonList(data.getTenantId().toString()));
         }
         user.setAttributes(attributes);
 
