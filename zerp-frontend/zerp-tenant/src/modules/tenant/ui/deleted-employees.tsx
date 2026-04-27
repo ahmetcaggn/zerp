@@ -38,7 +38,8 @@ export function DeletedEmployees() {
     patchEmployee(
       { id, fields: { isActive: true } },
       {
-        onSuccess: () => showToast('Çalışan geri yüklendi.', { severity: 'success' }),
+        onSuccess: () =>
+          showToast(t('employees.employeeRestoredToast'), { severity: 'success' }),
         onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
       },
     )
@@ -65,9 +66,9 @@ export function DeletedEmployees() {
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell>Ad Soyad</TableCell>
-            <TableCell>E-posta</TableCell>
-            <TableCell>Telefon</TableCell>
+            <TableCell>{t('employees.fullNameColumnHeader')}</TableCell>
+            <TableCell>{t('employees.emailColumnHeader')}</TableCell>
+            <TableCell>{t('employees.phoneColumnHeader')}</TableCell>
             <TableCell align="right">{t('employees.restoreButton')}</TableCell>
           </TableRow>
         </TableHead>

@@ -82,7 +82,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
 
   function handleSubmit() {
     if (!firstName || !lastName || !email || !hireDate) {
-      showToast('Zorunlu alanları doldurun.', { severity: 'warning' })
+      showToast(t('employees.requiredFieldsWarning'), { severity: 'warning' })
       return
     }
 
@@ -103,7 +103,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
     if (mode === 'create') {
       createEmployee(payload, {
         onSuccess: () => {
-          showToast('Çalışan oluşturuldu.', { severity: 'success' })
+          showToast(t('employees.employeeCreatedToast'), { severity: 'success' })
           onClose()
         },
         onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
@@ -113,7 +113,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
         { id: employee.id, data: payload },
         {
           onSuccess: () => {
-            showToast('Çalışan güncellendi.', { severity: 'success' })
+            showToast(t('employees.employeeUpdatedToast'), { severity: 'success' })
             onClose()
           },
           onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
@@ -146,14 +146,14 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
           <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField
-              label="Ad *"
+              label={t('employees.firstNameField')}
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               fullWidth
               size="small"
             />
             <TextField
-              label="Soyad *"
+              label={t('employees.lastNameField')}
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               fullWidth
@@ -162,7 +162,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
           </Box>
 
           <TextField
-            label="E-posta *"
+            label={t('employees.emailField')}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -171,7 +171,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
 
           <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField
-              label="İşe Giriş Tarihi *"
+              label={t('employees.hireDateField')}
               type="date"
               value={hireDate}
               onChange={(e) => setHireDate(e.target.value)}
@@ -180,7 +180,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
               slotProps={{ inputLabel: { shrink: true } }}
             />
             <TextField
-              label="Doğum Tarihi"
+              label={t('employees.dateOfBirthField')}
               type="date"
               value={dateOfBirth}
               onChange={(e) => setDateOfBirth(e.target.value)}
@@ -192,14 +192,14 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
 
           <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField
-              label="Telefon"
+              label={t('employees.phoneField')}
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               size="small"
               fullWidth
             />
             <TextField
-              label="TC Kimlik"
+              label={t('employees.nationalIdField')}
               value={nationalId}
               onChange={(e) => setNationalId(e.target.value)}
               size="small"
@@ -209,10 +209,10 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
 
           <Box sx={{ display: 'flex', gap: 2 }}>
             <FormControl size="small" fullWidth>
-              <InputLabel>Durum</InputLabel>
+              <InputLabel>{t('employees.statusField')}</InputLabel>
               <Select
                 value={status}
-                label="Durum"
+                label={t('employees.statusField')}
                 onChange={(e) => setStatus(e.target.value)}
               >
                 {STATUS_OPTIONS.map((s) => (
@@ -224,7 +224,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
             </FormControl>
 
             <TextField
-              label="Maaş"
+              label={t('employees.salaryField')}
               type="number"
               value={salary}
               onChange={(e) => setSalary(e.target.value)}
@@ -234,10 +234,10 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
           </Box>
 
           <FormControl size="small" fullWidth>
-            <InputLabel>Yönetici</InputLabel>
+            <InputLabel>{t('employees.managerField')}</InputLabel>
             <Select
               value={managerId}
-              label="Yönetici"
+              label={t('employees.managerField')}
               onChange={(e) => setManagerId(String(e.target.value))}
             >
               <MenuItem value="">—</MenuItem>
@@ -258,19 +258,21 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
                 mb: 1,
               }}
             >
-              <Typography variant="subtitle2">İletişim Bilgileri</Typography>
+              <Typography variant="subtitle2">
+                {t('employees.contactInfoSection')}
+              </Typography>
               <Button size="small" startIcon={<AddIcon />} onClick={addContact}>
-                Ekle
+                {t('employees.addContactButton')}
               </Button>
             </Box>
 
             {contacts.map((c, i) => (
               <Box key={i} sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}>
                 <FormControl size="small" sx={{ width: 180, flexShrink: 0 }}>
-                  <InputLabel>Tür</InputLabel>
+                  <InputLabel>{t('employees.contactTypeLabel')}</InputLabel>
                   <Select
                     value={c.type}
-                    label="Tür"
+                    label={t('employees.contactTypeLabel')}
                     onChange={(e) => updateContact(i, 'type', e.target.value)}
                   >
                     {CONTACT_TYPE_OPTIONS.map((ct) => (
@@ -281,7 +283,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
                   </Select>
                 </FormControl>
                 <TextField
-                  label="Değer"
+                  label={t('employees.contactValueField')}
                   value={c.value}
                   onChange={(e) => updateContact(i, 'value', e.target.value)}
                   size="small"
@@ -298,15 +300,15 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
 
       <DialogActions>
         <Button onClick={onClose} disabled={isPending}>
-          İptal
+          {t('common.cancel')}
         </Button>
         <Button variant="contained" onClick={handleSubmit} disabled={isPending}>
           {isPending ? (
             <CircularProgress size={20} />
           ) : mode === 'create' ? (
-            'Oluştur'
+            t('common.create')
           ) : (
-            'Kaydet'
+            t('common.save')
           )}
         </Button>
       </DialogActions>

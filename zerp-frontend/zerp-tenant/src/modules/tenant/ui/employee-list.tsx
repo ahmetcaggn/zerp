@@ -23,7 +23,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { ROUTES } from '@/core/constants/routes'
+import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
@@ -45,7 +45,7 @@ const STATUS_COLOR: Record<
 }
 
 export function EmployeeList() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { showToast } = useToast()
   const router = useRouter()
 
@@ -122,11 +122,11 @@ export function EmployeeList() {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>Ad Soyad</TableCell>
-                  <TableCell>E-posta</TableCell>
-                  <TableCell>Telefon</TableCell>
-                  <TableCell>Durum</TableCell>
-                  <TableCell align="right">İşlemler</TableCell>
+                  <TableCell>{t('employees.fullNameColumnHeader')}</TableCell>
+                  <TableCell>{t('employees.emailColumnHeader')}</TableCell>
+                  <TableCell>{t('employees.phoneColumnHeader')}</TableCell>
+                  <TableCell>{t('employees.statusColumnHeader')}</TableCell>
+                  <TableCell align="right">{t('common.actions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -150,7 +150,7 @@ export function EmployeeList() {
                           size="small"
                           onClick={() => {
                             if (emp.id !== undefined) {
-                              router.push(`${ROUTES.employees}/${emp.id}` as Route)
+                              router.push(withLocale(locale, `${ROUTES.employees}/${emp.id}`) as Route)
                             }
                           }}
                         >
@@ -165,7 +165,10 @@ export function EmployeeList() {
                             if (emp.id !== undefined) {
                               deleteEmployee(emp.id, {
                                 onSuccess: () =>
-                                  showToast('Çalışan silindi.', { severity: 'success' }),
+                                  showToast(
+                                    t('employees.employeeDeletedToast'),
+                                    { severity: 'success' },
+                                  ),
                                 onError: (err) =>
                                   showToast(getUserFriendlyError(err), { severity: 'error' }),
                               })

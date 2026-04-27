@@ -10,7 +10,7 @@ import {
 } from '@mui/material'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
-import { ROUTES } from '@/core/constants/routes'
+import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useEmployees } from '../hooks/use-employees'
 
@@ -19,7 +19,7 @@ function initials(firstName?: string, lastName?: string): string {
 }
 
 export function DashboardRecentActivity() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const router = useRouter()
 
   const { data, isLoading } = useEmployees({
@@ -51,7 +51,7 @@ export function DashboardRecentActivity() {
               dense
               onClick={() => {
                 if (emp.id !== undefined)
-                  router.push(`${ROUTES.employees}/${emp.id}` as Route)
+                  router.push(withLocale(locale, `${ROUTES.employees}/${emp.id}`) as Route)
               }}
               sx={{ borderRadius: 1, px: 1 }}
             >

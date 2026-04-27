@@ -16,7 +16,7 @@ import {
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { ROUTES } from '@/core/constants/routes'
+import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
@@ -32,7 +32,7 @@ const PRIORITY_OPTIONS = Object.values(TicketPriority)
 const TYPE_OPTIONS = Object.values(TicketType)
 
 export function TicketCreateDialog({ open, onClose }: Props) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { showToast } = useToast()
   const router = useRouter()
 
@@ -45,7 +45,7 @@ export function TicketCreateDialog({ open, onClose }: Props) {
 
   function handleSubmit() {
     if (!title.trim()) {
-      showToast('Başlık zorunludur.', { severity: 'warning' })
+      showToast(t('tickets.titleRequiredWarning'), { severity: 'warning' })
       return
     }
 
@@ -58,10 +58,10 @@ export function TicketCreateDialog({ open, onClose }: Props) {
       },
       {
         onSuccess: (ticket) => {
-          showToast('Destek talebi oluşturuldu.', { severity: 'success' })
+          showToast(t('tickets.ticketCreatedToast'), { severity: 'success' })
           onClose()
           if (ticket.id !== undefined) {
-            router.push(`${ROUTES.tickets}/${ticket.id}` as Route)
+            router.push(withLocale(locale, `${ROUTES.tickets}/${ticket.id}`) as Route)
           }
         },
         onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
@@ -76,7 +76,7 @@ export function TicketCreateDialog({ open, onClose }: Props) {
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
           <TextField
-            label="Başlık *"
+            label={t('tickets.titleField')}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             size="small"
@@ -84,7 +84,7 @@ export function TicketCreateDialog({ open, onClose }: Props) {
           />
 
           <TextField
-            label="Açıklama"
+            label={t('tickets.descriptionField')}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             size="small"
@@ -95,10 +95,10 @@ export function TicketCreateDialog({ open, onClose }: Props) {
 
           <Box sx={{ display: 'flex', gap: 2 }}>
             <FormControl size="small" fullWidth>
-              <InputLabel>Öncelik</InputLabel>
+              <InputLabel>{t('tickets.priorityLabel')}</InputLabel>
               <Select
                 value={priority}
-                label="Öncelik"
+                label={t('tickets.priorityLabel')}
                 onChange={(e) => setPriority(e.target.value)}
               >
                 {PRIORITY_OPTIONS.map((p) => (
@@ -110,10 +110,10 @@ export function TicketCreateDialog({ open, onClose }: Props) {
             </FormControl>
 
             <FormControl size="small" fullWidth>
-              <InputLabel>Tür</InputLabel>
+              <InputLabel>{t('tickets.typeLabel')}</InputLabel>
               <Select
                 value={type}
-                label="Tür"
+                label={t('tickets.typeLabel')}
                 onChange={(e) => setType(e.target.value)}
               >
                 {TYPE_OPTIONS.map((ty) => (
@@ -129,10 +129,10 @@ export function TicketCreateDialog({ open, onClose }: Props) {
 
       <DialogActions>
         <Button onClick={onClose} disabled={isPending}>
-          İptal
+          {t('common.cancel')}
         </Button>
         <Button variant="contained" onClick={handleSubmit} disabled={isPending}>
-          {isPending ? <CircularProgress size={20} /> : 'Oluştur'}
+          {isPending ? <CircularProgress size={20} /> : t('common.create')}
         </Button>
       </DialogActions>
     </Dialog>

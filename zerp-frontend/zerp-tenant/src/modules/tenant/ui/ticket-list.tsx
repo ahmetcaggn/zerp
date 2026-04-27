@@ -28,7 +28,7 @@ import SearchIcon from '@mui/icons-material/Search'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
-import { ROUTES } from '@/core/constants/routes'
+import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
@@ -71,7 +71,7 @@ const PRIORITY_OPTIONS: TicketPriorityString[] = ['CRITICAL', 'HIGH', 'MEDIUM', 
 const TYPE_OPTIONS: TicketTypeString[] = ['BUG', 'FEATURE_REQUEST', 'QUESTION', 'INCIDENT']
 
 export function TicketList() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { showToast } = useToast()
   const router = useRouter()
 
@@ -133,9 +133,10 @@ export function TicketList() {
 
   const sortDir = sortOrder === 'ASC' ? 'asc' : 'desc'
 
+  const dateLocale = locale === 'tr' ? 'tr-TR' : 'en-US'
+
   return (
     <Box>
-      {/* Başlık */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5">{t('tickets.title')}</Typography>
         <Button
@@ -147,11 +148,11 @@ export function TicketList() {
         </Button>
       </Box>
 
-      {/* Filtre toolbar */}
+      {/* Filter toolbar */}
       <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap', alignItems: 'center' }}>
         <TextField
           size="small"
-          placeholder="Başlık veya açıklamada ara…"
+          placeholder={t('tickets.listSearchPlaceholder')}
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -182,20 +183,20 @@ export function TicketList() {
         />
 
         <Button variant="outlined" size="small" onClick={handleSearch}>
-          Ara
+          {t('tickets.searchButton')}
         </Button>
 
         <FormControl size="small" sx={{ minWidth: 130 }}>
-          <InputLabel>Durum</InputLabel>
+          <InputLabel>{t('tickets.statusLabel')}</InputLabel>
           <Select
             value={statusFilter}
-            label="Durum"
+            label={t('tickets.statusLabel')}
             onChange={(e) => {
               setStatusFilter(e.target.value)
               setPage(0)
             }}
           >
-            <MenuItem value="">Tümü</MenuItem>
+            <MenuItem value="">{t('common.all')}</MenuItem>
             {STATUS_OPTIONS.map((s) => (
               <MenuItem key={s} value={s}>
                 <Chip
@@ -210,16 +211,16 @@ export function TicketList() {
         </FormControl>
 
         <FormControl size="small" sx={{ minWidth: 130 }}>
-          <InputLabel>Öncelik</InputLabel>
+          <InputLabel>{t('tickets.priorityLabel')}</InputLabel>
           <Select
             value={priorityFilter}
-            label="Öncelik"
+            label={t('tickets.priorityLabel')}
             onChange={(e) => {
               setPriorityFilter(e.target.value)
               setPage(0)
             }}
           >
-            <MenuItem value="">Tümü</MenuItem>
+            <MenuItem value="">{t('common.all')}</MenuItem>
             {PRIORITY_OPTIONS.map((p) => (
               <MenuItem key={p} value={p}>
                 <Chip
@@ -234,16 +235,16 @@ export function TicketList() {
         </FormControl>
 
         <FormControl size="small" sx={{ minWidth: 140 }}>
-          <InputLabel>Tür</InputLabel>
+          <InputLabel>{t('tickets.typeLabel')}</InputLabel>
           <Select
             value={typeFilter}
-            label="Tür"
+            label={t('tickets.typeLabel')}
             onChange={(e) => {
               setTypeFilter(e.target.value)
               setPage(0)
             }}
           >
-            <MenuItem value="">Tümü</MenuItem>
+            <MenuItem value="">{t('common.all')}</MenuItem>
             {TYPE_OPTIONS.map((ty) => (
               <MenuItem key={ty} value={ty}>
                 {ty}
@@ -254,12 +255,11 @@ export function TicketList() {
 
         {hasActiveFilters && (
           <Button size="small" color="inherit" onClick={clearFilters}>
-            Filtreleri Temizle
+            {t('tickets.clearFiltersButton')}
           </Button>
         )}
       </Box>
 
-      {/* Tablo */}
       {isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
           <CircularProgress />
@@ -278,7 +278,7 @@ export function TicketList() {
                   direction={sortField === 'title' ? sortDir : 'asc'}
                   onClick={() => handleSort('title')}
                 >
-                  Başlık
+                  {t('tickets.titleColumnHeader')}
                 </TableSortLabel>
               </TableCell>
               <TableCell>
@@ -287,7 +287,7 @@ export function TicketList() {
                   direction={sortField === 'status' ? sortDir : 'asc'}
                   onClick={() => handleSort('status')}
                 >
-                  Durum
+                  {t('tickets.statusLabel')}
                 </TableSortLabel>
               </TableCell>
               <TableCell>
@@ -296,7 +296,7 @@ export function TicketList() {
                   direction={sortField === 'priority' ? sortDir : 'asc'}
                   onClick={() => handleSort('priority')}
                 >
-                  Öncelik
+                  {t('tickets.priorityLabel')}
                 </TableSortLabel>
               </TableCell>
               <TableCell>
@@ -305,7 +305,7 @@ export function TicketList() {
                   direction={sortField === 'type' ? sortDir : 'asc'}
                   onClick={() => handleSort('type')}
                 >
-                  Tür
+                  {t('tickets.typeLabel')}
                 </TableSortLabel>
               </TableCell>
               <TableCell>
@@ -314,10 +314,10 @@ export function TicketList() {
                   direction={sortField === 'createdAt' ? sortDir : 'asc'}
                   onClick={() => handleSort('createdAt')}
                 >
-                  Oluşturulma
+                  {t('tickets.createdAtColumnHeader')}
                 </TableSortLabel>
               </TableCell>
-              <TableCell align="right">İşlemler</TableCell>
+              <TableCell align="right">{t('common.actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -328,7 +328,7 @@ export function TicketList() {
                 sx={{ cursor: 'pointer' }}
                 onClick={() => {
                   if (ticket.id !== undefined)
-                    router.push(`${ROUTES.tickets}/${ticket.id}` as Route)
+                    router.push(withLocale(locale, `${ROUTES.tickets}/${ticket.id}`) as Route)
                 }}
               >
                 <TableCell>
@@ -374,16 +374,18 @@ export function TicketList() {
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2" color="text.secondary">
-                    {ticket.createdAt ? new Date(ticket.createdAt).toLocaleString('tr-TR') : '—'}
+                    {ticket.createdAt
+                      ? new Date(ticket.createdAt).toLocaleString(dateLocale)
+                      : '—'}
                   </Typography>
                 </TableCell>
                 <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                  <Tooltip title="Detay">
+                  <Tooltip title={t('tickets.detailTooltip')}>
                     <IconButton
                       size="small"
                       onClick={() => {
                         if (ticket.id !== undefined)
-                          router.push(`${ROUTES.tickets}/${ticket.id}` as Route)
+                          router.push(withLocale(locale, `${ROUTES.tickets}/${ticket.id}`) as Route)
                       }}
                     >
                       <OpenInNewIcon fontSize="small" />
@@ -407,7 +409,7 @@ export function TicketList() {
           setPage(0)
         }}
         rowsPerPageOptions={[10, 25, 50]}
-        labelRowsPerPage="Sayfa başına:"
+        labelRowsPerPage={t('tickets.rowsPerPageLabel')}
         labelDisplayedRows={({ from, to, count }) =>
           `${from}–${to} / ${count !== -1 ? count : `${to}+`}`
         }

@@ -39,18 +39,6 @@ interface Props {
   id: string
 }
 
-const STATUS_META: Record<
-  EmploymentStatusValue,
-  { color: 'success' | 'info' | 'warning' | 'error' | 'default'; label: string }
-> = {
-  ACTIVE:     { color: 'success', label: 'Aktif' },
-  PROBATION:  { color: 'info',    label: 'Deneme Süreci' },
-  ON_LEAVE:   { color: 'warning', label: 'İzinli' },
-  SUSPENDED:  { color: 'error',   label: 'Askıya Alındı' },
-  TERMINATED: { color: 'default', label: 'Ayrıldı' },
-  RETIRED:    { color: 'default', label: 'Emekli' },
-}
-
 function InfoRow({
   icon,
   label,
@@ -85,7 +73,16 @@ function SectionCard({
   return (
     <Card variant="outlined" sx={{ height: '100%' }}>
       <CardContent>
-        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2, textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.7rem' }}>
+        <Typography
+          variant="subtitle2"
+          color="text.secondary"
+          sx={{
+            mb: 2,
+            textTransform: 'uppercase',
+            letterSpacing: 0.5,
+            fontSize: '0.7rem',
+          }}
+        >
           {title}
         </Typography>
         <Stack spacing={2}>{children}</Stack>
@@ -99,10 +96,22 @@ function getInitials(firstName?: string, lastName?: string) {
 }
 
 export function EmployeeDetail({ id }: Props) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { showToast } = useToast()
   const router = useRouter()
   const [editOpen, setEditOpen] = useState(false)
+
+  const STATUS_META: Record<
+    EmploymentStatusValue,
+    { color: 'success' | 'info' | 'warning' | 'error' | 'default'; label: string }
+  > = {
+    ACTIVE:     { color: 'success', label: t('employees.statusActive') },
+    PROBATION:  { color: 'info',    label: t('employees.statusProbation') },
+    ON_LEAVE:   { color: 'warning', label: t('employees.statusOnLeave') },
+    SUSPENDED:  { color: 'error',   label: t('employees.statusSuspended') },
+    TERMINATED: { color: 'default', label: t('employees.statusTerminated') },
+    RETIRED:    { color: 'default', label: t('employees.statusRetired') },
+  }
 
   const { data: employee, isLoading, error } = useEmployee(id)
 
@@ -127,16 +136,18 @@ export function EmployeeDetail({ id }: Props) {
     ? `${employee.manager.firstName ?? ''} ${employee.manager.lastName ?? ''}`.trim() || null
     : null
 
+  const salaryLocale = locale === 'tr' ? 'tr-TR' : 'en-US'
+
   return (
     <Box>
-      {/* Üst bar */}
+      {/* Top bar */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Button
           startIcon={<ArrowBackIcon />}
           onClick={() => router.back()}
           sx={{ color: 'text.secondary' }}
         >
-          Geri
+          {t('common.back')}
         </Button>
         <Tooltip title={t('employees.editButton')}>
           <IconButton onClick={() => setEditOpen(true)} color="primary">
@@ -145,7 +156,7 @@ export function EmployeeDetail({ id }: Props) {
         </Tooltip>
       </Box>
 
-      {/* Hero — avatar + isim + durum */}
+      {/* Hero — avatar + name + status */}
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent>
           <Box sx={{ display: 'flex', gap: 3, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -192,75 +203,87 @@ export function EmployeeDetail({ id }: Props) {
         </CardContent>
       </Card>
 
-      {/* Kart grid'i */}
+      {/* Card grid */}
       <Grid container spacing={2} sx={{ mb: 2 }}>
-        {/* İstihdam */}
+        {/* Employment */}
         <Grid size={{ xs: 12, sm: 6 }}>
-          <SectionCard title="İstihdam">
+          <SectionCard title={t('employees.employmentSection')}>
             <InfoRow
               icon={<EventAvailableIcon fontSize="small" />}
-              label="İşe Giriş Tarihi"
+              label={t('employees.hireDateLabel')}
               value={employee.hireDate}
             />
             <InfoRow
               icon={<EventBusyIcon fontSize="small" />}
-              label="Ayrılış Tarihi"
+              label={t('employees.terminationDateLabel')}
               value={employee.terminationDate}
             />
             <InfoRow
               icon={<MonetizationOnIcon fontSize="small" />}
-              label="Maaş"
-              value={employee.salary !== undefined ? `${employee.salary.toLocaleString('tr-TR')} ₺` : undefined}
+              label={t('employees.salaryLabel')}
+              value={
+                employee.salary !== undefined
+                  ? employee.salary.toLocaleString(salaryLocale)
+                  : undefined
+              }
             />
             <InfoRow
               icon={<PersonIcon fontSize="small" />}
-              label="Yönetici"
+              label={t('employees.managerLabel')}
               value={managerName ?? undefined}
             />
           </SectionCard>
         </Grid>
 
-        {/* Kişisel */}
+        {/* Personal */}
         <Grid size={{ xs: 12, sm: 6 }}>
-          <SectionCard title="Kişisel Bilgiler">
+          <SectionCard title={t('employees.personalInfoSection')}>
             <InfoRow
               icon={<EmailIcon fontSize="small" />}
-              label="E-posta"
+              label={t('employees.emailLabel')}
               value={employee.email}
             />
             <InfoRow
               icon={<FingerprintIcon fontSize="small" />}
-              label="TC Kimlik No"
+              label={t('employees.nationalIdLabel')}
               value={employee.nationalId}
             />
             <InfoRow
               icon={<CakeIcon fontSize="small" />}
-              label="Doğum Tarihi"
+              label={t('employees.dateOfBirthLabel')}
               value={employee.dateOfBirth}
             />
             <InfoRow
               icon={<BadgeIcon fontSize="small" />}
-              label="Çalışan ID"
+              label={t('employees.employeeIdLabel')}
               value={String(id)}
             />
           </SectionCard>
         </Grid>
       </Grid>
 
-      {/* İletişim bilgileri */}
+      {/* Contact info */}
       {(employee.contacts?.length ?? 0) > 0 && (
         <Card variant="outlined" sx={{ mb: 2 }}>
           <CardContent>
             <Typography
               variant="subtitle2"
               color="text.secondary"
-              sx={{ mb: 2, textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.7rem' }}
+              sx={{
+                mb: 2,
+                textTransform: 'uppercase',
+                letterSpacing: 0.5,
+                fontSize: '0.7rem',
+              }}
             >
-              İletişim Bilgileri
+              {t('employees.contactInfoSection')}
             </Typography>
             <Stack divider={<Divider flexItem />} spacing={1.5}>
               {employee.contacts?.map((c) => (
-                <Box key={c.id} sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                <Box
+                  key={c.id}
+                  sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}
+                >
                   <Chip label={c.type} size="small" variant="outlined" sx={{ minWidth: 100 }} />
                   <Typography variant="body2" fontWeight={500}>
                     {c.value ?? '—'}
@@ -278,18 +301,18 @@ export function EmployeeDetail({ id }: Props) {
         </Card>
       )}
 
-      {/* Sistem bilgileri */}
+      {/* System info */}
       <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           <CalendarTodayIcon sx={{ fontSize: '0.85rem', color: 'text.disabled' }} />
           <Typography variant="caption" color="text.disabled">
-            Oluşturulma: {employee.createdAt ?? '—'}
+            {t('employees.createdAtLabel')} {employee.createdAt ?? '—'}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           <CalendarTodayIcon sx={{ fontSize: '0.85rem', color: 'text.disabled' }} />
           <Typography variant="caption" color="text.disabled">
-            Son güncelleme: {employee.updatedAt ?? '—'}
+            {t('employees.updatedAtLabel')} {employee.updatedAt ?? '—'}
           </Typography>
         </Box>
       </Box>
