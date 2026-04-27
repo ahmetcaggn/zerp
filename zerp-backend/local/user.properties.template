@@ -6,3 +6,8 @@ spring.datasource.username=
 spring.datasource.password=
 
 eureka.client.service-url.defaultZone=http://localhost:8761/eureka/
+
+keycloak.admin.server-url=https://auth.femrek.dev
+keycloak.admin.realm=zerp
+keycloak.admin.client-id=zerp-admin-cli
+keycloak.admin.client-secret=
