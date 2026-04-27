@@ -32,7 +32,9 @@ public class UsernameService {
     private final UserRepository userRepository;
 
     public UsernameCheckResponseDTO isUsernameAvailable(String username) {
+        log.debug("Checking username availability (case-insensitive): {}", username);
         boolean isAvailable = !isUserExists(username);
+        log.info("Username availability check for '{}': available={}", username, isAvailable);
         return UsernameCheckResponseDTO.builder()
                 .username(username)
                 .available(isAvailable).build();
@@ -41,11 +43,15 @@ public class UsernameService {
     public boolean isUserExists(String username) {
         validateUsername(username);
 
+        // Search in Keycloak (case-insensitive)
         List<UserRepresentation> kcResult = keycloakAdminClient.realm(keycloakAdminProperties.getRealm())
                 .users()
                 .search(username, true);
-        boolean existInKeycloak = kcResult.stream().anyMatch(u -> u.getUsername().equals(username));
-        boolean existInDb = userRepository.existsByUsername(username);
+        boolean existInKeycloak = kcResult.stream()
+                .anyMatch(u -> u.getUsername().equalsIgnoreCase(username));
+
+        // Search in database (case-insensitive)
+        boolean existInDb = userRepository.existsByUsernameIgnoreCase(username);
 
         if (existInDb != existInKeycloak) {
             throw new IllegalStateException("Data inconsistency detected for username " + username +
