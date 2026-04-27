@@ -26,11 +26,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </Box>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} gap={{ xs: 1.5, sm: 2 }}>
-          <Button href={`/${locale}/dashboard`} variant="contained" fullWidth>
+          <Button href={`/${locale}/dashboard`} variant="contained">
             {messages.home.cta}
-          </Button>
-          <Button href={`/${locale}/login`} variant="outlined" fullWidth>
-            {messages.nav.login}
           </Button>
         </Stack>
       </Stack>

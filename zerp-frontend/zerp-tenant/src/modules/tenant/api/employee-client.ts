@@ -20,6 +20,8 @@ const base = createResourceClient<
 
 export const employeeClient = {
   ...base,
+  
+  // TODO backend filter yapisi type safe olmadigi icin simdilik alttaki kisim yorum satiri olarak birakildi.
 
   // getList: (params: RaListParams = {}): Promise<RaListResult<EmployeeListResponseDto>> => {
   //   const merged: RaListParams = {
