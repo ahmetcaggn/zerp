@@ -35,3 +35,8 @@ export type TicketStatusString =
 export type TicketPriorityString = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
 
 export type TicketTypeString = 'BUG' | 'FEATURE_REQUEST' | 'QUESTION' | 'INCIDENT'
+
+export interface UpdateTicketRequest {
+  title?: string
+  description?: string
+}

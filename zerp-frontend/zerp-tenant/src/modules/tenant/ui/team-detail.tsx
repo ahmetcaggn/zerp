@@ -28,7 +28,6 @@ import PersonRemoveIcon from '@mui/icons-material/PersonRemove'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { ROUTES } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
@@ -111,8 +110,8 @@ export function TeamDetail({ id }: Props) {
     <Box>
       {/* Üst bar */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(ROUTES.teams)}>
-          {t('teams.title')}
+        <Button startIcon={<ArrowBackIcon />} onClick={() => router.back()} sx={{ color: 'text.secondary' }}>
+          Geri
         </Button>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
