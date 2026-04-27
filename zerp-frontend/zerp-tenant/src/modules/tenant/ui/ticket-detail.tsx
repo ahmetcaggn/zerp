@@ -44,7 +44,7 @@ const PRIORITY_COLOR: Record<TicketPriorityString, 'error' | 'warning' | 'info' 
 const CLOSEABLE_STATUSES: TicketStatusString[] = ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER']
 
 interface Props {
-  id: number
+  id: string
 }
 
 export function TicketDetail({ id }: Props) {

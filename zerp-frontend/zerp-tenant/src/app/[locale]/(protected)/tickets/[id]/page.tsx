@@ -10,5 +10,5 @@ export default async function TicketDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  return <TicketDetail id={Number(id)} />
+  return <TicketDetail id={id} />
 }

@@ -13,26 +13,26 @@ const base = createResourceClient<
   TeamResponse,
   CreateTeamRequest,
   UpdateTeamRequest,
-  number
+  string
 >('/teams')
 
 export const teamClient = {
   ...base,
 
-  activate: (id: number): Promise<TeamResponse> =>
+  activate: (id: string): Promise<TeamResponse> =>
     httpClient.post<TeamResponse>(`/teams/${id}/activate`, {}),
 
-  deactivate: (id: number): Promise<TeamResponse> =>
+  deactivate: (id: string): Promise<TeamResponse> =>
     httpClient.post<TeamResponse>(`/teams/${id}/deactivate`, {}),
 
-  addMember: (id: number, body: AddMemberRequest): Promise<TeamResponse> =>
+  addMember: (id: string, body: AddMemberRequest): Promise<TeamResponse> =>
     httpClient.post<TeamResponse>(`/teams/${id}/members`, body),
 
-  removeMember: (id: number, userId: string): Promise<TeamResponse> =>
+  removeMember: (id: string, userId: string): Promise<TeamResponse> =>
     httpClient.del<TeamResponse>(`/teams/${id}/members/${encodeURIComponent(userId)}`),
 
   changeMemberRole: (
-    id: number,
+    id: string,
     userId: string,
     body: ChangeMemberRoleRequest,
   ): Promise<TeamResponse> =>

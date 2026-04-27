@@ -8,21 +8,21 @@ import type {
 } from '../types/ticket'
 
 export const ticketClient = {
-  getById: (id: number): Promise<TicketResponse> =>
-    httpClient.get<TicketResponse>(`/api/tickets/${id}`),
+  getById: (id: string): Promise<TicketResponse> =>
+    httpClient.get<TicketResponse>(`/tickets/${id}`),
 
   create: (body: CreateTicketRequest): Promise<TicketResponse> =>
-    httpClient.post<TicketResponse>('/api/tickets', body),
+    httpClient.post<TicketResponse>('/tickets', body),
 
-  addComment: (id: number, body: AddCommentRequest): Promise<TicketResponse> =>
-    httpClient.post<TicketResponse>(`/api/tickets/${id}/comments`, body),
+  addComment: (id: string, body: AddCommentRequest): Promise<TicketResponse> =>
+    httpClient.post<TicketResponse>(`/tickets/${id}/comments`, body),
 
-  close: (id: number): Promise<TicketResponse> =>
-    httpClient.post<TicketResponse>(`/api/tickets/${id}/close`, {}),
+  close: (id: string): Promise<TicketResponse> =>
+    httpClient.post<TicketResponse>(`/tickets/${id}/close`, {}),
 
-  changeStatus: (id: number, body: ChangeStatusRequest): Promise<TicketResponse> =>
-    httpClient.patch<TicketResponse>(`/api/tickets/${id}/status`, body),
+  changeStatus: (id: string, body: ChangeStatusRequest): Promise<TicketResponse> =>
+    httpClient.patch<TicketResponse>(`/tickets/${id}/status`, body),
 
-  changePriority: (id: number, body: ChangePriorityRequest): Promise<TicketResponse> =>
-    httpClient.patch<TicketResponse>(`/api/tickets/${id}/priority`, body),
+  changePriority: (id: string, body: ChangePriorityRequest): Promise<TicketResponse> =>
+    httpClient.patch<TicketResponse>(`/tickets/${id}/priority`, body),
 }

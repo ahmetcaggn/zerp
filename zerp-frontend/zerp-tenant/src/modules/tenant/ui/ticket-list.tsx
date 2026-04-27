@@ -46,15 +46,15 @@ export function TicketList() {
   const router = useRouter()
   const [createOpen, setCreateOpen] = useState(false)
   const [lookupInput, setLookupInput] = useState('')
-  const [lookupId, setLookupId] = useState<number | undefined>()
+  const [lookupId, setLookupId] = useState<string | undefined>()
 
   const { data: lookedUpTicket, isLoading, error } = useTicket(lookupId)
 
   if (error) showToast(getUserFriendlyError(error), { severity: 'error' })
 
   function handleLookup() {
-    const parsed = parseInt(lookupInput, 10)
-    if (!isNaN(parsed) && parsed > 0) setLookupId(parsed)
+    const trimmed = lookupInput.trim()
+    if (trimmed) setLookupId(trimmed)
   }
 
   return (
@@ -81,7 +81,7 @@ export function TicketList() {
         <TextField
           size="small"
           label="Talep ID"
-          type="number"
+          type="text"
           value={lookupInput}
           onChange={(e) => setLookupInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleLookup()}

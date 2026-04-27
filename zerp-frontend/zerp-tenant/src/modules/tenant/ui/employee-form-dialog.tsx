@@ -95,7 +95,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
       ...(nationalId && { nationalId }),
       ...(dateOfBirth && { dateOfBirth }),
       ...(status && { status: status as CreateEmployeeRequestDto['status'] }),
-      ...(managerId && { managerId: Number(managerId) }),
+      ...(managerId && { managerId: managerId as unknown as number }),
       ...(salary && { salary: Number(salary) }),
       ...(contacts.length > 0 && { contacts }),
     }

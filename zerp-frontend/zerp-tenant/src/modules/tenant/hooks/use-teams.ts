@@ -28,7 +28,7 @@ export {
 export function useActivateTeam() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: number) => teamClient.activate(id),
+    mutationFn: (id: string) => teamClient.activate(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.tenant.teams }),
   })
 }
@@ -36,7 +36,7 @@ export function useActivateTeam() {
 export function useDeactivateTeam() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: number) => teamClient.deactivate(id),
+    mutationFn: (id: string) => teamClient.deactivate(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.tenant.teams }),
   })
 }
@@ -44,7 +44,7 @@ export function useDeactivateTeam() {
 export function useAddTeamMember() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, body }: { id: number; body: AddMemberRequest }) =>
+    mutationFn: ({ id, body }: { id: string; body: AddMemberRequest }) =>
       teamClient.addMember(id, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.tenant.teams }),
   })
@@ -53,7 +53,7 @@ export function useAddTeamMember() {
 export function useRemoveTeamMember() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, userId }: { id: number; userId: string }) =>
+    mutationFn: ({ id, userId }: { id: string; userId: string }) =>
       teamClient.removeMember(id, userId),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.tenant.teams }),
   })
@@ -67,7 +67,7 @@ export function useChangeTeamMemberRole() {
       userId,
       body,
     }: {
-      id: number
+      id: string
       userId: string
       body: ChangeMemberRoleRequest
     }) => teamClient.changeMemberRole(id, userId, body),

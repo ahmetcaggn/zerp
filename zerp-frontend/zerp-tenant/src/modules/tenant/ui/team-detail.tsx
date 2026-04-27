@@ -44,7 +44,7 @@ import { TeamMemberRole } from '../types/team'
 import { TeamFormDialog } from './team-form-dialog'
 
 interface Props {
-  id: number
+  id: string
 }
 
 export function TeamDetail({ id }: Props) {

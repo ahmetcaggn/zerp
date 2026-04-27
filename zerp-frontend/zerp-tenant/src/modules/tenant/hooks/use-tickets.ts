@@ -9,10 +9,10 @@ import type {
   CreateTicketRequest,
 } from '../types/ticket'
 
-const ticketDetailKey = (id: number) =>
+const ticketDetailKey = (id: string) =>
   [...queryKeys.tenant.tickets, 'detail', id] as const
 
-export function useTicket(id: number | undefined) {
+export function useTicket(id: string | undefined) {
   return useQuery({
     queryKey: ticketDetailKey(id!),
     queryFn: () => ticketClient.getById(id!),
@@ -31,7 +31,7 @@ export function useCreateTicket() {
 export function useAddComment() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, body }: { id: number; body: AddCommentRequest }) =>
+    mutationFn: ({ id, body }: { id: string; body: AddCommentRequest }) =>
       ticketClient.addComment(id, body),
     onSuccess: (_, { id }) =>
       qc.invalidateQueries({ queryKey: ticketDetailKey(id) }),
@@ -41,7 +41,7 @@ export function useAddComment() {
 export function useCloseTicket() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: number) => ticketClient.close(id),
+    mutationFn: (id: string) => ticketClient.close(id),
     onSuccess: (_, id) => qc.invalidateQueries({ queryKey: ticketDetailKey(id) }),
   })
 }
@@ -49,7 +49,7 @@ export function useCloseTicket() {
 export function useChangeTicketStatus() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, body }: { id: number; body: ChangeStatusRequest }) =>
+    mutationFn: ({ id, body }: { id: string; body: ChangeStatusRequest }) =>
       ticketClient.changeStatus(id, body),
     onSuccess: (_, { id }) =>
       qc.invalidateQueries({ queryKey: ticketDetailKey(id) }),
@@ -59,7 +59,7 @@ export function useChangeTicketStatus() {
 export function useChangePriority() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, body }: { id: number; body: ChangePriorityRequest }) =>
+    mutationFn: ({ id, body }: { id: string; body: ChangePriorityRequest }) =>
       ticketClient.changePriority(id, body),
     onSuccess: (_, { id }) =>
       qc.invalidateQueries({ queryKey: ticketDetailKey(id) }),
