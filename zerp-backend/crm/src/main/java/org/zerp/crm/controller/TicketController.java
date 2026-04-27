@@ -10,11 +10,10 @@ import org.zerp.crm.service.TicketService;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/tickets")
+@RequestMapping("/tickets")
 @Tag(name = "Tickets", description = "APIs for managing support tickets")
 public class TicketController extends ResourceController<TicketResponse, TicketResponse,
         CreateTicketRequest, UpdateTicketRequest, UUID> {
-    private static final UUID CURRENT_USER_ID = UUID.fromString("2b9de1ef-3cda-4226-b1e7-e23a178cdb7e");
 
     private final TicketService ticketService;
 
@@ -31,43 +30,37 @@ public class TicketController extends ResourceController<TicketResponse, TicketR
     public ResponseEntity<TicketResponse> changeTicketStatus(
             @PathVariable UUID id,
             @RequestBody ChangeStatusRequest request) {
-        TicketResponse response = ticketService.changeStatus(id, request, CURRENT_USER_ID);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ticketService.changeStatus(id, request));
     }
 
     @PatchMapping("/{id}/priority")
     public ResponseEntity<TicketResponse> changeTicketPriority(
             @PathVariable UUID id,
             @RequestBody ChangePriorityRequest request) {
-        TicketResponse response = ticketService.changePriority(id, request, CURRENT_USER_ID);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ticketService.changePriority(id, request));
     }
 
     @PostMapping("/{id}/assign")
     public ResponseEntity<TicketResponse> assignTicket(
             @PathVariable UUID id,
             @RequestBody AssignTicketRequest request) {
-        TicketResponse response = ticketService.assignTicket(id, request, CURRENT_USER_ID);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ticketService.assignTicket(id, request));
     }
 
     @DeleteMapping("/{id}/assign")
     public ResponseEntity<TicketResponse> unassignTicket(@PathVariable UUID id) {
-        TicketResponse response = ticketService.unassignTicket(id, CURRENT_USER_ID);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ticketService.unassignTicket(id));
     }
 
     @PostMapping("/{id}/comments")
     public ResponseEntity<TicketResponse> addTicketComment(
             @PathVariable UUID id,
             @RequestBody AddCommentRequest request) {
-        TicketResponse response = ticketService.addComment(id, request, CURRENT_USER_ID);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ticketService.addComment(id, request));
     }
 
     @PostMapping("/{id}/close")
     public ResponseEntity<TicketResponse> closeTicket(@PathVariable UUID id) {
-        TicketResponse response = ticketService.closeTicket(id, CURRENT_USER_ID);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ticketService.closeTicket(id));
     }
 }

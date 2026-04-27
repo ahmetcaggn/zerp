@@ -8,12 +8,10 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
-  FormHelperText,
   InputLabel,
   MenuItem,
   Select,
   TextField,
-  Typography,
 } from '@mui/material'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
@@ -42,7 +40,6 @@ export function TicketCreateDialog({ open, onClose }: Props) {
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<string>(TicketPriority.Medium)
   const [type, setType] = useState<string>(TicketType.Question)
-  const [tenantId, setTenantId] = useState('')
 
   const { mutate: createTicket, isPending } = useCreateTicket()
 
@@ -56,7 +53,6 @@ export function TicketCreateDialog({ open, onClose }: Props) {
       {
         title: title.trim(),
         ...(description && { description }),
-        ...(tenantId && { tenantId }),
         priority: priority as (typeof TicketPriority)[keyof typeof TicketPriority],
         type: type as (typeof TicketType)[keyof typeof TicketType],
       },
@@ -127,21 +123,6 @@ export function TicketCreateDialog({ open, onClose }: Props) {
                 ))}
               </Select>
             </FormControl>
-          </Box>
-
-          <Box>
-            <TextField
-              label="Tenant ID"
-              value={tenantId}
-              onChange={(e) => setTenantId(e.target.value)}
-              size="small"
-              fullWidth
-            />
-            <FormHelperText>
-              <Typography variant="caption" color="text.secondary">
-                İleride JWT token&apos;dan otomatik doldurulacak.
-              </Typography>
-            </FormHelperText>
           </Box>
         </Box>
       </DialogContent>

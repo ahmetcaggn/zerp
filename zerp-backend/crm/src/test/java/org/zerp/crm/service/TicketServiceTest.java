@@ -8,6 +8,8 @@ import org.zerp.common.entity.crm.TicketEntity.TicketPriority;
 import org.zerp.common.entity.crm.TicketEntity.TicketStatus;
 import org.zerp.common.entity.crm.TicketEntity.TicketType;
 import org.zerp.common.entity.user.AppUser;
+import org.zerp.common.util.CurrentTenantIdResolver;
+import org.zerp.common.util.CurrentUserIdResolver;
 import org.zerp.crm.dto.ticket.*;
 import org.zerp.crm.repository.TicketRepository;
 import org.zerp.crm.service.ticket.TicketResponseMapper;
@@ -34,6 +36,8 @@ public class TicketServiceTest {
     void setUp() {
         ticketRepository = mock(TicketRepository.class);
         entityManager = mock(EntityManager.class);
+        CurrentTenantIdResolver currentTenantIdResolver = mock(CurrentTenantIdResolver.class);
+        CurrentUserIdResolver currentUserIdResolver = mock(CurrentUserIdResolver.class);
         TicketValueParser ticketValueParser = new TicketValueParser();
         TicketSpecificationBuilder ticketSpecificationBuilder = new TicketSpecificationBuilder(ticketValueParser);
         TicketResponseMapper ticketResponseMapper = new TicketResponseMapper();
@@ -42,7 +46,10 @@ public class TicketServiceTest {
                 ticketResponseMapper,
                 ticketSpecificationBuilder,
                 ticketValueParser,
-                entityManager
+                entityManager,
+                currentTenantIdResolver,
+                currentUserIdResolver
+
         );
 
         defaultTenantId = UUID.randomUUID();
@@ -258,7 +265,7 @@ public class TicketServiceTest {
         @Test
         @DisplayName("Should track history of ticket creation")
         void should_Track_History_Of_Ticket_Creation() {
-            TicketResponse response = ticketService.createTicket(defaultCreateRequest(), defaultUserId);
+            TicketResponse response = ticketService.createTicket(defaultCreateRequest());
 
             // The save mock returns the entity, which should have history entries
             verify(ticketRepository).save(argThat(entity -> {
