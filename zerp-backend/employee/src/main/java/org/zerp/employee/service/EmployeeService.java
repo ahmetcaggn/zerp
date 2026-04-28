@@ -2,6 +2,7 @@ package org.zerp.employee.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -9,13 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import org.zerp.common.util.CurrentTenantIdResolver;
-import org.zerp.common.util.CurrentUserIdResolver;
+import org.zerp.common.resource.util.filter.FilterRefiner;
+import org.zerp.common.util.header.CurrentTenantIdResolver;
+import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.common.entity.employee.Employee;
 import org.zerp.common.entity.employee.EmployeeContact;
 import org.zerp.common.entity.employee.EmploymentStatus;
 import org.zerp.common.resource.service.IResourceService;
-import org.zerp.common.resource.util.FilterType;
 import org.zerp.employee.Exception.DuplicateResourceException;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.EmployeeContactDto;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class EmployeeService implements IResourceService<EmployeeResponseDto, EmployeeListResponseDto,
@@ -42,6 +44,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
     private final EmployeePermissionEvaluator permissionEvaluator;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final CurrentTenantIdResolver currentTenantIdResolver;
+    private final FilterRefiner filterRefiner;
 
     // =============================================
     // IResourceService overrides
@@ -323,34 +326,15 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
     }
 
     private Specification<Employee> buildSpecificationFromFilters(Map<String, String> filters) {
-        Specification<Employee> spec = Specification.unrestricted();
-        for (Map.Entry<String, String> entry : filters.entrySet()) {
-            String key = entry.getKey();
-            int lastDotIndex = key.lastIndexOf('.');
-            if (lastDotIndex < 0 || lastDotIndex == key.length() - 1) continue;
-            String field = key.substring(0, lastDotIndex);
-            FilterType filterType = FilterType.fromCode(key.substring(lastDotIndex + 1));
-            if (filterType == null) continue;
-            spec = spec.and((root, _, cb) -> {
-                if (filterType == FilterType.EQUAL)
-                    return cb.equal(root.get(field), entry.getValue());
-                if (filterType == FilterType.NOT_EQUAL)
-                    return cb.notEqual(root.get(field), entry.getValue());
-                if (filterType == FilterType.GREATER_THAN_OR_EQUAL)
-                    return cb.greaterThanOrEqualTo(root.get(field), entry.getValue());
-                if (filterType == FilterType.LESS_THAN_OR_EQUAL)
-                    return cb.lessThanOrEqualTo(root.get(field), entry.getValue());
-                if (filterType == FilterType.LIKE)
-                    return cb.like(root.get(field), "%" + entry.getValue() + "%");
-                throw new IllegalArgumentException("Unsupported filter type: " + filterType);
-            });
-        }
+        Specification<Employee> spec = filterRefiner.refined(filters, Employee.class);
+        log.debug("Built specification from filters: filters={}, spec={}", filters, spec);
         return spec;
     }
 
     private UUID resolveCurrentUserId() {
         return currentUserIdResolver.resolve();
     }
+
     private UUID resolveCurrentTenantId() {
         return currentTenantIdResolver.resolve();
     }

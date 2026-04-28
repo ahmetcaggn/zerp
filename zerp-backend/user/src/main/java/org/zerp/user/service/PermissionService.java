@@ -14,8 +14,8 @@ import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
 import org.zerp.common.resource.service.IResourceService;
-import org.zerp.common.resource.util.FilterType;
-import org.zerp.common.util.CurrentUserIdResolver;
+import org.zerp.common.resource.util.filter.FilterRefiner;
+import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.user.permission.PermissionPermissionEvaluator;
 
 import java.util.ArrayList;
@@ -33,6 +33,7 @@ public class PermissionService implements IResourceService<Permission, Permissio
     private final PermissionRepository repository;
     private final PermissionPermissionEvaluator permissionEvaluator;
     private final CurrentUserIdResolver currentUserIdResolver;
+    private final FilterRefiner filterRefiner;
 
     @Override
     @Transactional(readOnly = true)
@@ -265,65 +266,9 @@ public class PermissionService implements IResourceService<Permission, Permissio
     }
 
     private Specification<Permission> buildSpecificationFromFilters(Map<String, String> filters) {
-        Specification<Permission> spec = Specification.unrestricted();
-
-        for (Map.Entry<String, String> entry : filters.entrySet()) {
-            String key = entry.getKey();
-            int lastDotIndex = key.lastIndexOf('.');
-
-            if (lastDotIndex < 0 || lastDotIndex == key.length() - 1) {
-                continue;
-            }
-
-            String field = key.substring(0, lastDotIndex);
-            FilterType filterType = FilterType.fromCode(key.substring(lastDotIndex + 1));
-            if (filterType == null) {
-                continue;
-            }
-
-            String value = entry.getValue();
-            spec = spec.and((root, _, cb) -> {
-                Object typedValue = toTypedFilterValue(field, value);
-
-                if (filterType == FilterType.EQUAL) {
-                    return cb.equal(root.get(field), typedValue);
-                }
-                if (filterType == FilterType.NOT_EQUAL) {
-                    return cb.notEqual(root.get(field), typedValue);
-                }
-                if (filterType == FilterType.LIKE) {
-                    return cb.like(root.get(field).as(String.class), "%" + value + "%");
-                }
-
-                if (typedValue instanceof Comparable<?> comparableValue) {
-                    @SuppressWarnings("unchecked")
-                    Comparable<Object> comparable = (Comparable<Object>) comparableValue;
-                    if (filterType == FilterType.GREATER_THAN_OR_EQUAL) {
-                        return cb.greaterThanOrEqualTo(root.get(field), comparable);
-                    }
-                    if (filterType == FilterType.LESS_THAN_OR_EQUAL) {
-                        return cb.lessThanOrEqualTo(root.get(field), comparable);
-                    }
-                }
-
-                throw new IllegalArgumentException("Unsupported filter type: " + filterType);
-            });
-        }
-
+        Specification<Permission> spec = filterRefiner.refined(filters, Permission.class);
+        log.debug("Built specification from filters: {}, spec: {}", filters, spec);
         return spec;
-    }
-
-    private Object toTypedFilterValue(String field, String value) {
-        if ("targetType".equals(field)) {
-            return parseTargetTypeOrBadRequest(value);
-        }
-        if ("action".equals(field)) {
-            return parseActionOrBadRequest(value);
-        }
-        if ("userId".equals(field) || "targetId".equals(field)) {
-            return parseUuidOrBadRequest(field, value);
-        }
-        return value;
     }
 
     private PermissionAction parseActionOrBadRequest(String rawValue) {

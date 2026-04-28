@@ -12,7 +12,7 @@ import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
-import org.zerp.common.util.CurrentTenantIdResolver;
+import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.user.repository.UserRepository;
 
 import java.util.UUID;

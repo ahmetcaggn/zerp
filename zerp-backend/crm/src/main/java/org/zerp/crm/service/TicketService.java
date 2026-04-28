@@ -2,6 +2,7 @@ package org.zerp.crm.service;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -9,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import org.zerp.common.entity.Tenant;
 import org.zerp.common.entity.crm.TeamEntity;
 import org.zerp.common.entity.crm.TicketAssignmentEntity;
 import org.zerp.common.entity.crm.TicketCommentEntity;
@@ -21,8 +21,9 @@ import org.zerp.common.entity.crm.TicketEntity.TicketStatus;
 import org.zerp.common.entity.crm.TicketEntity.TicketType;
 import org.zerp.common.entity.user.AppUser;
 import org.zerp.common.resource.service.IResourceService;
-import org.zerp.common.util.CurrentTenantIdResolver;
-import org.zerp.common.util.CurrentUserIdResolver;
+import org.zerp.common.resource.util.filter.FilterRefiner;
+import org.zerp.common.util.header.CurrentTenantIdResolver;
+import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.crm.dto.ticket.AddCommentRequest;
 import org.zerp.crm.dto.ticket.AssignTicketRequest;
 import org.zerp.crm.dto.ticket.ChangePriorityRequest;
@@ -32,7 +33,6 @@ import org.zerp.crm.dto.ticket.TicketResponse;
 import org.zerp.crm.dto.ticket.UpdateTicketRequest;
 import org.zerp.crm.repository.TicketRepository;
 import org.zerp.crm.service.ticket.TicketResponseMapper;
-import org.zerp.crm.service.ticket.TicketSpecificationBuilder;
 import org.zerp.crm.service.ticket.TicketValueParser;
 
 import java.time.LocalDateTime;
@@ -42,26 +42,26 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Log4j2
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class TicketService implements IResourceService<TicketResponse, TicketResponse,
         CreateTicketRequest, UpdateTicketRequest, UUID> {
-
     private final TicketRepository ticketRepository;
     private final TicketResponseMapper ticketResponseMapper;
-    private final TicketSpecificationBuilder ticketSpecificationBuilder;
     private final TicketValueParser ticketValueParser;
     private final EntityManager entityManager;
     private final CurrentTenantIdResolver currentTenantIdResolver;
     private final CurrentUserIdResolver currentUserIdResolver;
+    private final FilterRefiner filterRefiner;
 
     // -- Resource service methods --
 
     @Override
     @Transactional(readOnly = true)
     public Page<TicketResponse> findWithFilters(Map<String, String> filters, Pageable pageable) {
-        Specification<TicketEntity> specification = ticketSpecificationBuilder.build(filters);
+        Specification<TicketEntity> specification = buildSpecificationFromFilters(filters);
         return ticketRepository.findAll(specification, pageable).map(ticketResponseMapper::toResponse);
     }
 
@@ -223,11 +223,6 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
 
         TicketEntity saved = ticketRepository.save(entity);
         return ticketResponseMapper.toResponse(saved);
-    }
-
-    @Transactional(readOnly = true)
-    public TicketResponse getTicket(UUID ticketId) {
-        return findById(ticketId);
     }
 
     public TicketResponse changeStatus(UUID ticketId, ChangeStatusRequest request) {
@@ -450,13 +445,6 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found: " + ticketId));
     }
 
-    private Tenant toTenantReference(UUID tenantId) {
-        if (tenantId == null) {
-            return null;
-        }
-        return entityManager.getReference(Tenant.class, tenantId);
-    }
-
     private TeamEntity toTeamReference(UUID teamId) {
         if (teamId == null) {
             return null;
@@ -536,6 +524,12 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         history.setPayload(payload);
         history.setOccurredAt(LocalDateTime.now());
         entity.getHistory().add(history);
+    }
+
+    private Specification<TicketEntity> buildSpecificationFromFilters(Map<String, String> filters) {
+        Specification<TicketEntity> spec = filterRefiner.refined(filters, TicketEntity.class);
+        log.debug("Built specification from filters: {}", spec);
+        return spec;
     }
 
     private UUID resolveCurrentUserId() {

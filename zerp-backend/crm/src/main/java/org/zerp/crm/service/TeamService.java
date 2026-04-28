@@ -14,9 +14,9 @@ import org.zerp.common.entity.crm.TeamEntity;
 import org.zerp.common.entity.crm.TeamMemberEntity;
 import org.zerp.common.entity.user.AppUser;
 import org.zerp.common.resource.service.IResourceService;
-import org.zerp.common.resource.util.FilterType;
-import org.zerp.common.util.CurrentTenantIdResolver;
-import org.zerp.common.util.CurrentUserIdResolver;
+import org.zerp.common.resource.util.filter.FilterRefiner;
+import org.zerp.common.util.header.CurrentTenantIdResolver;
+import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.crm.dto.team.*;
 import org.zerp.crm.repository.TeamRepository;
 
@@ -37,6 +37,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     private final EntityManager entityManager;
     private final CurrentTenantIdResolver currentTenantIdResolver;
     private final CurrentUserIdResolver currentUserIdResolver;
+    private final FilterRefiner filterRefiner;
 
     @Override
     @Transactional(readOnly = true)
@@ -281,61 +282,30 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     }
 
     private Specification<TeamEntity> buildSpecificationFromFilters(Map<String, String> filters) {
-        Specification<TeamEntity> specification = Specification.unrestricted();
-
         if (filters == null || filters.isEmpty()) {
-            return specification;
+            return Specification.unrestricted();
         }
 
-        for (Map.Entry<String, String> entry : filters.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-
-            if ("q".equalsIgnoreCase(key) && value != null && !value.isBlank()) {
+        // Handle global search filter separately
+        Specification<TeamEntity> specification = Specification.unrestricted();
+        if (filters.containsKey("q")) {
+            String searchValue = filters.get("q");
+            if (searchValue != null && !searchValue.isBlank()) {
                 specification = specification.and((root, _, cb) -> cb.or(
-                        cb.like(cb.lower(root.get("name")), "%" + value.toLowerCase() + "%"),
-                        cb.like(cb.lower(root.get("description")), "%" + value.toLowerCase() + "%")
+                        cb.like(cb.lower(root.get("name")), "%" + searchValue.toLowerCase() + "%"),
+                        cb.like(cb.lower(root.get("description")), "%" + searchValue.toLowerCase() + "%")
                 ));
-                log.debug("Applied global search filter (q): {}", value);
-                continue;
+                log.debug("Applied global search filter (q): {}", searchValue);
             }
+        }
 
-            int separatorIndex = key.lastIndexOf('.');
-            if (separatorIndex < 0 || separatorIndex == key.length() - 1) {
-                log.warn("Invalid filter key format (missing filter type): {}", key);
-                continue;
-            }
+        // Apply field-based filters using the filter spec generator
+        Map<String, String> fieldFilters = new java.util.HashMap<>(filters);
+        fieldFilters.remove("q");
 
-            String field = key.substring(0, separatorIndex);
-            FilterType filterType = FilterType.fromCode(key.substring(separatorIndex + 1));
-            if (filterType == null) {
-                log.warn("Unsupported filter type in key: {}", key);
-                continue;
-            }
-
-            specification = specification.and((root, _, cb) -> {
-                if ("isActive".equals(field)) {
-                    Boolean boolValue = parseBoolean(value, key);
-                    return filterType == FilterType.NOT_EQUAL
-                            ? cb.notEqual(root.get(field), boolValue)
-                            : cb.equal(root.get(field), boolValue);
-                }
-
-                if ("name".equals(field) || "description".equals(field)) {
-                    if (filterType == FilterType.EQUAL) {
-                        return cb.equal(root.get(field), value);
-                    }
-                    if (filterType == FilterType.NOT_EQUAL) {
-                        return cb.notEqual(root.get(field), value);
-                    }
-                    if (filterType == FilterType.LIKE) {
-                        return cb.like(cb.lower(root.get(field)), "%" + value.toLowerCase() + "%");
-                    }
-                }
-
-                log.warn("Unsupported filter field or type for key: {}. This filter will be ignored.", key);
-                return cb.conjunction();
-            });
+        if (!fieldFilters.isEmpty()) {
+            Specification<TeamEntity> fieldSpecification = filterRefiner.refined(fieldFilters, TeamEntity.class);
+            specification = specification.and(fieldSpecification);
         }
 
         return specification;

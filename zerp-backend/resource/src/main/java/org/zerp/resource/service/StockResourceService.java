@@ -12,7 +12,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.resource.StockResource;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.FilterType;
-import org.zerp.common.util.CurrentUserIdResolver;
+import org.zerp.common.resource.util.filter.FilterRefiner;
+import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.resource.dto.resource.StockResourceCreateDTO;
 import org.zerp.resource.dto.resource.StockResourceDTO;
 import org.zerp.resource.dto.resource.StockResourceUpdateDTO;
@@ -34,6 +35,7 @@ public class StockResourceService implements
     private final StockResourceRepository repository;
     private final StockResourceMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
+    private final FilterRefiner filterRefiner;
 
     @Override
     @Transactional(readOnly = true)
@@ -249,43 +251,7 @@ public class StockResourceService implements
     private Specification<StockResource> buildSpecificationFromFilters(Map<String, String> filters) {
         log.trace("Building specification from {} filters", filters.size());
 
-        Specification<StockResource> spec = Specification.unrestricted();
-
-        for (Map.Entry<String, String> entry : filters.entrySet()) {
-            String key = entry.getKey();
-            int lastDotIndex = key.lastIndexOf('.');
-
-            if (lastDotIndex < 0 || lastDotIndex == key.length() - 1) {
-                log.warn("Invalid filter format: {}", key);
-                continue;
-            }
-
-            String field = key.substring(0, lastDotIndex);
-            FilterType filterType = FilterType.fromCode(key.substring(lastDotIndex + 1));
-
-            if (filterType == null) {
-                log.warn("Unsupported filter type for key: {}", key);
-                continue;
-            }
-
-            log.trace("Adding filter - field: {}, type: {}, value: {}", field, filterType, entry.getValue());
-
-            spec = spec.and((root, _, cb) -> {
-                if (filterType == FilterType.EQUAL)
-                    return cb.equal(root.get(field), entry.getValue());
-                if (filterType == FilterType.NOT_EQUAL)
-                    return cb.notEqual(root.get(field), entry.getValue());
-                if (filterType == FilterType.GREATER_THAN_OR_EQUAL)
-                    return cb.greaterThanOrEqualTo(root.get(field), entry.getValue());
-                if (filterType == FilterType.LESS_THAN_OR_EQUAL)
-                    return cb.lessThanOrEqualTo(root.get(field), entry.getValue());
-                if (filterType == FilterType.LIKE)
-                    return cb.like(root.get(field), "%" + entry.getValue() + "%");
-
-                log.error("Unsupported filter type: {}", filterType);
-                throw new IllegalArgumentException("Unsupported filter type: " + filterType);
-            });
-        }
+        Specification<StockResource> spec = filterRefiner.refined(filters, StockResource.class);
 
         log.debug("Specification built with {} filter conditions", filters.size());
         return spec;

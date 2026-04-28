@@ -32,8 +32,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.zerp.common.util.CurrentTenantIdResolver.TENANT_ID_HEADER;
-import static org.zerp.common.util.CurrentUserIdResolver.USER_ID_HEADER;
+import static org.zerp.common.util.header.CurrentTenantIdResolver.TENANT_ID_HEADER;
+import static org.zerp.common.util.header.CurrentUserIdResolver.USER_ID_HEADER;
 
 @Configuration
 @EnableWebFluxSecurity

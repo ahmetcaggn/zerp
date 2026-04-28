@@ -8,12 +8,12 @@ import org.zerp.common.entity.crm.TicketEntity.TicketPriority;
 import org.zerp.common.entity.crm.TicketEntity.TicketStatus;
 import org.zerp.common.entity.crm.TicketEntity.TicketType;
 import org.zerp.common.entity.user.AppUser;
-import org.zerp.common.util.CurrentTenantIdResolver;
-import org.zerp.common.util.CurrentUserIdResolver;
+import org.zerp.common.resource.util.filter.FilterRefiner;
+import org.zerp.common.util.header.CurrentTenantIdResolver;
+import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.crm.dto.ticket.*;
 import org.zerp.crm.repository.TicketRepository;
 import org.zerp.crm.service.ticket.TicketResponseMapper;
-import org.zerp.crm.service.ticket.TicketSpecificationBuilder;
 import org.zerp.crm.service.ticket.TicketValueParser;
 
 import java.time.LocalDateTime;
@@ -38,18 +38,17 @@ public class TicketServiceTest {
         entityManager = mock(EntityManager.class);
         CurrentTenantIdResolver currentTenantIdResolver = mock(CurrentTenantIdResolver.class);
         CurrentUserIdResolver currentUserIdResolver = mock(CurrentUserIdResolver.class);
-        TicketValueParser ticketValueParser = new TicketValueParser();
-        TicketSpecificationBuilder ticketSpecificationBuilder = new TicketSpecificationBuilder(ticketValueParser);
+        FilterRefiner filterRefiner = mock(FilterRefiner.class);
         TicketResponseMapper ticketResponseMapper = new TicketResponseMapper();
+        TicketValueParser ticketValueParser = new TicketValueParser();
         ticketService = new TicketService(
                 ticketRepository,
                 ticketResponseMapper,
-                ticketSpecificationBuilder,
                 ticketValueParser,
                 entityManager,
                 currentTenantIdResolver,
-                currentUserIdResolver
-
+                currentUserIdResolver,
+                filterRefiner
         );
 
         defaultTenantId = UUID.randomUUID();
