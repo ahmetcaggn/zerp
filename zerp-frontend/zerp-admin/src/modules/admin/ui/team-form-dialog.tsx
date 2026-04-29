@@ -12,10 +12,12 @@ import {
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+
 import { ROUTES } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
+
 import { useCreateTeam, useUpdateTeam } from '../hooks/use-teams'
 import type { TeamResponse } from '../types/team'
 
@@ -31,12 +33,28 @@ export function TeamFormDialog({ open, mode, team, onClose }: Props) {
   const { showToast } = useToast()
   const router = useRouter()
 
-  const [name, setName] = useState(team?.name ?? '')
-  const [description, setDescription] = useState(team?.description ?? '')
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
 
   const { mutate: createTeam, isPending: isCreating } = useCreateTeam()
   const { mutate: updateTeam, isPending: isUpdating } = useUpdateTeam()
   const isPending = isCreating || isUpdating
+
+  function seedForm() {
+    if (mode === 'edit') {
+      setName(team?.name ?? '')
+      setDescription(team?.description ?? '')
+      return
+    }
+
+    setName('')
+    setDescription('')
+  }
+
+  function handleClose() {
+    seedForm()
+    onClose()
+  }
 
   function handleSubmit() {
     if (!name.trim()) {
@@ -50,47 +68,49 @@ export function TeamFormDialog({ open, mode, team, onClose }: Props) {
         {
           onSuccess: (created) => {
             showToast('Takım oluşturuldu.', { severity: 'success' })
+            setName('')
+            setDescription('')
             onClose()
-            if (created.id !== undefined)
+            if (created.id) {
               router.push(`${ROUTES.teams}/${created.id}` as Route)
+            }
           },
           onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
         },
       )
-    } else {
-      if (!team?.id) return
-      updateTeam(
-        { id: team.id, data: { name: name.trim(), description: description.trim() || undefined } },
-        {
-          onSuccess: () => {
-            showToast('Takım güncellendi.', { severity: 'success' })
-            onClose()
-          },
-          onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-        },
-      )
+      return
     }
+
+    if (!team?.id) return
+    updateTeam(
+      { id: team.id, data: { name: name.trim(), description: description.trim() || undefined } },
+      {
+        onSuccess: () => {
+          showToast('Takım güncellendi.', { severity: 'success' })
+          handleClose()
+        },
+        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      },
+    )
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        {mode === 'create' ? t('teams.createButton') : t('teams.editButton')}
-      </DialogTitle>
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth onTransitionEnter={seedForm}>
+      <DialogTitle>{mode === 'create' ? t('teams.createButton') : t('teams.editButton')}</DialogTitle>
 
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
           <TextField
             label="Takım Adı *"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(event) => setName(event.target.value)}
             size="small"
             fullWidth
           />
           <TextField
             label="Açıklama"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(event) => setDescription(event.target.value)}
             size="small"
             fullWidth
             multiline
@@ -100,7 +120,7 @@ export function TeamFormDialog({ open, mode, team, onClose }: Props) {
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose} disabled={isPending}>
+        <Button onClick={handleClose} disabled={isPending}>
           İptal
         </Button>
         <Button variant="contained" onClick={handleSubmit} disabled={isPending}>

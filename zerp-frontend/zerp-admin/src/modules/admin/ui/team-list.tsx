@@ -1,4 +1,9 @@
 'use client'
+import AddIcon from '@mui/icons-material/Add'
+import DeleteIcon from '@mui/icons-material/Delete'
+import PauseIcon from '@mui/icons-material/Pause'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import VisibilityIcon from '@mui/icons-material/Visibility'
 import {
   Box,
   Button,
@@ -14,24 +19,16 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
-import PauseIcon from '@mui/icons-material/Pause'
-import PlayArrowIcon from '@mui/icons-material/PlayArrow'
-import VisibilityIcon from '@mui/icons-material/Visibility'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+
 import { ROUTES } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
-import {
-  useActivateTeam,
-  useDeactivateTeam,
-  useDeleteTeam,
-  useTeams,
-} from '../hooks/use-teams'
+
+import { useActivateTeam, useDeactivateTeam, useDeleteTeam, useTeams } from '../hooks/use-teams'
 import { TeamFormDialog } from './team-form-dialog'
 
 export function TeamList() {
@@ -86,8 +83,8 @@ export function TeamList() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((team) => (
-              <TableRow key={team.id} hover>
+            {rows.map((team, index) => (
+              <TableRow key={team.id ?? `team-${index}`} hover>
                 <TableCell>{team.name ?? '—'}</TableCell>
                 <TableCell>{team.description ?? '—'}</TableCell>
                 <TableCell>
@@ -103,8 +100,7 @@ export function TeamList() {
                     <IconButton
                       size="small"
                       onClick={() => {
-                        if (team.id !== undefined)
-                          router.push(`${ROUTES.teams}/${team.id}` as Route)
+                        if (team.id) router.push(`${ROUTES.teams}/${team.id}` as Route)
                       }}
                     >
                       <VisibilityIcon fontSize="small" />
@@ -115,9 +111,9 @@ export function TeamList() {
                       size="small"
                       color={team.isActive ? 'warning' : 'success'}
                       onClick={() => {
-                        if (team.id === undefined) return
-                        const fn = team.isActive ? deactivateTeam : activateTeam
-                        fn(team.id, {
+                        if (!team.id) return
+                        const mutateFn = team.isActive ? deactivateTeam : activateTeam
+                        mutateFn(team.id, {
                           onSuccess: () =>
                             showToast(
                               team.isActive ? 'Takım pasifleştirildi.' : 'Takım aktifleştirildi.',
@@ -128,11 +124,7 @@ export function TeamList() {
                         })
                       }}
                     >
-                      {team.isActive ? (
-                        <PauseIcon fontSize="small" />
-                      ) : (
-                        <PlayArrowIcon fontSize="small" />
-                      )}
+                      {team.isActive ? <PauseIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
                     </IconButton>
                   </Tooltip>
                   <Tooltip title={t('teams.deleteButton')}>
@@ -140,12 +132,10 @@ export function TeamList() {
                       size="small"
                       color="error"
                       onClick={() => {
-                        if (team.id === undefined) return
+                        if (!team.id) return
                         deleteTeam(team.id, {
-                          onSuccess: () =>
-                            showToast('Takım silindi.', { severity: 'success' }),
-                          onError: (err) =>
-                            showToast(getUserFriendlyError(err), { severity: 'error' }),
+                          onSuccess: () => showToast('Takım silindi.', { severity: 'success' }),
+                          onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
                         })
                       }}
                     >
@@ -164,9 +154,9 @@ export function TeamList() {
         count={total}
         page={page}
         rowsPerPage={rowsPerPage}
-        onPageChange={(_, p) => setPage(p)}
-        onRowsPerPageChange={(e) => {
-          setRowsPerPage(Number(e.target.value))
+        onPageChange={(_, nextPage) => setPage(nextPage)}
+        onRowsPerPageChange={(event) => {
+          setRowsPerPage(Number(event.target.value))
           setPage(0)
         }}
         rowsPerPageOptions={[10, 25, 50]}

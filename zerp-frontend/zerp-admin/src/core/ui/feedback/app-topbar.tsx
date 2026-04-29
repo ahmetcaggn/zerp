@@ -2,10 +2,12 @@
 
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
+import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded'
 import LoginRoundedIcon from '@mui/icons-material/LoginRounded'
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded'
 import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
+import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded'
 import {
   AppBar,
   Button,
@@ -33,15 +35,20 @@ import { responsiveLayout } from '@/core/theme/layout'
 import { LocaleSwitcher } from '@/core/ui/feedback/locale-switcher'
 import { ThemeToggle } from '@/core/ui/feedback/theme-toggle'
 
-type TopbarLabelKey = 'nav.dashboard' | 'nav.login' | 'nav.logout'
+type TopbarLabelKey =
+  | 'nav.dashboard'
+  | 'nav.teams'
+  | 'nav.teamTickets'
+  | 'nav.login'
+  | 'nav.logout'
 type TopbarVisibility = 'always' | 'authenticated' | 'unauthenticated'
 
 interface TopbarAction {
-  id: 'dashboard' | 'login' | 'logout'
+  id: 'dashboard' | 'teams' | 'teamTickets' | 'login' | 'logout'
   labelKey: TopbarLabelKey
   icon: ReactElement
   visibility: TopbarVisibility
-  href?: '/dashboard' | '/login'
+  href?: '/dashboard' | '/teams' | '/team-tickets' | '/login'
 }
 
 const TOPBAR_ACTIONS: readonly TopbarAction[] = [
@@ -49,8 +56,22 @@ const TOPBAR_ACTIONS: readonly TopbarAction[] = [
     id: 'dashboard',
     labelKey: 'nav.dashboard',
     icon: <DashboardRoundedIcon fontSize="small" />,
-    visibility: 'always',
+    visibility: 'authenticated',
     href: '/dashboard',
+  },
+  {
+    id: 'teams',
+    labelKey: 'nav.teams',
+    icon: <GroupsRoundedIcon fontSize="small" />,
+    visibility: 'authenticated',
+    href: '/teams',
+  },
+  {
+    id: 'teamTickets',
+    labelKey: 'nav.teamTickets',
+    icon: <SupportAgentRoundedIcon fontSize="small" />,
+    visibility: 'authenticated',
+    href: '/team-tickets',
   },
   {
     id: 'login',
@@ -163,9 +184,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
                   key={action.id}
                   onClick={() => handleActionClick(action)}
                   size="small"
-                  variant={
-                    action.id === 'dashboard' && pathname.includes('/dashboard') ? 'contained' : 'text'
-                  }
+                  variant={action.href && pathname.includes(action.href) ? 'contained' : 'text'}
                 >
                   {t(action.labelKey)}
                 </Button>
@@ -203,7 +222,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
             <ListItemButton
               key={action.id}
               onClick={() => handleActionClick(action)}
-              selected={action.id === 'dashboard' && pathname.includes('/dashboard')}
+              selected={Boolean(action.href && pathname.includes(action.href))}
             >
               <ListItemIcon sx={{ minWidth: 34 }}>{action.icon}</ListItemIcon>
               <ListItemText primary={t(action.labelKey)} />

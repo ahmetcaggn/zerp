@@ -1,7 +1,9 @@
 'use client'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+
 import { queryKeys } from '@/core/api/query-keys'
 import { createResourceHooks } from '@/core/api/resource-hooks'
+
 import { teamClient } from '../api/team-client'
 import type { AddMemberRequest, ChangeMemberRoleRequest } from '../types/team'
 
@@ -13,23 +15,23 @@ const {
   usePatch: usePatchTeam,
   useDelete: useDeleteTeam,
   useDeleteMany: useDeleteManyTeams,
-} = createResourceHooks(queryKeys.tenant.teams, teamClient)
+} = createResourceHooks(queryKeys.admin.teams, teamClient)
 
 export {
-  useTeams,
-  useTeam,
   useCreateTeam,
-  useUpdateTeam,
-  usePatchTeam,
-  useDeleteTeam,
   useDeleteManyTeams,
+  useDeleteTeam,
+  usePatchTeam,
+  useTeam,
+  useTeams,
+  useUpdateTeam,
 }
 
 export function useActivateTeam() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => teamClient.activate(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.tenant.teams }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.admin.teams }),
   })
 }
 
@@ -37,7 +39,7 @@ export function useDeactivateTeam() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => teamClient.deactivate(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.tenant.teams }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.admin.teams }),
   })
 }
 
@@ -46,7 +48,7 @@ export function useAddTeamMember() {
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: AddMemberRequest }) =>
       teamClient.addMember(id, body),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.tenant.teams }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.admin.teams }),
   })
 }
 
@@ -55,7 +57,7 @@ export function useRemoveTeamMember() {
   return useMutation({
     mutationFn: ({ id, userId }: { id: string; userId: string }) =>
       teamClient.removeMember(id, userId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.tenant.teams }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.admin.teams }),
   })
 }
 
@@ -71,6 +73,6 @@ export function useChangeTeamMemberRole() {
       userId: string
       body: ChangeMemberRoleRequest
     }) => teamClient.changeMemberRole(id, userId, body),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.tenant.teams }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.admin.teams }),
   })
 }

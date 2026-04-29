@@ -31,12 +31,11 @@ export interface MessageDictionary {
     title: string
     subtitle: string
     totalEmployees: string
-    totalTeams: string
-    activeTeams: string
+    totalTickets: string
+    openTickets: string
     recentEmployeesTitle: string
     quickActionsTitle: string
     addEmployeeAction: string
-    manageTeamsAction: string
     sendNotificationAction: string
     newTicketAction: string
   }
@@ -54,25 +53,6 @@ export interface MessageDictionary {
     title: string
     createButton: string
     emptyState: string
-    addComment: string
-    closeTicket: string
-    commentPlaceholder: string
-  }
-  teams: {
-    title: string
-    createButton: string
-    editButton: string
-    deleteButton: string
-    activateButton: string
-    deactivateButton: string
-    addMemberButton: string
-    removeMemberButton: string
-    emptyState: string
-    membersLabel: string
-    activeLabel: string
-    inactiveLabel: string
-    roleLeader: string
-    roleMember: string
   }
   notifications: {
     title: string

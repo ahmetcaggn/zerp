@@ -10,8 +10,8 @@ import org.zerp.crm.service.TeamService;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/teams")
-@Tag(name = "Teams", description = "APIs for managing teams and their members")
+@RequestMapping("/crm/teams")
+@Tag(name = "Teams", description = "Admin APIs for managing teams and team members")
 public class TeamController extends ResourceController<TeamResponse, TeamResponse,
         CreateTeamRequest, UpdateTeamRequest, UUID> {
     private final TeamService teamService;

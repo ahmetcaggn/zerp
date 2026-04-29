@@ -5,6 +5,7 @@ docker/.env
 
 .idea/
 .claude/
-
+logs/
+.codex
 zerp-frontend/zerp-admin/src/modules/generated/
 

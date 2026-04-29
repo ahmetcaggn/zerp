@@ -1,4 +1,10 @@
 'use client'
+import AddIcon from '@mui/icons-material/Add'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import EditIcon from '@mui/icons-material/Edit'
+import PauseIcon from '@mui/icons-material/Pause'
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import {
   Box,
   Button,
@@ -20,17 +26,13 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import EditIcon from '@mui/icons-material/Edit'
-import PauseIcon from '@mui/icons-material/Pause'
-import PersonRemoveIcon from '@mui/icons-material/PersonRemove'
-import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
+
 import {
   useActivateTeam,
   useAddTeamMember,
@@ -76,15 +78,16 @@ export function TeamDetail({ id }: Props) {
   }
 
   if (!team) return null
+  const currentTeam = team
 
   const isTogglePending = isActivating || isDeactivating
 
   function handleToggleActive() {
-    const fn = team!.isActive ? deactivateTeam : activateTeam
-    fn(id, {
+    const mutateFn = currentTeam.isActive ? deactivateTeam : activateTeam
+    mutateFn(id, {
       onSuccess: () =>
         showToast(
-          team!.isActive ? 'Takım pasifleştirildi.' : 'Takım aktifleştirildi.',
+          currentTeam.isActive ? 'Takım pasifleştirildi.' : 'Takım aktifleştirildi.',
           { severity: 'success' },
         ),
       onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
@@ -94,7 +97,13 @@ export function TeamDetail({ id }: Props) {
   function handleAddMember() {
     if (!addMemberUserId.trim()) return
     addMember(
-      { id, body: { userId: addMemberUserId.trim(), role: addMemberRole as 'LEADER' | 'MEMBER' } },
+      {
+        id,
+        body: {
+          userId: addMemberUserId.trim(),
+          role: addMemberRole as 'LEADER' | 'MEMBER',
+        },
+      },
       {
         onSuccess: () => {
           setAddMemberUserId('')
@@ -108,7 +117,6 @@ export function TeamDetail({ id }: Props) {
 
   return (
     <Box>
-      {/* Üst bar */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Button startIcon={<ArrowBackIcon />} onClick={() => router.back()} sx={{ color: 'text.secondary' }}>
           Geri
@@ -129,7 +137,6 @@ export function TeamDetail({ id }: Props) {
         </Box>
       </Box>
 
-      {/* Takım bilgileri */}
       <Typography variant="h5" sx={{ mb: 1 }}>
         {team.name}
       </Typography>
@@ -146,22 +153,16 @@ export function TeamDetail({ id }: Props) {
         </Paper>
       )}
 
-      {/* Üyeler */}
       <Divider sx={{ mb: 2 }} />
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="subtitle1">
           {t('teams.membersLabel')} ({team.members?.length ?? 0})
         </Typography>
-        <Button
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={() => setShowAddMember((v) => !v)}
-        >
+        <Button size="small" startIcon={<AddIcon />} onClick={() => setShowAddMember((prev) => !prev)}>
           {t('teams.addMemberButton')}
         </Button>
       </Box>
 
-      {/* Üye ekleme formu */}
       {showAddMember && (
         <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
@@ -169,7 +170,7 @@ export function TeamDetail({ id }: Props) {
               size="small"
               label="Kullanıcı ID"
               value={addMemberUserId}
-              onChange={(e) => setAddMemberUserId(e.target.value)}
+              onChange={(event) => setAddMemberUserId(event.target.value)}
               sx={{ flex: 1 }}
             />
             <FormControl size="small" sx={{ minWidth: 140 }}>
@@ -177,7 +178,7 @@ export function TeamDetail({ id }: Props) {
               <Select
                 value={addMemberRole}
                 label="Rol"
-                onChange={(e) => setAddMemberRole(e.target.value)}
+                onChange={(event) => setAddMemberRole(event.target.value)}
               >
                 <MenuItem value={TeamMemberRole.Leader}>{t('teams.roleLeader')}</MenuItem>
                 <MenuItem value={TeamMemberRole.Member}>{t('teams.roleMember')}</MenuItem>
@@ -194,7 +195,6 @@ export function TeamDetail({ id }: Props) {
         </Paper>
       )}
 
-      {/* Üye tablosu */}
       {(team.members?.length ?? 0) > 0 ? (
         <Table size="small">
           <TableHead>
@@ -206,14 +206,12 @@ export function TeamDetail({ id }: Props) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {team.members?.map((member) => (
-              <TableRow key={member.id} hover>
+            {currentTeam.members?.map((member, index) => (
+              <TableRow key={member.id ?? `${member.userId ?? 'member'}-${index}`} hover>
                 <TableCell>{member.userId ?? '—'}</TableCell>
                 <TableCell>
                   <Chip
-                    label={
-                      member.role === 'LEADER' ? t('teams.roleLeader') : t('teams.roleMember')
-                    }
+                    label={member.role === 'LEADER' ? t('teams.roleLeader') : t('teams.roleMember')}
                     color={member.role === 'LEADER' ? 'primary' : 'default'}
                     size="small"
                   />
@@ -231,17 +229,13 @@ export function TeamDetail({ id }: Props) {
                       size="small"
                       onClick={() => {
                         if (!member.userId) return
-                        const newRole =
-                          member.role === 'LEADER'
-                            ? ('MEMBER' as const)
-                            : ('LEADER' as const)
+                        const nextRole =
+                          member.role === 'LEADER' ? ('MEMBER' as const) : ('LEADER' as const)
                         changeMemberRole(
-                          { id, userId: member.userId, body: { role: newRole } },
+                          { id, userId: member.userId, body: { role: nextRole } },
                           {
-                            onSuccess: () =>
-                              showToast('Rol güncellendi.', { severity: 'success' }),
-                            onError: (err) =>
-                              showToast(getUserFriendlyError(err), { severity: 'error' }),
+                            onSuccess: () => showToast('Rol güncellendi.', { severity: 'success' }),
+                            onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
                           },
                         )
                       }}
@@ -258,10 +252,8 @@ export function TeamDetail({ id }: Props) {
                         removeMember(
                           { id, userId: member.userId },
                           {
-                            onSuccess: () =>
-                              showToast('Üye çıkarıldı.', { severity: 'success' }),
-                            onError: (err) =>
-                              showToast(getUserFriendlyError(err), { severity: 'error' }),
+                            onSuccess: () => showToast('Üye çıkarıldı.', { severity: 'success' }),
+                            onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
                           },
                         )
                       }}
@@ -278,12 +270,7 @@ export function TeamDetail({ id }: Props) {
         <Typography color="text.secondary">{t('teams.emptyState')}</Typography>
       )}
 
-      <TeamFormDialog
-        open={editOpen}
-        mode="edit"
-        team={team}
-        onClose={() => setEditOpen(false)}
-      />
+      <TeamFormDialog open={editOpen} mode="edit" team={currentTeam} onClose={() => setEditOpen(false)} />
     </Box>
   )
 }

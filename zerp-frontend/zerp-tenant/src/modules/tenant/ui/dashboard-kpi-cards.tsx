@@ -1,11 +1,13 @@
 'use client'
-import { Box, Card, CardContent, Skeleton, Typography } from '@mui/material'
-import GroupsIcon from '@mui/icons-material/Groups'
-import GroupWorkIcon from '@mui/icons-material/GroupWork'
+import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber'
+import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread'
 import PeopleIcon from '@mui/icons-material/People'
+import { Box, Card, CardContent, Skeleton, Typography } from '@mui/material'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
+
 import { useEmployees } from '../hooks/use-employees'
-import { useTeams } from '../hooks/use-teams'
+import { useTickets } from '../hooks/use-tickets'
 
 interface KpiCardProps {
   label: string
@@ -47,16 +49,20 @@ export function DashboardKpiCards() {
     sort: { field: 'id', order: 'ASC' },
   })
 
-  const { data: teamData, isLoading: isLoadingTeams } = useTeams({
-    pagination: { page: 1, perPage: 200 },
+  const { data: ticketData, isLoading: isLoadingTickets } = useTickets({
+    pagination: { page: 1, perPage: 1 },
     sort: { field: 'id', order: 'ASC' },
   })
 
+  const { data: openTicketData, isLoading: isLoadingOpenTickets } = useTickets({
+    pagination: { page: 1, perPage: 1 },
+    sort: { field: 'id', order: 'ASC' },
+    filter: { 'status.eq': 'OPEN' },
+  })
+
   const totalEmployees = employeeData?.total ?? '—'
-  const totalTeams = teamData?.total ?? '—'
-  const activeTeams = isLoadingTeams
-    ? undefined
-    : (teamData?.data.filter((t) => t.isActive).length ?? '—')
+  const totalTickets = ticketData?.total ?? '—'
+  const openTickets = openTicketData?.total ?? '—'
 
   return (
     <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
@@ -68,17 +74,17 @@ export function DashboardKpiCards() {
         isLoading={isLoadingEmployees}
       />
       <KpiCard
-        label={t('dashboard.totalTeams')}
-        value={totalTeams}
-        icon={<GroupsIcon fontSize="large" />}
-        isLoading={isLoadingTeams}
+        label={t('dashboard.totalTickets')}
+        value={totalTickets}
+        icon={<ConfirmationNumberIcon fontSize="large" />}
+        isLoading={isLoadingTickets}
       />
       <KpiCard
-        label={t('dashboard.activeTeams')}
-        value={activeTeams ?? '—'}
-        icon={<GroupWorkIcon fontSize="large" />}
+        label={t('dashboard.openTickets')}
+        value={openTickets}
+        icon={<MarkEmailUnreadIcon fontSize="large" />}
         color="success.main"
-        isLoading={isLoadingTeams}
+        isLoading={isLoadingOpenTickets}
       />
     </Box>
   )

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
+
 import { buildMetadata } from '@/core/seo/metadata'
-import { TeamDetail } from '@/modules/tenant/ui/team-detail'
+import { TeamDetail } from '@/modules/admin/ui/team-detail'
 
 export const metadata: Metadata = buildMetadata({ title: 'Team Detail' })
 
