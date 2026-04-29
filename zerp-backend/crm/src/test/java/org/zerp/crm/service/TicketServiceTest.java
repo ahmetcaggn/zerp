@@ -42,6 +42,7 @@ public class TicketServiceTest {
         TicketResponseMapper ticketResponseMapper = new TicketResponseMapper();
         TicketValueParser ticketValueParser = new TicketValueParser();
 
+        //noinspection unchecked
         when(filterRefiner.refined(any(Map.class), eq(TicketEntity.class)))
                 .thenReturn(Specification.unrestricted());
         when(currentTenantIdResolver.resolve()).thenReturn(UUID.randomUUID());
@@ -193,7 +194,7 @@ public class TicketServiceTest {
             when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
             Assertions.assertThrows(IllegalStateException.class, () ->
-                    ticketService.changeStatus(ticketId, new ChangeStatusRequest(TicketStatus.OPEN)),
+                            ticketService.changeStatus(ticketId, new ChangeStatusRequest(TicketStatus.OPEN)),
                     "Changing status of a closed ticket should throw an exception.");
         }
 
@@ -206,7 +207,7 @@ public class TicketServiceTest {
             when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
             Assertions.assertThrows(IllegalStateException.class, () ->
-                    ticketService.changeStatus(ticketId, new ChangeStatusRequest(TicketStatus.OPEN)),
+                            ticketService.changeStatus(ticketId, new ChangeStatusRequest(TicketStatus.OPEN)),
                     "Changing status of a cancelled ticket should throw an exception.");
         }
 
@@ -219,7 +220,7 @@ public class TicketServiceTest {
             when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
             Assertions.assertDoesNotThrow(() ->
-                    ticketService.changeStatus(ticketId, new ChangeStatusRequest(TicketStatus.OPEN)),
+                            ticketService.changeStatus(ticketId, new ChangeStatusRequest(TicketStatus.OPEN)),
                     "Changing status of a resolved ticket to open should not throw an exception.");
         }
 
@@ -232,7 +233,7 @@ public class TicketServiceTest {
             when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
             Assertions.assertDoesNotThrow(() ->
-                    ticketService.changeStatus(ticketId, new ChangeStatusRequest(TicketStatus.CLOSED)),
+                            ticketService.changeStatus(ticketId, new ChangeStatusRequest(TicketStatus.CLOSED)),
                     "Changing status of a resolved ticket to closed should not throw an exception.");
         }
     }
@@ -250,7 +251,7 @@ public class TicketServiceTest {
             when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
             Assertions.assertThrows(IllegalStateException.class, () ->
-                    ticketService.addComment(ticketId, new AddCommentRequest("Test", false)),
+                            ticketService.addComment(ticketId, new AddCommentRequest("Test", false)),
                     "Adding a comment to a closed ticket should throw an exception.");
         }
 
@@ -263,7 +264,7 @@ public class TicketServiceTest {
             when(ticketRepository.findById(ticketId)).thenReturn(Optional.of(entity));
 
             Assertions.assertThrows(IllegalStateException.class, () ->
-                    ticketService.addComment(ticketId, new AddCommentRequest("Test", false)),
+                            ticketService.addComment(ticketId, new AddCommentRequest("Test", false)),
                     "Adding a comment to a cancelled ticket should throw an exception.");
         }
     }
@@ -275,13 +276,13 @@ public class TicketServiceTest {
         @Test
         @DisplayName("Should track history of ticket creation")
         void should_Track_History_Of_Ticket_Creation() {
-            TicketResponse response = ticketService.createTicket(defaultCreateRequest());
+            @SuppressWarnings("unused") TicketResponse response = ticketService.createTicket(defaultCreateRequest());
 
             // The save mock returns the entity, which should have history entries
             verify(ticketRepository).save(argThat(entity -> {
                 Assertions.assertFalse(entity.getHistory().isEmpty(), "Should have history entries");
                 Assertions.assertEquals(TicketHistoryEntity.EventType.CREATED,
-                        entity.getHistory().get(0).getEventType(),
+                        entity.getHistory().getFirst().getEventType(),
                         "First history should be CREATED");
                 return true;
             }));
@@ -299,7 +300,7 @@ public class TicketServiceTest {
 
             Assertions.assertTrue(entity.getHistory().size() > initialHistorySize,
                     "Status change should add history entry");
-            TicketHistoryEntity lastHistory = entity.getHistory().get(entity.getHistory().size() - 1);
+            TicketHistoryEntity lastHistory = entity.getHistory().getLast();
             Assertions.assertEquals(TicketHistoryEntity.EventType.STATUS_CHANGED,
                     lastHistory.getEventType(), "Last history should be STATUS_CHANGED");
         }
@@ -316,7 +317,7 @@ public class TicketServiceTest {
 
             Assertions.assertTrue(entity.getHistory().size() > initialHistorySize,
                     "Priority change should add history entry");
-            TicketHistoryEntity lastHistory = entity.getHistory().get(entity.getHistory().size() - 1);
+            TicketHistoryEntity lastHistory = entity.getHistory().getLast();
             Assertions.assertEquals(TicketHistoryEntity.EventType.PRIORITY_CHANGED,
                     lastHistory.getEventType(), "Last history should be PRIORITY_CHANGED");
         }
