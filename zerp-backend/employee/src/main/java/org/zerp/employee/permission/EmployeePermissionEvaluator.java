@@ -38,6 +38,21 @@ public class EmployeePermissionEvaluator {
 		return !result.isEmpty();
 	}
 
+    public boolean canRead1(UUID userId, Employee employee) {
+        EmployeeTarget target = new EmployeeTarget(
+                employee.getId(),
+                employee.getParent().getId()
+        );
+
+        List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(
+                userId,
+                PermissionAction.READ_EMPLOYEE,
+                target.employeeId(),
+                target.tenantId()
+        );
+        return !result.isEmpty();
+    }
+
 	public boolean canCreate(UUID userId, TenantParent parent) {
 		List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(
 				userId,

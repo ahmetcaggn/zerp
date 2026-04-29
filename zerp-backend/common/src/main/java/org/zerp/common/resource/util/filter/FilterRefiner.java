@@ -11,6 +11,7 @@ import org.zerp.common.entity.resource.StockResource;
 import org.zerp.common.resource.util.filter.specgenerator.*;
 
 import jakarta.annotation.PostConstruct;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -64,8 +65,7 @@ public class FilterRefiner {
     }
 
     public <T> Specification<T> refined(Map<String, String> filter, Class<T> entityClass) {
-        @SuppressWarnings("unchecked")
-        final IFilterSpecGenerator<T> specGenerator = (IFilterSpecGenerator<T>) specGeneratorMap
+        @SuppressWarnings("unchecked") final IFilterSpecGenerator<T> specGenerator = (IFilterSpecGenerator<T>) specGeneratorMap
                 .getOrDefault(entityClass, defaultFilterSpecGenerator);
 
         log.info("Starting filter refinement: entityType={}, filterCount={}, specGenerator={}",
@@ -106,7 +106,15 @@ public class FilterRefiner {
             }
 
             try {
-                specification = specification.and(specGenerator.generateSpecification(parts, filterOperator, value));
+                if (parts.getFirst().equals("q")) {
+                    log.debug("Detected global search filter: value={}", value);
+                    specification = specification.and(specGenerator.generateGlobalSearchSpecification(value));
+                } else {
+                    log.debug("Generating specification for filter: field={}, operator={}, value={}",
+                            String.join(".", parts), filterOperator, value);
+                    specification = specification.and(specGenerator.generateSpecification(parts, filterOperator, value));
+                }
+
                 appliedFilters++;
                 log.trace("Filter applied successfully: field={}, operator={}",
                         String.join(".", parts), filterOperator);

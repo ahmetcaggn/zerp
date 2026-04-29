@@ -64,7 +64,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     @Override
     public TeamResponse create(CreateTeamRequest data) {
         UUID tenantId = resolveCurrentTenantId();
-        if(tenantId == null){
+        if (tenantId == null) {
             throw new IllegalStateException("Tenant not found");
         }
 
@@ -282,33 +282,9 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     }
 
     private Specification<TeamEntity> buildSpecificationFromFilters(Map<String, String> filters) {
-        if (filters == null || filters.isEmpty()) {
-            return Specification.unrestricted();
-        }
-
-        // Handle global search filter separately
-        Specification<TeamEntity> specification = Specification.unrestricted();
-        if (filters.containsKey("q")) {
-            String searchValue = filters.get("q");
-            if (searchValue != null && !searchValue.isBlank()) {
-                specification = specification.and((root, _, cb) -> cb.or(
-                        cb.like(cb.lower(root.get("name")), "%" + searchValue.toLowerCase() + "%"),
-                        cb.like(cb.lower(root.get("description")), "%" + searchValue.toLowerCase() + "%")
-                ));
-                log.debug("Applied global search filter (q): {}", searchValue);
-            }
-        }
-
-        // Apply field-based filters using the filter spec generator
-        Map<String, String> fieldFilters = new java.util.HashMap<>(filters);
-        fieldFilters.remove("q");
-
-        if (!fieldFilters.isEmpty()) {
-            Specification<TeamEntity> fieldSpecification = filterRefiner.refined(fieldFilters, TeamEntity.class);
-            specification = specification.and(fieldSpecification);
-        }
-
-        return specification;
+        Specification<TeamEntity> spec = filterRefiner.refined(filters, TeamEntity.class);
+        log.debug("Generated specification for Team with filters {}: {}", filters, spec);
+        return spec;
     }
 
     private Boolean parseBoolean(Object rawValue, String fieldName) {
@@ -325,9 +301,11 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
         throw new IllegalArgumentException("Invalid boolean value for " + fieldName + ": " + rawValue);
     }
+
     private UUID resolveCurrentUserId() {
         return currentUserIdResolver.resolve();
     }
+
     private UUID resolveCurrentTenantId() {
         return currentTenantIdResolver.resolve();
     }
