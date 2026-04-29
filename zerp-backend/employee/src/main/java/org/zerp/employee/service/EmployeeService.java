@@ -66,10 +66,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
         List<EmployeeResponseDto> result = new ArrayList<>();
         for (UUID id : ids) {
             employeeRepository.findByIdWithContactsAndNotDeleted(id)
-                    .filter(employee -> permissionEvaluator.canRead(
-                            userId,
-                            new EmployeePermissionEvaluator.EmployeeTarget(employee.getId(), employee.getTenant().getId())
-                    ))
+                    .filter(employee -> permissionEvaluator.canRead(userId, employee))
                     .map(employeeMapper::toResponseDto)
                     .ifPresent(result::add);
         }
@@ -83,8 +80,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
         Employee employee = employeeRepository.findByIdWithContactsAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
 
-        if (!permissionEvaluator.canRead(userId,
-                new EmployeePermissionEvaluator.EmployeeTarget(employee.getId(), employee.getTenant().getId()))) {
+        if (!permissionEvaluator.canRead(userId, employee)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Employee");
         }
 

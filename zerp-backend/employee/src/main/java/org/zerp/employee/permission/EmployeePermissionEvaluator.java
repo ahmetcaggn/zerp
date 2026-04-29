@@ -28,27 +28,12 @@ public class EmployeePermissionEvaluator {
 	private final PermissionRepository permissionRepository;
 	private final PermittableService permittableService;
 
-	public boolean canRead(UUID userId, EmployeeTarget target) {
-		List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(
-				userId,
-				PermissionAction.READ_EMPLOYEE,
-				target.employeeId(),
-				target.tenantId()
-		);
-		return !result.isEmpty();
-	}
-
-    public boolean canRead1(UUID userId, Employee employee) {
-        EmployeeTarget target = new EmployeeTarget(
-                employee.getId(),
-                employee.getParent().getId()
-        );
-
+    public boolean canRead(UUID userId, Employee employee) {
         List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(
                 userId,
                 PermissionAction.READ_EMPLOYEE,
-                target.employeeId(),
-                target.tenantId()
+                employee.getId(),
+                employee.getParent().getId()
         );
         return !result.isEmpty();
     }

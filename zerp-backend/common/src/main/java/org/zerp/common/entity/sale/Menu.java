@@ -11,7 +11,6 @@ import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.permission.entity.Permittable;
 
-import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
