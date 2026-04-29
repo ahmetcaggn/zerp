@@ -13,6 +13,8 @@ export interface MessageDictionary {
     login: string
     register: string
     dashboard: string
+    teams: string
+    teamTickets: string
     logout: string
     language: string
     menu: string
@@ -30,6 +32,29 @@ export interface MessageDictionary {
   dashboard: {
     title: string
     subtitle: string
+  }
+  teams: {
+    title: string
+    createButton: string
+    editButton: string
+    deleteButton: string
+    activateButton: string
+    deactivateButton: string
+    addMemberButton: string
+    removeMemberButton: string
+    emptyState: string
+    membersLabel: string
+    activeLabel: string
+    inactiveLabel: string
+    roleLeader: string
+    roleMember: string
+  }
+  teamTickets: {
+    title: string
+    emptyState: string
+    addComment: string
+    closeTicket: string
+    commentPlaceholder: string
   }
 }
 
