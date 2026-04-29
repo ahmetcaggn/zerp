@@ -10,5 +10,7 @@ export const queryKeys = {
   admin: {
     tenants: ['admin', 'tenants'] as const,
     health: ['admin', 'health'] as const,
+    teams: ['admin', 'teams'] as const,
+    teamTickets: ['admin', 'team-tickets'] as const,
   },
 }
