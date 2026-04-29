@@ -2,28 +2,31 @@ package org.zerp.crm.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.zerp.common.resource.controller.ResourceController;
-import org.zerp.crm.dto.ticket.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.zerp.crm.dto.ticket.AddCommentRequest;
+import org.zerp.crm.dto.ticket.AssignTicketRequest;
+import org.zerp.crm.dto.ticket.ChangePriorityRequest;
+import org.zerp.crm.dto.ticket.ChangeStatusRequest;
+import org.zerp.crm.dto.ticket.TicketResponse;
 import org.zerp.crm.service.TicketService;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/tickets")
-@Tag(name = "Tickets", description = "APIs for managing support tickets")
-public class TicketController extends ResourceController<TicketResponse, TicketResponse,
-        CreateTicketRequest, UpdateTicketRequest, UUID> {
+@RequestMapping("/crm/tickets")
+@Tag(name = "Team Tickets", description = "APIs for team members to operate on tickets")
+public class TeamTicketController {
 
     private final TicketService ticketService;
 
-    public TicketController(TicketService ticketService) {
+    public TeamTicketController(TicketService ticketService) {
         this.ticketService = ticketService;
-    }
-
-    @Override
-    protected TicketService getService() {
-        return ticketService;
     }
 
     @PatchMapping("/{id}/status")

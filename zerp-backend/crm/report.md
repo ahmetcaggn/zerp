@@ -1,149 +1,148 @@
-# CRM B2B Ticket Support Report
+# CRM Ticket Gorunurluk RLS Report
 
-Tarih: 2026-04-23
-Kapsam: `crm` modulu (controller + service + dto + entity katmanlari)
+Tarih: 2026-04-28  
+Kapsam: `zerp-backend/crm` modulunde ticket gorunurluk kurallarinin belirlenmesi
 
-## 1. Genel Durum
+## 1) Istenen Kural Seti
 
-Kisa sonuc: modul temel ticket/team akislarini calistirabilecek seviyede, ama B2B production destegi icin hala "kismi hazir".
+Hedef kurallar:
 
-Su an iyi olan kisimlar:
-- Ticket icin temel lifecycle var: create, read/list/filter, assign, unassign, status/priority degisimi, comment, close.
-- Team icin temel lifecycle var: create, read/list/filter, activate/deactivate, member ekle/sil/rol degistir.
-- Soft delete yaklasimi bircok entityde mevcut.
-- Ticket tarafinda servis parcalanmasi baslatilmis (`TicketResponseMapper`, `TicketSpecificationBuilder`, `TicketValueParser`).
+1. Tenant kullanicisi: sadece kendi tenant'inin ticket'larini gorebilir.
+2. Team member: tenant fark etmeksizin sadece kendisine atanmis ticket'lari gorebilir.
+3. Team leader: tum ticket'lari gorebilir.
 
-Eksik/yarim kalan ana alanlar:
-- Auth/actor ve tenant izolasyonu gercek anlamda implement edilmemis.
-- SLA breach/pause/resume otomasyonu tamam degil.
-- History olayi yaziliyor ama tam kapsama ve sorgulama tarafi eksik.
-- Team ile Ticket arasinda domain dogrulamalari (team var mi, aktif mi, ajan team icinde mi) eksik.
+## 2) RLS Karar Matrisi
 
-## 2. Ticket Mantigi - Neler Eklenebilir
+Ticket listesi (`GET /tickets`) ve ticket detayi (`GET /tickets/{id}`) icin karar:
 
-Mevcut durumda makul ve "ekstrem olmayan" eklemeler:
+- Kural A (en yuksek oncelik): kullanici aktif bir team'de `LEADER` ise -> tum ticket'lar.
+- Kural B: degilse ve actor tenant context'indeyse -> `ticket.tenant_id = currentTenantId`.
+- Kural C: degilse -> `ticket_assignment.is_active = true AND ticket_assignment.agent_party_id = currentUserId`.
+- Kural D: hicbirine girmiyorsa -> bos sonuc.
 
-- Team ve agent dogrulamasi:
-  `assignTicket` team id aliyor ama team var mi/aktif mi kontrol etmiyor.
-- Tenant guvenligi:
-  Ticket `tenantId` tasiyor ama service seviyesinde tenant bazli authorization/validation yok.
-- Actor guvenligi:
-  Controller ve service tarafinda hardcoded actor kullaniliyor (`CURRENT_USER_ID`, `SYSTEM_ACTOR_ID`).
-- Patch guvenligi:
-  `patch` ile `tenantId` degisebiliyor; B2B icin genelde bu alan immutable olmali.
-- Watcher/attachment operasyon endpointleri:
-  Response modelde var, ama ekleme/silme/isleme endpoint ve service mantigi yok.
-- Validasyon anotasyonlari:
-  Request DTO'larda `@NotNull`, `@Size`, `@NotBlank` yok; validasyon service icinde parcali.
-- Event consistency:
-  `closeTicket` de `CLOSED` eventi yerine `STATUS_CHANGED` yaziliyor; enumdaki bircok event hic kullanilmiyor.
+Not: Buradaki oncelik sirasi kritiktir. Leader kapsami diger kurallari override eder.
 
-Ticket tarafinda kritik teknik riskler:
+## 3) SQL/JPA Seviyesinde Predicate Karsiliklari
 
-- Assignment persistence riski:
-  `TicketEntity.currentAssignment` alaninda cascade yok (`@OneToOne(mappedBy = "ticket")`).
-  Service yeni assignment olusturup ticket save ediyor; gercek JPA akisinda persist davranisi garanti degil.
-- Audit alan cakismasi riski:
-  `BaseEntity` icinde `created_at`/`updated_at` var, `TicketEntity` ayni kolonlari tekrar tanimliyor.
-  Bu JPA mapleme tarafinda tekrarli kolon riski olusturabilir.
-- Bulk operasyon davranisi:
-  `patchMany`/`deleteMany` `IllegalArgumentException` yakaliyor ama not-found `ResponseStatusException`.
-  Beklenen "hatali id'yi atla devam et" davranisi tam calismayabilir.
+Tenant gorunurlugu:
 
-## 3. Team Mantigi - Neler Eklenebilir
+`ticket.tenant_id = :currentTenantId`
 
-Mevcut durumda makul ve oncelikli eklemeler:
+Team member gorunurlugu:
 
-- Team tenant baglantisi:
-  Team entity'de tenant/account alani yok; B2B modelde tenant boundary net olmali.
-- Team-ticket tutarliligi:
-  Ticket assignment team'e gidiyor ama team inaktifse ya da farkli tenant'taysa engel yok.
-- Uye rol kurallari:
-  "Takimda en az 1 lider kalmali" gibi kural yok.
-- DB seviyesinde benzersizlik:
-  `team_member` icin `(team_id, user_id)` unique constraint gorunmuyor; race condition ile duplicate uye riski var.
-- Uye ekleme/silme icin yetki modeli:
-  Su an role/permission kontrolu yok (kim team yonetebilir belirsiz).
+`EXISTS (SELECT 1 FROM ticket_assignment ta
+         WHERE ta.ticket_id = ticket.id
+           AND ta.is_active = true
+           AND ta.agent_party_id = :currentUserId
+           AND ta.deleted = false)`
 
-Team tarafi genel degerlendirme:
-- Temel mantik sade ve okunakli.
-- Ama B2B operasyonu icin governance/authorization/tenant guardlari eksik.
+Team leader gorunurlugu:
 
-## 4. SLA Tracking - Su an Ne Kadar Tam?
+`TRUE` (restriction yok)
 
-Su an implement edilenler:
+JPA Specification birlestirme prensibi:
 
-- Ticket olusurken SLA initialize ediliyor.
-  - first response due: priority bazli
-  - resolution due: first response suresinin 4 kati
-- Agent public comment geldiginde first response kaydi atiliyor.
-- Ticket RESOLVED oldugunda resolution kaydi atiliyor ve breach flag hesaplaniyor.
+`finalSpec = rlsSpec.and(clientFilterSpec)`
 
-Kismi/eksik kalanlar:
+Burada `clientFilterSpec`, mevcut `TicketSpecificationBuilder.build(filters)` sonucudur.
 
-- Proactive breach yok:
-  Sure doldugunda otomatik `SLA_BREACHED` set eden scheduler/background job yok.
-- Pause/resume yok:
-  Entityde `isPaused`, `pausedAt`, `totalPausedTimeMinutes` var ama service tarafinda aktif kullanimi yok.
-- Priority degisiminde SLA yeniden hesaplama yok.
-- Reopen durumunda SLA politikasinin nasil resetlenecegi tanimli degil.
-- SLA event history entegrasyonu eksik (`SLA_BREACHED`, `SLA_PAUSED`, `SLA_RESUMED` kullanilmiyor).
+## 4) Mevcut Kodda Durum ve Bosluklar
 
-Karar:
-- SLA tracking "tam implementasyon" degil.
-- Temel alanlar var, ama operasyonel B2B SLA yonetimi icin orta seviye eksik.
+Su an `TicketService.findWithFilters` sadece:
 
-## 5. History Yonetimi - Su an Ne Durumda?
+- `TicketSpecificationBuilder.build(filters)` uygular.
+- User/tenant/team tabanli gorunurluk filtresi uygulamaz.
 
-Su an implement edilenler:
+Sonuc: pratikte listeleme RLS'siz calisir.
 
-- Asagidaki operasyonlarda history kaydi yaziliyor:
-  - create
-  - status degisimi
-  - priority degisimi
-  - assign / reassign / unassign
-  - comment ekleme
-- Event tipi + actor id + payload + occurredAt tutuluyor.
+Ek olarak:
 
-Kismi/eksik kalanlar:
+- `findById` da RLS kontrolu yok.
+- `TeamTicketController` operasyon endpointleri var (`/tickets/{id}/status`, `/assign`, `/comments` vb.) ama read endpointleri yok.
+- `GET /tickets` ve `GET /tickets/{id}` `TenantTicketController` uzerinden geliyor; bu da team member / leader gorunurlugu icin ayrik politika ihtiyacini netlestiriyor.
 
-- Tum update tipleri history'ye dusmuyor:
-  `patch/update` ile title/description/type/tags/customAttributes degisimi icin event yok.
-- Event semantigi tutarsiz:
-  Enumda `CLOSED`, `RESOLVED`, `UPDATED`, `CANCELLED`, `ASSIGNMENT_CLEARED` var, ama pratikte cogu yazilmiyor.
-- reference alanlari kullanimsiz:
-  `referenceType` ve `referenceId` doldurulmuyor.
-- History read API yok:
-  Ticket detayinda comments/attachments/watchers var ama history listesi donmuyor.
-- Actor kimligi guvenilir degil:
-  Hardcoded actor kullanimi audit guvenini dusuruyor.
+## 5) Onerilen Teknik Tasarim
 
-Karar:
-- History mekanizmasi mevcut ama "tam audit trail" seviyesinde degil.
+### 5.1 Yeni bir "TicketVisibilityPolicy" katmani
 
-## 6. B2B Ticket Support icin Eksik/Yarim Backlog (Onceliklendirilmis)
+`crm` modulunde yeni bir policy/resolver sinifi:
 
-P0 - Kisa vadede gerekli:
+- Input: `currentUserId`, `currentTenantId`, kullanicinin leader/member bilgisi
+- Output: `Specification<TicketEntity> rlsSpec`
 
-- Hardcoded actor yapisini kaldir, auth context'ten actor/tenant al.
-- Team ve ticket icin tenant isolation kurallarini zorunlu hale getir.
-- Assignment persistence modelini netlestir (cascade/owner tarafi) ve integration test ile dogrula.
-- TicketEntity audit alanlarinda BaseEntity ile kolon cakismasini gider.
+Oncelik:
 
-P1 - Isletim kalitesi:
+1. `isLeader(userId)` -> `Specification.unrestricted()`
+2. `currentTenantId != null` -> `ticket.tenantId == currentTenantId`
+3. `isTeamMember(userId)` -> kendine atanmis aktif ticket spec'i
+4. aksi -> `id in (empty)`
 
-- SLA icin scheduled breach evaluator + pause/resume logic ekle.
-- History event coverage'i genislet (update, close/resolved ayrimi, cancellation, sla events).
-- History read endpointi ekle (ticket timeline).
-- Team member icin DB unique constraint + lider kurali ekle.
+### 5.2 Service entegrasyonu
 
-P2 - Urun olgunlugu:
+`TicketService.findWithFilters`:
 
-- Watcher/attachment yonetim endpointlerini tamamla.
-- Notification/escalation tetiklerini SLA/history ile bagla.
-- Team kapasite/skill metadata (hafif seviye) ekle.
+- `filterSpec = ticketSpecificationBuilder.build(filters)`
+- `rlsSpec = ticketVisibilityPolicy.resolveReadSpec(...)`
+- `ticketRepository.findAll(rlsSpec.and(filterSpec), pageable)`
 
-## 7. Son Cumle
+`TicketService.findById`:
 
-CRM modulu su an "temel ticket support" icin iyi bir cekirdek sunuyor.
-Ama B2B ticket support'un kritik beklentileri olan tenant guvenligi, gercek SLA otomasyonu ve tam audit trail acisindan implementasyon halen yarim.
+- `id + rlsSpec` ile erisim kontrolu yap.
+- erisim yoksa `404` don (ID enumeration riskini azaltir).
+
+### 5.3 Repository katmani
+
+`TicketRepository` icin eklenebilir:
+
+- `exists(Specification<TicketEntity>)`
+- veya `findOne(Specification<TicketEntity>)`
+
+Team membership / leader check icin:
+
+- ya `TeamMemberRepository` eklenir,
+- ya da `EntityManager` ile hafif sorgu kullanilir.
+
+## 6) Team Leader / Team Member Tespiti
+
+Minimum kurallar:
+
+- Leader: `team_member.role = LEADER` ve bagli team aktif (`team.is_active = true`).
+- Member: `team_member.role = MEMBER` veya `LEADER` ama leader yolu ilk calistigi icin member kuralina dusmez.
+
+Ek guvenlik notu:
+
+- Soft delete kurallari (`deleted = false`) joinlerde korunmali.
+- `is_active = false` olan assignment kayitlari member gorunurlugune dahil edilmemeli.
+
+## 7) Controller Seviyesinde Operasyonel Cizgi
+
+Mevcut route yapisiyla uygulanabilir, ama daha temiz ayrim:
+
+- Tenant read endpointleri: tenant view
+- Team read endpointleri: member/leader view (ayri prefix, ornek `/team-tickets`)
+
+Boylece "hangi actor tipiyle okunuyor" belirsizligi azalir.
+
+Su anki yapida tek `GET /tickets` oldugu icin actor ayirimi policy icinde (header/context tabanli) net bir sekilde tanimlanmalidir.
+
+## 8) Kabul Kriterleri (Test Senaryolari)
+
+Asagidaki testler gecmeden RLS tamamlandi denmemeli:
+
+1. Tenant A kullanicisi, Tenant B ticket'ini listede goremez.
+2. Team member U1, sadece `agent_party_id = U1` olan aktif assignment ticket'larini gorur.
+3. Team member U1, `agent_party_id = U2` ticket'ini goremez.
+4. Team member U1, assignment'i olmayan ticket'i goremez.
+5. Team leader, farkli tenant'lardaki ticket'lari gorebilir.
+6. `GET /tickets/{id}` icin yetkisiz erisimde `404` doner.
+7. Client filter (`status.eq`, `priority.eq`, `q`) RLS ile birlikte dogru calisir.
+
+## 9) Sonuc
+
+Bu modelle ticket gorunurluk kurallari deterministik hale gelir:
+
+- tenant izolasyonu korunur,
+- team member sadece kendi assignment'i kadar gorur,
+- leader tam operasyonel gorunurluk alir.
+
+En kritik nokta, bu kurallarin sadece endpoint degil, `findWithFilters` ve `findById` servis akisinin merkezinde uygulanmasidir.
