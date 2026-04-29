@@ -2,9 +2,11 @@ package org.zerp.crm.service.ticket;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
+import org.zerp.common.entity.employee.Employee;
 import org.zerp.common.entity.crm.TicketAssignmentEntity;
 import org.zerp.common.entity.crm.TicketEntity;
 import org.zerp.common.entity.crm.TicketSlaTrackingEntity;
+import org.zerp.common.entity.user.AppUser;
 import org.zerp.crm.dto.ticket.AttachmentResponse;
 import org.zerp.crm.dto.ticket.CommentResponse;
 import org.zerp.crm.dto.ticket.TicketAssignmentResponse;
@@ -46,6 +48,7 @@ public class TicketResponseMapper {
                 .map(comment -> new CommentResponse(
                         comment.getId(),
                         comment.getAuthor() != null ? comment.getAuthor().getId() : null,
+                        resolveAuthorName(comment.getAuthor()),
                         comment.getAuthorType().name(),
                         comment.getContent(),
                         comment.getIsInternal(),
@@ -120,5 +123,27 @@ public class TicketResponseMapper {
             );
         }
         return assignmentResponse;
+    }
+
+    private String resolveAuthorName(AppUser author) {
+        if (author == null) {
+            return null;
+        }
+
+        if (author instanceof Employee employee) {
+            String fullName = ((employee.getFirstName() != null ? employee.getFirstName() : "") + " "
+                    + (employee.getLastName() != null ? employee.getLastName() : "")).trim();
+            if (!fullName.isBlank()) {
+                return fullName;
+            }
+        }
+
+        if (author.getUsername() != null && !author.getUsername().isBlank()) {
+            return author.getUsername();
+        }
+        if (author.getEmail() != null && !author.getEmail().isBlank()) {
+            return author.getEmail();
+        }
+        return author.getId() != null ? author.getId().toString() : null;
     }
 }

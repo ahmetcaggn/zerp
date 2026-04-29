@@ -6,6 +6,7 @@ import java.util.UUID;
 public record CommentResponse(
         UUID id,
         UUID authorId,
+        String authorName,
         String authorType,
         String content,
         boolean isInternal,

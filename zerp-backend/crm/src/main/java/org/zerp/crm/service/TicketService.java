@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.crm.TeamMemberEntity;
 import org.zerp.common.entity.crm.TeamEntity;
 import org.zerp.common.entity.crm.TicketAssignmentEntity;
 import org.zerp.common.entity.crm.TicketCommentEntity;
@@ -31,6 +32,7 @@ import org.zerp.crm.dto.ticket.ChangeStatusRequest;
 import org.zerp.crm.dto.ticket.CreateTicketRequest;
 import org.zerp.crm.dto.ticket.TicketResponse;
 import org.zerp.crm.dto.ticket.UpdateTicketRequest;
+import org.zerp.crm.repository.TeamMemberRepository;
 import org.zerp.crm.repository.TicketRepository;
 import org.zerp.crm.service.ticket.TicketResponseMapper;
 import org.zerp.crm.service.ticket.TicketValueParser;
@@ -39,6 +41,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -48,7 +51,21 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TicketService implements IResourceService<TicketResponse, TicketResponse,
         CreateTicketRequest, UpdateTicketRequest, UUID> {
+
+    private static final Set<String> EDIT_LOCKED_PATCH_FIELDS = Set.of(
+            "title", "description", "type", "tags", "customAttributes"
+    );
+    private static final Set<TeamMemberEntity.TeamMemberRole> AGENT_TEAM_MEMBER_ROLES = Set.of(
+            TeamMemberEntity.TeamMemberRole.LEADER,
+            TeamMemberEntity.TeamMemberRole.MEMBER
+    );
+    private static final String REFERENCE_TYPE_TICKET = "TICKET";
+    private static final String REFERENCE_TYPE_TICKET_ASSIGNMENT = "TICKET_ASSIGNMENT";
+    private static final String REFERENCE_TYPE_TICKET_COMMENT = "TICKET_COMMENT";
+    private static final String REFERENCE_TYPE_TEAM = "TEAM";
+
     private final TicketRepository ticketRepository;
+    private final TeamMemberRepository teamMemberRepository;
     private final TicketResponseMapper ticketResponseMapper;
     private final TicketValueParser ticketValueParser;
     private final EntityManager entityManager;
@@ -68,7 +85,9 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     @Override
     @Transactional(readOnly = true)
     public List<TicketResponse> findAllById(List<UUID> ids) {
+        UUID tenantId = resolveCurrentTenantIdOrThrow();
         return ticketRepository.findAllById(ids).stream()
+                .filter(ticket -> tenantId.equals(ticket.getTenantId()))
                 .map(ticketResponseMapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -87,30 +106,32 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     @Override
     public TicketResponse patch(UUID id, Map<String, Object> data) {
         TicketEntity entity = findOrThrow(id);
+        Map<String, Object> patchData = data == null ? Map.of() : data;
+        ensureTicketEditableForFields(entity, patchData.keySet());
         boolean changed = false;
 
-        if (data.containsKey("title")) {
-            entity.setTitle(validateTitle(String.valueOf(data.get("title"))));
+        if (patchData.containsKey("title")) {
+            entity.setTitle(validateTitle(String.valueOf(patchData.get("title"))));
             changed = true;
         }
 
-        if (data.containsKey("description")) {
-            Object description = data.get("description");
+        if (patchData.containsKey("description")) {
+            Object description = patchData.get("description");
             entity.setDescription(description == null ? null : String.valueOf(description));
             changed = true;
         }
 
-        if (data.containsKey("status")) {
-            TicketStatus requestedStatus = ticketValueParser.parseStatus(data.get("status"), "status");
+        if (patchData.containsKey("status")) {
+            TicketStatus requestedStatus = ticketValueParser.parseStatus(patchData.get("status"), "status");
             if (entity.getStatus() != requestedStatus) {
                 changeStatusInternal(entity, requestedStatus);
                 changed = true;
             }
         }
 
-        if (data.containsKey("priority")) {
+        if (patchData.containsKey("priority")) {
             TicketPriority oldPriority = entity.getPriority();
-            TicketPriority newPriority = ticketValueParser.parsePriority(data.get("priority"), "priority");
+            TicketPriority newPriority = ticketValueParser.parsePriority(patchData.get("priority"), "priority");
 
             if (oldPriority != newPriority) {
                 entity.setPriority(newPriority);
@@ -121,24 +142,24 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
             }
         }
 
-        if (data.containsKey("type")) {
-            Object typeValue = data.get("type");
+        if (patchData.containsKey("type")) {
+            Object typeValue = patchData.get("type");
             entity.setType(typeValue == null ? null : ticketValueParser.parseType(typeValue, "type"));
             changed = true;
         }
 
-        if (data.containsKey("reporterId")) {
-            entity.setReporter(toAppUserReference(ticketValueParser.parseNullableUuid(data.get("reporterId"), "reporterId")));
+        if (patchData.containsKey("reporterId")) {
+            entity.setReporter(toAppUserReference(ticketValueParser.parseNullableUuid(patchData.get("reporterId"), "reporterId")));
             changed = true;
         }
 
-        if (data.containsKey("tags")) {
-            entity.setTags(ticketValueParser.parseStringSet(data.get("tags"), "tags"));
+        if (patchData.containsKey("tags")) {
+            entity.setTags(ticketValueParser.parseStringSet(patchData.get("tags"), "tags"));
             changed = true;
         }
 
-        if (data.containsKey("customAttributes")) {
-            entity.setCustomAttributes(ticketValueParser.parseMap(data.get("customAttributes"), "customAttributes"));
+        if (patchData.containsKey("customAttributes")) {
+            entity.setCustomAttributes(ticketValueParser.parseMap(patchData.get("customAttributes"), "customAttributes"));
             changed = true;
         }
 
@@ -153,6 +174,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     @Override
     public TicketResponse update(UUID id, UpdateTicketRequest data) {
         TicketEntity entity = findOrThrow(id);
+        ensureTicketEditable(entity);
         entity.setTitle(validateTitle(data.title()));
         entity.setDescription(data.description());
         entity.setUpdatedAt(LocalDateTime.now());
@@ -218,10 +240,12 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         entity.setCreatedAt(LocalDateTime.now());
 
         initializeSla(entity, priority);
-        addHistory(entity, TicketHistoryEntity.EventType.CREATED,
-                String.format("Ticket created with priority: %s", priority));
-
         TicketEntity saved = ticketRepository.save(entity);
+        addHistory(saved, TicketHistoryEntity.EventType.CREATED,
+                String.format("Ticket created with priority: %s", priority),
+                REFERENCE_TYPE_TICKET,
+                saved.getId());
+        saved = ticketRepository.save(saved);
         return ticketResponseMapper.toResponse(saved);
     }
 
@@ -295,7 +319,9 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
                     ? "agent " + request.agentPartyId()
                     : "team " + request.teamId();
             addHistory(entity, TicketHistoryEntity.EventType.REASSIGNED,
-                    String.format("Reassigned to %s", target));
+                    String.format("Reassigned to %s", target),
+                    REFERENCE_TYPE_TICKET_ASSIGNMENT,
+                    old.getId());
         }
 
         TicketAssignmentEntity assignment = new TicketAssignmentEntity();
@@ -312,7 +338,8 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
             String target = request.agentPartyId() != null
                     ? String.format("Assigned to agent %s", request.agentPartyId())
                     : String.format("Ticket assigned to team: %s", request.teamId());
-            addHistory(entity, TicketHistoryEntity.EventType.ASSIGNED, target);
+            addHistory(entity, TicketHistoryEntity.EventType.ASSIGNED, target,
+                    REFERENCE_TYPE_TEAM, request.teamId());
         }
 
         if (entity.getStatus() == TicketStatus.OPEN) {
@@ -340,7 +367,9 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
             entity.setUpdatedAt(LocalDateTime.now());
 
             addHistory(entity, TicketHistoryEntity.EventType.UNASSIGNED,
-                    String.format("Ticket unassigned from %s", assignmentTarget));
+                    String.format("Ticket unassigned from %s", assignmentTarget),
+                    REFERENCE_TYPE_TICKET_ASSIGNMENT,
+                    assignment.getId());
 
             changeStatusInternal(entity, TicketStatus.OPEN);
         }
@@ -363,11 +392,12 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
 
 
         boolean isInternal = request.isInternal() != null && request.isInternal();
+        TicketCommentEntity.AuthorType authorType = resolveCommentAuthorType(userId, tenantId);
 
         TicketCommentEntity comment = new TicketCommentEntity();
         comment.setTicket(entity);
         comment.setAuthor(toAppUserReference(userId));
-        comment.setAuthorType(TicketCommentEntity.AuthorType.AGENT);
+        comment.setAuthorType(authorType);
         comment.setContent(request.content());
         comment.setIsInternal(isInternal);
         comment.setCreatedAt(LocalDateTime.now());
@@ -383,10 +413,12 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
                     LocalDateTime.now().isAfter(entity.getSlaTracking().getFirstResponseDueAt()));
         }
 
-        addHistory(entity, TicketHistoryEntity.EventType.COMMENT_ADDED,
-                String.format("Comment added by %s", TicketCommentEntity.AuthorType.AGENT));
-
         TicketEntity saved = ticketRepository.save(entity);
+        addHistory(saved, TicketHistoryEntity.EventType.COMMENT_ADDED,
+                String.format("Comment added by %s", authorType),
+                REFERENCE_TYPE_TICKET_COMMENT,
+                comment.getId());
+        saved = ticketRepository.save(saved);
         return ticketResponseMapper.toResponse(saved);
     }
 
@@ -441,8 +473,14 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     private TicketEntity findOrThrow(UUID ticketId) {
-        return ticketRepository.findById(ticketId)
+        UUID tenantId = resolveCurrentTenantIdOrThrow();
+        TicketEntity entity = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found: " + ticketId));
+
+        if (!tenantId.equals(entity.getTenantId())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found: " + ticketId);
+        }
+        return entity;
     }
 
     private TeamEntity toTeamReference(UUID teamId) {
@@ -468,6 +506,25 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     private void validateCommentable(TicketEntity entity) {
         if (entity.getStatus() == TicketStatus.CLOSED || entity.getStatus() == TicketStatus.CANCELLED) {
             throw new IllegalStateException("Cannot make a comment on a closed or cancelled ticket");
+        }
+    }
+
+    private void ensureTicketEditableForFields(TicketEntity entity, Set<String> fields) {
+        if (fields == null || fields.isEmpty()) {
+            return;
+        }
+        boolean touchesEditableField = fields.stream().anyMatch(EDIT_LOCKED_PATCH_FIELDS::contains);
+        if (touchesEditableField) {
+            ensureTicketEditable(entity);
+        }
+    }
+
+    private void ensureTicketEditable(TicketEntity entity) {
+        if (entity.getStatus() == TicketStatus.IN_PROGRESS) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Ticket cannot be edited after it is in progress"
+            );
         }
     }
 
@@ -508,6 +565,15 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     private void addHistory(TicketEntity entity, TicketHistoryEntity.EventType eventType, String payload) {
+        addHistory(entity, eventType, payload, REFERENCE_TYPE_TICKET, entity != null ? entity.getId() : null);
+    }
+
+    private void addHistory(
+            TicketEntity entity,
+            TicketHistoryEntity.EventType eventType,
+            String payload,
+            String referenceType,
+            UUID referenceId) {
         UUID userId = resolveCurrentUserId();
         UUID tenantId = resolveCurrentTenantId();
         if(tenantId == null) {
@@ -521,9 +587,29 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         history.setEventType(eventType);
         history.setActorParty(toAppUserReference(userId));
         history.setTenantId(tenantId);
+        history.setReferenceType(referenceType != null && !referenceType.isBlank()
+                ? referenceType
+                : REFERENCE_TYPE_TICKET);
+        history.setReferenceId(resolveHistoryReferenceId(entity, referenceId, userId));
         history.setPayload(payload);
         history.setOccurredAt(LocalDateTime.now());
         entity.getHistory().add(history);
+    }
+
+    private UUID resolveHistoryReferenceId(TicketEntity entity, UUID referenceId, UUID userId) {
+        if (referenceId != null) {
+            return referenceId;
+        }
+        if (entity != null && entity.getId() != null) {
+            return entity.getId();
+        }
+        return userId;
+    }
+
+    private TicketCommentEntity.AuthorType resolveCommentAuthorType(UUID userId, UUID tenantId) {
+        boolean isAgent = teamMemberRepository.existsByUserAndTenantAndRoleIn(
+                userId, tenantId, AGENT_TEAM_MEMBER_ROLES);
+        return isAgent ? TicketCommentEntity.AuthorType.AGENT : TicketCommentEntity.AuthorType.CUSTOMER;
     }
 
     private Specification<TicketEntity> buildSpecificationFromFilters(Map<String, String> filters) {
@@ -535,6 +621,15 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     private UUID resolveCurrentUserId() {
         return currentUserIdResolver.resolve();
     }
+
+    private UUID resolveCurrentTenantIdOrThrow() {
+        UUID tenantId = resolveCurrentTenantId();
+        if (tenantId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing tenant context");
+        }
+        return tenantId;
+    }
+
     private UUID resolveCurrentTenantId() {
         return currentTenantIdResolver.resolve();
     }
