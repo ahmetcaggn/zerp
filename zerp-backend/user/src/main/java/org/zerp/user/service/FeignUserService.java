@@ -10,13 +10,17 @@ import org.zerp.common.dto.feign.user.UserCheckResponseDTO;
 import org.zerp.common.dto.feign.user.UserCreateIfNotExistRequestDTO;
 import org.zerp.common.entity.user.AppUser;
 import org.zerp.user.mapper.UserMapper;
+import org.zerp.user.repository.TenantRepository;
 import org.zerp.user.repository.UserRepository;
+
+import java.util.UUID;
 
 @Log4j2
 @Service
 @RequiredArgsConstructor
 public class FeignUserService {
     private final UserRepository repository;
+    private final TenantRepository tenantRepository;
     private final UserMapper mapper;
 
     /**
@@ -24,6 +28,16 @@ public class FeignUserService {
      * @param request the user info to check and create if not exist
      */
     public UserCheckResponseDTO checkUserExists(UserCreateIfNotExistRequestDTO request) {
+        validateRequest(request);
+
+        UUID tenantId = request.getTenantId();
+        if (!tenantRepository.existsById(tenantId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Tenant not found for user creation: " + tenantId
+            );
+        }
+
         log.trace("Checking if user with id {} exists", request.getId());
         boolean exist = repository.existsById(request.getId());
         log.trace("User with id {} exists: {}", request.getId(), exist);
@@ -37,7 +51,7 @@ public class FeignUserService {
         // create new
         log.info("User with id {} does not exist, creating new user", request.getId());
         AppUser newUser = mapper.toEntity(request);
-        newUser.setTenantId(request.getTenantId());
+        newUser.setTenantId(tenantId);
         try {
             repository.save(newUser);
             log.info("Created new user with id {}", request.getId());
@@ -48,14 +62,55 @@ public class FeignUserService {
                 return UserCheckResponseDTO.builder().valid(true).build();
             }
 
-            log.error("Unique constraint violation while creating user with id {}: {}", request.getId(), e.getMessage());
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "User already exists with conflicting unique fields", e);
+            if (isForeignKeyViolation(e)) {
+                log.error("Foreign key violation while creating user with id {}: {}", request.getId(), e.getMessage());
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Tenant not found for user creation: " + tenantId, e);
+            }
+
+            if (isUniqueViolation(e)) {
+                log.error("Unique constraint violation while creating user with id {}: {}", request.getId(), e.getMessage());
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "User already exists with conflicting unique fields", e);
+            }
+
+            log.error("Data integrity violation while creating user with id {}: {}", request.getId(), e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "User creation failed due to invalid data", e);
         } catch (Exception e) {
             log.error("Failed to create user with id {}: {}", request.getId(), e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Failed to create user", e);
         }
         return UserCheckResponseDTO.builder().valid(false).build();
+    }
+
+    private void validateRequest(UserCreateIfNotExistRequestDTO request) {
+        if (request == null || request.getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id is required");
+        }
+        if (request.getTenantId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tenant id is required");
+        }
+    }
+
+    private boolean isUniqueViolation(DataIntegrityViolationException exception) {
+        return hasSqlState(exception, "23505");
+    }
+
+    private boolean isForeignKeyViolation(DataIntegrityViolationException exception) {
+        return hasSqlState(exception, "23503");
+    }
+
+    private boolean hasSqlState(Throwable throwable, String sqlState) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof java.sql.SQLException sqlException
+                    && sqlState.equals(sqlException.getSQLState())) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 }
