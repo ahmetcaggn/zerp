@@ -1,5 +1,5 @@
 import { getClientEnv } from '@/core/config/env.client'
-
+import type { AppRole } from '@/core/types/common'
 export const appConfig = (() => {
   const env = getClientEnv()
 
@@ -19,7 +19,7 @@ export const appConfig = (() => {
       browserBasePath: '/api',
     },
     access: {
-      dashboardRoles: ['client_user'],
+      dashboardRoles: ['client_user'] as AppRole[],
     },
     seo: {
       titleTemplate: '%s | ZERP',

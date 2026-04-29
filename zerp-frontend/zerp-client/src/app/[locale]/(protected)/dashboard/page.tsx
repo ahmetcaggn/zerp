@@ -1,5 +1,5 @@
-import { ClientDashboard } from '@/modules/admin/ui/admin-dashboard'
+import { WelcomeScreen } from '@/modules/restaurants/ui/welcome-screen'
 
-export default function DashboardPage() {
-  return <ClientDashboard />
+export default async function DashboardPage() {
+  return <WelcomeScreen />
 }
