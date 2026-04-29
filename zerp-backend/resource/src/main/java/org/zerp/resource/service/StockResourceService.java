@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.resource.StockResource;
 import org.zerp.common.resource.service.IResourceService;
-import org.zerp.common.resource.util.FilterType;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.resource.dto.resource.StockResourceCreateDTO;
