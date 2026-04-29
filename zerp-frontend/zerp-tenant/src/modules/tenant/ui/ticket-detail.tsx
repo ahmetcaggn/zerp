@@ -1,6 +1,8 @@
 'use client'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import EditIcon from '@mui/icons-material/Edit'
+import SendIcon from '@mui/icons-material/Send'
 import {
-  Alert,
   Box,
   Button,
   Chip,
@@ -8,40 +10,25 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
-  Divider,
-  FormControl,
-  InputLabel,
   MenuItem,
   Paper,
-  Select,
+  Stack,
   TextField,
   Typography,
 } from '@mui/material'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
-import PersonRemoveIcon from '@mui/icons-material/PersonRemove'
-import SendIcon from '@mui/icons-material/Send'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { useI18n } from '@/core/i18n/i18n-provider'
+
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
-import {
-  useAddComment,
-  useAssignTicket,
-  useChangePriority,
-  useChangeTicketStatus,
-  useCloseTicket,
-  useDeleteTicket,
-  useTicket,
-  useUnassignTicket,
-  useUpdateTicket,
-} from '../hooks/use-tickets'
-import type { TicketPriorityString, TicketStatusString } from '../types/ticket'
+
+import { useAddTicketComment, usePatchTicket, useTicket } from '../hooks/use-tickets'
+import type {
+  TicketPriorityString,
+  TicketStatusString,
+  TicketTypeString,
+} from '../types/ticket'
 
 const STATUS_COLOR: Record<
   TicketStatusString,
@@ -62,46 +49,40 @@ const PRIORITY_COLOR: Record<TicketPriorityString, 'error' | 'warning' | 'info' 
   LOW: 'default',
 }
 
-const CLOSEABLE_STATUSES: TicketStatusString[] = ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER']
-
-const STATUS_OPTIONS: TicketStatusString[] = [
-  'OPEN',
-  'IN_PROGRESS',
-  'WAITING_CUSTOMER',
-  'RESOLVED',
-  'CLOSED',
-  'CANCELLED',
-]
-
-const PRIORITY_OPTIONS: TicketPriorityString[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
+const TYPE_OPTIONS: TicketTypeString[] = ['BUG', 'FEATURE_REQUEST', 'QUESTION', 'INCIDENT']
 
 interface Props {
   id: string
 }
 
-export function TicketDetail({ id }: Props) {
-  const { t } = useI18n()
-  const { showToast } = useToast()
-  const router = useRouter()
+function formatDate(value?: string): string {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleString('tr-TR')
+}
 
-  const [commentText, setCommentText] = useState('')
+export function TicketDetail({ id }: Props) {
+  const router = useRouter()
+  const { showToast } = useToast()
+
   const [editOpen, setEditOpen] = useState(false)
-  const [deleteOpen, setDeleteOpen] = useState(false)
   const [editTitle, setEditTitle] = useState('')
   const [editDescription, setEditDescription] = useState('')
-  const [showAssignForm, setShowAssignForm] = useState(false)
-  const [assignTeamId, setAssignTeamId] = useState('')
-  const [assignAgentId, setAssignAgentId] = useState('')
+  const [editType, setEditType] = useState<TicketTypeString | ''>('')
+  const [editTags, setEditTags] = useState('')
+  const [editCustomAttributes, setEditCustomAttributes] = useState('{}')
+  const [commentText, setCommentText] = useState('')
 
   const { data: ticket, isLoading, error } = useTicket(id)
-  const { mutate: addComment, isPending: isCommenting } = useAddComment()
-  const { mutate: closeTicket, isPending: isClosing } = useCloseTicket()
-  const { mutate: changeStatus, isPending: isChangingStatus } = useChangeTicketStatus()
-  const { mutate: changePriority, isPending: isChangingPriority } = useChangePriority()
-  const { mutate: assignTicket, isPending: isAssigning } = useAssignTicket()
-  const { mutate: unassignTicket, isPending: isUnassigning } = useUnassignTicket()
-  const { mutate: updateTicket, isPending: isUpdating } = useUpdateTicket()
-  const { mutate: deleteTicket, isPending: isDeleting } = useDeleteTicket()
+  const { mutate: patchTicket, isPending: isSaving } = usePatchTicket()
+  const { mutate: addComment, isPending: isCommenting } = useAddTicketComment()
+
+  const comments = (ticket?.comments ?? []).filter((comment) => !comment.isInternal).sort((a, b) => {
+    const left = new Date(a.createdAt ?? '').getTime()
+    const right = new Date(b.createdAt ?? '').getTime()
+    return right - left
+  })
 
   if (isLoading) {
     return (
@@ -117,15 +98,85 @@ export function TicketDetail({ id }: Props) {
   }
 
   if (!ticket) return null
+  const currentTicket = ticket
 
-  const status = ticket.status as TicketStatusString | undefined
-  const priority = ticket.priority as TicketPriorityString | undefined
-  const isCloseable = status !== undefined && CLOSEABLE_STATUSES.includes(status)
+  const status = currentTicket.status as TicketStatusString | undefined
+  const priority = currentTicket.priority as TicketPriorityString | undefined
+  const tags = Array.from(currentTicket.tags ?? [])
   const isClosed = status === 'CLOSED' || status === 'CANCELLED'
-  const externalComments = (ticket.comments ?? []).filter((c) => !c.isInternal)
+  const isEditLocked = status === 'IN_PROGRESS'
+
+  function openEditDialog() {
+    if (isEditLocked) {
+      showToast('IN_PROGRESS durumundaki talepler düzenlenemez.', { severity: 'warning' })
+      return
+    }
+    setEditTitle(currentTicket.title ?? '')
+    setEditDescription(currentTicket.description ?? '')
+    setEditType((currentTicket.type as TicketTypeString | undefined) ?? '')
+    setEditTags(tags.join(', '))
+    setEditCustomAttributes(JSON.stringify(currentTicket.customAttributes ?? {}, null, 2))
+    setEditOpen(true)
+  }
+
+  function handleSave() {
+    if (isEditLocked) {
+      showToast('IN_PROGRESS durumundaki talepler düzenlenemez.', { severity: 'warning' })
+      setEditOpen(false)
+      return
+    }
+
+    const title = editTitle.trim()
+    if (!title) {
+      showToast('Başlık zorunludur.', { severity: 'warning' })
+      return
+    }
+
+    let customAttributes: Record<string, unknown> = {}
+    try {
+      const parsed = JSON.parse(editCustomAttributes || '{}') as unknown
+      if (
+        parsed === null ||
+        Array.isArray(parsed) ||
+        typeof parsed !== 'object'
+      ) {
+        showToast('Özel alanlar geçerli bir JSON nesnesi olmalı.', { severity: 'warning' })
+        return
+      }
+      customAttributes = parsed as Record<string, unknown>
+    } catch {
+      showToast('Özel alanlar geçerli JSON formatında olmalı.', { severity: 'warning' })
+      return
+    }
+
+    const tags = editTags
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter(Boolean)
+
+    const fields: Record<string, unknown> = {
+      title,
+      description: editDescription.trim() ? editDescription : null,
+      type: editType || null,
+      tags,
+      customAttributes,
+    }
+
+    patchTicket(
+      { id, fields },
+      {
+        onSuccess: () => {
+          setEditOpen(false)
+          showToast('Talep güncellendi.', { severity: 'success' })
+        },
+        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      },
+    )
+  }
 
   function handleAddComment() {
     if (!commentText.trim()) return
+
     addComment(
       { id, body: { content: commentText.trim(), isInternal: false } },
       {
@@ -138,101 +189,9 @@ export function TicketDetail({ id }: Props) {
     )
   }
 
-  function handleClose() {
-    closeTicket(id, {
-      onSuccess: () => showToast('Talep kapatıldı.', { severity: 'success' }),
-      onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-    })
-  }
-
-  function handleStatusChange(newStatus: TicketStatusString) {
-    changeStatus(
-      { id, body: { status: newStatus } },
-      {
-        onSuccess: () => showToast('Durum güncellendi.', { severity: 'success' }),
-        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-      },
-    )
-  }
-
-  function handlePriorityChange(newPriority: TicketPriorityString) {
-    changePriority(
-      { id, body: { priority: newPriority } },
-      {
-        onSuccess: () => showToast('Öncelik güncellendi.', { severity: 'success' }),
-        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-      },
-    )
-  }
-
-  function handleAssign() {
-    if (!assignTeamId.trim()) return
-    assignTicket(
-      {
-        id,
-        body: {
-          teamId: assignTeamId.trim() as unknown as number,
-          ...(assignAgentId.trim() && { agentPartyId: assignAgentId.trim() }),
-        },
-      },
-      {
-        onSuccess: () => {
-          setAssignTeamId('')
-          setAssignAgentId('')
-          setShowAssignForm(false)
-          showToast('Atama yapıldı.', { severity: 'success' })
-        },
-        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-      },
-    )
-  }
-
-  function handleUnassign() {
-    unassignTicket(id, {
-      onSuccess: () => showToast('Atama kaldırıldı.', { severity: 'success' }),
-      onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-    })
-  }
-
-  function handleOpenEdit() {
-    setEditTitle(ticket!.title ?? '')
-    setEditDescription(ticket!.description ?? '')
-    setEditOpen(true)
-  }
-
-  function handleUpdate() {
-    if (!editTitle.trim()) {
-      showToast('Başlık zorunludur.', { severity: 'warning' })
-      return
-    }
-    updateTicket(
-      { id, data: { title: editTitle.trim(), description: editDescription } },
-      {
-        onSuccess: () => {
-          setEditOpen(false)
-          showToast('Talep güncellendi.', { severity: 'success' })
-        },
-        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-      },
-    )
-  }
-
-  function handleDelete() {
-    deleteTicket(id, {
-      onSuccess: () => {
-        showToast('Talep silindi.', { severity: 'success' })
-        router.back()
-      },
-      onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-    })
-  }
-
   return (
-    <Box>
-      {/* Üst bar */}
-      <Box
-        sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
-      >
+    <Stack spacing={3}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Button
           startIcon={<ArrowBackIcon />}
           onClick={() => router.back()}
@@ -240,254 +199,134 @@ export function TicketDetail({ id }: Props) {
         >
           Geri
         </Button>
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-          <Button variant="outlined" startIcon={<EditIcon />} onClick={handleOpenEdit}>
-            Düzenle
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<DeleteIcon />}
-            onClick={() => setDeleteOpen(true)}
-          >
-            Sil
-          </Button>
-          {isCloseable && (
-            <Button
-              variant="outlined"
-              color="warning"
-              startIcon={<CheckCircleIcon />}
-              onClick={handleClose}
-              disabled={isClosing}
-            >
-              {t('tickets.closeTicket')}
-            </Button>
-          )}
-        </Box>
-      </Box>
-
-      {/* Başlık */}
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        #{ticket.id} — {ticket.title}
-      </Typography>
-
-      {/* Durum ve Öncelik — inline select */}
-      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3, alignItems: 'center' }}>
-        <FormControl size="small" sx={{ minWidth: 180 }} disabled={isChangingStatus || isClosed}>
-          <InputLabel>Durum</InputLabel>
-          <Select
-            value={status ?? ''}
-            label="Durum"
-            onChange={(e) => handleStatusChange(e.target.value as TicketStatusString)}
-            renderValue={(val) => (
-              <Chip
-                label={val}
-                color={STATUS_COLOR[val as TicketStatusString] ?? 'default'}
-                size="small"
-              />
-            )}
-          >
-            {STATUS_OPTIONS.map((s) => (
-              <MenuItem key={s} value={s}>
-                <Chip label={s} color={STATUS_COLOR[s] ?? 'default'} size="small" />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl size="small" sx={{ minWidth: 160 }} disabled={isChangingPriority || isClosed}>
-          <InputLabel>Öncelik</InputLabel>
-          <Select
-            value={priority ?? ''}
-            label="Öncelik"
-            onChange={(e) => handlePriorityChange(e.target.value as TicketPriorityString)}
-            renderValue={(val) => (
-              <Chip
-                label={val}
-                color={PRIORITY_COLOR[val as TicketPriorityString] ?? 'default'}
-                size="small"
-                variant="outlined"
-              />
-            )}
-          >
-            {PRIORITY_OPTIONS.map((p) => (
-              <MenuItem key={p} value={p}>
-                <Chip
-                  label={p}
-                  color={PRIORITY_COLOR[p] ?? 'default'}
-                  size="small"
-                  variant="outlined"
-                />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {ticket.type && (
-          <Chip label={ticket.type} size="small" variant="outlined" />
-        )}
-        <Typography variant="caption" color="text.secondary">
-          {ticket.createdAt}
-        </Typography>
-      </Box>
-
-      {/* Açıklama */}
-      {ticket.description && (
-        <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
-          <Typography variant="body1">{ticket.description}</Typography>
-        </Paper>
-      )}
-
-      {/* Atama */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: ticket.currentAssignment ? 1 : 0,
-          }}
+        <Button
+          variant="outlined"
+          startIcon={<EditIcon />}
+          onClick={openEditDialog}
+          disabled={isEditLocked}
         >
-          <Typography variant="subtitle2">Atama</Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            {ticket.currentAssignment && (
-              <Button
-                size="small"
-                color="error"
-                startIcon={<PersonRemoveIcon fontSize="small" />}
-                onClick={handleUnassign}
-                disabled={isUnassigning}
-              >
-                Atamayı Kaldır
-              </Button>
-            )}
-            {!isClosed && (
-              <Button size="small" onClick={() => setShowAssignForm((v) => !v)}>
-                {ticket.currentAssignment ? 'Yeniden Ata' : 'Ata'}
-              </Button>
+          Düzenle
+        </Button>
+      </Box>
+
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Typography variant="h5" sx={{ mb: 2 }}>
+          #{currentTicket.id} — {currentTicket.title}
+        </Typography>
+
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+          {status && (
+            <Chip
+              label={status}
+              color={STATUS_COLOR[status] ?? 'default'}
+              size="small"
+            />
+          )}
+          {priority && (
+            <Chip
+              label={priority}
+              color={PRIORITY_COLOR[priority] ?? 'default'}
+              size="small"
+              variant="outlined"
+            />
+          )}
+          {currentTicket.type && <Chip label={currentTicket.type} size="small" variant="outlined" />}
+        </Box>
+
+        <Stack spacing={1}>
+          <Typography variant="body2" color="text.secondary">
+            Oluşturulma: {formatDate(currentTicket.createdAt)}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Son Güncelleme: {formatDate(currentTicket.updatedAt)}
+          </Typography>
+        </Stack>
+
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+            Açıklama
+          </Typography>
+          <Typography variant="body2">{currentTicket.description || '—'}</Typography>
+        </Box>
+
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+            Etiketler
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {tags.length > 0 ? (
+              tags.map((tag) => (
+                <Chip key={tag} label={tag} size="small" variant="outlined" />
+              ))
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                —
+              </Typography>
             )}
           </Box>
         </Box>
 
-        {ticket.currentAssignment ? (
-          <Typography variant="body2">
-            Takım ID: {ticket.currentAssignment.teamId ?? '—'}
-            {ticket.currentAssignment.agentPartyId &&
-              ` · Ajan: ${ticket.currentAssignment.agentPartyId}`}
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+            Özel Alanlar
+          </Typography>
+          <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'background.default' }}>
+            <Typography
+              component="pre"
+              variant="caption"
+              sx={{ m: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+            >
+              {JSON.stringify(currentTicket.customAttributes ?? {}, null, 2)}
+            </Typography>
+          </Paper>
+        </Box>
+      </Paper>
+
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Typography variant="subtitle1" sx={{ mb: 1.5 }}>
+          Yorumlar ({comments.length})
+        </Typography>
+
+        {comments.length === 0 ? (
+          <Typography color="text.secondary" variant="body2">
+            Yorum yok.
           </Typography>
         ) : (
-          <Typography variant="body2" color="text.secondary">
-            Atanmamış
-          </Typography>
-        )}
-
-        {showAssignForm && (
-          <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-            <TextField
-              size="small"
-              label="Takım ID"
-              value={assignTeamId}
-              onChange={(e) => setAssignTeamId(e.target.value)}
-              sx={{ flex: 1, minWidth: 140 }}
-            />
-            <TextField
-              size="small"
-              label="Ajan ID (opsiyonel)"
-              value={assignAgentId}
-              onChange={(e) => setAssignAgentId(e.target.value)}
-              sx={{ flex: 1, minWidth: 160 }}
-            />
-            <Button
-              variant="contained"
-              size="small"
-              onClick={handleAssign}
-              disabled={isAssigning || !assignTeamId.trim()}
-            >
-              Kaydet
-            </Button>
-          </Box>
+          <Stack spacing={1.5}>
+            {comments.map((comment, index) => (
+              <Paper
+                key={comment.id ?? `${comment.authorId ?? 'unknown'}-${comment.createdAt ?? index}`}
+                variant="outlined"
+                sx={{ p: 1.5 }}
+              >
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    {comment.authorName ?? comment.authorId ?? 'Bilinmeyen'}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {formatDate(comment.createdAt)}
+                  </Typography>
+                </Box>
+                <Typography variant="body2">{comment.content}</Typography>
+              </Paper>
+            ))}
+          </Stack>
         )}
       </Paper>
 
-      {/* SLA */}
-      {ticket.slaTracking && (
-        <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            SLA Takibi
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-            <Box>
-              <Typography variant="caption" color="text.secondary">
-                İlk Yanıt Hedefi
-              </Typography>
-              <Typography variant="body2">
-                {ticket.slaTracking.firstResponseDueAt ?? '—'}
-              </Typography>
-              {ticket.slaTracking.isFirstResponseBreached && (
-                <Alert severity="error" sx={{ py: 0, px: 1, mt: 0.5 }}>
-                  İhlal
-                </Alert>
-              )}
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary">
-                Çözüm Hedefi
-              </Typography>
-              <Typography variant="body2">
-                {ticket.slaTracking.resolutionDueAt ?? '—'}
-              </Typography>
-              {ticket.slaTracking.isResolutionBreached && (
-                <Alert severity="error" sx={{ py: 0, px: 1, mt: 0.5 }}>
-                  İhlal
-                </Alert>
-              )}
-            </Box>
-          </Box>
-        </Paper>
-      )}
-
-      {/* Yorumlar */}
-      <Typography variant="subtitle1" sx={{ mb: 2 }}>
-        Yorumlar ({externalComments.length})
-      </Typography>
-
-      {externalComments.length === 0 ? (
-        <Typography color="text.secondary" sx={{ mb: 3 }}>
-          {t('tickets.emptyState')}
-        </Typography>
-      ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
-          {externalComments.map((comment) => (
-            <Paper key={comment.id} variant="outlined" sx={{ p: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                <Typography variant="caption" color="text.secondary">
-                  {comment.authorId ?? 'Bilinmeyen'}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {comment.createdAt}
-                </Typography>
-              </Box>
-              <Typography variant="body2">{comment.content}</Typography>
-            </Paper>
-          ))}
-        </Box>
-      )}
-
-      {/* Yorum ekleme */}
       {!isClosed && (
-        <>
-          <Divider sx={{ mb: 2 }} />
+        <Paper variant="outlined" sx={{ p: 2 }}>
           <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            {t('tickets.addComment')}
+            Yorum Ekle
           </Typography>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
             <TextField
               multiline
               minRows={2}
               fullWidth
-              placeholder={t('tickets.commentPlaceholder')}
+              placeholder="Yorumunuzu yazın..."
               value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
+              onChange={(event) => setCommentText(event.target.value)}
               size="small"
             />
             <Button
@@ -500,59 +339,72 @@ export function TicketDetail({ id }: Props) {
               Gönder
             </Button>
           </Box>
-        </>
+        </Paper>
       )}
 
-      {/* Düzenleme dialog */}
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Talebi Düzenle</DialogTitle>
         <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+          <Stack spacing={2} sx={{ pt: 1 }}>
             <TextField
               label="Başlık *"
               value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
+              onChange={(event) => setEditTitle(event.target.value)}
               size="small"
               fullWidth
             />
             <TextField
               label="Açıklama"
               value={editDescription}
-              onChange={(e) => setEditDescription(e.target.value)}
+              onChange={(event) => setEditDescription(event.target.value)}
               size="small"
               fullWidth
               multiline
-              minRows={4}
+              minRows={3}
             />
-          </Box>
+            <TextField
+              select
+              label="Tür"
+              value={editType}
+              onChange={(event) => setEditType(event.target.value as TicketTypeString)}
+              size="small"
+              fullWidth
+            >
+              <MenuItem value="">Seçilmedi</MenuItem>
+              {TYPE_OPTIONS.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              label="Etiketler"
+              value={editTags}
+              onChange={(event) => setEditTags(event.target.value)}
+              size="small"
+              fullWidth
+              helperText="Virgülle ayırın. Örn: ödeme, acil, teknik"
+            />
+            <TextField
+              label="Özel Alanlar (JSON)"
+              value={editCustomAttributes}
+              onChange={(event) => setEditCustomAttributes(event.target.value)}
+              size="small"
+              fullWidth
+              multiline
+              minRows={6}
+            />
+          </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditOpen(false)} disabled={isUpdating}>
+          <Button onClick={() => setEditOpen(false)} disabled={isSaving}>
             İptal
           </Button>
-          <Button variant="contained" onClick={handleUpdate} disabled={isUpdating}>
-            {isUpdating ? <CircularProgress size={20} /> : 'Kaydet'}
+          <Button variant="contained" onClick={handleSave} disabled={isSaving}>
+            {isSaving ? <CircularProgress size={20} /> : 'Kaydet'}
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Silme onay dialog */}
-      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
-        <DialogTitle>Talebi Sil</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Bu destek talebini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteOpen(false)} disabled={isDeleting}>
-            İptal
-          </Button>
-          <Button variant="contained" color="error" onClick={handleDelete} disabled={isDeleting}>
-            {isDeleting ? <CircularProgress size={20} /> : 'Sil'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+    </Stack>
   )
 }

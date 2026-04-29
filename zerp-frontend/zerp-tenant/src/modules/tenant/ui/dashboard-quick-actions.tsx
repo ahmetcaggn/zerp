@@ -1,10 +1,10 @@
 'use client'
-import { Box, Button, Typography } from '@mui/material'
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber'
-import GroupsIcon from '@mui/icons-material/Groups'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import SendIcon from '@mui/icons-material/Send'
+import { Box, Button, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
+
 import { ROUTES } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
 
@@ -14,7 +14,6 @@ export function DashboardQuickActions() {
 
   const actions = [
     { label: t('dashboard.addEmployeeAction'), icon: <PersonAddIcon />, href: ROUTES.employees },
-    { label: t('dashboard.manageTeamsAction'), icon: <GroupsIcon />, href: ROUTES.teams },
     {
       label: t('dashboard.sendNotificationAction'),
       icon: <SendIcon />,

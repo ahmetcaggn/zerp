@@ -8,7 +8,6 @@ export const ROUTES = {
   unauthorized: '/unauthorized',
   employees: '/employees',
   tickets: '/tickets',
-  teams: '/teams',
   notifications: '/notifications',
 } as const
 
