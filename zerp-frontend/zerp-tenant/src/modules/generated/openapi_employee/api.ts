@@ -75,6 +75,8 @@ export interface ApiResponseVoid {
  * Entity data to create
  */
 export interface CreateEmployeeRequestDto {
+    'username': string;
+    'tempPassword': string;
     'firstName': string;
     'lastName': string;
     'email': string;

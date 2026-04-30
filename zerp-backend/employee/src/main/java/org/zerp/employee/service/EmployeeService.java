@@ -11,6 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.dto.ApiResponse;
+import org.zerp.common.dto.feign.user.keycloak.KeycloakCreateUserRequestDTO;
+import org.zerp.common.dto.feign.user.keycloak.KeycloakCreateUserResponseDTO;
+import org.zerp.common.dto.user.UsernameCheckResponseDTO;
 import org.zerp.common.error.filter.FilterError;
 import org.zerp.common.error.filter.FilterErrorUtils;
 import org.zerp.common.resource.util.filter.FilterRefiner;
@@ -21,6 +25,7 @@ import org.zerp.common.entity.employee.EmployeeContact;
 import org.zerp.common.entity.employee.EmploymentStatus;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.employee.Exception.DuplicateResourceException;
+import org.zerp.employee.client.UserServiceClient;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.EmployeeContactDto;
 import org.zerp.employee.dtos.request.UpdateEmployeeRequestDto;
@@ -49,6 +54,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
     private final CurrentTenantIdResolver currentTenantIdResolver;
     private final FilterRefiner filterRefiner;
 
+    private final UserServiceClient userServiceClient;
     // =============================================
     // IResourceService overrides
     // =============================================
@@ -109,22 +115,51 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
         UUID tenantId = resolveCurrentTenantId();
         validateUniqueConstraints(dto.getEmail(), dto.getNationalId(), null);
 
-        // TODO bu ileride keycloak'a istek atilip kullanici kayit edilecek sekidle duzenlenecek.
-        UUID tempEmployeeId = UUID.randomUUID();
-
-        Employee employee = employeeMapper.toEntity(dto);
-        employee.setId(tempEmployeeId);
-        employee.setTenantId(tenantId);
-        // TODO bu ileride keycloak'a istek atilip kullanici kayit edilecek sekidle duzenlenecek.'
-        employee.setUsername("test-username");
-//        employee.setVersion(0L);
-
-        // TODO ileride temp sifre de input olarak alinacak.
-
         if (!permissionEvaluator.canCreate(userId,
                 new EmployeePermissionEvaluator.TenantParent(tenantId))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Employee");
         }
+
+        ApiResponse<UsernameCheckResponseDTO> keycloakUsernameResponse;
+        //check username
+        try{
+            keycloakUsernameResponse = userServiceClient.checkUsername(dto.getUsername()).getBody();
+        }catch (Exception e){
+            log.error("Failed to check username: {}. Error: {}", dto.getUsername(), e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to check username", e);
+        }
+        if (keycloakUsernameResponse == null || keycloakUsernameResponse.getData() == null || !keycloakUsernameResponse.getData().getAvailable()) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Username already exist");
+        }
+
+
+        // 1. Create user in Keycloak (conflict detection and orphan cleanup handled inside)
+        KeycloakCreateUserRequestDTO keycloakRequest = KeycloakCreateUserRequestDTO.builder()
+                .username(dto.getUsername())
+                .email(dto.getEmail())
+                .tenantId(tenantId)
+                .tempPassword(dto.getTempPassword())
+                .build();
+        ApiResponse<KeycloakCreateUserResponseDTO> keycloakCreateUserResponse;
+
+        try{
+            keycloakCreateUserResponse = userServiceClient.createKeycloakUser(keycloakRequest).getBody();
+        }catch (Exception e){
+            log.error("Failed to create user in Keycloak for username: {}, email: {}. Error: {}", dto.getUsername(), dto.getEmail(), e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to create user in Keycloak", e);
+        }
+
+        if (keycloakCreateUserResponse == null || keycloakCreateUserResponse.getData() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Keycloak user creation failed");
+        }
+
+        UUID employeeId = keycloakCreateUserResponse.getData().getUserId();
+        log.info("User created in Keycloak with id: {}", employeeId);
+
+        Employee employee = employeeMapper.toEntity(dto);
+        employee.setId(employeeId);
+        employee.setTenantId(tenantId);
+        employee.setUsername(dto.getUsername());
 
         if (dto.getManagerId() != null) {
             Employee manager = employeeRepository.findByIdAndNotDeleted(dto.getManagerId())
@@ -139,7 +174,13 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
             }
         }
 
-        return employeeMapper.toResponseDto(employeeRepository.save(employee));
+        try {
+            return employeeMapper.toResponseDto(employeeRepository.save(employee));
+        } catch (Exception e) {
+            log.error("Failed to save employee, rolling back Keycloak user and user DB entry: {}", employeeId, e);
+            try { userServiceClient.deleteKeycloakUser(employeeId); } catch (Exception ex) { log.error("Keycloak rollback failed for id: {}", employeeId, ex); }
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create employee", e);
+        }
     }
 
     @Override

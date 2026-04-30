@@ -23,6 +23,6 @@ public class KeycloakCreateUserRequestDTO {
     @Size(min = 8, message = "Temporary password must be at least 8 characters long")
     private String tempPassword;
 
-    @NotBlank(message = "Tenant ID cannot be blank")
+    @NotNull(message = "Tenant ID cannot be blank")
     private UUID tenantId;
 }

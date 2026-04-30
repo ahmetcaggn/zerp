@@ -9,6 +9,7 @@ import {
   DialogTitle,
   FormControl,
   IconButton,
+  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
@@ -16,6 +17,8 @@ import {
   Typography,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
@@ -26,6 +29,7 @@ import {
   useEmployees,
   useUpdateEmployee,
 } from '../hooks/use-employees'
+import { useUsernameCheck } from '../hooks/use-username-check'
 import {
   ContactType,
   EmploymentStatus,
@@ -48,6 +52,10 @@ const EMPTY_CONTACT: EmployeeContactDto = { type: ContactType.WorkPhone, value: 
 export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
+
+  const [username, setUsername] = useState('')
+  const [tempPassword, setTempPassword] = useState('')
+  const usernameStatus = useUsernameCheck(mode === 'create' ? username : '')
 
   const [firstName, setFirstName] = useState(employee?.firstName ?? '')
   const [lastName, setLastName] = useState(employee?.lastName ?? '')
@@ -86,7 +94,12 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
       return
     }
 
-    const payload: CreateEmployeeRequestDto = {
+    if (mode === 'create' && tempPassword.length < 8) {
+      showToast(t('employees.requiredFieldsWarning'), { severity: 'warning' })
+      return
+    }
+
+    const sharedFields = {
       firstName,
       lastName,
       email,
@@ -101,7 +114,11 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
     }
 
     if (mode === 'create') {
-      createEmployee(payload, {
+      if (usernameStatus !== 'available') {
+        showToast(t('employees.usernameUnavailable'), { severity: 'warning' })
+        return
+      }
+      createEmployee({ username, tempPassword, ...sharedFields }, {
         onSuccess: () => {
           showToast(t('employees.employeeCreatedToast'), { severity: 'success' })
           onClose()
@@ -110,7 +127,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
       })
     } else if (employee?.id !== undefined) {
       updateEmployee(
-        { id: employee.id, data: payload },
+        { id: employee.id, data: sharedFields },
         {
           onSuccess: () => {
             showToast(t('employees.employeeUpdatedToast'), { severity: 'success' })
@@ -144,6 +161,66 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
 
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+          {mode === 'create' && (
+            <TextField
+              label={t('employees.usernameField')}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              size="small"
+              fullWidth
+              error={usernameStatus === 'unavailable' || usernameStatus === 'error'}
+              helperText={
+                usernameStatus === 'idle'
+                  ? username.trim().length > 0 && username.trim().length < 3
+                    ? t('employees.usernameMinLength')
+                    : undefined
+                  : usernameStatus === 'checking'
+                    ? t('employees.usernameChecking')
+                    : usernameStatus === 'available'
+                      ? t('employees.usernameAvailable')
+                      : usernameStatus === 'unavailable'
+                        ? t('employees.usernameUnavailable')
+                        : t('employees.usernameError')
+              }
+              FormHelperTextProps={{
+                sx: {
+                  color:
+                    usernameStatus === 'available'
+                      ? 'success.main'
+                      : usernameStatus === 'checking'
+                        ? 'text.secondary'
+                        : undefined,
+                },
+              }}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {usernameStatus === 'checking' && <CircularProgress size={16} />}
+                      {usernameStatus === 'available' && (
+                        <CheckCircleOutlineIcon color="success" fontSize="small" />
+                      )}
+                      {(usernameStatus === 'unavailable' || usernameStatus === 'error') && (
+                        <ErrorOutlineIcon color="error" fontSize="small" />
+                      )}
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+          )}
+
+          {mode === 'create' && (
+            <TextField
+              label={t('employees.tempPasswordField')}
+              type="password"
+              value={tempPassword}
+              onChange={(e) => setTempPassword(e.target.value)}
+              size="small"
+              fullWidth
+            />
+          )}
+
           <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField
               label={t('employees.firstNameField')}
@@ -302,7 +379,14 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
         <Button onClick={onClose} disabled={isPending}>
           {t('common.cancel')}
         </Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={isPending}>
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={
+            isPending ||
+            (mode === 'create' && usernameStatus !== 'available')
+          }
+        >
           {isPending ? (
             <CircularProgress size={20} />
           ) : mode === 'create' ? (

@@ -86,6 +86,13 @@ export interface MessageDictionary {
     phoneColumnHeader: string
     statusColumnHeader: string
     // form fields
+    usernameField: string
+    usernameChecking: string
+    usernameAvailable: string
+    usernameUnavailable: string
+    usernameError: string
+    usernameMinLength: string
+    tempPasswordField: string
     firstNameField: string
     lastNameField: string
     emailField: string

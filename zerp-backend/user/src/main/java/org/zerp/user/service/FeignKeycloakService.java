@@ -81,8 +81,8 @@ public class FeignKeycloakService {
                         .userId(userId)
                         .build();
             } else if (response.getStatus() == Response.Status.CONFLICT.getStatusCode()) {
-                log.warn("User creation failed for username: {} - User already exists (Status: 409)", data.getUsername());
-                throw new ResponseStatusException(HttpStatus.CONFLICT);
+                log.warn("User creation failed for username: {} - User already exists in Keycloak (Status: 409)", data.getUsername());
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "User creation failed. Username already exists.");
             } else {
                 log.error("Failed to create user in Keycloak for username: {} - Unexpected status: {}",
                         data.getUsername(), response.getStatus());
@@ -118,6 +118,18 @@ public class FeignKeycloakService {
             log.error("Error checking if user exists in Keycloak for username {}: {}",
                     username, e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "User creation failed");
+        }
+    }
+
+    public void deleteUser(UUID userId) {
+        log.info("Deleting user from Keycloak with id: {}", userId);
+        String realm = keycloakAdminProperties.getRealm();
+        try {
+            keycloakAdminClient.realm(realm).users().delete(userId.toString());
+            log.info("User {} successfully deleted from Keycloak", userId);
+        } catch (Exception e) {
+            log.error("Failed to delete user {} from Keycloak: {}", userId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to delete user from Keycloak", e);
         }
     }
 

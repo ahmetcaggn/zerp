@@ -60,4 +60,9 @@ export const employeeClient = {
       total: page.totalElements ?? 0,
     }
   },
+
+  checkUsername: (username: string): Promise<{ available: boolean }> =>
+    httpClient.get<{ available: boolean }>(
+      `/user/usernames/check?username=${encodeURIComponent(username)}`,
+    ),
 }

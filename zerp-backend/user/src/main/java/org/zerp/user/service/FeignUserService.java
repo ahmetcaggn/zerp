@@ -85,6 +85,11 @@ public class FeignUserService {
         return UserCheckResponseDTO.builder().valid(false).build();
     }
 
+    public void deleteById(UUID id) {
+        log.info("Deleting user with id {} from DB", id);
+        repository.deleteById(id);
+    }
+
     private void validateRequest(UserCreateIfNotExistRequestDTO request) {
         if (request == null || request.getId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id is required");
