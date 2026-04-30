@@ -8,6 +8,7 @@ import org.zerp.common.entity.crm.TicketEntity;
 import org.zerp.common.resource.util.filter.FilterOperator;
 import org.zerp.common.resource.util.filter.FilterProcessor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Log4j2
@@ -25,7 +26,12 @@ public class TicketFilterSpecGenerator implements IFilterSpecGenerator<TicketEnt
             return Specification.unrestricted();
         }
 
-        String field = parts.getFirst();
+        List<String> normalizedParts = normalizeFieldAliases(parts);
+        if (!normalizedParts.equals(parts)) {
+            log.debug("Normalized Ticket filter path: original={}, normalized={}", parts, normalizedParts);
+        }
+
+        String field = normalizedParts.getFirst();
 
         // Global search - delegate to dedicated method
         if ("q".equals(field)) {
@@ -36,7 +42,7 @@ public class TicketFilterSpecGenerator implements IFilterSpecGenerator<TicketEnt
         // Standard field-based filter
         log.trace("Generating standard filter for Ticket field: field={}, operator={}", field, operator);
         return (root, query, cb) ->
-                filterProcessor.generatePredicate(parts, value, operator, root, query, cb);
+                filterProcessor.generatePredicate(normalizedParts, value, operator, root, query, cb);
     }
 
     @Override
@@ -55,5 +61,31 @@ public class TicketFilterSpecGenerator implements IFilterSpecGenerator<TicketEnt
                 cb.like(cb.lower(root.get("description")), pattern)
         );
     }
-}
 
+    private List<String> normalizeFieldAliases(List<String> parts) {
+        String first = parts.getFirst();
+
+        if (parts.size() == 1) {
+            return switch (first) {
+                case "reporterId" -> path("reporter", "id");
+                case "teamId" -> path("currentAssignment", "team", "id");
+                case "agentPartyId", "assigneeId" -> path("currentAssignment", "agentParty", "id");
+                default -> parts;
+            };
+        }
+
+        if (parts.size() == 2 && "currentAssignment".equals(first)) {
+            return switch (parts.get(1)) {
+                case "teamId" -> path("currentAssignment", "team", "id");
+                case "agentPartyId", "assigneeId" -> path("currentAssignment", "agentParty", "id");
+                default -> parts;
+            };
+        }
+
+        return parts;
+    }
+
+    private List<String> path(String... parts) {
+        return new ArrayList<>(List.of(parts));
+    }
+}

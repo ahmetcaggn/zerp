@@ -307,24 +307,23 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         TicketEntity entity = findOrThrow(ticketId);
         validateAssignable(entity);
 
-        boolean isReassignment = entity.getCurrentAssignment() != null
-                && Boolean.TRUE.equals(entity.getCurrentAssignment().getActive());
+        TicketAssignmentEntity assignment = entity.getCurrentAssignment();
+        boolean hasExistingAssignment = assignment != null;
+        boolean isReassignment = hasExistingAssignment && Boolean.TRUE.equals(assignment.getActive());
 
-        if (isReassignment) {
-            TicketAssignmentEntity old = entity.getCurrentAssignment();
-            old.setActive(false);
-            old.setUnassignedAt(LocalDateTime.now());
-
+        if (!hasExistingAssignment) {
+            assignment = new TicketAssignmentEntity();
+            entity.setCurrentAssignment(assignment);
+        } else if (isReassignment) {
             String target = request.agentPartyId() != null
                     ? "agent " + request.agentPartyId()
                     : "team " + request.teamId();
             addHistory(entity, TicketHistoryEntity.EventType.REASSIGNED,
                     String.format("Reassigned to %s", target),
                     REFERENCE_TYPE_TICKET_ASSIGNMENT,
-                    old.getId());
+                    assignment.getId());
         }
 
-        TicketAssignmentEntity assignment = new TicketAssignmentEntity();
         assignment.setTicket(entity);
         assignment.setTeam(toTeamReference(request.teamId()));
         assignment.setAgentParty(toAppUserReference(request.agentPartyId()));
@@ -332,7 +331,12 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         assignment.setActive(true);
         assignment.setReason(request.agentPartyId() != null ? "Assigned to agent" : "Assigned to team");
         assignment.setAssignedAt(LocalDateTime.now());
-        entity.setCurrentAssignment(assignment);
+        assignment.setUnassignedAt(null);
+        assignment.setTenantId(entity.getTenantId());
+
+        if (!hasExistingAssignment) {
+            entityManager.persist(assignment);
+        }
 
         if (!isReassignment) {
             String target = request.agentPartyId() != null
