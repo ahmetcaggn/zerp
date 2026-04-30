@@ -5,6 +5,7 @@ import org.mapstruct.MappingTarget;
 import org.zerp.common.dto.feign.user.UserCheckResponseDTO;
 import org.zerp.common.dto.feign.user.UserCreateIfNotExistRequestDTO;
 import org.zerp.common.entity.user.AppUser;
+import org.zerp.user.dto.UserResponseDTO;
 
 import java.util.List;
 
@@ -14,6 +15,11 @@ public interface UserMapper {
      * Convert AppUser entity to UserCheckResponseDTO
      */
     UserCheckResponseDTO toUserCheckResponseDTO(AppUser appUser);
+
+    /**
+     * Convert AppUser entity to UserResponseDTO
+     */
+    UserResponseDTO toUserResponseDTO(AppUser appUser);
 
     /**
      * Convert UserCreateIfNotExistRequestDTO to AppUser entity

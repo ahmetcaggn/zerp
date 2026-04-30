@@ -1,6 +1,7 @@
 package org.zerp.user.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.zerp.common.entity.user.AppUser;
@@ -8,7 +9,7 @@ import org.zerp.common.entity.user.AppUser;
 import java.util.UUID;
 
 @Repository
-public interface UserRepository extends JpaRepository<AppUser, UUID> {
+public interface UserRepository extends JpaRepository<AppUser, UUID>, JpaSpecificationExecutor<AppUser> {
     /**
      * Check if user exists by username (case-insensitive).
      * Performs case-insensitive comparison at the database level.

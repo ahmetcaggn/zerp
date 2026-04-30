@@ -15,6 +15,7 @@ public enum PermissionAction {
     CREATE_TICKET(TENANT),
 
     // USER level
+    READ_USER(USER),
     READ_PERMISSION(USER),
 
     // STOCK_RESOURCE level

@@ -19,6 +19,22 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
               WHERE p.userId = :userId
                 AND p.action = :action
                 AND (
+                     (:targetUserId IS NOT NULL AND p.targetType = 'USER' AND p.targetId = :targetUserId)
+                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                )
+            """)
+    List<Permission> findAllByUserAndUserHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("targetUserId") UUID targetUserId,
+            @Param("tenantId") UUID tenantId
+    );
+
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
                      (:stockResourceId IS NOT NULL AND p.targetType = 'STOCK_RESOURCE' AND p.targetId = :stockResourceId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
                 )
