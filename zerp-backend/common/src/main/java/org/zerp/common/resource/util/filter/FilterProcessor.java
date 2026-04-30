@@ -3,6 +3,8 @@ package org.zerp.common.resource.util.filter;
 import jakarta.persistence.criteria.*;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
+import org.zerp.common.error.filter.FilterError;
+import org.zerp.common.error.filter.FilterValueError;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,8 +21,9 @@ public class FilterProcessor {
             CriteriaQuery<?> query,
             CriteriaBuilder cb
     ) {
+        String key = String.join(".", parts);
         log.debug("Generating predicate: parts={}, operator={}, valueType={}",
-                String.join(".", parts), filterOperator, value);
+                key, filterOperator, value);
 
         Path<?> path = _getPath(root, parts);
         Class<?> type = path.getJavaType();
@@ -30,45 +33,49 @@ public class FilterProcessor {
             case LIKE -> {
                 if (!String.class.equals(type)) {
                     log.warn("LIKE operator applied to non-String field: field={}, type={}",
-                            String.join(".", parts), type.getSimpleName());
+                            key, type.getSimpleName());
                     throw new IllegalArgumentException("LIKE operator only valid for String fields");
                 }
                 log.trace("Applying LIKE operator: field={}, pattern={}%...%",
-                        String.join(".", parts), value.toLowerCase());
+                        key, value.toLowerCase());
                 yield cb.like(cb.lower(path.as(String.class)), "%" + value.toLowerCase() + "%");
             }
             case GT -> {
-                log.trace("Applying GT operator: field={}, value={}", String.join(".", parts), value);
-                yield cb.greaterThan(path.as(Comparable.class), (Comparable) typedValue);
+                _validateComparableType(type, filterOperator, parts);
+                log.trace("Applying GT operator: field={}, value={}", key, value);
+                yield cb.greaterThan((Expression) path, (Comparable) typedValue);
             }
             case LT -> {
-                log.trace("Applying LT operator: field={}, value={}", String.join(".", parts), value);
-                yield cb.lessThan(path.as(Comparable.class), (Comparable) typedValue);
+                _validateComparableType(type, filterOperator, parts);
+                log.trace("Applying LT operator: field={}, value={}", key, value);
+                yield cb.lessThan((Expression) path, (Comparable) typedValue);
             }
             case GTE -> {
-                log.trace("Applying GTE operator: field={}, value={}", String.join(".", parts), value);
-                yield cb.greaterThanOrEqualTo(path.as(Comparable.class), (Comparable) typedValue);
+                _validateComparableType(type, filterOperator, parts);
+                log.trace("Applying GTE operator: field={}, value={}", key, value);
+                yield cb.greaterThanOrEqualTo((Expression) path, (Comparable) typedValue);
             }
             case LTE -> {
-                log.trace("Applying LTE operator: field={}, value={}", String.join(".", parts), value);
-                yield cb.lessThanOrEqualTo(path.as(Comparable.class), (Comparable) typedValue);
+                _validateComparableType(type, filterOperator, parts);
+                log.trace("Applying LTE operator: field={}, value={}", key, value);
+                yield cb.lessThanOrEqualTo((Expression) path, (Comparable) typedValue);
             }
             case EQUALS -> {
-                log.trace("Applying EQUALS operator: field={}, value={}", String.join(".", parts), value);
+                log.trace("Applying EQUALS operator: field={}, value={}", key, value);
                 yield cb.equal(path, typedValue);
             }
             case NOT_EQUALS -> {
-                log.trace("Applying NOT_EQUALS operator: field={}, value={}", String.join(".", parts), value);
+                log.trace("Applying NOT_EQUALS operator: field={}, value={}", key, value);
                 yield cb.notEqual(path, typedValue);
             }
             default -> {
-                log.error("Unsupported filter operator: operator={}, field={}", filterOperator, String.join(".", parts));
+                log.error("Unsupported filter operator: operator={}, field={}", filterOperator, key);
                 throw new IllegalArgumentException("Unsupported filter operator: " + filterOperator);
             }
         };
 
         log.debug("Predicate generated successfully: field={}, operator={}",
-                String.join(".", parts), filterOperator);
+                key, filterOperator);
         return predicate;
     }
 
@@ -129,14 +136,51 @@ public class FilterProcessor {
             }
             log.trace("No type conversion needed, returning value as String: value={}", value);
             return value;
+        } catch (NumberFormatException e) {
+            log.warn("Failed to convert filter value to number: value={}, targetType={}, error={}",
+                    value, type.getSimpleName(), e.getMessage(), e);
+            throw new FilterError.Runtime(new FilterValueError(value, "Invalid number format for value: "
+                    + value + " expected type: " + type.getSimpleName(), e));
         } catch (IllegalArgumentException e) {
-            log.error("Failed to convert filter value: value={}, targetType={}, error={}",
+            log.warn("Failed to convert filter value: value={}, targetType={}, error={}",
                     value, type.getSimpleName(), e.getMessage());
-            throw e;
+            throw new FilterError.Runtime(new FilterValueError(value, "Invalid value: "
+                    + value + " for type: " + type.getSimpleName(), e));
         } catch (Exception e) {
             log.error("Unexpected error during value conversion: value={}, targetType={}, error={}",
                     value, type.getSimpleName(), e.getMessage(), e);
-            throw new IllegalArgumentException("Value conversion failed for value=" + value + " to type=" + type.getSimpleName(), e);
+            throw new FilterError.Runtime(new FilterValueError(value, "Unexpected error converting value: " + value + " to type: " +
+                    type.getSimpleName(), e));
+        }
+    }
+
+    private void _validateComparableType(Class<?> type, FilterOperator operator, List<String> parts) {
+        String fieldPath = String.join(".", parts);
+
+        // Boolean is technically Comparable but not meant for GT/LT/GTE/LTE
+        if (Boolean.class.equals(type) || boolean.class.equals(type)) {
+            log.warn("Comparison operator applied to Boolean field: field={}, operator={}",
+                    fieldPath, operator);
+            throw new IllegalArgumentException(
+                    "Comparison operators (GT, LT, GTE, LTE) not supported for Boolean fields: " + fieldPath
+            );
+        }
+
+        // Validate that the type is Comparable (safe for numeric and orderable types)
+        boolean isComparable = type != null && (
+                Number.class.isAssignableFrom(type) ||
+                        String.class.equals(type) ||
+                        UUID.class.equals(type) ||
+                        Enum.class.isAssignableFrom(type)
+        );
+
+        if (!isComparable) {
+            log.warn("Comparison operator applied to non-comparable type: field={}, type={}, operator={}",
+                    fieldPath, type != null ? type.getSimpleName() : null, operator);
+            throw new IllegalArgumentException(
+                    "Comparison operators not supported for type " + (type != null ? type.getSimpleName() : null) +
+                            " on field: " + fieldPath
+            );
         }
     }
 }
