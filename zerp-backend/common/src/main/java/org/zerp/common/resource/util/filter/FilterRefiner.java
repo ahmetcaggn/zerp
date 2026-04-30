@@ -8,9 +8,12 @@ import org.zerp.common.entity.crm.TeamEntity;
 import org.zerp.common.entity.crm.TicketEntity;
 import org.zerp.common.entity.employee.Employee;
 import org.zerp.common.entity.resource.StockResource;
+import org.zerp.common.error.filter.FilterError;
+import org.zerp.common.error.filter.FilterErrorUtils;
 import org.zerp.common.resource.util.filter.specgenerator.*;
 
 import jakarta.annotation.PostConstruct;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -63,9 +66,18 @@ public class FilterRefiner {
         log.info("Spec generator map initialized with {} generators", specGeneratorMap.size());
     }
 
-    public <T> Specification<T> refined(Map<String, String> filter, Class<T> entityClass) {
-        @SuppressWarnings("unchecked")
-        final IFilterSpecGenerator<T> specGenerator = (IFilterSpecGenerator<T>) specGeneratorMap
+    public <T> Specification<T> refinedOrBadRequest(Map<String, String> filter, Class<T> entityClass) {
+        try {
+            return refined(filter, entityClass);
+        } catch (FilterError.Multiple e) {
+            log.warn("Filter refinement failed with multiple errors: count={}, entityType={}",
+                    e.getErrors().size(), entityClass.getSimpleName());
+            throw FilterErrorUtils.toResponseStatusException(e);
+        }
+    }
+
+    private <T> Specification<T> refined(Map<String, String> filter, Class<T> entityClass) throws FilterError.Multiple {
+        @SuppressWarnings("unchecked") final IFilterSpecGenerator<T> specGenerator = (IFilterSpecGenerator<T>) specGeneratorMap
                 .getOrDefault(entityClass, defaultFilterSpecGenerator);
 
         log.info("Starting filter refinement: entityType={}, filterCount={}, specGenerator={}",
@@ -75,6 +87,7 @@ public class FilterRefiner {
         Specification<T> specification = Specification.unrestricted();
         int appliedFilters = 0;
         int skippedFilters = 0;
+        List<FilterError.Single> filterErrors = new ArrayList<>();
 
         for (Map.Entry<String, String> entry : filter.entrySet()) {
             String key = entry.getKey();
@@ -106,15 +119,32 @@ public class FilterRefiner {
             }
 
             try {
-                specification = specification.and(specGenerator.generateSpecification(parts, filterOperator, value));
+                if (parts.getFirst().equals("q")) {
+                    log.debug("Detected global search filter: value={}", value);
+                    specification = specification.and(specGenerator.generateGlobalSearchSpecification(value));
+                } else {
+                    log.debug("Generating specification for filter: field={}, operator={}, value={}",
+                            String.join(".", parts), filterOperator, value);
+                    specification = specification.and(specGenerator.generateSpecification(parts, filterOperator, value));
+                }
+
                 appliedFilters++;
                 log.trace("Filter applied successfully: field={}, operator={}",
                         String.join(".", parts), filterOperator);
+            } catch (FilterError.Runtime e) {
+                log.warn("Filter error for filter: key={}, value={}, error={}",
+                        key, value, e.getMessage(), e);
+                filterErrors.add(e.getError());
             } catch (Exception e) {
                 log.error("Failed to generate specification for filter: key={}, value={}, error={}",
                         key, value, e.getMessage(), e);
                 throw e;
             }
+        }
+
+        if (!filterErrors.isEmpty()) {
+            log.warn("Multiple filter errors encountered: count={}", filterErrors.size());
+            throw new FilterError.Multiple(filterErrors);
         }
 
         log.info("Filter refinement completed: applied={}, skipped={}, total={}, entityType={}",

@@ -12,6 +12,7 @@ import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.crm.dto.ticket.*;
+import org.zerp.crm.repository.TeamMemberRepository;
 import org.zerp.crm.repository.TicketRepository;
 import org.zerp.crm.service.ticket.TicketResponseMapper;
 import org.zerp.crm.service.ticket.TicketValueParser;
@@ -38,18 +39,20 @@ public class TicketServiceTest {
         EntityManager entityManager = mock(EntityManager.class);
         CurrentTenantIdResolver currentTenantIdResolver = mock(CurrentTenantIdResolver.class);
         CurrentUserIdResolver currentUserIdResolver = mock(CurrentUserIdResolver.class);
+        TeamMemberRepository teamMemberRepository = mock(TeamMemberRepository.class);
         FilterRefiner filterRefiner = mock(FilterRefiner.class);
         TicketResponseMapper ticketResponseMapper = new TicketResponseMapper();
         TicketValueParser ticketValueParser = new TicketValueParser();
 
         //noinspection unchecked
-        when(filterRefiner.refined(any(Map.class), eq(TicketEntity.class)))
+        when(filterRefiner.refinedOrBadRequest(any(Map.class), eq(TicketEntity.class)))
                 .thenReturn(Specification.unrestricted());
         when(currentTenantIdResolver.resolve()).thenReturn(UUID.randomUUID());
         when(currentUserIdResolver.resolve()).thenReturn(UUID.randomUUID());
 
         ticketService = new TicketService(
                 ticketRepository,
+                teamMemberRepository,
                 ticketResponseMapper,
                 ticketValueParser,
                 entityManager,

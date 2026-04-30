@@ -3,6 +3,7 @@ package org.zerp.employee.service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -10,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.error.filter.FilterError;
+import org.zerp.common.error.filter.FilterErrorUtils;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
@@ -56,7 +59,19 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
         UUID userId = resolveCurrentUserId();
         Specification<Employee> spec = buildSpecificationFromFilters(filters);
         spec = permissionEvaluator.filterRead(userId).and(spec);
-        return employeeRepository.findAll(spec, pageable).map(employeeMapper::toListResponseDto);
+        try {
+            return employeeRepository.findAll(spec, pageable).map(employeeMapper::toListResponseDto);
+        } catch (DataAccessException e) {
+            if (e.getCause() instanceof FilterError.Runtime fe) {
+                log.warn("Filter error while processing filters {}: {}", filters, fe.getMessage(), e);
+                throw FilterErrorUtils.toResponseStatusException(fe.getError());
+            }
+            log.error("Unexpected error while processing filters {}: {}", filters, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            log.error("Unexpected error while processing filters {}: {}", filters, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filter parameters: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -66,10 +81,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
         List<EmployeeResponseDto> result = new ArrayList<>();
         for (UUID id : ids) {
             employeeRepository.findByIdWithContactsAndNotDeleted(id)
-                    .filter(employee -> permissionEvaluator.canRead(
-                            userId,
-                            new EmployeePermissionEvaluator.EmployeeTarget(employee.getId(), employee.getTenant().getId())
-                    ))
+                    .filter(employee -> permissionEvaluator.canRead(userId, employee))
                     .map(employeeMapper::toResponseDto)
                     .ifPresent(result::add);
         }
@@ -83,8 +95,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
         Employee employee = employeeRepository.findByIdWithContactsAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
 
-        if (!permissionEvaluator.canRead(userId,
-                new EmployeePermissionEvaluator.EmployeeTarget(employee.getId(), employee.getTenant().getId()))) {
+        if (!permissionEvaluator.canRead(userId, employee)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Employee");
         }
 
@@ -326,7 +337,8 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
     }
 
     private Specification<Employee> buildSpecificationFromFilters(Map<String, String> filters) {
-        Specification<Employee> spec = filterRefiner.refined(filters, Employee.class);
+        log.debug("Building specification from filters: filters={}", filters);
+        Specification<Employee> spec = filterRefiner.refinedOrBadRequest(filters, Employee.class);
         log.debug("Built specification from filters: filters={}, spec={}", filters, spec);
         return spec;
     }

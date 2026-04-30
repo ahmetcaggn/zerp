@@ -2,6 +2,7 @@ package org.zerp.resource.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -10,8 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.resource.StockResource;
+import org.zerp.common.error.filter.FilterError;
+import org.zerp.common.error.filter.FilterErrorUtils;
 import org.zerp.common.resource.service.IResourceService;
-import org.zerp.common.resource.util.FilterType;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.resource.dto.resource.StockResourceCreateDTO;
@@ -45,11 +47,21 @@ public class StockResourceService implements
 
         Specification<StockResource> spec = buildSpecificationFromFilters(filters);
         spec = permissionEvaluator.filterRead(userId).and(spec);
-        Page<StockResourceDTO> results = repository.findAll(spec, pageable)
-                .map(mapper::toDTO);
-
-        log.debug("Found {} StockResources with filters", results.getTotalElements());
-        return results;
+        try {
+            Page<StockResourceDTO> results = repository.findAll(spec, pageable).map(mapper::toDTO);
+            log.debug("Found {} StockResources with filters", results.getTotalElements());
+            return results;
+        } catch (DataAccessException e) {
+            if (e.getCause() instanceof FilterError.Runtime fe) {
+                log.warn("Filter error while processing filters {}: {}", filters, fe.getMessage(), e);
+                throw FilterErrorUtils.toResponseStatusException(fe.getError());
+            }
+            log.error("Unexpected error while processing filters {}: {}", filters, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            log.error("Unexpected error while processing filters {}: {}", filters, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filter parameters: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -249,10 +261,8 @@ public class StockResourceService implements
      * Filters are expected in the format: "fieldName.filterType"
      */
     private Specification<StockResource> buildSpecificationFromFilters(Map<String, String> filters) {
-        log.trace("Building specification from {} filters", filters.size());
-
-        Specification<StockResource> spec = filterRefiner.refined(filters, StockResource.class);
-
+        log.debug("Building specification from {} filters", filters.size());
+        Specification<StockResource> spec = filterRefiner.refinedOrBadRequest(filters, StockResource.class);
         log.debug("Specification built with {} filter conditions", filters.size());
         return spec;
     }

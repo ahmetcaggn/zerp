@@ -2,6 +2,7 @@ package org.zerp.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -9,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.error.filter.FilterError;
+import org.zerp.common.error.filter.FilterErrorUtils;
 import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
@@ -43,7 +46,19 @@ public class PermissionService implements IResourceService<Permission, Permissio
         Specification<Permission> spec = buildSpecificationFromFilters(filters);
         spec = permissionEvaluator.filterRead(userId).and(spec);
 
-        return repository.findAll(spec, pageable);
+        try {
+            return repository.findAll(spec, pageable);
+        } catch (DataAccessException e) {
+            if (e.getCause() instanceof FilterError.Runtime fe) {
+                log.warn("Filter error while processing filters {}: {}", filters, fe.getMessage(), e);
+                throw FilterErrorUtils.toResponseStatusException(fe.getError());
+            }
+            log.error("Unexpected error while processing filters {}: {}", filters, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            log.error("Unexpected error while processing filters {}: {}", filters, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filter parameters: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -266,7 +281,8 @@ public class PermissionService implements IResourceService<Permission, Permissio
     }
 
     private Specification<Permission> buildSpecificationFromFilters(Map<String, String> filters) {
-        Specification<Permission> spec = filterRefiner.refined(filters, Permission.class);
+        log.debug("Building specification from filters: {}", filters);
+        Specification<Permission> spec = filterRefiner.refinedOrBadRequest(filters, Permission.class);
         log.debug("Built specification from filters: {}, spec: {}", filters, spec);
         return spec;
     }

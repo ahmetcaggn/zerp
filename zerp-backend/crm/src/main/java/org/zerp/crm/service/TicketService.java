@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,8 @@ import org.zerp.common.entity.crm.TicketEntity.TicketPriority;
 import org.zerp.common.entity.crm.TicketEntity.TicketStatus;
 import org.zerp.common.entity.crm.TicketEntity.TicketType;
 import org.zerp.common.entity.user.AppUser;
+import org.zerp.common.error.filter.FilterError;
+import org.zerp.common.error.filter.FilterErrorUtils;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
@@ -79,7 +82,19 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     @Transactional(readOnly = true)
     public Page<TicketResponse> findWithFilters(Map<String, String> filters, Pageable pageable) {
         Specification<TicketEntity> specification = buildSpecificationFromFilters(filters);
-        return ticketRepository.findAll(specification, pageable).map(ticketResponseMapper::toResponse);
+        try {
+            return ticketRepository.findAll(specification, pageable).map(ticketResponseMapper::toResponse);
+        } catch (DataAccessException e) {
+            if (e.getCause() instanceof FilterError.Runtime fe) {
+                log.warn("Filter error while processing filters {}: {}", filters, fe.getMessage(), e);
+                throw FilterErrorUtils.toResponseStatusException(fe.getError());
+            }
+            log.error("Unexpected error while processing filters {}: {}", filters, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            log.error("Unexpected error while processing filters {}: {}", filters, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filter parameters: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -221,11 +236,11 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         TicketPriority priority = request.priority() != null ? request.priority() : TicketPriority.MEDIUM;
         TicketType type = request.type() != null ? request.type() : TicketType.QUESTION;
         UUID tenantId = resolveCurrentTenantId();
-        if(tenantId == null) {
+        if (tenantId == null) {
             throw new IllegalStateException("Tenant not found");
         }
         UUID userId = resolveCurrentUserId();
-        if(userId == null) {
+        if (userId == null) {
             throw new IllegalStateException("User not found");
         }
 
@@ -384,11 +399,11 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
 
     public TicketResponse addComment(UUID ticketId, AddCommentRequest request) {
         UUID tenantId = resolveCurrentTenantId();
-        if(tenantId == null) {
+        if (tenantId == null) {
             throw new IllegalStateException("Tenant not found");
         }
         UUID userId = resolveCurrentUserId();
-        if(userId == null) {
+        if (userId == null) {
             throw new IllegalStateException("User not found");
         }
         TicketEntity entity = findOrThrow(ticketId);
@@ -544,7 +559,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
 
     private void initializeSla(TicketEntity entity, TicketPriority priority) {
         UUID tenantId = resolveCurrentTenantId();
-        if(tenantId == null) {
+        if (tenantId == null) {
             throw new IllegalStateException("Tenant not found");
         }
         TicketSlaTrackingEntity sla = new TicketSlaTrackingEntity();
@@ -580,10 +595,10 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
             UUID referenceId) {
         UUID userId = resolveCurrentUserId();
         UUID tenantId = resolveCurrentTenantId();
-        if(tenantId == null) {
+        if (tenantId == null) {
             throw new IllegalStateException("Tenant not found");
         }
-        if(userId == null) {
+        if (userId == null) {
             throw new IllegalStateException("User not found");
         }
         TicketHistoryEntity history = new TicketHistoryEntity();
@@ -617,7 +632,8 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     private Specification<TicketEntity> buildSpecificationFromFilters(Map<String, String> filters) {
-        Specification<TicketEntity> spec = filterRefiner.refined(filters, TicketEntity.class);
+        log.debug("Building specification from filters: {}", filters);
+        Specification<TicketEntity> spec = filterRefiner.refinedOrBadRequest(filters, TicketEntity.class);
         log.debug("Built specification from filters: {}", spec);
         return spec;
     }

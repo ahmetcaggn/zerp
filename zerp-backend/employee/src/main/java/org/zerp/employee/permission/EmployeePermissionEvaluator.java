@@ -28,15 +28,15 @@ public class EmployeePermissionEvaluator {
 	private final PermissionRepository permissionRepository;
 	private final PermittableService permittableService;
 
-	public boolean canRead(UUID userId, EmployeeTarget target) {
-		List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(
-				userId,
-				PermissionAction.READ_EMPLOYEE,
-				target.employeeId(),
-				target.tenantId()
-		);
-		return !result.isEmpty();
-	}
+    public boolean canRead(UUID userId, Employee employee) {
+        List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(
+                userId,
+                PermissionAction.READ_EMPLOYEE,
+                employee.getId(),
+                employee.getParent().getId()
+        );
+        return !result.isEmpty();
+    }
 
 	public boolean canCreate(UUID userId, TenantParent parent) {
 		List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(

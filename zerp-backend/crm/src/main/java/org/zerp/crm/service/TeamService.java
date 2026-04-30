@@ -3,6 +3,7 @@ package org.zerp.crm.service;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -13,6 +14,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.crm.TeamEntity;
 import org.zerp.common.entity.crm.TeamMemberEntity;
 import org.zerp.common.entity.user.AppUser;
+import org.zerp.common.error.filter.FilterError;
+import org.zerp.common.error.filter.FilterErrorUtils;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
@@ -43,7 +46,19 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     @Transactional(readOnly = true)
     public Page<TeamResponse> findWithFilters(Map<String, String> filters, Pageable pageable) {
         Specification<TeamEntity> specification = buildSpecificationFromFilters(filters);
-        return teamRepository.findAll(specification, pageable).map(this::toResponse);
+        try {
+            return teamRepository.findAll(specification, pageable).map(this::toResponse);
+        } catch (DataAccessException e) {
+            if (e.getCause() instanceof FilterError.Runtime fe) {
+                log.warn("Filter error while processing filters {}: {}", filters, fe.getMessage(), e);
+                throw FilterErrorUtils.toResponseStatusException(fe.getError());
+            }
+            log.error("Unexpected error while processing filters {}: {}", filters, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            log.error("Unexpected error while processing filters {}: {}", filters, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filter parameters: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -64,7 +79,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     @Override
     public TeamResponse create(CreateTeamRequest data) {
         UUID tenantId = resolveCurrentTenantId();
-        if(tenantId == null){
+        if (tenantId == null) {
             throw new IllegalStateException("Tenant not found");
         }
 
@@ -282,8 +297,9 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     }
 
     private Specification<TeamEntity> buildSpecificationFromFilters(Map<String, String> filters) {
-        Specification<TeamEntity> spec = filterRefiner.refined(filters, TeamEntity.class);
-        log.debug("Built specification from filters: {}", spec);
+        log.debug("Building specification for Team with filters: {}", filters);
+        Specification<TeamEntity> spec = filterRefiner.refinedOrBadRequest(filters, TeamEntity.class);
+        log.debug("Generated specification for Team with filters {}: {}", filters, spec);
         return spec;
     }
 
@@ -301,9 +317,11 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
         throw new IllegalArgumentException("Invalid boolean value for " + fieldName + ": " + rawValue);
     }
+
     private UUID resolveCurrentUserId() {
         return currentUserIdResolver.resolve();
     }
+
     private UUID resolveCurrentTenantId() {
         return currentTenantIdResolver.resolve();
     }
