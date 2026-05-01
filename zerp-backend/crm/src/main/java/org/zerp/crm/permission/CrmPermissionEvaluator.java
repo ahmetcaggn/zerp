@@ -63,12 +63,11 @@ public class CrmPermissionEvaluator {
                 userId, PermissionAction.READ_TEAM, target.teamId());
     }
 
-    public boolean canCreateTeam(UUID userId, TenantRootParent parent) {
+    public boolean canCreateTeam(UUID userId) {
         log.trace("Checking create team permission - userId: {}", userId);
 
         List<Permission> result = permissionRepository.findAllByUserAndTenantRootPermission(
-                userId, PermissionAction.CREATE_TEAM, TenantRoot.INSTANCE.getId()
-        );
+                userId, PermissionAction.CREATE_TEAM);
 
         boolean permitted = !result.isEmpty();
         log.debug("Create team permission result - userId: {}, permitted: {}",
@@ -382,13 +381,11 @@ public class CrmPermissionEvaluator {
             PermissionAction action,
             UUID teamId
     ) {
-        UUID tenantRootId = TenantRoot.INSTANCE.getId();
-        log.trace("Checking team hierarchy permission - userId: {}, action: {}, teamId: {}, tenantRootId: {}",
-                userId, action, teamId, tenantRootId);
+        log.trace("Checking team hierarchy permission - userId: {}, action: {}, teamId: {}",
+                userId, action, teamId);
 
         List<Permission> result = permissionRepository.findAllByUserAndTeamHierarchy(
-                userId, action, teamId, tenantRootId
-        );
+                userId, action, teamId);
 
         boolean permitted = !result.isEmpty();
         log.debug("Team hierarchy permission result - userId: {}, action: {}, permitted: {}",
@@ -402,13 +399,11 @@ public class CrmPermissionEvaluator {
             UUID teamMemberId,
             UUID teamId
     ) {
-        UUID tenantRootId = TenantRoot.INSTANCE.getId();
-        log.trace("Checking team member hierarchy permission - userId: {}, action: {}, teamMemberId: {}, teamId: {}, tenantRootId: {}",
-                userId, action, teamMemberId, teamId, tenantRootId);
+        log.trace("Checking team member hierarchy permission - userId: {}, action: {}, teamMemberId: {}, teamId: {}",
+                userId, action, teamMemberId, teamId);
 
         List<Permission> result = permissionRepository.findAllByUserAndTeamMemberHierarchy(
-                userId, action, teamMemberId, teamId, tenantRootId
-        );
+                userId, action, teamMemberId, teamId);
 
         boolean permitted = !result.isEmpty();
         log.debug("Team member hierarchy permission result - userId: {}, action: {}, permitted: {}",

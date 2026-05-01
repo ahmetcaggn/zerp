@@ -21,6 +21,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND (
                      (:targetUserId IS NOT NULL AND p.targetType = 'USER' AND p.targetId = :targetUserId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
                 )
             """)
     List<Permission> findAllByUserAndUserHierarchy(
@@ -37,6 +38,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND (
                      (:stockResourceId IS NOT NULL AND p.targetType = 'STOCK_RESOURCE' AND p.targetId = :stockResourceId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
                 )
             """)
     List<Permission> findAllByUserAndStockResourceHierarchy(
@@ -53,6 +55,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND (
                      (:employeeId IS NOT NULL AND p.targetType = 'EMPLOYEE' AND p.targetId = :employeeId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
                 )
             """)
     List<Permission> findAllByUserAndEmployeeHierarchy(
@@ -67,12 +70,11 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
               WHERE p.userId = :userId
                 AND p.action = :action
                 AND p.targetType = 'TENANT_ROOT'
-                AND p.targetId = :tenantRootId
+                AND p.targetId = '00000000-0000-0000-0000-000000000000'
             """)
     List<Permission> findAllByUserAndTenantRootPermission(
             @Param("userId") UUID userId,
-            @Param("action") PermissionAction action,
-            @Param("tenantRootId") UUID tenantRootId
+            @Param("action") PermissionAction action
     );
 
     @Query("""
@@ -82,6 +84,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND (
                      (:ticketId IS NOT NULL AND p.targetType = 'TICKET' AND p.targetId = :ticketId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
                 )
             """)
     List<Permission> findAllByUserAndTicketHierarchy(
@@ -97,14 +100,13 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND p.action = :action
                 AND (
                      (:teamId IS NOT NULL AND p.targetType = 'TEAM' AND p.targetId = :teamId)
-                  OR (:tenantRootId IS NOT NULL AND p.targetType = 'TENANT_ROOT' AND p.targetId = :tenantRootId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
                 )
             """)
     List<Permission> findAllByUserAndTeamHierarchy(
             @Param("userId") UUID userId,
             @Param("action") PermissionAction action,
-            @Param("teamId") UUID teamId,
-            @Param("tenantRootId") UUID tenantRootId
+            @Param("teamId") UUID teamId
     );
 
     @Query("""
@@ -114,15 +116,14 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND (
                      (:teamMemberId IS NOT NULL AND p.targetType = 'TEAM_MEMBER' AND p.targetId = :teamMemberId)
                   OR (:teamId IS NOT NULL AND p.targetType = 'TEAM' AND p.targetId = :teamId)
-                  OR (:tenantRootId IS NOT NULL AND p.targetType = 'TENANT_ROOT' AND p.targetId = :tenantRootId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
                 )
             """)
     List<Permission> findAllByUserAndTeamMemberHierarchy(
             @Param("userId") UUID userId,
             @Param("action") PermissionAction action,
             @Param("teamMemberId") UUID teamMemberId,
-            @Param("teamId") UUID teamId,
-            @Param("tenantRootId") UUID tenantRootId
+            @Param("teamId") UUID teamId
     );
 
     @Query("""
@@ -133,6 +134,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                      (:childId IS NOT NULL AND p.targetType = :childType AND p.targetId = :childId)
                   OR (:ticketId IS NOT NULL AND p.targetType = 'TICKET' AND p.targetId = :ticketId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
                 )
             """)
     List<Permission> findAllByUserAndTicketChildHierarchy(
@@ -153,6 +155,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                   OR (:commentId IS NOT NULL AND p.targetType = 'TICKET_COMMENT' AND p.targetId = :commentId)
                   OR (:ticketId IS NOT NULL AND p.targetType = 'TICKET' AND p.targetId = :ticketId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
                 )
             """)
     List<Permission> findAllByUserAndTicketAttachmentHierarchy(
