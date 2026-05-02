@@ -41,7 +41,7 @@ public class CurrentTenantIdResolver {
         try {
             return UUID.fromString(tenantHeader.trim());
         } catch (IllegalArgumentException ex) {
-            log.warn("invalid tenant header {} value {}", TENANT_ID_HEADER, tenantHeader);
+            log.warn("invalid tenant header {} value {}", TENANT_ID_HEADER, tenantHeader, ex);
             return null;
         }
     }

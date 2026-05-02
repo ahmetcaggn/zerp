@@ -23,7 +23,7 @@ import java.util.UUID;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name= "shops")
+@Table(name = "shops")
 @SQLDelete(sql = "UPDATE shops SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("deleted = false")
 public class Shop extends BaseEntity implements Permittable {
@@ -54,6 +54,7 @@ public class Shop extends BaseEntity implements Permittable {
 
     @OneToMany(mappedBy = "shop")
     private List<ShopTable> tables;
+
     @Override
     public Permittable getParent() {
         return tenant;

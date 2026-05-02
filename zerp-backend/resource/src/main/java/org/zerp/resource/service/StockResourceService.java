@@ -73,8 +73,7 @@ public class StockResourceService implements
         List<StockResourceDTO> results = new ArrayList<>();
         for (UUID id : uuids) {
             repository.findById(id).ifPresent(stockResource -> {
-                if (permissionEvaluator.canRead(userId,
-                        new StockResourcePermissionEvaluator.StockResourceTarget(id, stockResource.getTenant().getId()))) {
+                if (permissionEvaluator.canRead(userId, stockResource)) {
                     log.trace("Fetched StockResource with id: {}", id);
                     results.add(mapper.toDTO(stockResource));
                 }
@@ -96,8 +95,7 @@ public class StockResourceService implements
             return new ResponseStatusException(HttpStatus.NOT_FOUND, "StockResource not found");
         });
 
-        if (!permissionEvaluator.canRead(userId,
-                new StockResourcePermissionEvaluator.StockResourceTarget(uuid, stockResource.getTenant().getId()))) {
+        if (!permissionEvaluator.canRead(userId, stockResource)) {
             log.warn("Permission denied for reading StockResource with id: {}", uuid);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read StockResource");
         }
@@ -112,15 +110,12 @@ public class StockResourceService implements
         log.trace("Creating new StockResource with data: {}", data);
         UUID userId = resolveCurrentUserId();
 
-        StockResource stockResource = mapper.toEntity(data);
-
-        if (!permissionEvaluator.canCreate(userId,
-                new StockResourcePermissionEvaluator.TenantParent(stockResource.getTenant().getId()))) {
-            log.warn("Permission denied for creating StockResource in tenant: {}",
-                    stockResource.getTenant().getId());
+        if (!permissionEvaluator.canCreate(userId, data)) {
+            log.warn("Permission denied for creating StockResource. data: {}", data);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create StockResource");
         }
 
+        StockResource stockResource = mapper.toEntity(data);
         StockResource saved = repository.save(stockResource);
         log.info("Successfully created StockResource with id: {}", saved.getId());
 
@@ -138,8 +133,7 @@ public class StockResourceService implements
             return new ResponseStatusException(HttpStatus.NOT_FOUND, "StockResource not found");
         });
 
-        if (!permissionEvaluator.canPatch(userId,
-                new StockResourcePermissionEvaluator.StockResourceTarget(uuid, stockResource.getTenant().getId()))) {
+        if (!permissionEvaluator.canPatch(userId, stockResource)) {
             log.warn("Permission denied for patching StockResource with id: {}", uuid);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to patch StockResource");
         }
@@ -158,19 +152,22 @@ public class StockResourceService implements
         log.trace("Updating StockResource with id: {} and data: {}", uuid, data);
         UUID userId = resolveCurrentUserId();
 
+        // find existing
         StockResource stockResource = repository.findById(uuid).orElseThrow(() -> {
             log.warn("StockResource not found with id: {} for updating", uuid);
             return new ResponseStatusException(HttpStatus.NOT_FOUND, "StockResource not found");
         });
 
-        if (!permissionEvaluator.canUpdate(userId,
-                new StockResourcePermissionEvaluator.StockResourceTarget(uuid, stockResource.getTenant().getId()))) {
+        // check permission
+        if (!permissionEvaluator.canUpdate(userId, stockResource)) {
             log.warn("Permission denied for updating StockResource with id: {}", uuid);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update StockResource");
         }
 
+        // update fields
         mapper.updateEntityFromDTO(data, stockResource);
 
+        // save
         StockResource updated = repository.save(stockResource);
         log.info("Successfully updated StockResource with id: {}", uuid);
 
@@ -207,8 +204,7 @@ public class StockResourceService implements
             return new ResponseStatusException(HttpStatus.NOT_FOUND, "StockResource not found");
         });
 
-        if (!permissionEvaluator.canDelete(userId,
-                new StockResourcePermissionEvaluator.StockResourceTarget(uuid, stockResource.getTenant().getId()))) {
+        if (!permissionEvaluator.canDelete(userId, stockResource)) {
             log.warn("Permission denied for deleting StockResource with id: {}", uuid);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete StockResource");
         }

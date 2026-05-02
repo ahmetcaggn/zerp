@@ -8,20 +8,14 @@ import org.zerp.resource.dto.resource.StockResourceCreateDTO;
 import org.zerp.resource.dto.resource.StockResourceDTO;
 import org.zerp.resource.dto.resource.StockResourceUpdateDTO;
 
-import java.util.List;
-
 @Mapper(componentModel = "spring")
 public interface StockResourceMapper {
-
-    @Mapping(source = "tenantId", target = "tenant.id")
+    @Mapping(source = "shopId", target = "shop.id")
     StockResource toEntity(StockResourceCreateDTO dto);
 
-    @Mapping(source = "tenant.id", target = "tenantId")
+    @Mapping(source = "shop.id", target = "shopId")
     StockResourceDTO toDTO(StockResource entity);
 
     void updateEntityFromDTO(StockResourceUpdateDTO dto, @MappingTarget StockResource entity);
-
-    @Mapping(source = "tenant.id", target = "tenantId")
-    List<StockResourceDTO> toDTOList(List<StockResource> entities);
 }
 

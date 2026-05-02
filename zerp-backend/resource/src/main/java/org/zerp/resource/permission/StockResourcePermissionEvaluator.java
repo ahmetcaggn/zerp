@@ -3,13 +3,16 @@ package org.zerp.resource.permission;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.resource.StockResource;
 import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
 import org.zerp.common.permission.service.PermittableService;
+import org.zerp.resource.dto.resource.StockResourceCreateDTO;
 
 import java.util.List;
 import java.util.Set;
@@ -19,18 +22,21 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class StockResourcePermissionEvaluator {
-    public record StockResourceTarget(UUID stockResourceId, UUID tenantId) {
-    }
-
-    public record TenantParent(UUID tenantId) {
-    }
-
     private final PermissionRepository permissionRepository;
     private final PermittableService permittableService;
 
-    public boolean canRead(UUID userId, StockResourceTarget target) {
-        final UUID stockResourceId = target.stockResourceId();
-        final UUID tenantId = target.tenantId();
+    public boolean canRead(UUID userId, StockResource target) {
+        UUID stockResourceId;
+        UUID shopId;
+        UUID tenantId;
+        try {
+            stockResourceId = target.getId();
+            shopId = target.getParent().getId();
+            tenantId = target.getParent().getParent().getId();
+        } catch (NullPointerException e) {
+            log.error("Null pointer exception while evaluating canRead permission for user {}.", userId, e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid stock resource structure");
+        }
 
         log.trace("Checking canRead permission - userId: {}, stockResourceId: {}, tenantId: {}",
                 userId, stockResourceId, tenantId);
@@ -39,6 +45,7 @@ public class StockResourcePermissionEvaluator {
                 userId,
                 PermissionAction.READ_STOCK_RESOURCE,
                 stockResourceId,
+                shopId,
                 tenantId
         );
 
@@ -48,35 +55,44 @@ public class StockResourcePermissionEvaluator {
         return canRead;
     }
 
-    public boolean canCreate(UUID userId, TenantParent parent) {
-        final UUID tenantId = parent.tenantId();
-
-        log.trace("Checking canCreate permission - userId: {}, tenantId: {}", userId, tenantId);
+    public boolean canCreate(UUID userId, StockResourceCreateDTO data) {
+        log.trace("Checking canCreate permission - userId: {}, data: {}", userId, data);
 
         List<Permission> result = permissionRepository.findAllByUserAndStockResourceHierarchy(
                 userId,
                 PermissionAction.CREATE_STOCK_RESOURCE,
                 null,
-                tenantId
+                data.getShopId(),
+                data.getTenantId()
         );
 
         boolean canCreate = !result.isEmpty();
         log.debug("canCreate result for user {} in tenant {} - permitted: {}",
-                userId, tenantId, canCreate);
+                userId, data.getTenantId(), canCreate);
         return canCreate;
     }
 
-    public boolean canUpdate(UUID userId, StockResourceTarget target) {
-        final UUID stockResourceId = target.stockResourceId();
-        final UUID tenantId = target.tenantId();
+    public boolean canUpdate(UUID userId, StockResource target) {
+        UUID stockResourceId;
+        UUID shopId;
+        UUID tenantId;
+        try {
+            stockResourceId = target.getId();
+            shopId = target.getParent().getId();
+            tenantId = target.getParent().getParent().getId();
+        } catch (NullPointerException e) {
+            log.error("Null pointer exception while evaluating canRead permission for user {}.", userId, e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid stock resource structure");
+        }
 
-        log.trace("Checking canUpdate permission - userId: {}, stockResourceId: {}, tenantId: {}",
-                userId, stockResourceId, tenantId);
+        log.trace("Checking canUpdate permission - userId: {}, stockResourceId: {}, shopId: {}, tenantId: {}",
+                userId, stockResourceId, shopId, tenantId);
 
         List<Permission> result = permissionRepository.findAllByUserAndStockResourceHierarchy(
                 userId,
                 PermissionAction.UPDATE_STOCK_RESOURCE,
                 stockResourceId,
+                shopId,
                 tenantId
         );
 
@@ -86,17 +102,27 @@ public class StockResourcePermissionEvaluator {
         return canUpdate;
     }
 
-    public boolean canPatch(UUID userId, StockResourceTarget target) {
-        final UUID stockResourceId = target.stockResourceId();
-        final UUID tenantId = target.tenantId();
+    public boolean canPatch(UUID userId, StockResource target) {
+        UUID stockResourceId;
+        UUID shopId;
+        UUID tenantId;
+        try {
+            stockResourceId = target.getId();
+            shopId = target.getParent().getId();
+            tenantId = target.getParent().getParent().getId();
+        } catch (NullPointerException e) {
+            log.error("Null pointer exception while evaluating canRead permission for user {}.", userId, e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid stock resource structure");
+        }
 
-        log.trace("Checking canPatch permission - userId: {}, stockResourceId: {}, tenantId: {}",
-                userId, stockResourceId, tenantId);
+        log.trace("Checking canPatch permission - userId: {}, stockResourceId: {}, shopId: {}, tenantId: {}",
+                userId, stockResourceId, shopId, tenantId);
 
         List<Permission> result = permissionRepository.findAllByUserAndStockResourceHierarchy(
                 userId,
                 PermissionAction.UPDATE_STOCK_RESOURCE,
                 stockResourceId,
+                shopId,
                 tenantId
         );
 
@@ -106,17 +132,27 @@ public class StockResourcePermissionEvaluator {
         return canPatch;
     }
 
-    public boolean canDelete(UUID userId, StockResourceTarget target) {
-        final UUID stockResourceId = target.stockResourceId();
-        final UUID tenantId = target.tenantId();
+    public boolean canDelete(UUID userId, StockResource target) {
+        UUID stockResourceId;
+        UUID shopId;
+        UUID tenantId;
+        try {
+            stockResourceId = target.getId();
+            shopId = target.getParent().getId();
+            tenantId = target.getParent().getParent().getId();
+        } catch (NullPointerException e) {
+            log.error("Null pointer exception while evaluating canRead permission for user {}.", userId, e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid stock resource structure");
+        }
 
-        log.trace("Checking canDelete permission - userId: {}, stockResourceId: {}, tenantId: {}",
-                userId, stockResourceId, tenantId);
+        log.trace("Checking canDelete permission - userId: {}, stockResourceId: {}, shopId: {}, tenantId: {}",
+                userId, stockResourceId, shopId, tenantId);
 
         List<Permission> result = permissionRepository.findAllByUserAndStockResourceHierarchy(
                 userId,
                 PermissionAction.DELETE_STOCK_RESOURCE,
                 stockResourceId,
+                shopId,
                 tenantId
         );
 
@@ -129,8 +165,16 @@ public class StockResourcePermissionEvaluator {
     public Specification<StockResource> filterRead(UUID userId) {
         log.trace("Creating filterRead specification for userId: {}", userId);
 
+        boolean hasRootPermission = permittableService.hasRootPermission(userId, PermissionAction.READ_STOCK_RESOURCE);
+        if (hasRootPermission) {
+            log.debug("User {} has root permission for READ_STOCK_RESOURCE, returning unrestricted specification", userId);
+            return Specification.unrestricted();
+        }
+
         Set<UUID> permittedStockResourceIds = permittableService.getAllPermitted(
                 userId, PermissionTargetType.STOCK_RESOURCE, PermissionAction.READ_STOCK_RESOURCE);
+        Set<UUID> permittedShopIds = permittableService.getAllPermitted(
+                userId, PermissionTargetType.SHOP, PermissionAction.READ_STOCK_RESOURCE);
         Set<UUID> permittedTenantIds = permittableService.getAllPermitted(
                 userId, PermissionTargetType.TENANT, PermissionAction.READ_STOCK_RESOURCE);
 
@@ -141,7 +185,9 @@ public class StockResourcePermissionEvaluator {
                 (root, _, _) ->
                         root.get("id").in(permittedStockResourceIds),
                 (root, _, _) ->
-                        root.get("tenant").get("id").in(permittedTenantIds)
+                        root.get("shop").get("id").in(permittedShopIds),
+                (root, _, _) ->
+                        root.get("shop").get("tenant").get("id").in(permittedTenantIds)
         );
     }
 }

@@ -20,7 +20,6 @@ import java.util.List;
 @Setter
 @PermissionTargetTypeAnnotation(type = PermissionTargetType.EMPLOYEE)
 public class Employee extends AppUser implements Permittable {
-
     @Column(nullable = false)
     private String firstName;
 
@@ -67,7 +66,7 @@ public class Employee extends AppUser implements Permittable {
         return tenant;
     }
 
-    public void deleteEmployee(){
+    public void deleteEmployee() {
         LocalDateTime now = LocalDateTime.now();
         this.status = EmploymentStatus.DELETED;
         this.terminationDate = now.toLocalDate();
