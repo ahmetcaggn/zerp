@@ -21,7 +21,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND (
                      (:targetUserId IS NOT NULL AND p.targetType = 'USER' AND p.targetId = :targetUserId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
-                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
                 )
             """)
     List<Permission> findAllByUserAndUserHierarchy(
@@ -37,14 +37,16 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND p.action = :action
                 AND (
                      (:stockResourceId IS NOT NULL AND p.targetType = 'STOCK_RESOURCE' AND p.targetId = :stockResourceId)
+                  OR (:shopId IS NOT NULL AND p.targetType = 'SHOP' AND p.targetId = :shopId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
-                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
                 )
             """)
     List<Permission> findAllByUserAndStockResourceHierarchy(
             @Param("userId") UUID userId,
             @Param("action") PermissionAction action,
             @Param("stockResourceId") UUID stockResourceId,
+            @Param("shopId") UUID shopId,
             @Param("tenantId") UUID tenantId
     );
 
@@ -55,7 +57,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND (
                      (:employeeId IS NOT NULL AND p.targetType = 'EMPLOYEE' AND p.targetId = :employeeId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
-                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
                 )
             """)
     List<Permission> findAllByUserAndEmployeeHierarchy(
@@ -70,7 +72,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
               WHERE p.userId = :userId
                 AND p.action = :action
                 AND p.targetType = 'TENANT_ROOT'
-                AND p.targetId = '00000000-0000-0000-0000-000000000000'
+                AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID}
             """)
     List<Permission> findAllByUserAndTenantRootPermission(
             @Param("userId") UUID userId,
@@ -84,7 +86,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND (
                      (:ticketId IS NOT NULL AND p.targetType = 'TICKET' AND p.targetId = :ticketId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
-                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
                 )
             """)
     List<Permission> findAllByUserAndTicketHierarchy(
@@ -100,7 +102,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND p.action = :action
                 AND (
                      (:teamId IS NOT NULL AND p.targetType = 'TEAM' AND p.targetId = :teamId)
-                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
                 )
             """)
     List<Permission> findAllByUserAndTeamHierarchy(
@@ -116,7 +118,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND (
                      (:teamMemberId IS NOT NULL AND p.targetType = 'TEAM_MEMBER' AND p.targetId = :teamMemberId)
                   OR (:teamId IS NOT NULL AND p.targetType = 'TEAM' AND p.targetId = :teamId)
-                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
                 )
             """)
     List<Permission> findAllByUserAndTeamMemberHierarchy(
@@ -134,7 +136,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                      (:childId IS NOT NULL AND p.targetType = :childType AND p.targetId = :childId)
                   OR (:ticketId IS NOT NULL AND p.targetType = 'TICKET' AND p.targetId = :ticketId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
-                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
                 )
             """)
     List<Permission> findAllByUserAndTicketChildHierarchy(
@@ -155,7 +157,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                   OR (:commentId IS NOT NULL AND p.targetType = 'TICKET_COMMENT' AND p.targetId = :commentId)
                   OR (:ticketId IS NOT NULL AND p.targetType = 'TICKET' AND p.targetId = :ticketId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
-                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = '00000000-0000-0000-0000-000000000000')
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
                 )
             """)
     List<Permission> findAllByUserAndTicketAttachmentHierarchy(

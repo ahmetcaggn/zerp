@@ -17,6 +17,15 @@ import java.util.UUID;
 public class PermittableService {
     private final PermissionRepository permissionRepository;
 
+    public boolean hasRootPermission(UUID userId, PermissionAction action) {
+        log.trace("Checking root permission for userId: {}, action: {}", userId, action);
+        boolean hasRootPermission = !permissionRepository.findAllByUserAndTenantRootPermission(
+                userId, action).isEmpty();
+        log.trace("Root permission check result for user {} and action {}: {}",
+                userId, action, hasRootPermission);
+        return hasRootPermission;
+    }
+
     public Set<UUID> getAllPermitted(UUID userId, PermissionTargetType type, PermissionAction action) {
         log.trace("getAllPermitted: user={}, type={}, action={}", userId, type, action);
         Set<UUID> result = new HashSet<>(permissionRepository
