@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients
-@ComponentScan(basePackages = {"org.zerp.crm", "org.zerp.common"})
+@ComponentScan(basePackages = {"org.zerp.common"})
 @EntityScan("org.zerp.common")
 @EnableJpaRepositories(basePackages = {"org.zerp.notification.repository", "org.zerp.common.permission.repository"})
 @EnableJpaAuditing
