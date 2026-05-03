@@ -19,34 +19,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @MappedSuperclass
-@EntityListeners(AuditingEntityListener.class)
-public class BaseEntity implements Serializable {
+public class BaseEntity extends CommonBaseEntity {
     @Column(name = "tenant_id", nullable = false, updatable = false)
     protected UUID tenantId;
-
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    protected LocalDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
-    protected LocalDateTime updatedAt;
-
-    @CreatedBy
-    @Column(name = "created_by", updatable = false)
-    protected Long createdBy;
-
-    @LastModifiedBy
-    @Column(name = "updated_by", updatable = false)
-    protected Long updatedBy;
-
-    @Column(name = "deleted_at")
-    protected LocalDateTime deletedAt;
-
-    @Column(name = "deleted", nullable = false)
-    protected Boolean deleted = false;
-
-    @Version
-    @Column(name = "version", nullable = false)
-    protected Long version;
 }
