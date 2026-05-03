@@ -3,6 +3,7 @@ package org.zerp.crm.service;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.Tenant;
 import org.zerp.common.entity.crm.TeamEntity;
 import org.zerp.common.entity.crm.TeamMemberEntity;
 import org.zerp.common.entity.user.AppUser;
@@ -18,8 +20,8 @@ import org.zerp.common.error.filter.FilterError;
 import org.zerp.common.error.filter.FilterErrorUtils;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
-import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
+import org.zerp.crm.permission.CrmPermissionEvaluator;
 import org.zerp.crm.dto.team.*;
 import org.zerp.crm.repository.TeamRepository;
 
@@ -38,14 +40,21 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         CreateTeamRequest, UpdateTeamRequest, UUID> {
     private final TeamRepository teamRepository;
     private final EntityManager entityManager;
-    private final CurrentTenantIdResolver currentTenantIdResolver;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final FilterRefiner filterRefiner;
+    private final CrmPermissionEvaluator permissionEvaluator;
+
+    @Value("${app.crm.system-tenant-id:00000000-0000-0000-0000-000000000000}")
+    private UUID systemTenantId;
 
     @Override
     @Transactional(readOnly = true)
     public Page<TeamResponse> findWithFilters(Map<String, String> filters, Pageable pageable) {
+        UUID userId = resolveCurrentUserId();
         Specification<TeamEntity> specification = buildSpecificationFromFilters(filters);
+        specification = systemTenantOwnershipSpec()
+                .and(permissionEvaluator.filterReadTeams(userId))
+                .and(specification);
         try {
             return teamRepository.findAll(specification, pageable).map(this::toResponse);
         } catch (DataAccessException e) {
@@ -64,7 +73,10 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     @Override
     @Transactional(readOnly = true)
     public List<TeamResponse> findAllById(List<UUID> ids) {
+        UUID userId = resolveCurrentUserId();
         return teamRepository.findAllById(ids).stream()
+                .filter(this::isOwnedBySystemTenant)
+                .filter(team -> permissionEvaluator.canReadTeam(userId, toTeamTarget(team)))
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -72,22 +84,24 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     @Override
     @Transactional(readOnly = true)
     public TeamResponse findById(UUID id) {
-        TeamEntity entity = findOrThrow(id);
+        UUID userId = resolveCurrentUserId();
+        TeamEntity entity = findSystemOwnedTeamOrThrow(id);
+        ensureCanReadTeam(userId, entity);
         return toResponse(entity);
     }
 
     @Override
     public TeamResponse create(CreateTeamRequest data) {
-        UUID tenantId = resolveCurrentTenantId();
-        if (tenantId == null) {
-            throw new IllegalStateException("Tenant not found");
-        }
+        UUID userId = resolveCurrentUserId();
+        UUID resolvedSystemTenantId = resolveSystemTenantIdOrThrow();
+        ensureCanCreateTeam(userId, resolvedSystemTenantId);
+        ensureSystemTenantExists(resolvedSystemTenantId);
 
         TeamEntity entity = new TeamEntity();
         entity.setName(validateName(data.name()));
         entity.setDescription(data.description());
         entity.setIsActive(true);
-        entity.setTenantId(tenantId);
+        entity.setTenantId(resolvedSystemTenantId);
 
         TeamEntity saved = teamRepository.save(entity);
         return toResponse(saved);
@@ -95,7 +109,9 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
     @Override
     public TeamResponse patch(UUID id, Map<String, Object> data) {
-        TeamEntity entity = findOrThrow(id);
+        UUID userId = resolveCurrentUserId();
+        TeamEntity entity = findSystemOwnedTeamOrThrow(id);
+        ensureCanUpdateTeam(userId, entity);
 
         if (data.containsKey("name")) {
             entity.setName(validateName(String.valueOf(data.get("name"))));
@@ -114,7 +130,9 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
     @Override
     public TeamResponse update(UUID id, UpdateTeamRequest data) {
-        TeamEntity entity = findOrThrow(id);
+        UUID userId = resolveCurrentUserId();
+        TeamEntity entity = findSystemOwnedTeamOrThrow(id);
+        ensureCanUpdateTeam(userId, entity);
         entity.setName(validateName(data.name()));
         entity.setDescription(data.description());
 
@@ -137,7 +155,9 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
     @Override
     public void deleteById(UUID id) {
-        TeamEntity entity = findOrThrow(id);
+        UUID userId = resolveCurrentUserId();
+        TeamEntity entity = findSystemOwnedTeamOrThrow(id);
+        ensureCanDeleteTeam(userId, entity);
         teamRepository.delete(entity);
     }
 
@@ -157,7 +177,9 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     // -- others --
 
     public TeamResponse deactivateTeam(UUID teamId) {
-        TeamEntity entity = findOrThrow(teamId);
+        UUID userId = resolveCurrentUserId();
+        TeamEntity entity = findSystemOwnedTeamOrThrow(teamId);
+        ensureCanUpdateTeam(userId, entity);
         if (!Boolean.TRUE.equals(entity.getIsActive())) {
             throw new IllegalStateException("Team is already inactive");
         }
@@ -168,7 +190,9 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     }
 
     public TeamResponse activateTeam(UUID teamId) {
-        TeamEntity entity = findOrThrow(teamId);
+        UUID userId = resolveCurrentUserId();
+        TeamEntity entity = findSystemOwnedTeamOrThrow(teamId);
+        ensureCanUpdateTeam(userId, entity);
         if (Boolean.TRUE.equals(entity.getIsActive())) {
             throw new IllegalStateException("Team is already active");
         }
@@ -179,7 +203,9 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     }
 
     public TeamResponse addMember(UUID teamId, AddMemberRequest request) {
-        TeamEntity entity = findOrThrow(teamId);
+        UUID userId = resolveCurrentUserId();
+        TeamEntity entity = findSystemOwnedTeamOrThrow(teamId);
+        ensureCanCreateTeamMember(userId, entity);
 
         if (!Boolean.TRUE.equals(entity.getIsActive())) {
             throw new IllegalStateException("Cannot add member to an inactive team");
@@ -190,9 +216,8 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         if (request.role() == null) {
             throw new IllegalArgumentException("role cannot be null");
         }
-        if (!appUserExists(request.userId())) {
-            throw new IllegalArgumentException("User not found: " + request.userId());
-        }
+        AppUser appUser = findAppUserOrThrow(request.userId());
+        ensureMemberTenantMatchesTeamTenant(appUser, entity);
 
         boolean alreadyMember = entity.getMembers().stream()
                 .anyMatch(m -> m.getUser() != null && request.userId().equals(m.getUser().getId()));
@@ -203,7 +228,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
         TeamMemberEntity member = new TeamMemberEntity();
         member.setTeam(entity);
-        member.setUser(toUserReference(request.userId()));
+        member.setUser(appUser);
         member.setRole(request.role());
         member.setJoinedAt(LocalDateTime.now());
         entity.getMembers().add(member);
@@ -213,25 +238,23 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     }
 
     public TeamResponse removeMember(UUID teamId, UUID userId) {
-        TeamEntity entity = findOrThrow(teamId);
+        UUID actorUserId = resolveCurrentUserId();
+        TeamEntity entity = findSystemOwnedTeamOrThrow(teamId);
         if (userId == null) {
             throw new IllegalArgumentException("userId cannot be null");
         }
 
-        boolean removed = entity.getMembers().removeIf(
-                m -> m.getUser() != null && userId.equals(m.getUser().getId())
-        );
-        if (!removed) {
-            throw new IllegalArgumentException(
-                    String.format("User %s is not a member of this team", userId));
-        }
+        TeamMemberEntity member = findMemberOrThrow(entity, userId);
+        ensureCanDeleteTeamMember(actorUserId, entity, member);
+        entity.getMembers().remove(member);
 
         TeamEntity saved = teamRepository.save(entity);
         return toResponse(saved);
     }
 
     public TeamResponse changeMemberRole(UUID teamId, UUID userId, ChangeMemberRoleRequest request) {
-        TeamEntity entity = findOrThrow(teamId);
+        UUID actorUserId = resolveCurrentUserId();
+        TeamEntity entity = findSystemOwnedTeamOrThrow(teamId);
         if (userId == null) {
             throw new IllegalArgumentException("userId cannot be null");
         }
@@ -239,11 +262,8 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
             throw new IllegalArgumentException("role cannot be null");
         }
 
-        TeamMemberEntity member = entity.getMembers().stream()
-                .filter(m -> m.getUser() != null && userId.equals(m.getUser().getId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        String.format("User %s is not a member of this team", userId)));
+        TeamMemberEntity member = findMemberOrThrow(entity, userId);
+        ensureCanUpdateTeamMember(actorUserId, entity, member);
 
         member.setRole(request.role());
 
@@ -253,9 +273,21 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
     // ─── Helpers ───
 
-    private TeamEntity findOrThrow(UUID teamId) {
-        return teamRepository.findById(teamId)
+    private TeamEntity findSystemOwnedTeamOrThrow(UUID teamId) {
+        TeamEntity team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found: " + teamId));
+        if (!isOwnedBySystemTenant(team)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found: " + teamId);
+        }
+        return team;
+    }
+
+    private TeamMemberEntity findMemberOrThrow(TeamEntity team, UUID userId) {
+        return team.getMembers().stream()
+                .filter(member -> member.getUser() != null && userId.equals(member.getUser().getId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        String.format("User %s is not a member of this team", userId)));
     }
 
     private String validateName(String name) {
@@ -285,15 +317,21 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
                 memberResponses);
     }
 
-    private boolean appUserExists(UUID userId) {
-        return entityManager.find(AppUser.class, userId) != null;
+    private AppUser findAppUserOrThrow(UUID userId) {
+        AppUser user = entityManager.find(AppUser.class, userId);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found: " + userId);
+        }
+        return user;
     }
 
-    private AppUser toUserReference(UUID userId) {
-        if (userId == null) {
-            return null;
+    private void ensureMemberTenantMatchesTeamTenant(AppUser user, TeamEntity team) {
+        UUID userTenantId = user.getTenantId();
+        UUID teamTenantId = team.getTenantId();
+        if (userTenantId == null || !userTenantId.equals(teamTenantId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "AppUser tenant must match Team tenant");
         }
-        return entityManager.getReference(AppUser.class, userId);
     }
 
     private Specification<TeamEntity> buildSpecificationFromFilters(Map<String, String> filters) {
@@ -301,6 +339,11 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         Specification<TeamEntity> spec = filterRefiner.refinedOrBadRequest(filters, TeamEntity.class);
         log.debug("Generated specification for Team with filters {}: {}", filters, spec);
         return spec;
+    }
+
+    private Specification<TeamEntity> systemTenantOwnershipSpec() {
+        UUID resolvedSystemTenantId = resolveSystemTenantIdOrThrow();
+        return (root, query, cb) -> cb.equal(root.get("tenantId"), resolvedSystemTenantId);
     }
 
     private Boolean parseBoolean(Object rawValue, String fieldName) {
@@ -322,7 +365,75 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         return currentUserIdResolver.resolve();
     }
 
-    private UUID resolveCurrentTenantId() {
-        return currentTenantIdResolver.resolve();
+    private UUID resolveSystemTenantIdOrThrow() {
+        if (systemTenantId == null) {
+            throw new IllegalStateException("System tenant is not configured");
+        }
+        return systemTenantId;
+    }
+
+    private void ensureSystemTenantExists(UUID tenantId) {
+        if (entityManager.find(Tenant.class, tenantId) == null) {
+            throw new IllegalStateException("System tenant not found: " + tenantId);
+        }
+    }
+
+    private boolean isOwnedBySystemTenant(TeamEntity team) {
+        UUID resolvedSystemTenantId = resolveSystemTenantIdOrThrow();
+        return resolvedSystemTenantId.equals(team.getTenantId());
+    }
+
+    private CrmPermissionEvaluator.TeamTarget toTeamTarget(TeamEntity team) {
+        return new CrmPermissionEvaluator.TeamTarget(team.getId(), team.getTenantId());
+    }
+
+    private CrmPermissionEvaluator.TeamParent toTeamParent(TeamEntity team) {
+        return new CrmPermissionEvaluator.TeamParent(team.getId(), team.getTenantId());
+    }
+
+    private CrmPermissionEvaluator.TeamMemberTarget toTeamMemberTarget(TeamEntity team, TeamMemberEntity member) {
+        return new CrmPermissionEvaluator.TeamMemberTarget(member.getId(), team.getId(), team.getTenantId());
+    }
+
+    private void ensureCanReadTeam(UUID userId, TeamEntity team) {
+        if (!permissionEvaluator.canReadTeam(userId, toTeamTarget(team))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Team");
+        }
+    }
+
+    private void ensureCanCreateTeam(UUID userId, UUID tenantId) {
+        if (!permissionEvaluator.canCreateTeam(userId, new CrmPermissionEvaluator.TenantParent(tenantId))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Team");
+        }
+    }
+
+    private void ensureCanUpdateTeam(UUID userId, TeamEntity team) {
+        if (!permissionEvaluator.canUpdateTeam(userId, toTeamTarget(team))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Team");
+        }
+    }
+
+    private void ensureCanDeleteTeam(UUID userId, TeamEntity team) {
+        if (!permissionEvaluator.canDeleteTeam(userId, toTeamTarget(team))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Team");
+        }
+    }
+
+    private void ensureCanCreateTeamMember(UUID userId, TeamEntity team) {
+        if (!permissionEvaluator.canCreateTeamMember(userId, toTeamParent(team))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Team member");
+        }
+    }
+
+    private void ensureCanUpdateTeamMember(UUID userId, TeamEntity team, TeamMemberEntity member) {
+        if (!permissionEvaluator.canUpdateTeamMember(userId, toTeamMemberTarget(team, member))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Team member");
+        }
+    }
+
+    private void ensureCanDeleteTeamMember(UUID userId, TeamEntity team, TeamMemberEntity member) {
+        if (!permissionEvaluator.canDeleteTeamMember(userId, toTeamMemberTarget(team, member))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Team member");
+        }
     }
 }

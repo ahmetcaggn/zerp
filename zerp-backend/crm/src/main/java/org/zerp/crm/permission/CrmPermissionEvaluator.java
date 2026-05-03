@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-import org.zerp.common.entity.TenantRoot;
 import org.zerp.common.entity.crm.TeamEntity;
 import org.zerp.common.entity.crm.TicketEntity;
 import org.zerp.common.permission.entity.Permission;
@@ -27,13 +26,13 @@ public class CrmPermissionEvaluator {
     public record TenantParent(UUID tenantId) {
     }
 
-    public record TeamParent(UUID teamId) {
+    public record TeamParent(UUID teamId, UUID tenantId) {
     }
 
-    public record TeamTarget(UUID teamId) {
+    public record TeamTarget(UUID teamId, UUID tenantId) {
     }
 
-    public record TeamMemberTarget(UUID teamMemberId, UUID teamId) {
+    public record TeamMemberTarget(UUID teamMemberId, UUID teamId, UUID tenantId) {
     }
 
     public record TicketParent(UUID ticketId, UUID tenantId) {
@@ -60,24 +59,17 @@ public class CrmPermissionEvaluator {
 
     public boolean canReadTeam(UUID userId, TeamTarget target) {
         return hasTeamHierarchyPermission(
-                userId, PermissionAction.READ_TEAM, target.teamId());
+                userId, PermissionAction.READ_TEAM, target.teamId(), target.tenantId());
     }
 
-    public boolean canCreateTeam(UUID userId) {
-        log.trace("Checking create team permission - userId: {}", userId);
-
-        List<Permission> result = permissionRepository.findAllByUserAndTenantRootPermission(
-                userId, PermissionAction.CREATE_TEAM);
-
-        boolean permitted = !result.isEmpty();
-        log.debug("Create team permission result - userId: {}, permitted: {}",
-                userId, permitted);
-        return permitted;
+    public boolean canCreateTeam(UUID userId, TenantParent parent) {
+        return hasTeamHierarchyPermission(
+                userId, PermissionAction.CREATE_TEAM, null, parent.tenantId());
     }
 
     public boolean canUpdateTeam(UUID userId, TeamTarget target) {
         return hasTeamHierarchyPermission(
-                userId, PermissionAction.UPDATE_TEAM, target.teamId());
+                userId, PermissionAction.UPDATE_TEAM, target.teamId(), target.tenantId());
     }
 
     public boolean canPatchTeam(UUID userId, TeamTarget target) {
@@ -86,24 +78,28 @@ public class CrmPermissionEvaluator {
 
     public boolean canDeleteTeam(UUID userId, TeamTarget target) {
         return hasTeamHierarchyPermission(
-                userId, PermissionAction.DELETE_TEAM, target.teamId());
+                userId, PermissionAction.DELETE_TEAM, target.teamId(), target.tenantId());
     }
 
     public Specification<TeamEntity> filterReadTeams(UUID userId) {
         Set<UUID> permittedTeamIds = permittableService.getAllPermitted(
                 userId, PermissionTargetType.TEAM, PermissionAction.READ_TEAM);
-        Set<UUID> permittedTenantRootIds = permittableService.getAllPermitted(
-                userId, PermissionTargetType.TENANT_ROOT, PermissionAction.READ_TEAM);
-        boolean hasTenantRootAccess = permittedTenantRootIds.contains(TenantRoot.INSTANCE.getId());
+        Set<UUID> permittedTenantIds = permittableService.getAllPermitted(
+                userId, PermissionTargetType.TENANT, PermissionAction.READ_TEAM);
+        boolean hasTenantRootAccess = permittableService.hasRootPermission(
+                userId, PermissionAction.READ_TEAM);
 
-        log.debug("user {} permitted: {} teams, {} tenant roots",
-                userId, permittedTeamIds.size(), permittedTenantRootIds.size());
+        log.info("user {} permitted: {} teams, {} tenants, tenant root access: {}",
+                userId, permittedTeamIds.size(), permittedTenantIds.size(), hasTenantRootAccess);
 
         if (hasTenantRootAccess) {
             return Specification.unrestricted();
         }
 
-        return (root, query, cb) -> root.get("id").in(permittedTeamIds);
+        return Specification.anyOf(
+                (root, query, cb) -> root.get("id").in(permittedTeamIds),
+                (root, query, cb) -> root.get("tenantId").in(permittedTenantIds)
+        );
     }
 
     // =============================================
@@ -113,19 +109,19 @@ public class CrmPermissionEvaluator {
     public boolean canReadTeamMember(UUID userId, TeamMemberTarget target) {
         return hasTeamMemberHierarchyPermission(
                 userId, PermissionAction.READ_TEAM_MEMBER,
-                target.teamMemberId(), target.teamId());
+                target.teamMemberId(), target.teamId(), target.tenantId());
     }
 
     public boolean canCreateTeamMember(UUID userId, TeamParent parent) {
         return hasTeamMemberHierarchyPermission(
                 userId, PermissionAction.CREATE_TEAM_MEMBER,
-                null, parent.teamId());
+                null, parent.teamId(), parent.tenantId());
     }
 
     public boolean canUpdateTeamMember(UUID userId, TeamMemberTarget target) {
         return hasTeamMemberHierarchyPermission(
                 userId, PermissionAction.UPDATE_TEAM_MEMBER,
-                target.teamMemberId(), target.teamId());
+                target.teamMemberId(), target.teamId(), target.tenantId());
     }
 
     public boolean canPatchTeamMember(UUID userId, TeamMemberTarget target) {
@@ -135,7 +131,7 @@ public class CrmPermissionEvaluator {
     public boolean canDeleteTeamMember(UUID userId, TeamMemberTarget target) {
         return hasTeamMemberHierarchyPermission(
                 userId, PermissionAction.DELETE_TEAM_MEMBER,
-                target.teamMemberId(), target.teamId());
+                target.teamMemberId(), target.teamId(), target.tenantId());
     }
 
     // =============================================
@@ -379,13 +375,14 @@ public class CrmPermissionEvaluator {
     private boolean hasTeamHierarchyPermission(
             UUID userId,
             PermissionAction action,
-            UUID teamId
+            UUID teamId,
+            UUID tenantId
     ) {
-        log.trace("Checking team hierarchy permission - userId: {}, action: {}, teamId: {}",
-                userId, action, teamId);
+        log.trace("Checking team hierarchy permission - userId: {}, action: {}, teamId: {}, tenantId: {}",
+                userId, action, teamId, tenantId);
 
         List<Permission> result = permissionRepository.findAllByUserAndTeamHierarchy(
-                userId, action, teamId);
+                userId, action, teamId, tenantId);
 
         boolean permitted = !result.isEmpty();
         log.debug("Team hierarchy permission result - userId: {}, action: {}, permitted: {}",
@@ -397,13 +394,14 @@ public class CrmPermissionEvaluator {
             UUID userId,
             PermissionAction action,
             UUID teamMemberId,
-            UUID teamId
+            UUID teamId,
+            UUID tenantId
     ) {
-        log.trace("Checking team member hierarchy permission - userId: {}, action: {}, teamMemberId: {}, teamId: {}",
-                userId, action, teamMemberId, teamId);
+        log.trace("Checking team member hierarchy permission - userId: {}, action: {}, teamMemberId: {}, teamId: {}, tenantId: {}",
+                userId, action, teamMemberId, teamId, tenantId);
 
         List<Permission> result = permissionRepository.findAllByUserAndTeamMemberHierarchy(
-                userId, action, teamMemberId, teamId);
+                userId, action, teamMemberId, teamId, tenantId);
 
         boolean permitted = !result.isEmpty();
         log.debug("Team member hierarchy permission result - userId: {}, action: {}, permitted: {}",

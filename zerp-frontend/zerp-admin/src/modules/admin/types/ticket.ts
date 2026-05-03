@@ -32,6 +32,7 @@ export interface CreateTicketRequest {
   description?: string
   priority?: TicketPriorityValue
   type?: TicketTypeValue
+  tenantId: string
 }
 
 export interface UpdateTicketRequest {

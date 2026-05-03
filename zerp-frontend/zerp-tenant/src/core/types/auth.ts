@@ -6,6 +6,7 @@ export interface AuthSession {
     email?: string | null
     image?: string | null
     roles: AppRole[]
+    tenantId?: string
   }
   expires?: string
   error?: string

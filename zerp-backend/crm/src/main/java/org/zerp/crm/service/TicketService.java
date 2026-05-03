@@ -3,6 +3,7 @@ package org.zerp.crm.service;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -28,6 +29,7 @@ import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
+import org.zerp.crm.permission.CrmPermissionEvaluator;
 import org.zerp.crm.dto.ticket.AddCommentRequest;
 import org.zerp.crm.dto.ticket.AssignTicketRequest;
 import org.zerp.crm.dto.ticket.ChangePriorityRequest;
@@ -75,13 +77,20 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     private final CurrentTenantIdResolver currentTenantIdResolver;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final FilterRefiner filterRefiner;
+    private final CrmPermissionEvaluator permissionEvaluator;
+
+    @Value("${app.crm.system-tenant-id:00000000-0000-0000-0000-000000000000}")
+    private UUID systemTenantId;
 
     // -- Resource service methods --
 
     @Override
     @Transactional(readOnly = true)
     public Page<TicketResponse> findWithFilters(Map<String, String> filters, Pageable pageable) {
-        Specification<TicketEntity> specification = buildSpecificationFromFilters(filters);
+        UUID userId = resolveCurrentUserIdOrThrow();
+        Specification<TicketEntity> specification = permissionEvaluator
+                .filterReadTickets(userId)
+                .and(buildSpecificationFromFilters(filters));
         try {
             return ticketRepository.findAll(specification, pageable).map(ticketResponseMapper::toResponse);
         } catch (DataAccessException e) {
@@ -100,9 +109,9 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     @Override
     @Transactional(readOnly = true)
     public List<TicketResponse> findAllById(List<UUID> ids) {
-        UUID tenantId = resolveCurrentTenantIdOrThrow();
+        UUID userId = resolveCurrentUserIdOrThrow();
         return ticketRepository.findAllById(ids).stream()
-                .filter(ticket -> tenantId.equals(ticket.getTenantId()))
+                .filter(ticket -> permissionEvaluator.canReadTicket(userId, toTicketTarget(ticket)))
                 .map(ticketResponseMapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -110,7 +119,10 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     @Override
     @Transactional(readOnly = true)
     public TicketResponse findById(UUID id) {
-        return ticketResponseMapper.toResponse(findOrThrow(id));
+        UUID userId = resolveCurrentUserIdOrThrow();
+        TicketEntity entity = findOrThrow(id);
+        ensureCanReadTicket(userId, entity);
+        return ticketResponseMapper.toResponse(entity);
     }
 
     @Override
@@ -120,7 +132,9 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
 
     @Override
     public TicketResponse patch(UUID id, Map<String, Object> data) {
+        UUID userId = resolveCurrentUserIdOrThrow();
         TicketEntity entity = findOrThrow(id);
+        ensureCanUpdateTicket(userId, entity);
         Map<String, Object> patchData = data == null ? Map.of() : data;
         ensureTicketEditableForFields(entity, patchData.keySet());
         boolean changed = false;
@@ -188,7 +202,9 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
 
     @Override
     public TicketResponse update(UUID id, UpdateTicketRequest data) {
+        UUID userId = resolveCurrentUserIdOrThrow();
         TicketEntity entity = findOrThrow(id);
+        ensureCanUpdateTicket(userId, entity);
         ensureTicketEditable(entity);
         entity.setTitle(validateTitle(data.title()));
         entity.setDescription(data.description());
@@ -213,7 +229,9 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
 
     @Override
     public void deleteById(UUID id) {
+        UUID userId = resolveCurrentUserIdOrThrow();
         TicketEntity entity = findOrThrow(id);
+        ensureCanDeleteTicket(userId, entity);
         ticketRepository.delete(entity);
     }
 
@@ -235,14 +253,13 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     public TicketResponse createTicket(CreateTicketRequest request) {
         TicketPriority priority = request.priority() != null ? request.priority() : TicketPriority.MEDIUM;
         TicketType type = request.type() != null ? request.type() : TicketType.QUESTION;
-        UUID tenantId = resolveCurrentTenantId();
+        UUID tenantId = request.tenantId();
         if (tenantId == null) {
-            throw new IllegalStateException("Tenant not found");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "tenantId is required");
         }
-        UUID userId = resolveCurrentUserId();
-        if (userId == null) {
-            throw new IllegalStateException("User not found");
-        }
+
+        UUID userId = resolveCurrentUserIdOrThrow();
+        ensureCanCreateTicket(userId, tenantId);
 
         TicketEntity entity = new TicketEntity();
         entity.setTitle(validateTitle(request.title()));
@@ -265,7 +282,9 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     public TicketResponse changeStatus(UUID ticketId, ChangeStatusRequest request) {
+        UUID userId = resolveCurrentUserIdOrThrow();
         TicketEntity entity = findOrThrow(ticketId);
+        ensureCanUpdateTicket(userId, entity);
         TicketStatus newStatus = request.status();
         TicketStatus oldStatus = entity.getStatus();
 
@@ -299,7 +318,9 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     public TicketResponse changePriority(UUID ticketId, ChangePriorityRequest request) {
+        UUID userId = resolveCurrentUserIdOrThrow();
         TicketEntity entity = findOrThrow(ticketId);
+        ensureCanUpdateTicket(userId, entity);
         TicketPriority oldPriority = entity.getPriority();
         TicketPriority newPriority = request.priority();
 
@@ -318,9 +339,12 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     public TicketResponse assignTicket(UUID ticketId, AssignTicketRequest request) {
-        UUID currentUserId = resolveCurrentUserId();
+        UUID userId = resolveCurrentUserIdOrThrow();
         TicketEntity entity = findOrThrow(ticketId);
+        ensureCanCreateTicketAssignment(userId, entity);
         validateAssignable(entity);
+        TeamEntity assignmentTeam = resolveAssignmentTeamOrThrow(request);
+        AppUser assignmentAgent = resolveAssignmentAgentOrThrow(request, assignmentTeam);
 
         TicketAssignmentEntity assignment = entity.getCurrentAssignment();
         boolean hasExistingAssignment = assignment != null;
@@ -340,11 +364,11 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         }
 
         assignment.setTicket(entity);
-        assignment.setTeam(toTeamReference(request.teamId()));
-        assignment.setAgentParty(toAppUserReference(request.agentPartyId()));
-        assignment.setAssignedByParty(toAppUserReference(currentUserId));
+        assignment.setTeam(assignmentTeam);
+        assignment.setAgentParty(assignmentAgent);
+        assignment.setAssignedByParty(toAppUserReference(userId));
         assignment.setActive(true);
-        assignment.setReason(request.agentPartyId() != null ? "Assigned to agent" : "Assigned to team");
+        assignment.setReason(assignmentAgent != null ? "Assigned to agent" : "Assigned to team");
         assignment.setAssignedAt(LocalDateTime.now());
         assignment.setUnassignedAt(null);
         assignment.setTenantId(entity.getTenantId());
@@ -371,11 +395,13 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     public TicketResponse unassignTicket(UUID ticketId) {
+        UUID userId = resolveCurrentUserIdOrThrow();
         TicketEntity entity = findOrThrow(ticketId);
 
         if (entity.getCurrentAssignment() != null
                 && Boolean.TRUE.equals(entity.getCurrentAssignment().getActive())) {
             TicketAssignmentEntity assignment = entity.getCurrentAssignment();
+            ensureCanUpdateTicketAssignment(userId, entity, assignment);
 
             String assignmentTarget = assignment.getAgentParty() != null
                     ? "agent " + assignment.getAgentParty().getId()
@@ -398,20 +424,21 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     public TicketResponse addComment(UUID ticketId, AddCommentRequest request) {
-        UUID tenantId = resolveCurrentTenantId();
+        UUID userId = resolveCurrentUserIdOrThrow();
+        TicketEntity entity = findOrThrow(ticketId);
+        ensureCanCreateTicketComment(userId, entity);
+        validateCommentable(entity);
+        UUID tenantId = entity.getTenantId();
         if (tenantId == null) {
             throw new IllegalStateException("Tenant not found");
         }
-        UUID userId = resolveCurrentUserId();
-        if (userId == null) {
-            throw new IllegalStateException("User not found");
-        }
-        TicketEntity entity = findOrThrow(ticketId);
-        validateCommentable(entity);
-
 
         boolean isInternal = request.isInternal() != null && request.isInternal();
-        TicketCommentEntity.AuthorType authorType = resolveCommentAuthorType(userId, tenantId);
+        UUID requesterTenantId = currentTenantIdResolver.resolve();
+        if (requesterTenantId == null) {
+            throw new IllegalStateException("Requester tenant not found");
+        }
+        TicketCommentEntity.AuthorType authorType = resolveCommentAuthorType(userId, requesterTenantId);
 
         TicketCommentEntity comment = new TicketCommentEntity();
         comment.setTicket(entity);
@@ -442,7 +469,9 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     public TicketResponse closeTicket(UUID ticketId) {
+        UUID userId = resolveCurrentUserIdOrThrow();
         TicketEntity entity = findOrThrow(ticketId);
+        ensureCanUpdateTicket(userId, entity);
         TicketStatus oldStatus = entity.getStatus();
 
         if (!oldStatus.canTransitionTo(TicketStatus.CLOSED)) {
@@ -492,21 +521,8 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     private TicketEntity findOrThrow(UUID ticketId) {
-        UUID tenantId = resolveCurrentTenantIdOrThrow();
-        TicketEntity entity = ticketRepository.findById(ticketId)
+        return ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found: " + ticketId));
-
-        if (!tenantId.equals(entity.getTenantId())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found: " + ticketId);
-        }
-        return entity;
-    }
-
-    private TeamEntity toTeamReference(UUID teamId) {
-        if (teamId == null) {
-            return null;
-        }
-        return entityManager.getReference(TeamEntity.class, teamId);
     }
 
     private AppUser toAppUserReference(UUID userId) {
@@ -514,6 +530,47 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
             return null;
         }
         return entityManager.getReference(AppUser.class, userId);
+    }
+
+    private TeamEntity resolveAssignmentTeamOrThrow(AssignTicketRequest request) {
+        if (request == null || request.teamId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "teamId is required");
+        }
+
+        TeamEntity team = entityManager.find(TeamEntity.class, request.teamId());
+        if (team == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Team not found: " + request.teamId());
+        }
+
+        UUID resolvedSystemTenantId = resolveSystemTenantIdOrThrow();
+        if (!resolvedSystemTenantId.equals(team.getTenantId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Team must belong to system tenant");
+        }
+
+        return team;
+    }
+
+    private AppUser resolveAssignmentAgentOrThrow(AssignTicketRequest request, TeamEntity team) {
+        UUID agentId = request != null ? request.agentPartyId() : null;
+        if (agentId == null) {
+            return null;
+        }
+
+        AppUser agent = entityManager.find(AppUser.class, agentId);
+        if (agent == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Agent not found: " + agentId);
+        }
+
+        UUID resolvedSystemTenantId = resolveSystemTenantIdOrThrow();
+        if (!resolvedSystemTenantId.equals(agent.getTenantId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Agent must belong to system tenant");
+        }
+
+        if (!teamMemberRepository.existsByTeamIdAndUserId(team.getId(), agentId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Agent is not a member of the selected team");
+        }
+
+        return agent;
     }
 
     private void validateAssignable(TicketEntity entity) {
@@ -558,7 +615,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     private void initializeSla(TicketEntity entity, TicketPriority priority) {
-        UUID tenantId = resolveCurrentTenantId();
+        UUID tenantId = entity.getTenantId();
         if (tenantId == null) {
             throw new IllegalStateException("Tenant not found");
         }
@@ -593,13 +650,10 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
             String payload,
             String referenceType,
             UUID referenceId) {
-        UUID userId = resolveCurrentUserId();
-        UUID tenantId = resolveCurrentTenantId();
+        UUID userId = resolveCurrentUserIdOrThrow();
+        UUID tenantId = entity.getTenantId();
         if (tenantId == null) {
             throw new IllegalStateException("Tenant not found");
-        }
-        if (userId == null) {
-            throw new IllegalStateException("User not found");
         }
         TicketHistoryEntity history = new TicketHistoryEntity();
         history.setTicket(entity);
@@ -638,19 +692,79 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         return spec;
     }
 
-    private UUID resolveCurrentUserId() {
-        return currentUserIdResolver.resolve();
+    private CrmPermissionEvaluator.TicketTarget toTicketTarget(TicketEntity ticket) {
+        return new CrmPermissionEvaluator.TicketTarget(ticket.getId(), ticket.getTenantId());
     }
 
-    private UUID resolveCurrentTenantIdOrThrow() {
-        UUID tenantId = resolveCurrentTenantId();
-        if (tenantId == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing tenant context");
+    private CrmPermissionEvaluator.TicketParent toTicketParent(TicketEntity ticket) {
+        return new CrmPermissionEvaluator.TicketParent(ticket.getId(), ticket.getTenantId());
+    }
+
+    private CrmPermissionEvaluator.TicketChildTarget toTicketAssignmentTarget(
+            TicketEntity ticket,
+            TicketAssignmentEntity assignment
+    ) {
+        return new CrmPermissionEvaluator.TicketChildTarget(
+                assignment != null ? assignment.getId() : null,
+                ticket.getId(),
+                ticket.getTenantId()
+        );
+    }
+
+    private void ensureCanReadTicket(UUID userId, TicketEntity ticket) {
+        if (!permissionEvaluator.canReadTicket(userId, toTicketTarget(ticket))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Ticket");
         }
-        return tenantId;
     }
 
-    private UUID resolveCurrentTenantId() {
-        return currentTenantIdResolver.resolve();
+    private void ensureCanCreateTicket(UUID userId, UUID tenantId) {
+        if (!permissionEvaluator.canCreateTicket(userId, new CrmPermissionEvaluator.TenantParent(tenantId))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Ticket");
+        }
+    }
+
+    private void ensureCanUpdateTicket(UUID userId, TicketEntity ticket) {
+        if (!permissionEvaluator.canUpdateTicket(userId, toTicketTarget(ticket))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Ticket");
+        }
+    }
+
+    private void ensureCanDeleteTicket(UUID userId, TicketEntity ticket) {
+        if (!permissionEvaluator.canDeleteTicket(userId, toTicketTarget(ticket))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Ticket");
+        }
+    }
+
+    private void ensureCanCreateTicketComment(UUID userId, TicketEntity ticket) {
+        if (!permissionEvaluator.canCreateTicketComment(userId, toTicketParent(ticket))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Ticket comment");
+        }
+    }
+
+    private void ensureCanCreateTicketAssignment(UUID userId, TicketEntity ticket) {
+        if (!permissionEvaluator.canCreateTicketAssignment(userId, toTicketParent(ticket))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Ticket assignment");
+        }
+    }
+
+    private void ensureCanUpdateTicketAssignment(UUID userId, TicketEntity ticket, TicketAssignmentEntity assignment) {
+        if (!permissionEvaluator.canUpdateTicketAssignment(userId, toTicketAssignmentTarget(ticket, assignment))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Ticket assignment");
+        }
+    }
+
+    private UUID resolveSystemTenantIdOrThrow() {
+        if (systemTenantId == null) {
+            throw new IllegalStateException("System tenant is not configured");
+        }
+        return systemTenantId;
+    }
+
+    private UUID resolveCurrentUserIdOrThrow() {
+        UUID userId = currentUserIdResolver.resolve();
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing user context");
+        }
+        return userId;
     }
 }

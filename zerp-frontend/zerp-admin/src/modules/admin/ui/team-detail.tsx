@@ -48,6 +48,13 @@ interface Props {
   id: string
 }
 
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+function isUuid(value: string): boolean {
+  return UUID_REGEX.test(value)
+}
+
 export function TeamDetail({ id }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
@@ -63,6 +70,10 @@ export function TeamDetail({ id }: Props) {
   const { mutate: addMember, isPending: isAddingMember } = useAddTeamMember()
   const { mutate: removeMember } = useRemoveTeamMember()
   const { mutate: changeMemberRole } = useChangeTeamMemberRole()
+  const trimmedAddMemberUserId = addMemberUserId.trim()
+  const isAddMemberUserIdValid = trimmedAddMemberUserId
+    ? isUuid(trimmedAddMemberUserId)
+    : true
 
   if (isLoading) {
     return (
@@ -95,12 +106,16 @@ export function TeamDetail({ id }: Props) {
   }
 
   function handleAddMember() {
-    if (!addMemberUserId.trim()) return
+    if (!trimmedAddMemberUserId) return
+    if (!isUuid(trimmedAddMemberUserId)) {
+      showToast('Gecerli bir kullanici UUID degeri girin.', { severity: 'warning' })
+      return
+    }
     addMember(
       {
         id,
         body: {
-          userId: addMemberUserId.trim(),
+          userId: trimmedAddMemberUserId,
           role: addMemberRole as 'LEADER' | 'MEMBER',
         },
       },
@@ -171,6 +186,12 @@ export function TeamDetail({ id }: Props) {
               label="Kullanıcı ID"
               value={addMemberUserId}
               onChange={(event) => setAddMemberUserId(event.target.value)}
+              error={Boolean(trimmedAddMemberUserId) && !isAddMemberUserIdValid}
+              helperText={
+                Boolean(trimmedAddMemberUserId) && !isAddMemberUserIdValid
+                  ? 'Gecerli bir UUID girin.'
+                  : 'Sadece system tenant kullanicilari eklenebilir.'
+              }
               sx={{ flex: 1 }}
             />
             <FormControl size="small" sx={{ minWidth: 140 }}>
@@ -187,7 +208,9 @@ export function TeamDetail({ id }: Props) {
             <Button
               variant="contained"
               onClick={handleAddMember}
-              disabled={isAddingMember || !addMemberUserId.trim()}
+              disabled={
+                isAddingMember || !trimmedAddMemberUserId || !isAddMemberUserIdValid
+              }
             >
               Ekle
             </Button>
