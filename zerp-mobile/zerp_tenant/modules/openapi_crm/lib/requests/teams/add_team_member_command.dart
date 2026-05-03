@@ -26,21 +26,21 @@ class AddTeamMemberRequestSchema extends JsonRequestSchema {
 }
 
 ///
-/// POST /api/teams/{id}/members
+/// POST /crm/teams/{id}/members
 class AddTeamMemberCommand extends OpenapiDefinitionBaseRequest<TeamResponse> {
   AddTeamMemberCommand({
     required this.id,
     required AddMemberRequest addMemberRequest,
   }) : _payload = AddTeamMemberRequestSchema(data: addMemberRequest);
 
-  final int id;
+  final String id;
 
   final AddTeamMemberRequestSchema _payload;
 
   @override
   String get path {
-    var p = r'/api/teams/{id}/members';
-    p = p.replaceAll('{id}', id.toString());
+    var p = r'/crm/teams/{id}/members';
+    p = p.replaceAll('{id}', id);
     return p;
   }
 

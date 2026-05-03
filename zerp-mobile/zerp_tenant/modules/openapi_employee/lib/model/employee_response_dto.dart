@@ -37,7 +37,7 @@ class EmployeeResponseDto extends Schema {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  final int? id;
+  final String? id;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -277,7 +277,7 @@ class EmployeeResponseDto extends Schema {
       }());
 
       return EmployeeResponseDto(
-        id: json[r'id'] is int ? json[r'id'] as int : null,
+        id: json[r'id'] is String ? json[r'id'] as String : null,
         firstName: json[r'firstName'] is String ? json[r'firstName'] as String : null,
         lastName: json[r'lastName'] is String ? json[r'lastName'] as String : null,
         email: json[r'email'] is String ? json[r'email'] as String : null,
@@ -369,6 +369,7 @@ class EmployeeResponseDtoStatusEnum {
   static const ON_LEAVE = EmployeeResponseDtoStatusEnum._(r'ON_LEAVE');
   static const RETIRED = EmployeeResponseDtoStatusEnum._(r'RETIRED');
   static const PROBATION = EmployeeResponseDtoStatusEnum._(r'PROBATION');
+  static const DELETED = EmployeeResponseDtoStatusEnum._(r'DELETED');
 
   /// List of all possible values in this [enum][EmployeeResponseDtoStatusEnum].
   static const values = <EmployeeResponseDtoStatusEnum>[
@@ -378,6 +379,7 @@ class EmployeeResponseDtoStatusEnum {
     ON_LEAVE,
     RETIRED,
     PROBATION,
+    DELETED,
   ];
 
   static EmployeeResponseDtoStatusEnum? fromJson(dynamic value) => EmployeeResponseDtoStatusEnumTypeTransformer().decode(value);
@@ -422,6 +424,7 @@ class EmployeeResponseDtoStatusEnumTypeTransformer {
         case r'ON_LEAVE': return EmployeeResponseDtoStatusEnum.ON_LEAVE;
         case r'RETIRED': return EmployeeResponseDtoStatusEnum.RETIRED;
         case r'PROBATION': return EmployeeResponseDtoStatusEnum.PROBATION;
+        case r'DELETED': return EmployeeResponseDtoStatusEnum.DELETED;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

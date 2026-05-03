@@ -44,7 +44,7 @@ class TicketResponse extends Schema {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  final int? id;
+  final String? id;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -310,7 +310,7 @@ class TicketResponse extends Schema {
       }());
 
       return TicketResponse(
-        id: json[r'id'] is int ? json[r'id'] as int : null,
+        id: json[r'id'] is String ? json[r'id'] as String : null,
         title: json[r'title'] is String ? json[r'title'] as String : null,
         description: json[r'description'] is String ? json[r'description'] as String : null,
         status: json[r'status'] is String ? json[r'status'] as String : null,

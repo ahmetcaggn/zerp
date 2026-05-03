@@ -40,37 +40,18 @@ Please follow the [installation procedure](#installation--usage) and then run th
 ```dart
 import 'package:openapi_notification/api.dart';
 
-
-final api_instance = EmailControllerSendEmailApi();
-final emailEmployeeListRequestDto = EmailEmployeeListRequestDto(); // EmailEmployeeListRequestDto | 
-
-try {
-    final result = api_instance.sendEmail(emailEmployeeListRequestDto);
-    print(result);
-} catch (e) {
-    print('Exception when calling EmailControllerSendEmailApi->sendEmail: $e\n');
-}
-
 ```
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://192.168.0.112:8083*
+All URIs are relative to *http://192.168.0.106:8083*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*EmailControllerSendEmailApi* | [**sendEmail**](doc//EmailControllerSendEmailApi.md#) | **POST** /notification/email/send | 
-*EmailControllerSendEmailToListApi* | [**sendEmailToList**](doc//EmailControllerSendEmailToListApi.md#) | **POST** /notification/email/sendToList | 
-*EmailControllerSendEmailToListWithHtmlApi* | [**sendEmailToListWithHtml**](doc//EmailControllerSendEmailToListWithHtmlApi.md#) | **POST** /notification/email/sendToListHtml | 
-*EmailControllerSendSingleEmailApi* | [**sendSingleEmail**](doc//EmailControllerSendSingleEmailApi.md#) | **POST** /notification/email/sendSingle | 
 
 
 ## Documentation For Models
 
- - [EmailEmployeeListRequestDto](doc//EmailEmployeeListRequestDto.md)
- - [EmailListHtmlRequestDto](doc//EmailListHtmlRequestDto.md)
- - [EmailListRequestDto](doc//EmailListRequestDto.md)
- - [EmailSingleRequestDto](doc//EmailSingleRequestDto.md)
 
 
 ## Documentation For Authorization
@@ -79,6 +60,5 @@ Endpoints do not require authorization.
 
 
 ## Author
-
 
 

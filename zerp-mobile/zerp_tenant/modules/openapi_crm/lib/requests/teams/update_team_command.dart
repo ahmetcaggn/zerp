@@ -28,7 +28,7 @@ class UpdateTeamRequestSchema extends JsonRequestSchema {
 /// Update: Update an existing entity
 /// Updates an existing entity with the provided field values. Implements ra-spring-data-provider's update operation with support for partial updates. Only the fields provided in the request body will be updated. 
 ///
-/// PUT /api/teams/{id}
+/// PUT /crm/teams/{id}
 class UpdateTeamCommand extends OpenapiDefinitionBaseRequest<ApiResponseTeamResponse> {
   UpdateTeamCommand({
     required this.id,
@@ -36,14 +36,14 @@ class UpdateTeamCommand extends OpenapiDefinitionBaseRequest<ApiResponseTeamResp
   }) : _payload = UpdateTeamRequestSchema(data: updateTeamRequest);
 
   /// Unique identifier of the entity to update
-  final int id;
+  final String id;
 
   final UpdateTeamRequestSchema _payload;
 
   @override
   String get path {
-    var p = r'/api/teams/{id}';
-    p = p.replaceAll('{id}', id.toString());
+    var p = r'/crm/teams/{id}';
+    p = p.replaceAll('{id}', id);
     return p;
   }
 

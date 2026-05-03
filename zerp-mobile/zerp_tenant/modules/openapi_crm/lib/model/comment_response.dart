@@ -15,6 +15,7 @@ class CommentResponse extends Schema {
   CommentResponse({
     this.id,
     this.authorId,
+    this.authorName,
     this.authorType,
     this.content,
     this.isInternal,
@@ -28,7 +29,7 @@ class CommentResponse extends Schema {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  final int? id;
+  final String? id;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -37,6 +38,14 @@ class CommentResponse extends Schema {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   final String? authorId;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  final String? authorName;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -79,6 +88,7 @@ class CommentResponse extends Schema {
   bool operator ==(Object other) => identical(this, other) || other is CommentResponse &&
     other.id == id &&
     other.authorId == authorId &&
+    other.authorName == authorName &&
     other.authorType == authorType &&
     other.content == content &&
     other.isInternal == isInternal &&
@@ -90,6 +100,7 @@ class CommentResponse extends Schema {
     // ignore: unnecessary_parenthesis
     (id == null ? 0 : id!.hashCode) +
     (authorId == null ? 0 : authorId!.hashCode) +
+    (authorName == null ? 0 : authorName!.hashCode) +
     (authorType == null ? 0 : authorType!.hashCode) +
     (content == null ? 0 : content!.hashCode) +
     (isInternal == null ? 0 : isInternal!.hashCode) +
@@ -97,7 +108,7 @@ class CommentResponse extends Schema {
     (attachments.hashCode);
 
   @override
-  String toString() => 'CommentResponse[id=$id, authorId=$authorId, authorType=$authorType, content=$content, isInternal=$isInternal, createdAt=$createdAt, attachments=$attachments]';
+  String toString() => 'CommentResponse[id=$id, authorId=$authorId, authorName=$authorName, authorType=$authorType, content=$content, isInternal=$isInternal, createdAt=$createdAt, attachments=$attachments]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -110,6 +121,11 @@ class CommentResponse extends Schema {
       json[r'authorId'] = this.authorId;
     } else {
       json[r'authorId'] = null;
+    }
+    if (this.authorName != null) {
+      json[r'authorName'] = this.authorName;
+    } else {
+      json[r'authorName'] = null;
     }
     if (this.authorType != null) {
       json[r'authorType'] = this.authorType;
@@ -154,8 +170,9 @@ class CommentResponse extends Schema {
       }());
 
       return CommentResponse(
-        id: json[r'id'] is int ? json[r'id'] as int : null,
+        id: json[r'id'] is String ? json[r'id'] as String : null,
         authorId: json[r'authorId'] is String ? json[r'authorId'] as String : null,
+        authorName: json[r'authorName'] is String ? json[r'authorName'] as String : null,
         authorType: json[r'authorType'] is String ? json[r'authorType'] as String : null,
         content: json[r'content'] is String ? json[r'content'] as String : null,
         isInternal: json[r'isInternal'] is bool ? json[r'isInternal'] as bool : null,

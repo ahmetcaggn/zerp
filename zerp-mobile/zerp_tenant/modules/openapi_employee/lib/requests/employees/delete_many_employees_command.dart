@@ -11,20 +11,20 @@ import 'package:dart_network_layer_core/dart_network_layer_core.dart';
 
 import '../../base/base_request.dart';
 
-import '../../model/api_response_list_long.dart';
+import '../../model/api_response_list_uuid.dart';
 
 
 /// DeleteMany: Delete multiple entities
 /// Deletes multiple entities in a single operation. Implements ra-spring-data-provider's deleteMany operation for bulk deletions. Returns a list of deleted entity IDs. 
 ///
 /// DELETE /employee
-class DeleteManyEmployeesCommand extends OpenapiDefinitionBaseRequest<ApiResponseListLong> {
+class DeleteManyEmployeesCommand extends OpenapiDefinitionBaseRequest<ApiResponseListUUID> {
   DeleteManyEmployeesCommand({
     this.id,
   });
 
   /// List of entity IDs to delete
-  final List<int>? id;
+  final List<String>? id;
 
   @override
   String get path {
@@ -41,14 +41,14 @@ class DeleteManyEmployeesCommand extends OpenapiDefinitionBaseRequest<ApiRespons
   HttpRequestMethod get method => HttpRequestMethod.delete;
 
   @override
-  SchemaFactory<ApiResponseListLong> get defaultResponseFactory => ApiResponseListLong.factory;
+  SchemaFactory<ApiResponseListUUID> get defaultResponseFactory => ApiResponseListUUID.factory;
 
   @override
   SchemaFactory get defaultErrorResponseFactory => AnyDataSchema.factory;
 
   @override
   Map<int, SchemaFactory> get responseFactories => {
-    200: ApiResponseListLong.factory,
+    200: ApiResponseListUUID.factory,
   };
 
   @override

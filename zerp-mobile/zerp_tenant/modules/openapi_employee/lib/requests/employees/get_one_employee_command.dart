@@ -24,12 +24,12 @@ class GetOneEmployeeCommand extends OpenapiDefinitionBaseRequest<ApiResponseEmpl
   });
 
   /// Unique identifier of the entity to retrieve
-  final int id;
+  final String id;
 
   @override
   String get path {
     var p = r'/employee/{id}';
-    p = p.replaceAll('{id}', id.toString());
+    p = p.replaceAll('{id}', id);
     return p;
   }
 

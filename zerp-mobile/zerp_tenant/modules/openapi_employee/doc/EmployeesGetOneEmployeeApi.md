@@ -5,7 +5,7 @@
 import 'package:openapi_employee/api.dart';
 ```
 
-All URIs are relative to *http://192.168.0.112:8082*
+All URIs are relative to *http://192.168.0.106:8082*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -24,7 +24,7 @@ Retrieves a single entity by its unique identifier. Implements ra-spring-data-pr
 import 'package:openapi_employee/api.dart';
 
 final api_instance = EmployeesGetOneEmployeeApi();
-final id = 1; // int | Unique identifier of the entity to retrieve
+final id = 1; // String | Unique identifier of the entity to retrieve
 
 try {
     final result = api_instance.getOneEmployee(id);
@@ -38,7 +38,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **int**| Unique identifier of the entity to retrieve | 
+ **id** | **String**| Unique identifier of the entity to retrieve | 
 
 ### Return type
 

@@ -16,7 +16,7 @@ void main() {
   // final instance = TeamsRemoveTeamMemberApi();
 
   group('tests for TeamsRemoveTeamMemberApi', () {
-    //Future<TeamResponse> removeTeamMember(int id, String userId) async
+    //Future<TeamResponse> removeTeamMember(String id, String userId) async
     test('test removeTeamMember', () async {
       // TODO
     });

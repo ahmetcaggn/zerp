@@ -27,7 +27,7 @@ class AttachmentResponse extends Schema {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  final int? id;
+  final String? id;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -163,7 +163,7 @@ class AttachmentResponse extends Schema {
       }());
 
       return AttachmentResponse(
-        id: json[r'id'] is int ? json[r'id'] as int : null,
+        id: json[r'id'] is String ? json[r'id'] as String : null,
         fileName: json[r'fileName'] is String ? json[r'fileName'] as String : null,
         fileSize: json[r'fileSize'] is int ? json[r'fileSize'] as int : null,
         contentType: json[r'contentType'] is String ? json[r'contentType'] as String : null,

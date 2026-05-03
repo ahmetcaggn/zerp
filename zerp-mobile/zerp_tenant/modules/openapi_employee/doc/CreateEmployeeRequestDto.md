@@ -8,6 +8,8 @@ import 'package:openapi_employee/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**username** | **String** |  | 
+**tempPassword** | **String** |  | 
 **firstName** | **String** |  | 
 **lastName** | **String** |  | 
 **email** | **String** |  | 
@@ -16,7 +18,7 @@ Name | Type | Description | Notes
 **dateOfBirth** | [**DateTime**](DateTime.md) |  | [optional] 
 **hireDate** | [**DateTime**](DateTime.md) |  | 
 **status** | **String** |  | [optional] 
-**managerId** | **int** |  | [optional] 
+**managerId** | **String** |  | [optional] 
 **salary** | **num** |  | [optional] 
 **isActive** | **bool** |  | [optional] 
 **contacts** | [**List<EmployeeContactDto>**](EmployeeContactDto.md) |  | [optional] [default to const []]

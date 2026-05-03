@@ -15,6 +15,16 @@ void main() {
   // final instance = CreateEmployeeRequestDto();
 
   group('test CreateEmployeeRequestDto', () {
+    // String username
+    test('to test the property `username`', () async {
+      // TODO
+    });
+
+    // String tempPassword
+    test('to test the property `tempPassword`', () async {
+      // TODO
+    });
+
     // String firstName
     test('to test the property `firstName`', () async {
       // TODO
@@ -55,7 +65,7 @@ void main() {
       // TODO
     });
 
-    // int managerId
+    // String managerId
     test('to test the property `managerId`', () async {
       // TODO
     });

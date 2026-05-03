@@ -26,7 +26,7 @@ class EmployeeListResponseDto extends Schema {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  final int? id;
+  final String? id;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -141,7 +141,7 @@ class EmployeeListResponseDto extends Schema {
       }());
 
       return EmployeeListResponseDto(
-        id: json[r'id'] is int ? json[r'id'] as int : null,
+        id: json[r'id'] is String ? json[r'id'] as String : null,
         firstName: json[r'firstName'] is String ? json[r'firstName'] as String : null,
         lastName: json[r'lastName'] is String ? json[r'lastName'] as String : null,
         email: json[r'email'] is String ? json[r'email'] as String : null,
@@ -224,6 +224,7 @@ class EmployeeListResponseDtoStatusEnum {
   static const ON_LEAVE = EmployeeListResponseDtoStatusEnum._(r'ON_LEAVE');
   static const RETIRED = EmployeeListResponseDtoStatusEnum._(r'RETIRED');
   static const PROBATION = EmployeeListResponseDtoStatusEnum._(r'PROBATION');
+  static const DELETED = EmployeeListResponseDtoStatusEnum._(r'DELETED');
 
   /// List of all possible values in this [enum][EmployeeListResponseDtoStatusEnum].
   static const values = <EmployeeListResponseDtoStatusEnum>[
@@ -233,6 +234,7 @@ class EmployeeListResponseDtoStatusEnum {
     ON_LEAVE,
     RETIRED,
     PROBATION,
+    DELETED,
   ];
 
   static EmployeeListResponseDtoStatusEnum? fromJson(dynamic value) => EmployeeListResponseDtoStatusEnumTypeTransformer().decode(value);
@@ -277,6 +279,7 @@ class EmployeeListResponseDtoStatusEnumTypeTransformer {
         case r'ON_LEAVE': return EmployeeListResponseDtoStatusEnum.ON_LEAVE;
         case r'RETIRED': return EmployeeListResponseDtoStatusEnum.RETIRED;
         case r'PROBATION': return EmployeeListResponseDtoStatusEnum.PROBATION;
+        case r'DELETED': return EmployeeListResponseDtoStatusEnum.DELETED;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

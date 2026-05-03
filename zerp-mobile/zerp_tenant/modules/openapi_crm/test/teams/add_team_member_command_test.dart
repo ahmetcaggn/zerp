@@ -16,7 +16,7 @@ void main() {
   // final instance = TeamsAddTeamMemberApi();
 
   group('tests for TeamsAddTeamMemberApi', () {
-    //Future<TeamResponse> addTeamMember(int id, AddMemberRequest addMemberRequest) async
+    //Future<TeamResponse> addTeamMember(String id, AddMemberRequest addMemberRequest) async
     test('test addTeamMember', () async {
       // TODO
     });

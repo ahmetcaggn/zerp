@@ -17,19 +17,19 @@ import '../../model/api_response_void.dart';
 /// Delete: Delete a single entity
 /// Deletes a single entity by its unique identifier. Implements ra-spring-data-provider's delete operation. 
 ///
-/// DELETE /api/teams/{id}
+/// DELETE /crm/teams/{id}
 class DeleteTeamCommand extends OpenapiDefinitionBaseRequest<ApiResponseVoid> {
   DeleteTeamCommand({
     required this.id,
   });
 
   /// Unique identifier of the entity to delete
-  final int id;
+  final String id;
 
   @override
   String get path {
-    var p = r'/api/teams/{id}';
-    p = p.replaceAll('{id}', id.toString());
+    var p = r'/crm/teams/{id}';
+    p = p.replaceAll('{id}', id);
     return p;
   }
 

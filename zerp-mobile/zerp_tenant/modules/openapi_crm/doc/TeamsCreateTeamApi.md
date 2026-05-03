@@ -5,11 +5,11 @@
 import 'package:openapi_crm/api.dart';
 ```
 
-All URIs are relative to *http://192.168.0.112:8081*
+All URIs are relative to *http://192.168.0.106:8081*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**createTeam**](TeamsCreateTeamApi.md#) | **POST** /api/teams | Create: Create a new entity
+[**createTeam**](TeamsCreateTeamApi.md#) | **POST** /crm/teams | Create: Create a new entity
 
 
 # **createTeam**

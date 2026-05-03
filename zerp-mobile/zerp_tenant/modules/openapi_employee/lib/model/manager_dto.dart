@@ -24,7 +24,7 @@ class ManagerDto extends Schema {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  final int? id;
+  final String? id;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -115,7 +115,7 @@ class ManagerDto extends Schema {
       }());
 
       return ManagerDto(
-        id: json[r'id'] is int ? json[r'id'] as int : null,
+        id: json[r'id'] is String ? json[r'id'] as String : null,
         firstName: json[r'firstName'] is String ? json[r'firstName'] as String : null,
         lastName: json[r'lastName'] is String ? json[r'lastName'] as String : null,
         email: json[r'email'] is String ? json[r'email'] as String : null,

@@ -15,12 +15,12 @@ void main() {
   // final instance = TicketAssignmentResponse();
 
   group('test TicketAssignmentResponse', () {
-    // int id
+    // String id
     test('to test the property `id`', () async {
       // TODO
     });
 
-    // int teamId
+    // String teamId
     test('to test the property `teamId`', () async {
       // TODO
     });

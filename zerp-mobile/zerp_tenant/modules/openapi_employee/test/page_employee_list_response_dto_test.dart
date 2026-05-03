@@ -25,13 +25,8 @@ void main() {
       // TODO
     });
 
-    // PageableObject pageable
-    test('to test the property `pageable`', () async {
-      // TODO
-    });
-
-    // SortObject sort
-    test('to test the property `sort`', () async {
+    // int numberOfElements
+    test('to test the property `numberOfElements`', () async {
       // TODO
     });
 
@@ -45,8 +40,13 @@ void main() {
       // TODO
     });
 
-    // int numberOfElements
-    test('to test the property `numberOfElements`', () async {
+    // PageableObject pageable
+    test('to test the property `pageable`', () async {
+      // TODO
+    });
+
+    // SortObject sort
+    test('to test the property `sort`', () async {
       // TODO
     });
 

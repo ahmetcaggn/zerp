@@ -16,7 +16,7 @@ void main() {
   // final instance = TeamsChangeTeamMemberRoleApi();
 
   group('tests for TeamsChangeTeamMemberRoleApi', () {
-    //Future<TeamResponse> changeTeamMemberRole(int id, String userId, ChangeMemberRoleRequest changeMemberRoleRequest) async
+    //Future<TeamResponse> changeTeamMemberRole(String id, String userId, ChangeMemberRoleRequest changeMemberRoleRequest) async
     test('test changeTeamMemberRole', () async {
       // TODO
     });

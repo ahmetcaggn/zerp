@@ -15,7 +15,7 @@ void main() {
   // final instance = AssignTicketRequest();
 
   group('test AssignTicketRequest', () {
-    // int teamId
+    // String teamId
     test('to test the property `teamId`', () async {
       // TODO
     });

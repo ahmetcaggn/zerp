@@ -17,7 +17,7 @@ Name | Type | Description | Notes
 **hireDate** | [**DateTime**](DateTime.md) |  | [optional] 
 **terminationDate** | [**DateTime**](DateTime.md) |  | [optional] 
 **status** | **String** |  | [optional] 
-**managerId** | **int** |  | [optional] 
+**managerId** | **String** |  | [optional] 
 **salary** | **num** |  | [optional] 
 **contacts** | [**List<EmployeeContactDto>**](EmployeeContactDto.md) |  | [optional] [default to const []]
 

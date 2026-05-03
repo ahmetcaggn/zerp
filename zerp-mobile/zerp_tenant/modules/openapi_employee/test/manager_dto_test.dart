@@ -15,7 +15,7 @@ void main() {
   // final instance = ManagerDto();
 
   group('test ManagerDto', () {
-    // int id
+    // String id
     test('to test the property `id`', () async {
       // TODO
     });

@@ -5,7 +5,7 @@
 import 'package:openapi_employee/api.dart';
 ```
 
-All URIs are relative to *http://192.168.0.112:8082*
+All URIs are relative to *http://192.168.0.106:8082*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -24,7 +24,7 @@ Retrieves multiple specific entities by their unique identifiers. Implements ra-
 import 'package:openapi_employee/api.dart';
 
 final api_instance = EmployeesGetManyEmployeesApi();
-final id = [[1,5,12]]; // List<int> | List of entity IDs to retrieve
+final id = [[1,5,12]]; // List<String> | List of entity IDs to retrieve
 
 try {
     final result = api_instance.getManyEmployees(id);
@@ -38,7 +38,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | [**List<int>**](int.md)| List of entity IDs to retrieve | [default to const []]
+ **id** | [**List<String>**](String.md)| List of entity IDs to retrieve | [default to const []]
 
 ### Return type
 

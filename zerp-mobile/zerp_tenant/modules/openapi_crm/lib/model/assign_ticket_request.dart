@@ -22,7 +22,7 @@ class AssignTicketRequest extends Schema {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  final int? teamId;
+  final String? teamId;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -83,7 +83,7 @@ class AssignTicketRequest extends Schema {
       }());
 
       return AssignTicketRequest(
-        teamId: json[r'teamId'] is int ? json[r'teamId'] as int : null,
+        teamId: json[r'teamId'] is String ? json[r'teamId'] as String : null,
         agentPartyId: json[r'agentPartyId'] is String ? json[r'agentPartyId'] as String : null,
       );
     }

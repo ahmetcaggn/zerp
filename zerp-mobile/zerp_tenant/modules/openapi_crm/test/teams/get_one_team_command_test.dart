@@ -20,7 +20,7 @@ void main() {
     //
     // Retrieves a single entity by its unique identifier. Implements ra-spring-data-provider's getOne operation. 
     //
-    //Future<ApiResponseTeamResponse> getOneTeam(int id) async
+    //Future<ApiResponseTeamResponse> getOneTeam(String id) async
     test('test getOneTeam', () async {
       // TODO
     });

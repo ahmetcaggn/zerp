@@ -5,11 +5,11 @@
 import 'package:openapi_crm/api.dart';
 ```
 
-All URIs are relative to *http://192.168.0.112:8081*
+All URIs are relative to *http://192.168.0.106:8081*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**patchTeam**](TeamsPatchTeamApi.md#) | **PATCH** /api/teams/{id} | Update: Update an existing entity
+[**patchTeam**](TeamsPatchTeamApi.md#) | **PATCH** /crm/teams/{id} | Update: Update an existing entity
 
 
 # **patchTeam**
@@ -24,7 +24,7 @@ Updates an existing entity with the provided field values. Implements ra-spring-
 import 'package:openapi_crm/api.dart';
 
 final api_instance = TeamsPatchTeamApi();
-final id = 1; // int | Unique identifier of the entity to update
+final id = 1; // String | Unique identifier of the entity to update
 final requestBody = Map<String, Object>(); // Map<String, Object> | 
 
 try {
@@ -39,7 +39,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **int**| Unique identifier of the entity to update | 
+ **id** | **String**| Unique identifier of the entity to update | 
  **requestBody** | [**Map<String, Object>**](Object.md)|  | 
 
 ### Return type

@@ -40,18 +40,47 @@ Please follow the [installation procedure](#installation--usage) and then run th
 ```dart
 import 'package:openapi_resource/api.dart';
 
+
+final api_instance = StockResourcesCreateStockResourceApi();
+final stockResourceCreateDTO = StockResourceCreateDTO(); // StockResourceCreateDTO | 
+
+try {
+    final result = api_instance.createStockResource(stockResourceCreateDTO);
+    print(result);
+} catch (e) {
+    print('Exception when calling StockResourcesCreateStockResourceApi->createStockResource: $e\n');
+}
+
 ```
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://192.168.0.112:8084*
+All URIs are relative to *http://192.168.0.106:8084*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*StockResourcesCreateStockResourceApi* | [**createStockResource**](doc//StockResourcesCreateStockResourceApi.md#) | **POST** / | Create: Create a new entity
+*StockResourcesDeleteManyStockResourcesApi* | [**deleteManyStockResources**](doc//StockResourcesDeleteManyStockResourcesApi.md#) | **DELETE** / | DeleteMany: Delete multiple entities
+*StockResourcesDeleteStockResourceApi* | [**deleteStockResource**](doc//StockResourcesDeleteStockResourceApi.md#) | **DELETE** /{id} | Delete: Delete a single entity
+*StockResourcesGetListStockResourcesApi* | [**getListStockResources**](doc//StockResourcesGetListStockResourcesApi.md#) | **GET** / | GetList: Get paginated list of entities with filtering
+*StockResourcesGetManyStockResourcesApi* | [**getManyStockResources**](doc//StockResourcesGetManyStockResourcesApi.md#) | **GET** /many | GetMany: Get multiple entities by IDs
+*StockResourcesGetOneStockResourceApi* | [**getOneStockResource**](doc//StockResourcesGetOneStockResourceApi.md#) | **GET** /{id} | GetOne: Get single entity by ID
+*StockResourcesPatchManyStockResourcesApi* | [**patchManyStockResources**](doc//StockResourcesPatchManyStockResourcesApi.md#) | **PATCH** / | UpdateMany: Update multiple entities
+*StockResourcesPatchStockResourceApi* | [**patchStockResource**](doc//StockResourcesPatchStockResourceApi.md#) | **PATCH** /{id} | Update: Update an existing entity
+*StockResourcesUpdateStockResourceApi* | [**updateStockResource**](doc//StockResourcesUpdateStockResourceApi.md#) | **PUT** /{id} | Update: Update an existing entity
 
 
 ## Documentation For Models
 
+ - [ApiResponseListStockResourceDTO](doc//ApiResponseListStockResourceDTO.md)
+ - [ApiResponseListUUID](doc//ApiResponseListUUID.md)
+ - [ApiResponseStockResourceDTO](doc//ApiResponseStockResourceDTO.md)
+ - [ApiResponseVoid](doc//ApiResponseVoid.md)
+ - [Meta](doc//Meta.md)
+ - [Parameter](doc//Parameter.md)
+ - [StockResourceCreateDTO](doc//StockResourceCreateDTO.md)
+ - [StockResourceDTO](doc//StockResourceDTO.md)
+ - [StockResourceUpdateDTO](doc//StockResourceUpdateDTO.md)
 
 
 ## Documentation For Authorization
@@ -60,5 +89,6 @@ Endpoints do not require authorization.
 
 
 ## Author
+
 
 

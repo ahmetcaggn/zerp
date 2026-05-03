@@ -14,7 +14,6 @@ class CreateTicketRequest extends Schema {
   CreateTicketRequest({
     this.title,
     this.description,
-    this.tenantId,
     this.priority,
     this.type,
   });
@@ -35,14 +34,6 @@ class CreateTicketRequest extends Schema {
   ///
   final String? description;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  final String? tenantId;
-
   final CreateTicketRequestPriorityEnum? priority;
 
   final CreateTicketRequestTypeEnum? type;
@@ -54,7 +45,6 @@ class CreateTicketRequest extends Schema {
   bool operator ==(Object other) => identical(this, other) || other is CreateTicketRequest &&
     other.title == title &&
     other.description == description &&
-    other.tenantId == tenantId &&
     other.priority == priority &&
     other.type == type;
 
@@ -63,12 +53,11 @@ class CreateTicketRequest extends Schema {
     // ignore: unnecessary_parenthesis
     (title == null ? 0 : title!.hashCode) +
     (description == null ? 0 : description!.hashCode) +
-    (tenantId == null ? 0 : tenantId!.hashCode) +
     (priority == null ? 0 : priority!.hashCode) +
     (type == null ? 0 : type!.hashCode);
 
   @override
-  String toString() => 'CreateTicketRequest[title=$title, description=$description, tenantId=$tenantId, priority=$priority, type=$type]';
+  String toString() => 'CreateTicketRequest[title=$title, description=$description, priority=$priority, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -81,11 +70,6 @@ class CreateTicketRequest extends Schema {
       json[r'description'] = this.description;
     } else {
       json[r'description'] = null;
-    }
-    if (this.tenantId != null) {
-      json[r'tenantId'] = this.tenantId;
-    } else {
-      json[r'tenantId'] = null;
     }
     if (this.priority != null) {
       json[r'priority'] = this.priority;
@@ -121,7 +105,6 @@ class CreateTicketRequest extends Schema {
       return CreateTicketRequest(
         title: json[r'title'] is String ? json[r'title'] as String : null,
         description: json[r'description'] is String ? json[r'description'] as String : null,
-        tenantId: json[r'tenantId'] is String ? json[r'tenantId'] as String : null,
         priority: CreateTicketRequestPriorityEnum.fromJson(json[r'priority']),
         type: CreateTicketRequestTypeEnum.fromJson(json[r'type']),
       );

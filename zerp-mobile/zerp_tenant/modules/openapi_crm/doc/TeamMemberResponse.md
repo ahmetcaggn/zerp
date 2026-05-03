@@ -8,7 +8,7 @@ import 'package:openapi_crm/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **int** |  | [optional] 
+**id** | **String** |  | [optional] 
 **userId** | **String** |  | [optional] 
 **role** | **String** |  | [optional] 
 **joinedAt** | [**DateTime**](DateTime.md) |  | [optional] 

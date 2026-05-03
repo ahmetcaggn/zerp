@@ -28,7 +28,7 @@ class CreateTeamRequestSchema extends JsonRequestSchema {
 /// Create: Create a new entity
 /// Creates a new entity with the provided data. Implements ra-spring-data-provider's create operation. Returns the created entity with generated ID and server-side defaults. 
 ///
-/// POST /api/teams
+/// POST /crm/teams
 class CreateTeamCommand extends OpenapiDefinitionBaseRequest<ApiResponseTeamResponse> {
   CreateTeamCommand({
     required CreateTeamRequest createTeamRequest,
@@ -39,7 +39,7 @@ class CreateTeamCommand extends OpenapiDefinitionBaseRequest<ApiResponseTeamResp
 
   @override
   String get path {
-    var p = r'/api/teams';
+    var p = r'/crm/teams';
     return p;
   }
 

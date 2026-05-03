@@ -17,19 +17,19 @@ import '../../model/api_response_team_response.dart';
 /// GetOne: Get single entity by ID
 /// Retrieves a single entity by its unique identifier. Implements ra-spring-data-provider's getOne operation. 
 ///
-/// GET /api/teams/{id}
+/// GET /crm/teams/{id}
 class GetOneTeamCommand extends OpenapiDefinitionBaseRequest<ApiResponseTeamResponse> {
   GetOneTeamCommand({
     required this.id,
   });
 
   /// Unique identifier of the entity to retrieve
-  final int id;
+  final String id;
 
   @override
   String get path {
-    var p = r'/api/teams/{id}';
-    p = p.replaceAll('{id}', id.toString());
+    var p = r'/crm/teams/{id}';
+    p = p.replaceAll('{id}', id);
     return p;
   }
 

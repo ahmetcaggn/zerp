@@ -5,7 +5,7 @@
 import 'package:openapi_employee/api.dart';
 ```
 
-All URIs are relative to *http://192.168.0.112:8082*
+All URIs are relative to *http://192.168.0.106:8082*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -13,7 +13,7 @@ Method | HTTP request | Description
 
 
 # **deleteManyEmployees**
-> ApiResponseListLong deleteManyEmployees(id)
+> ApiResponseListUUID deleteManyEmployees(id)
 
 DeleteMany: Delete multiple entities
 
@@ -24,7 +24,7 @@ Deletes multiple entities in a single operation. Implements ra-spring-data-provi
 import 'package:openapi_employee/api.dart';
 
 final api_instance = EmployeesDeleteManyEmployeesApi();
-final id = [[1,2,3]]; // List<int> | List of entity IDs to delete
+final id = [[1,2,3]]; // List<String> | List of entity IDs to delete
 
 try {
     final result = api_instance.deleteManyEmployees(id);
@@ -38,11 +38,11 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | [**List<int>**](int.md)| List of entity IDs to delete | [optional] [default to const []]
+ **id** | [**List<String>**](String.md)| List of entity IDs to delete | [optional] [default to const []]
 
 ### Return type
 
-[**ApiResponseListLong**](ApiResponseListLong.md)
+[**ApiResponseListUUID**](ApiResponseListUUID.md)
 
 ### Authorization
 

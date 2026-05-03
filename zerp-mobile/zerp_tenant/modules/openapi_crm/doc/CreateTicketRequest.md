@@ -10,7 +10,6 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **title** | **String** |  | [optional] 
 **description** | **String** |  | [optional] 
-**tenantId** | **String** |  | [optional] 
 **priority** | **String** |  | [optional] 
 **type** | **String** |  | [optional] 
 

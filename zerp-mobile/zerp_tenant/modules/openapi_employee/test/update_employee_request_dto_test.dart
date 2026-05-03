@@ -60,7 +60,7 @@ void main() {
       // TODO
     });
 
-    // int managerId
+    // String managerId
     test('to test the property `managerId`', () async {
       // TODO
     });

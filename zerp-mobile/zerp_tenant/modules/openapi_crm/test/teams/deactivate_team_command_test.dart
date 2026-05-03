@@ -16,7 +16,7 @@ void main() {
   // final instance = TeamsDeactivateTeamApi();
 
   group('tests for TeamsDeactivateTeamApi', () {
-    //Future<TeamResponse> deactivateTeam(int id) async
+    //Future<TeamResponse> deactivateTeam(String id) async
     test('test deactivateTeam', () async {
       // TODO
     });

@@ -5,11 +5,11 @@
 import 'package:openapi_crm/api.dart';
 ```
 
-All URIs are relative to *http://192.168.0.112:8081*
+All URIs are relative to *http://192.168.0.106:8081*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**deleteTeam**](TeamsDeleteTeamApi.md#) | **DELETE** /api/teams/{id} | Delete: Delete a single entity
+[**deleteTeam**](TeamsDeleteTeamApi.md#) | **DELETE** /crm/teams/{id} | Delete: Delete a single entity
 
 
 # **deleteTeam**
@@ -24,7 +24,7 @@ Deletes a single entity by its unique identifier. Implements ra-spring-data-prov
 import 'package:openapi_crm/api.dart';
 
 final api_instance = TeamsDeleteTeamApi();
-final id = 1; // int | Unique identifier of the entity to delete
+final id = 1; // String | Unique identifier of the entity to delete
 
 try {
     final result = api_instance.deleteTeam(id);
@@ -38,7 +38,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **int**| Unique identifier of the entity to delete | 
+ **id** | **String**| Unique identifier of the entity to delete | 
 
 ### Return type
 

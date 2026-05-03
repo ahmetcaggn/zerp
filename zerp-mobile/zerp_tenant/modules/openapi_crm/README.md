@@ -41,56 +41,65 @@ Please follow the [installation procedure](#installation--usage) and then run th
 import 'package:openapi_crm/api.dart';
 
 
-final api_instance = TeamsActivateTeamApi();
-final id = 56; // int | 
+final api_instance = TeamTicketsAddTicketCommentApi();
+final id = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final addCommentRequest = AddCommentRequest(); // AddCommentRequest | 
 
 try {
-    final result = api_instance.activateTeam(id);
+    final result = api_instance.addTicketComment(id, addCommentRequest);
     print(result);
 } catch (e) {
-    print('Exception when calling TeamsActivateTeamApi->activateTeam: $e\n');
+    print('Exception when calling TeamTicketsAddTicketCommentApi->addTicketComment: $e\n');
 }
 
 ```
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://192.168.0.112:8081*
+All URIs are relative to *http://192.168.0.106:8081*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*TeamsActivateTeamApi* | [**activateTeam**](doc//TeamsActivateTeamApi.md#) | **POST** /api/teams/{id}/activate | 
-*TeamsAddTeamMemberApi* | [**addTeamMember**](doc//TeamsAddTeamMemberApi.md#) | **POST** /api/teams/{id}/members | 
-*TeamsChangeTeamMemberRoleApi* | [**changeTeamMemberRole**](doc//TeamsChangeTeamMemberRoleApi.md#) | **PATCH** /api/teams/{id}/members/{userId}/role | 
-*TeamsCreateTeamApi* | [**createTeam**](doc//TeamsCreateTeamApi.md#) | **POST** /api/teams | Create: Create a new entity
-*TeamsDeactivateTeamApi* | [**deactivateTeam**](doc//TeamsDeactivateTeamApi.md#) | **POST** /api/teams/{id}/deactivate | 
-*TeamsDeleteManyTeamsApi* | [**deleteManyTeams**](doc//TeamsDeleteManyTeamsApi.md#) | **DELETE** /api/teams | DeleteMany: Delete multiple entities
-*TeamsDeleteTeamApi* | [**deleteTeam**](doc//TeamsDeleteTeamApi.md#) | **DELETE** /api/teams/{id} | Delete: Delete a single entity
-*TeamsGetListApi* | [**getList**](doc//TeamsGetListApi.md#) | **GET** /api/teams | GetList: Get paginated list of entities with filtering
-*TeamsGetManyReferenceApi* | [**getManyReference**](doc//TeamsGetManyReferenceApi.md#) | **GET** /api/teams/of/{target}/{targetId} | GetManyReference: Get entities that reference another entity
-*TeamsGetManyTeamsApi* | [**getManyTeams**](doc//TeamsGetManyTeamsApi.md#) | **GET** /api/teams/many | GetMany: Get multiple entities by IDs
-*TeamsGetOneTeamApi* | [**getOneTeam**](doc//TeamsGetOneTeamApi.md#) | **GET** /api/teams/{id} | GetOne: Get single entity by ID
-*TeamsPatchManyApi* | [**patchMany**](doc//TeamsPatchManyApi.md#) | **PATCH** /api/teams | UpdateMany: Update multiple entities
-*TeamsPatchTeamApi* | [**patchTeam**](doc//TeamsPatchTeamApi.md#) | **PATCH** /api/teams/{id} | Update: Update an existing entity
-*TeamsRemoveTeamMemberApi* | [**removeTeamMember**](doc//TeamsRemoveTeamMemberApi.md#) | **DELETE** /api/teams/{id}/members/{userId} | 
-*TeamsUpdateTeamApi* | [**updateTeam**](doc//TeamsUpdateTeamApi.md#) | **PUT** /api/teams/{id} | Update: Update an existing entity
-*TicketsAddTicketCommentApi* | [**addTicketComment**](doc//TicketsAddTicketCommentApi.md#) | **POST** /api/tickets/{id}/comments | 
-*TicketsAssignTicketApi* | [**assignTicket**](doc//TicketsAssignTicketApi.md#) | **POST** /api/tickets/{id}/assign | 
-*TicketsChangeTicketPriorityApi* | [**changeTicketPriority**](doc//TicketsChangeTicketPriorityApi.md#) | **PATCH** /api/tickets/{id}/priority | 
-*TicketsChangeTicketStatusApi* | [**changeTicketStatus**](doc//TicketsChangeTicketStatusApi.md#) | **PATCH** /api/tickets/{id}/status | 
-*TicketsCloseTicketApi* | [**closeTicket**](doc//TicketsCloseTicketApi.md#) | **POST** /api/tickets/{id}/close | 
-*TicketsCreateTicketApi* | [**createTicket**](doc//TicketsCreateTicketApi.md#) | **POST** /api/tickets | 
-*TicketsGetTicketApi* | [**getTicket**](doc//TicketsGetTicketApi.md#) | **GET** /api/tickets/{id} | 
-*TicketsUnassignTicketApi* | [**unassignTicket**](doc//TicketsUnassignTicketApi.md#) | **DELETE** /api/tickets/{id}/assign | 
+*TeamTicketsAddTicketCommentApi* | [**addTicketComment**](doc//TeamTicketsAddTicketCommentApi.md#) | **POST** /crm/tickets/{id}/comments | 
+*TeamTicketsAssignTicketApi* | [**assignTicket**](doc//TeamTicketsAssignTicketApi.md#) | **POST** /crm/tickets/{id}/assign | 
+*TeamTicketsChangeTicketPriorityApi* | [**changeTicketPriority**](doc//TeamTicketsChangeTicketPriorityApi.md#) | **PATCH** /crm/tickets/{id}/priority | 
+*TeamTicketsChangeTicketStatusApi* | [**changeTicketStatus**](doc//TeamTicketsChangeTicketStatusApi.md#) | **PATCH** /crm/tickets/{id}/status | 
+*TeamTicketsCloseTicketApi* | [**closeTicket**](doc//TeamTicketsCloseTicketApi.md#) | **POST** /crm/tickets/{id}/close | 
+*TeamTicketsUnassignTicketApi* | [**unassignTicket**](doc//TeamTicketsUnassignTicketApi.md#) | **DELETE** /crm/tickets/{id}/assign | 
+*TeamsActivateTeamApi* | [**activateTeam**](doc//TeamsActivateTeamApi.md#) | **POST** /crm/teams/{id}/activate | 
+*TeamsAddTeamMemberApi* | [**addTeamMember**](doc//TeamsAddTeamMemberApi.md#) | **POST** /crm/teams/{id}/members | 
+*TeamsChangeTeamMemberRoleApi* | [**changeTeamMemberRole**](doc//TeamsChangeTeamMemberRoleApi.md#) | **PATCH** /crm/teams/{id}/members/{userId}/role | 
+*TeamsCreateTeamApi* | [**createTeam**](doc//TeamsCreateTeamApi.md#) | **POST** /crm/teams | Create: Create a new entity
+*TeamsDeactivateTeamApi* | [**deactivateTeam**](doc//TeamsDeactivateTeamApi.md#) | **POST** /crm/teams/{id}/deactivate | 
+*TeamsDeleteManyTeamsApi* | [**deleteManyTeams**](doc//TeamsDeleteManyTeamsApi.md#) | **DELETE** /crm/teams | DeleteMany: Delete multiple entities
+*TeamsDeleteTeamApi* | [**deleteTeam**](doc//TeamsDeleteTeamApi.md#) | **DELETE** /crm/teams/{id} | Delete: Delete a single entity
+*TeamsGetListTeamsApi* | [**getListTeams**](doc//TeamsGetListTeamsApi.md#) | **GET** /crm/teams | GetList: Get paginated list of entities with filtering
+*TeamsGetManyTeamsApi* | [**getManyTeams**](doc//TeamsGetManyTeamsApi.md#) | **GET** /crm/teams/many | GetMany: Get multiple entities by IDs
+*TeamsGetOneTeamApi* | [**getOneTeam**](doc//TeamsGetOneTeamApi.md#) | **GET** /crm/teams/{id} | GetOne: Get single entity by ID
+*TeamsPatchManyTeamsApi* | [**patchManyTeams**](doc//TeamsPatchManyTeamsApi.md#) | **PATCH** /crm/teams | UpdateMany: Update multiple entities
+*TeamsPatchTeamApi* | [**patchTeam**](doc//TeamsPatchTeamApi.md#) | **PATCH** /crm/teams/{id} | Update: Update an existing entity
+*TeamsRemoveTeamMemberApi* | [**removeTeamMember**](doc//TeamsRemoveTeamMemberApi.md#) | **DELETE** /crm/teams/{id}/members/{userId} | 
+*TeamsUpdateTeamApi* | [**updateTeam**](doc//TeamsUpdateTeamApi.md#) | **PUT** /crm/teams/{id} | Update: Update an existing entity
+*TenantTicketsCreateTenantTicketApi* | [**createTenantTicket**](doc//TenantTicketsCreateTenantTicketApi.md#) | **POST** /crm/tickets | Create: Create a new entity
+*TenantTicketsDeleteManyTenantTicketsApi* | [**deleteManyTenantTickets**](doc//TenantTicketsDeleteManyTenantTicketsApi.md#) | **DELETE** /crm/tickets | DeleteMany: Delete multiple entities
+*TenantTicketsDeleteTenantTicketApi* | [**deleteTenantTicket**](doc//TenantTicketsDeleteTenantTicketApi.md#) | **DELETE** /crm/tickets/{id} | Delete: Delete a single entity
+*TenantTicketsGetListTenantTicketsApi* | [**getListTenantTickets**](doc//TenantTicketsGetListTenantTicketsApi.md#) | **GET** /crm/tickets | GetList: Get paginated list of entities with filtering
+*TenantTicketsGetManyTenantTicketsApi* | [**getManyTenantTickets**](doc//TenantTicketsGetManyTenantTicketsApi.md#) | **GET** /crm/tickets/many | GetMany: Get multiple entities by IDs
+*TenantTicketsGetOneTenantTicketApi* | [**getOneTenantTicket**](doc//TenantTicketsGetOneTenantTicketApi.md#) | **GET** /crm/tickets/{id} | GetOne: Get single entity by ID
+*TenantTicketsPatchManyTenantTicketsApi* | [**patchManyTenantTickets**](doc//TenantTicketsPatchManyTenantTicketsApi.md#) | **PATCH** /crm/tickets | UpdateMany: Update multiple entities
+*TenantTicketsPatchTenantTicketApi* | [**patchTenantTicket**](doc//TenantTicketsPatchTenantTicketApi.md#) | **PATCH** /crm/tickets/{id} | Update: Update an existing entity
+*TenantTicketsUpdateTenantTicketApi* | [**updateTenantTicket**](doc//TenantTicketsUpdateTenantTicketApi.md#) | **PUT** /crm/tickets/{id} | Update: Update an existing entity
 
 
 ## Documentation For Models
 
  - [AddCommentRequest](doc//AddCommentRequest.md)
  - [AddMemberRequest](doc//AddMemberRequest.md)
- - [ApiResponseListInteger](doc//ApiResponseListInteger.md)
  - [ApiResponseListTeamResponse](doc//ApiResponseListTeamResponse.md)
+ - [ApiResponseListTicketResponse](doc//ApiResponseListTicketResponse.md)
+ - [ApiResponseListUUID](doc//ApiResponseListUUID.md)
  - [ApiResponseTeamResponse](doc//ApiResponseTeamResponse.md)
+ - [ApiResponseTicketResponse](doc//ApiResponseTicketResponse.md)
  - [ApiResponseVoid](doc//ApiResponseVoid.md)
  - [AssignTicketRequest](doc//AssignTicketRequest.md)
  - [AttachmentResponse](doc//AttachmentResponse.md)
@@ -108,6 +117,7 @@ Class | Method | HTTP request | Description
  - [TicketAssignmentResponse](doc//TicketAssignmentResponse.md)
  - [TicketResponse](doc//TicketResponse.md)
  - [UpdateTeamRequest](doc//UpdateTeamRequest.md)
+ - [UpdateTicketRequest](doc//UpdateTicketRequest.md)
  - [WatcherResponse](doc//WatcherResponse.md)
 
 

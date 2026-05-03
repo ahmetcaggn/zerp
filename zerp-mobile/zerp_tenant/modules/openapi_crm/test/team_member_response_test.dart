@@ -15,7 +15,7 @@ void main() {
   // final instance = TeamMemberResponse();
 
   group('test TeamMemberResponse', () {
-    // int id
+    // String id
     test('to test the property `id`', () async {
       // TODO
     });

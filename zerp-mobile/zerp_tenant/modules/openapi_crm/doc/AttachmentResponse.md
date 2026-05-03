@@ -8,7 +8,7 @@ import 'package:openapi_crm/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **int** |  | [optional] 
+**id** | **String** |  | [optional] 
 **fileName** | **String** |  | [optional] 
 **fileSize** | **int** |  | [optional] 
 **contentType** | **String** |  | [optional] 

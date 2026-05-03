@@ -20,7 +20,7 @@ void main() {
     //
     // Deletes multiple entities in a single operation. Implements ra-spring-data-provider's deleteMany operation for bulk deletions. Returns a list of deleted entity IDs. 
     //
-    //Future<ApiResponseListLong> deleteManyEmployees({ List<int> id }) async
+    //Future<ApiResponseListUUID> deleteManyEmployees({ List<String> id }) async
     test('test deleteManyEmployees', () async {
       // TODO
     });

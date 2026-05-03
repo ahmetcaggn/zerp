@@ -55,7 +55,7 @@ try {
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://192.168.0.112:8082*
+All URIs are relative to *http://192.168.0.106:8082*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
@@ -64,12 +64,11 @@ Class | Method | HTTP request | Description
 *EmployeesDeleteManyEmployeesApi* | [**deleteManyEmployees**](doc//EmployeesDeleteManyEmployeesApi.md#) | **DELETE** /employee | DeleteMany: Delete multiple entities
 *EmployeesGetDeletedEmployeesApi* | [**getDeletedEmployees**](doc//EmployeesGetDeletedEmployeesApi.md#) | **GET** /employee/deleted | 
 *EmployeesGetDeletedEmployeesPaginatedApi* | [**getDeletedEmployeesPaginated**](doc//EmployeesGetDeletedEmployeesPaginatedApi.md#) | **GET** /employee/deleted/paginated | 
-*EmployeesGetListApi* | [**getList**](doc//EmployeesGetListApi.md#) | **GET** /employee | GetList: Get paginated list of entities with filtering
+*EmployeesGetListEmployeesApi* | [**getListEmployees**](doc//EmployeesGetListEmployeesApi.md#) | **GET** /employee | GetList: Get paginated list of entities with filtering
 *EmployeesGetManyEmployeesApi* | [**getManyEmployees**](doc//EmployeesGetManyEmployeesApi.md#) | **GET** /employee/many | GetMany: Get multiple entities by IDs
-*EmployeesGetManyReferenceApi* | [**getManyReference**](doc//EmployeesGetManyReferenceApi.md#) | **GET** /employee/of/{target}/{targetId} | GetManyReference: Get entities that reference another entity
 *EmployeesGetOneEmployeeApi* | [**getOneEmployee**](doc//EmployeesGetOneEmployeeApi.md#) | **GET** /employee/{id} | GetOne: Get single entity by ID
 *EmployeesPatchEmployeeApi* | [**patchEmployee**](doc//EmployeesPatchEmployeeApi.md#) | **PATCH** /employee/{id} | Update: Update an existing entity
-*EmployeesPatchManyApi* | [**patchMany**](doc//EmployeesPatchManyApi.md#) | **PATCH** /employee | UpdateMany: Update multiple entities
+*EmployeesPatchManyEmployeesApi* | [**patchManyEmployees**](doc//EmployeesPatchManyEmployeesApi.md#) | **PATCH** /employee | UpdateMany: Update multiple entities
 *EmployeesSearchEmployeesApi* | [**searchEmployees**](doc//EmployeesSearchEmployeesApi.md#) | **GET** /employee/search | 
 *EmployeesUpdateEmployeeApi* | [**updateEmployee**](doc//EmployeesUpdateEmployeeApi.md#) | **PUT** /employee/{id} | Update: Update an existing entity
 
@@ -79,7 +78,7 @@ Class | Method | HTTP request | Description
  - [ApiResponseEmployeeResponseDto](doc//ApiResponseEmployeeResponseDto.md)
  - [ApiResponseListEmployeeListResponseDto](doc//ApiResponseListEmployeeListResponseDto.md)
  - [ApiResponseListEmployeeResponseDto](doc//ApiResponseListEmployeeResponseDto.md)
- - [ApiResponseListLong](doc//ApiResponseListLong.md)
+ - [ApiResponseListUUID](doc//ApiResponseListUUID.md)
  - [ApiResponsePageEmployeeListResponseDto](doc//ApiResponsePageEmployeeListResponseDto.md)
  - [ApiResponseVoid](doc//ApiResponseVoid.md)
  - [CreateEmployeeRequestDto](doc//CreateEmployeeRequestDto.md)

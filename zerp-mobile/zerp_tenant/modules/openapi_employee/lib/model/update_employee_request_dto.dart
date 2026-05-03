@@ -99,7 +99,7 @@ class UpdateEmployeeRequestDto extends Schema {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  final int? managerId;
+  final String? managerId;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -237,7 +237,7 @@ class UpdateEmployeeRequestDto extends Schema {
         hireDate: json[r'hireDate'] != null ? DateTime.parse(json[r'hireDate'].toString()) : null,
         terminationDate: json[r'terminationDate'] != null ? DateTime.parse(json[r'terminationDate'].toString()) : null,
         status: UpdateEmployeeRequestDtoStatusEnum.fromJson(json[r'status']),
-        managerId: json[r'managerId'] is int ? json[r'managerId'] as int : null,
+        managerId: json[r'managerId'] is String ? json[r'managerId'] as String : null,
         salary: num.parse('${json[r'salary']}'),
         contacts: EmployeeContactDto.listFromJson(json[r'contacts']),
       );
@@ -317,6 +317,7 @@ class UpdateEmployeeRequestDtoStatusEnum {
   static const ON_LEAVE = UpdateEmployeeRequestDtoStatusEnum._(r'ON_LEAVE');
   static const RETIRED = UpdateEmployeeRequestDtoStatusEnum._(r'RETIRED');
   static const PROBATION = UpdateEmployeeRequestDtoStatusEnum._(r'PROBATION');
+  static const DELETED = UpdateEmployeeRequestDtoStatusEnum._(r'DELETED');
 
   /// List of all possible values in this [enum][UpdateEmployeeRequestDtoStatusEnum].
   static const values = <UpdateEmployeeRequestDtoStatusEnum>[
@@ -326,6 +327,7 @@ class UpdateEmployeeRequestDtoStatusEnum {
     ON_LEAVE,
     RETIRED,
     PROBATION,
+    DELETED,
   ];
 
   static UpdateEmployeeRequestDtoStatusEnum? fromJson(dynamic value) => UpdateEmployeeRequestDtoStatusEnumTypeTransformer().decode(value);
@@ -370,6 +372,7 @@ class UpdateEmployeeRequestDtoStatusEnumTypeTransformer {
         case r'ON_LEAVE': return UpdateEmployeeRequestDtoStatusEnum.ON_LEAVE;
         case r'RETIRED': return UpdateEmployeeRequestDtoStatusEnum.RETIRED;
         case r'PROBATION': return UpdateEmployeeRequestDtoStatusEnum.PROBATION;
+        case r'DELETED': return UpdateEmployeeRequestDtoStatusEnum.DELETED;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

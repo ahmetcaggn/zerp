@@ -5,11 +5,11 @@
 import 'package:openapi_crm/api.dart';
 ```
 
-All URIs are relative to *http://192.168.0.112:8081*
+All URIs are relative to *http://192.168.0.106:8081*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**changeTeamMemberRole**](TeamsChangeTeamMemberRoleApi.md#) | **PATCH** /api/teams/{id}/members/{userId}/role | 
+[**changeTeamMemberRole**](TeamsChangeTeamMemberRoleApi.md#) | **PATCH** /crm/teams/{id}/members/{userId}/role | 
 
 
 # **changeTeamMemberRole**
@@ -22,7 +22,7 @@ Method | HTTP request | Description
 import 'package:openapi_crm/api.dart';
 
 final api_instance = TeamsChangeTeamMemberRoleApi();
-final id = 56; // int | 
+final id = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
 final userId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
 final changeMemberRoleRequest = ChangeMemberRoleRequest(); // ChangeMemberRoleRequest | 
 
@@ -38,7 +38,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **int**|  | 
+ **id** | **String**|  | 
  **userId** | **String**|  | 
  **changeMemberRoleRequest** | [**ChangeMemberRoleRequest**](ChangeMemberRoleRequest.md)|  | 
 

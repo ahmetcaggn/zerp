@@ -16,7 +16,7 @@ void main() {
   // final instance = TeamsActivateTeamApi();
 
   group('tests for TeamsActivateTeamApi', () {
-    //Future<TeamResponse> activateTeam(int id) async
+    //Future<TeamResponse> activateTeam(String id) async
     test('test activateTeam', () async {
       // TODO
     });

@@ -8,8 +8,8 @@ import 'package:openapi_crm/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **int** |  | [optional] 
-**teamId** | **int** |  | [optional] 
+**id** | **String** |  | [optional] 
+**teamId** | **String** |  | [optional] 
 **agentPartyId** | **String** |  | [optional] 
 **active** | **bool** |  | [optional] 
 **assignedAt** | [**DateTime**](DateTime.md) |  | [optional] 

@@ -15,20 +15,20 @@ import '../../model/team_response.dart';
 
 
 ///
-/// DELETE /api/teams/{id}/members/{userId}
+/// DELETE /crm/teams/{id}/members/{userId}
 class RemoveTeamMemberCommand extends OpenapiDefinitionBaseRequest<TeamResponse> {
   RemoveTeamMemberCommand({
     required this.id,
     required this.userId,
   });
 
-  final int id;
+  final String id;
   final String userId;
 
   @override
   String get path {
-    var p = r'/api/teams/{id}/members/{userId}';
-    p = p.replaceAll('{id}', id.toString());
+    var p = r'/crm/teams/{id}/members/{userId}';
+    p = p.replaceAll('{id}', id);
     p = p.replaceAll('{userId}', userId);
     return p;
   }

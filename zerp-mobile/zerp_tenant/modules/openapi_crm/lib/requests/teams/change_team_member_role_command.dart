@@ -26,7 +26,7 @@ class ChangeTeamMemberRoleRequestSchema extends JsonRequestSchema {
 }
 
 ///
-/// PATCH /api/teams/{id}/members/{userId}/role
+/// PATCH /crm/teams/{id}/members/{userId}/role
 class ChangeTeamMemberRoleCommand extends OpenapiDefinitionBaseRequest<TeamResponse> {
   ChangeTeamMemberRoleCommand({
     required this.id,
@@ -34,15 +34,15 @@ class ChangeTeamMemberRoleCommand extends OpenapiDefinitionBaseRequest<TeamRespo
     required ChangeMemberRoleRequest changeMemberRoleRequest,
   }) : _payload = ChangeTeamMemberRoleRequestSchema(data: changeMemberRoleRequest);
 
-  final int id;
+  final String id;
   final String userId;
 
   final ChangeTeamMemberRoleRequestSchema _payload;
 
   @override
   String get path {
-    var p = r'/api/teams/{id}/members/{userId}/role';
-    p = p.replaceAll('{id}', id.toString());
+    var p = r'/crm/teams/{id}/members/{userId}/role';
+    p = p.replaceAll('{id}', id);
     p = p.replaceAll('{userId}', userId);
     return p;
   }

@@ -5,7 +5,7 @@
 import 'package:openapi_employee/api.dart';
 ```
 
-All URIs are relative to *http://192.168.0.112:8082*
+All URIs are relative to *http://192.168.0.106:8082*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -24,7 +24,7 @@ Updates an existing entity with the provided field values. Implements ra-spring-
 import 'package:openapi_employee/api.dart';
 
 final api_instance = EmployeesUpdateEmployeeApi();
-final id = 1; // int | Unique identifier of the entity to update
+final id = 1; // String | Unique identifier of the entity to update
 final updateEmployeeRequestDto = UpdateEmployeeRequestDto(); // UpdateEmployeeRequestDto | 
 
 try {
@@ -39,7 +39,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **int**| Unique identifier of the entity to update | 
+ **id** | **String**| Unique identifier of the entity to update | 
  **updateEmployeeRequestDto** | [**UpdateEmployeeRequestDto**](UpdateEmployeeRequestDto.md)|  | 
 
 ### Return type

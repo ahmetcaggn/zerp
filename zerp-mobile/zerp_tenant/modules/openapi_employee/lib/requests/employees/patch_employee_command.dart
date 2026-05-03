@@ -35,14 +35,14 @@ class PatchEmployeeCommand extends OpenapiDefinitionBaseRequest<ApiResponseEmplo
   }) : _payload = PatchEmployeeRequestSchema(data: requestBody);
 
   /// Unique identifier of the entity to update
-  final int id;
+  final String id;
 
   final PatchEmployeeRequestSchema _payload;
 
   @override
   String get path {
     var p = r'/employee/{id}';
-    p = p.replaceAll('{id}', id.toString());
+    p = p.replaceAll('{id}', id);
     return p;
   }
 

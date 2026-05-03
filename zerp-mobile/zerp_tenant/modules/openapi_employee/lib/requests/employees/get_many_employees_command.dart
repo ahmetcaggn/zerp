@@ -24,7 +24,7 @@ class GetManyEmployeesCommand extends OpenapiDefinitionBaseRequest<ApiResponseLi
   });
 
   /// List of entity IDs to retrieve
-  final List<int> id;
+  final List<String> id;
 
   @override
   String get path {

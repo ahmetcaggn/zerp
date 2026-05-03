@@ -15,18 +15,18 @@ import '../../model/team_response.dart';
 
 
 ///
-/// POST /api/teams/{id}/activate
+/// POST /crm/teams/{id}/activate
 class ActivateTeamCommand extends OpenapiDefinitionBaseRequest<TeamResponse> {
   ActivateTeamCommand({
     required this.id,
   });
 
-  final int id;
+  final String id;
 
   @override
   String get path {
-    var p = r'/api/teams/{id}/activate';
-    p = p.replaceAll('{id}', id.toString());
+    var p = r'/crm/teams/{id}/activate';
+    p = p.replaceAll('{id}', id);
     return p;
   }
 

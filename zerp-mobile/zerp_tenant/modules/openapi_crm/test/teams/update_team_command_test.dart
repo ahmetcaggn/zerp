@@ -20,7 +20,7 @@ void main() {
     //
     // Updates an existing entity with the provided field values. Implements ra-spring-data-provider's update operation with support for partial updates. Only the fields provided in the request body will be updated. 
     //
-    //Future<ApiResponseTeamResponse> updateTeam(int id, UpdateTeamRequest updateTeamRequest) async
+    //Future<ApiResponseTeamResponse> updateTeam(String id, UpdateTeamRequest updateTeamRequest) async
     test('test updateTeam', () async {
       // TODO
     });

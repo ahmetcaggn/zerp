@@ -20,7 +20,7 @@ void main() {
     //
     // Deletes a single entity by its unique identifier. Implements ra-spring-data-provider's delete operation. 
     //
-    //Future<ApiResponseVoid> deleteTeam(int id) async
+    //Future<ApiResponseVoid> deleteTeam(String id) async
     test('test deleteTeam', () async {
       // TODO
     });

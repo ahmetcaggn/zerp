@@ -5,11 +5,11 @@
 import 'package:openapi_crm/api.dart';
 ```
 
-All URIs are relative to *http://192.168.0.112:8081*
+All URIs are relative to *http://192.168.0.106:8081*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**getManyTeams**](TeamsGetManyTeamsApi.md#) | **GET** /api/teams/many | GetMany: Get multiple entities by IDs
+[**getManyTeams**](TeamsGetManyTeamsApi.md#) | **GET** /crm/teams/many | GetMany: Get multiple entities by IDs
 
 
 # **getManyTeams**
@@ -24,7 +24,7 @@ Retrieves multiple specific entities by their unique identifiers. Implements ra-
 import 'package:openapi_crm/api.dart';
 
 final api_instance = TeamsGetManyTeamsApi();
-final id = [[1,5,12]]; // List<int> | List of entity IDs to retrieve
+final id = [[1, 5, 12]]; // List<String> | List of entity IDs to retrieve
 
 try {
     final result = api_instance.getManyTeams(id);
@@ -38,7 +38,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | [**List<int>**](int.md)| List of entity IDs to retrieve | [default to const []]
+ **id** | [**List<String>**](String.md)| List of entity IDs to retrieve | [default to const []]
 
 ### Return type
 

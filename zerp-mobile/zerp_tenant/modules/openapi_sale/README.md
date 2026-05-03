@@ -44,7 +44,7 @@ import 'package:openapi_sale/api.dart';
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://192.168.0.112:8085*
+All URIs are relative to *http://192.168.0.106:8085*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------

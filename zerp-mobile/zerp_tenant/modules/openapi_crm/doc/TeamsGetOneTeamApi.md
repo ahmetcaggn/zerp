@@ -5,11 +5,11 @@
 import 'package:openapi_crm/api.dart';
 ```
 
-All URIs are relative to *http://192.168.0.112:8081*
+All URIs are relative to *http://192.168.0.106:8081*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**getOneTeam**](TeamsGetOneTeamApi.md#) | **GET** /api/teams/{id} | GetOne: Get single entity by ID
+[**getOneTeam**](TeamsGetOneTeamApi.md#) | **GET** /crm/teams/{id} | GetOne: Get single entity by ID
 
 
 # **getOneTeam**
@@ -24,7 +24,7 @@ Retrieves a single entity by its unique identifier. Implements ra-spring-data-pr
 import 'package:openapi_crm/api.dart';
 
 final api_instance = TeamsGetOneTeamApi();
-final id = 1; // int | Unique identifier of the entity to retrieve
+final id = 1; // String | Unique identifier of the entity to retrieve
 
 try {
     final result = api_instance.getOneTeam(id);
@@ -38,7 +38,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **int**| Unique identifier of the entity to retrieve | 
+ **id** | **String**| Unique identifier of the entity to retrieve | 
 
 ### Return type
 

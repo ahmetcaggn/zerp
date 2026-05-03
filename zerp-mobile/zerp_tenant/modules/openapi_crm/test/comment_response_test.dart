@@ -15,13 +15,18 @@ void main() {
   // final instance = CommentResponse();
 
   group('test CommentResponse', () {
-    // int id
+    // String id
     test('to test the property `id`', () async {
       // TODO
     });
 
     // String authorId
     test('to test the property `authorId`', () async {
+      // TODO
+    });
+
+    // String authorName
+    test('to test the property `authorName`', () async {
       // TODO
     });
 

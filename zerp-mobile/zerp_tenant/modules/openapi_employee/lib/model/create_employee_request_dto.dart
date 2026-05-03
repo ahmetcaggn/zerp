@@ -13,6 +13,8 @@ import 'employee_contact_dto.dart';
 class CreateEmployeeRequestDto extends Schema {
   /// Returns a new [CreateEmployeeRequestDto] instance.
   CreateEmployeeRequestDto({
+    required this.username,
+    required this.tempPassword,
     required this.firstName,
     required this.lastName,
     required this.email,
@@ -26,6 +28,10 @@ class CreateEmployeeRequestDto extends Schema {
     this.isActive,
     this.contacts = const [],
   });
+
+  final String username;
+
+  final String tempPassword;
 
   final String firstName;
 
@@ -67,7 +73,7 @@ class CreateEmployeeRequestDto extends Schema {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  final int? managerId;
+  final String? managerId;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -92,6 +98,8 @@ class CreateEmployeeRequestDto extends Schema {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CreateEmployeeRequestDto &&
+    other.username == username &&
+    other.tempPassword == tempPassword &&
     other.firstName == firstName &&
     other.lastName == lastName &&
     other.email == email &&
@@ -108,6 +116,8 @@ class CreateEmployeeRequestDto extends Schema {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (username.hashCode) +
+    (tempPassword.hashCode) +
     (firstName.hashCode) +
     (lastName.hashCode) +
     (email.hashCode) +
@@ -122,10 +132,12 @@ class CreateEmployeeRequestDto extends Schema {
     (contacts.hashCode);
 
   @override
-  String toString() => 'CreateEmployeeRequestDto[firstName=$firstName, lastName=$lastName, email=$email, phoneNumber=$phoneNumber, nationalId=$nationalId, dateOfBirth=$dateOfBirth, hireDate=$hireDate, status=$status, managerId=$managerId, salary=$salary, isActive=$isActive, contacts=$contacts]';
+  String toString() => 'CreateEmployeeRequestDto[username=$username, tempPassword=$tempPassword, firstName=$firstName, lastName=$lastName, email=$email, phoneNumber=$phoneNumber, nationalId=$nationalId, dateOfBirth=$dateOfBirth, hireDate=$hireDate, status=$status, managerId=$managerId, salary=$salary, isActive=$isActive, contacts=$contacts]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'username'] = this.username;
+      json[r'tempPassword'] = this.tempPassword;
       json[r'firstName'] = this.firstName;
       json[r'lastName'] = this.lastName;
       json[r'email'] = this.email;
@@ -188,6 +200,8 @@ class CreateEmployeeRequestDto extends Schema {
       }());
 
       return CreateEmployeeRequestDto(
+        username: json[r'username'] as String,
+        tempPassword: json[r'tempPassword'] as String,
         firstName: json[r'firstName'] as String,
         lastName: json[r'lastName'] as String,
         email: json[r'email'] as String,
@@ -196,7 +210,7 @@ class CreateEmployeeRequestDto extends Schema {
         dateOfBirth: json[r'dateOfBirth'] != null ? DateTime.parse(json[r'dateOfBirth'].toString()) : null,
         hireDate: DateTime.parse(json[r'hireDate'].toString()),
         status: CreateEmployeeRequestDtoStatusEnum.fromJson(json[r'status']),
-        managerId: json[r'managerId'] is int ? json[r'managerId'] as int : null,
+        managerId: json[r'managerId'] is String ? json[r'managerId'] as String : null,
         salary: num.parse('${json[r'salary']}'),
         isActive: json[r'isActive'] is bool ? json[r'isActive'] as bool : null,
         contacts: EmployeeContactDto.listFromJson(json[r'contacts']),
@@ -247,6 +261,8 @@ class CreateEmployeeRequestDto extends Schema {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'username',
+    'tempPassword',
     'firstName',
     'lastName',
     'email',
@@ -281,6 +297,7 @@ class CreateEmployeeRequestDtoStatusEnum {
   static const ON_LEAVE = CreateEmployeeRequestDtoStatusEnum._(r'ON_LEAVE');
   static const RETIRED = CreateEmployeeRequestDtoStatusEnum._(r'RETIRED');
   static const PROBATION = CreateEmployeeRequestDtoStatusEnum._(r'PROBATION');
+  static const DELETED = CreateEmployeeRequestDtoStatusEnum._(r'DELETED');
 
   /// List of all possible values in this [enum][CreateEmployeeRequestDtoStatusEnum].
   static const values = <CreateEmployeeRequestDtoStatusEnum>[
@@ -290,6 +307,7 @@ class CreateEmployeeRequestDtoStatusEnum {
     ON_LEAVE,
     RETIRED,
     PROBATION,
+    DELETED,
   ];
 
   static CreateEmployeeRequestDtoStatusEnum? fromJson(dynamic value) => CreateEmployeeRequestDtoStatusEnumTypeTransformer().decode(value);
@@ -334,6 +352,7 @@ class CreateEmployeeRequestDtoStatusEnumTypeTransformer {
         case r'ON_LEAVE': return CreateEmployeeRequestDtoStatusEnum.ON_LEAVE;
         case r'RETIRED': return CreateEmployeeRequestDtoStatusEnum.RETIRED;
         case r'PROBATION': return CreateEmployeeRequestDtoStatusEnum.PROBATION;
+        case r'DELETED': return CreateEmployeeRequestDtoStatusEnum.DELETED;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

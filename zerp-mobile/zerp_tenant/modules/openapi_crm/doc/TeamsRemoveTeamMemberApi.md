@@ -5,11 +5,11 @@
 import 'package:openapi_crm/api.dart';
 ```
 
-All URIs are relative to *http://192.168.0.112:8081*
+All URIs are relative to *http://192.168.0.106:8081*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**removeTeamMember**](TeamsRemoveTeamMemberApi.md#) | **DELETE** /api/teams/{id}/members/{userId} | 
+[**removeTeamMember**](TeamsRemoveTeamMemberApi.md#) | **DELETE** /crm/teams/{id}/members/{userId} | 
 
 
 # **removeTeamMember**
@@ -22,7 +22,7 @@ Method | HTTP request | Description
 import 'package:openapi_crm/api.dart';
 
 final api_instance = TeamsRemoveTeamMemberApi();
-final id = 56; // int | 
+final id = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
 final userId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
 
 try {
@@ -37,7 +37,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **int**|  | 
+ **id** | **String**|  | 
  **userId** | **String**|  | 
 
 ### Return type
