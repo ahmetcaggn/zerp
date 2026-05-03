@@ -19,6 +19,10 @@ import org.zerp.common.permission.repository.PermissionRepository;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentUserIdResolver;
+import org.zerp.user.dto.permission.PermissionCreateRequestDTO;
+import org.zerp.user.dto.permission.PermissionResponse;
+import org.zerp.user.dto.permission.PermissionUpdateRequest;
+import org.zerp.user.mapper.PermissionMapper;
 import org.zerp.user.permission.PermissionPermissionEvaluator;
 
 import java.util.ArrayList;
@@ -32,22 +36,23 @@ import java.util.UUID;
 @Service
 @Log4j2
 @RequiredArgsConstructor
-public class PermissionService implements IResourceService<Permission, Permission, Permission, Permission, Long> {
+public class PermissionService implements IResourceService<PermissionResponse, PermissionResponse, PermissionCreateRequestDTO, PermissionUpdateRequest, Long> {
     private final PermissionRepository repository;
     private final PermissionPermissionEvaluator permissionEvaluator;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final FilterRefiner filterRefiner;
+    private final PermissionMapper permissionMapper;
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Permission> findWithFilters(Map<String, String> filters, Pageable pageable) {
+    public Page<PermissionResponse> findWithFilters(Map<String, String> filters, Pageable pageable) {
         UUID userId = resolveCurrentUserId();
 
         Specification<Permission> spec = buildSpecificationFromFilters(filters);
         spec = permissionEvaluator.filterRead(userId).and(spec);
 
         try {
-            return repository.findAll(spec, pageable);
+            return repository.findAll(spec, pageable).map(permissionMapper::toResponse);
         } catch (DataAccessException e) {
             if (e.getCause() instanceof FilterError.Runtime fe) {
                 log.warn("Filter error while processing filters {}: {}", filters, fe.getMessage(), e);
@@ -63,17 +68,17 @@ public class PermissionService implements IResourceService<Permission, Permissio
 
     @Override
     @Transactional(readOnly = true)
-    public List<Permission> findAllById(List<Long> ids) {
+    public List<PermissionResponse> findAllById(List<Long> ids) {
         UUID userId = resolveCurrentUserId();
-        List<Permission> result = new ArrayList<>();
+        List<PermissionResponse> result = new ArrayList<>();
 
         Map<Long, Permission> permissionById = new HashMap<>();
         repository.findAllById(ids).forEach(permission -> permissionById.put(permission.getId(), permission));
 
         for (Long id : ids) {
             Permission permission = permissionById.get(id);
-            if (permission != null && permissionEvaluator.canRead(userId, toTarget(permission))) {
-                result.add(permission);
+            if (permission != null && permissionEvaluator.canRead(userId, permissionMapper.toTarget(permission))) {
+                result.add(permissionMapper.toResponse(permission));
             }
         }
 
@@ -82,25 +87,25 @@ public class PermissionService implements IResourceService<Permission, Permissio
 
     @Override
     @Transactional(readOnly = true)
-    public Permission findById(Long id) {
+    public PermissionResponse findById(Long id) {
         UUID userId = resolveCurrentUserId();
         Permission permission = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Permission not found"));
 
-        if (!permissionEvaluator.canRead(userId, toTarget(permission))) {
+        if (!permissionEvaluator.canRead(userId, permissionMapper.toTarget(permission))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Permission");
         }
 
-        return permission;
+        return permissionMapper.toResponse(permission);
     }
 
     @Override
     @Transactional
-    public Permission create(Permission data) {
+    public PermissionResponse create(PermissionCreateRequestDTO data) {
         UUID userId = resolveCurrentUserId();
         validateRequiredFields(data);
 
-        if (!permissionEvaluator.canCreate(userId, toDraft(data))) {
+        if (!permissionEvaluator.canCreate(userId, permissionMapper.toDraft(data))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Permission");
         }
 
@@ -111,36 +116,36 @@ public class PermissionService implements IResourceService<Permission, Permissio
                 .action(data.getAction())
                 .build();
 
-        return repository.save(toSave);
+        return permissionMapper.toResponse(repository.save(toSave));
     }
 
     @Override
     @Transactional
-    public Permission patch(Long id, Map<String, Object> fields) {
+    public PermissionResponse patch(Long id, Map<String, Object> fields) {
         UUID userId = resolveCurrentUserId();
         Permission existing = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Permission not found"));
 
         applyFieldUpdates(existing, fields);
-        validateRequiredFields(existing);
+        validateEntityRequiredFields(existing);
 
-        if (!permissionEvaluator.canPatch(userId, toTarget(existing))) {
+        if (!permissionEvaluator.canPatch(userId, permissionMapper.toTarget(existing))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to patch Permission");
         }
 
-        return repository.save(existing);
+        return permissionMapper.toResponse(repository.save(existing));
     }
 
     @Override
     @Transactional
-    public Permission update(Long id, Permission data) {
+    public PermissionResponse update(Long id, PermissionUpdateRequest data) {
         UUID userId = resolveCurrentUserId();
         Permission existing = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Permission not found"));
 
         validateRequiredFields(data);
 
-        if (!permissionEvaluator.canUpdate(userId, toTarget(existing.getId(), data))) {
+        if (!permissionEvaluator.canUpdate(userId, permissionMapper.toTarget(existing.getId(), data))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Permission");
         }
 
@@ -149,7 +154,7 @@ public class PermissionService implements IResourceService<Permission, Permissio
         existing.setTargetId(data.getTargetId());
         existing.setAction(data.getAction());
 
-        return repository.save(existing);
+        return permissionMapper.toResponse(repository.save(existing));
     }
 
     @Override
@@ -172,9 +177,9 @@ public class PermissionService implements IResourceService<Permission, Permissio
 
             try {
                 applyFieldUpdates(existing, fields);
-                validateRequiredFields(existing);
+                validateEntityRequiredFields(existing);
 
-                if (!permissionEvaluator.canPatch(userId, toTarget(existing))) {
+                if (!permissionEvaluator.canPatch(userId, permissionMapper.toTarget(existing))) {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to patch Permission");
                 }
 
@@ -199,7 +204,7 @@ public class PermissionService implements IResourceService<Permission, Permissio
         Permission existing = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Permission not found"));
 
-        if (!permissionEvaluator.canDelete(userId, toTarget(existing))) {
+        if (!permissionEvaluator.canDelete(userId, permissionMapper.toTarget(existing))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Permission");
         }
 
@@ -225,7 +230,7 @@ public class PermissionService implements IResourceService<Permission, Permissio
                 continue;
             }
 
-            if (!permissionEvaluator.canDelete(userId, toTarget(existing))) {
+            if (!permissionEvaluator.canDelete(userId, permissionMapper.toTarget(existing))) {
                 log.warn("Skipping delete for permission id {} due to user is not permitted", id);
                 continue;
             }
@@ -254,12 +259,29 @@ public class PermissionService implements IResourceService<Permission, Permissio
         return List.of(PermissionAction.values());
     }
 
-    private void validateRequiredFields(Permission permission) {
-        if (permission == null
-                || permission.getUserId() == null
-                || permission.getTargetType() == null
-                || permission.getTargetId() == null
-                || permission.getAction() == null) {
+    private void validateRequiredFields(PermissionCreateRequestDTO request) {
+        if (request == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request cannot be null");
+        }
+        validateProperties(request.getUserId(), request.getTargetType(), request.getTargetId(), request.getAction());
+    }
+
+    private void validateRequiredFields(PermissionUpdateRequest request) {
+        if (request == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request cannot be null");
+        }
+        validateProperties(request.getUserId(), request.getTargetType(), request.getTargetId(), request.getAction());
+    }
+
+    private void validateEntityRequiredFields(Permission permission) {
+        if (permission == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entity cannot be null");
+        }
+        validateProperties(permission.getUserId(), permission.getTargetType(), permission.getTargetId(), permission.getAction());
+    }
+
+    private void validateProperties(UUID userId, PermissionTargetType targetType, UUID targetId, PermissionAction action) {
+        if (userId == null || targetType == null || targetId == null || action == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "userId, targetType, targetId and action are required");
         }
@@ -314,34 +336,6 @@ public class PermissionService implements IResourceService<Permission, Permissio
         }
     }
 
-    private PermissionPermissionEvaluator.PermissionTarget toTarget(Permission permission) {
-        return new PermissionPermissionEvaluator.PermissionTarget(
-                permission.getId(),
-                permission.getUserId(),
-                permission.getTargetType(),
-                permission.getTargetId(),
-                permission.getAction()
-        );
-    }
-
-    private PermissionPermissionEvaluator.PermissionTarget toTarget(Long id, Permission permission) {
-        return new PermissionPermissionEvaluator.PermissionTarget(
-                id,
-                permission.getUserId(),
-                permission.getTargetType(),
-                permission.getTargetId(),
-                permission.getAction()
-        );
-    }
-
-    private PermissionPermissionEvaluator.PermissionDraft toDraft(Permission permission) {
-        return new PermissionPermissionEvaluator.PermissionDraft(
-                permission.getUserId(),
-                permission.getTargetType(),
-                permission.getTargetId(),
-                permission.getAction()
-        );
-    }
 
     private UUID resolveCurrentUserId() {
         return currentUserIdResolver.resolve();

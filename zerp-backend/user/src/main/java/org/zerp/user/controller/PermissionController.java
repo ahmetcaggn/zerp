@@ -7,9 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.zerp.common.dto.ApiResponse;
-import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.resource.controller.ResourceController;
+import org.zerp.user.dto.permission.PermissionCreateRequestDTO;
+import org.zerp.user.dto.permission.PermissionResponse;
+import org.zerp.user.dto.permission.PermissionUpdateRequest;
 import org.zerp.user.service.PermissionService;
 
 import java.util.List;
@@ -18,7 +20,7 @@ import java.util.List;
 @RequestMapping("/user/permissions")
 @RequiredArgsConstructor
 @Tag(name = "Permission", description = "API for managing permissions")
-public class PermissionController extends ResourceController<Permission, Permission, Permission, Permission, Long> {
+public class PermissionController extends ResourceController<PermissionResponse, PermissionResponse, PermissionCreateRequestDTO, PermissionUpdateRequest, Long> {
     private final PermissionService service;
 
     @Override
