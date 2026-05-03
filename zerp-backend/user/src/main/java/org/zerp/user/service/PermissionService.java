@@ -77,7 +77,7 @@ public class PermissionService implements IResourceService<PermissionResponse, P
 
         for (Long id : ids) {
             Permission permission = permissionById.get(id);
-            if (permission != null && permissionEvaluator.canRead(userId, permissionMapper.toTarget(permission))) {
+            if (permission != null && permissionEvaluator.canRead(userId, permission)) {
                 result.add(permissionMapper.toResponse(permission));
             }
         }
@@ -92,7 +92,7 @@ public class PermissionService implements IResourceService<PermissionResponse, P
         Permission permission = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Permission not found"));
 
-        if (!permissionEvaluator.canRead(userId, permissionMapper.toTarget(permission))) {
+        if (!permissionEvaluator.canRead(userId, permission)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Permission");
         }
 
@@ -105,16 +105,16 @@ public class PermissionService implements IResourceService<PermissionResponse, P
         UUID userId = resolveCurrentUserId();
         validateRequiredFields(data);
 
-        if (!permissionEvaluator.canCreate(userId, permissionMapper.toDraft(data))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Permission");
-        }
-
         Permission toSave = Permission.builder()
                 .userId(data.getUserId())
                 .targetType(data.getTargetType())
                 .targetId(data.getTargetId())
                 .action(data.getAction())
                 .build();
+
+        if (!permissionEvaluator.canCreate(userId, toSave)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Permission");
+        }
 
         return permissionMapper.toResponse(repository.save(toSave));
     }
@@ -129,7 +129,7 @@ public class PermissionService implements IResourceService<PermissionResponse, P
         applyFieldUpdates(existing, fields);
         validateEntityRequiredFields(existing);
 
-        if (!permissionEvaluator.canPatch(userId, permissionMapper.toTarget(existing))) {
+        if (!permissionEvaluator.canPatch(userId, existing)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to patch Permission");
         }
 
@@ -145,14 +145,14 @@ public class PermissionService implements IResourceService<PermissionResponse, P
 
         validateRequiredFields(data);
 
-        if (!permissionEvaluator.canUpdate(userId, permissionMapper.toTarget(existing.getId(), data))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Permission");
-        }
-
         existing.setUserId(data.getUserId());
         existing.setTargetType(data.getTargetType());
         existing.setTargetId(data.getTargetId());
         existing.setAction(data.getAction());
+
+        if (!permissionEvaluator.canUpdate(userId, existing)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Permission");
+        }
 
         return permissionMapper.toResponse(repository.save(existing));
     }
@@ -179,7 +179,7 @@ public class PermissionService implements IResourceService<PermissionResponse, P
                 applyFieldUpdates(existing, fields);
                 validateEntityRequiredFields(existing);
 
-                if (!permissionEvaluator.canPatch(userId, permissionMapper.toTarget(existing))) {
+                if (!permissionEvaluator.canPatch(userId, existing)) {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to patch Permission");
                 }
 
@@ -204,7 +204,7 @@ public class PermissionService implements IResourceService<PermissionResponse, P
         Permission existing = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Permission not found"));
 
-        if (!permissionEvaluator.canDelete(userId, permissionMapper.toTarget(existing))) {
+        if (!permissionEvaluator.canDelete(userId, existing)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Permission");
         }
 
@@ -230,7 +230,7 @@ public class PermissionService implements IResourceService<PermissionResponse, P
                 continue;
             }
 
-            if (!permissionEvaluator.canDelete(userId, permissionMapper.toTarget(existing))) {
+            if (!permissionEvaluator.canDelete(userId, existing)) {
                 log.warn("Skipping delete for permission id {} due to user is not permitted", id);
                 continue;
             }
@@ -335,7 +335,6 @@ public class PermissionService implements IResourceService<PermissionResponse, P
             );
         }
     }
-
 
     private UUID resolveCurrentUserId() {
         return currentUserIdResolver.resolve();

@@ -21,60 +21,44 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class PermissionPermissionEvaluator {
-    public record PermissionTarget(
-            Long permissionId,
-            UUID permissionUserId,
-            PermissionTargetType targetType,
-            UUID targetId,
-            PermissionAction action
-    ) {
-    }
-
-    public record PermissionDraft(
-            UUID permissionUserId,
-            PermissionTargetType targetType,
-            UUID targetId,
-            PermissionAction action
-    ) {
-    }
 
     private final PermissionRepository permissionRepository;
     private final CurrentTenantIdResolver tenantIdResolver;
     private final UserRepository userRepository;
 
-    public boolean canRead(UUID userId, PermissionTarget target) {
+    public boolean canRead(UUID userId, Permission target) {
         log.debug("Checking if user {} can read permission {} for user {}",
-                userId, target.permissionId, target.permissionUserId);
+                userId, target.getId(), target.getUserId());
 
         UUID tenantId = tenantIdResolver.resolve();
         return isAdminTenant(userId, tenantId) ||
-                hasReadPermissionOnUser(userId, target.permissionUserId);
+                hasReadPermissionOnUser(userId, target.getUserId());
     }
 
-    public boolean canCreate(UUID userId, PermissionDraft draft) {
+    public boolean canCreate(UUID userId, Permission target) {
         log.debug("Checking if user {} can create permission for user {}",
-                userId, draft.permissionUserId);
-        return canWrite(userId, draft.permissionUserId);
+                userId, target.getUserId());
+        return canWrite(userId, target.getUserId());
     }
 
-    public boolean canUpdate(UUID userId, PermissionTarget target) {
+    public boolean canUpdate(UUID userId, Permission target) {
         log.debug("Checking if user {} can update permission {} for user {}",
-                userId, target.permissionId, target.permissionUserId);
-        return canWrite(userId, target.permissionUserId);
+                userId, target.getId(), target.getUserId());
+        return canWrite(userId, target.getUserId());
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public boolean canPatch(UUID userId, PermissionTarget target) {
+    public boolean canPatch(UUID userId, Permission target) {
         log.debug("Checking if user {} can patch permission {} for user {}",
-                userId, target.permissionId, target.permissionUserId);
-        return canWrite(userId, target.permissionUserId);
+                userId, target.getId(), target.getUserId());
+        return canWrite(userId, target.getUserId());
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public boolean canDelete(UUID userId, PermissionTarget target) {
+    public boolean canDelete(UUID userId, Permission target) {
         log.debug("Checking if user {} can delete permission {} for user {}",
-                userId, target.permissionId, target.permissionUserId);
-        return canWrite(userId, target.permissionUserId);
+                userId, target.getId(), target.getUserId());
+        return canWrite(userId, target.getUserId());
     }
 
     @NonNull
