@@ -3,16 +3,14 @@ package org.zerp.common.permission.entity;
 import static org.zerp.common.permission.entity.PermissionTargetType.*;
 
 public enum PermissionAction {
-    // TENANT_ROOT level
-    CREATE_TEAM(TENANT_ROOT),
-
     // TENANT level
-    ADMIN_TENANT(TENANT),
+ADMIN_TENANT(TENANT),
     UPDATE_TENANT(TENANT),
     READ_TENANT(TENANT),
     CREATE_STOCK_RESOURCE(TENANT),
     CREATE_EMPLOYEE(TENANT),
     CREATE_TICKET(TENANT),
+    CREATE_TEAM(TENANT),
 
     // USER level
     READ_USER(USER),

@@ -8,10 +8,13 @@ import org.zerp.common.entity.crm.TicketEntity.TicketPriority;
 import org.zerp.common.entity.crm.TicketEntity.TicketStatus;
 import org.zerp.common.entity.crm.TicketEntity.TicketType;
 import org.zerp.common.entity.user.AppUser;
+import org.zerp.common.permission.repository.PermissionRepository;
+import org.zerp.common.permission.service.PermittableService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.crm.dto.ticket.*;
+import org.zerp.crm.permission.CrmPermissionEvaluator;
 import org.zerp.crm.repository.TeamMemberRepository;
 import org.zerp.crm.repository.TicketRepository;
 import org.zerp.crm.service.ticket.TicketResponseMapper;
@@ -40,9 +43,12 @@ public class TicketServiceTest {
         CurrentTenantIdResolver currentTenantIdResolver = mock(CurrentTenantIdResolver.class);
         CurrentUserIdResolver currentUserIdResolver = mock(CurrentUserIdResolver.class);
         TeamMemberRepository teamMemberRepository = mock(TeamMemberRepository.class);
+        PermissionRepository permissionRepository = mock(PermissionRepository.class);
         FilterRefiner filterRefiner = mock(FilterRefiner.class);
         TicketResponseMapper ticketResponseMapper = new TicketResponseMapper();
         TicketValueParser ticketValueParser = new TicketValueParser();
+        PermittableService permittableService = new PermittableService(permissionRepository);
+        CrmPermissionEvaluator crmPermissionEvaluator = new CrmPermissionEvaluator(permissionRepository, permittableService);
 
         //noinspection unchecked
         when(filterRefiner.refinedOrBadRequest(any(Map.class), eq(TicketEntity.class)))
@@ -58,7 +64,8 @@ public class TicketServiceTest {
                 entityManager,
                 currentTenantIdResolver,
                 currentUserIdResolver,
-                filterRefiner
+                filterRefiner,
+                crmPermissionEvaluator
         );
 
         defaultTenantId = UUID.randomUUID();
@@ -100,7 +107,8 @@ public class TicketServiceTest {
                 "Test Ticket",
                 "Description",
                 TicketPriority.MEDIUM,
-                TicketType.QUESTION
+                TicketType.QUESTION,
+                defaultTenantId
         );
     }
 

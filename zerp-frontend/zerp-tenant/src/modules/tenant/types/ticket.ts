@@ -1,7 +1,7 @@
 import type {
   AttachmentResponse,
   CommentResponse as GeneratedCommentResponse,
-  CreateTicketRequest,
+  CreateTicketRequest as GeneratedCreateTicketRequest,
   SlaTrackingResponse,
   TicketAssignmentResponse,
   TicketResponse as GeneratedTicketResponse,
@@ -10,10 +10,13 @@ import type {
 
 export type {
   AttachmentResponse,
-  CreateTicketRequest,
   SlaTrackingResponse,
   TicketAssignmentResponse,
   WatcherResponse,
+}
+
+export type CreateTicketRequest = Omit<GeneratedCreateTicketRequest, 'tenantId'> & {
+  tenantId: string
 }
 export type CommentResponse = GeneratedCommentResponse & { authorName?: string }
 export type TicketResponse = Omit<GeneratedTicketResponse, 'comments'> & {

@@ -71,6 +71,13 @@ interface Props {
   id: string
 }
 
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+function isUuid(value: string): boolean {
+  return UUID_REGEX.test(value)
+}
+
 export function TeamTicketDetail({ id }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
@@ -88,6 +95,10 @@ export function TeamTicketDetail({ id }: Props) {
   const { mutate: changePriority, isPending: isChangingPriority } = useChangeTeamTicketPriority()
   const { mutate: assignTicket, isPending: isAssigning } = useAssignTeamTicket()
   const { mutate: unassignTicket, isPending: isUnassigning } = useUnassignTeamTicket()
+  const trimmedAssignTeamId = assignTeamId.trim()
+  const trimmedAssignAgentId = assignAgentId.trim()
+  const isAssignTeamIdValid = trimmedAssignTeamId ? isUuid(trimmedAssignTeamId) : true
+  const isAssignAgentIdValid = trimmedAssignAgentId ? isUuid(trimmedAssignAgentId) : true
 
   if (isLoading) {
     return (
@@ -152,13 +163,24 @@ export function TeamTicketDetail({ id }: Props) {
   }
 
   function handleAssign() {
-    if (!assignTeamId.trim()) return
+    if (!trimmedAssignTeamId) {
+      showToast('Takim ID zorunlu.', { severity: 'warning' })
+      return
+    }
+    if (!isUuid(trimmedAssignTeamId)) {
+      showToast('Gecerli bir takim UUID degeri girin.', { severity: 'warning' })
+      return
+    }
+    if (trimmedAssignAgentId && !isUuid(trimmedAssignAgentId)) {
+      showToast('Gecerli bir ajan UUID degeri girin.', { severity: 'warning' })
+      return
+    }
     assignTicket(
       {
         id,
         body: {
-          teamId: assignTeamId.trim(),
-          ...(assignAgentId.trim() && { agentPartyId: assignAgentId.trim() }),
+          teamId: trimmedAssignTeamId,
+          ...(trimmedAssignAgentId && { agentPartyId: trimmedAssignAgentId }),
         },
       },
       {
@@ -314,6 +336,12 @@ export function TeamTicketDetail({ id }: Props) {
               label="Takım ID"
               value={assignTeamId}
               onChange={(event) => setAssignTeamId(event.target.value)}
+              error={Boolean(trimmedAssignTeamId) && !isAssignTeamIdValid}
+              helperText={
+                Boolean(trimmedAssignTeamId) && !isAssignTeamIdValid
+                  ? 'Gecerli bir UUID girin.'
+                  : 'Takim system tenant altinda olmalidir.'
+              }
               sx={{ flex: 1, minWidth: 140 }}
             />
             <TextField
@@ -321,9 +349,25 @@ export function TeamTicketDetail({ id }: Props) {
               label="Ajan ID (opsiyonel)"
               value={assignAgentId}
               onChange={(event) => setAssignAgentId(event.target.value)}
+              error={Boolean(trimmedAssignAgentId) && !isAssignAgentIdValid}
+              helperText={
+                Boolean(trimmedAssignAgentId) && !isAssignAgentIdValid
+                  ? 'Gecerli bir UUID girin.'
+                  : 'Ajan, secilen takimin system tenant uyelerinden biri olmali.'
+              }
               sx={{ flex: 1, minWidth: 160 }}
             />
-            <Button variant="contained" size="small" onClick={handleAssign} disabled={isAssigning || !assignTeamId.trim()}>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleAssign}
+              disabled={
+                isAssigning ||
+                !trimmedAssignTeamId ||
+                !isAssignTeamIdValid ||
+                !isAssignAgentIdValid
+              }
+            >
               Kaydet
             </Button>
           </Box>

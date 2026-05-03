@@ -9,6 +9,8 @@ import java.util.Collection;
 import java.util.UUID;
 
 public interface TeamMemberRepository extends JpaRepository<TeamMemberEntity, UUID> {
+    boolean existsByTeamIdAndUserId(UUID teamId, UUID userId);
+
     @Query("""
             select (count(tm) > 0)
             from TeamMemberEntity tm
