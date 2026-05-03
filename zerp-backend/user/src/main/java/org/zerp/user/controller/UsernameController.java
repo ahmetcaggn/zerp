@@ -16,7 +16,7 @@ import org.zerp.user.service.UsernameService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user/usernames")
-@Tag(name = "Username", description = "API for checking username availability")
+@Tag(name = "Usernames", description = "API for checking username availability")
 public class UsernameController {
     private final UsernameService service;
 

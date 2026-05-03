@@ -54,10 +54,10 @@ public class ResourcesOpenAPIConfig {
      * becomes "listPosts").
      */
     private static final Set<String> PLURAL_OPERATION_IDS = Set.of(
-            "list",
+            "getList",
             "getMany",
-            "getManyReferenceBy",
             "updateMany",
+            "patchMany",
             "deleteMany"
     );
 

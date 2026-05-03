@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "StockResource", description = "API for managing stock resources")
+@Tag(name = "StockResources", description = "API for managing stock resources")
 public class StockResourceController extends
         ResourceController<StockResourceDTO, StockResourceDTO, StockResourceCreateDTO, StockResourceUpdateDTO, UUID> {
     private final StockResourceService service;

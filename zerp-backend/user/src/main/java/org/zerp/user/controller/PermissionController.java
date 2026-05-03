@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/user/permissions")
 @RequiredArgsConstructor
-@Tag(name = "Permission", description = "API for managing permissions")
+@Tag(name = "Permissions", description = "API for managing permissions")
 public class PermissionController extends ResourceController<PermissionResponse, PermissionResponse, PermissionCreateRequestDTO, PermissionUpdateRequest, Long> {
     private final PermissionService service;
 
