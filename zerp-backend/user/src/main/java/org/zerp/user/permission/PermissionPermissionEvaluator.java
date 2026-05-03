@@ -12,6 +12,7 @@ import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
+import org.zerp.common.permission.repository.PermittableTenantRepository;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.user.repository.UserRepository;
 
@@ -21,10 +22,10 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class PermissionPermissionEvaluator {
-
     private final PermissionRepository permissionRepository;
     private final CurrentTenantIdResolver tenantIdResolver;
     private final UserRepository userRepository;
+    private final PermittableTenantRepository permittableTenantRepository;
 
     public boolean canRead(UUID userId, Permission target) {
         log.debug("Checking if user {} can read permission {} for user {}",
@@ -38,27 +39,27 @@ public class PermissionPermissionEvaluator {
     public boolean canCreate(UUID userId, Permission target) {
         log.debug("Checking if user {} can create permission for user {}",
                 userId, target.getUserId());
-        return canWrite(userId, target.getUserId());
+        return canWrite(userId, target);
     }
 
     public boolean canUpdate(UUID userId, Permission target) {
         log.debug("Checking if user {} can update permission {} for user {}",
                 userId, target.getId(), target.getUserId());
-        return canWrite(userId, target.getUserId());
+        return canWrite(userId, target);
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean canPatch(UUID userId, Permission target) {
         log.debug("Checking if user {} can patch permission {} for user {}",
                 userId, target.getId(), target.getUserId());
-        return canWrite(userId, target.getUserId());
+        return canWrite(userId, target);
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean canDelete(UUID userId, Permission target) {
         log.debug("Checking if user {} can delete permission {} for user {}",
                 userId, target.getId(), target.getUserId());
-        return canWrite(userId, target.getUserId());
+        return canWrite(userId, target);
     }
 
     @NonNull
@@ -85,21 +86,58 @@ public class PermissionPermissionEvaluator {
     }
 
     public boolean canReadPermissionActions(UUID userId) {
-        return isAdminTenant(userId, tenantIdResolver.resolve());
+        return isAdminTenant(userId, tenantIdResolver.resolve()) || isAdminTenantOnRoot(userId);
     }
 
-    private boolean canWrite(UUID userId, UUID targetUserId) {
-        UUID tenantId = tenantIdResolver.resolve();
-        if (tenantId == null) {
-            log.error("Cannot evaluate permission for user {} because tenant ID is not resolved", userId);
+    private boolean canWrite(UUID userId, Permission target) {
+        AppUser targetUser = userRepository.findById(target.getUserId()).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Target user not found"));
+
+        UUID targetUserTenantId = targetUser.getTenantId();
+
+        boolean hasRootAdmin = isAdminTenantOnRoot(userId);
+        boolean hasTenantAdmin = isAdminTenant(userId, targetUserTenantId);
+
+        if (!hasRootAdmin && !hasTenantAdmin) {
+            log.warn("User {} is neither root admin nor tenant admin for tenant {}", userId, targetUserTenantId);
             return false;
         }
 
-        AppUser targetUser = userRepository.findById(targetUserId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Target user not found"));
+        return switch (target.getTargetType()) {
+            case TENANT_ROOT -> hasRootAdmin;
+            case TENANT -> hasRootAdmin || target.getTargetId().equals(targetUserTenantId);
+            default -> {
+                if (hasRootAdmin) {
+                    yield true;
+                }
 
-        return targetUser.getTenantId().equals(tenantIdResolver.resolve()) &&
-                isAdminTenant(userId, tenantId);
+                UUID resourceTenantId = permittableTenantRepository
+                        .findTenantIdByIdAndTargetType(target.getTargetId(), target.getTargetType())
+                        .orElse(null);
+
+                if (resourceTenantId == null) {
+                    log.warn("Failed to resolve tenant ID for target id {} of type {}",
+                            target.getTargetId(), target.getTargetType());
+                    yield false;
+                }
+
+                if (!resourceTenantId.equals(targetUserTenantId)) {
+                    log.warn("User {} is tenant admin for {} but tried to define permission over resource {} of another tenant {}",
+                            userId, targetUserTenantId, target.getTargetId(), resourceTenantId);
+                    yield false;
+                }
+
+                yield true;
+            }
+        };
+    }
+
+    private boolean isAdminTenantOnRoot(UUID userId) {
+        return permissionRepository.findTargetIdsByUserAndTargetTypeAndAction(
+                userId,
+                PermissionTargetType.TENANT_ROOT,
+                PermissionAction.ADMIN_TENANT
+        ).contains(org.zerp.common.entity.TenantRoot.ID);
     }
 
     private boolean isAdminTenant(UUID userId, UUID tenantId) {
