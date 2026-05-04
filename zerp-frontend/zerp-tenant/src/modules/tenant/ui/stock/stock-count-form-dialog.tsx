@@ -40,11 +40,11 @@ export function StockCountFormDialog({ open, onClose }: StockCountFormDialogProp
     e.preventDefault()
     try {
       await createMutation.mutateAsync(formData)
-      showToast('success', 'Count session created successfully')
+      showToast('Count session created successfully', { severity: 'success' })
       refetch()
       onClose()
     } catch (err: any) {
-      showToast('error', err?.message || 'Error creating count session')
+      showToast(err?.message || 'Error creating count session', { severity: 'error' })
     }
   }
 

@@ -53,12 +53,12 @@ export function StockMovementFormDialog({ open, onClose, preselectedResourceId, 
     e.preventDefault()
     try {
       await createMutation.mutateAsync(formData)
-      showToast('success', 'Movement saved successfully')
+      showToast('Movement saved successfully', { severity: 'success' })
       refetchMovements()
       refetchResources()
       onClose()
     } catch (err: any) {
-      showToast('error', err?.message || 'Error saving movement')
+      showToast(err?.message || 'Error saving movement', { severity: 'error' })
     }
   }
 

@@ -53,15 +53,15 @@ export function StockResourceFormDialog({ open, onClose, initialData }: StockRes
     try {
       if (initialData) {
         await updateMutation.mutateAsync({ id: initialData.id, data: formData })
-        showToast('success', 'Stock updated successfully')
+        showToast('Stock updated successfully', { severity: 'success' })
       } else {
         await createMutation.mutateAsync(formData)
-        showToast('success', 'Stock created successfully')
+        showToast('Stock created successfully', { severity: 'success' })
       }
       refetch()
       onClose()
     } catch (err: any) {
-      showToast('error', err?.message || 'Error saving stock')
+      showToast(err?.message || 'Error saving stock', { severity: 'error' })
     }
   }
 
