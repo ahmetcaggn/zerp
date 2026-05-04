@@ -6,7 +6,7 @@
         <groupId>org.zerp</groupId>
         <artifactId>zerp</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath/>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>sale</artifactId>
