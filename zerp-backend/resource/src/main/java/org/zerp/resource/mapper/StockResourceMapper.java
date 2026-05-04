@@ -14,8 +14,9 @@ public interface StockResourceMapper {
     StockResource toEntity(StockResourceCreateDTO dto);
 
     @Mapping(source = "shop.id", target = "shopId")
+    @Mapping(source = "shop.name", target = "shopName")
+    @Mapping(source = "tenantId", target = "tenantId")
     StockResourceDTO toDTO(StockResource entity);
 
     void updateEntityFromDTO(StockResourceUpdateDTO dto, @MappingTarget StockResource entity);
 }
-

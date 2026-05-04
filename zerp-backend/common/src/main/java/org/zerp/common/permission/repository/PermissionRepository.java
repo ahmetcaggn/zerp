@@ -174,4 +174,168 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
     List<UUID> findTargetIdsByUserAndTargetTypeAndAction(@Param("userId") UUID userId,
                                                          @Param("type") PermissionTargetType type,
                                                          @Param("action") PermissionAction action);
+
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
+                     (:stockCountId IS NOT NULL AND p.targetType = 'STOCK_COUNT' AND p.targetId = :stockCountId)
+                  OR (:shopId IS NOT NULL AND p.targetType = 'SHOP' AND p.targetId = :shopId)
+                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
+                )
+            """)
+    List<Permission> findAllByUserAndStockCountHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("stockCountId") UUID stockCountId,
+            @Param("shopId") UUID shopId,
+            @Param("tenantId") UUID tenantId
+    );
+
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
+                     (:stockMovementId IS NOT NULL AND p.targetType = 'STOCK_MOVEMENT' AND p.targetId = :stockMovementId)
+                  OR (:stockResourceId IS NOT NULL AND p.targetType = 'STOCK_RESOURCE' AND p.targetId = :stockResourceId)
+                  OR (:shopId IS NOT NULL AND p.targetType = 'SHOP' AND p.targetId = :shopId)
+                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
+                )
+            """)
+    List<Permission> findAllByUserAndStockMovementHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("stockMovementId") UUID stockMovementId,
+            @Param("stockResourceId") UUID stockResourceId,
+            @Param("shopId") UUID shopId,
+            @Param("tenantId") UUID tenantId
+    );
+
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
+                     (:productId IS NOT NULL AND p.targetType = 'PRODUCT' AND p.targetId = :productId)
+                  OR (:shopId IS NOT NULL AND p.targetType = 'SHOP' AND p.targetId = :shopId)
+                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
+                )
+            """)
+    List<Permission> findAllByUserAndProductHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("productId") UUID productId,
+            @Param("shopId") UUID shopId,
+            @Param("tenantId") UUID tenantId
+    );
+
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
+                     (:recipeId IS NOT NULL AND p.targetType = 'PRODUCT_RECIPE' AND p.targetId = :recipeId)
+                  OR (:productId IS NOT NULL AND p.targetType = 'PRODUCT' AND p.targetId = :productId)
+                  OR (:shopId IS NOT NULL AND p.targetType = 'SHOP' AND p.targetId = :shopId)
+                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
+                )
+            """)
+    List<Permission> findAllByUserAndProductRecipeHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("recipeId") UUID recipeId,
+            @Param("productId") UUID productId,
+            @Param("shopId") UUID shopId,
+            @Param("tenantId") UUID tenantId
+    );
+
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
+                     (:extraOptionId IS NOT NULL AND p.targetType = 'PRODUCT_EXTRA_OPTION' AND p.targetId = :extraOptionId)
+                  OR (:productId IS NOT NULL AND p.targetType = 'PRODUCT' AND p.targetId = :productId)
+                  OR (:shopId IS NOT NULL AND p.targetType = 'SHOP' AND p.targetId = :shopId)
+                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
+                )
+            """)
+    List<Permission> findAllByUserAndProductExtraOptionHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("extraOptionId") UUID extraOptionId,
+            @Param("productId") UUID productId,
+            @Param("shopId") UUID shopId,
+            @Param("tenantId") UUID tenantId
+    );
+
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
+                     (:menuId IS NOT NULL AND p.targetType = 'MENU' AND p.targetId = :menuId)
+                  OR (:shopId IS NOT NULL AND p.targetType = 'SHOP' AND p.targetId = :shopId)
+                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
+                )
+            """)
+    List<Permission> findAllByUserAndMenuHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("menuId") UUID menuId,
+            @Param("shopId") UUID shopId,
+            @Param("tenantId") UUID tenantId
+    );
+
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
+                     (:categoryId IS NOT NULL AND p.targetType = 'MENU_CATEGORY' AND p.targetId = :categoryId)
+                  OR (:menuId IS NOT NULL AND p.targetType = 'MENU' AND p.targetId = :menuId)
+                  OR (:shopId IS NOT NULL AND p.targetType = 'SHOP' AND p.targetId = :shopId)
+                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
+                )
+            """)
+    List<Permission> findAllByUserAndMenuCategoryHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("categoryId") UUID categoryId,
+            @Param("menuId") UUID menuId,
+            @Param("shopId") UUID shopId,
+            @Param("tenantId") UUID tenantId
+    );
+
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
+                     (:itemId IS NOT NULL AND p.targetType = 'MENU_ITEM' AND p.targetId = :itemId)
+                  OR (:categoryId IS NOT NULL AND p.targetType = 'MENU_CATEGORY' AND p.targetId = :categoryId)
+                  OR (:menuId IS NOT NULL AND p.targetType = 'MENU' AND p.targetId = :menuId)
+                  OR (:shopId IS NOT NULL AND p.targetType = 'SHOP' AND p.targetId = :shopId)
+                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
+                )
+            """)
+    List<Permission> findAllByUserAndMenuItemHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("itemId") UUID itemId,
+            @Param("categoryId") UUID categoryId,
+            @Param("menuId") UUID menuId,
+            @Param("shopId") UUID shopId,
+            @Param("tenantId") UUID tenantId
+    );
 }

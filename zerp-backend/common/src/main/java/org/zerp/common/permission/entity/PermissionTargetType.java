@@ -25,6 +25,20 @@ public enum PermissionTargetType {
     TEAM_MEMBER,
 
     SHOP,
+
+    // stock management
+    STOCK_MOVEMENT,
+    STOCK_COUNT,
+
+    // product management
+    PRODUCT,
+    PRODUCT_RECIPE,
+    PRODUCT_EXTRA_OPTION,
+
+    // menu management
+    MENU,
+    MENU_CATEGORY,
+    MENU_ITEM,
     ;
 
     static PermissionTargetType fromType(Class<Permittable> type) {

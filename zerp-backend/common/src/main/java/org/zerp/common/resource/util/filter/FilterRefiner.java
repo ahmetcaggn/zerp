@@ -7,7 +7,15 @@ import org.springframework.stereotype.Component;
 import org.zerp.common.entity.crm.TeamEntity;
 import org.zerp.common.entity.crm.TicketEntity;
 import org.zerp.common.entity.employee.Employee;
+import org.zerp.common.entity.resource.StockCount;
+import org.zerp.common.entity.resource.StockMovement;
 import org.zerp.common.entity.resource.StockResource;
+import org.zerp.common.entity.sale.Menu;
+import org.zerp.common.entity.sale.MenuCategory;
+import org.zerp.common.entity.sale.MenuItem;
+import org.zerp.common.entity.sale.Product;
+import org.zerp.common.entity.sale.ProductExtraOption;
+import org.zerp.common.entity.sale.ProductRecipe;
 import org.zerp.common.error.filter.FilterError;
 import org.zerp.common.error.filter.FilterErrorUtils;
 import org.zerp.common.resource.util.filter.specgenerator.*;
@@ -35,6 +43,16 @@ public class FilterRefiner {
 
     // Resource
     private final StockResourceFilterSpecGenerator stockResourceFilterSpecGenerator;
+    private final StockMovementFilterSpecGenerator stockMovementFilterSpecGenerator;
+    private final StockCountFilterSpecGenerator stockCountFilterSpecGenerator;
+
+    // Sale
+    private final ProductFilterSpecGenerator productFilterSpecGenerator;
+    private final ProductRecipeFilterSpecGenerator productRecipeFilterSpecGenerator;
+    private final ProductExtraOptionFilterSpecGenerator productExtraOptionFilterSpecGenerator;
+    private final MenuFilterSpecGenerator menuFilterSpecGenerator;
+    private final MenuCategoryFilterSpecGenerator menuCategoryFilterSpecGenerator;
+    private final MenuItemFilterSpecGenerator menuItemFilterSpecGenerator;
 
     /**
      * Generic entity type to its dedicated spec generator.
@@ -62,6 +80,30 @@ public class FilterRefiner {
 
         specGeneratorMap.put(StockResource.class, stockResourceFilterSpecGenerator);
         log.trace("Registered spec generator: StockResource -> {}", stockResourceFilterSpecGenerator.getClass().getSimpleName());
+
+        specGeneratorMap.put(StockMovement.class, stockMovementFilterSpecGenerator);
+        log.trace("Registered spec generator: StockMovement -> {}", stockMovementFilterSpecGenerator.getClass().getSimpleName());
+
+        specGeneratorMap.put(StockCount.class, stockCountFilterSpecGenerator);
+        log.trace("Registered spec generator: StockCount -> {}", stockCountFilterSpecGenerator.getClass().getSimpleName());
+
+        specGeneratorMap.put(Product.class, productFilterSpecGenerator);
+        log.trace("Registered spec generator: Product -> {}", productFilterSpecGenerator.getClass().getSimpleName());
+
+        specGeneratorMap.put(ProductRecipe.class, productRecipeFilterSpecGenerator);
+        log.trace("Registered spec generator: ProductRecipe -> {}", productRecipeFilterSpecGenerator.getClass().getSimpleName());
+
+        specGeneratorMap.put(ProductExtraOption.class, productExtraOptionFilterSpecGenerator);
+        log.trace("Registered spec generator: ProductExtraOption -> {}", productExtraOptionFilterSpecGenerator.getClass().getSimpleName());
+
+        specGeneratorMap.put(Menu.class, menuFilterSpecGenerator);
+        log.trace("Registered spec generator: Menu -> {}", menuFilterSpecGenerator.getClass().getSimpleName());
+
+        specGeneratorMap.put(MenuCategory.class, menuCategoryFilterSpecGenerator);
+        log.trace("Registered spec generator: MenuCategory -> {}", menuCategoryFilterSpecGenerator.getClass().getSimpleName());
+
+        specGeneratorMap.put(MenuItem.class, menuItemFilterSpecGenerator);
+        log.trace("Registered spec generator: MenuItem -> {}", menuItemFilterSpecGenerator.getClass().getSimpleName());
 
         log.info("Spec generator map initialized with {} generators", specGeneratorMap.size());
     }

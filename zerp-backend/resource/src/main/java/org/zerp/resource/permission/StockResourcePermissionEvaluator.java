@@ -12,8 +12,6 @@ import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
 import org.zerp.common.permission.service.PermittableService;
-import org.zerp.resource.dto.resource.StockResourceCreateDTO;
-
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -55,20 +53,20 @@ public class StockResourcePermissionEvaluator {
         return canRead;
     }
 
-    public boolean canCreate(UUID userId, StockResourceCreateDTO data) {
-        log.trace("Checking canCreate permission - userId: {}, data: {}", userId, data);
+    public boolean canCreate(UUID userId, UUID shopId, UUID tenantId) {
+        log.trace("Checking canCreate permission - userId: {}, shopId: {}, tenantId: {}", userId, shopId, tenantId);
 
         List<Permission> result = permissionRepository.findAllByUserAndStockResourceHierarchy(
                 userId,
                 PermissionAction.CREATE_STOCK_RESOURCE,
                 null,
-                data.getShopId(),
-                data.getTenantId()
+                shopId,
+                tenantId
         );
 
         boolean canCreate = !result.isEmpty();
         log.debug("canCreate result for user {} in tenant {} - permitted: {}",
-                userId, data.getTenantId(), canCreate);
+                userId, tenantId, canCreate);
         return canCreate;
     }
 

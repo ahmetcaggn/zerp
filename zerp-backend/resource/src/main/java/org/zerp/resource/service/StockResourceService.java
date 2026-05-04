@@ -15,6 +15,7 @@ import org.zerp.common.error.filter.FilterError;
 import org.zerp.common.error.filter.FilterErrorUtils;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
+import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.resource.dto.resource.StockResourceCreateDTO;
 import org.zerp.resource.dto.resource.StockResourceDTO;
@@ -37,6 +38,7 @@ public class StockResourceService implements
     private final StockResourceRepository repository;
     private final StockResourceMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
+    private final CurrentTenantIdResolver currentTenantIdResolver;
     private final FilterRefiner filterRefiner;
 
     @Override
@@ -109,13 +111,15 @@ public class StockResourceService implements
     public StockResourceDTO create(StockResourceCreateDTO data) {
         log.trace("Creating new StockResource with data: {}", data);
         UUID userId = resolveCurrentUserId();
+        UUID tenantId = currentTenantIdResolver.resolve();
 
-        if (!permissionEvaluator.canCreate(userId, data)) {
+        if (!permissionEvaluator.canCreate(userId, data.getShopId(), tenantId)) {
             log.warn("Permission denied for creating StockResource. data: {}", data);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create StockResource");
         }
 
         StockResource stockResource = mapper.toEntity(data);
+        stockResource.setTenantId(tenantId);
         StockResource saved = repository.save(stockResource);
         log.info("Successfully created StockResource with id: {}", saved.getId());
 
@@ -243,11 +247,14 @@ public class StockResourceService implements
     private void applyFieldUpdates(StockResource stockResource, Map<String, Object> fields) {
         log.trace("Applying {} field updates to StockResource", fields.size());
 
-        if (fields.containsKey("name")) {
-            String name = (String) fields.get("name");
-            stockResource.setName(name);
-            log.trace("Updated name field to: {}", name);
-        }
+        if (fields.containsKey("name")) stockResource.setName((String) fields.get("name"));
+        if (fields.containsKey("description")) stockResource.setDescription((String) fields.get("description"));
+        if (fields.containsKey("unitType"))
+            stockResource.setUnitType(org.zerp.common.entity.resource.UnitType.valueOf(fields.get("unitType").toString()));
+        if (fields.containsKey("reorderThreshold"))
+            stockResource.setReorderThreshold(new java.math.BigDecimal(fields.get("reorderThreshold").toString()));
+        if (fields.containsKey("costPerUnit"))
+            stockResource.setCostPerUnit(new java.math.BigDecimal(fields.get("costPerUnit").toString()));
 
         log.debug("Field update completed for StockResource");
     }
