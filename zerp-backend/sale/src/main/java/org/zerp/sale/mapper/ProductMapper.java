@@ -10,10 +10,10 @@ import org.zerp.sale.dto.product.ProductUpdateDTO;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
-    @Mapping(source = "shopId", target = "shop.id")
-    @Mapping(source = "typeId", target = "type.id")
-    @Mapping(source = "metricId", target = "metric.id")
-    @Mapping(source = "menuItemId", target = "menuItem.id")
+    @Mapping(target = "shop", ignore = true)
+    @Mapping(target = "type", ignore = true)
+    @Mapping(target = "metric", ignore = true)
+    @Mapping(target = "menuItem", ignore = true)
     Product toEntity(ProductCreateDTO dto);
 
     @Mapping(source = "shop.id", target = "shopId")
@@ -26,8 +26,8 @@ public interface ProductMapper {
     @Mapping(source = "tenantId", target = "tenantId")
     ProductDTO toDTO(Product entity);
 
-    @Mapping(source = "typeId", target = "type.id")
-    @Mapping(source = "metricId", target = "metric.id")
-    @Mapping(source = "menuItemId", target = "menuItem.id")
+    @Mapping(target = "type", ignore = true)
+    @Mapping(target = "metric", ignore = true)
+    @Mapping(target = "menuItem", ignore = true)
     void updateEntityFromDTO(ProductUpdateDTO dto, @MappingTarget Product entity);
 }

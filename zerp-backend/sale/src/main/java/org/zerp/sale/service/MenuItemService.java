@@ -20,6 +20,7 @@ import org.zerp.sale.dto.menuitem.MenuItemUpdateDTO;
 import org.zerp.sale.mapper.MenuItemMapper;
 import org.zerp.sale.permission.MenuItemPermissionEvaluator;
 import org.zerp.sale.repository.MenuItemRepository;
+import org.zerp.sale.repository.MenuCategoryRepository;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class MenuItemService implements
         IResourceService<MenuItemDTO, MenuItemDTO, MenuItemCreateDTO, MenuItemUpdateDTO, UUID> {
     private final MenuItemPermissionEvaluator permissionEvaluator;
     private final MenuItemRepository repository;
+    private final MenuCategoryRepository categoryRepository;
     private final MenuItemMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final CurrentTenantIdResolver currentTenantIdResolver;
@@ -87,6 +89,7 @@ public class MenuItemService implements
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create MenuItem");
         }
         MenuItem item = mapper.toEntity(data);
+        item.setCategory(categoryRepository.getReferenceById(data.getCategoryId()));
         item.setTenantId(tenantId);
         MenuItem saved = repository.save(item);
         log.info("Created MenuItem with id: {}", saved.getId());

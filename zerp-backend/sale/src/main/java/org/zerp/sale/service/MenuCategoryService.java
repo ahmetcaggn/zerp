@@ -20,6 +20,7 @@ import org.zerp.sale.dto.menucategory.MenuCategoryUpdateDTO;
 import org.zerp.sale.mapper.MenuCategoryMapper;
 import org.zerp.sale.permission.MenuCategoryPermissionEvaluator;
 import org.zerp.sale.repository.MenuCategoryRepository;
+import org.zerp.sale.repository.MenuRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,7 @@ public class MenuCategoryService implements
         IResourceService<MenuCategoryDTO, MenuCategoryDTO, MenuCategoryCreateDTO, MenuCategoryUpdateDTO, UUID> {
     private final MenuCategoryPermissionEvaluator permissionEvaluator;
     private final MenuCategoryRepository repository;
+    private final MenuRepository menuRepository;
     private final MenuCategoryMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final CurrentTenantIdResolver currentTenantIdResolver;
@@ -86,6 +88,7 @@ public class MenuCategoryService implements
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create MenuCategory");
         }
         MenuCategory category = mapper.toEntity(data);
+        category.setMenu(menuRepository.getReferenceById(data.getMenuId()));
         category.setTenantId(tenantId);
         MenuCategory saved = repository.save(category);
         log.info("Created MenuCategory with id: {}", saved.getId());

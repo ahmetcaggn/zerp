@@ -13,7 +13,7 @@ import org.zerp.sale.dto.productrecipe.ProductRecipeUpdateDTO;
 
 @Mapper(componentModel = "spring")
 public interface ProductRecipeMapper {
-    @Mapping(source = "productId", target = "product.id")
+    @Mapping(target = "product", ignore = true)
     @Mapping(target = "items", ignore = true)
     ProductRecipe toEntity(ProductRecipeCreateDTO dto);
 
@@ -22,7 +22,7 @@ public interface ProductRecipeMapper {
     @Mapping(source = "product.tenantId", target = "tenantId")
     ProductRecipeDTO toDTO(ProductRecipe entity);
 
-    @Mapping(source = "stockResourceId", target = "stockResource.id")
+    @Mapping(target = "stockResource", ignore = true)
     ProductRecipeItem toItemEntity(ProductRecipeItemCreateDTO dto);
 
     @Mapping(source = "stockResource.id", target = "stockResourceId")

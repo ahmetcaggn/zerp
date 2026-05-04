@@ -8,7 +8,7 @@ import org.zerp.resource.dto.stockmovement.StockMovementDTO;
 
 @Mapper(componentModel = "spring")
 public interface StockMovementMapper {
-    @Mapping(source = "stockResourceId", target = "stockResource.id")
+    @Mapping(target = "stockResource", ignore = true)
     StockMovement toEntity(StockMovementCreateDTO dto);
 
     @Mapping(source = "stockResource.id", target = "stockResourceId")

@@ -13,7 +13,7 @@ import org.zerp.sale.dto.productextraoption.ProductExtraOptionUpdateDTO;
 
 @Mapper(componentModel = "spring")
 public interface ProductExtraOptionMapper {
-    @Mapping(source = "productId", target = "product.id")
+    @Mapping(target = "product", ignore = true)
     @Mapping(target = "items", ignore = true)
     ProductExtraOption toEntity(ProductExtraOptionCreateDTO dto);
 
@@ -22,7 +22,7 @@ public interface ProductExtraOptionMapper {
     @Mapping(source = "product.tenantId", target = "tenantId")
     ProductExtraOptionDTO toDTO(ProductExtraOption entity);
 
-    @Mapping(source = "stockResourceId", target = "stockResource.id")
+    @Mapping(target = "stockResource", ignore = true)
     ProductExtraOptionItem toItemEntity(ProductExtraOptionItemCreateDTO dto);
 
     @Mapping(source = "stockResource.id", target = "stockResourceId")

@@ -10,7 +10,7 @@ import org.zerp.resource.dto.resource.StockResourceUpdateDTO;
 
 @Mapper(componentModel = "spring")
 public interface StockResourceMapper {
-    @Mapping(source = "shopId", target = "shop.id")
+    @Mapping(target = "shop", ignore = true)
     StockResource toEntity(StockResourceCreateDTO dto);
 
     @Mapping(source = "shop.id", target = "shopId")

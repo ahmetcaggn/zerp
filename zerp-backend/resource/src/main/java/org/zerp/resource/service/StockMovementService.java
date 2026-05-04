@@ -99,6 +99,7 @@ public class StockMovementService implements
         BigDecimal newQuantity = calculateNewQuantity(previousQuantity, data.getQuantity(), data.getType().name());
 
         StockMovement movement = mapper.toEntity(data);
+        movement.setStockResource(stockResource);
         movement.setTenantId(tenantId);
         movement.setPreviousQuantity(previousQuantity);
         movement.setNewQuantity(newQuantity);

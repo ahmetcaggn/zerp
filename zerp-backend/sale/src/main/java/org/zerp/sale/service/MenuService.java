@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.sale.Menu;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
@@ -19,6 +20,7 @@ import org.zerp.sale.dto.menu.MenuDTO;
 import org.zerp.sale.dto.menu.MenuUpdateDTO;
 import org.zerp.sale.mapper.MenuMapper;
 import org.zerp.sale.permission.MenuPermissionEvaluator;
+import org.zerp.sale.repository.ShopRepository;
 import org.zerp.sale.repository.MenuRepository;
 
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ public class MenuService implements
         IResourceService<MenuDTO, MenuDTO, MenuCreateDTO, MenuUpdateDTO, UUID> {
     private final MenuPermissionEvaluator permissionEvaluator;
     private final MenuRepository repository;
+    private final ShopRepository shopRepository;
     private final MenuMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final CurrentTenantIdResolver currentTenantIdResolver;
@@ -82,10 +85,12 @@ public class MenuService implements
     public MenuDTO create(MenuCreateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
         UUID tenantId = currentTenantIdResolver.resolve();
-        if (!permissionEvaluator.canCreate(userId, data.getShopId(), tenantId)) {
+        Shop shop = resolveShop(data.getShopId());
+        if (!permissionEvaluator.canCreate(userId, shop.getId(), tenantId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Menu");
         }
         Menu menu = mapper.toEntity(data);
+        menu.setShop(shop);
         menu.setTenantId(tenantId);
         Menu saved = repository.save(menu);
         log.info("Created Menu with id: {}", saved.getId());
@@ -168,5 +173,13 @@ public class MenuService implements
     private void applyFieldUpdates(Menu menu, Map<String, Object> fields) {
         if (fields.containsKey("name")) menu.setName((String) fields.get("name"));
         if (fields.containsKey("description")) menu.setDescription((String) fields.get("description"));
+    }
+
+    private Shop resolveShop(UUID shopId) {
+        if (shopId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "shopId is required");
+        }
+        return shopRepository.findById(shopId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shop not found"));
     }
 }

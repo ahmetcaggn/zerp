@@ -2,17 +2,15 @@ package org.zerp.resource.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 import org.zerp.common.entity.resource.StockCount;
 import org.zerp.common.entity.resource.StockCountItem;
 import org.zerp.resource.dto.stockcount.StockCountCreateDTO;
 import org.zerp.resource.dto.stockcount.StockCountDTO;
 import org.zerp.resource.dto.stockcount.StockCountItemDTO;
-import org.zerp.resource.dto.stockcount.StockCountUpdateDTO;
 
 @Mapper(componentModel = "spring")
 public interface StockCountMapper {
-    @Mapping(source = "shopId", target = "shop.id")
+    @Mapping(target = "shop", ignore = true)
     StockCount toEntity(StockCountCreateDTO dto);
 
     @Mapping(source = "shop.id", target = "shopId")
@@ -24,6 +22,4 @@ public interface StockCountMapper {
     @Mapping(source = "stockResource.name", target = "stockResourceName")
     @Mapping(source = "stockResource.unitType.abbreviation", target = "unitTypeAbbreviation")
     StockCountItemDTO toItemDTO(StockCountItem entity);
-
-    void updateEntityFromDTO(StockCountUpdateDTO dto, @MappingTarget StockCount entity);
 }

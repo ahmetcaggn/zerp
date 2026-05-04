@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.resource.StockCount;
 import org.zerp.common.entity.resource.StockCountItem;
 import org.zerp.common.entity.resource.StockCountStatus;
@@ -22,10 +23,10 @@ import org.zerp.resource.dto.stockcount.StockCountItemUpdateDTO;
 import org.zerp.resource.dto.stockcount.StockCountUpdateDTO;
 import org.zerp.resource.mapper.StockCountMapper;
 import org.zerp.resource.permission.StockCountPermissionEvaluator;
+import org.zerp.resource.repository.ShopRepository;
 import org.zerp.resource.repository.StockCountRepository;
 import org.zerp.resource.repository.StockResourceRepository;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,7 @@ public class StockCountService implements
         IResourceService<StockCountDTO, StockCountDTO, StockCountCreateDTO, StockCountUpdateDTO, UUID> {
     private final StockCountPermissionEvaluator permissionEvaluator;
     private final StockCountRepository repository;
+    private final ShopRepository shopRepository;
     private final StockResourceRepository stockResourceRepository;
     private final StockCountMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
@@ -93,11 +95,14 @@ public class StockCountService implements
     public StockCountDTO create(StockCountCreateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
         UUID tenantId = currentTenantIdResolver.resolve();
-        if (!permissionEvaluator.canCreate(userId, data.getShopId(), tenantId)) {
+        Shop shop = resolveShop(data.getShopId());
+
+        if (!permissionEvaluator.canCreate(userId, shop.getId(), tenantId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create StockCount");
         }
 
         StockCount stockCount = mapper.toEntity(data);
+        stockCount.setShop(shop);
         stockCount.setTenantId(tenantId);
         stockCount.setStatus(StockCountStatus.DRAFT);
 
@@ -219,5 +224,13 @@ public class StockCountService implements
         StockCountDTO dto = mapper.toDTO(stockCount);
         dto.setItems(stockCount.getItems().stream().map(mapper::toItemDTO).toList());
         return dto;
+    }
+
+    private Shop resolveShop(UUID shopId) {
+        if (shopId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "shopId is required");
+        }
+        return shopRepository.findById(shopId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shop not found"));
     }
 }

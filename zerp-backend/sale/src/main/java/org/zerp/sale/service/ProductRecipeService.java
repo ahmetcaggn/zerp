@@ -21,6 +21,8 @@ import org.zerp.sale.dto.productrecipe.ProductRecipeUpdateDTO;
 import org.zerp.sale.mapper.ProductRecipeMapper;
 import org.zerp.sale.permission.ProductRecipePermissionEvaluator;
 import org.zerp.sale.repository.ProductRecipeRepository;
+import org.zerp.sale.repository.ProductRepository;
+import org.zerp.sale.repository.StockResourceRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +36,8 @@ public class ProductRecipeService implements
         IResourceService<ProductRecipeDTO, ProductRecipeDTO, ProductRecipeCreateDTO, ProductRecipeUpdateDTO, UUID> {
     private final ProductRecipePermissionEvaluator permissionEvaluator;
     private final ProductRecipeRepository repository;
+    private final ProductRepository productRepository;
+    private final StockResourceRepository stockResourceRepository;
     private final ProductRecipeMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final CurrentTenantIdResolver currentTenantIdResolver;
@@ -88,11 +92,13 @@ public class ProductRecipeService implements
         }
 
         ProductRecipe recipe = mapper.toEntity(data);
+        recipe.setProduct(productRepository.getReferenceById(data.getProductId()));
         recipe.setTenantId(tenantId);
 
         if (data.getItems() != null) {
             data.getItems().forEach(itemDTO -> {
                 ProductRecipeItem item = mapper.toItemEntity(itemDTO);
+                item.setStockResource(stockResourceRepository.getReferenceById(itemDTO.getStockResourceId()));
                 item.setRecipe(recipe);
                 recipe.getItems().add(item);
             });
@@ -135,6 +141,7 @@ public class ProductRecipeService implements
             recipe.getItems().clear();
             data.getItems().forEach(itemDTO -> {
                 ProductRecipeItem item = mapper.toItemEntity(itemDTO);
+                item.setStockResource(stockResourceRepository.getReferenceById(itemDTO.getStockResourceId()));
                 item.setRecipe(recipe);
                 recipe.getItems().add(item);
             });

@@ -10,7 +10,7 @@ import org.zerp.sale.dto.menuitem.MenuItemUpdateDTO;
 
 @Mapper(componentModel = "spring")
 public interface MenuItemMapper {
-    @Mapping(source = "categoryId", target = "category.id")
+    @Mapping(target = "category", ignore = true)
     MenuItem toEntity(MenuItemCreateDTO dto);
 
     @Mapping(source = "category.id", target = "categoryId")

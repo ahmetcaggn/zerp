@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.resource.StockResource;
 import org.zerp.common.error.filter.FilterError;
 import org.zerp.common.error.filter.FilterErrorUtils;
@@ -22,6 +23,7 @@ import org.zerp.resource.dto.resource.StockResourceDTO;
 import org.zerp.resource.dto.resource.StockResourceUpdateDTO;
 import org.zerp.resource.mapper.StockResourceMapper;
 import org.zerp.resource.permission.StockResourcePermissionEvaluator;
+import org.zerp.resource.repository.ShopRepository;
 import org.zerp.resource.repository.StockResourceRepository;
 
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ public class StockResourceService implements
         IResourceService<StockResourceDTO, StockResourceDTO, StockResourceCreateDTO, StockResourceUpdateDTO, UUID> {
     private final StockResourcePermissionEvaluator permissionEvaluator;
     private final StockResourceRepository repository;
+    private final ShopRepository shopRepository;
     private final StockResourceMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final CurrentTenantIdResolver currentTenantIdResolver;
@@ -112,13 +115,15 @@ public class StockResourceService implements
         log.trace("Creating new StockResource with data: {}", data);
         UUID userId = resolveCurrentUserId();
         UUID tenantId = currentTenantIdResolver.resolve();
+        Shop shop = resolveShop(data.getShopId());
 
-        if (!permissionEvaluator.canCreate(userId, data.getShopId(), tenantId)) {
+        if (!permissionEvaluator.canCreate(userId, shop.getId(), tenantId)) {
             log.warn("Permission denied for creating StockResource. data: {}", data);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create StockResource");
         }
 
         StockResource stockResource = mapper.toEntity(data);
+        stockResource.setShop(shop);
         stockResource.setTenantId(tenantId);
         StockResource saved = repository.save(stockResource);
         log.info("Successfully created StockResource with id: {}", saved.getId());
@@ -272,5 +277,13 @@ public class StockResourceService implements
 
     private UUID resolveCurrentUserId() {
         return currentUserIdResolver.resolve();
+    }
+
+    private Shop resolveShop(UUID shopId) {
+        if (shopId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "shopId is required");
+        }
+        return shopRepository.findById(shopId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shop not found"));
     }
 }

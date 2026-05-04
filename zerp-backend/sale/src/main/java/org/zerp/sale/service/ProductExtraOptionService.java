@@ -21,6 +21,8 @@ import org.zerp.sale.dto.productextraoption.ProductExtraOptionUpdateDTO;
 import org.zerp.sale.mapper.ProductExtraOptionMapper;
 import org.zerp.sale.permission.ProductExtraOptionPermissionEvaluator;
 import org.zerp.sale.repository.ProductExtraOptionRepository;
+import org.zerp.sale.repository.ProductRepository;
+import org.zerp.sale.repository.StockResourceRepository;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -35,6 +37,8 @@ public class ProductExtraOptionService implements
         IResourceService<ProductExtraOptionDTO, ProductExtraOptionDTO, ProductExtraOptionCreateDTO, ProductExtraOptionUpdateDTO, UUID> {
     private final ProductExtraOptionPermissionEvaluator permissionEvaluator;
     private final ProductExtraOptionRepository repository;
+    private final ProductRepository productRepository;
+    private final StockResourceRepository stockResourceRepository;
     private final ProductExtraOptionMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final CurrentTenantIdResolver currentTenantIdResolver;
@@ -89,11 +93,13 @@ public class ProductExtraOptionService implements
         }
 
         ProductExtraOption option = mapper.toEntity(data);
+        option.setProduct(productRepository.getReferenceById(data.getProductId()));
         option.setTenantId(tenantId);
 
         if (data.getItems() != null) {
             data.getItems().forEach(itemDTO -> {
                 ProductExtraOptionItem item = mapper.toItemEntity(itemDTO);
+                item.setStockResource(stockResourceRepository.getReferenceById(itemDTO.getStockResourceId()));
                 item.setExtraOption(option);
                 option.getItems().add(item);
             });
@@ -137,6 +143,7 @@ public class ProductExtraOptionService implements
             option.getItems().clear();
             data.getItems().forEach(itemDTO -> {
                 ProductExtraOptionItem item = mapper.toItemEntity(itemDTO);
+                item.setStockResource(stockResourceRepository.getReferenceById(itemDTO.getStockResourceId()));
                 item.setExtraOption(option);
                 option.getItems().add(item);
             });

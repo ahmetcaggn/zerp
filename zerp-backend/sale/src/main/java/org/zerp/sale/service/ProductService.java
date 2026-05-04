@@ -9,7 +9,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.sale.Product;
+import org.zerp.common.entity.sale.ProductMetric;
+import org.zerp.common.entity.sale.ProductType;
+import org.zerp.common.entity.sale.MenuItem;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
@@ -19,6 +23,10 @@ import org.zerp.sale.dto.product.ProductDTO;
 import org.zerp.sale.dto.product.ProductUpdateDTO;
 import org.zerp.sale.mapper.ProductMapper;
 import org.zerp.sale.permission.ProductPermissionEvaluator;
+import org.zerp.sale.repository.MenuItemRepository;
+import org.zerp.sale.repository.ProductMetricRepository;
+import org.zerp.sale.repository.ProductTypeRepository;
+import org.zerp.sale.repository.ShopRepository;
 import org.zerp.sale.repository.ProductRepository;
 
 import java.math.BigDecimal;
@@ -34,6 +42,10 @@ public class ProductService implements
         IResourceService<ProductDTO, ProductDTO, ProductCreateDTO, ProductUpdateDTO, UUID> {
     private final ProductPermissionEvaluator permissionEvaluator;
     private final ProductRepository repository;
+    private final ShopRepository shopRepository;
+    private final ProductTypeRepository productTypeRepository;
+    private final ProductMetricRepository productMetricRepository;
+    private final MenuItemRepository menuItemRepository;
     private final ProductMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final CurrentTenantIdResolver currentTenantIdResolver;
@@ -83,10 +95,15 @@ public class ProductService implements
     public ProductDTO create(ProductCreateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
         UUID tenantId = currentTenantIdResolver.resolve();
-        if (!permissionEvaluator.canCreate(userId, data.getShopId(), tenantId)) {
+        Shop shop = resolveShop(data.getShopId());
+        if (!permissionEvaluator.canCreate(userId, shop.getId(), tenantId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Product");
         }
         Product product = mapper.toEntity(data);
+        product.setShop(shop);
+        product.setType(resolveProductType(data.getTypeId()));
+        product.setMetric(resolveProductMetric(data.getMetricId()));
+        product.setMenuItem(resolveMenuItem(data.getMenuItemId()));
         product.setTenantId(tenantId);
         Product saved = repository.save(product);
         log.info("Created Product with id: {}", saved.getId());
@@ -118,6 +135,9 @@ public class ProductService implements
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Product");
         }
         mapper.updateEntityFromDTO(data, product);
+        if (data.getTypeId() != null) product.setType(resolveProductType(data.getTypeId()));
+        if (data.getMetricId() != null) product.setMetric(resolveProductMetric(data.getMetricId()));
+        if (data.getMenuItemId() != null) product.setMenuItem(resolveMenuItem(data.getMenuItemId()));
         Product updated = repository.save(product);
         log.info("Updated Product with id: {}", uuid);
         return mapper.toDTO(updated);
@@ -172,5 +192,37 @@ public class ProductService implements
         if (fields.containsKey("price")) product.setPrice(new BigDecimal(fields.get("price").toString()));
         if (fields.containsKey("isActive")) product.setActive((Boolean) fields.get("isActive"));
         if (fields.containsKey("preparationTime")) product.setPreparationTime((Integer) fields.get("preparationTime"));
+    }
+
+    private Shop resolveShop(UUID shopId) {
+        if (shopId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "shopId is required");
+        }
+        return shopRepository.findById(shopId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shop not found"));
+    }
+
+    private ProductType resolveProductType(UUID typeId) {
+        if (typeId == null ) {
+            return null;
+        }
+        return productTypeRepository.findById(typeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ProductType not found"));
+    }
+
+    private ProductMetric resolveProductMetric(UUID metricId) {
+        if (metricId == null) {
+            return null;
+        }
+        return productMetricRepository.findById(metricId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ProductMetric not found"));
+    }
+
+    private MenuItem resolveMenuItem(UUID menuItemId) {
+        if (menuItemId == null) {
+            return null;
+        }
+        return menuItemRepository.findById(menuItemId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "MenuItem not found"));
     }
 }
