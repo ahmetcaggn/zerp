@@ -100,6 +100,7 @@ public class ProductRecipeService implements
                 ProductRecipeItem item = mapper.toItemEntity(itemDTO);
                 item.setStockResource(stockResourceRepository.getReferenceById(itemDTO.getStockResourceId()));
                 item.setRecipe(recipe);
+                item.setTenantId(tenantId);
                 recipe.getItems().add(item);
             });
         }

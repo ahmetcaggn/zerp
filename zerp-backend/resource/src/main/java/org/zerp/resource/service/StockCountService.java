@@ -113,6 +113,7 @@ public class StockCountService implements
             item.setStockCount(stockCount);
             item.setStockResource(stockResource);
             item.setTheoreticalQuantity(stockResource.getQuantity());
+            item.setTenantId(tenantId);
             stockCount.getItems().add(item);
         });
 

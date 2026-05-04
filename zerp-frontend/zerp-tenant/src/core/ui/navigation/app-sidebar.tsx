@@ -10,26 +10,36 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  useTheme,
-  useMediaQuery,
-  Divider,
+  Stack,
   Tooltip,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
-import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
-import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded'
 import InventoryRoundedIcon from '@mui/icons-material/InventoryRounded'
+import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded'
+import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded'
+import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
 import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded'
+import type { Route } from 'next'
 import { usePathname, useRouter } from 'next/navigation'
+import { appConfig } from '@/core/config/app-config'
 import { useI18n } from '@/core/i18n/i18n-provider'
 
 const DRAWER_WIDTH = 240
 const COLLAPSED_DRAWER_WIDTH = 64
 
-type SidebarLabelKey = 'nav.dashboard' | 'nav.sale' | 'nav.stock' | 'nav.employees' | 'nav.tickets' | 'nav.notifications'
+type SidebarLabelKey =
+  | 'nav.dashboard'
+  | 'nav.sale'
+  | 'nav.stock'
+  | 'nav.employees'
+  | 'nav.tickets'
+  | 'nav.notifications'
 
 interface SidebarAction {
   id: string
@@ -55,57 +65,81 @@ export function AppSidebar({ locale }: { locale: string }) {
   const pathname = usePathname()
   const { t } = useI18n()
 
-  const currentWidth = isExpanded ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH
-
-  const handleToggle = () => setIsExpanded(!isExpanded)
+  const handleToggle = () => setIsExpanded((prev) => !prev)
 
   return (
     <Drawer
       variant="permanent"
       sx={{
-        width: currentWidth,
+        width: isExpanded ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
         flexShrink: 0,
         whiteSpace: 'nowrap',
         boxSizing: 'border-box',
+        transition: theme.transitions.create('width', {
+          easing: theme.transitions.easing.sharp,
+          duration: isExpanded
+            ? theme.transitions.duration.enteringScreen
+            : theme.transitions.duration.leavingScreen,
+        }),
       }}
       PaperProps={{
         sx: {
           position: 'relative',
           height: '100vh',
-          ...(isExpanded
-            ? {
-                width: DRAWER_WIDTH,
-                transition: theme.transitions.create('width', {
-                  easing: theme.transitions.easing.sharp,
-                  duration: theme.transitions.duration.enteringScreen,
-                }),
-                overflowX: 'hidden',
-              }
-            : {
-                width: COLLAPSED_DRAWER_WIDTH,
-                transition: theme.transitions.create('width', {
-                  easing: theme.transitions.easing.sharp,
-                  duration: theme.transitions.duration.leavingScreen,
-                }),
-                overflowX: 'hidden',
-              }),
+          overflowX: 'hidden',
+          width: isExpanded ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
+          transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: isExpanded
+              ? theme.transitions.duration.enteringScreen
+              : theme.transitions.duration.leavingScreen,
+          }),
         },
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: isExpanded ? 'flex-end' : 'center', p: 1, minHeight: 64 }}>
-        <IconButton onClick={handleToggle}>
-          {isExpanded ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-        </IconButton>
+      {/* Logo header */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          minHeight: 64,
+          px: isExpanded ? 2 : 0,
+          justifyContent: isExpanded ? 'space-between' : 'center',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          overflow: 'hidden',
+        }}
+      >
+        {isExpanded ? (
+          <>
+            <Stack direction="row" alignItems="center" gap={1.25}>
+              <StorefrontRoundedIcon color="primary" />
+              <Typography fontWeight={700} noWrap>
+                {appConfig.app.name}
+              </Typography>
+            </Stack>
+            <IconButton onClick={handleToggle} size="small">
+              <ChevronLeftIcon />
+            </IconButton>
+          </>
+        ) : (
+          <Tooltip title={appConfig.app.name} placement="right">
+            <IconButton onClick={handleToggle} size="small">
+              <StorefrontRoundedIcon color="primary" />
+            </IconButton>
+          </Tooltip>
+        )}
       </Box>
-      <Divider />
-      <List>
+
+      {/* Nav items */}
+      <List sx={{ pt: 1 }}>
         {SIDEBAR_ACTIONS.map((action) => {
           const hrefWithLocale = `/${locale}${action.href}`
           const isSelected = pathname.startsWith(hrefWithLocale)
 
           const listItemButton = (
             <ListItemButton
-              onClick={() => router.push(hrefWithLocale)}
+              onClick={() => router.push(hrefWithLocale as Route)}
               selected={isSelected}
               sx={{
                 minHeight: 48,

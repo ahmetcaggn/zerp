@@ -1,12 +1,9 @@
 'use client'
 
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
-import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
 import LoginRoundedIcon from '@mui/icons-material/LoginRounded'
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
-import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded'
-import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
 import {
   AppBar,
   Button,
@@ -28,7 +25,6 @@ import { signOut, useSession } from 'next-auth/react'
 import type { ReactElement } from 'react'
 import { useMemo, useState } from 'react'
 
-import { appConfig } from '@/core/config/app-config'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { responsiveLayout } from '@/core/theme/layout'
 import { LocaleSwitcher } from '@/core/ui/feedback/locale-switcher'
@@ -111,32 +107,12 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
         <Toolbar
           disableGutters
           sx={{
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end',
             gap: { xs: 1, sm: 2 },
             minHeight: responsiveLayout.toolbarMinHeight,
             px: responsiveLayout.toolbarPaddingX,
           }}
         >
-          <Stack alignItems="center" direction="row" gap={1.25} minWidth={0}>
-            <StorefrontRoundedIcon color="primary" />
-            <Typography
-              role="link"
-              tabIndex={0}
-              fontWeight={700}
-              noWrap
-              onClick={() => router.push(`/${locale}`)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault()
-                  router.push(`/${locale}`)
-                }
-              }}
-              sx={{ color: 'inherit', cursor: 'pointer' }}
-            >
-              {appConfig.app.name}
-            </Typography>
-          </Stack>
-
           {isMobile ? (
             <Stack alignItems="center" direction="row" gap={0.5}>
               <LocaleSwitcher locale={locale} />
@@ -195,10 +171,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
             <ListItemButton
               key={action.id}
               onClick={() => handleActionClick(action)}
-              selected={
-                (action.id === 'dashboard' && pathname.includes('/dashboard')) ||
-                (action.id === 'sale' && pathname.includes('/sale'))
-              }
+              selected={false}
             >
               <ListItemIcon sx={{ minWidth: 34 }}>{action.icon}</ListItemIcon>
               <ListItemText primary={t(action.labelKey)} />
