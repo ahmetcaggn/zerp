@@ -38,8 +38,6 @@ services:
       - "8086:8086"
       - "8087:8087"
     environment:
-      # SERVICE: aggregated
-      # MODULE_NAME: aggregated
       SPRING_PROFILES_ACTIVE: ${AGGREGATED_SPRING_PROFILES_ACTIVE}
       LOG4J2_CONFIG_PATH: ${AGGREGATED_LOG4J2_CONFIG_PATH}
       JAVA_OPTS: ${AGGREGATED_JAVA_OPTS}
