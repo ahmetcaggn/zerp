@@ -10,8 +10,8 @@ public class TenantRoot implements Permittable {
     private TenantRoot() {
     }
 
-    public static final TenantRoot INSTANCE = new TenantRoot();
     public static final UUID ID = new UUID(0L, 0L);
+    public static final TenantRoot INSTANCE = new TenantRoot();
 
     private final UUID id = ID;
 
