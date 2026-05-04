@@ -101,6 +101,7 @@ public class ProductExtraOptionService implements
                 ProductExtraOptionItem item = mapper.toItemEntity(itemDTO);
                 item.setStockResource(stockResourceRepository.getReferenceById(itemDTO.getStockResourceId()));
                 item.setExtraOption(option);
+                item.setTenantId(tenantId);
                 option.getItems().add(item);
             });
         }
