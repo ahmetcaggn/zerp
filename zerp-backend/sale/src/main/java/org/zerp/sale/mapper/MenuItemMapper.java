@@ -11,6 +11,7 @@ import org.zerp.sale.dto.menuitem.MenuItemUpdateDTO;
 @Mapper(componentModel = "spring")
 public interface MenuItemMapper {
     @Mapping(target = "category", ignore = true)
+    @Mapping(target = "products", ignore = true)
     MenuItem toEntity(MenuItemCreateDTO dto);
 
     @Mapping(source = "category.id", target = "categoryId")
@@ -19,5 +20,6 @@ public interface MenuItemMapper {
     @Mapping(target = "productIds", expression = "java(entity.getProducts() == null ? java.util.List.of() : entity.getProducts().stream().map(org.zerp.common.entity.sale.Product::getId).collect(java.util.stream.Collectors.toList()))")
     MenuItemDTO toDTO(MenuItem entity);
 
+    @Mapping(target = "products", ignore = true)
     void updateEntityFromDTO(MenuItemUpdateDTO dto, @MappingTarget MenuItem entity);
 }

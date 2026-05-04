@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.sale.MenuItem;
+import org.zerp.common.entity.sale.Product;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
@@ -21,6 +22,7 @@ import org.zerp.sale.mapper.MenuItemMapper;
 import org.zerp.sale.permission.MenuItemPermissionEvaluator;
 import org.zerp.sale.repository.MenuItemRepository;
 import org.zerp.sale.repository.MenuCategoryRepository;
+import org.zerp.sale.repository.ProductRepository;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ public class MenuItemService implements
     private final MenuItemPermissionEvaluator permissionEvaluator;
     private final MenuItemRepository repository;
     private final MenuCategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
     private final MenuItemMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final CurrentTenantIdResolver currentTenantIdResolver;
@@ -93,6 +96,9 @@ public class MenuItemService implements
         item.setTenantId(tenantId);
         MenuItem saved = repository.save(item);
         log.info("Created MenuItem with id: {}", saved.getId());
+        
+        handleProductAssignments(saved, data.getProductIds());
+        
         return mapper.toDTO(saved);
     }
 
@@ -120,8 +126,11 @@ public class MenuItemService implements
         if (!permissionEvaluator.canUpdate(userId, item)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update MenuItem");
         }
+        
         mapper.updateEntityFromDTO(data, item);
         MenuItem updated = repository.save(item);
+        
+        handleProductAssignments(updated, data.getProductIds());
         log.info("Updated MenuItem with id: {}", uuid);
         return mapper.toDTO(updated);
     }
@@ -174,5 +183,30 @@ public class MenuItemService implements
         if (fields.containsKey("description")) item.setDescription((String) fields.get("description"));
         if (fields.containsKey("price")) item.setPrice(new BigDecimal(fields.get("price").toString()));
         if (fields.containsKey("imageId")) item.setImageId((String) fields.get("imageId"));
+    }
+
+    private void handleProductAssignments(MenuItem item, List<UUID> newProductIds) {
+        if (newProductIds == null) {
+            return;
+        }
+        List<Product> currentProducts = productRepository.findByMenuItemId(item.getId());
+        
+        for (Product product : currentProducts) {
+            if (!newProductIds.contains(product.getId())) {
+                product.setMenuItem(null);
+                productRepository.save(product);
+            }
+        }
+        
+        for (UUID productId : newProductIds) {
+            boolean alreadyAssigned = currentProducts.stream()
+                .anyMatch(p -> p.getId().equals(productId));
+            if (!alreadyAssigned) {
+                productRepository.findById(productId).ifPresent(product -> {
+                    product.setMenuItem(item);
+                    productRepository.save(product);
+                });
+            }
+        }
     }
 }
