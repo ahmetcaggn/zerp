@@ -46,6 +46,7 @@ export const trMessages = {
     addEmployeeAction: 'Calisan Ekle',
     sendNotificationAction: 'Bildirim Gonder',
     newTicketAction: 'Yeni Talep',
+    viewStockAction: 'Stoku Görüntüle',
   },
   employees: {
     title: 'Çalışanlar',
@@ -168,5 +169,60 @@ export const trMessages = {
     htmlModeLabel: 'HTML Modu',
     htmlBodyLabel: 'HTML İçerik',
     recipientPlaceholder: "E-posta ekle, Enter'a bas",
+  },
+  stock: {
+    title: 'Stok Yönetimi',
+    tabs: {
+      resources: 'Stoklar',
+      movements: 'Hareketler',
+      counts: 'Sayımlar',
+    },
+    resource: {
+      createButton: 'Stok Ekle',
+      editButton: 'Düzenle',
+      emptyState: 'Sistemde kayıtlı stok bulunamadı.',
+      searchPlaceholder: 'İsme göre ara...',
+      form: {
+        name: 'Stok Adı',
+        description: 'Açıklama',
+        unitType: 'Birim Türü',
+        quantity: 'Miktar',
+        reorderThreshold: 'Yeniden Sipariş Eşiği',
+        costPerUnit: 'Birim Maliyeti',
+      },
+      quickActions: {
+        waste: 'İsraf Bildir',
+        restock: 'Giriş Yap',
+        adjust: 'Düzenle',
+      },
+    },
+    movement: {
+      createButton: 'Hareket Ekle',
+      emptyState: 'Stok hareketi bulunamadı.',
+      type: 'Türü',
+      types: {
+        PURCHASE: 'Satın Alma',
+        SALE: 'Satış',
+        WASTE: 'İsraf',
+        ADJUSTMENT: 'Düzenleme',
+        TRANSFER: 'Transfer',
+        RETURN: 'İade',
+        STOCK_COUNT_CORRECTION: 'Sayım Düzeltmesi',
+      },
+      quantity: 'Miktar Değişimi',
+      notes: 'Notlar',
+    },
+    count: {
+      createButton: 'Sayım Başlat',
+      emptyState: 'Sayım oturumu bulunamadı.',
+      status: 'Durum',
+      statuses: {
+        DRAFT: 'Taslak',
+        IN_PROGRESS: 'Devam Ediyor',
+        COMPLETED: 'Tamamlandı',
+      },
+      countDate: 'Sayım Tarihi',
+      notes: 'Notlar',
+    },
   },
 } as const

@@ -4,6 +4,7 @@ import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber'
 import GroupsIcon from '@mui/icons-material/Groups'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import SendIcon from '@mui/icons-material/Send'
+import InventoryIcon from '@mui/icons-material/Inventory'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { ROUTES, withLocale } from '@/core/constants/routes'
@@ -21,6 +22,7 @@ export function DashboardQuickActions() {
       href: ROUTES.notifications,
     },
     { label: t('dashboard.newTicketAction'), icon: <ConfirmationNumberIcon />, href: ROUTES.tickets },
+    { label: t('dashboard.viewStockAction'), icon: <InventoryIcon />, href: ROUTES.stock },
   ]
 
   return (

@@ -46,6 +46,7 @@ export const enMessages = {
     addEmployeeAction: 'Add Employee',
     sendNotificationAction: 'Send Notification',
     newTicketAction: 'New Ticket',
+    viewStockAction: 'View Stock',
   },
   employees: {
     title: 'Employees',
@@ -206,5 +207,60 @@ export const enMessages = {
     htmlModeLabel: 'HTML Mode',
     htmlBodyLabel: 'HTML Body',
     recipientPlaceholder: 'Add email, press Enter',
+  },
+  stock: {
+    title: 'Stock Management',
+    tabs: {
+      resources: 'Current Stock',
+      movements: 'Movements',
+      counts: 'Counts',
+    },
+    resource: {
+      createButton: 'Add Stock',
+      editButton: 'Edit Stock',
+      emptyState: 'No stock resources found.',
+      searchPlaceholder: 'Search by name...',
+      form: {
+        name: 'Name',
+        description: 'Description',
+        unitType: 'Unit Type',
+        quantity: 'Quantity',
+        reorderThreshold: 'Reorder Threshold',
+        costPerUnit: 'Cost per Unit',
+      },
+      quickActions: {
+        waste: 'Report Waste',
+        restock: 'Restock',
+        adjust: 'Adjust',
+      },
+    },
+    movement: {
+      createButton: 'Add Movement',
+      emptyState: 'No movements found.',
+      type: 'Movement Type',
+      types: {
+        PURCHASE: 'Purchase',
+        SALE: 'Sale',
+        WASTE: 'Waste',
+        ADJUSTMENT: 'Adjustment',
+        TRANSFER: 'Transfer',
+        RETURN: 'Return',
+        STOCK_COUNT_CORRECTION: 'Count Correction',
+      },
+      quantity: 'Quantity Change',
+      notes: 'Notes',
+    },
+    count: {
+      createButton: 'Start Count',
+      emptyState: 'No counts found.',
+      status: 'Status',
+      statuses: {
+        DRAFT: 'Draft',
+        IN_PROGRESS: 'In Progress',
+        COMPLETED: 'Completed',
+      },
+      countDate: 'Count Date',
+      notes: 'Notes',
+    },
   },
 } as const
