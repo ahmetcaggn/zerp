@@ -1,2 +1,3 @@
 *.properties
 !docker-config/*.properties
+!docker-config/aggregated/*/*.properties
