@@ -10,6 +10,7 @@ export const ROUTES = {
   tickets: '/tickets',
   notifications: '/notifications',
   stock: '/stock',
+  sale: '/sale',
 } as const
 
 export const PUBLIC_PATHS = [ROUTES.root, ROUTES.login, ROUTES.register] as const

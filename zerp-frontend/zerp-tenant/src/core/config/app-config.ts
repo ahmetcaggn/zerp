@@ -1,3 +1,4 @@
+import type { AppRole } from '@/core/types/common'
 import { getClientEnv } from '@/core/config/env.client'
 
 export const appConfig = (() => {
@@ -19,7 +20,7 @@ export const appConfig = (() => {
       browserBasePath: '/api',
     },
     access: {
-      dashboardRoles: ['tenant_owner', 'tenant_employee'],
+      dashboardRoles: ['tenant_owner', 'tenant_employee'] as AppRole[],
     },
     seo: {
       titleTemplate: '%s | ZERP',

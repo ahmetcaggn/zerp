@@ -4,6 +4,7 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
 import LoginRoundedIcon from '@mui/icons-material/LoginRounded'
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
+import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded'
 import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
 import {
@@ -33,25 +34,18 @@ import { responsiveLayout } from '@/core/theme/layout'
 import { LocaleSwitcher } from '@/core/ui/feedback/locale-switcher'
 import { ThemeToggle } from '@/core/ui/feedback/theme-toggle'
 
-type TopbarLabelKey = 'nav.dashboard' | 'nav.login' | 'nav.logout'
+type TopbarLabelKey = 'nav.login' | 'nav.logout'
 type TopbarVisibility = 'always' | 'authenticated' | 'unauthenticated'
 
 interface TopbarAction {
-  id: 'dashboard' | 'login' | 'logout'
+  id: 'login' | 'logout'
   labelKey: TopbarLabelKey
   icon: ReactElement
   visibility: TopbarVisibility
-  href?: '/dashboard' | '/login'
+  href?: '/login'
 }
 
 const TOPBAR_ACTIONS: readonly TopbarAction[] = [
-  {
-    id: 'dashboard',
-    labelKey: 'nav.dashboard',
-    icon: <DashboardRoundedIcon fontSize="small" />,
-    visibility: 'always',
-    href: '/dashboard',
-  },
   {
     id: 'login',
     labelKey: 'nav.login',
@@ -163,9 +157,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
                   key={action.id}
                   onClick={() => handleActionClick(action)}
                   size="small"
-                  variant={
-                    action.id === 'dashboard' && pathname.includes('/dashboard') ? 'contained' : 'text'
-                  }
+                  variant="text"
                 >
                   {t(action.labelKey)}
                 </Button>
@@ -203,7 +195,10 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
             <ListItemButton
               key={action.id}
               onClick={() => handleActionClick(action)}
-              selected={action.id === 'dashboard' && pathname.includes('/dashboard')}
+              selected={
+                (action.id === 'dashboard' && pathname.includes('/dashboard')) ||
+                (action.id === 'sale' && pathname.includes('/sale'))
+              }
             >
               <ListItemIcon sx={{ minWidth: 34 }}>{action.icon}</ListItemIcon>
               <ListItemText primary={t(action.labelKey)} />

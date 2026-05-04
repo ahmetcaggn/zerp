@@ -27,6 +27,11 @@ export interface MessageDictionary {
     logout: string
     language: string
     menu: string
+    sale: string
+    stock: string
+    employees: string
+    tickets: string
+    notifications: string
   }
   home: {
     title: string
