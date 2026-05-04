@@ -159,6 +159,10 @@ public class MenuItemService implements
         if (!permissionEvaluator.canDelete(userId, item)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete MenuItem");
         }
+        productRepository.findByMenuItemId(uuid).forEach(p -> {
+            p.setMenuItem(null);
+            productRepository.save(p);
+        });
         repository.delete(item);
         log.info("Deleted MenuItem with id: {}", uuid);
     }

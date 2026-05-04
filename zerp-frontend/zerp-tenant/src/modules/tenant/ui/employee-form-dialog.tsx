@@ -127,7 +127,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
       })
     } else if (employee?.id !== undefined) {
       updateEmployee(
-        { id: employee.id, data: sharedFields },
+        { id: String(employee.id), data: sharedFields },
         {
           onSuccess: () => {
             showToast(t('employees.employeeUpdatedToast'), { severity: 'success' })

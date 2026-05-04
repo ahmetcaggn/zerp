@@ -3,7 +3,6 @@ package org.zerp.common.entity.sale;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.permission.entity.Permittable;
@@ -19,7 +18,6 @@ import java.util.UUID;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "product_extra_options")
-@SQLDelete(sql = "UPDATE product_extra_options SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("deleted = false")
 @PermissionTargetTypeAnnotation(type = PermissionTargetType.PRODUCT_EXTRA_OPTION)
 public class ProductExtraOption extends BaseEntity implements Permittable {

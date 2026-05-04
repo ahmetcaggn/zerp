@@ -163,7 +163,7 @@ export function EmployeeList() {
                           color="error"
                           onClick={() => {
                             if (emp.id !== undefined) {
-                              deleteEmployee(emp.id, {
+                              deleteEmployee(String(emp.id), {
                                 onSuccess: () =>
                                   showToast(
                                     t('employees.employeeDeletedToast'),

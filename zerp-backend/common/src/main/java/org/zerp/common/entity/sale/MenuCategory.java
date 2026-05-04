@@ -2,7 +2,6 @@ package org.zerp.common.entity.sale;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.permission.entity.PermissionTargetType;
@@ -15,7 +14,6 @@ import java.util.UUID;
 @Entity
 @Data
 @Table(name = "menu_categories")
-@SQLDelete(sql = "UPDATE menu_categories SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("deleted = false")
 @PermissionTargetTypeAnnotation(type = PermissionTargetType.MENU_CATEGORY)
 public class MenuCategory extends BaseEntity implements Permittable {
