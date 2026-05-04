@@ -641,7 +641,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     private void addHistory(TicketEntity entity, TicketHistoryEntity.EventType eventType, String payload) {
-        addHistory(entity, eventType, payload, REFERENCE_TYPE_TICKET, entity != null ? entity.getId() : null);
+        addHistory(entity, eventType, payload, REFERENCE_TYPE_TICKET, entity.getId());
     }
 
     private void addHistory(

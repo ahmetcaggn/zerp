@@ -8,6 +8,7 @@ import org.zerp.common.entity.crm.TicketEntity.TicketPriority;
 import org.zerp.common.entity.crm.TicketEntity.TicketStatus;
 import org.zerp.common.entity.crm.TicketEntity.TicketType;
 import org.zerp.common.entity.user.AppUser;
+import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.repository.PermissionRepository;
 import org.zerp.common.permission.service.PermittableService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
@@ -20,6 +21,7 @@ import org.zerp.crm.repository.TicketRepository;
 import org.zerp.crm.service.ticket.TicketResponseMapper;
 import org.zerp.crm.service.ticket.TicketValueParser;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -50,6 +52,17 @@ public class TicketServiceTest {
         PermittableService permittableService = new PermittableService(permissionRepository);
         CrmPermissionEvaluator crmPermissionEvaluator = new CrmPermissionEvaluator(permissionRepository, permittableService);
 
+        // Mock permission checks to always succeed
+        Permission dummyPermission = new Permission();
+        when(permissionRepository.findAllByUserAndTicketHierarchy(any(), any(), any(), any()))
+                .thenReturn(List.of(dummyPermission));
+        when(permissionRepository.findAllByUserAndTicketChildHierarchy(any(), any(), any(), any(), any(), any()))
+                .thenReturn(List.of(dummyPermission));
+        when(permissionRepository.findAllByUserAndTicketAttachmentHierarchy(any(), any(), any(), any(), any(), any()))
+                .thenReturn(List.of(dummyPermission));
+        when(permissionRepository.findAllByUserAndTenantRootPermission(any(), any()))
+                .thenReturn(List.of(dummyPermission));
+
         //noinspection unchecked
         when(filterRefiner.refinedOrBadRequest(any(Map.class), eq(TicketEntity.class)))
                 .thenReturn(Specification.unrestricted());
@@ -67,6 +80,10 @@ public class TicketServiceTest {
                 filterRefiner,
                 crmPermissionEvaluator
         );
+
+        // Mock systemTenantId for assignment logic
+        UUID systemTenantId = new UUID(0L, 0L);
+        ReflectionTestUtils.setField(ticketService, "systemTenantId", systemTenantId);
 
         defaultTenantId = UUID.randomUUID();
         defaultUserId = UUID.randomUUID();
@@ -98,8 +115,29 @@ public class TicketServiceTest {
             UUID id = invocation.getArgument(1);
             TeamEntity team = new TeamEntity();
             team.setId(id);
+            team.setTenantId(systemTenantId); // Matches systemTenantId
             return team;
         });
+
+        // Add entityManager.find mocks for AssignTicketRequest validation
+        when(entityManager.find(eq(TeamEntity.class), any(UUID.class))).thenAnswer(invocation -> {
+            UUID id = invocation.getArgument(1);
+            TeamEntity team = new TeamEntity();
+            team.setId(id);
+            team.setTenantId(systemTenantId);
+            return team;
+        });
+
+        when(entityManager.find(eq(AppUser.class), any(UUID.class))).thenAnswer(invocation -> {
+            UUID id = invocation.getArgument(1);
+            AppUser user = new AppUser();
+            user.setId(id);
+            user.setTenantId(systemTenantId);
+            return user;
+        });
+
+        // Mock teamMemberRepository to allow assignment
+        when(teamMemberRepository.existsByTeamIdAndUserId(any(), any())).thenReturn(true);
     }
 
     private CreateTicketRequest defaultCreateRequest() {
@@ -121,6 +159,7 @@ public class TicketServiceTest {
         entity.setPriority(TicketPriority.MEDIUM);
         entity.setType(TicketType.QUESTION);
         entity.setTenant(tenant(defaultTenantId));
+        entity.setTenantId(defaultTenantId); // Add this line to fix the IllegalStateException
         entity.setReporter(reporter(defaultUserId));
         entity.setCreatedAt(LocalDateTime.now());
 
@@ -289,8 +328,8 @@ public class TicketServiceTest {
         void should_Track_History_Of_Ticket_Creation() {
             @SuppressWarnings("unused") TicketResponse response = ticketService.createTicket(defaultCreateRequest());
 
-            // The save mock returns the entity, which should have history entries
-            verify(ticketRepository).save(argThat(entity -> {
+            // Updated to atLeastOnce() because createTicket calls save twice
+            verify(ticketRepository, atLeastOnce()).save(argThat(entity -> {
                 Assertions.assertFalse(entity.getHistory().isEmpty(), "Should have history entries");
                 Assertions.assertEquals(TicketHistoryEntity.EventType.CREATED,
                         entity.getHistory().getFirst().getEventType(),

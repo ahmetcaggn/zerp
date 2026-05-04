@@ -102,15 +102,13 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND p.action = :action
                 AND (
                      (:teamId IS NOT NULL AND p.targetType = 'TEAM' AND p.targetId = :teamId)
-                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
                   OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
                 )
             """)
     List<Permission> findAllByUserAndTeamHierarchy(
             @Param("userId") UUID userId,
             @Param("action") PermissionAction action,
-            @Param("teamId") UUID teamId,
-            @Param("tenantId") UUID tenantId
+            @Param("teamId") UUID teamId
     );
 
     @Query("""
@@ -120,7 +118,6 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND (
                      (:teamMemberId IS NOT NULL AND p.targetType = 'TEAM_MEMBER' AND p.targetId = :teamMemberId)
                   OR (:teamId IS NOT NULL AND p.targetType = 'TEAM' AND p.targetId = :teamId)
-                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
                   OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
                 )
             """)
@@ -128,8 +125,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
             @Param("userId") UUID userId,
             @Param("action") PermissionAction action,
             @Param("teamMemberId") UUID teamMemberId,
-            @Param("teamId") UUID teamId,
-            @Param("tenantId") UUID tenantId
+            @Param("teamId") UUID teamId
     );
 
     @Query("""
