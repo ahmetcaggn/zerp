@@ -1,7 +1,6 @@
 package org.zerp.common.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -11,10 +10,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.StreamSupport;
 
+@Log4j2
 public class PropertyLogger implements ApplicationListener<ApplicationEnvironmentPreparedEvent> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyLogger.class);
-
     public PropertyLogger() {
         System.out.println("PropertyLogger initialized");
     }
@@ -45,15 +42,18 @@ public class PropertyLogger implements ApplicationListener<ApplicationEnvironmen
                 });
         sb.append("================================================================================================\n");
 
-        System.out.println(sb.toString());
-        LOGGER.info(sb.toString());
+        System.out.println(sb);
+        log.info(sb.toString());
     }
 
     private boolean isSensitive(String key) {
         String lowerKey = key.toLowerCase();
         return lowerKey.contains("password") ||
-               lowerKey.contains("secret") ||
-               lowerKey.contains("key") ||
-               lowerKey.contains("token");
+                lowerKey.contains("secret") ||
+                lowerKey.contains("key") ||
+                lowerKey.contains("token") ||
+                lowerKey.endsWith("pass") ||
+                lowerKey.endsWith("pw")
+                ;
     }
 }
