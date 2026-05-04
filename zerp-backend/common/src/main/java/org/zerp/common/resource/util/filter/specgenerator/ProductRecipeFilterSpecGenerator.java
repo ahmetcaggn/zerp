@@ -28,6 +28,11 @@ public class ProductRecipeFilterSpecGenerator implements IFilterSpecGenerator<Pr
             return generateGlobalSearchSpecification(value);
         }
 
+        if (parts.size() == 1 && "productId".equals(parts.getFirst())) {
+            parts.set(0, "product");
+            parts.add("id");
+        }
+
         return (root, query, cb) -> filterProcessor.generatePredicate(parts, value, operator, root, query, cb);
     }
 
