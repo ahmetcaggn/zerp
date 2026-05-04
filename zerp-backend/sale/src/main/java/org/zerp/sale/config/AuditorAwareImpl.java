@@ -1,4 +1,4 @@
-package org.zerp.employee.config;
+package org.zerp.sale.config;
 
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
