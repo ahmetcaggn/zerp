@@ -10,8 +10,6 @@ RUN chmod +x /app/entrypoint.sh
 
 COPY ${JAR_FILE} ${SERVICE}.jar
 
-EXPOSE 8080
-
 ENV SERVICE=${SERVICE} \
     MODULE_NAME=${SERVICE}
 

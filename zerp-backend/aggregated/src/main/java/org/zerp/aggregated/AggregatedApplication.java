@@ -23,6 +23,14 @@ import org.zerp.user.UserApplication;
 })
 public class AggregatedApplication {
     static void main(String[] args) {
+        String configRoot = System.getenv("AGGREGATED_CONFIG_ROOT");
+        String crmConfig = resolveConfigPath(configRoot, "crm", "CRM_CONFIG_PATH");
+        String employeeConfig = resolveConfigPath(configRoot, "employee", "EMPLOYEE_CONFIG_PATH");
+        String notificationConfig = resolveConfigPath(configRoot, "notification", "NOTIFICATION_CONFIG_PATH");
+        String resourceConfig = resolveConfigPath(configRoot, "resource", "RESOURCE_CONFIG_PATH");
+        String saleConfig = resolveConfigPath(configRoot, "sale", "SALE_CONFIG_PATH");
+        String suggestionConfig = resolveConfigPath(configRoot, "suggestion", "SUGGESTION_CONFIG_PATH");
+        String userConfig = resolveConfigPath(configRoot, "user", "USER_CONFIG_PATH");
 
         // Disable JMX globally to prevent HikariCP pool name clashes
         System.setProperty("spring.jmx.enabled", "false");
@@ -37,38 +45,52 @@ public class AggregatedApplication {
                 // 1. CRM Context
                 .child(CrmApplication.class).web(WebApplicationType.SERVLET)
                 .properties(
-                        "spring.config.additional-location=optional:file:./crm/src/main/resources/")
+                        "spring.config.additional-location=optional:file:" + crmConfig)
 
                 // 2. Employee Context
                 .sibling(EmployeeApplication.class).web(WebApplicationType.SERVLET)
                 .properties(
-                        "spring.config.additional-location=optional:file:./employee/src/main/resources/")
+                        "spring.config.additional-location=optional:file:" + employeeConfig)
 
                 // 3. Notification Context
                 .sibling(NotificationApplication.class).web(WebApplicationType.SERVLET)
                 .properties(
-                        "spring.config.additional-location=optional:file:./notification/src/main/resources/")
+                        "spring.config.additional-location=optional:file:" + notificationConfig)
 
                 // 4. Resource Context
                 .sibling(ResourceApplication.class).web(WebApplicationType.SERVLET)
                 .properties(
-                        "spring.config.additional-location=optional:file:./resource/src/main/resources/")
+                        "spring.config.additional-location=optional:file:" + resourceConfig)
 
                 // 5. Sale Context
                 .sibling(SaleApplication.class).web(WebApplicationType.SERVLET)
                 .properties(
-                        "spring.config.additional-location=optional:file:./sale/src/main/resources/")
+                        "spring.config.additional-location=optional:file:" + saleConfig)
 
                 // 6. Suggestion Context
                 .sibling(SuggestionApplication.class).web(WebApplicationType.SERVLET)
                 .properties(
-                        "spring.config.additional-location=optional:file:./suggestion/src/main/resources/")
+                        "spring.config.additional-location=optional:file:" + suggestionConfig)
 
                 // 7. User context
                 .sibling(UserApplication.class).web(WebApplicationType.SERVLET)
                 .properties(
-                        "spring.config.additional-location=optional:file:./user/src/main/resources/")
+                        "spring.config.additional-location=optional:file:" + userConfig)
 
                 .run(args);
+    }
+
+    private static String resolveConfigPath(String root, String service, String envName) {
+        String override = System.getenv(envName);
+        if (override != null && !override.isBlank()) {
+            return override;
+        }
+
+        if (root == null || root.isBlank()) {
+            return "./" + service + "/src/main/resources/";
+        }
+
+        String normalizedRoot = root.endsWith("/") ? root : root + "/";
+        return normalizedRoot + service + "/";
     }
 }

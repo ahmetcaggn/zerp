@@ -1,1 +1,2 @@
 *.properties
+!docker-config/*.properties

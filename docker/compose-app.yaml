@@ -1,0 +1,280 @@
+services:
+  eureka:
+    build:
+      context: ..
+      dockerfile: zerp-backend/docker/jre25.dockerfile
+      args:
+        SERVICE: eureka
+    container_name: zerp-eureka
+    hostname: eureka
+    ports:
+      - "${EUREKA_PORT}:8761"
+    environment:
+      SERVICE: eureka
+      MODULE_NAME: eureka
+      SPRING_PROFILES_ACTIVE: ${EUREKA_SPRING_PROFILES_ACTIVE}
+      LOG4J2_CONFIG_PATH: ${EUREKA_LOG4J2_CONFIG_PATH}
+      JAVA_OPTS: ${EUREKA_JAVA_OPTS}
+      spring.config.import: optional:file:/config/eureka.properties
+    volumes:
+      - ../zerp-backend/local/docker-config/eureka.docker.properties:/config/eureka.properties:ro
+    networks:
+      - zerp-net
+
+  crm:
+    build:
+      context: ..
+      dockerfile: zerp-backend/docker/jre25.dockerfile
+      args:
+        SERVICE: crm
+    container_name: zerp-crm
+    hostname: crm
+    ports:
+      - "8081:8081"
+    environment:
+      SERVICE: crm
+      MODULE_NAME: crm
+      SPRING_PROFILES_ACTIVE: ${CRM_SPRING_PROFILES_ACTIVE}
+      LOG4J2_CONFIG_PATH: ${CRM_LOG4J2_CONFIG_PATH}
+      JAVA_OPTS: ${CRM_JAVA_OPTS}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE}
+      spring.config.import: optional:file:/config/crm.properties
+    volumes:
+      - ../zerp-backend/local/docker-config/crm.docker.properties:/config/crm.properties:ro
+    depends_on:
+      - eureka
+    networks:
+      - zerp-net
+
+  employee:
+    build:
+      context: ..
+      dockerfile: zerp-backend/docker/jre25.dockerfile
+      args:
+        SERVICE: employee
+    container_name: zerp-employee
+    hostname: employee
+    ports:
+      - "8082:8082"
+    environment:
+      SERVICE: employee
+      MODULE_NAME: employee
+      SPRING_PROFILES_ACTIVE: ${EMPLOYEE_SPRING_PROFILES_ACTIVE}
+      LOG4J2_CONFIG_PATH: ${EMPLOYEE_LOG4J2_CONFIG_PATH}
+      JAVA_OPTS: ${EMPLOYEE_JAVA_OPTS}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE}
+      spring.config.import: optional:file:/config/employee.properties
+    volumes:
+      - ../zerp-backend/local/docker-config/employee.docker.properties:/config/employee.properties:ro
+    depends_on:
+      - eureka
+    networks:
+      - zerp-net
+
+  notification:
+    build:
+      context: ..
+      dockerfile: zerp-backend/docker/jre25.dockerfile
+      args:
+        SERVICE: notification
+    container_name: zerp-notification
+    hostname: notification
+    ports:
+      - "8083:8083"
+    environment:
+      SERVICE: notification
+      MODULE_NAME: notification
+      SPRING_PROFILES_ACTIVE: ${NOTIFICATION_SPRING_PROFILES_ACTIVE}
+      LOG4J2_CONFIG_PATH: ${NOTIFICATION_LOG4J2_CONFIG_PATH}
+      JAVA_OPTS: ${NOTIFICATION_JAVA_OPTS}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE}
+      KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP}
+      KAFKA_TOPIC_EMAIL: ${KAFKA_TOPIC_EMAIL}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      spring.config.import: optional:file:/config/notification.properties
+    volumes:
+      - ../zerp-backend/local/docker-config/notification.docker.properties:/config/notification.properties:ro
+    depends_on:
+      - eureka
+    networks:
+      - zerp-net
+
+  resource:
+    build:
+      context: ..
+      dockerfile: zerp-backend/docker/jre25.dockerfile
+      args:
+        SERVICE: resource
+    container_name: zerp-resource
+    hostname: resource
+    ports:
+      - "8084:8084"
+    environment:
+      SERVICE: resource
+      MODULE_NAME: resource
+      SPRING_PROFILES_ACTIVE: ${RESOURCE_SPRING_PROFILES_ACTIVE}
+      LOG4J2_CONFIG_PATH: ${RESOURCE_LOG4J2_CONFIG_PATH}
+      JAVA_OPTS: ${RESOURCE_JAVA_OPTS}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE}
+      spring.config.import: optional:file:/config/resource.properties
+    volumes:
+      - ../zerp-backend/local/docker-config/resource.docker.properties:/config/resource.properties:ro
+    depends_on:
+      - eureka
+    networks:
+      - zerp-net
+
+  sale:
+    build:
+      context: ..
+      dockerfile: zerp-backend/docker/jre25.dockerfile
+      args:
+        SERVICE: sale
+    container_name: zerp-sale
+    hostname: sale
+    ports:
+      - "8085:8085"
+    environment:
+      SERVICE: sale
+      MODULE_NAME: sale
+      SPRING_PROFILES_ACTIVE: ${SALE_SPRING_PROFILES_ACTIVE}
+      LOG4J2_CONFIG_PATH: ${SALE_LOG4J2_CONFIG_PATH}
+      JAVA_OPTS: ${SALE_JAVA_OPTS}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE}
+      spring.config.import: optional:file:/config/sale.properties
+    volumes:
+      - ../zerp-backend/local/docker-config/sale.docker.properties:/config/sale.properties:ro
+    depends_on:
+      - eureka
+    networks:
+      - zerp-net
+
+  suggestion:
+    build:
+      context: ..
+      dockerfile: zerp-backend/docker/jre25.dockerfile
+      args:
+        SERVICE: suggestion
+    container_name: zerp-suggestion
+    hostname: suggestion
+    ports:
+      - "8086:8086"
+    environment:
+      SERVICE: suggestion
+      MODULE_NAME: suggestion
+      SPRING_PROFILES_ACTIVE: ${SUGGESTION_SPRING_PROFILES_ACTIVE}
+      LOG4J2_CONFIG_PATH: ${SUGGESTION_LOG4J2_CONFIG_PATH}
+      JAVA_OPTS: ${SUGGESTION_JAVA_OPTS}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE}
+      spring.config.import: optional:file:/config/suggestion.properties
+    volumes:
+      - ../zerp-backend/local/docker-config/suggestion.docker.properties:/config/suggestion.properties:ro
+    depends_on:
+      - eureka
+    networks:
+      - zerp-net
+
+  user:
+    build:
+      context: ..
+      dockerfile: zerp-backend/docker/jre25.dockerfile
+      args:
+        SERVICE: user
+    container_name: zerp-user
+    hostname: user
+    ports:
+      - "8087:8087"
+    environment:
+      SERVICE: user
+      MODULE_NAME: user
+      SPRING_PROFILES_ACTIVE: ${USER_SPRING_PROFILES_ACTIVE}
+      LOG4J2_CONFIG_PATH: ${USER_LOG4J2_CONFIG_PATH}
+      JAVA_OPTS: ${USER_JAVA_OPTS}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE}
+      KEYCLOAK_ADMIN_SERVER_URL: ${KEYCLOAK_ADMIN_SERVER_URL}
+      KEYCLOAK_ADMIN_REALM: ${KEYCLOAK_ADMIN_REALM}
+      KEYCLOAK_ADMIN_CLIENT_ID: ${KEYCLOAK_ADMIN_CLIENT_ID}
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET}
+      spring.config.import: optional:file:/config/user.properties
+    volumes:
+      - ../zerp-backend/local/docker-config/user.docker.properties:/config/user.properties:ro
+    depends_on:
+      - eureka
+    networks:
+      - zerp-net
+
+  gateway:
+    build:
+      context: ..
+      dockerfile: zerp-backend/docker/jre25.dockerfile
+      args:
+        SERVICE: gateway
+    container_name: zerp-gateway
+    hostname: gateway
+    ports:
+      - "${GATEWAY_PORT}:8080"
+    environment:
+      SERVICE: gateway
+      MODULE_NAME: gateway
+      SPRING_PROFILES_ACTIVE: ${GATEWAY_SPRING_PROFILES_ACTIVE}
+      LOG4J2_CONFIG_PATH: ${GATEWAY_LOG4J2_CONFIG_PATH}
+      JAVA_OPTS: ${GATEWAY_JAVA_OPTS}
+      EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE}
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
+      CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN}
+      spring.config.import: optional:file:/config/gateway.properties
+    volumes:
+      - ../zerp-backend/local/docker-config/gateway.docker.properties:/config/gateway.properties:ro
+    depends_on:
+      - eureka
+      - crm
+      - employee
+      - notification
+      - resource
+      - sale
+      - suggestion
+      - user
+    networks:
+      - zerp-net
+
+networks:
+  zerp-net:
+    external: true
