@@ -1,16 +1,13 @@
 package org.zerp.common.entity.sale;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
+import org.zerp.common.permission.entity.PermissionTargetType;
+import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
+import org.zerp.common.permission.entity.Permittable;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -18,27 +15,30 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Table(name= "menu_items")
+@Table(name = "menu_items")
 @SQLDelete(sql = "UPDATE menu_items SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("deleted = false")
-public class MenuItem extends BaseEntity{
-
+@PermissionTargetTypeAnnotation(type = PermissionTargetType.MENU_ITEM)
+public class MenuItem extends BaseEntity implements Permittable {
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private int position;
     private String name;
     private String description;
     private String imageId;
 
-    // TODO eger product silinirse menuItem'dan da silinmeli.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private MenuCategory category;
+
     @OneToMany(mappedBy = "menuItem")
     private List<Product> products;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private MenuCategory category;
-
     private BigDecimal price;
+
+    @Override
+    public Permittable getParent() {
+        return category;
+    }
 }
