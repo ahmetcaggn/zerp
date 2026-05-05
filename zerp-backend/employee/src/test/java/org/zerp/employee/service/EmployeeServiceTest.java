@@ -14,11 +14,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.mockito.ArgumentMatchers;
+import org.zerp.common.dto.ApiResponse;
+import org.zerp.common.dto.feign.user.keycloak.KeycloakCreateUserResponseDTO;
+import org.zerp.common.dto.user.UsernameCheckResponseDTO;
 import org.zerp.common.entity.Tenant;
 import org.zerp.common.entity.employee.Employee;
 import org.zerp.common.entity.employee.EmploymentStatus;
+import org.zerp.common.resource.util.filter.FilterRefiner;
+import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.employee.Exception.DuplicateResourceException;
+import org.zerp.employee.client.UserServiceClient;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.UpdateEmployeeRequestDto;
 import org.zerp.employee.dtos.response.EmployeeListResponseDto;
@@ -55,12 +61,23 @@ class EmployeeServiceTest {
     @Mock
     private CurrentUserIdResolver currentUserIdResolver;
 
+    @Mock
+    private CurrentTenantIdResolver currentTenantIdResolver;
+
+    @Mock
+    private FilterRefiner filterRefiner;
+
+    @Mock
+    private UserServiceClient userServiceClient;
+
     @InjectMocks
     private EmployeeService employeeService;
 
     @BeforeEach
     void commonStubs() {
         lenient().when(currentUserIdResolver.resolve()).thenReturn(uuidOf(999));
+        lenient().when(currentTenantIdResolver.resolve()).thenReturn(uuidOf(500));
+        lenient().when(filterRefiner.refinedOrBadRequest(any(), any())).thenReturn(Specification.unrestricted());
         lenient().when(permissionEvaluator.filterRead(any())).thenReturn(Specification.unrestricted());
         lenient().when(permissionEvaluator.canRead(any(), any())).thenReturn(true);
         lenient().when(permissionEvaluator.canCreate(any(), any())).thenReturn(true);
@@ -245,13 +262,28 @@ class EmployeeServiceTest {
         private CreateEmployeeRequestDto dto;
 
         @BeforeEach
+        @SuppressWarnings("unchecked")
         void setup() {
             dto = new CreateEmployeeRequestDto();
+            dto.setUsername("janesmith");
+            dto.setTempPassword("Password123");
             dto.setFirstName("Jane");
             dto.setLastName("Smith");
             dto.setEmail("jane@example.com");
             dto.setHireDate(LocalDate.of(2023, 6, 1));
             dto.setStatus(EmploymentStatus.ACTIVE);
+
+            UsernameCheckResponseDTO checkDto = new UsernameCheckResponseDTO();
+            checkDto.setAvailable(true);
+            ApiResponse<UsernameCheckResponseDTO> checkResponse = new ApiResponse<>();
+            checkResponse.setData(checkDto);
+            lenient().when(userServiceClient.checkUsername(any())).thenReturn(org.springframework.http.ResponseEntity.ok(checkResponse));
+
+            KeycloakCreateUserResponseDTO keycloakDto = new KeycloakCreateUserResponseDTO();
+            keycloakDto.setUserId(uuidOf(1));
+            ApiResponse<KeycloakCreateUserResponseDTO> keycloakResponse = new ApiResponse<>();
+            keycloakResponse.setData(keycloakDto);
+            lenient().when(userServiceClient.createKeycloakUser(any())).thenReturn(org.springframework.http.ResponseEntity.ok(keycloakResponse));
         }
 
         @Test
@@ -467,7 +499,8 @@ class EmployeeServiceTest {
 
             employeeService.deleteById(uuidOf(1));
 
-            verify(employeeRepository).delete(emp);
+            verify(employeeRepository).save(emp);
+            assertThat(emp.getDeletedAt()).isNotNull();
         }
 
         @Test
@@ -498,7 +531,7 @@ class EmployeeServiceTest {
             List<UUID> deleted = employeeService.deleteMany(List.of(uuidOf(1), uuidOf(2)));
 
             assertThat(deleted).containsExactlyInAnyOrder(uuidOf(1), uuidOf(2));
-            verify(employeeRepository, times(2)).delete(any(Employee.class));
+            verify(employeeRepository, times(2)).save(any(Employee.class));
         }
 
         @Test
@@ -511,7 +544,7 @@ class EmployeeServiceTest {
             List<UUID> deleted = employeeService.deleteMany(List.of(uuidOf(1), uuidOf(99)));
 
             assertThat(deleted).containsExactly(uuidOf(1));
-            verify(employeeRepository, times(1)).delete(any(Employee.class));
+            verify(employeeRepository, times(1)).save(any(Employee.class));
         }
 
         @Test
@@ -605,5 +638,4 @@ class EmployeeServiceTest {
         }
     }
 }
-
 
