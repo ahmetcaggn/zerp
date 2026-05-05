@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-import org.zerp.common.entity.TenantRoot;
+import org.zerp.common.entity.Tenant;
 import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
@@ -35,6 +35,11 @@ public class TeamEntity extends BaseEntity implements Permittable {
     @Column(nullable = false, length = 100)
     private String name;
 
+    // this tenant will be the system tenant.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tenant_id", nullable = false, insertable = false, updatable = false)
+    private Tenant tenant;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -46,6 +51,6 @@ public class TeamEntity extends BaseEntity implements Permittable {
 
     @Override
     public Permittable getParent() {
-        return TenantRoot.INSTANCE;
+        return tenant;
     }
 }

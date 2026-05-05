@@ -382,7 +382,7 @@ public class CrmPermissionEvaluator {
                 userId, action, teamId, tenantId);
 
         List<Permission> result = permissionRepository.findAllByUserAndTeamHierarchy(
-                userId, action, teamId);
+                userId, action, teamId, tenantId);
 
         boolean permitted = !result.isEmpty();
         log.debug("Team hierarchy permission result - userId: {}, action: {}, permitted: {}",
@@ -401,7 +401,7 @@ public class CrmPermissionEvaluator {
                 userId, action, teamMemberId, teamId, tenantId);
 
         List<Permission> result = permissionRepository.findAllByUserAndTeamMemberHierarchy(
-                userId, action, teamMemberId, teamId);
+                userId, action, teamMemberId, teamId, tenantId);
 
         boolean permitted = !result.isEmpty();
         log.debug("Team member hierarchy permission result - userId: {}, action: {}, permitted: {}",
