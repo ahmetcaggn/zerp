@@ -250,3 +250,11 @@ fetch-and-generate-all-apis-and-pub-get: download-all-specs generate-all-apis
 	cd $(USER_OUTPUT_DIR) && flutter pub get
 	echo "All APIs fetched, generated, and dependencies installed!"
 
+pub-get-all-modules:
+	@for dir in ./modules/* ; do \
+		if [ -d "$$dir" ]; then \
+			echo "Entering $$dir..."; \
+			(cd "$$dir" && flutter pub get) || exit 1; \
+		fi; \
+	done
+	@echo "Pub get completed for all modules."
