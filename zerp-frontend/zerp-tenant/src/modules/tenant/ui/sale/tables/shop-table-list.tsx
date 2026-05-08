@@ -1,10 +1,12 @@
 'use client'
 import {
+  Alert,
   Box,
   Button,
   Chip,
   CircularProgress,
   IconButton,
+  Link,
   Table,
   TableBody,
   TableCell,
@@ -17,7 +19,6 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
-import ReceiptIcon from '@mui/icons-material/Receipt'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
@@ -25,7 +26,6 @@ import { getUserFriendlyError } from '@/core/utils/error-message'
 import { useShopTables, useDeleteShopTable } from '../../../hooks/use-shop-tables'
 import type { ShopTableResponseDto, ShopTableStatus } from '../../../types/sale'
 import { ShopTableFormDialog } from './shop-table-form-dialog'
-import { TableOrderDialog } from './table-order-dialog'
 
 const statusColorMap: Record<ShopTableStatus, 'success' | 'warning' | 'error' | 'default'> = {
   AVAILABLE: 'success',
@@ -35,14 +35,13 @@ const statusColorMap: Record<ShopTableStatus, 'success' | 'warning' | 'error' | 
 }
 
 export function ShopTableList() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { showToast } = useToast()
 
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [formOpen, setFormOpen] = useState(false)
   const [editTable, setEditTable] = useState<ShopTableResponseDto | null>(null)
-  const [orderTable, setOrderTable] = useState<ShopTableResponseDto | null>(null)
 
   const { data, isLoading } = useShopTables({
     pagination: { page: page + 1, perPage: rowsPerPage },
@@ -65,6 +64,14 @@ export function ShopTableList() {
 
   return (
     <Box>
+      <Alert severity="info" sx={{ mb: 2 }}>
+        Masalara sipariş girmek için{' '}
+        <Link href={`/${locale}/cashier`} underline="hover" fontWeight={600}>
+          Kasa
+        </Link>{' '}
+        sayfasını kullanın.
+      </Alert>
+
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h6">{t('sale.tabs.tables')}</Typography>
         <Button
@@ -123,11 +130,6 @@ export function ShopTableList() {
                       />
                     </TableCell>
                     <TableCell align="right">
-                      <Tooltip title={t('sale.table.orderButton')}>
-                        <IconButton size="small" color="primary" onClick={() => setOrderTable(table)}>
-                          <ReceiptIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
                       <Tooltip title={t('common.edit')}>
                         <IconButton size="small" onClick={() => handleEdit(table)}>
                           <EditIcon fontSize="small" />
@@ -164,14 +166,6 @@ export function ShopTableList() {
           mode={editTable ? 'edit' : 'create'}
           table={editTable}
           onClose={() => setFormOpen(false)}
-        />
-      )}
-
-      {orderTable && (
-        <TableOrderDialog
-          open={!!orderTable}
-          table={orderTable}
-          onClose={() => setOrderTable(null)}
         />
       )}
     </Box>

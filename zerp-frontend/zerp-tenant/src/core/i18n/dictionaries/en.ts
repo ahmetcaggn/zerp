@@ -23,7 +23,9 @@ export const enMessages = {
     logout: 'Logout',
     language: 'Language',
     menu: 'Menu',
-    sale: 'Sales',
+    sale: 'Catalog',
+    tables: 'Tables',
+    cashier: 'Cashier',
     stock: 'Stock',
     employees: 'Employees',
     tickets: 'Tickets',
@@ -52,6 +54,7 @@ export const enMessages = {
     sendNotificationAction: 'Send Notification',
     newTicketAction: 'New Ticket',
     viewStockAction: 'View Stock',
+    openCashierAction: 'Open Cashier',
   },
   employees: {
     title: 'Employees',

@@ -28,6 +28,8 @@ export interface MessageDictionary {
     language: string
     menu: string
     sale: string
+    tables: string
+    cashier: string
     stock: string
     employees: string
     tickets: string

@@ -1,6 +1,7 @@
 'use client'
 import {
   Box,
+  Button,
   Card,
   CardActionArea,
   CardContent,
@@ -14,11 +15,13 @@ import {
   TableRow,
   Typography,
 } from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopTables } from '../../../hooks/use-shop-tables'
 import { useTableOrders } from '../../../hooks/use-table-orders'
 import type { ShopTableResponseDto, TableOrderResponseDto } from '../../../types/sale'
+import { TableOrderDialog } from '../tables/table-order-dialog'
 
 function TableOrderSummary({ table }: { table: ShopTableResponseDto }) {
   const { t } = useI18n()
@@ -120,6 +123,7 @@ function getStatusColor(status: string): 'default' | 'success' | 'warning' | 'er
 export function CashierView() {
   const { t } = useI18n()
   const [selectedTable, setSelectedTable] = useState<ShopTableResponseDto | null>(null)
+  const [orderDialogOpen, setOrderDialogOpen] = useState(false)
 
   const { data: tablesData, isLoading: isTablesLoading } = useShopTables({
     pagination: { page: 1, perPage: 100 },
@@ -198,7 +202,7 @@ export function CashierView() {
           </Box>
         ) : (
           <>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
               <Typography variant="h6" fontWeight={600}>
                 {selectedTable.name}
               </Typography>
@@ -207,11 +211,28 @@ export function CashierView() {
                 color={getStatusColor(selectedTable.status)}
                 size="small"
               />
+              <Box sx={{ ml: 'auto' }}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<AddIcon />}
+                  onClick={() => setOrderDialogOpen(true)}
+                >
+                  {t('sale.tableOrder.newOrderButton')}
+                </Button>
+              </Box>
             </Box>
             <TableOrderSummary table={selectedTable} />
           </>
         )}
       </Box>
+      {selectedTable && orderDialogOpen && (
+        <TableOrderDialog
+          open={orderDialogOpen}
+          table={selectedTable}
+          onClose={() => setOrderDialogOpen(false)}
+        />
+      )}
     </Box>
   )
 }

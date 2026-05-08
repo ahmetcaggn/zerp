@@ -23,7 +23,9 @@ export const trMessages = {
     logout: 'Çıkış',
     language: 'Dil',
     menu: 'Menü',
-    sale: 'Satış',
+    sale: 'Katalog',
+    tables: 'Masalar',
+    cashier: 'Kasa',
     stock: 'Stok',
     employees: 'Çalışanlar',
     tickets: 'Talepler',
@@ -52,6 +54,7 @@ export const trMessages = {
     sendNotificationAction: 'Bildirim Gonder',
     newTicketAction: 'Yeni Talep',
     viewStockAction: 'Stoku Görüntüle',
+    openCashierAction: 'Kasaya Git',
   },
   employees: {
     title: 'Çalışanlar',
