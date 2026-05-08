@@ -1,5 +1,6 @@
 package org.zerp.aggregated;
 
+import lombok.extern.log4j.Log4j2;
 import org.apache.catalina.startup.HostConfig;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,6 +18,7 @@ import org.zerp.user.UserApplication;
 /**
  * The Java app to run all feature services on only one jvm. use only for development and testing, not for production.
  */
+@Log4j2
 @SpringBootApplication(exclude = {
         DataSourceAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class
@@ -31,6 +33,16 @@ public class AggregatedApplication {
         String saleConfig = resolveConfigPath(configRoot, "sale", "SALE_CONFIG_PATH");
         String suggestionConfig = resolveConfigPath(configRoot, "suggestion", "SUGGESTION_CONFIG_PATH");
         String userConfig = resolveConfigPath(configRoot, "user", "USER_CONFIG_PATH");
+
+        log.info("Starting AggregatedApplication with the following configurations:");
+        log.info("AGGREGATED_CONFIG_ROOT: {}", configRoot);
+        log.info("CRM config path: {}", crmConfig);
+        log.info("Employee config path: {}", employeeConfig);
+        log.info("Notification config path: {}", notificationConfig);
+        log.info("Resource config path: {}", resourceConfig);
+        log.info("Sale config path: {}", saleConfig);
+        log.info("Suggestion config path: {}", suggestionConfig);
+        log.info("User config path: {}", userConfig);
 
         // Disable JMX globally to prevent HikariCP pool name clashes
         System.setProperty("spring.jmx.enabled", "false");
