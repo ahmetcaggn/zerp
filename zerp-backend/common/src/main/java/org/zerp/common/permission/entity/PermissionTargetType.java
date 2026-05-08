@@ -24,7 +24,6 @@ public enum PermissionTargetType {
 
     // shop
     SHOP(TENANT),
-    SHOP_TABLE(SHOP),
 
     // stock management
     STOCK_COUNT(SHOP),
@@ -40,6 +39,10 @@ public enum PermissionTargetType {
     MENU(SHOP),
     MENU_CATEGORY(MENU),
     MENU_ITEM(MENU_CATEGORY),
+
+    // table management
+    SHOP_TABLE(SHOP),
+    TABLE_ORDER(SHOP_TABLE),
     ;
 
     public final PermissionTargetType parent;

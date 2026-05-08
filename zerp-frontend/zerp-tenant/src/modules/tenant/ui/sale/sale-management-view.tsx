@@ -6,6 +6,8 @@ import { ProductList } from './products/product-list'
 import { MenuList } from './menus/menu-list'
 import { MenuCategoryList } from './menus/menu-category-list'
 import { MenuItemList } from './menus/menu-item-list'
+import { ShopTableList } from './tables/shop-table-list'
+import { CashierView } from './cashier/cashier-view'
 
 export function SaleManagementView() {
   const { t } = useI18n()
@@ -23,6 +25,8 @@ export function SaleManagementView() {
           <Tab label={t('sale.tabs.menus')} />
           <Tab label={t('sale.tabs.categories')} />
           <Tab label={t('sale.tabs.menuItems')} />
+          <Tab label={t('sale.tabs.tables')} />
+          <Tab label={t('sale.tabs.cashier')} />
         </Tabs>
       </Box>
 
@@ -31,6 +35,8 @@ export function SaleManagementView() {
         {tab === 1 && <MenuList />}
         {tab === 2 && <MenuCategoryList />}
         {tab === 3 && <MenuItemList />}
+        {tab === 4 && <ShopTableList />}
+        {tab === 5 && <CashierView />}
       </Box>
     </Box>
   )
