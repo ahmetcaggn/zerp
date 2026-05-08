@@ -5,42 +5,44 @@ CUSTOM_CODEGEN_JAR := ./openapi-dart-network-codegen-$(CUSTOM_CODEGEN_VERSION).j
 GENERATOR := dart-network
 SPECS_DIR := ./openapi-specs
 
-MERGED_SPEC_URL=http://localhost:8080/gateway/v3/api-docs/merged
+SPEC_BASE_URL ?= https://zerpapi.femrek.dev/
+
+MERGED_SPEC_URL=$(SPEC_BASE_URL)gateway/v3/api-docs/merged
 MERGED_SPEC_FILE=$(SPECS_DIR)/merged-api-spec.json
 MERGED_PUB_NAME=openapi_merged
 MERGED_OUTPUT_DIR=./modules/$(MERGED_PUB_NAME)
 
-CRM_SPEC_URL := http://localhost:8080/v3/api-docs/crm
+CRM_SPEC_URL := $(SPEC_BASE_URL)v3/api-docs/crm
 CRM_SPEC_FILE := $(SPECS_DIR)/crm-api-spec.json
 CRM_PUB_NAME := openapi_crm
 CRM_OUTPUT_DIR := ./modules/$(CRM_PUB_NAME)
 
-EMPLOYEE_SPEC_URL := http://localhost:8080/v3/api-docs/employee
+EMPLOYEE_SPEC_URL := $(SPEC_BASE_URL)v3/api-docs/employee
 EMPLOYEE_SPEC_FILE := $(SPECS_DIR)/employee-api-spec.json
 EMPLOYEE_PUB_NAME := openapi_employee
 EMPLOYEE_OUTPUT_DIR := ./modules/$(EMPLOYEE_PUB_NAME)
 
-NOTIFICATION_SPEC_URL := http://localhost:8080/v3/api-docs/notification
+NOTIFICATION_SPEC_URL := $(SPEC_BASE_URL)v3/api-docs/notification
 NOTIFICATION_SPEC_FILE := $(SPECS_DIR)/notification-api-spec.json
 NOTIFICATION_PUB_NAME := openapi_notification
 NOTIFICATION_OUTPUT_DIR := ./modules/$(NOTIFICATION_PUB_NAME)
 
-RESOURCE_SPEC_URL := http://localhost:8080/v3/api-docs/resource
+RESOURCE_SPEC_URL := $(SPEC_BASE_URL)v3/api-docs/resource
 RESOURCE_SPEC_FILE := $(SPECS_DIR)/resource-api-spec.json
 RESOURCE_PUB_NAME := openapi_resource
 RESOURCE_OUTPUT_DIR := ./modules/$(RESOURCE_PUB_NAME)
 
-SALE_SPEC_URL := http://localhost:8080/v3/api-docs/sale
+SALE_SPEC_URL := $(SPEC_BASE_URL)v3/api-docs/sale
 SALE_SPEC_FILE := $(SPECS_DIR)/sale-api-spec.json
 SALE_PUB_NAME := openapi_sale
 SALE_OUTPUT_DIR := ./modules/$(SALE_PUB_NAME)
 
-SUGGESTION_SPEC_URL := http://localhost:8080/v3/api-docs/suggestion
+SUGGESTION_SPEC_URL := $(SPEC_BASE_URL)v3/api-docs/suggestion
 SUGGESTION_SPEC_FILE := $(SPECS_DIR)/suggestion-api-spec.json
 SUGGESTION_PUB_NAME := openapi_suggestion
 SUGGESTION_OUTPUT_DIR := ./modules/$(SUGGESTION_PUB_NAME)
 
-USER_SPEC_URL := http://localhost:8080/v3/api-docs/user
+USER_SPEC_URL := $(SPEC_BASE_URL)v3/api-docs/user
 USER_SPEC_FILE := $(SPECS_DIR)/user-api-spec.json
 USER_PUB_NAME := openapi_user
 USER_OUTPUT_DIR := ./modules/$(USER_PUB_NAME)

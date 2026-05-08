@@ -13,8 +13,12 @@ class StockResourceCreateDTO extends Schema {
   /// Returns a new [StockResourceCreateDTO] instance.
   StockResourceCreateDTO({
     this.name,
+    this.description,
     this.shopId,
-    this.tenantId,
+    this.unitType,
+    this.quantity,
+    this.reorderThreshold,
+    this.costPerUnit,
   });
 
   ///
@@ -31,7 +35,7 @@ class StockResourceCreateDTO extends Schema {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  final String? shopId;
+  final String? description;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -39,7 +43,33 @@ class StockResourceCreateDTO extends Schema {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  final String? tenantId;
+  final String? shopId;
+
+  final StockResourceCreateDTOUnitTypeEnum? unitType;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  final num? quantity;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  final num? reorderThreshold;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  final num? costPerUnit;
 
   /// The factory instance for creating [StockResourceCreateDTO] from JSON.
   static const factory = StockResourceCreateDTOFactory();
@@ -47,18 +77,26 @@ class StockResourceCreateDTO extends Schema {
   @override
   bool operator ==(Object other) => identical(this, other) || other is StockResourceCreateDTO &&
     other.name == name &&
+    other.description == description &&
     other.shopId == shopId &&
-    other.tenantId == tenantId;
+    other.unitType == unitType &&
+    other.quantity == quantity &&
+    other.reorderThreshold == reorderThreshold &&
+    other.costPerUnit == costPerUnit;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (name == null ? 0 : name!.hashCode) +
+    (description == null ? 0 : description!.hashCode) +
     (shopId == null ? 0 : shopId!.hashCode) +
-    (tenantId == null ? 0 : tenantId!.hashCode);
+    (unitType == null ? 0 : unitType!.hashCode) +
+    (quantity == null ? 0 : quantity!.hashCode) +
+    (reorderThreshold == null ? 0 : reorderThreshold!.hashCode) +
+    (costPerUnit == null ? 0 : costPerUnit!.hashCode);
 
   @override
-  String toString() => 'StockResourceCreateDTO[name=$name, shopId=$shopId, tenantId=$tenantId]';
+  String toString() => 'StockResourceCreateDTO[name=$name, description=$description, shopId=$shopId, unitType=$unitType, quantity=$quantity, reorderThreshold=$reorderThreshold, costPerUnit=$costPerUnit]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -67,15 +105,35 @@ class StockResourceCreateDTO extends Schema {
     } else {
       json[r'name'] = null;
     }
+    if (this.description != null) {
+      json[r'description'] = this.description;
+    } else {
+      json[r'description'] = null;
+    }
     if (this.shopId != null) {
       json[r'shopId'] = this.shopId;
     } else {
       json[r'shopId'] = null;
     }
-    if (this.tenantId != null) {
-      json[r'tenantId'] = this.tenantId;
+    if (this.unitType != null) {
+      json[r'unitType'] = this.unitType;
     } else {
-      json[r'tenantId'] = null;
+      json[r'unitType'] = null;
+    }
+    if (this.quantity != null) {
+      json[r'quantity'] = this.quantity;
+    } else {
+      json[r'quantity'] = null;
+    }
+    if (this.reorderThreshold != null) {
+      json[r'reorderThreshold'] = this.reorderThreshold;
+    } else {
+      json[r'reorderThreshold'] = null;
+    }
+    if (this.costPerUnit != null) {
+      json[r'costPerUnit'] = this.costPerUnit;
+    } else {
+      json[r'costPerUnit'] = null;
     }
     return json;
   }
@@ -100,8 +158,12 @@ class StockResourceCreateDTO extends Schema {
 
       return StockResourceCreateDTO(
         name: json[r'name'] is String ? json[r'name'] as String : null,
+        description: json[r'description'] is String ? json[r'description'] as String : null,
         shopId: json[r'shopId'] is String ? json[r'shopId'] as String : null,
-        tenantId: json[r'tenantId'] is String ? json[r'tenantId'] as String : null,
+        unitType: StockResourceCreateDTOUnitTypeEnum.fromJson(json[r'unitType']),
+        quantity: num.parse('${json[r'quantity']}'),
+        reorderThreshold: num.parse('${json[r'reorderThreshold']}'),
+        costPerUnit: num.parse('${json[r'costPerUnit']}'),
       );
     }
     return null;
@@ -159,4 +221,87 @@ class StockResourceCreateDTOFactory extends JsonSchemaFactory<StockResourceCreat
   @override
   StockResourceCreateDTO fromJson(dynamic json) => StockResourceCreateDTO.fromJson(json)!;
 }
+
+
+class StockResourceCreateDTOUnitTypeEnum {
+  /// Instantiate a new enum with the provided [value].
+  const StockResourceCreateDTOUnitTypeEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const PIECE = StockResourceCreateDTOUnitTypeEnum._(r'PIECE');
+  static const GRAM = StockResourceCreateDTOUnitTypeEnum._(r'GRAM');
+  static const KILOGRAM = StockResourceCreateDTOUnitTypeEnum._(r'KILOGRAM');
+  static const MILLILITER = StockResourceCreateDTOUnitTypeEnum._(r'MILLILITER');
+  static const LITER = StockResourceCreateDTOUnitTypeEnum._(r'LITER');
+
+  /// List of all possible values in this [enum][StockResourceCreateDTOUnitTypeEnum].
+  static const values = <StockResourceCreateDTOUnitTypeEnum>[
+    PIECE,
+    GRAM,
+    KILOGRAM,
+    MILLILITER,
+    LITER,
+  ];
+
+  static StockResourceCreateDTOUnitTypeEnum? fromJson(dynamic value) => StockResourceCreateDTOUnitTypeEnumTypeTransformer().decode(value);
+
+  static List<StockResourceCreateDTOUnitTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <StockResourceCreateDTOUnitTypeEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = StockResourceCreateDTOUnitTypeEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [StockResourceCreateDTOUnitTypeEnum] to String,
+/// and [decode] dynamic data back to [StockResourceCreateDTOUnitTypeEnum].
+class StockResourceCreateDTOUnitTypeEnumTypeTransformer {
+  factory StockResourceCreateDTOUnitTypeEnumTypeTransformer() => _instance ??= const StockResourceCreateDTOUnitTypeEnumTypeTransformer._();
+
+  const StockResourceCreateDTOUnitTypeEnumTypeTransformer._();
+
+  String encode(StockResourceCreateDTOUnitTypeEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a StockResourceCreateDTOUnitTypeEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  StockResourceCreateDTOUnitTypeEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'PIECE': return StockResourceCreateDTOUnitTypeEnum.PIECE;
+        case r'GRAM': return StockResourceCreateDTOUnitTypeEnum.GRAM;
+        case r'KILOGRAM': return StockResourceCreateDTOUnitTypeEnum.KILOGRAM;
+        case r'MILLILITER': return StockResourceCreateDTOUnitTypeEnum.MILLILITER;
+        case r'LITER': return StockResourceCreateDTOUnitTypeEnum.LITER;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [StockResourceCreateDTOUnitTypeEnumTypeTransformer] instance.
+  static StockResourceCreateDTOUnitTypeEnumTypeTransformer? _instance;
+}
+
 

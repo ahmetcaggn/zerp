@@ -193,6 +193,14 @@ class PermissionUpdateRequestTargetTypeEnum {
   static const TEAM = PermissionUpdateRequestTargetTypeEnum._(r'TEAM');
   static const TEAM_MEMBER = PermissionUpdateRequestTargetTypeEnum._(r'TEAM_MEMBER');
   static const SHOP = PermissionUpdateRequestTargetTypeEnum._(r'SHOP');
+  static const STOCK_MOVEMENT = PermissionUpdateRequestTargetTypeEnum._(r'STOCK_MOVEMENT');
+  static const STOCK_COUNT = PermissionUpdateRequestTargetTypeEnum._(r'STOCK_COUNT');
+  static const PRODUCT = PermissionUpdateRequestTargetTypeEnum._(r'PRODUCT');
+  static const PRODUCT_RECIPE = PermissionUpdateRequestTargetTypeEnum._(r'PRODUCT_RECIPE');
+  static const PRODUCT_EXTRA_OPTION = PermissionUpdateRequestTargetTypeEnum._(r'PRODUCT_EXTRA_OPTION');
+  static const MENU = PermissionUpdateRequestTargetTypeEnum._(r'MENU');
+  static const MENU_CATEGORY = PermissionUpdateRequestTargetTypeEnum._(r'MENU_CATEGORY');
+  static const MENU_ITEM = PermissionUpdateRequestTargetTypeEnum._(r'MENU_ITEM');
 
   /// List of all possible values in this [enum][PermissionUpdateRequestTargetTypeEnum].
   static const values = <PermissionUpdateRequestTargetTypeEnum>[
@@ -211,6 +219,14 @@ class PermissionUpdateRequestTargetTypeEnum {
     TEAM,
     TEAM_MEMBER,
     SHOP,
+    STOCK_MOVEMENT,
+    STOCK_COUNT,
+    PRODUCT,
+    PRODUCT_RECIPE,
+    PRODUCT_EXTRA_OPTION,
+    MENU,
+    MENU_CATEGORY,
+    MENU_ITEM,
   ];
 
   static PermissionUpdateRequestTargetTypeEnum? fromJson(dynamic value) => PermissionUpdateRequestTargetTypeEnumTypeTransformer().decode(value);
@@ -264,6 +280,14 @@ class PermissionUpdateRequestTargetTypeEnumTypeTransformer {
         case r'TEAM': return PermissionUpdateRequestTargetTypeEnum.TEAM;
         case r'TEAM_MEMBER': return PermissionUpdateRequestTargetTypeEnum.TEAM_MEMBER;
         case r'SHOP': return PermissionUpdateRequestTargetTypeEnum.SHOP;
+        case r'STOCK_MOVEMENT': return PermissionUpdateRequestTargetTypeEnum.STOCK_MOVEMENT;
+        case r'STOCK_COUNT': return PermissionUpdateRequestTargetTypeEnum.STOCK_COUNT;
+        case r'PRODUCT': return PermissionUpdateRequestTargetTypeEnum.PRODUCT;
+        case r'PRODUCT_RECIPE': return PermissionUpdateRequestTargetTypeEnum.PRODUCT_RECIPE;
+        case r'PRODUCT_EXTRA_OPTION': return PermissionUpdateRequestTargetTypeEnum.PRODUCT_EXTRA_OPTION;
+        case r'MENU': return PermissionUpdateRequestTargetTypeEnum.MENU;
+        case r'MENU_CATEGORY': return PermissionUpdateRequestTargetTypeEnum.MENU_CATEGORY;
+        case r'MENU_ITEM': return PermissionUpdateRequestTargetTypeEnum.MENU_ITEM;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -291,13 +315,21 @@ class PermissionUpdateRequestActionEnum {
 
   String toJson() => value;
 
-  static const CREATE_TEAM = PermissionUpdateRequestActionEnum._(r'CREATE_TEAM');
   static const ADMIN_TENANT = PermissionUpdateRequestActionEnum._(r'ADMIN_TENANT');
   static const UPDATE_TENANT = PermissionUpdateRequestActionEnum._(r'UPDATE_TENANT');
   static const READ_TENANT = PermissionUpdateRequestActionEnum._(r'READ_TENANT');
   static const CREATE_STOCK_RESOURCE = PermissionUpdateRequestActionEnum._(r'CREATE_STOCK_RESOURCE');
   static const CREATE_EMPLOYEE = PermissionUpdateRequestActionEnum._(r'CREATE_EMPLOYEE');
   static const CREATE_TICKET = PermissionUpdateRequestActionEnum._(r'CREATE_TICKET');
+  static const CREATE_TEAM = PermissionUpdateRequestActionEnum._(r'CREATE_TEAM');
+  static const CREATE_STOCK_MOVEMENT = PermissionUpdateRequestActionEnum._(r'CREATE_STOCK_MOVEMENT');
+  static const CREATE_STOCK_COUNT = PermissionUpdateRequestActionEnum._(r'CREATE_STOCK_COUNT');
+  static const CREATE_PRODUCT = PermissionUpdateRequestActionEnum._(r'CREATE_PRODUCT');
+  static const CREATE_PRODUCT_RECIPE = PermissionUpdateRequestActionEnum._(r'CREATE_PRODUCT_RECIPE');
+  static const CREATE_PRODUCT_EXTRA_OPTION = PermissionUpdateRequestActionEnum._(r'CREATE_PRODUCT_EXTRA_OPTION');
+  static const CREATE_MENU = PermissionUpdateRequestActionEnum._(r'CREATE_MENU');
+  static const CREATE_MENU_CATEGORY = PermissionUpdateRequestActionEnum._(r'CREATE_MENU_CATEGORY');
+  static const CREATE_MENU_ITEM = PermissionUpdateRequestActionEnum._(r'CREATE_MENU_ITEM');
   static const READ_USER = PermissionUpdateRequestActionEnum._(r'READ_USER');
   static const READ_PERMISSION = PermissionUpdateRequestActionEnum._(r'READ_PERMISSION');
   static const ADMIN_STOCK_RESOURCE = PermissionUpdateRequestActionEnum._(r'ADMIN_STOCK_RESOURCE');
@@ -341,16 +373,53 @@ class PermissionUpdateRequestActionEnum {
   static const READ_TICKET_WATCHER = PermissionUpdateRequestActionEnum._(r'READ_TICKET_WATCHER');
   static const UPDATE_TICKET_WATCHER = PermissionUpdateRequestActionEnum._(r'UPDATE_TICKET_WATCHER');
   static const DELETE_TICKET_WATCHER = PermissionUpdateRequestActionEnum._(r'DELETE_TICKET_WATCHER');
+  static const READ_STOCK_MOVEMENT = PermissionUpdateRequestActionEnum._(r'READ_STOCK_MOVEMENT');
+  static const ADMIN_STOCK_COUNT = PermissionUpdateRequestActionEnum._(r'ADMIN_STOCK_COUNT');
+  static const UPDATE_STOCK_COUNT = PermissionUpdateRequestActionEnum._(r'UPDATE_STOCK_COUNT');
+  static const DELETE_STOCK_COUNT = PermissionUpdateRequestActionEnum._(r'DELETE_STOCK_COUNT');
+  static const READ_STOCK_COUNT = PermissionUpdateRequestActionEnum._(r'READ_STOCK_COUNT');
+  static const ADMIN_PRODUCT = PermissionUpdateRequestActionEnum._(r'ADMIN_PRODUCT');
+  static const UPDATE_PRODUCT = PermissionUpdateRequestActionEnum._(r'UPDATE_PRODUCT');
+  static const DELETE_PRODUCT = PermissionUpdateRequestActionEnum._(r'DELETE_PRODUCT');
+  static const READ_PRODUCT = PermissionUpdateRequestActionEnum._(r'READ_PRODUCT');
+  static const ADMIN_PRODUCT_RECIPE = PermissionUpdateRequestActionEnum._(r'ADMIN_PRODUCT_RECIPE');
+  static const UPDATE_PRODUCT_RECIPE = PermissionUpdateRequestActionEnum._(r'UPDATE_PRODUCT_RECIPE');
+  static const DELETE_PRODUCT_RECIPE = PermissionUpdateRequestActionEnum._(r'DELETE_PRODUCT_RECIPE');
+  static const READ_PRODUCT_RECIPE = PermissionUpdateRequestActionEnum._(r'READ_PRODUCT_RECIPE');
+  static const ADMIN_PRODUCT_EXTRA_OPTION = PermissionUpdateRequestActionEnum._(r'ADMIN_PRODUCT_EXTRA_OPTION');
+  static const UPDATE_PRODUCT_EXTRA_OPTION = PermissionUpdateRequestActionEnum._(r'UPDATE_PRODUCT_EXTRA_OPTION');
+  static const DELETE_PRODUCT_EXTRA_OPTION = PermissionUpdateRequestActionEnum._(r'DELETE_PRODUCT_EXTRA_OPTION');
+  static const READ_PRODUCT_EXTRA_OPTION = PermissionUpdateRequestActionEnum._(r'READ_PRODUCT_EXTRA_OPTION');
+  static const ADMIN_MENU = PermissionUpdateRequestActionEnum._(r'ADMIN_MENU');
+  static const UPDATE_MENU = PermissionUpdateRequestActionEnum._(r'UPDATE_MENU');
+  static const DELETE_MENU = PermissionUpdateRequestActionEnum._(r'DELETE_MENU');
+  static const READ_MENU = PermissionUpdateRequestActionEnum._(r'READ_MENU');
+  static const ADMIN_MENU_CATEGORY = PermissionUpdateRequestActionEnum._(r'ADMIN_MENU_CATEGORY');
+  static const UPDATE_MENU_CATEGORY = PermissionUpdateRequestActionEnum._(r'UPDATE_MENU_CATEGORY');
+  static const DELETE_MENU_CATEGORY = PermissionUpdateRequestActionEnum._(r'DELETE_MENU_CATEGORY');
+  static const READ_MENU_CATEGORY = PermissionUpdateRequestActionEnum._(r'READ_MENU_CATEGORY');
+  static const ADMIN_MENU_ITEM = PermissionUpdateRequestActionEnum._(r'ADMIN_MENU_ITEM');
+  static const UPDATE_MENU_ITEM = PermissionUpdateRequestActionEnum._(r'UPDATE_MENU_ITEM');
+  static const DELETE_MENU_ITEM = PermissionUpdateRequestActionEnum._(r'DELETE_MENU_ITEM');
+  static const READ_MENU_ITEM = PermissionUpdateRequestActionEnum._(r'READ_MENU_ITEM');
 
   /// List of all possible values in this [enum][PermissionUpdateRequestActionEnum].
   static const values = <PermissionUpdateRequestActionEnum>[
-    CREATE_TEAM,
     ADMIN_TENANT,
     UPDATE_TENANT,
     READ_TENANT,
     CREATE_STOCK_RESOURCE,
     CREATE_EMPLOYEE,
     CREATE_TICKET,
+    CREATE_TEAM,
+    CREATE_STOCK_MOVEMENT,
+    CREATE_STOCK_COUNT,
+    CREATE_PRODUCT,
+    CREATE_PRODUCT_RECIPE,
+    CREATE_PRODUCT_EXTRA_OPTION,
+    CREATE_MENU,
+    CREATE_MENU_CATEGORY,
+    CREATE_MENU_ITEM,
     READ_USER,
     READ_PERMISSION,
     ADMIN_STOCK_RESOURCE,
@@ -394,6 +463,35 @@ class PermissionUpdateRequestActionEnum {
     READ_TICKET_WATCHER,
     UPDATE_TICKET_WATCHER,
     DELETE_TICKET_WATCHER,
+    READ_STOCK_MOVEMENT,
+    ADMIN_STOCK_COUNT,
+    UPDATE_STOCK_COUNT,
+    DELETE_STOCK_COUNT,
+    READ_STOCK_COUNT,
+    ADMIN_PRODUCT,
+    UPDATE_PRODUCT,
+    DELETE_PRODUCT,
+    READ_PRODUCT,
+    ADMIN_PRODUCT_RECIPE,
+    UPDATE_PRODUCT_RECIPE,
+    DELETE_PRODUCT_RECIPE,
+    READ_PRODUCT_RECIPE,
+    ADMIN_PRODUCT_EXTRA_OPTION,
+    UPDATE_PRODUCT_EXTRA_OPTION,
+    DELETE_PRODUCT_EXTRA_OPTION,
+    READ_PRODUCT_EXTRA_OPTION,
+    ADMIN_MENU,
+    UPDATE_MENU,
+    DELETE_MENU,
+    READ_MENU,
+    ADMIN_MENU_CATEGORY,
+    UPDATE_MENU_CATEGORY,
+    DELETE_MENU_CATEGORY,
+    READ_MENU_CATEGORY,
+    ADMIN_MENU_ITEM,
+    UPDATE_MENU_ITEM,
+    DELETE_MENU_ITEM,
+    READ_MENU_ITEM,
   ];
 
   static PermissionUpdateRequestActionEnum? fromJson(dynamic value) => PermissionUpdateRequestActionEnumTypeTransformer().decode(value);
@@ -432,13 +530,21 @@ class PermissionUpdateRequestActionEnumTypeTransformer {
   PermissionUpdateRequestActionEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'CREATE_TEAM': return PermissionUpdateRequestActionEnum.CREATE_TEAM;
         case r'ADMIN_TENANT': return PermissionUpdateRequestActionEnum.ADMIN_TENANT;
         case r'UPDATE_TENANT': return PermissionUpdateRequestActionEnum.UPDATE_TENANT;
         case r'READ_TENANT': return PermissionUpdateRequestActionEnum.READ_TENANT;
         case r'CREATE_STOCK_RESOURCE': return PermissionUpdateRequestActionEnum.CREATE_STOCK_RESOURCE;
         case r'CREATE_EMPLOYEE': return PermissionUpdateRequestActionEnum.CREATE_EMPLOYEE;
         case r'CREATE_TICKET': return PermissionUpdateRequestActionEnum.CREATE_TICKET;
+        case r'CREATE_TEAM': return PermissionUpdateRequestActionEnum.CREATE_TEAM;
+        case r'CREATE_STOCK_MOVEMENT': return PermissionUpdateRequestActionEnum.CREATE_STOCK_MOVEMENT;
+        case r'CREATE_STOCK_COUNT': return PermissionUpdateRequestActionEnum.CREATE_STOCK_COUNT;
+        case r'CREATE_PRODUCT': return PermissionUpdateRequestActionEnum.CREATE_PRODUCT;
+        case r'CREATE_PRODUCT_RECIPE': return PermissionUpdateRequestActionEnum.CREATE_PRODUCT_RECIPE;
+        case r'CREATE_PRODUCT_EXTRA_OPTION': return PermissionUpdateRequestActionEnum.CREATE_PRODUCT_EXTRA_OPTION;
+        case r'CREATE_MENU': return PermissionUpdateRequestActionEnum.CREATE_MENU;
+        case r'CREATE_MENU_CATEGORY': return PermissionUpdateRequestActionEnum.CREATE_MENU_CATEGORY;
+        case r'CREATE_MENU_ITEM': return PermissionUpdateRequestActionEnum.CREATE_MENU_ITEM;
         case r'READ_USER': return PermissionUpdateRequestActionEnum.READ_USER;
         case r'READ_PERMISSION': return PermissionUpdateRequestActionEnum.READ_PERMISSION;
         case r'ADMIN_STOCK_RESOURCE': return PermissionUpdateRequestActionEnum.ADMIN_STOCK_RESOURCE;
@@ -482,6 +588,35 @@ class PermissionUpdateRequestActionEnumTypeTransformer {
         case r'READ_TICKET_WATCHER': return PermissionUpdateRequestActionEnum.READ_TICKET_WATCHER;
         case r'UPDATE_TICKET_WATCHER': return PermissionUpdateRequestActionEnum.UPDATE_TICKET_WATCHER;
         case r'DELETE_TICKET_WATCHER': return PermissionUpdateRequestActionEnum.DELETE_TICKET_WATCHER;
+        case r'READ_STOCK_MOVEMENT': return PermissionUpdateRequestActionEnum.READ_STOCK_MOVEMENT;
+        case r'ADMIN_STOCK_COUNT': return PermissionUpdateRequestActionEnum.ADMIN_STOCK_COUNT;
+        case r'UPDATE_STOCK_COUNT': return PermissionUpdateRequestActionEnum.UPDATE_STOCK_COUNT;
+        case r'DELETE_STOCK_COUNT': return PermissionUpdateRequestActionEnum.DELETE_STOCK_COUNT;
+        case r'READ_STOCK_COUNT': return PermissionUpdateRequestActionEnum.READ_STOCK_COUNT;
+        case r'ADMIN_PRODUCT': return PermissionUpdateRequestActionEnum.ADMIN_PRODUCT;
+        case r'UPDATE_PRODUCT': return PermissionUpdateRequestActionEnum.UPDATE_PRODUCT;
+        case r'DELETE_PRODUCT': return PermissionUpdateRequestActionEnum.DELETE_PRODUCT;
+        case r'READ_PRODUCT': return PermissionUpdateRequestActionEnum.READ_PRODUCT;
+        case r'ADMIN_PRODUCT_RECIPE': return PermissionUpdateRequestActionEnum.ADMIN_PRODUCT_RECIPE;
+        case r'UPDATE_PRODUCT_RECIPE': return PermissionUpdateRequestActionEnum.UPDATE_PRODUCT_RECIPE;
+        case r'DELETE_PRODUCT_RECIPE': return PermissionUpdateRequestActionEnum.DELETE_PRODUCT_RECIPE;
+        case r'READ_PRODUCT_RECIPE': return PermissionUpdateRequestActionEnum.READ_PRODUCT_RECIPE;
+        case r'ADMIN_PRODUCT_EXTRA_OPTION': return PermissionUpdateRequestActionEnum.ADMIN_PRODUCT_EXTRA_OPTION;
+        case r'UPDATE_PRODUCT_EXTRA_OPTION': return PermissionUpdateRequestActionEnum.UPDATE_PRODUCT_EXTRA_OPTION;
+        case r'DELETE_PRODUCT_EXTRA_OPTION': return PermissionUpdateRequestActionEnum.DELETE_PRODUCT_EXTRA_OPTION;
+        case r'READ_PRODUCT_EXTRA_OPTION': return PermissionUpdateRequestActionEnum.READ_PRODUCT_EXTRA_OPTION;
+        case r'ADMIN_MENU': return PermissionUpdateRequestActionEnum.ADMIN_MENU;
+        case r'UPDATE_MENU': return PermissionUpdateRequestActionEnum.UPDATE_MENU;
+        case r'DELETE_MENU': return PermissionUpdateRequestActionEnum.DELETE_MENU;
+        case r'READ_MENU': return PermissionUpdateRequestActionEnum.READ_MENU;
+        case r'ADMIN_MENU_CATEGORY': return PermissionUpdateRequestActionEnum.ADMIN_MENU_CATEGORY;
+        case r'UPDATE_MENU_CATEGORY': return PermissionUpdateRequestActionEnum.UPDATE_MENU_CATEGORY;
+        case r'DELETE_MENU_CATEGORY': return PermissionUpdateRequestActionEnum.DELETE_MENU_CATEGORY;
+        case r'READ_MENU_CATEGORY': return PermissionUpdateRequestActionEnum.READ_MENU_CATEGORY;
+        case r'ADMIN_MENU_ITEM': return PermissionUpdateRequestActionEnum.ADMIN_MENU_ITEM;
+        case r'UPDATE_MENU_ITEM': return PermissionUpdateRequestActionEnum.UPDATE_MENU_ITEM;
+        case r'DELETE_MENU_ITEM': return PermissionUpdateRequestActionEnum.DELETE_MENU_ITEM;
+        case r'READ_MENU_ITEM': return PermissionUpdateRequestActionEnum.READ_MENU_ITEM;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

@@ -40,18 +40,121 @@ Please follow the [installation procedure](#installation--usage) and then run th
 ```dart
 import 'package:openapi_sale/api.dart';
 
+
+final api_instance = MenuCreateMenuApi();
+final menuCreateDTO = MenuCreateDTO(); // MenuCreateDTO | 
+
+try {
+    final result = api_instance.createMenu(menuCreateDTO);
+    print(result);
+} catch (e) {
+    print('Exception when calling MenuCreateMenuApi->createMenu: $e\n');
+}
+
 ```
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://192.168.0.106:8085*
+All URIs are relative to *https://zerpapi.femrek.dev*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*MenuCreateMenuApi* | [**createMenu**](doc//MenuCreateMenuApi.md#) | **POST** /sale/menus | Create: Create a new entity
+*MenuDeleteManyMenuApi* | [**deleteManyMenu**](doc//MenuDeleteManyMenuApi.md#) | **DELETE** /sale/menus | DeleteMany: Delete multiple entities
+*MenuDeleteMenuApi* | [**deleteMenu**](doc//MenuDeleteMenuApi.md#) | **DELETE** /sale/menus/{id} | Delete: Delete a single entity
+*MenuGetListMenuApi* | [**getListMenu**](doc//MenuGetListMenuApi.md#) | **GET** /sale/menus | GetList: Get paginated list of entities with filtering
+*MenuGetManyMenuApi* | [**getManyMenu**](doc//MenuGetManyMenuApi.md#) | **GET** /sale/menus/many | GetMany: Get multiple entities by IDs
+*MenuGetOneMenuApi* | [**getOneMenu**](doc//MenuGetOneMenuApi.md#) | **GET** /sale/menus/{id} | GetOne: Get single entity by ID
+*MenuPatchManyMenuApi* | [**patchManyMenu**](doc//MenuPatchManyMenuApi.md#) | **PATCH** /sale/menus | UpdateMany: Update multiple entities
+*MenuPatchMenuApi* | [**patchMenu**](doc//MenuPatchMenuApi.md#) | **PATCH** /sale/menus/{id} | Update: Update an existing entity
+*MenuUpdateMenuApi* | [**updateMenu**](doc//MenuUpdateMenuApi.md#) | **PUT** /sale/menus/{id} | Update: Update an existing entity
+*MenuCategoryCreateMenuCategoryApi* | [**createMenuCategory**](doc//MenuCategoryCreateMenuCategoryApi.md#) | **POST** /sale/menu-categories | Create: Create a new entity
+*MenuCategoryDeleteManyMenuCategoryApi* | [**deleteManyMenuCategory**](doc//MenuCategoryDeleteManyMenuCategoryApi.md#) | **DELETE** /sale/menu-categories | DeleteMany: Delete multiple entities
+*MenuCategoryDeleteMenuCategoryApi* | [**deleteMenuCategory**](doc//MenuCategoryDeleteMenuCategoryApi.md#) | **DELETE** /sale/menu-categories/{id} | Delete: Delete a single entity
+*MenuCategoryGetListMenuCategoryApi* | [**getListMenuCategory**](doc//MenuCategoryGetListMenuCategoryApi.md#) | **GET** /sale/menu-categories | GetList: Get paginated list of entities with filtering
+*MenuCategoryGetManyMenuCategoryApi* | [**getManyMenuCategory**](doc//MenuCategoryGetManyMenuCategoryApi.md#) | **GET** /sale/menu-categories/many | GetMany: Get multiple entities by IDs
+*MenuCategoryGetOneMenuCategoryApi* | [**getOneMenuCategory**](doc//MenuCategoryGetOneMenuCategoryApi.md#) | **GET** /sale/menu-categories/{id} | GetOne: Get single entity by ID
+*MenuCategoryPatchManyMenuCategoryApi* | [**patchManyMenuCategory**](doc//MenuCategoryPatchManyMenuCategoryApi.md#) | **PATCH** /sale/menu-categories | UpdateMany: Update multiple entities
+*MenuCategoryPatchMenuCategoryApi* | [**patchMenuCategory**](doc//MenuCategoryPatchMenuCategoryApi.md#) | **PATCH** /sale/menu-categories/{id} | Update: Update an existing entity
+*MenuCategoryUpdateMenuCategoryApi* | [**updateMenuCategory**](doc//MenuCategoryUpdateMenuCategoryApi.md#) | **PUT** /sale/menu-categories/{id} | Update: Update an existing entity
+*MenuItemCreateMenuItemApi* | [**createMenuItem**](doc//MenuItemCreateMenuItemApi.md#) | **POST** /sale/menu-items | Create: Create a new entity
+*MenuItemDeleteManyMenuItemApi* | [**deleteManyMenuItem**](doc//MenuItemDeleteManyMenuItemApi.md#) | **DELETE** /sale/menu-items | DeleteMany: Delete multiple entities
+*MenuItemDeleteMenuItemApi* | [**deleteMenuItem**](doc//MenuItemDeleteMenuItemApi.md#) | **DELETE** /sale/menu-items/{id} | Delete: Delete a single entity
+*MenuItemGetListMenuItemApi* | [**getListMenuItem**](doc//MenuItemGetListMenuItemApi.md#) | **GET** /sale/menu-items | GetList: Get paginated list of entities with filtering
+*MenuItemGetManyMenuItemApi* | [**getManyMenuItem**](doc//MenuItemGetManyMenuItemApi.md#) | **GET** /sale/menu-items/many | GetMany: Get multiple entities by IDs
+*MenuItemGetOneMenuItemApi* | [**getOneMenuItem**](doc//MenuItemGetOneMenuItemApi.md#) | **GET** /sale/menu-items/{id} | GetOne: Get single entity by ID
+*MenuItemPatchManyMenuItemApi* | [**patchManyMenuItem**](doc//MenuItemPatchManyMenuItemApi.md#) | **PATCH** /sale/menu-items | UpdateMany: Update multiple entities
+*MenuItemPatchMenuItemApi* | [**patchMenuItem**](doc//MenuItemPatchMenuItemApi.md#) | **PATCH** /sale/menu-items/{id} | Update: Update an existing entity
+*MenuItemUpdateMenuItemApi* | [**updateMenuItem**](doc//MenuItemUpdateMenuItemApi.md#) | **PUT** /sale/menu-items/{id} | Update: Update an existing entity
+*ProductCreateProductApi* | [**createProduct**](doc//ProductCreateProductApi.md#) | **POST** /sale/products | Create: Create a new entity
+*ProductDeleteManyProductApi* | [**deleteManyProduct**](doc//ProductDeleteManyProductApi.md#) | **DELETE** /sale/products | DeleteMany: Delete multiple entities
+*ProductDeleteProductApi* | [**deleteProduct**](doc//ProductDeleteProductApi.md#) | **DELETE** /sale/products/{id} | Delete: Delete a single entity
+*ProductGetListProductApi* | [**getListProduct**](doc//ProductGetListProductApi.md#) | **GET** /sale/products | GetList: Get paginated list of entities with filtering
+*ProductGetManyProductApi* | [**getManyProduct**](doc//ProductGetManyProductApi.md#) | **GET** /sale/products/many | GetMany: Get multiple entities by IDs
+*ProductGetOneProductApi* | [**getOneProduct**](doc//ProductGetOneProductApi.md#) | **GET** /sale/products/{id} | GetOne: Get single entity by ID
+*ProductPatchManyProductApi* | [**patchManyProduct**](doc//ProductPatchManyProductApi.md#) | **PATCH** /sale/products | UpdateMany: Update multiple entities
+*ProductPatchProductApi* | [**patchProduct**](doc//ProductPatchProductApi.md#) | **PATCH** /sale/products/{id} | Update: Update an existing entity
+*ProductUpdateProductApi* | [**updateProduct**](doc//ProductUpdateProductApi.md#) | **PUT** /sale/products/{id} | Update: Update an existing entity
+*ProductExtraOptionCreateProductExtraOptionApi* | [**createProductExtraOption**](doc//ProductExtraOptionCreateProductExtraOptionApi.md#) | **POST** /sale/product-extra-options | Create: Create a new entity
+*ProductExtraOptionDeleteManyProductExtraOptionApi* | [**deleteManyProductExtraOption**](doc//ProductExtraOptionDeleteManyProductExtraOptionApi.md#) | **DELETE** /sale/product-extra-options | DeleteMany: Delete multiple entities
+*ProductExtraOptionDeleteProductExtraOptionApi* | [**deleteProductExtraOption**](doc//ProductExtraOptionDeleteProductExtraOptionApi.md#) | **DELETE** /sale/product-extra-options/{id} | Delete: Delete a single entity
+*ProductExtraOptionGetListProductExtraOptionApi* | [**getListProductExtraOption**](doc//ProductExtraOptionGetListProductExtraOptionApi.md#) | **GET** /sale/product-extra-options | GetList: Get paginated list of entities with filtering
+*ProductExtraOptionGetManyProductExtraOptionApi* | [**getManyProductExtraOption**](doc//ProductExtraOptionGetManyProductExtraOptionApi.md#) | **GET** /sale/product-extra-options/many | GetMany: Get multiple entities by IDs
+*ProductExtraOptionGetOneProductExtraOptionApi* | [**getOneProductExtraOption**](doc//ProductExtraOptionGetOneProductExtraOptionApi.md#) | **GET** /sale/product-extra-options/{id} | GetOne: Get single entity by ID
+*ProductExtraOptionPatchManyProductExtraOptionApi* | [**patchManyProductExtraOption**](doc//ProductExtraOptionPatchManyProductExtraOptionApi.md#) | **PATCH** /sale/product-extra-options | UpdateMany: Update multiple entities
+*ProductExtraOptionPatchProductExtraOptionApi* | [**patchProductExtraOption**](doc//ProductExtraOptionPatchProductExtraOptionApi.md#) | **PATCH** /sale/product-extra-options/{id} | Update: Update an existing entity
+*ProductExtraOptionUpdateProductExtraOptionApi* | [**updateProductExtraOption**](doc//ProductExtraOptionUpdateProductExtraOptionApi.md#) | **PUT** /sale/product-extra-options/{id} | Update: Update an existing entity
+*ProductRecipeCreateProductRecipeApi* | [**createProductRecipe**](doc//ProductRecipeCreateProductRecipeApi.md#) | **POST** /sale/product-recipes | Create: Create a new entity
+*ProductRecipeDeleteManyProductRecipeApi* | [**deleteManyProductRecipe**](doc//ProductRecipeDeleteManyProductRecipeApi.md#) | **DELETE** /sale/product-recipes | DeleteMany: Delete multiple entities
+*ProductRecipeDeleteProductRecipeApi* | [**deleteProductRecipe**](doc//ProductRecipeDeleteProductRecipeApi.md#) | **DELETE** /sale/product-recipes/{id} | Delete: Delete a single entity
+*ProductRecipeGetListProductRecipeApi* | [**getListProductRecipe**](doc//ProductRecipeGetListProductRecipeApi.md#) | **GET** /sale/product-recipes | GetList: Get paginated list of entities with filtering
+*ProductRecipeGetManyProductRecipeApi* | [**getManyProductRecipe**](doc//ProductRecipeGetManyProductRecipeApi.md#) | **GET** /sale/product-recipes/many | GetMany: Get multiple entities by IDs
+*ProductRecipeGetOneProductRecipeApi* | [**getOneProductRecipe**](doc//ProductRecipeGetOneProductRecipeApi.md#) | **GET** /sale/product-recipes/{id} | GetOne: Get single entity by ID
+*ProductRecipePatchManyProductRecipeApi* | [**patchManyProductRecipe**](doc//ProductRecipePatchManyProductRecipeApi.md#) | **PATCH** /sale/product-recipes | UpdateMany: Update multiple entities
+*ProductRecipePatchProductRecipeApi* | [**patchProductRecipe**](doc//ProductRecipePatchProductRecipeApi.md#) | **PATCH** /sale/product-recipes/{id} | Update: Update an existing entity
+*ProductRecipeUpdateProductRecipeApi* | [**updateProductRecipe**](doc//ProductRecipeUpdateProductRecipeApi.md#) | **PUT** /sale/product-recipes/{id} | Update: Update an existing entity
 
 
 ## Documentation For Models
 
+ - [ApiResponseListMenuCategoryDTO](doc//ApiResponseListMenuCategoryDTO.md)
+ - [ApiResponseListMenuDTO](doc//ApiResponseListMenuDTO.md)
+ - [ApiResponseListMenuItemDTO](doc//ApiResponseListMenuItemDTO.md)
+ - [ApiResponseListProductDTO](doc//ApiResponseListProductDTO.md)
+ - [ApiResponseListProductExtraOptionDTO](doc//ApiResponseListProductExtraOptionDTO.md)
+ - [ApiResponseListProductRecipeDTO](doc//ApiResponseListProductRecipeDTO.md)
+ - [ApiResponseListUUID](doc//ApiResponseListUUID.md)
+ - [ApiResponseMenuCategoryDTO](doc//ApiResponseMenuCategoryDTO.md)
+ - [ApiResponseMenuDTO](doc//ApiResponseMenuDTO.md)
+ - [ApiResponseMenuItemDTO](doc//ApiResponseMenuItemDTO.md)
+ - [ApiResponseProductDTO](doc//ApiResponseProductDTO.md)
+ - [ApiResponseProductExtraOptionDTO](doc//ApiResponseProductExtraOptionDTO.md)
+ - [ApiResponseProductRecipeDTO](doc//ApiResponseProductRecipeDTO.md)
+ - [ApiResponseVoid](doc//ApiResponseVoid.md)
+ - [MenuCategoryCreateDTO](doc//MenuCategoryCreateDTO.md)
+ - [MenuCategoryDTO](doc//MenuCategoryDTO.md)
+ - [MenuCategoryUpdateDTO](doc//MenuCategoryUpdateDTO.md)
+ - [MenuCreateDTO](doc//MenuCreateDTO.md)
+ - [MenuDTO](doc//MenuDTO.md)
+ - [MenuItemCreateDTO](doc//MenuItemCreateDTO.md)
+ - [MenuItemDTO](doc//MenuItemDTO.md)
+ - [MenuItemUpdateDTO](doc//MenuItemUpdateDTO.md)
+ - [MenuUpdateDTO](doc//MenuUpdateDTO.md)
+ - [Meta](doc//Meta.md)
+ - [Parameter](doc//Parameter.md)
+ - [ProductCreateDTO](doc//ProductCreateDTO.md)
+ - [ProductDTO](doc//ProductDTO.md)
+ - [ProductExtraOptionCreateDTO](doc//ProductExtraOptionCreateDTO.md)
+ - [ProductExtraOptionDTO](doc//ProductExtraOptionDTO.md)
+ - [ProductExtraOptionItemCreateDTO](doc//ProductExtraOptionItemCreateDTO.md)
+ - [ProductExtraOptionItemDTO](doc//ProductExtraOptionItemDTO.md)
+ - [ProductExtraOptionUpdateDTO](doc//ProductExtraOptionUpdateDTO.md)
+ - [ProductRecipeCreateDTO](doc//ProductRecipeCreateDTO.md)
+ - [ProductRecipeDTO](doc//ProductRecipeDTO.md)
+ - [ProductRecipeItemCreateDTO](doc//ProductRecipeItemCreateDTO.md)
+ - [ProductRecipeItemDTO](doc//ProductRecipeItemDTO.md)
+ - [ProductRecipeUpdateDTO](doc//ProductRecipeUpdateDTO.md)
+ - [ProductUpdateDTO](doc//ProductUpdateDTO.md)
 
 
 ## Documentation For Authorization
@@ -60,5 +163,6 @@ Endpoints do not require authorization.
 
 
 ## Author
+
 
 

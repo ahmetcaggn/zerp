@@ -41,43 +41,72 @@ Please follow the [installation procedure](#installation--usage) and then run th
 import 'package:openapi_resource/api.dart';
 
 
-final api_instance = StockResourcesCreateStockResourceApi();
-final stockResourceCreateDTO = StockResourceCreateDTO(); // StockResourceCreateDTO | 
+final api_instance = StockCountCreateStockCountApi();
+final stockCountCreateDTO = StockCountCreateDTO(); // StockCountCreateDTO | 
 
 try {
-    final result = api_instance.createStockResource(stockResourceCreateDTO);
+    final result = api_instance.createStockCount(stockCountCreateDTO);
     print(result);
 } catch (e) {
-    print('Exception when calling StockResourcesCreateStockResourceApi->createStockResource: $e\n');
+    print('Exception when calling StockCountCreateStockCountApi->createStockCount: $e\n');
 }
 
 ```
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://192.168.0.106:8084*
+All URIs are relative to *https://zerpapi.femrek.dev*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*StockResourcesCreateStockResourceApi* | [**createStockResource**](doc//StockResourcesCreateStockResourceApi.md#) | **POST** / | Create: Create a new entity
-*StockResourcesDeleteManyStockResourcesApi* | [**deleteManyStockResources**](doc//StockResourcesDeleteManyStockResourcesApi.md#) | **DELETE** / | DeleteMany: Delete multiple entities
-*StockResourcesDeleteStockResourceApi* | [**deleteStockResource**](doc//StockResourcesDeleteStockResourceApi.md#) | **DELETE** /{id} | Delete: Delete a single entity
-*StockResourcesGetListStockResourcesApi* | [**getListStockResources**](doc//StockResourcesGetListStockResourcesApi.md#) | **GET** / | GetList: Get paginated list of entities with filtering
-*StockResourcesGetManyStockResourcesApi* | [**getManyStockResources**](doc//StockResourcesGetManyStockResourcesApi.md#) | **GET** /many | GetMany: Get multiple entities by IDs
-*StockResourcesGetOneStockResourceApi* | [**getOneStockResource**](doc//StockResourcesGetOneStockResourceApi.md#) | **GET** /{id} | GetOne: Get single entity by ID
-*StockResourcesPatchManyStockResourcesApi* | [**patchManyStockResources**](doc//StockResourcesPatchManyStockResourcesApi.md#) | **PATCH** / | UpdateMany: Update multiple entities
-*StockResourcesPatchStockResourceApi* | [**patchStockResource**](doc//StockResourcesPatchStockResourceApi.md#) | **PATCH** /{id} | Update: Update an existing entity
-*StockResourcesUpdateStockResourceApi* | [**updateStockResource**](doc//StockResourcesUpdateStockResourceApi.md#) | **PUT** /{id} | Update: Update an existing entity
+*StockCountCreateStockCountApi* | [**createStockCount**](doc//StockCountCreateStockCountApi.md#) | **POST** /resource/stock-counts | Create: Create a new entity
+*StockCountDeleteManyStockCountApi* | [**deleteManyStockCount**](doc//StockCountDeleteManyStockCountApi.md#) | **DELETE** /resource/stock-counts | DeleteMany: Delete multiple entities
+*StockCountDeleteStockCountApi* | [**deleteStockCount**](doc//StockCountDeleteStockCountApi.md#) | **DELETE** /resource/stock-counts/{id} | Delete: Delete a single entity
+*StockCountGetListStockCountApi* | [**getListStockCount**](doc//StockCountGetListStockCountApi.md#) | **GET** /resource/stock-counts | GetList: Get paginated list of entities with filtering
+*StockCountGetManyStockCountApi* | [**getManyStockCount**](doc//StockCountGetManyStockCountApi.md#) | **GET** /resource/stock-counts/many | GetMany: Get multiple entities by IDs
+*StockCountGetOneStockCountApi* | [**getOneStockCount**](doc//StockCountGetOneStockCountApi.md#) | **GET** /resource/stock-counts/{id} | GetOne: Get single entity by ID
+*StockCountPatchManyStockCountApi* | [**patchManyStockCount**](doc//StockCountPatchManyStockCountApi.md#) | **PATCH** /resource/stock-counts | UpdateMany: Update multiple entities
+*StockCountPatchStockCountApi* | [**patchStockCount**](doc//StockCountPatchStockCountApi.md#) | **PATCH** /resource/stock-counts/{id} | Update: Update an existing entity
+*StockCountUpdateStockCountApi* | [**updateStockCount**](doc//StockCountUpdateStockCountApi.md#) | **PUT** /resource/stock-counts/{id} | Update: Update an existing entity
+*StockMovementCreateStockMovementApi* | [**createStockMovement**](doc//StockMovementCreateStockMovementApi.md#) | **POST** /resource/stock-movements | Create: Create a new entity
+*StockMovementDeleteManyStockMovementApi* | [**deleteManyStockMovement**](doc//StockMovementDeleteManyStockMovementApi.md#) | **DELETE** /resource/stock-movements | DeleteMany: Delete multiple entities
+*StockMovementDeleteStockMovementApi* | [**deleteStockMovement**](doc//StockMovementDeleteStockMovementApi.md#) | **DELETE** /resource/stock-movements/{id} | Delete: Delete a single entity
+*StockMovementGetListStockMovementApi* | [**getListStockMovement**](doc//StockMovementGetListStockMovementApi.md#) | **GET** /resource/stock-movements | GetList: Get paginated list of entities with filtering
+*StockMovementGetManyStockMovementApi* | [**getManyStockMovement**](doc//StockMovementGetManyStockMovementApi.md#) | **GET** /resource/stock-movements/many | GetMany: Get multiple entities by IDs
+*StockMovementGetOneStockMovementApi* | [**getOneStockMovement**](doc//StockMovementGetOneStockMovementApi.md#) | **GET** /resource/stock-movements/{id} | GetOne: Get single entity by ID
+*StockMovementPatchManyStockMovementApi* | [**patchManyStockMovement**](doc//StockMovementPatchManyStockMovementApi.md#) | **PATCH** /resource/stock-movements | UpdateMany: Update multiple entities
+*StockMovementPatchStockMovementApi* | [**patchStockMovement**](doc//StockMovementPatchStockMovementApi.md#) | **PATCH** /resource/stock-movements/{id} | Update: Update an existing entity
+*StockMovementUpdateStockMovementApi* | [**updateStockMovement**](doc//StockMovementUpdateStockMovementApi.md#) | **PUT** /resource/stock-movements/{id} | Update: Update an existing entity
+*StockResourceCreateStockResourceApi* | [**createStockResource**](doc//StockResourceCreateStockResourceApi.md#) | **POST** /resource/stock-resources | Create: Create a new entity
+*StockResourceDeleteManyStockResourceApi* | [**deleteManyStockResource**](doc//StockResourceDeleteManyStockResourceApi.md#) | **DELETE** /resource/stock-resources | DeleteMany: Delete multiple entities
+*StockResourceDeleteStockResourceApi* | [**deleteStockResource**](doc//StockResourceDeleteStockResourceApi.md#) | **DELETE** /resource/stock-resources/{id} | Delete: Delete a single entity
+*StockResourceGetListStockResourceApi* | [**getListStockResource**](doc//StockResourceGetListStockResourceApi.md#) | **GET** /resource/stock-resources | GetList: Get paginated list of entities with filtering
+*StockResourceGetManyStockResourceApi* | [**getManyStockResource**](doc//StockResourceGetManyStockResourceApi.md#) | **GET** /resource/stock-resources/many | GetMany: Get multiple entities by IDs
+*StockResourceGetOneStockResourceApi* | [**getOneStockResource**](doc//StockResourceGetOneStockResourceApi.md#) | **GET** /resource/stock-resources/{id} | GetOne: Get single entity by ID
+*StockResourcePatchManyStockResourceApi* | [**patchManyStockResource**](doc//StockResourcePatchManyStockResourceApi.md#) | **PATCH** /resource/stock-resources | UpdateMany: Update multiple entities
+*StockResourcePatchStockResourceApi* | [**patchStockResource**](doc//StockResourcePatchStockResourceApi.md#) | **PATCH** /resource/stock-resources/{id} | Update: Update an existing entity
+*StockResourceUpdateStockResourceApi* | [**updateStockResource**](doc//StockResourceUpdateStockResourceApi.md#) | **PUT** /resource/stock-resources/{id} | Update: Update an existing entity
 
 
 ## Documentation For Models
 
+ - [ApiResponseListStockCountDTO](doc//ApiResponseListStockCountDTO.md)
+ - [ApiResponseListStockMovementDTO](doc//ApiResponseListStockMovementDTO.md)
  - [ApiResponseListStockResourceDTO](doc//ApiResponseListStockResourceDTO.md)
  - [ApiResponseListUUID](doc//ApiResponseListUUID.md)
+ - [ApiResponseStockCountDTO](doc//ApiResponseStockCountDTO.md)
+ - [ApiResponseStockMovementDTO](doc//ApiResponseStockMovementDTO.md)
  - [ApiResponseStockResourceDTO](doc//ApiResponseStockResourceDTO.md)
  - [ApiResponseVoid](doc//ApiResponseVoid.md)
  - [Meta](doc//Meta.md)
  - [Parameter](doc//Parameter.md)
+ - [StockCountCreateDTO](doc//StockCountCreateDTO.md)
+ - [StockCountDTO](doc//StockCountDTO.md)
+ - [StockCountItemDTO](doc//StockCountItemDTO.md)
+ - [StockCountItemUpdateDTO](doc//StockCountItemUpdateDTO.md)
+ - [StockCountUpdateDTO](doc//StockCountUpdateDTO.md)
+ - [StockMovementCreateDTO](doc//StockMovementCreateDTO.md)
+ - [StockMovementDTO](doc//StockMovementDTO.md)
  - [StockResourceCreateDTO](doc//StockResourceCreateDTO.md)
  - [StockResourceDTO](doc//StockResourceDTO.md)
  - [StockResourceUpdateDTO](doc//StockResourceUpdateDTO.md)

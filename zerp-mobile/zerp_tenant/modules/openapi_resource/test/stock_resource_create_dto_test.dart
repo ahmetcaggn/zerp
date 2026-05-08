@@ -20,13 +20,33 @@ void main() {
       // TODO
     });
 
+    // String description
+    test('to test the property `description`', () async {
+      // TODO
+    });
+
     // String shopId
     test('to test the property `shopId`', () async {
       // TODO
     });
 
-    // String tenantId
-    test('to test the property `tenantId`', () async {
+    // String unitType
+    test('to test the property `unitType`', () async {
+      // TODO
+    });
+
+    // num quantity
+    test('to test the property `quantity`', () async {
+      // TODO
+    });
+
+    // num reorderThreshold
+    test('to test the property `reorderThreshold`', () async {
+      // TODO
+    });
+
+    // num costPerUnit
+    test('to test the property `costPerUnit`', () async {
       // TODO
     });
 

@@ -20,6 +20,26 @@ void main() {
       // TODO
     });
 
+    // String description
+    test('to test the property `description`', () async {
+      // TODO
+    });
+
+    // String unitType
+    test('to test the property `unitType`', () async {
+      // TODO
+    });
+
+    // num reorderThreshold
+    test('to test the property `reorderThreshold`', () async {
+      // TODO
+    });
+
+    // num costPerUnit
+    test('to test the property `costPerUnit`', () async {
+      // TODO
+    });
+
 
   });
 

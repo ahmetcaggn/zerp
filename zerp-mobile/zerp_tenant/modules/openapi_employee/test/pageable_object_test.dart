@@ -15,6 +15,11 @@ void main() {
   // final instance = PageableObject();
 
   group('test PageableObject', () {
+    // int offset
+    test('to test the property `offset`', () async {
+      // TODO
+    });
+
     // bool paged
     test('to test the property `paged`', () async {
       // TODO
@@ -37,11 +42,6 @@ void main() {
 
     // bool unpaged
     test('to test the property `unpaged`', () async {
-      // TODO
-    });
-
-    // int offset
-    test('to test the property `offset`', () async {
       // TODO
     });
 

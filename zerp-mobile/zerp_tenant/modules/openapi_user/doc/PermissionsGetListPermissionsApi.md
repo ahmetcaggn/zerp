@@ -5,7 +5,7 @@
 import 'package:openapi_user/api.dart';
 ```
 
-All URIs are relative to *http://192.168.0.106:8087*
+All URIs are relative to *https://zerpapi.femrek.dev*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------

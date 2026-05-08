@@ -55,7 +55,7 @@ try {
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://192.168.0.106:8082*
+All URIs are relative to *https://zerpapi.femrek.dev*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------

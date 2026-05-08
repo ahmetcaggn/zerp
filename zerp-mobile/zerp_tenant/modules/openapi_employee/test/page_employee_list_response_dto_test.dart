@@ -25,18 +25,18 @@ void main() {
       // TODO
     });
 
-    // int numberOfElements
-    test('to test the property `numberOfElements`', () async {
+    // int size
+    test('to test the property `size`', () async {
       // TODO
     });
 
-    // bool first
-    test('to test the property `first`', () async {
+    // List<EmployeeListResponseDto> content (default value: const [])
+    test('to test the property `content`', () async {
       // TODO
     });
 
-    // bool last
-    test('to test the property `last`', () async {
+    // int number
+    test('to test the property `number`', () async {
       // TODO
     });
 
@@ -50,18 +50,18 @@ void main() {
       // TODO
     });
 
-    // int size
-    test('to test the property `size`', () async {
+    // int numberOfElements
+    test('to test the property `numberOfElements`', () async {
       // TODO
     });
 
-    // List<EmployeeListResponseDto> content (default value: const [])
-    test('to test the property `content`', () async {
+    // bool first
+    test('to test the property `first`', () async {
       // TODO
     });
 
-    // int number
-    test('to test the property `number`', () async {
+    // bool last
+    test('to test the property `last`', () async {
       // TODO
     });
 

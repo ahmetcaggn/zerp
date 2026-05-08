@@ -12,10 +12,18 @@ import 'package:dart_network_layer_core/dart_network_layer_core.dart';
 class SortObject extends Schema {
   /// Returns a new [SortObject] instance.
   SortObject({
+    this.empty,
     this.sorted,
     this.unsorted,
-    this.empty,
   });
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  final bool? empty;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -33,35 +41,32 @@ class SortObject extends Schema {
   ///
   final bool? unsorted;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  final bool? empty;
-
   /// The factory instance for creating [SortObject] from JSON.
   static const factory = SortObjectFactory();
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is SortObject &&
+    other.empty == empty &&
     other.sorted == sorted &&
-    other.unsorted == unsorted &&
-    other.empty == empty;
+    other.unsorted == unsorted;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (empty == null ? 0 : empty!.hashCode) +
     (sorted == null ? 0 : sorted!.hashCode) +
-    (unsorted == null ? 0 : unsorted!.hashCode) +
-    (empty == null ? 0 : empty!.hashCode);
+    (unsorted == null ? 0 : unsorted!.hashCode);
 
   @override
-  String toString() => 'SortObject[sorted=$sorted, unsorted=$unsorted, empty=$empty]';
+  String toString() => 'SortObject[empty=$empty, sorted=$sorted, unsorted=$unsorted]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.empty != null) {
+      json[r'empty'] = this.empty;
+    } else {
+      json[r'empty'] = null;
+    }
     if (this.sorted != null) {
       json[r'sorted'] = this.sorted;
     } else {
@@ -71,11 +76,6 @@ class SortObject extends Schema {
       json[r'unsorted'] = this.unsorted;
     } else {
       json[r'unsorted'] = null;
-    }
-    if (this.empty != null) {
-      json[r'empty'] = this.empty;
-    } else {
-      json[r'empty'] = null;
     }
     return json;
   }
@@ -99,9 +99,9 @@ class SortObject extends Schema {
       }());
 
       return SortObject(
+        empty: json[r'empty'] is bool ? json[r'empty'] as bool : null,
         sorted: json[r'sorted'] is bool ? json[r'sorted'] as bool : null,
         unsorted: json[r'unsorted'] is bool ? json[r'unsorted'] as bool : null,
-        empty: json[r'empty'] is bool ? json[r'empty'] as bool : null,
       );
     }
     return null;

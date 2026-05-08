@@ -206,13 +206,21 @@ class ApiResponseListPermissionActionDataEnum {
 
   String toJson() => value;
 
-  static const CREATE_TEAM = ApiResponseListPermissionActionDataEnum._(r'CREATE_TEAM');
   static const ADMIN_TENANT = ApiResponseListPermissionActionDataEnum._(r'ADMIN_TENANT');
   static const UPDATE_TENANT = ApiResponseListPermissionActionDataEnum._(r'UPDATE_TENANT');
   static const READ_TENANT = ApiResponseListPermissionActionDataEnum._(r'READ_TENANT');
   static const CREATE_STOCK_RESOURCE = ApiResponseListPermissionActionDataEnum._(r'CREATE_STOCK_RESOURCE');
   static const CREATE_EMPLOYEE = ApiResponseListPermissionActionDataEnum._(r'CREATE_EMPLOYEE');
   static const CREATE_TICKET = ApiResponseListPermissionActionDataEnum._(r'CREATE_TICKET');
+  static const CREATE_TEAM = ApiResponseListPermissionActionDataEnum._(r'CREATE_TEAM');
+  static const CREATE_STOCK_MOVEMENT = ApiResponseListPermissionActionDataEnum._(r'CREATE_STOCK_MOVEMENT');
+  static const CREATE_STOCK_COUNT = ApiResponseListPermissionActionDataEnum._(r'CREATE_STOCK_COUNT');
+  static const CREATE_PRODUCT = ApiResponseListPermissionActionDataEnum._(r'CREATE_PRODUCT');
+  static const CREATE_PRODUCT_RECIPE = ApiResponseListPermissionActionDataEnum._(r'CREATE_PRODUCT_RECIPE');
+  static const CREATE_PRODUCT_EXTRA_OPTION = ApiResponseListPermissionActionDataEnum._(r'CREATE_PRODUCT_EXTRA_OPTION');
+  static const CREATE_MENU = ApiResponseListPermissionActionDataEnum._(r'CREATE_MENU');
+  static const CREATE_MENU_CATEGORY = ApiResponseListPermissionActionDataEnum._(r'CREATE_MENU_CATEGORY');
+  static const CREATE_MENU_ITEM = ApiResponseListPermissionActionDataEnum._(r'CREATE_MENU_ITEM');
   static const READ_USER = ApiResponseListPermissionActionDataEnum._(r'READ_USER');
   static const READ_PERMISSION = ApiResponseListPermissionActionDataEnum._(r'READ_PERMISSION');
   static const ADMIN_STOCK_RESOURCE = ApiResponseListPermissionActionDataEnum._(r'ADMIN_STOCK_RESOURCE');
@@ -256,16 +264,53 @@ class ApiResponseListPermissionActionDataEnum {
   static const READ_TICKET_WATCHER = ApiResponseListPermissionActionDataEnum._(r'READ_TICKET_WATCHER');
   static const UPDATE_TICKET_WATCHER = ApiResponseListPermissionActionDataEnum._(r'UPDATE_TICKET_WATCHER');
   static const DELETE_TICKET_WATCHER = ApiResponseListPermissionActionDataEnum._(r'DELETE_TICKET_WATCHER');
+  static const READ_STOCK_MOVEMENT = ApiResponseListPermissionActionDataEnum._(r'READ_STOCK_MOVEMENT');
+  static const ADMIN_STOCK_COUNT = ApiResponseListPermissionActionDataEnum._(r'ADMIN_STOCK_COUNT');
+  static const UPDATE_STOCK_COUNT = ApiResponseListPermissionActionDataEnum._(r'UPDATE_STOCK_COUNT');
+  static const DELETE_STOCK_COUNT = ApiResponseListPermissionActionDataEnum._(r'DELETE_STOCK_COUNT');
+  static const READ_STOCK_COUNT = ApiResponseListPermissionActionDataEnum._(r'READ_STOCK_COUNT');
+  static const ADMIN_PRODUCT = ApiResponseListPermissionActionDataEnum._(r'ADMIN_PRODUCT');
+  static const UPDATE_PRODUCT = ApiResponseListPermissionActionDataEnum._(r'UPDATE_PRODUCT');
+  static const DELETE_PRODUCT = ApiResponseListPermissionActionDataEnum._(r'DELETE_PRODUCT');
+  static const READ_PRODUCT = ApiResponseListPermissionActionDataEnum._(r'READ_PRODUCT');
+  static const ADMIN_PRODUCT_RECIPE = ApiResponseListPermissionActionDataEnum._(r'ADMIN_PRODUCT_RECIPE');
+  static const UPDATE_PRODUCT_RECIPE = ApiResponseListPermissionActionDataEnum._(r'UPDATE_PRODUCT_RECIPE');
+  static const DELETE_PRODUCT_RECIPE = ApiResponseListPermissionActionDataEnum._(r'DELETE_PRODUCT_RECIPE');
+  static const READ_PRODUCT_RECIPE = ApiResponseListPermissionActionDataEnum._(r'READ_PRODUCT_RECIPE');
+  static const ADMIN_PRODUCT_EXTRA_OPTION = ApiResponseListPermissionActionDataEnum._(r'ADMIN_PRODUCT_EXTRA_OPTION');
+  static const UPDATE_PRODUCT_EXTRA_OPTION = ApiResponseListPermissionActionDataEnum._(r'UPDATE_PRODUCT_EXTRA_OPTION');
+  static const DELETE_PRODUCT_EXTRA_OPTION = ApiResponseListPermissionActionDataEnum._(r'DELETE_PRODUCT_EXTRA_OPTION');
+  static const READ_PRODUCT_EXTRA_OPTION = ApiResponseListPermissionActionDataEnum._(r'READ_PRODUCT_EXTRA_OPTION');
+  static const ADMIN_MENU = ApiResponseListPermissionActionDataEnum._(r'ADMIN_MENU');
+  static const UPDATE_MENU = ApiResponseListPermissionActionDataEnum._(r'UPDATE_MENU');
+  static const DELETE_MENU = ApiResponseListPermissionActionDataEnum._(r'DELETE_MENU');
+  static const READ_MENU = ApiResponseListPermissionActionDataEnum._(r'READ_MENU');
+  static const ADMIN_MENU_CATEGORY = ApiResponseListPermissionActionDataEnum._(r'ADMIN_MENU_CATEGORY');
+  static const UPDATE_MENU_CATEGORY = ApiResponseListPermissionActionDataEnum._(r'UPDATE_MENU_CATEGORY');
+  static const DELETE_MENU_CATEGORY = ApiResponseListPermissionActionDataEnum._(r'DELETE_MENU_CATEGORY');
+  static const READ_MENU_CATEGORY = ApiResponseListPermissionActionDataEnum._(r'READ_MENU_CATEGORY');
+  static const ADMIN_MENU_ITEM = ApiResponseListPermissionActionDataEnum._(r'ADMIN_MENU_ITEM');
+  static const UPDATE_MENU_ITEM = ApiResponseListPermissionActionDataEnum._(r'UPDATE_MENU_ITEM');
+  static const DELETE_MENU_ITEM = ApiResponseListPermissionActionDataEnum._(r'DELETE_MENU_ITEM');
+  static const READ_MENU_ITEM = ApiResponseListPermissionActionDataEnum._(r'READ_MENU_ITEM');
 
   /// List of all possible values in this [enum][ApiResponseListPermissionActionDataEnum].
   static const values = <ApiResponseListPermissionActionDataEnum>[
-    CREATE_TEAM,
     ADMIN_TENANT,
     UPDATE_TENANT,
     READ_TENANT,
     CREATE_STOCK_RESOURCE,
     CREATE_EMPLOYEE,
     CREATE_TICKET,
+    CREATE_TEAM,
+    CREATE_STOCK_MOVEMENT,
+    CREATE_STOCK_COUNT,
+    CREATE_PRODUCT,
+    CREATE_PRODUCT_RECIPE,
+    CREATE_PRODUCT_EXTRA_OPTION,
+    CREATE_MENU,
+    CREATE_MENU_CATEGORY,
+    CREATE_MENU_ITEM,
     READ_USER,
     READ_PERMISSION,
     ADMIN_STOCK_RESOURCE,
@@ -309,6 +354,35 @@ class ApiResponseListPermissionActionDataEnum {
     READ_TICKET_WATCHER,
     UPDATE_TICKET_WATCHER,
     DELETE_TICKET_WATCHER,
+    READ_STOCK_MOVEMENT,
+    ADMIN_STOCK_COUNT,
+    UPDATE_STOCK_COUNT,
+    DELETE_STOCK_COUNT,
+    READ_STOCK_COUNT,
+    ADMIN_PRODUCT,
+    UPDATE_PRODUCT,
+    DELETE_PRODUCT,
+    READ_PRODUCT,
+    ADMIN_PRODUCT_RECIPE,
+    UPDATE_PRODUCT_RECIPE,
+    DELETE_PRODUCT_RECIPE,
+    READ_PRODUCT_RECIPE,
+    ADMIN_PRODUCT_EXTRA_OPTION,
+    UPDATE_PRODUCT_EXTRA_OPTION,
+    DELETE_PRODUCT_EXTRA_OPTION,
+    READ_PRODUCT_EXTRA_OPTION,
+    ADMIN_MENU,
+    UPDATE_MENU,
+    DELETE_MENU,
+    READ_MENU,
+    ADMIN_MENU_CATEGORY,
+    UPDATE_MENU_CATEGORY,
+    DELETE_MENU_CATEGORY,
+    READ_MENU_CATEGORY,
+    ADMIN_MENU_ITEM,
+    UPDATE_MENU_ITEM,
+    DELETE_MENU_ITEM,
+    READ_MENU_ITEM,
   ];
 
   static ApiResponseListPermissionActionDataEnum? fromJson(dynamic value) => ApiResponseListPermissionActionDataEnumTypeTransformer().decode(value);
@@ -347,13 +421,21 @@ class ApiResponseListPermissionActionDataEnumTypeTransformer {
   ApiResponseListPermissionActionDataEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'CREATE_TEAM': return ApiResponseListPermissionActionDataEnum.CREATE_TEAM;
         case r'ADMIN_TENANT': return ApiResponseListPermissionActionDataEnum.ADMIN_TENANT;
         case r'UPDATE_TENANT': return ApiResponseListPermissionActionDataEnum.UPDATE_TENANT;
         case r'READ_TENANT': return ApiResponseListPermissionActionDataEnum.READ_TENANT;
         case r'CREATE_STOCK_RESOURCE': return ApiResponseListPermissionActionDataEnum.CREATE_STOCK_RESOURCE;
         case r'CREATE_EMPLOYEE': return ApiResponseListPermissionActionDataEnum.CREATE_EMPLOYEE;
         case r'CREATE_TICKET': return ApiResponseListPermissionActionDataEnum.CREATE_TICKET;
+        case r'CREATE_TEAM': return ApiResponseListPermissionActionDataEnum.CREATE_TEAM;
+        case r'CREATE_STOCK_MOVEMENT': return ApiResponseListPermissionActionDataEnum.CREATE_STOCK_MOVEMENT;
+        case r'CREATE_STOCK_COUNT': return ApiResponseListPermissionActionDataEnum.CREATE_STOCK_COUNT;
+        case r'CREATE_PRODUCT': return ApiResponseListPermissionActionDataEnum.CREATE_PRODUCT;
+        case r'CREATE_PRODUCT_RECIPE': return ApiResponseListPermissionActionDataEnum.CREATE_PRODUCT_RECIPE;
+        case r'CREATE_PRODUCT_EXTRA_OPTION': return ApiResponseListPermissionActionDataEnum.CREATE_PRODUCT_EXTRA_OPTION;
+        case r'CREATE_MENU': return ApiResponseListPermissionActionDataEnum.CREATE_MENU;
+        case r'CREATE_MENU_CATEGORY': return ApiResponseListPermissionActionDataEnum.CREATE_MENU_CATEGORY;
+        case r'CREATE_MENU_ITEM': return ApiResponseListPermissionActionDataEnum.CREATE_MENU_ITEM;
         case r'READ_USER': return ApiResponseListPermissionActionDataEnum.READ_USER;
         case r'READ_PERMISSION': return ApiResponseListPermissionActionDataEnum.READ_PERMISSION;
         case r'ADMIN_STOCK_RESOURCE': return ApiResponseListPermissionActionDataEnum.ADMIN_STOCK_RESOURCE;
@@ -397,6 +479,35 @@ class ApiResponseListPermissionActionDataEnumTypeTransformer {
         case r'READ_TICKET_WATCHER': return ApiResponseListPermissionActionDataEnum.READ_TICKET_WATCHER;
         case r'UPDATE_TICKET_WATCHER': return ApiResponseListPermissionActionDataEnum.UPDATE_TICKET_WATCHER;
         case r'DELETE_TICKET_WATCHER': return ApiResponseListPermissionActionDataEnum.DELETE_TICKET_WATCHER;
+        case r'READ_STOCK_MOVEMENT': return ApiResponseListPermissionActionDataEnum.READ_STOCK_MOVEMENT;
+        case r'ADMIN_STOCK_COUNT': return ApiResponseListPermissionActionDataEnum.ADMIN_STOCK_COUNT;
+        case r'UPDATE_STOCK_COUNT': return ApiResponseListPermissionActionDataEnum.UPDATE_STOCK_COUNT;
+        case r'DELETE_STOCK_COUNT': return ApiResponseListPermissionActionDataEnum.DELETE_STOCK_COUNT;
+        case r'READ_STOCK_COUNT': return ApiResponseListPermissionActionDataEnum.READ_STOCK_COUNT;
+        case r'ADMIN_PRODUCT': return ApiResponseListPermissionActionDataEnum.ADMIN_PRODUCT;
+        case r'UPDATE_PRODUCT': return ApiResponseListPermissionActionDataEnum.UPDATE_PRODUCT;
+        case r'DELETE_PRODUCT': return ApiResponseListPermissionActionDataEnum.DELETE_PRODUCT;
+        case r'READ_PRODUCT': return ApiResponseListPermissionActionDataEnum.READ_PRODUCT;
+        case r'ADMIN_PRODUCT_RECIPE': return ApiResponseListPermissionActionDataEnum.ADMIN_PRODUCT_RECIPE;
+        case r'UPDATE_PRODUCT_RECIPE': return ApiResponseListPermissionActionDataEnum.UPDATE_PRODUCT_RECIPE;
+        case r'DELETE_PRODUCT_RECIPE': return ApiResponseListPermissionActionDataEnum.DELETE_PRODUCT_RECIPE;
+        case r'READ_PRODUCT_RECIPE': return ApiResponseListPermissionActionDataEnum.READ_PRODUCT_RECIPE;
+        case r'ADMIN_PRODUCT_EXTRA_OPTION': return ApiResponseListPermissionActionDataEnum.ADMIN_PRODUCT_EXTRA_OPTION;
+        case r'UPDATE_PRODUCT_EXTRA_OPTION': return ApiResponseListPermissionActionDataEnum.UPDATE_PRODUCT_EXTRA_OPTION;
+        case r'DELETE_PRODUCT_EXTRA_OPTION': return ApiResponseListPermissionActionDataEnum.DELETE_PRODUCT_EXTRA_OPTION;
+        case r'READ_PRODUCT_EXTRA_OPTION': return ApiResponseListPermissionActionDataEnum.READ_PRODUCT_EXTRA_OPTION;
+        case r'ADMIN_MENU': return ApiResponseListPermissionActionDataEnum.ADMIN_MENU;
+        case r'UPDATE_MENU': return ApiResponseListPermissionActionDataEnum.UPDATE_MENU;
+        case r'DELETE_MENU': return ApiResponseListPermissionActionDataEnum.DELETE_MENU;
+        case r'READ_MENU': return ApiResponseListPermissionActionDataEnum.READ_MENU;
+        case r'ADMIN_MENU_CATEGORY': return ApiResponseListPermissionActionDataEnum.ADMIN_MENU_CATEGORY;
+        case r'UPDATE_MENU_CATEGORY': return ApiResponseListPermissionActionDataEnum.UPDATE_MENU_CATEGORY;
+        case r'DELETE_MENU_CATEGORY': return ApiResponseListPermissionActionDataEnum.DELETE_MENU_CATEGORY;
+        case r'READ_MENU_CATEGORY': return ApiResponseListPermissionActionDataEnum.READ_MENU_CATEGORY;
+        case r'ADMIN_MENU_ITEM': return ApiResponseListPermissionActionDataEnum.ADMIN_MENU_ITEM;
+        case r'UPDATE_MENU_ITEM': return ApiResponseListPermissionActionDataEnum.UPDATE_MENU_ITEM;
+        case r'DELETE_MENU_ITEM': return ApiResponseListPermissionActionDataEnum.DELETE_MENU_ITEM;
+        case r'READ_MENU_ITEM': return ApiResponseListPermissionActionDataEnum.READ_MENU_ITEM;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
