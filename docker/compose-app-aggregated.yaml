@@ -69,6 +69,7 @@ services:
       CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+      OPENAPI_SERVER_URLS: ${OPENAPI_SERVER_URLS}
     depends_on:
       - eureka
     volumes:

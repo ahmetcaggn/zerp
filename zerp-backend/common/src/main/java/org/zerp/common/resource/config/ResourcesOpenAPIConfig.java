@@ -3,6 +3,8 @@ package org.zerp.common.resource.config;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Value;
+import io.swagger.v3.oas.models.servers.Server;
 
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @AutoConfiguration
 @SuppressWarnings("GrazieInspection")
 public class ResourcesOpenAPIConfig {
+    @Value("${openapi.server-urls:}")
+    private List<String> serverUrls;
+
     private static final String GENERIC_TAG = "Objects";
 
     /**
@@ -159,6 +164,16 @@ public class ResourcesOpenAPIConfig {
     @Bean
     public OpenApiCustomizer removeDuplicateGenericTag() {
         return openApi -> {
+            if (serverUrls != null && !serverUrls.isEmpty()) {
+                List<Server> servers = serverUrls.stream()
+                        .filter(url -> !url.isBlank())
+                        .map(url -> new Server().url(url))
+                        .toList();
+                if (!servers.isEmpty()) {
+                    openApi.setServers(servers);
+                }
+            }
+
             AtomicBoolean isGenericTagUsedAlone = new AtomicBoolean(false);
 
             // Clean operations AND check if generic tag is needed
