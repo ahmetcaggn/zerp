@@ -626,6 +626,34 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  openapi_resource:
+    dependency: "direct main"
+    description:
+      path: "modules/openapi_resource"
+      relative: true
+    source: path
+    version: "1.0.0"
+  openapi_sale:
+    dependency: "direct main"
+    description:
+      path: "modules/openapi_sale"
+      relative: true
+    source: path
+    version: "1.0.0"
+  openapi_suggestion:
+    dependency: "direct main"
+    description:
+      path: "modules/openapi_suggestion"
+      relative: true
+    source: path
+    version: "1.0.0"
+  openapi_user:
+    dependency: "direct main"
+    description:
+      path: "modules/openapi_user"
+      relative: true
+    source: path
+    version: "1.0.0"
   package_config:
     dependency: transitive
     description:

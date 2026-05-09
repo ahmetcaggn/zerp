@@ -33,6 +33,14 @@ dependencies:
     path: modules/openapi_employee
   openapi_notification:
     path: modules/openapi_notification
+  openapi_resource:
+    path: modules/openapi_resource
+  openapi_sale:
+    path: modules/openapi_sale
+  openapi_suggestion:
+    path: modules/openapi_suggestion
+  openapi_user:
+    path: modules/openapi_user
   path_provider: ^2.1.5
   remote_logging:
     path: modules/remote_logging

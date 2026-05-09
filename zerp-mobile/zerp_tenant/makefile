@@ -1,6 +1,6 @@
 OPENAPI_CODEGEN_VERSION := 7.20.0
 OPENAPI_CODEGEN_JAR := ./openapi-generator-cli-$(OPENAPI_CODEGEN_VERSION).jar
-CUSTOM_CODEGEN_VERSION := 0.1.9
+CUSTOM_CODEGEN_VERSION := 0.1.11
 CUSTOM_CODEGEN_JAR := ./openapi-dart-network-codegen-$(CUSTOM_CODEGEN_VERSION).jar
 GENERATOR := dart-network
 SPECS_DIR := ./openapi-specs
