@@ -14,6 +14,7 @@ import org.zerp.common.entity.sale.MenuItem;
 import org.zerp.common.entity.sale.ShopTable;
 import org.zerp.common.entity.sale.TableOrder;
 import org.zerp.common.entity.sale.TableOrderItem;
+import org.zerp.common.entity.sale.ShopTableStatus;
 import org.zerp.common.entity.sale.TableOrderStatus;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
@@ -115,6 +116,10 @@ public class TableOrderService implements
         }
 
         TableOrder saved = repository.save(order);
+
+        shopTable.setStatus(ShopTableStatus.OCCUPIED);
+        shopTableRepository.save(shopTable);
+
         log.info("Created TableOrder with id: {}", saved.getId());
         return mapper.toDTO(saved);
     }
@@ -135,6 +140,11 @@ public class TableOrderService implements
             order.setNote((String) data.get("note"));
         }
         TableOrder updated = repository.save(order);
+
+        if (isClosed(updated.getStatus())) {
+            releaseTableIfNoOpenOrders(updated.getShopTable());
+        }
+
         log.info("Patched TableOrder with id: {}", uuid);
         return mapper.toDTO(updated);
     }
@@ -188,7 +198,9 @@ public class TableOrderService implements
         if (!permissionEvaluator.canDelete(userId, order)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete TableOrder");
         }
+        ShopTable shopTable = order.getShopTable();
         repository.delete(order);
+        releaseTableIfNoOpenOrders(shopTable);
         log.info("Deleted TableOrder with id: {}", uuid);
     }
 
@@ -219,6 +231,20 @@ public class TableOrderService implements
         item.setNotes(dto.getNotes());
         item.setTenantId(order.getTenantId());
         return item;
+    }
+
+    private boolean isClosed(TableOrderStatus status) {
+        return status == TableOrderStatus.PAID || status == TableOrderStatus.CANCELLED;
+    }
+
+    private void releaseTableIfNoOpenOrders(ShopTable shopTable) {
+        boolean hasOpenOrders = !repository
+                .findByShopTableIdAndStatus(shopTable.getId(), TableOrderStatus.OPEN)
+                .isEmpty();
+        if (!hasOpenOrders) {
+            shopTable.setStatus(ShopTableStatus.AVAILABLE);
+            shopTableRepository.save(shopTable);
+        }
     }
 
     private ShopTable resolveShopTable(UUID tableId) {
