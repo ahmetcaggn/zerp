@@ -202,6 +202,7 @@ public class GatewaySecurityConfig {
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers("/swagger-ui/**").permitAll()
                         .pathMatchers("/v3/api-docs/**").permitAll()
+                        .pathMatchers("/gateway/v3/api-docs/merged").permitAll()
                         .pathMatchers("/employee", "/employee/**").authenticated()
                         .pathMatchers("/notification", "/notification/**").authenticated()
                         .pathMatchers("/resource", "/resource/**").authenticated()
