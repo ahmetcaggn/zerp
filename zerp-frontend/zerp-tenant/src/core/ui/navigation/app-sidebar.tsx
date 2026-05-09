@@ -23,8 +23,10 @@ import InventoryRoundedIcon from '@mui/icons-material/InventoryRounded'
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded'
 import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded'
+import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded'
 import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
 import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded'
+import TableRestaurantRoundedIcon from '@mui/icons-material/TableRestaurantRounded'
 import type { Route } from 'next'
 import { usePathname, useRouter } from 'next/navigation'
 import { appConfig } from '@/core/config/app-config'
@@ -36,6 +38,8 @@ const COLLAPSED_DRAWER_WIDTH = 64
 type SidebarLabelKey =
   | 'nav.dashboard'
   | 'nav.sale'
+  | 'nav.tables'
+  | 'nav.cashier'
   | 'nav.stock'
   | 'nav.employees'
   | 'nav.tickets'
@@ -50,7 +54,9 @@ interface SidebarAction {
 
 const SIDEBAR_ACTIONS: SidebarAction[] = [
   { id: 'dashboard', labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon />, href: '/dashboard' },
-  { id: 'sale', labelKey: 'nav.sale', icon: <MenuBookRoundedIcon />, href: '/sale' },
+  { id: 'catalog', labelKey: 'nav.sale', icon: <MenuBookRoundedIcon />, href: '/catalog' },
+  { id: 'tables', labelKey: 'nav.tables', icon: <TableRestaurantRoundedIcon />, href: '/tables' },
+  { id: 'sale', labelKey: 'nav.cashier', icon: <PointOfSaleRoundedIcon />, href: '/sale' },
   { id: 'stock', labelKey: 'nav.stock', icon: <InventoryRoundedIcon />, href: '/stock' },
   { id: 'employees', labelKey: 'nav.employees', icon: <PeopleAltRoundedIcon />, href: '/employees' },
   { id: 'tickets', labelKey: 'nav.tickets', icon: <SupportAgentRoundedIcon />, href: '/tickets' },

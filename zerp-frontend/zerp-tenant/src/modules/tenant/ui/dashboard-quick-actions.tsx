@@ -24,7 +24,7 @@ export function DashboardQuickActions() {
     },
     { label: t('dashboard.newTicketAction'), icon: <ConfirmationNumberIcon />, href: ROUTES.tickets },
     { label: t('dashboard.viewStockAction'), icon: <InventoryIcon />, href: ROUTES.stock },
-    { label: t('dashboard.openCashierAction'), icon: <PointOfSaleIcon />, href: ROUTES.cashier },
+    { label: t('dashboard.openCashierAction'), icon: <PointOfSaleIcon />, href: ROUTES.sale },
   ]
 
   return (

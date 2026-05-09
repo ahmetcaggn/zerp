@@ -66,8 +66,8 @@ export function ShopTableList() {
     <Box>
       <Alert severity="info" sx={{ mb: 2 }}>
         Masalara sipariş girmek için{' '}
-        <Link href={`/${locale}/cashier`} underline="hover" fontWeight={600}>
-          Kasa
+        <Link href={`/${locale}/sale`} underline="hover" fontWeight={600}>
+          Satış
         </Link>{' '}
         sayfasını kullanın.
       </Alert>
