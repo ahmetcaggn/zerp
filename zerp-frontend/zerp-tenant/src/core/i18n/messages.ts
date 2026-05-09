@@ -3,6 +3,73 @@ import { trMessages } from '@/core/i18n/dictionaries/tr'
 import type { Locale } from '@/core/types/common'
 
 export interface MessageDictionary {
+  pos: {
+    statusAvailable: string
+    statusOccupied: string
+    statusReserved: string
+    statusOutOfOrder: string
+    filterAll: string
+    noTablesYet: string
+    noTablesForFilter: string
+    groundFloor: string
+    floorLabel: string
+    persons: string
+    tableDeletedToast: string
+    openOrderMenu: string
+    orderPanelTitle: string
+    openOrdersSection: string
+    newItemsSection: string
+    openStatus: string
+    openTotalLabel: string
+    addFromMenuHint: string
+    orderNotePlaceholder: string
+    cartTotalLabel: string
+    placeOrderBtn: string
+    cancelOrderBtn: string
+    allCategories: string
+    noCategoryItems: string
+    orderCreatedToast: string
+    orderCancelledToast: string
+    orderUpdatedToast: string
+    orderDeletedToast: string
+  }
+  sale: {
+    cashier: {
+      tables: string
+      selectTable: string
+      unitPrice: string
+      lineTotal: string
+      subtotal: string
+      total: string
+      tablesHeader: string
+      activeTables: string
+      noActiveTables: string
+      selectTableHint: string
+      noOpenOrders: string
+      noOpenOrdersHint: string
+      openStatus: string
+      tableTotal: string
+      paymentReceivedToast: string
+      allPaidToast: string
+      pageSubtitle: string
+      itemCount: string
+      payBtn: string
+      payAllBtn: string
+      paymentMethodCash: string
+      paymentMethodCard: string
+      paymentMethodCardSoon: string
+      payModeFull: string
+      payModeItems: string
+      payModeAmount: string
+      paySelected: string
+      paidSoFar: string
+      remaining: string
+      recordPayment: string
+      completePayment: string
+      partialItemsUpdatedToast: string
+    }
+    [key: string]: unknown
+  }
   common: {
     appName: string
     loading: string
