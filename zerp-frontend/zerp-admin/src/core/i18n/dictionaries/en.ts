@@ -9,8 +9,12 @@ export const enMessages = {
     login: 'Login',
     register: 'Register',
     dashboard: 'Dashboard',
+    crm: 'CRM',
     teams: 'Teams',
+    teamManagement: 'Team Management',
     teamTickets: 'Team Tickets',
+    ticketManagement: 'Ticket Management',
+    assignedTickets: 'Assigned Tickets',
     logout: 'Logout',
     language: 'Language',
     menu: 'Menu',
@@ -52,5 +56,9 @@ export const enMessages = {
     addComment: 'Add Comment',
     closeTicket: 'Close Ticket',
     commentPlaceholder: 'Write your comment...',
+  },
+  assignedTickets: {
+    title: 'Assigned Tickets',
+    emptyState: 'No tickets assigned to you.',
   },
 } as const

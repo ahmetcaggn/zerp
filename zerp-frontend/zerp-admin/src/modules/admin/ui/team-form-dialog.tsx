@@ -7,6 +7,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
   TextField,
 } from '@mui/material'
 import type { Route } from 'next'
@@ -15,11 +19,14 @@ import { useState } from 'react'
 
 import { ROUTES } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
 import { useCreateTeam, useUpdateTeam } from '../hooks/use-teams'
 import type { TeamResponse } from '../types/team'
+import type { IssueTypeValue } from '../types/ticket'
+import { IssueType } from '../types/ticket'
 
 interface Props {
   open: boolean
@@ -35,20 +42,27 @@ export function TeamFormDialog({ open, mode, team, onClose }: Props) {
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [type, setType] = useState<IssueTypeValue>(IssueType.Question)
 
   const { mutate: createTeam, isPending: isCreating } = useCreateTeam()
   const { mutate: updateTeam, isPending: isUpdating } = useUpdateTeam()
+  const { hasPermission } = useCurrentUserPermissions()
+  const canCreateTeam = hasPermission(PermissionActions.CREATE_TEAM)
+  const canUpdateTeam = hasPermission(PermissionActions.UPDATE_TEAM)
+  const canSubmit = mode === 'create' ? canCreateTeam : canUpdateTeam
   const isPending = isCreating || isUpdating
 
   function seedForm() {
     if (mode === 'edit') {
       setName(team?.name ?? '')
       setDescription(team?.description ?? '')
+      setType(team?.type ?? IssueType.Question)
       return
     }
 
     setName('')
     setDescription('')
+    setType(IssueType.Question)
   }
 
   function handleClose() {
@@ -57,6 +71,11 @@ export function TeamFormDialog({ open, mode, team, onClose }: Props) {
   }
 
   function handleSubmit() {
+    if (!canSubmit) {
+      showToast('Bu işlem için yetkiniz yok.', { severity: 'warning' })
+      return
+    }
+
     if (!name.trim()) {
       showToast('Takım adı zorunludur.', { severity: 'warning' })
       return
@@ -64,12 +83,13 @@ export function TeamFormDialog({ open, mode, team, onClose }: Props) {
 
     if (mode === 'create') {
       createTeam(
-        { name: name.trim(), description: description.trim() || undefined },
+        { name: name.trim(), description: description.trim() || undefined, type },
         {
           onSuccess: (created) => {
             showToast('Takım oluşturuldu.', { severity: 'success' })
             setName('')
             setDescription('')
+            setType(IssueType.Question)
             onClose()
             if (created.id) {
               router.push(`${ROUTES.teams}/${created.id}` as Route)
@@ -83,7 +103,10 @@ export function TeamFormDialog({ open, mode, team, onClose }: Props) {
 
     if (!team?.id) return
     updateTeam(
-      { id: team.id, data: { name: name.trim(), description: description.trim() || undefined } },
+      {
+        id: team.id,
+        data: { name: name.trim(), description: description.trim() || undefined, type },
+      },
       {
         onSuccess: () => {
           showToast('Takım güncellendi.', { severity: 'success' })
@@ -116,6 +139,20 @@ export function TeamFormDialog({ open, mode, team, onClose }: Props) {
             multiline
             minRows={3}
           />
+          <FormControl size="small" fullWidth>
+            <InputLabel>Takım Türü</InputLabel>
+            <Select
+              value={type}
+              label="Takım Türü"
+              onChange={(event) => setType(event.target.value as IssueTypeValue)}
+            >
+              {Object.values(IssueType).map((value) => (
+                <MenuItem key={value} value={value}>
+                  {value}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
       </DialogContent>
 
@@ -123,7 +160,7 @@ export function TeamFormDialog({ open, mode, team, onClose }: Props) {
         <Button onClick={handleClose} disabled={isPending}>
           İptal
         </Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={isPending}>
+        <Button variant="contained" onClick={handleSubmit} disabled={isPending || !canSubmit}>
           {isPending ? <CircularProgress size={20} /> : mode === 'create' ? 'Oluştur' : 'Kaydet'}
         </Button>
       </DialogActions>

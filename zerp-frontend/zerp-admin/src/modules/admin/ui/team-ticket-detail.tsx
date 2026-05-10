@@ -16,12 +16,14 @@ import {
   Paper,
   Select,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
@@ -88,17 +90,41 @@ export function TeamTicketDetail({ id }: Props) {
   const [assignTeamId, setAssignTeamId] = useState('')
   const [assignAgentId, setAssignAgentId] = useState('')
 
-  const { data: ticket, isLoading, error } = useTeamTicket(id)
   const { mutate: addComment, isPending: isCommenting } = useAddTeamTicketComment()
   const { mutate: closeTicket, isPending: isClosing } = useCloseTeamTicket()
   const { mutate: changeStatus, isPending: isChangingStatus } = useChangeTeamTicketStatus()
   const { mutate: changePriority, isPending: isChangingPriority } = useChangeTeamTicketPriority()
   const { mutate: assignTicket, isPending: isAssigning } = useAssignTeamTicket()
   const { mutate: unassignTicket, isPending: isUnassigning } = useUnassignTeamTicket()
+  const { hasPermission, isLoadingPermissions } = useCurrentUserPermissions()
+  const canReadTicket = hasPermission(PermissionActions.READ_TICKET)
+  const { data: ticket, isLoading, error } = useTeamTicket(id, {
+    enabled: canReadTicket && !isLoadingPermissions,
+  })
+  const canUpdateTicket = hasPermission(PermissionActions.UPDATE_TICKET)
+  const canReadTicketComment = hasPermission(PermissionActions.READ_TICKET_COMMENT)
+  const canCreateTicketComment = hasPermission(PermissionActions.CREATE_TICKET_COMMENT)
+  const canReadTicketAssignment = hasPermission(PermissionActions.READ_TICKET_ASSIGNMENT)
+  const canCreateTicketAssignment = hasPermission(PermissionActions.CREATE_TICKET_ASSIGNMENT)
+  const canUpdateTicketAssignment = hasPermission(PermissionActions.UPDATE_TICKET_ASSIGNMENT)
+  const canDeleteTicketAssignment = hasPermission(PermissionActions.DELETE_TICKET_ASSIGNMENT)
+  const canReadTicketSlaTracking = hasPermission(PermissionActions.READ_TICKET_SLA_TRACKING)
   const trimmedAssignTeamId = assignTeamId.trim()
   const trimmedAssignAgentId = assignAgentId.trim()
   const isAssignTeamIdValid = trimmedAssignTeamId ? isUuid(trimmedAssignTeamId) : true
   const isAssignAgentIdValid = trimmedAssignAgentId ? isUuid(trimmedAssignAgentId) : true
+
+  if (isLoadingPermissions) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  if (!canReadTicket) {
+    return <Typography color="text.secondary">Talep detayını görüntüleme yetkiniz yok.</Typography>
+  }
 
   if (isLoading) {
     return (
@@ -119,9 +145,25 @@ export function TeamTicketDetail({ id }: Props) {
   const priority = ticket.priority as TicketPriorityString | undefined
   const isCloseable = status !== undefined && CLOSEABLE_STATUSES.includes(status)
   const isClosed = status === 'CLOSED' || status === 'CANCELLED'
-  const externalComments = (ticket.comments ?? []).filter((comment) => !comment.isInternal)
+  const hasCurrentAssignment = Boolean(ticket.currentAssignment)
+  const canChangeAssignment = hasCurrentAssignment
+    ? canUpdateTicketAssignment
+    : canCreateTicketAssignment
+  const closeActionBlockedReason = !isCloseable
+    ? 'Talep mevcut durumunda kapatılamaz.'
+    : null
+  const assignmentActionBlockedReason = isClosed
+    ? 'Talep kapalı olduğu için atama işlemi yapılamaz.'
+    : null
+  const externalComments = canReadTicketComment
+    ? (ticket.comments ?? []).filter((comment) => !comment.isInternal)
+    : []
 
   function handleAddComment() {
+    if (!canCreateTicketComment) {
+      showToast('Yorum ekleme yetkiniz yok.', { severity: 'warning' })
+      return
+    }
     if (!commentText.trim()) return
     addComment(
       { id, body: { content: commentText.trim(), isInternal: false } },
@@ -136,6 +178,10 @@ export function TeamTicketDetail({ id }: Props) {
   }
 
   function handleClose() {
+    if (!canUpdateTicket) {
+      showToast('Talebi kapatma yetkiniz yok.', { severity: 'warning' })
+      return
+    }
     closeTicket(id, {
       onSuccess: () => showToast('Talep kapatıldı.', { severity: 'success' }),
       onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
@@ -143,6 +189,10 @@ export function TeamTicketDetail({ id }: Props) {
   }
 
   function handleStatusChange(newStatus: TicketStatusString) {
+    if (!canUpdateTicket) {
+      showToast('Durum güncelleme yetkiniz yok.', { severity: 'warning' })
+      return
+    }
     changeStatus(
       { id, body: { status: newStatus } },
       {
@@ -153,6 +203,10 @@ export function TeamTicketDetail({ id }: Props) {
   }
 
   function handlePriorityChange(newPriority: TicketPriorityString) {
+    if (!canUpdateTicket) {
+      showToast('Öncelik güncelleme yetkiniz yok.', { severity: 'warning' })
+      return
+    }
     changePriority(
       { id, body: { priority: newPriority } },
       {
@@ -163,6 +217,14 @@ export function TeamTicketDetail({ id }: Props) {
   }
 
   function handleAssign() {
+    if (!canChangeAssignment) {
+      showToast('Talep atama yetkiniz yok.', { severity: 'warning' })
+      return
+    }
+    if (isClosed) {
+      showToast('Talep kapalı olduğu için atama işlemi yapılamaz.', { severity: 'warning' })
+      return
+    }
     if (!trimmedAssignTeamId) {
       showToast('Takim ID zorunlu.', { severity: 'warning' })
       return
@@ -196,6 +258,10 @@ export function TeamTicketDetail({ id }: Props) {
   }
 
   function handleUnassign() {
+    if (!canDeleteTicketAssignment) {
+      showToast('Atama kaldırma yetkiniz yok.', { severity: 'warning' })
+      return
+    }
     unassignTicket(id, {
       onSuccess: () => showToast('Atama kaldırıldı.', { severity: 'success' }),
       onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
@@ -208,16 +274,20 @@ export function TeamTicketDetail({ id }: Props) {
         <Button startIcon={<ArrowBackIcon />} onClick={() => router.back()} sx={{ color: 'text.secondary' }}>
           Geri
         </Button>
-        {isCloseable && (
-          <Button
-            variant="outlined"
-            color="warning"
-            startIcon={<CheckCircleIcon />}
-            onClick={handleClose}
-            disabled={isClosing}
-          >
-            {t('teamTickets.closeTicket')}
-          </Button>
+        {canUpdateTicket && (
+          <Tooltip title={closeActionBlockedReason ?? ''}>
+            <span>
+              <Button
+                variant="outlined"
+                color="warning"
+                startIcon={<CheckCircleIcon />}
+                onClick={handleClose}
+                disabled={isClosing || Boolean(closeActionBlockedReason)}
+              >
+                {t('teamTickets.closeTicket')}
+              </Button>
+            </span>
+          </Tooltip>
         )}
       </Box>
 
@@ -226,61 +296,90 @@ export function TeamTicketDetail({ id }: Props) {
       </Typography>
 
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3, alignItems: 'center' }}>
-        <FormControl size="small" sx={{ minWidth: 180 }} disabled={isChangingStatus || isClosed}>
-          <InputLabel>Durum</InputLabel>
-          <Select
-            value={status ?? ''}
-            label="Durum"
-            onChange={(event) => handleStatusChange(event.target.value as TicketStatusString)}
-            renderValue={(value) => (
-              <Chip
-                label={value}
-                color={STATUS_COLOR[value as TicketStatusString] ?? 'default'}
-                size="small"
-              />
-            )}
-          >
-            {STATUS_OPTIONS.map((value) => (
-              <MenuItem key={value} value={value}>
-                <Chip label={value} color={STATUS_COLOR[value] ?? 'default'} size="small" />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        {canUpdateTicket ? (
+          <>
+            <FormControl
+              size="small"
+              sx={{ minWidth: 180 }}
+              disabled={isChangingStatus || isClosed}
+            >
+              <InputLabel>Durum</InputLabel>
+              <Select
+                value={status ?? ''}
+                label="Durum"
+                onChange={(event) => handleStatusChange(event.target.value as TicketStatusString)}
+                renderValue={(value) => (
+                  <Chip
+                    label={value}
+                    color={STATUS_COLOR[value as TicketStatusString] ?? 'default'}
+                    size="small"
+                  />
+                )}
+              >
+                {STATUS_OPTIONS.map((value) => (
+                  <MenuItem key={value} value={value}>
+                    <Chip label={value} color={STATUS_COLOR[value] ?? 'default'} size="small" />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-        <FormControl size="small" sx={{ minWidth: 160 }} disabled={isChangingPriority || isClosed}>
-          <InputLabel>Öncelik</InputLabel>
-          <Select
-            value={priority ?? ''}
-            label="Öncelik"
-            onChange={(event) => handlePriorityChange(event.target.value as TicketPriorityString)}
-            renderValue={(value) => (
+            <FormControl
+              size="small"
+              sx={{ minWidth: 160 }}
+              disabled={isChangingPriority || isClosed}
+            >
+              <InputLabel>Öncelik</InputLabel>
+              <Select
+                value={priority ?? ''}
+                label="Öncelik"
+                onChange={(event) => handlePriorityChange(event.target.value as TicketPriorityString)}
+                renderValue={(value) => (
+                  <Chip
+                    label={value}
+                    color={PRIORITY_COLOR[value as TicketPriorityString] ?? 'default'}
+                    size="small"
+                    variant="outlined"
+                  />
+                )}
+              >
+                {PRIORITY_OPTIONS.map((value) => (
+                  <MenuItem key={value} value={value}>
+                    <Chip
+                      label={value}
+                      color={PRIORITY_COLOR[value] ?? 'default'}
+                      size="small"
+                      variant="outlined"
+                    />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </>
+        ) : (
+          <>
+            {status && <Chip label={status} color={STATUS_COLOR[status] ?? 'default'} size="small" />}
+            {priority && (
               <Chip
-                label={value}
-                color={PRIORITY_COLOR[value as TicketPriorityString] ?? 'default'}
+                label={priority}
+                color={PRIORITY_COLOR[priority] ?? 'default'}
                 size="small"
                 variant="outlined"
               />
             )}
-          >
-            {PRIORITY_OPTIONS.map((value) => (
-              <MenuItem key={value} value={value}>
-                <Chip
-                  label={value}
-                  color={PRIORITY_COLOR[value] ?? 'default'}
-                  size="small"
-                  variant="outlined"
-                />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+          </>
+        )}
 
         {ticket.type && <Chip label={ticket.type} size="small" variant="outlined" />}
         <Typography variant="caption" color="text.secondary">
           {ticket.createdAt}
         </Typography>
       </Box>
+      {canUpdateTicket && isClosed && (
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 3 }}>
+          Kapalı taleplerde durum ve öncelik güncellenemez.
+        </Typography>
+      )}
 
       {ticket.description && (
         <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
@@ -299,7 +398,7 @@ export function TeamTicketDetail({ id }: Props) {
         >
           <Typography variant="subtitle2">Atama</Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            {ticket.currentAssignment && (
+            {ticket.currentAssignment && canDeleteTicketAssignment && (
               <Button
                 size="small"
                 color="error"
@@ -310,26 +409,40 @@ export function TeamTicketDetail({ id }: Props) {
                 Atamayı Kaldır
               </Button>
             )}
-            {!isClosed && (
-              <Button size="small" onClick={() => setShowAssignForm((prev) => !prev)}>
-                {ticket.currentAssignment ? 'Yeniden Ata' : 'Ata'}
-              </Button>
+            {canChangeAssignment && (
+              <Tooltip title={assignmentActionBlockedReason ?? ''}>
+                <span>
+                  <Button
+                    size="small"
+                    onClick={() => setShowAssignForm((prev) => !prev)}
+                    disabled={Boolean(assignmentActionBlockedReason)}
+                  >
+                    {ticket.currentAssignment ? 'Yeniden Ata' : 'Ata'}
+                  </Button>
+                </span>
+              </Tooltip>
             )}
           </Box>
         </Box>
 
-        {ticket.currentAssignment ? (
-          <Typography variant="body2">
-            Takım ID: {ticket.currentAssignment.teamId ?? '—'}
-            {ticket.currentAssignment.agentPartyId && ` · Ajan: ${ticket.currentAssignment.agentPartyId}`}
-          </Typography>
+        {canReadTicketAssignment ? (
+          ticket.currentAssignment ? (
+            <Typography variant="body2">
+              Takım ID: {ticket.currentAssignment.teamId ?? '—'}
+              {ticket.currentAssignment.agentPartyId && ` · Ajan: ${ticket.currentAssignment.agentPartyId}`}
+            </Typography>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              Atanmamış
+            </Typography>
+          )
         ) : (
           <Typography variant="body2" color="text.secondary">
-            Atanmamış
+            Atama bilgisini görüntüleme yetkiniz yok.
           </Typography>
         )}
 
-        {showAssignForm && (
+        {canChangeAssignment && showAssignForm && (
           <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap', alignItems: 'flex-end' }}>
             <TextField
               size="small"
@@ -363,6 +476,7 @@ export function TeamTicketDetail({ id }: Props) {
               onClick={handleAssign}
               disabled={
                 isAssigning ||
+                Boolean(assignmentActionBlockedReason) ||
                 !trimmedAssignTeamId ||
                 !isAssignTeamIdValid ||
                 !isAssignAgentIdValid
@@ -374,7 +488,7 @@ export function TeamTicketDetail({ id }: Props) {
         )}
       </Paper>
 
-      {ticket.slaTracking && (
+      {canReadTicketSlaTracking && ticket.slaTracking && (
         <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
           <Typography variant="subtitle2" sx={{ mb: 1 }}>
             SLA Takibi
@@ -410,10 +524,14 @@ export function TeamTicketDetail({ id }: Props) {
         Yorumlar ({externalComments.length})
       </Typography>
 
-      {externalComments.length === 0 ? (
+      {!canReadTicketComment ? (
         <Typography color="text.secondary" sx={{ mb: 3 }}>
-          {t('teamTickets.emptyState')}
+          Yorumları görüntüleme yetkiniz yok.
         </Typography>
+      ) : externalComments.length === 0 ? (
+          <Typography color="text.secondary" sx={{ mb: 3 }}>
+            {t('teamTickets.emptyState')}
+          </Typography>
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
           {externalComments.map((comment, index) => (
@@ -436,32 +554,38 @@ export function TeamTicketDetail({ id }: Props) {
         </Box>
       )}
 
-      {!isClosed && (
+      {canCreateTicketComment && (
         <>
           <Divider sx={{ mb: 2 }} />
           <Typography variant="subtitle2" sx={{ mb: 1 }}>
             {t('teamTickets.addComment')}
           </Typography>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
-            <TextField
-              multiline
-              minRows={2}
-              fullWidth
-              placeholder={t('teamTickets.commentPlaceholder')}
-              value={commentText}
-              onChange={(event) => setCommentText(event.target.value)}
-              size="small"
-            />
-            <Button
-              variant="contained"
-              endIcon={<SendIcon />}
-              onClick={handleAddComment}
-              disabled={isCommenting || !commentText.trim()}
-              sx={{ flexShrink: 0 }}
-            >
-              Gönder
-            </Button>
-          </Box>
+          {isClosed ? (
+            <Typography variant="body2" color="text.secondary">
+              Talep kapalı olduğu için yorum eklenemez.
+            </Typography>
+          ) : (
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
+              <TextField
+                multiline
+                minRows={2}
+                fullWidth
+                placeholder={t('teamTickets.commentPlaceholder')}
+                value={commentText}
+                onChange={(event) => setCommentText(event.target.value)}
+                size="small"
+              />
+              <Button
+                variant="contained"
+                endIcon={<SendIcon />}
+                onClick={handleAddComment}
+                disabled={isCommenting || !commentText.trim()}
+                sx={{ flexShrink: 0 }}
+              >
+                Gönder
+              </Button>
+            </Box>
+          )}
         </>
       )}
     </Box>

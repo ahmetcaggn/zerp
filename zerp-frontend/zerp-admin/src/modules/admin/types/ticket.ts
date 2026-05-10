@@ -18,20 +18,21 @@ export const TicketPriority = {
 
 export type TicketPriorityValue = (typeof TicketPriority)[keyof typeof TicketPriority]
 
-export const TicketType = {
-  Bug: 'BUG',
-  FeatureRequest: 'FEATURE_REQUEST',
+export const IssueType = {
+  ServiceLevel: 'SERVICE_LEVEL',
   Question: 'QUESTION',
-  Incident: 'INCIDENT',
 } as const
 
-export type TicketTypeValue = (typeof TicketType)[keyof typeof TicketType]
+export type IssueTypeValue = (typeof IssueType)[keyof typeof IssueType]
+
+export const TicketType = IssueType
+export type TicketTypeValue = IssueTypeValue
 
 export interface CreateTicketRequest {
   title: string
   description?: string
   priority?: TicketPriorityValue
-  type?: TicketTypeValue
+  type?: IssueTypeValue
   tenantId: string
 }
 
@@ -135,4 +136,4 @@ export type TicketStatusString =
 
 export type TicketPriorityString = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
 
-export type TicketTypeString = 'BUG' | 'FEATURE_REQUEST' | 'QUESTION' | 'INCIDENT'
+export type TicketTypeString = IssueTypeValue

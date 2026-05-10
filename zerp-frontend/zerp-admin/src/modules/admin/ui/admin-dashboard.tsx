@@ -1,38 +1,96 @@
 'use client'
 
+import AssignmentTurnedInRoundedIcon from '@mui/icons-material/AssignmentTurnedInRounded'
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded'
 import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded'
-import { Box, Button, Stack, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
 
 import { ROUTES } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import {
+  type PermissionAction,
+  PermissionActions,
+  useCurrentUserPermissions,
+} from '@/core/permissions/use-permissions'
 import { responsiveLayout } from '@/core/theme/layout'
+
+const TEAM_PERMISSION_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.READ_TEAM,
+  PermissionActions.CREATE_TEAM,
+  PermissionActions.UPDATE_TEAM,
+  PermissionActions.DELETE_TEAM,
+  PermissionActions.READ_TEAM_MEMBER,
+  PermissionActions.CREATE_TEAM_MEMBER,
+  PermissionActions.UPDATE_TEAM_MEMBER,
+  PermissionActions.DELETE_TEAM_MEMBER,
+]
+
+const TICKET_MANAGEMENT_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.READ_TICKET,
+  PermissionActions.READ_TICKET_ASSIGNMENT,
+  PermissionActions.READ_TICKET_COMMENT,
+  PermissionActions.READ_TICKET_HISTORY,
+  PermissionActions.READ_TICKET_SLA_TRACKING,
+  PermissionActions.READ_TICKET_ATTACHMENT,
+  PermissionActions.READ_TICKET_WATCHER,
+  PermissionActions.UPDATE_TICKET,
+  PermissionActions.CREATE_TICKET_ASSIGNMENT,
+  PermissionActions.UPDATE_TICKET_ASSIGNMENT,
+  PermissionActions.DELETE_TICKET_ASSIGNMENT,
+  PermissionActions.CREATE_TICKET_COMMENT,
+]
 
 export function AdminDashboard() {
   const { t } = useI18n()
   const router = useRouter()
+  const { hasPermission, hasAnyPermission, isLoadingPermissions } = useCurrentUserPermissions()
+  const canOpenTeamManagement = hasAnyPermission(TEAM_PERMISSION_ACTIONS)
+  const canOpenTicketManagement = hasAnyPermission(TICKET_MANAGEMENT_ACTIONS)
+  const canOpenAssignedTickets = hasPermission(PermissionActions.READ_TICKET)
 
   return (
     <Stack spacing={responsiveLayout.sectionGap}>
       <Typography variant="h2">{t('dashboard.title')}</Typography>
       <Typography color="text.secondary">{t('dashboard.subtitle')}</Typography>
-      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-        <Button
-          variant="outlined"
-          startIcon={<GroupsRoundedIcon />}
-          onClick={() => router.push(ROUTES.teams)}
-        >
-          {t('nav.teams')}
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<SupportAgentRoundedIcon />}
-          onClick={() => router.push(ROUTES.teamTickets)}
-        >
-          {t('nav.teamTickets')}
-        </Button>
-      </Box>
+      {isLoadingPermissions ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+          <CircularProgress size={24} />
+        </Box>
+      ) : (
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+          {canOpenTeamManagement && (
+            <Button
+              variant="outlined"
+              startIcon={<GroupsRoundedIcon />}
+              onClick={() => router.push(ROUTES.teams)}
+            >
+              {t('nav.teamManagement')}
+            </Button>
+          )}
+          {canOpenTicketManagement && (
+            <Button
+              variant="outlined"
+              startIcon={<SupportAgentRoundedIcon />}
+              onClick={() => router.push(ROUTES.teamTickets)}
+            >
+              {t('nav.ticketManagement')}
+            </Button>
+          )}
+          {canOpenAssignedTickets && (
+            <Button
+              variant="outlined"
+              startIcon={<AssignmentTurnedInRoundedIcon />}
+              onClick={() => router.push(ROUTES.assignedTickets)}
+            >
+              {t('nav.assignedTickets')}
+            </Button>
+          )}
+          {!canOpenTeamManagement && !canOpenTicketManagement && !canOpenAssignedTickets && (
+            <Typography color="text.secondary">Bu alanda görüntüleme yetkiniz yok.</Typography>
+          )}
+        </Box>
+      )}
     </Stack>
   )
 }

@@ -10,6 +10,14 @@ import { decryptTokens, encryptTokens } from './token-crypto'
 
 const activeRefreshPromises = new Map<string, Promise<JWT>>()
 
+type TokenPayload = {
+  realm_access?: { roles?: string[] }
+  resource_access?: Record<string, { roles?: string[] }>
+  sub?: unknown
+  userId?: unknown
+  user_id?: unknown
+}
+
 function getAuthCookieName(): string {
   const { nextAuthUrl } = getServerEnv()
   const isHttps = nextAuthUrl.startsWith('https://')
@@ -19,23 +27,31 @@ function getAuthCookieName(): string {
   return isHttps || isProduction ? `__Secure-zerp.session-token.${variant}` : `zerp.session-token.${variant}`
 }
 
+function parseJwtPayload(jwtToken?: string): TokenPayload | null {
+  if (!jwtToken) {
+    return null
+  }
+
+  try {
+    const [, payloadPart] = jwtToken.split('.')
+    if (!payloadPart) {
+      return null
+    }
+
+    const payloadJson = Buffer.from(payloadPart, 'base64url').toString('utf-8')
+    return JSON.parse(payloadJson) as TokenPayload
+  } catch {
+    return null
+  }
+}
+
 function parseRolesFromIdToken(idToken?: string): AppRole[] {
-  if (!idToken) {
+  const payload = parseJwtPayload(idToken)
+  if (!payload) {
     return []
   }
 
   try {
-    const [, payloadPart] = idToken.split('.')
-    if (!payloadPart) {
-      return []
-    }
-
-    const payloadJson = Buffer.from(payloadPart, 'base64url').toString('utf-8')
-    const payload = JSON.parse(payloadJson) as {
-      realm_access?: { roles?: string[] }
-      resource_access?: Record<string, { roles?: string[] }>
-    }
-
     const roleSet = new Set<string>()
     payload.realm_access?.roles?.forEach((role) => roleSet.add(role))
     Object.values(payload.resource_access ?? {}).forEach((resource) => {
@@ -46,6 +62,40 @@ function parseRolesFromIdToken(idToken?: string): AppRole[] {
   } catch {
     return []
   }
+}
+
+function asUuid(value: unknown): string | undefined {
+  if (typeof value !== 'string') {
+    return undefined
+  }
+
+  const normalized = value.trim()
+  if (!normalized) {
+    return undefined
+  }
+
+  const uuidRegex =
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/
+  return uuidRegex.test(normalized) ? normalized : undefined
+}
+
+function parseUserIdFromTokens(
+  idToken?: string,
+  accessToken?: string,
+  fallbackSub?: string,
+): string | undefined {
+  const idPayload = parseJwtPayload(idToken)
+  const accessPayload = parseJwtPayload(accessToken)
+
+  return (
+    asUuid(idPayload?.sub) ??
+    asUuid(idPayload?.userId) ??
+    asUuid(idPayload?.user_id) ??
+    asUuid(accessPayload?.sub) ??
+    asUuid(accessPayload?.userId) ??
+    asUuid(accessPayload?.user_id) ??
+    asUuid(fallbackSub)
+  )
 }
 
 function isAppRole(value: string): value is AppRole {
@@ -93,12 +143,18 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
     })
 
     const parsedRoles = parseRolesFromIdToken(refreshed.id_token ?? tokens.idToken)
+    const userId = parseUserIdFromTokens(
+      refreshed.id_token ?? tokens.idToken,
+      refreshed.access_token ?? tokens.accessToken,
+      token.sub,
+    )
 
     return {
       ...token,
       encryptedTokens: updatedEncryptedTokens,
       accessTokenExpires: Date.now() + refreshed.expires_in * 1000,
       roles: parsedRoles.length ? parsedRoles : (token.roles as AppRole[]),
+      userId: userId ?? (token.userId as string | undefined),
       error: undefined,
     }
   } catch {
@@ -136,6 +192,11 @@ export const authOptions: NextAuthOptions = {
         })
 
         const parsedRoles = parseRolesFromIdToken(account.id_token)
+        const userId = parseUserIdFromTokens(
+          account.id_token,
+          account.access_token,
+          account.providerAccountId,
+        )
 
         return {
           ...token,
@@ -143,6 +204,7 @@ export const authOptions: NextAuthOptions = {
           accessTokenExpires: (account.expires_at ?? 0) * 1000,
           idToken: account.id_token,
           roles: parsedRoles.length ? parsedRoles : defaultRoleByVariant(),
+          userId,
           error: undefined,
         }
       }
@@ -173,6 +235,7 @@ export const authOptions: NextAuthOptions = {
       session.user = {
         ...session.user,
         roles: (token.roles as AppRole[]) ?? defaultRoleByVariant(),
+        userId: token.userId as string | undefined,
       }
       return session
     },

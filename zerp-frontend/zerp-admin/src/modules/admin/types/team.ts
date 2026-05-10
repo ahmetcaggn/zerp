@@ -1,3 +1,5 @@
+import type { IssueTypeValue } from './ticket'
+
 export interface TeamMemberResponse {
   id?: string
   userId?: string
@@ -5,10 +7,17 @@ export interface TeamMemberResponse {
   joinedAt?: string
 }
 
+export interface TeamMemberCandidateResponse {
+  id: string
+  username: string
+  email: string
+}
+
 export interface TeamResponse {
   id?: string
   name?: string
   description?: string
+  type?: IssueTypeValue
   isActive?: boolean
   members?: TeamMemberResponse[]
 }
@@ -16,11 +25,13 @@ export interface TeamResponse {
 export interface CreateTeamRequest {
   name: string
   description?: string
+  type: IssueTypeValue
 }
 
 export interface UpdateTeamRequest {
   name?: string
   description?: string
+  type?: IssueTypeValue
 }
 
 export const TeamMemberRole = {
