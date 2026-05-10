@@ -54,9 +54,9 @@ public class TicketEntity extends BaseEntity implements Permittable {
     @JoinColumn(name = "reporter_id")
     private AppUser reporter;
 
-    @Column(name = "ticket_type")
+    @Column(name = "ticket_type", nullable = false, length = 32)
     @Enumerated(EnumType.STRING)
-    private TicketType type;
+    private IssueType type;
 
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;
@@ -144,7 +144,4 @@ public class TicketEntity extends BaseEntity implements Permittable {
         public int getDefaultResponseTimeMinutes() { return defaultResponseTimeMinutes; }
     }
 
-    public enum TicketType {
-        BUG, FEATURE_REQUEST, QUESTION, INCIDENT
-    }
 }

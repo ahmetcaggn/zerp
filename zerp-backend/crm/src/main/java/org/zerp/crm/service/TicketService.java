@@ -12,16 +12,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.crm.IssueType;
 import org.zerp.common.entity.crm.TeamMemberEntity;
 import org.zerp.common.entity.crm.TeamEntity;
 import org.zerp.common.entity.crm.TicketAssignmentEntity;
+import org.zerp.common.entity.crm.TicketAttachmentEntity;
 import org.zerp.common.entity.crm.TicketCommentEntity;
 import org.zerp.common.entity.crm.TicketEntity;
 import org.zerp.common.entity.crm.TicketHistoryEntity;
 import org.zerp.common.entity.crm.TicketSlaTrackingEntity;
+import org.zerp.common.entity.crm.TicketWatcherEntity;
 import org.zerp.common.entity.crm.TicketEntity.TicketPriority;
 import org.zerp.common.entity.crm.TicketEntity.TicketStatus;
-import org.zerp.common.entity.crm.TicketEntity.TicketType;
 import org.zerp.common.entity.user.AppUser;
 import org.zerp.common.error.filter.FilterError;
 import org.zerp.common.error.filter.FilterErrorUtils;
@@ -31,13 +33,17 @@ import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.crm.permission.CrmPermissionEvaluator;
 import org.zerp.crm.dto.ticket.AddCommentRequest;
+import org.zerp.crm.dto.ticket.AttachmentResponse;
 import org.zerp.crm.dto.ticket.AssignTicketRequest;
 import org.zerp.crm.dto.ticket.ChangePriorityRequest;
 import org.zerp.crm.dto.ticket.ChangeStatusRequest;
+import org.zerp.crm.dto.ticket.CommentResponse;
 import org.zerp.crm.dto.ticket.CreateTicketRequest;
 import org.zerp.crm.dto.ticket.TicketResponse;
 import org.zerp.crm.dto.ticket.UpdateTicketRequest;
+import org.zerp.crm.dto.ticket.WatcherResponse;
 import org.zerp.crm.repository.TeamMemberRepository;
+import org.zerp.crm.repository.TeamRepository;
 import org.zerp.crm.repository.TicketRepository;
 import org.zerp.crm.service.ticket.TicketResponseMapper;
 import org.zerp.crm.service.ticket.TicketValueParser;
@@ -71,6 +77,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
 
     private final TicketRepository ticketRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final TeamRepository teamRepository;
     private final TicketResponseMapper ticketResponseMapper;
     private final TicketValueParser ticketValueParser;
     private final EntityManager entityManager;
@@ -92,7 +99,8 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
                 .filterReadTickets(userId)
                 .and(buildSpecificationFromFilters(filters));
         try {
-            return ticketRepository.findAll(specification, pageable).map(ticketResponseMapper::toResponse);
+            return ticketRepository.findAll(specification, pageable)
+                    .map(ticket -> toAuthorizedResponse(userId, ticket));
         } catch (DataAccessException e) {
             if (e.getCause() instanceof FilterError.Runtime fe) {
                 log.warn("Filter error while processing filters {}: {}", filters, fe.getMessage(), e);
@@ -112,7 +120,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         UUID userId = resolveCurrentUserIdOrThrow();
         return ticketRepository.findAllById(ids).stream()
                 .filter(ticket -> permissionEvaluator.canReadTicket(userId, toTicketTarget(ticket)))
-                .map(ticketResponseMapper::toResponse)
+                .map(ticket -> toAuthorizedResponse(userId, ticket))
                 .collect(Collectors.toList());
     }
 
@@ -122,7 +130,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         UUID userId = resolveCurrentUserIdOrThrow();
         TicketEntity entity = findOrThrow(id);
         ensureCanReadTicket(userId, entity);
-        return ticketResponseMapper.toResponse(entity);
+        return toAuthorizedResponse(userId, entity);
     }
 
     @Override
@@ -197,7 +205,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         }
 
         TicketEntity saved = ticketRepository.save(entity);
-        return ticketResponseMapper.toResponse(saved);
+        return toAuthorizedResponse(userId, saved);
     }
 
     @Override
@@ -211,7 +219,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         entity.setUpdatedAt(LocalDateTime.now());
 
         TicketEntity saved = ticketRepository.save(entity);
-        return ticketResponseMapper.toResponse(saved);
+        return toAuthorizedResponse(userId, saved);
     }
 
     @Override
@@ -252,7 +260,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
 
     public TicketResponse createTicket(CreateTicketRequest request) {
         TicketPriority priority = request.priority() != null ? request.priority() : TicketPriority.MEDIUM;
-        TicketType type = request.type() != null ? request.type() : TicketType.QUESTION;
+        IssueType type = request.type() != null ? request.type() : IssueType.QUESTION;
         UUID tenantId = request.tenantId();
         if (tenantId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "tenantId is required");
@@ -271,14 +279,16 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         entity.setReporter(toAppUserReference(userId));
         entity.setCreatedAt(LocalDateTime.now());
 
+        ensureCanCreateTicketSlaTracking(userId, entity);
         initializeSla(entity, priority);
         TicketEntity saved = ticketRepository.save(entity);
         addHistory(saved, TicketHistoryEntity.EventType.CREATED,
                 String.format("Ticket created with priority: %s", priority),
                 REFERENCE_TYPE_TICKET,
                 saved.getId());
+        autoAssignCreatedTicketToMatchingTeam(saved, userId);
         saved = ticketRepository.save(saved);
-        return ticketResponseMapper.toResponse(saved);
+        return toAuthorizedResponse(userId, saved);
     }
 
     public TicketResponse changeStatus(UUID ticketId, ChangeStatusRequest request) {
@@ -289,7 +299,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         TicketStatus oldStatus = entity.getStatus();
 
         if (oldStatus == newStatus) {
-            return ticketResponseMapper.toResponse(entity);
+            return toAuthorizedResponse(userId, entity);
         }
 
         if (!oldStatus.canTransitionTo(newStatus)) {
@@ -314,7 +324,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
                 String.format("Status changed from %s to %s", oldStatus, newStatus));
 
         TicketEntity saved = ticketRepository.save(entity);
-        return ticketResponseMapper.toResponse(saved);
+        return toAuthorizedResponse(userId, saved);
     }
 
     public TicketResponse changePriority(UUID ticketId, ChangePriorityRequest request) {
@@ -325,7 +335,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         TicketPriority newPriority = request.priority();
 
         if (oldPriority == newPriority) {
-            return ticketResponseMapper.toResponse(entity);
+            return toAuthorizedResponse(userId, entity);
         }
 
         entity.setPriority(newPriority);
@@ -335,7 +345,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
                 String.format("Priority changed from %s to %s", oldPriority, newPriority));
 
         TicketEntity saved = ticketRepository.save(entity);
-        return ticketResponseMapper.toResponse(saved);
+        return toAuthorizedResponse(userId, saved);
     }
 
     public TicketResponse assignTicket(UUID ticketId, AssignTicketRequest request) {
@@ -391,7 +401,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         entity.setUpdatedAt(LocalDateTime.now());
 
         TicketEntity saved = ticketRepository.save(entity);
-        return ticketResponseMapper.toResponse(saved);
+        return toAuthorizedResponse(userId, saved);
     }
 
     public TicketResponse unassignTicket(UUID ticketId) {
@@ -401,7 +411,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         if (entity.getCurrentAssignment() != null
                 && Boolean.TRUE.equals(entity.getCurrentAssignment().getActive())) {
             TicketAssignmentEntity assignment = entity.getCurrentAssignment();
-            ensureCanUpdateTicketAssignment(userId, entity, assignment);
+            ensureCanDeleteTicketAssignment(userId, entity, assignment);
 
             String assignmentTarget = assignment.getAgentParty() != null
                     ? "agent " + assignment.getAgentParty().getId()
@@ -420,7 +430,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         }
 
         TicketEntity saved = ticketRepository.save(entity);
-        return ticketResponseMapper.toResponse(saved);
+        return toAuthorizedResponse(userId, saved);
     }
 
     public TicketResponse addComment(UUID ticketId, AddCommentRequest request) {
@@ -465,7 +475,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
                 REFERENCE_TYPE_TICKET_COMMENT,
                 comment.getId());
         saved = ticketRepository.save(saved);
-        return ticketResponseMapper.toResponse(saved);
+        return toAuthorizedResponse(userId, saved);
     }
 
     public TicketResponse closeTicket(UUID ticketId) {
@@ -487,7 +497,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
                 String.format("Status changed from %s to %s", oldStatus, TicketStatus.CLOSED));
 
         TicketEntity saved = ticketRepository.save(entity);
-        return ticketResponseMapper.toResponse(saved);
+        return toAuthorizedResponse(userId, saved);
     }
 
     // -- Internal Helpers --
@@ -530,6 +540,61 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
             return null;
         }
         return entityManager.getReference(AppUser.class, userId);
+    }
+
+    private void autoAssignCreatedTicketToMatchingTeam(TicketEntity ticket, UUID assignedByUserId) {
+        IssueType ticketType = ticket.getType();
+        if (ticketType == null) {
+            throw new IllegalStateException("Ticket type cannot be null for auto-assignment");
+        }
+
+        UUID resolvedSystemTenantId = resolveSystemTenantIdOrThrow();
+        List<TeamEntity> candidateTeams = teamRepository.findAllByTenantIdAndType(resolvedSystemTenantId, ticketType);
+        if (candidateTeams.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "No team found for ticket type: " + ticketType.name()
+            );
+        }
+        if (candidateTeams.size() > 1) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Multiple teams configured for ticket type: " + ticketType.name()
+            );
+        }
+        TeamEntity assignmentTeam = candidateTeams.get(0);
+
+        if (!Boolean.TRUE.equals(assignmentTeam.getIsActive())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Team for ticket type is inactive: " + ticketType.name());
+        }
+
+        TicketAssignmentEntity assignment = ticket.getCurrentAssignment();
+        boolean hasExistingAssignment = assignment != null;
+        if (!hasExistingAssignment) {
+            assignment = new TicketAssignmentEntity();
+            ticket.setCurrentAssignment(assignment);
+        }
+
+        assignment.setTicket(ticket);
+        assignment.setTeam(assignmentTeam);
+        assignment.setAgentParty(null);
+        assignment.setAssignedByParty(toAppUserReference(assignedByUserId));
+        assignment.setActive(true);
+        assignment.setReason("Auto-assigned by ticket type");
+        assignment.setAssignedAt(LocalDateTime.now());
+        assignment.setUnassignedAt(null);
+        assignment.setTenantId(ticket.getTenantId());
+
+        if (!hasExistingAssignment) {
+            entityManager.persist(assignment);
+        }
+
+        addHistory(ticket, TicketHistoryEntity.EventType.ASSIGNED,
+                String.format("Ticket auto-assigned to team: %s", assignmentTeam.getId()),
+                REFERENCE_TYPE_TEAM,
+                assignmentTeam.getId());
     }
 
     private TeamEntity resolveAssignmentTeamOrThrow(AssignTicketRequest request) {
@@ -651,6 +716,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
             String referenceType,
             UUID referenceId) {
         UUID userId = resolveCurrentUserIdOrThrow();
+        ensureCanCreateTicketHistory(userId, entity);
         UUID tenantId = entity.getTenantId();
         if (tenantId == null) {
             throw new IllegalStateException("Tenant not found");
@@ -692,12 +758,123 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         return spec;
     }
 
+    private TicketResponse toAuthorizedResponse(UUID userId, TicketEntity ticket) {
+        TicketResponse response = ticketResponseMapper.toResponse(ticket);
+
+        CrmPermissionEvaluator.TicketParent ticketParent = toTicketParent(ticket);
+        List<CommentResponse> rawComments = response.comments() != null ? response.comments() : List.of();
+        List<AttachmentResponse> rawAttachments = response.attachments() != null ? response.attachments() : List.of();
+        Set<WatcherResponse> rawWatchers = response.watchers() != null ? response.watchers() : Set.of();
+
+        boolean hasComments = !rawComments.isEmpty();
+        boolean hasAttachments = !rawAttachments.isEmpty() || rawComments.stream()
+                .anyMatch(comment -> comment.attachments() != null && !comment.attachments().isEmpty());
+        boolean hasAssignment = response.currentAssignment() != null;
+        boolean hasSlaTracking = response.slaTracking() != null;
+        boolean hasWatchers = !rawWatchers.isEmpty();
+
+        boolean canReadComments = !hasComments || permissionEvaluator.canReadTicketComment(userId, ticketParent);
+        boolean canReadAttachments = !hasAttachments || permissionEvaluator
+                .canReadTicketAttachment(userId, toTicketAttachmentParent(ticket));
+        boolean canReadAssignment = !hasAssignment || permissionEvaluator.canReadTicketAssignment(userId, ticketParent);
+        boolean canReadSlaTracking = !hasSlaTracking || permissionEvaluator.canReadTicketSlaTracking(userId, ticketParent);
+        boolean canReadWatchers = !hasWatchers || permissionEvaluator.canReadTicketWatcher(userId, ticketParent);
+
+        if (canReadComments && canReadAttachments && canReadAssignment && canReadSlaTracking && canReadWatchers) {
+            return response;
+        }
+
+        List<AttachmentResponse> attachments = canReadAttachments ? rawAttachments : List.of();
+        List<CommentResponse> comments = canReadComments ? rawComments : List.of();
+        if (canReadComments && !canReadAttachments && comments != null && !comments.isEmpty()) {
+            comments = comments.stream()
+                    .map(comment -> new CommentResponse(
+                            comment.id(),
+                            comment.authorId(),
+                            comment.authorName(),
+                            comment.authorType(),
+                            comment.content(),
+                            comment.isInternal(),
+                            comment.createdAt(),
+                            List.of()))
+                    .collect(Collectors.toList());
+        }
+
+        return new TicketResponse(
+                response.id(),
+                response.title(),
+                response.description(),
+                response.status(),
+                response.priority(),
+                response.type(),
+                response.tenantId(),
+                response.reporterId(),
+                response.createdAt(),
+                response.updatedAt(),
+                response.resolvedAt(),
+                response.closedAt(),
+                response.tags(),
+                response.customAttributes(),
+                canReadWatchers ? response.watchers() : Set.of(),
+                attachments,
+                canReadAssignment ? response.currentAssignment() : null,
+                comments,
+                canReadSlaTracking ? response.slaTracking() : null
+        );
+    }
+
     private CrmPermissionEvaluator.TicketTarget toTicketTarget(TicketEntity ticket) {
-        return new CrmPermissionEvaluator.TicketTarget(ticket.getId(), ticket.getTenantId());
+        return new CrmPermissionEvaluator.TicketTarget(
+                ticket.getId(),
+                ticket.getTenantId(),
+                getActiveAssignedTeamId(ticket),
+                getActiveAssignedAgentId(ticket)
+        );
     }
 
     private CrmPermissionEvaluator.TicketParent toTicketParent(TicketEntity ticket) {
-        return new CrmPermissionEvaluator.TicketParent(ticket.getId(), ticket.getTenantId());
+        return new CrmPermissionEvaluator.TicketParent(
+                ticket.getId(),
+                ticket.getTenantId(),
+                getActiveAssignedTeamId(ticket),
+                getActiveAssignedAgentId(ticket)
+        );
+    }
+
+    private CrmPermissionEvaluator.TicketAttachmentParent toTicketAttachmentParent(TicketEntity ticket) {
+        return new CrmPermissionEvaluator.TicketAttachmentParent(
+                null,
+                ticket.getId(),
+                ticket.getTenantId(),
+                getActiveAssignedTeamId(ticket),
+                getActiveAssignedAgentId(ticket)
+        );
+    }
+
+    private CrmPermissionEvaluator.TicketChildTarget toTicketHistoryTarget(
+            TicketEntity ticket,
+            TicketHistoryEntity history
+    ) {
+        return new CrmPermissionEvaluator.TicketChildTarget(
+                history != null ? history.getId() : null,
+                ticket.getId(),
+                ticket.getTenantId(),
+                getActiveAssignedTeamId(ticket),
+                getActiveAssignedAgentId(ticket)
+        );
+    }
+
+    private CrmPermissionEvaluator.TicketChildTarget toTicketCommentTarget(
+            TicketEntity ticket,
+            TicketCommentEntity comment
+    ) {
+        return new CrmPermissionEvaluator.TicketChildTarget(
+                comment != null ? comment.getId() : null,
+                ticket.getId(),
+                ticket.getTenantId(),
+                getActiveAssignedTeamId(ticket),
+                getActiveAssignedAgentId(ticket)
+        );
     }
 
     private CrmPermissionEvaluator.TicketChildTarget toTicketAssignmentTarget(
@@ -707,7 +884,50 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         return new CrmPermissionEvaluator.TicketChildTarget(
                 assignment != null ? assignment.getId() : null,
                 ticket.getId(),
-                ticket.getTenantId()
+                ticket.getTenantId(),
+                getActiveAssignedTeamId(ticket),
+                getActiveAssignedAgentId(ticket)
+        );
+    }
+
+    private CrmPermissionEvaluator.TicketAttachmentTarget toTicketAttachmentTarget(
+            TicketEntity ticket,
+            TicketCommentEntity comment,
+            TicketAttachmentEntity attachment
+    ) {
+        return new CrmPermissionEvaluator.TicketAttachmentTarget(
+                attachment != null ? attachment.getId() : null,
+                comment != null ? comment.getId() : null,
+                ticket.getId(),
+                ticket.getTenantId(),
+                getActiveAssignedTeamId(ticket),
+                getActiveAssignedAgentId(ticket)
+        );
+    }
+
+    private CrmPermissionEvaluator.TicketChildTarget toTicketSlaTrackingTarget(
+            TicketEntity ticket,
+            TicketSlaTrackingEntity slaTracking
+    ) {
+        return new CrmPermissionEvaluator.TicketChildTarget(
+                slaTracking != null ? slaTracking.getId() : null,
+                ticket.getId(),
+                ticket.getTenantId(),
+                getActiveAssignedTeamId(ticket),
+                getActiveAssignedAgentId(ticket)
+        );
+    }
+
+    private CrmPermissionEvaluator.TicketChildTarget toTicketWatcherTarget(
+            TicketEntity ticket,
+            TicketWatcherEntity watcher
+    ) {
+        return new CrmPermissionEvaluator.TicketChildTarget(
+                watcher != null ? watcher.getId() : null,
+                ticket.getId(),
+                ticket.getTenantId(),
+                getActiveAssignedTeamId(ticket),
+                getActiveAssignedAgentId(ticket)
         );
     }
 
@@ -735,9 +955,57 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         }
     }
 
+    private void ensureCanReadTicketHistory(UUID userId, TicketEntity ticket) {
+        if (!permissionEvaluator.canReadTicketHistory(userId, toTicketParent(ticket))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Ticket history");
+        }
+    }
+
+    private void ensureCanCreateTicketHistory(UUID userId, TicketEntity ticket) {
+        if (!permissionEvaluator.canCreateTicketHistory(userId, toTicketParent(ticket))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Ticket history");
+        }
+    }
+
+    private void ensureCanUpdateTicketHistory(UUID userId, TicketEntity ticket, TicketHistoryEntity history) {
+        if (!permissionEvaluator.canUpdateTicketHistory(userId, toTicketHistoryTarget(ticket, history))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Ticket history");
+        }
+    }
+
+    private void ensureCanDeleteTicketHistory(UUID userId, TicketEntity ticket, TicketHistoryEntity history) {
+        if (!permissionEvaluator.canDeleteTicketHistory(userId, toTicketHistoryTarget(ticket, history))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Ticket history");
+        }
+    }
+
+    private void ensureCanReadTicketComment(UUID userId, TicketEntity ticket) {
+        if (!permissionEvaluator.canReadTicketComment(userId, toTicketParent(ticket))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Ticket comment");
+        }
+    }
+
     private void ensureCanCreateTicketComment(UUID userId, TicketEntity ticket) {
         if (!permissionEvaluator.canCreateTicketComment(userId, toTicketParent(ticket))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Ticket comment");
+        }
+    }
+
+    private void ensureCanUpdateTicketComment(UUID userId, TicketEntity ticket, TicketCommentEntity comment) {
+        if (!permissionEvaluator.canUpdateTicketComment(userId, toTicketCommentTarget(ticket, comment))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Ticket comment");
+        }
+    }
+
+    private void ensureCanDeleteTicketComment(UUID userId, TicketEntity ticket, TicketCommentEntity comment) {
+        if (!permissionEvaluator.canDeleteTicketComment(userId, toTicketCommentTarget(ticket, comment))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Ticket comment");
+        }
+    }
+
+    private void ensureCanReadTicketAssignment(UUID userId, TicketEntity ticket) {
+        if (!permissionEvaluator.canReadTicketAssignment(userId, toTicketParent(ticket))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Ticket assignment");
         }
     }
 
@@ -750,6 +1018,116 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     private void ensureCanUpdateTicketAssignment(UUID userId, TicketEntity ticket, TicketAssignmentEntity assignment) {
         if (!permissionEvaluator.canUpdateTicketAssignment(userId, toTicketAssignmentTarget(ticket, assignment))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Ticket assignment");
+        }
+    }
+
+    private void ensureCanDeleteTicketAssignment(UUID userId, TicketEntity ticket, TicketAssignmentEntity assignment) {
+        if (!permissionEvaluator.canDeleteTicketAssignment(userId, toTicketAssignmentTarget(ticket, assignment))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Ticket assignment");
+        }
+    }
+
+    private void ensureCanReadTicketAttachment(UUID userId, TicketEntity ticket) {
+        if (!permissionEvaluator.canReadTicketAttachment(userId, toTicketAttachmentParent(ticket))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Ticket attachment");
+        }
+    }
+
+    private void ensureCanCreateTicketAttachment(UUID userId, TicketEntity ticket, TicketCommentEntity comment) {
+        if (!permissionEvaluator.canCreateTicketAttachment(userId, new CrmPermissionEvaluator.TicketAttachmentParent(
+                comment != null ? comment.getId() : null,
+                ticket.getId(),
+                ticket.getTenantId(),
+                getActiveAssignedTeamId(ticket),
+                getActiveAssignedAgentId(ticket)
+        ))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Ticket attachment");
+        }
+    }
+
+    private UUID getActiveAssignedTeamId(TicketEntity ticket) {
+        TicketAssignmentEntity assignment = ticket.getCurrentAssignment();
+        if (assignment == null || !Boolean.TRUE.equals(assignment.getActive()) || assignment.getTeam() == null) {
+            return null;
+        }
+        return assignment.getTeam().getId();
+    }
+
+    private UUID getActiveAssignedAgentId(TicketEntity ticket) {
+        TicketAssignmentEntity assignment = ticket.getCurrentAssignment();
+        if (assignment == null || !Boolean.TRUE.equals(assignment.getActive()) || assignment.getAgentParty() == null) {
+            return null;
+        }
+        return assignment.getAgentParty().getId();
+    }
+
+    private void ensureCanUpdateTicketAttachment(
+            UUID userId,
+            TicketEntity ticket,
+            TicketCommentEntity comment,
+            TicketAttachmentEntity attachment
+    ) {
+        if (!permissionEvaluator.canUpdateTicketAttachment(userId, toTicketAttachmentTarget(ticket, comment, attachment))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Ticket attachment");
+        }
+    }
+
+    private void ensureCanDeleteTicketAttachment(
+            UUID userId,
+            TicketEntity ticket,
+            TicketCommentEntity comment,
+            TicketAttachmentEntity attachment
+    ) {
+        if (!permissionEvaluator.canDeleteTicketAttachment(userId, toTicketAttachmentTarget(ticket, comment, attachment))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Ticket attachment");
+        }
+    }
+
+    private void ensureCanCreateTicketSlaTracking(UUID userId, TicketEntity ticket) {
+        if (!permissionEvaluator.canCreateTicketSlaTracking(userId, toTicketParent(ticket))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Ticket SLA tracking");
+        }
+    }
+
+    private void ensureCanReadTicketSlaTracking(UUID userId, TicketEntity ticket) {
+        if (!permissionEvaluator.canReadTicketSlaTracking(userId, toTicketParent(ticket))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Ticket SLA tracking");
+        }
+    }
+
+    private void ensureCanUpdateTicketSlaTracking(UUID userId, TicketEntity ticket, TicketSlaTrackingEntity slaTracking) {
+        if (!permissionEvaluator.canUpdateTicketSlaTracking(userId, toTicketSlaTrackingTarget(ticket, slaTracking))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Ticket SLA tracking");
+        }
+    }
+
+    private void ensureCanDeleteTicketSlaTracking(UUID userId, TicketEntity ticket, TicketSlaTrackingEntity slaTracking) {
+        if (!permissionEvaluator.canDeleteTicketSlaTracking(userId, toTicketSlaTrackingTarget(ticket, slaTracking))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Ticket SLA tracking");
+        }
+    }
+
+    private void ensureCanReadTicketWatcher(UUID userId, TicketEntity ticket) {
+        if (!permissionEvaluator.canReadTicketWatcher(userId, toTicketParent(ticket))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Ticket watcher");
+        }
+    }
+
+    private void ensureCanCreateTicketWatcher(UUID userId, TicketEntity ticket) {
+        if (!permissionEvaluator.canCreateTicketWatcher(userId, toTicketParent(ticket))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Ticket watcher");
+        }
+    }
+
+    private void ensureCanUpdateTicketWatcher(UUID userId, TicketEntity ticket, TicketWatcherEntity watcher) {
+        if (!permissionEvaluator.canUpdateTicketWatcher(userId, toTicketWatcherTarget(ticket, watcher))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Ticket watcher");
+        }
+    }
+
+    private void ensureCanDeleteTicketWatcher(UUID userId, TicketEntity ticket, TicketWatcherEntity watcher) {
+        if (!permissionEvaluator.canDeleteTicketWatcher(userId, toTicketWatcherTarget(ticket, watcher))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Ticket watcher");
         }
     }
 

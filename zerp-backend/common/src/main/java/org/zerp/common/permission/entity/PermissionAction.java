@@ -4,7 +4,7 @@ import static org.zerp.common.permission.entity.PermissionTargetType.*;
 
 public enum PermissionAction {
     // TENANT level
-ADMIN_TENANT(TENANT),
+    ADMIN_TENANT(TENANT),
     UPDATE_TENANT(TENANT),
     READ_TENANT(TENANT),
     CREATE_STOCK_RESOURCE(TENANT),

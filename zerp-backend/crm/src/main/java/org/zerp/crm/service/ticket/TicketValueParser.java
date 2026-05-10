@@ -1,9 +1,9 @@
 package org.zerp.crm.service.ticket;
 
+import org.zerp.common.entity.crm.IssueType;
 import org.springframework.stereotype.Component;
 import org.zerp.common.entity.crm.TicketEntity.TicketPriority;
 import org.zerp.common.entity.crm.TicketEntity.TicketStatus;
-import org.zerp.common.entity.crm.TicketEntity.TicketType;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -42,13 +42,9 @@ public class TicketValueParser {
         }
     }
 
-    public TicketType parseType(Object rawValue, String fieldName) {
-        if (rawValue instanceof TicketType type) {
-            return type;
-        }
-
+    public IssueType parseType(Object rawValue, String fieldName) {
         try {
-            return TicketType.valueOf(String.valueOf(rawValue).trim().toUpperCase(Locale.ROOT));
+            return IssueType.fromValue(rawValue);
         } catch (Exception ex) {
             throw new IllegalArgumentException("Invalid type value for " + fieldName + ": " + rawValue);
         }
