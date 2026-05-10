@@ -8,6 +8,8 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.CommonBaseEntity;
+import org.zerp.common.permission.entity.PermissionTargetType;
+import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 import org.zerp.common.permission.entity.Permittable;
 
 import java.util.UUID;
@@ -18,6 +20,7 @@ import java.util.UUID;
 @Table(name= "tenants")
 @SQLDelete(sql = "UPDATE tenants SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("deleted = false")
+@PermissionTargetTypeAnnotation(type = PermissionTargetType.TENANT)
 public class Tenant extends CommonBaseEntity implements Permittable {
     @Id
     private UUID id;

@@ -12,6 +12,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.entity.user.AppUser;
+import org.zerp.common.permission.entity.PermissionTargetType;
+import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 import org.zerp.common.permission.entity.Permittable;
 
 @Entity
@@ -22,6 +24,7 @@ import org.zerp.common.permission.entity.Permittable;
 @AllArgsConstructor
 @SQLDelete(sql = "UPDATE ticket_assignment SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? and version = ?")
 @SQLRestriction("deleted = false")
+@PermissionTargetTypeAnnotation(type = PermissionTargetType.TICKET_ASSIGNMENT)
 public class TicketAssignmentEntity extends BaseEntity implements Permittable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

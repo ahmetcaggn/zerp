@@ -15,6 +15,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.entity.sale.ShopTable;
+import org.zerp.common.permission.entity.PermissionTargetType;
+import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 import org.zerp.common.permission.entity.Permittable;
 
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.UUID;
 @Table(name = "shops")
 @SQLDelete(sql = "UPDATE shops SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("deleted = false")
+@PermissionTargetTypeAnnotation(type = PermissionTargetType.SHOP)
 public class Shop extends BaseEntity implements Permittable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

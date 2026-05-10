@@ -11,6 +11,8 @@ import lombok.Data;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.base.BaseEntity;
+import org.zerp.common.permission.entity.PermissionTargetType;
+import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 import org.zerp.common.permission.entity.Permittable;
 
 import java.util.UUID;
@@ -19,6 +21,7 @@ import java.util.UUID;
 @Data
 @Table(name= "shop_tables")
 @SQLRestriction("deleted = false")
+@PermissionTargetTypeAnnotation(type = PermissionTargetType.SHOP_TABLE)
 public class ShopTable extends BaseEntity implements Permittable {
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.UUID)

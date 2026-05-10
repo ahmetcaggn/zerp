@@ -24,7 +24,9 @@ public enum PermissionTargetType {
     TEAM,
     TEAM_MEMBER,
 
+    // shop
     SHOP,
+    SHOP_TABLE,
 
     // stock management
     STOCK_MOVEMENT,

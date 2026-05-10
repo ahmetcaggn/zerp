@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.zerp.common.entity.base.BaseEntity;
+import org.zerp.common.permission.entity.PermissionTargetType;
+import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 import org.zerp.common.permission.entity.Permittable;
 
 import java.time.LocalDateTime;
@@ -17,6 +19,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@PermissionTargetTypeAnnotation(type = PermissionTargetType.TICKET_ATTACHMENT)
 public class TicketAttachmentEntity extends BaseEntity implements Permittable {
 
     @Id
