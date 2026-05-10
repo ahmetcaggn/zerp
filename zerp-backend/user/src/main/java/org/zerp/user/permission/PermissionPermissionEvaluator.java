@@ -31,6 +31,11 @@ public class PermissionPermissionEvaluator {
         log.debug("Checking if user {} can read permission {} for user {}",
                 userId, target.getId(), target.getUserId());
 
+        if (userId.equals(target.getUserId())) {
+            log.debug("User {} can read their own permission {}", userId, target.getId());
+            return true;
+        }
+
         UUID tenantId = tenantIdResolver.resolve();
         return isAdminTenant(userId, tenantId) ||
                 hasReadPermissionOnUser(userId, target.getUserId());
@@ -74,6 +79,7 @@ public class PermissionPermissionEvaluator {
                 PermissionTargetType.USER,
                 PermissionAction.READ_PERMISSION
         );
+        readableUserIds.add(userId);
 
         log.debug("user {} can read permissions for {} users via READ_PERMISSION or ADMIN_TENANT",
                 userId, readableUserIds.size());

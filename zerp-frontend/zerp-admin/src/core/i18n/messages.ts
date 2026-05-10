@@ -13,8 +13,12 @@ export interface MessageDictionary {
     login: string
     register: string
     dashboard: string
+    crm: string
     teams: string
+    teamManagement: string
     teamTickets: string
+    ticketManagement: string
+    assignedTickets: string
     logout: string
     language: string
     menu: string
@@ -55,6 +59,10 @@ export interface MessageDictionary {
     addComment: string
     closeTicket: string
     commentPlaceholder: string
+  }
+  assignedTickets: {
+    title: string
+    emptyState: string
   }
 }
 

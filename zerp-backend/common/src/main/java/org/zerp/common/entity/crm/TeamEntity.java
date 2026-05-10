@@ -46,6 +46,10 @@ public class TeamEntity extends BaseEntity implements Permittable {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
+    @Column(name = "type", nullable = false, length = 32)
+    @Enumerated(EnumType.STRING)
+    private IssueType type;
+
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TeamMemberEntity> members = new ArrayList<>();
 

@@ -7,6 +7,7 @@ public record TeamResponse(
         UUID id,
         String name,
         String description,
+        String type,
         boolean isActive,
         List<TeamMemberResponse> members) {
 }

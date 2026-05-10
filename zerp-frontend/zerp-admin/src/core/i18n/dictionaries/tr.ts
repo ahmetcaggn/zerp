@@ -9,8 +9,12 @@ export const trMessages = {
     login: 'Giris',
     register: 'Kayit Ol',
     dashboard: 'Panel',
+    crm: 'CRM',
     teams: 'Takimlar',
+    teamManagement: 'Takim Yonetimi',
     teamTickets: 'Takim Talepleri',
+    ticketManagement: 'Ticket Yonetimi',
+    assignedTickets: 'Bana Atanan Talepler',
     logout: 'Cikis',
     language: 'Dil',
     menu: 'Menü',
@@ -52,5 +56,9 @@ export const trMessages = {
     addComment: 'Yorum Ekle',
     closeTicket: 'Talebi Kapat',
     commentPlaceholder: 'Yorumunuzu yazin...',
+  },
+  assignedTickets: {
+    title: 'Bana Atanan Talepler',
+    emptyState: 'Uzerinize atanmis talep bulunmuyor.',
   },
 } as const

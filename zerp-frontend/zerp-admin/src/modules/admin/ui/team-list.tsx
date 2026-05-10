@@ -25,6 +25,7 @@ import { useState } from 'react'
 
 import { ROUTES } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
@@ -44,12 +45,20 @@ export function TeamList() {
     sort: { field: 'id', order: 'ASC' as const },
   }
 
-  const { data, isLoading, error } = useTeams(params)
+  const { hasPermission, isLoadingPermissions } = useCurrentUserPermissions()
+  const canReadTeam = hasPermission(PermissionActions.READ_TEAM)
+  const canCreateTeam = hasPermission(PermissionActions.CREATE_TEAM)
+  const canUpdateTeam = hasPermission(PermissionActions.UPDATE_TEAM)
+  const canDeleteTeam = hasPermission(PermissionActions.DELETE_TEAM)
+  const canReadTeamMember = hasPermission(PermissionActions.READ_TEAM_MEMBER)
+  const { data, isLoading, error } = useTeams(params, {
+    enabled: canReadTeam && !isLoadingPermissions,
+  })
   const { mutate: deleteTeam } = useDeleteTeam()
   const { mutate: activateTeam } = useActivateTeam()
   const { mutate: deactivateTeam } = useDeactivateTeam()
 
-  if (error) showToast(getUserFriendlyError(error), { severity: 'error' })
+  if (error && canReadTeam) showToast(getUserFriendlyError(error), { severity: 'error' })
 
   const rows = data?.data ?? []
   const total = data?.total ?? 0
@@ -58,12 +67,22 @@ export function TeamList() {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5">{t('teams.title')}</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setFormOpen(true)}>
-          {t('teams.createButton')}
-        </Button>
+        {canCreateTeam && (
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setFormOpen(true)}>
+            {t('teams.createButton')}
+          </Button>
+        )}
       </Box>
 
-      {isLoading ? (
+      {isLoadingPermissions ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+          <CircularProgress />
+        </Box>
+      ) : !canReadTeam ? (
+        <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+          Takımları görüntüleme yetkiniz yok.
+        </Typography>
+      ) : isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
           <CircularProgress />
         </Box>
@@ -77,6 +96,7 @@ export function TeamList() {
             <TableRow>
               <TableCell>Ad</TableCell>
               <TableCell>Açıklama</TableCell>
+              <TableCell>Tür</TableCell>
               <TableCell>Durum</TableCell>
               <TableCell>Üye Sayısı</TableCell>
               <TableCell align="right">İşlemler</TableCell>
@@ -87,6 +107,7 @@ export function TeamList() {
               <TableRow key={team.id ?? `team-${index}`} hover>
                 <TableCell>{team.name ?? '—'}</TableCell>
                 <TableCell>{team.description ?? '—'}</TableCell>
+                <TableCell>{team.type ?? '—'}</TableCell>
                 <TableCell>
                   <Chip
                     label={team.isActive ? t('teams.activeLabel') : t('teams.inactiveLabel')}
@@ -94,7 +115,7 @@ export function TeamList() {
                     size="small"
                   />
                 </TableCell>
-                <TableCell>{team.members?.length ?? 0}</TableCell>
+                <TableCell>{canReadTeamMember ? (team.members?.length ?? 0) : '—'}</TableCell>
                 <TableCell align="right">
                   <Tooltip title={t('teams.editButton')}>
                     <IconButton
@@ -106,42 +127,46 @@ export function TeamList() {
                       <VisibilityIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title={team.isActive ? t('teams.deactivateButton') : t('teams.activateButton')}>
-                    <IconButton
-                      size="small"
-                      color={team.isActive ? 'warning' : 'success'}
-                      onClick={() => {
-                        if (!team.id) return
-                        const mutateFn = team.isActive ? deactivateTeam : activateTeam
-                        mutateFn(team.id, {
-                          onSuccess: () =>
-                            showToast(
-                              team.isActive ? 'Takım pasifleştirildi.' : 'Takım aktifleştirildi.',
-                              { severity: 'success' },
-                            ),
-                          onError: (err) =>
-                            showToast(getUserFriendlyError(err), { severity: 'error' }),
-                        })
-                      }}
-                    >
-                      {team.isActive ? <PauseIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title={t('teams.deleteButton')}>
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={() => {
-                        if (!team.id) return
-                        deleteTeam(team.id, {
-                          onSuccess: () => showToast('Takım silindi.', { severity: 'success' }),
-                          onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-                        })
-                      }}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
+                  {canUpdateTeam && (
+                    <Tooltip title={team.isActive ? t('teams.deactivateButton') : t('teams.activateButton')}>
+                      <IconButton
+                        size="small"
+                        color={team.isActive ? 'warning' : 'success'}
+                        onClick={() => {
+                          if (!team.id) return
+                          const mutateFn = team.isActive ? deactivateTeam : activateTeam
+                          mutateFn(team.id, {
+                            onSuccess: () =>
+                              showToast(
+                                team.isActive ? 'Takım pasifleştirildi.' : 'Takım aktifleştirildi.',
+                                { severity: 'success' },
+                              ),
+                            onError: (err) =>
+                              showToast(getUserFriendlyError(err), { severity: 'error' }),
+                          })
+                        }}
+                      >
+                        {team.isActive ? <PauseIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {canDeleteTeam && (
+                    <Tooltip title={t('teams.deleteButton')}>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => {
+                          if (!team.id) return
+                          deleteTeam(team.id, {
+                            onSuccess: () => showToast('Takım silindi.', { severity: 'success' }),
+                            onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+                          })
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -149,18 +174,20 @@ export function TeamList() {
         </Table>
       )}
 
-      <TablePagination
-        component="div"
-        count={total}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={(_, nextPage) => setPage(nextPage)}
-        onRowsPerPageChange={(event) => {
-          setRowsPerPage(Number(event.target.value))
-          setPage(0)
-        }}
-        rowsPerPageOptions={[10, 25, 50]}
-      />
+      {canReadTeam && (
+        <TablePagination
+          component="div"
+          count={total}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          onPageChange={(_, nextPage) => setPage(nextPage)}
+          onRowsPerPageChange={(event) => {
+            setRowsPerPage(Number(event.target.value))
+            setPage(0)
+          }}
+          rowsPerPageOptions={[10, 25, 50]}
+        />
+      )}
 
       <TeamFormDialog open={formOpen} mode="create" onClose={() => setFormOpen(false)} />
     </Box>

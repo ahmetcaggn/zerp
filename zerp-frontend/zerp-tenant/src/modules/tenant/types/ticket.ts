@@ -15,22 +15,32 @@ export type {
   WatcherResponse,
 }
 
-export type CreateTicketRequest = Omit<GeneratedCreateTicketRequest, 'tenantId'> & {
+export const IssueType = {
+  ServiceLevel: 'SERVICE_LEVEL',
+  Question: 'QUESTION',
+} as const
+
+export type IssueTypeValue = (typeof IssueType)[keyof typeof IssueType]
+
+export const TicketType = IssueType
+export type TicketTypeValue = IssueTypeValue
+
+export type CreateTicketRequest = Omit<GeneratedCreateTicketRequest, 'tenantId' | 'type'> & {
   tenantId: string
+  type?: IssueTypeValue
 }
 export type CommentResponse = GeneratedCommentResponse & { authorName?: string }
-export type TicketResponse = Omit<GeneratedTicketResponse, 'comments'> & {
+export type TicketResponse = Omit<GeneratedTicketResponse, 'comments' | 'type'> & {
   comments?: CommentResponse[]
+  type?: IssueTypeValue
 }
 export type {
   CreateTicketRequestPriorityEnum as TicketPriorityValue,
   ChangeStatusRequestStatusEnum as TicketStatusValue,
-  CreateTicketRequestTypeEnum as TicketTypeValue,
 } from '@/modules/generated/openapi_crm/api'
 export {
   CreateTicketRequestPriorityEnum as TicketPriority,
   ChangeStatusRequestStatusEnum as TicketStatus,
-  CreateTicketRequestTypeEnum as TicketType,
 } from '@/modules/generated/openapi_crm/api'
 
 export type TicketStatusString =
@@ -43,7 +53,7 @@ export type TicketStatusString =
 
 export type TicketPriorityString = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
 
-export type TicketTypeString = 'BUG' | 'FEATURE_REQUEST' | 'QUESTION' | 'INCIDENT'
+export type TicketTypeString = IssueTypeValue
 
 export interface UpdateTicketRequest {
   title?: string

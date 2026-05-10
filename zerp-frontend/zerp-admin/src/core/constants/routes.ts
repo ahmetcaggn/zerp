@@ -7,12 +7,18 @@ export const ROUTES = {
   dashboard: '/dashboard',
   teams: '/teams',
   teamTickets: '/team-tickets',
+  assignedTickets: '/assigned-tickets',
   unauthorized: '/unauthorized',
 } as const
 
 export const PUBLIC_PATHS = [ROUTES.root, ROUTES.login, ROUTES.register] as const
 export const AUTH_PATHS = [ROUTES.login, ROUTES.register] as const
-export const PROTECTED_PATHS = [ROUTES.dashboard, ROUTES.teams, ROUTES.teamTickets] as const
+export const PROTECTED_PATHS = [
+  ROUTES.dashboard,
+  ROUTES.teams,
+  ROUTES.teamTickets,
+  ROUTES.assignedTickets,
+] as const
 
 export function withLocale(locale: Locale, path: string): string {
   if (!path.startsWith('/')) {

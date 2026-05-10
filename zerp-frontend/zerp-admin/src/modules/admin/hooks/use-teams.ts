@@ -1,8 +1,9 @@
 'use client'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { queryKeys } from '@/core/api/query-keys'
 import { createResourceHooks } from '@/core/api/resource-hooks'
+import type { RaListParams } from '@/core/api/resource-types'
 
 import { teamClient } from '../api/team-client'
 import type { AddMemberRequest, ChangeMemberRoleRequest } from '../types/team'
@@ -49,6 +50,23 @@ export function useAddTeamMember() {
     mutationFn: ({ id, body }: { id: string; body: AddMemberRequest }) =>
       teamClient.addMember(id, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.admin.teams }),
+  })
+}
+
+interface TeamMemberCandidateListParams extends RaListParams {
+  username?: string
+}
+
+export function useTeamMemberCandidates(
+  id: string | undefined,
+  params: TeamMemberCandidateListParams = {},
+  options: { enabled?: boolean } = {},
+) {
+  return useQuery({
+    queryKey: [...queryKeys.admin.teamMemberCandidates, id ?? 'unknown', params] as const,
+    queryFn: () => teamClient.listMemberCandidates(id as string, params),
+    enabled: Boolean(id) && (options.enabled ?? true),
+    staleTime: 30_000,
   })
 }
 

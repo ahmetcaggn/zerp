@@ -85,6 +85,8 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND p.action = :action
                 AND (
                      (:ticketId IS NOT NULL AND p.targetType = 'TICKET' AND p.targetId = :ticketId)
+                  OR (:assignedTeamId IS NOT NULL AND p.targetType = 'TEAM' AND p.targetId = :assignedTeamId)
+                  OR (:assignedAgentId IS NOT NULL AND p.targetType = 'USER' AND p.targetId = :assignedAgentId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
                   OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
                 )
@@ -93,6 +95,8 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
             @Param("userId") UUID userId,
             @Param("action") PermissionAction action,
             @Param("ticketId") UUID ticketId,
+            @Param("assignedTeamId") UUID assignedTeamId,
+            @Param("assignedAgentId") UUID assignedAgentId,
             @Param("tenantId") UUID tenantId
     );
 
@@ -139,6 +143,8 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND (
                      (:childId IS NOT NULL AND p.targetType = :childType AND p.targetId = :childId)
                   OR (:ticketId IS NOT NULL AND p.targetType = 'TICKET' AND p.targetId = :ticketId)
+                  OR (:assignedTeamId IS NOT NULL AND p.targetType = 'TEAM' AND p.targetId = :assignedTeamId)
+                  OR (:assignedAgentId IS NOT NULL AND p.targetType = 'USER' AND p.targetId = :assignedAgentId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
                   OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
                 )
@@ -149,6 +155,8 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
             @Param("childType") PermissionTargetType childType,
             @Param("childId") UUID childId,
             @Param("ticketId") UUID ticketId,
+            @Param("assignedTeamId") UUID assignedTeamId,
+            @Param("assignedAgentId") UUID assignedAgentId,
             @Param("tenantId") UUID tenantId
     );
 
@@ -160,6 +168,8 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                      (:attachmentId IS NOT NULL AND p.targetType = 'TICKET_ATTACHMENT' AND p.targetId = :attachmentId)
                   OR (:commentId IS NOT NULL AND p.targetType = 'TICKET_COMMENT' AND p.targetId = :commentId)
                   OR (:ticketId IS NOT NULL AND p.targetType = 'TICKET' AND p.targetId = :ticketId)
+                  OR (:assignedTeamId IS NOT NULL AND p.targetType = 'TEAM' AND p.targetId = :assignedTeamId)
+                  OR (:assignedAgentId IS NOT NULL AND p.targetType = 'USER' AND p.targetId = :assignedAgentId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
                   OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
                 )
@@ -170,6 +180,8 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
             @Param("attachmentId") UUID attachmentId,
             @Param("commentId") UUID commentId,
             @Param("ticketId") UUID ticketId,
+            @Param("assignedTeamId") UUID assignedTeamId,
+            @Param("assignedAgentId") UUID assignedAgentId,
             @Param("tenantId") UUID tenantId
     );
 

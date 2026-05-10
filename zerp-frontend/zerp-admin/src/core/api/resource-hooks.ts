@@ -9,6 +9,10 @@ import {
 import type { ResourceClient } from './resource-client'
 import type { RaListParams } from './resource-types'
 
+interface QueryOptions {
+  enabled?: boolean
+}
+
 export function createResourceHooks<
   T,
   LT,
@@ -23,17 +27,18 @@ export function createResourceHooks<
     [...(baseKey as unknown[]), 'detail', id] as const
 
   return {
-    useList: (params: RaListParams = {}) =>
+    useList: (params: RaListParams = {}, options: QueryOptions = {}) =>
       useQuery({
         queryKey: listKey(params),
         queryFn: () => client.getList(params),
+        enabled: options.enabled ?? true,
       }),
 
-    useOne: (id: ID | undefined) =>
+    useOne: (id: ID | undefined, options: QueryOptions = {}) =>
       useQuery({
         queryKey: oneKey(id as ID),
         queryFn: () => client.getOne(id as ID),
-        enabled: id !== undefined,
+        enabled: id !== undefined && (options.enabled ?? true),
       }),
 
     useCreate: () => {
