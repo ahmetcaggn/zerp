@@ -1,4 +1,8 @@
 'use client'
+import AddIcon from '@mui/icons-material/Add'
+import ClearIcon from '@mui/icons-material/Clear'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import SearchIcon from '@mui/icons-material/Search'
 import {
   Box,
   Button,
@@ -21,17 +25,15 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
-import ClearIcon from '@mui/icons-material/Clear'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew'
-import SearchIcon from '@mui/icons-material/Search'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
+
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
+
 import { useTickets } from '../hooks/use-tickets'
 import type { TicketPriorityString, TicketStatusString, TicketTypeString } from '../types/ticket'
 import { TicketCreateDialog } from './ticket-create-dialog'
@@ -68,7 +70,7 @@ const STATUS_OPTIONS: TicketStatusString[] = [
 
 const PRIORITY_OPTIONS: TicketPriorityString[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']
 
-const TYPE_OPTIONS: TicketTypeString[] = ['BUG', 'FEATURE_REQUEST', 'QUESTION', 'INCIDENT']
+const TYPE_OPTIONS: TicketTypeString[] = ['SERVICE_LEVEL', 'QUESTION']
 
 export function TicketList() {
   const { t, locale } = useI18n()

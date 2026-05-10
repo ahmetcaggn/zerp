@@ -49,7 +49,7 @@ const PRIORITY_COLOR: Record<TicketPriorityString, 'error' | 'warning' | 'info' 
   LOW: 'default',
 }
 
-const TYPE_OPTIONS: TicketTypeString[] = ['BUG', 'FEATURE_REQUEST', 'QUESTION', 'INCIDENT']
+const TYPE_OPTIONS: TicketTypeString[] = ['SERVICE_LEVEL', 'QUESTION']
 
 interface Props {
   id: string
@@ -69,7 +69,7 @@ export function TicketDetail({ id }: Props) {
   const [editOpen, setEditOpen] = useState(false)
   const [editTitle, setEditTitle] = useState('')
   const [editDescription, setEditDescription] = useState('')
-  const [editType, setEditType] = useState<TicketTypeString | ''>('')
+  const [editType, setEditType] = useState<TicketTypeString>('QUESTION')
   const [editTags, setEditTags] = useState('')
   const [editCustomAttributes, setEditCustomAttributes] = useState('{}')
   const [commentText, setCommentText] = useState('')
@@ -113,7 +113,7 @@ export function TicketDetail({ id }: Props) {
     }
     setEditTitle(currentTicket.title ?? '')
     setEditDescription(currentTicket.description ?? '')
-    setEditType((currentTicket.type as TicketTypeString | undefined) ?? '')
+    setEditType((currentTicket.type as TicketTypeString | undefined) ?? 'QUESTION')
     setEditTags(tags.join(', '))
     setEditCustomAttributes(JSON.stringify(currentTicket.customAttributes ?? {}, null, 2))
     setEditOpen(true)
@@ -157,7 +157,7 @@ export function TicketDetail({ id }: Props) {
     const fields: Record<string, unknown> = {
       title,
       description: editDescription.trim() ? editDescription : null,
-      type: editType || null,
+      type: editType,
       tags,
       customAttributes,
     }
@@ -370,7 +370,6 @@ export function TicketDetail({ id }: Props) {
               size="small"
               fullWidth
             >
-              <MenuItem value="">Seçilmedi</MenuItem>
               {TYPE_OPTIONS.map((type) => (
                 <MenuItem key={type} value={type}>
                   {type}

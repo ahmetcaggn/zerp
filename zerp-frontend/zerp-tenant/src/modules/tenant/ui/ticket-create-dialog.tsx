@@ -15,13 +15,16 @@ import {
 } from '@mui/material'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+
 import { useAuth } from '@/core/auth/client/use-auth'
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
+
 import { useCreateTicket } from '../hooks/use-tickets'
+import type { TicketTypeValue } from '../types/ticket'
 import { TicketPriority, TicketType } from '../types/ticket'
 
 interface Props {
@@ -40,19 +43,14 @@ export function TicketCreateDialog({ open, onClose }: Props) {
   const { showToast } = useToast()
   const router = useRouter()
 
-  const [tenantId, setTenantId] = useState('')
+  const [tenantIdOverride, setTenantIdOverride] = useState<string | null>(null)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<string>(TicketPriority.Medium)
-  const [type, setType] = useState<string>(TicketType.Question)
+  const [type, setType] = useState<TicketTypeValue>(TicketType.Question)
+  const tenantId = tenantIdOverride ?? sessionTenantId ?? ''
 
   const { mutate: createTicket, isPending } = useCreateTicket()
-
-  useEffect(() => {
-    if (sessionTenantId && !tenantId) {
-      setTenantId(sessionTenantId)
-    }
-  }, [sessionTenantId, tenantId])
 
   function handleSubmit() {
     const normalizedTenantId = tenantId.trim()
@@ -76,7 +74,7 @@ export function TicketCreateDialog({ open, onClose }: Props) {
         title: title.trim(),
         ...(description && { description }),
         priority: priority as (typeof TicketPriority)[keyof typeof TicketPriority],
-        type: type as (typeof TicketType)[keyof typeof TicketType],
+        type,
       },
       {
         onSuccess: (ticket) => {
@@ -100,7 +98,7 @@ export function TicketCreateDialog({ open, onClose }: Props) {
           <TextField
             label={t('tickets.tenantIdField')}
             value={tenantId}
-            onChange={(e) => setTenantId(e.target.value)}
+            onChange={(e) => setTenantIdOverride(e.target.value)}
             size="small"
             fullWidth
             required
@@ -146,7 +144,7 @@ export function TicketCreateDialog({ open, onClose }: Props) {
               <Select
                 value={type}
                 label={t('tickets.typeLabel')}
-                onChange={(e) => setType(e.target.value)}
+                onChange={(e) => setType(e.target.value as TicketTypeValue)}
               >
                 {TYPE_OPTIONS.map((ty) => (
                   <MenuItem key={ty} value={ty}>
