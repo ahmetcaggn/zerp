@@ -100,7 +100,7 @@ public class PermissionPermissionEvaluator {
         Specification<Permission> grantedPermissions = (root, _, _) ->
                 root.get("userId").in(readableUserIds);
         Specification<Permission> grantedTenantPermissions = (root, _, _) ->
-                root.get("tenantId").in(readableTenantIds);
+                root.get("user").get("tenantId").in(readableTenantIds);
 
         return Specification.anyOf(ownPermissions, grantedPermissions, grantedTenantPermissions);
     }

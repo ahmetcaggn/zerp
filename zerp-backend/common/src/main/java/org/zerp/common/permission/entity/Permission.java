@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Immutable;
 import org.zerp.common.entity.base.CommonBaseEntity;
+import org.zerp.common.entity.user.AppUser;
 
 import java.util.UUID;
 
@@ -20,7 +21,12 @@ public class Permission extends CommonBaseEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(name = "user_id", nullable = false, updatable = false)
     private UUID userId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private AppUser user;
 
     @Enumerated(EnumType.STRING)
     private PermissionTargetType targetType;
