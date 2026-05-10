@@ -14,9 +14,10 @@ import org.zerp.common.dto.ErrorDetails;
 @Log4j2
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiResponse<ErrorDetails>> handleResponseStatusException(ResponseStatusException exception) {
+        log.warn("Handling ResponseStatusException with status {} and reason '{}'",
+                exception.getStatusCode(), exception.getReason(), exception);
         String message = exception.getReason() != null ? exception.getReason() : "Request failed";
         return buildErrorResponse(exception.getStatusCode(), "REQUEST_FAILED", message, exception);
     }
@@ -25,6 +26,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<ErrorDetails>> handleHttpMessageNotReadableException(
             HttpMessageNotReadableException exception
     ) {
+        log.warn("Handling HttpMessageNotReadableException: {}", exception.getMessage(), exception);
         return buildErrorResponse(
                 HttpStatus.BAD_REQUEST,
                 "INVALID_REQUEST_BODY",
@@ -35,6 +37,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<ErrorDetails>> handleGenericException(Exception exception) {
+        log.error("Handling unexpected exception: {}", exception.getMessage(), exception);
         return buildErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "INTERNAL_ERROR",

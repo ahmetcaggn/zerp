@@ -3,6 +3,7 @@ package org.zerp.common.permission.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Immutable;
+import org.zerp.common.entity.base.CommonBaseEntity;
 
 import java.util.UUID;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
 @Table(name = "permissions")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Permission {
+public class Permission extends CommonBaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

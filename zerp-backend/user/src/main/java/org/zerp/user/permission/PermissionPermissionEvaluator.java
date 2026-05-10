@@ -4,9 +4,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.TenantRoot;
 import org.zerp.common.entity.user.AppUser;
 import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
@@ -31,13 +30,15 @@ public class PermissionPermissionEvaluator {
         log.debug("Checking if user {} can read permission {} for user {}",
                 userId, target.getId(), target.getUserId());
 
-        if (userId.equals(target.getUserId())) {
-            log.debug("User {} can read their own permission {}", userId, target.getId());
-            return true;
+        if (target.getUserId() == null) {
+            log.warn("Permission {} has null userId", target.getId());
+            return false;
         }
+        AppUser user = userRepository.findById(target.getUserId()).orElse(null);
+        if (user == null) return false;
 
-        UUID tenantId = tenantIdResolver.resolve();
-        return isAdminTenant(userId, tenantId) ||
+        return isOwnPermission(userId, target) ||
+                isAdminTenant(userId, user.getTenantId()) ||
                 hasReadPermissionOnUser(userId, target.getUserId());
     }
 
@@ -69,8 +70,8 @@ public class PermissionPermissionEvaluator {
 
     @NonNull
     public Specification<Permission> filterRead(UUID userId) {
-        if (isAdminTenant(userId, tenantIdResolver.resolve())) {
-            log.debug("user {} is admin tenant and can read all permissions", userId);
+        if (isAdminTenantOnRoot(userId)) {
+            log.debug("user {} is root admin tenant and can read all permissions", userId);
             return Specification.unrestricted();
         }
 
@@ -79,16 +80,29 @@ public class PermissionPermissionEvaluator {
                 PermissionTargetType.USER,
                 PermissionAction.READ_PERMISSION
         );
-        readableUserIds.add(userId);
+        var readableTenantIds = permissionRepository.findTargetIdsByUserAndTargetTypeAndAction(
+                userId,
+                PermissionTargetType.TENANT,
+                PermissionAction.ADMIN_TENANT
+        );
 
-        log.debug("user {} can read permissions for {} users via READ_PERMISSION or ADMIN_TENANT",
+        log.debug("user {} can read permissions for {} users via READ_PERMISSION",
                 userId, readableUserIds.size());
 
-        if (readableUserIds.isEmpty()) {
-            return (_, _, cb) -> cb.disjunction();
+        // Users can always read their own permissions
+        Specification<Permission> ownPermissions = (root, _, cb) ->
+                cb.equal(root.get("userId"), userId);
+
+        if (readableUserIds.isEmpty() && readableTenantIds.isEmpty()) {
+            return ownPermissions;
         }
 
-        return (root, _, _) -> root.get("userId").in(readableUserIds);
+        Specification<Permission> grantedPermissions = (root, _, _) ->
+                root.get("userId").in(readableUserIds);
+        Specification<Permission> grantedTenantPermissions = (root, _, _) ->
+                root.get("tenantId").in(readableTenantIds);
+
+        return Specification.anyOf(ownPermissions, grantedPermissions, grantedTenantPermissions);
     }
 
     public boolean canReadPermissionActions(UUID userId) {
@@ -96,8 +110,12 @@ public class PermissionPermissionEvaluator {
     }
 
     private boolean canWrite(UUID userId, Permission target) {
-        AppUser targetUser = userRepository.findById(target.getUserId()).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Target user not found"));
+        AppUser targetUser = userRepository.findById(target.getUserId()).orElse(null);
+
+        if (targetUser == null) {
+            log.warn("Target user {} not found", target.getUserId());
+            return false;
+        }
 
         UUID targetUserTenantId = targetUser.getTenantId();
 
@@ -127,6 +145,13 @@ public class PermissionPermissionEvaluator {
                     yield false;
                 }
 
+                if (resourceTenantId.equals(TenantRoot.ID)) {
+                    // return false because root tenant resources should not be manageable by tenant admins
+                    log.warn("User {} is tenant admin for {} but tried to define permission over " +
+                            "root tenant resource {}", userId, targetUserTenantId, target.getTargetId());
+                    yield false;
+                }
+
                 if (!resourceTenantId.equals(targetUserTenantId)) {
                     log.warn("User {} is tenant admin for {} but tried to define permission over resource {} of another tenant {}",
                             userId, targetUserTenantId, target.getTargetId(), resourceTenantId);
@@ -139,26 +164,33 @@ public class PermissionPermissionEvaluator {
     }
 
     private boolean isAdminTenantOnRoot(UUID userId) {
-        return permissionRepository.findTargetIdsByUserAndTargetTypeAndAction(
+        return permissionRepository.existsByUserAndTargetTypeAndActionAndTargetId(
                 userId,
                 PermissionTargetType.TENANT_ROOT,
-                PermissionAction.ADMIN_TENANT
-        ).contains(org.zerp.common.entity.TenantRoot.ID);
+                PermissionAction.ADMIN_TENANT,
+                TenantRoot.ID
+        );
     }
 
     private boolean isAdminTenant(UUID userId, UUID tenantId) {
-        return permissionRepository.findTargetIdsByUserAndTargetTypeAndAction(
+        return permissionRepository.existsByUserAndTargetTypeAndActionAndTargetId(
                 userId,
                 PermissionTargetType.TENANT,
-                PermissionAction.ADMIN_TENANT
-        ).contains(tenantId);
+                PermissionAction.ADMIN_TENANT,
+                tenantId
+        );
     }
 
     private boolean hasReadPermissionOnUser(UUID requesterId, UUID permissionUserId) {
-        return permissionRepository.findTargetIdsByUserAndTargetTypeAndAction(
+        return permissionRepository.existsByUserAndTargetTypeAndActionAndTargetId(
                 requesterId,
                 PermissionTargetType.USER,
-                PermissionAction.READ_PERMISSION
-        ).contains(permissionUserId);
+                PermissionAction.READ_PERMISSION,
+                permissionUserId
+        );
+    }
+
+    private boolean isOwnPermission(UUID requesterId, Permission permission) {
+        return requesterId.equals(permission.getUserId());
     }
 }

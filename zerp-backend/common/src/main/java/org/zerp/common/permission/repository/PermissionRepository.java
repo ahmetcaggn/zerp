@@ -192,6 +192,18 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                                                          @Param("action") PermissionAction action);
 
     @Query("""
+            SELECT CASE WHEN COUNT(p) > 0 THEN TRUE ELSE FALSE END FROM Permission p
+              WHERE p.userId = :userId
+                AND p.targetType = :type
+                AND p.action = :action
+                AND p.targetId = :targetId
+            """)
+    boolean existsByUserAndTargetTypeAndActionAndTargetId(@Param("userId") UUID userId,
+                                                         @Param("type") PermissionTargetType type,
+                                                         @Param("action") PermissionAction action,
+                                                         @Param("targetId") UUID targetId);
+
+    @Query("""
             SELECT p FROM Permission p
               WHERE p.userId = :userId
                 AND p.action = :action
