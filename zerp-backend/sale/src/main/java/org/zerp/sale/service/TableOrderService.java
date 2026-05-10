@@ -9,8 +9,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.dto.feign.resource.StockMovementFeignRequest;
 import org.zerp.common.entity.Shop;
+import org.zerp.common.entity.resource.StockMovementType;
 import org.zerp.common.entity.sale.MenuItem;
+import org.zerp.common.entity.sale.Product;
+import org.zerp.common.entity.sale.ProductRecipe;
+import org.zerp.common.entity.sale.ProductRecipeItem;
 import org.zerp.common.entity.sale.ShopTable;
 import org.zerp.common.entity.sale.TableOrder;
 import org.zerp.common.entity.sale.TableOrderItem;
@@ -20,6 +25,7 @@ import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
+import org.zerp.sale.client.ResourceServiceClient;
 import org.zerp.sale.dto.tableorder.TableOrderCreateDTO;
 import org.zerp.sale.dto.tableorder.TableOrderDTO;
 import org.zerp.sale.dto.tableorder.TableOrderItemCreateDTO;
@@ -27,13 +33,16 @@ import org.zerp.sale.dto.tableorder.TableOrderUpdateDTO;
 import org.zerp.sale.mapper.TableOrderMapper;
 import org.zerp.sale.permission.TableOrderPermissionEvaluator;
 import org.zerp.sale.repository.MenuItemRepository;
+import org.zerp.sale.repository.ProductRecipeRepository;
 import org.zerp.sale.repository.ShopTableRepository;
 import org.zerp.sale.repository.TableOrderRepository;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Log4j2
 @Service
@@ -45,6 +54,8 @@ public class TableOrderService implements
     private final TableOrderRepository repository;
     private final ShopTableRepository shopTableRepository;
     private final MenuItemRepository menuItemRepository;
+    private final ProductRecipeRepository productRecipeRepository;
+    private final ResourceServiceClient resourceServiceClient;
     private final TableOrderMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final CurrentTenantIdResolver currentTenantIdResolver;
@@ -133,6 +144,7 @@ public class TableOrderService implements
         if (!permissionEvaluator.canPatch(userId, order)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to patch TableOrder");
         }
+        TableOrderStatus previousStatus = order.getStatus();
         if (data.containsKey("status")) {
             order.setStatus(TableOrderStatus.valueOf((String) data.get("status")));
         }
@@ -143,6 +155,11 @@ public class TableOrderService implements
 
         if (isClosed(updated.getStatus())) {
             releaseTableIfNoOpenOrders(updated.getShopTable());
+        }
+
+        if (updated.getStatus() == TableOrderStatus.PAID && previousStatus != TableOrderStatus.PAID) {
+            List<StockMovementFeignRequest> requests = buildStockMovementRequests(updated);
+            dispatchStockDeduction(updated.getId(), requests);
         }
 
         log.info("Patched TableOrder with id: {}", uuid);
@@ -231,6 +248,58 @@ public class TableOrderService implements
         item.setNotes(dto.getNotes());
         item.setTenantId(order.getTenantId());
         return item;
+    }
+
+    /**
+     * Builds stock movement requests inside the active transaction so all lazy
+     * collections (MenuItem.products, ProductRecipe.items, etc.) are still accessible.
+     * The resulting list contains only plain POJOs and is safe to hand off to an async thread.
+     */
+    private List<StockMovementFeignRequest> buildStockMovementRequests(TableOrder order) {
+        List<StockMovementFeignRequest> requests = new ArrayList<>();
+        for (TableOrderItem item : order.getItems()) {
+            MenuItem menuItem = item.getMenuItem();
+            List<Product> products = menuItem.getProducts();
+            if (products == null || products.isEmpty()) continue;
+
+            for (Product product : products) {
+                List<ProductRecipe> defaultRecipes = product.getRecipes();
+                for (ProductRecipe recipe : defaultRecipes) {
+                    for (ProductRecipeItem recipeItem : recipe.getItems()) {
+                        BigDecimal qty = recipeItem.getQuantity()
+                                .multiply(BigDecimal.valueOf(item.getQuantity()));
+                        requests.add(StockMovementFeignRequest.builder()
+                                .stockResourceId(recipeItem.getStockResource().getId())
+                                .type(StockMovementType.SALE)
+                                .quantity(qty)
+                                .referenceType("TABLE_ORDER")
+                                .referenceId(order.getId())
+                                .notes(menuItem.getName() + " x" + item.getQuantity())
+                                .tenantId(order.getTenantId())
+                                .build());
+                    }
+                }
+            }
+        }
+        return requests;
+    }
+
+    /**
+     * Sends stock deduction requests to the resource service asynchronously.
+     * A failure here must NOT block or roll back the completed sale.
+     */
+    private void dispatchStockDeduction(UUID orderId, List<StockMovementFeignRequest> requests) {
+        if (requests.isEmpty()) return;
+        CompletableFuture.runAsync(() -> {
+            try {
+                resourceServiceClient.createStockMovements(requests);
+                log.info("Stock deducted for order {} ({} movements)", orderId, requests.size());
+            } catch (Exception e) {
+                log.error("Failed to deduct stock for order {}: {}", orderId, e.getMessage(), e);
+                // TODO: Publish failed requests to a Kafka dead-letter topic (e.g. "stock.deduction.failed")
+                //       so they can be retried without losing the sale record.
+            }
+        });
     }
 
     private boolean isClosed(TableOrderStatus status) {
