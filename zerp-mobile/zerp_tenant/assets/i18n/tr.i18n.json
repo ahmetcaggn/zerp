@@ -10,6 +10,7 @@
     "sales": "Satışlar",
     "stock": "Stok",
     "store": "Mağaza",
+    "profile": "Profil",
     "settings": "Ayarlar"
   },
   "auth": {
@@ -31,6 +32,7 @@
     "sale": "Satış",
     "stock": "Stok",
     "store": "Mağaza",
+    "profile": "Profil",
     "settings": "Ayarlar"
   },
   "section": {
@@ -43,5 +45,11 @@
   "common": {
     "hello": "Merhaba $name",
     "save": "Kaydet"
+  },
+  "profile": {
+    "title": "Profil",
+    "permissions": {
+      "title": "İzinler"
+    }
   }
 }

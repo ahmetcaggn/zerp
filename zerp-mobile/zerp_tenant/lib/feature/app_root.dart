@@ -6,10 +6,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/state_auth.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/error/cubit_error.dart';
 import 'package:zerp_tenant/product/navigation/app_route.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 import 'package:zerp_tenant/product/ui/theme/app_theme.dart';
+import 'package:zerp_tenant/product/ui/widget/error_overlay.dart';
 
 class AppRoot extends StatelessWidget {
   const AppRoot({super.key});
@@ -21,7 +23,8 @@ class AppRoot extends StatelessWidget {
     return TranslationProvider(
       child: MultiBlocProvider(
         providers: [
-          BlocProvider.value(value: getIt<CubitAuth>()),
+          BlocProvider(create: (_) => getIt<CubitAuth>()),
+          BlocProvider(create: (_) => getIt<CubitError>()),
         ],
         child: BlocListener<CubitAuth, StateAuth>(
           listenWhen: (previous, current) =>
@@ -56,6 +59,14 @@ class AppRoot extends StatelessWidget {
                 theme: AppTheme.light(),
                 darkTheme: AppTheme.dark(),
                 routerConfig: appRouter.config(),
+                builder: (context, child) {
+                  return Stack(
+                    children: [
+                      ?child,
+                      const ErrorOverlay(),
+                    ],
+                  );
+                },
               );
             },
           ),

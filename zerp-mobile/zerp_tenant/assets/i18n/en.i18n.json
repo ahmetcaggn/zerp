@@ -10,6 +10,7 @@
     "sales": "Sales",
     "stock": "Stock",
     "store": "Store",
+    "profile": "Profile",
     "settings": "Settings"
   },
   "auth": {
@@ -31,6 +32,7 @@
     "sale": "Sale",
     "stock": "Stock",
     "store": "Store",
+    "profile": "Profile",
     "settings": "Settings"
   },
   "section": {
@@ -43,5 +45,11 @@
   "common": {
     "hello": "Hello $name",
     "save": "Save"
+  },
+  "profile": {
+    "title": "Profile",
+    "permissions": {
+      "title": "Permissions"
+    }
   }
 }

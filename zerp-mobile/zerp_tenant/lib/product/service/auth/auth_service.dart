@@ -3,11 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/model/auth_claims.dart';
-import 'package:zerp_tenant/product/model/auth_tokens.dart';
-import 'package:zerp_tenant/product/storage/model/auth_claims.storage_model.dart';
-import 'package:zerp_tenant/product/storage/model/auth_token.storage_model.dart';
-import 'package:zerp_tenant/product/storage/operator/auth_claims.operator.dart';
-import 'package:zerp_tenant/product/storage/operator/auth_token.operator.dart';
+import 'package:zerp_tenant/product/service/auth/auth_storage_service.dart';
 
 enum AuthSessionOnlineStatus {
   valid,
@@ -22,8 +18,8 @@ enum _RefreshAttemptStatus {
 }
 
 @injectable
-class AuthService with LoggerMixin<AuthService> {
-  AuthService(this._appAuth, this._authTokenOperator, this._authClaimsOperator);
+final class AuthService with LoggerMixin<AuthService> {
+  AuthService(this._appAuth, this._authStorageService);
 
   // Keycloak configuration
   static const String _issuer = 'https://auth.femrek.dev/realms/zerp';
@@ -35,8 +31,7 @@ class AuthService with LoggerMixin<AuthService> {
   static const List<String> _scopes = ['openid', 'profile', 'email'];
 
   final FlutterAppAuth _appAuth;
-  final AuthTokenOperator _authTokenOperator;
-  final AuthClaimsOperator _authClaimsOperator;
+  final AuthStorageService _authStorageService;
 
   /// Login using Keycloak authorization code flow.
   Future<AuthClaims?> login() async {
@@ -53,17 +48,17 @@ class AuthService with LoggerMixin<AuthService> {
         ),
       );
 
-      await _saveAuthTokensResponse(result);
+      await _authStorageService.saveAuthTokensResponse(result);
 
       if (result.accessToken == null ||
           JwtDecoder.isExpired(result.accessToken!)) {
-        await _clearTokens();
+        await _authStorageService.clearTokens();
         throw Exception(
           'Access token is invalid or expired immediately after login',
         );
       }
 
-      final claims = await _authClaims;
+      final claims = await _authStorageService.authClaims;
       log.info('Login successful for user: ${claims?.preferredUsername}');
       return claims;
     } on Object catch (e, s) {
@@ -89,17 +84,17 @@ class AuthService with LoggerMixin<AuthService> {
         ),
       );
 
-      await _saveAuthTokensResponse(result);
+      await _authStorageService.saveAuthTokensResponse(result);
 
       if (result.accessToken == null ||
           JwtDecoder.isExpired(result.accessToken!)) {
-        await _clearTokens();
+        await _authStorageService.clearTokens();
         throw Exception(
           'Access token is invalid or expired immediately after sign-up',
         );
       }
 
-      final claims = await _authClaims;
+      final claims = await _authStorageService.authClaims;
       log.info('Sign-up successful for user: ${claims?.preferredUsername}');
       return claims;
     } on Object catch (e, s) {
@@ -113,7 +108,7 @@ class AuthService with LoggerMixin<AuthService> {
     log.fine('Starting logout process');
 
     try {
-      final idToken = await _authTokenOperator.idToken;
+      final idToken = await _authStorageService.idToken;
 
       if (idToken != null) {
         await _appAuth.endSession(
@@ -136,13 +131,15 @@ class AuthService with LoggerMixin<AuthService> {
       );
       return true;
     } finally {
-      await _clearTokens();
+      await _authStorageService.clearTokens();
     }
   }
 
   /// Try to refresh the access token silently using the stored refresh token.
   Future<bool> tryRefreshToken() async {
+    log.fine('Initiating silent token refresh attempt');
     final refreshStatus = await _tryRefreshTokenInternal();
+    log.info('Refresh token attempt completed with status: $refreshStatus');
     return refreshStatus == _RefreshAttemptStatus.refreshed;
   }
 
@@ -150,7 +147,7 @@ class AuthService with LoggerMixin<AuthService> {
     log.fine('Attempting to refresh access token silently');
 
     try {
-      final refreshToken = await _authTokenOperator.refreshToken;
+      final refreshToken = await _authStorageService.refreshToken;
       if (refreshToken == null) {
         log.fine('No refresh token found in storage. Aborting refresh.');
         return _RefreshAttemptStatus.invalidSession;
@@ -167,12 +164,12 @@ class AuthService with LoggerMixin<AuthService> {
         ),
       );
 
-      await _saveTokenResponse(result);
+      await _authStorageService.saveTokenResponse(result);
       log.info('Silent token refresh successful');
       return _RefreshAttemptStatus.refreshed;
     } on FlutterAppAuthPlatformException catch (e, s) {
       if (_isAuthorizationFailure(e)) {
-        await _clearTokens();
+        await _authStorageService.clearTokens();
         log.info(
           () =>
               'Silent token refresh detected an invalid remote session '
@@ -235,7 +232,7 @@ class AuthService with LoggerMixin<AuthService> {
     final refreshStatus = await _tryRefreshTokenInternal();
     switch (refreshStatus) {
       case _RefreshAttemptStatus.refreshed:
-        return await isAccessTokenValid
+        return await _authStorageService.isAccessTokenValid
             ? AuthSessionOnlineStatus.valid
             : AuthSessionOnlineStatus.invalid;
       case _RefreshAttemptStatus.invalidSession:
@@ -243,139 +240,5 @@ class AuthService with LoggerMixin<AuthService> {
       case _RefreshAttemptStatus.transientFailure:
         return AuthSessionOnlineStatus.unknown;
     }
-  }
-
-  Future<bool> get isAccessTokenValid async {
-    final accessToken = await _authTokenOperator.accessToken;
-    if (accessToken == null) {
-      log.fine('No access token found in storage');
-      return false;
-    } else if (JwtDecoder.isExpired(accessToken)) {
-      log.fine(
-        () =>
-            'Access token is expired. Expiration date: '
-            '${JwtDecoder.getExpirationDate(accessToken)}',
-      );
-      return false;
-    } else {
-      log.fine('Access token is valid');
-      return true;
-    }
-  }
-
-  Future<AuthClaims?> get authClaimsIfValid async {
-    if (await isAccessTokenValid) {
-      final claims = await _authClaims;
-      log.fine(
-        () =>
-            'Access token is valid. Retrieving auth claims for user: '
-            '${claims?.preferredUsername}',
-      );
-      return claims;
-    }
-    log.fine('Access token is invalid or expired. No auth claims available.');
-    return null;
-  }
-
-  Future<AuthClaims?> get _authClaims async {
-    final authClaimsModel = await _authClaimsOperator.get();
-    return authClaimsModel?.authClaims;
-  }
-
-  Future<void> _saveAuthTokensResponse(
-    AuthorizationTokenResponse response,
-  ) async {
-    final accessToken = response.accessToken;
-    final refreshToken = response.refreshToken;
-    final idToken = response.idToken;
-
-    if (accessToken == null || refreshToken == null || idToken == null) {
-      throw Exception('Missing tokens in the response');
-    }
-
-    await _saveTokens(
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-      idToken: idToken,
-    );
-  }
-
-  Future<void> _saveTokenResponse(TokenResponse response) async {
-    final accessToken = response.accessToken;
-    final refreshToken = response.refreshToken;
-    final idToken = response.idToken;
-
-    if (accessToken == null || refreshToken == null || idToken == null) {
-      throw Exception('Missing tokens in the response');
-    }
-
-    await _saveTokens(
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-      idToken: idToken,
-    );
-  }
-
-  Future<void> _saveTokens({
-    required String accessToken,
-    required String refreshToken,
-    required String idToken,
-  }) async {
-    final tokens = AuthTokens(
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-      idToken: idToken,
-    );
-    final claims = _extractAllClaims(tokens);
-
-    await _authTokenOperator.put(AuthTokenStorageModel(authTokens: tokens));
-    await _authClaimsOperator.put(AuthClaimsStorageModel(authClaims: claims));
-  }
-
-  Future<void> _clearTokens() async {
-    await _authTokenOperator.clear();
-    await _authClaimsOperator.clear();
-  }
-
-  AuthClaims _extractAllClaims(AuthTokens tokens) {
-    final accessToken = tokens.accessToken;
-    final refreshToken = tokens.refreshToken;
-    final idToken = tokens.idToken;
-
-    final accessClaims = JwtDecoder.decode(accessToken);
-    final refreshClaims = JwtDecoder.decode(refreshToken);
-    final idClaims = idToken != null ? JwtDecoder.decode(idToken) : null;
-
-    // mandatory claims from access token
-    final sub = accessClaims['sub'];
-    final preferredUsername = accessClaims['preferred_username'];
-    if (sub == null || preferredUsername == null) {
-      throw Exception(
-        'Missing mandatory claims in access token. '
-        'sub: $sub, preferred_username: $preferredUsername',
-      );
-    }
-    if (sub is! String || preferredUsername is! String) {
-      throw Exception(
-        'Invalid claim types in access token. '
-        'Expected sub and preferred_username to be strings. '
-        'Got sub: ${sub.runtimeType}, '
-        'preferred_username: ${preferredUsername.runtimeType}',
-      );
-    }
-
-    // optional claims from access token
-    final firstName = accessClaims['first_name'];
-    final lastName = accessClaims['last_name'];
-
-    return AuthClaims(
-      accessTokenClaims: accessClaims,
-      refreshTokenClaims: refreshClaims,
-      idTokenClaims: idClaims ?? {},
-      sub: sub,
-      preferredUsername: preferredUsername,
-      firstName: firstName?.toString(),
-      lastName: lastName?.toString(),
-    );
   }
 }

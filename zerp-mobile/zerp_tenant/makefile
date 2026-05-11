@@ -1,7 +1,8 @@
 OPENAPI_CODEGEN_VERSION := 7.20.0
 OPENAPI_CODEGEN_JAR := ./openapi-generator-cli-$(OPENAPI_CODEGEN_VERSION).jar
-CUSTOM_CODEGEN_VERSION := 0.1.11
+CUSTOM_CODEGEN_VERSION := 0.1.12
 CUSTOM_CODEGEN_JAR := ./openapi-dart-network-codegen-$(CUSTOM_CODEGEN_VERSION).jar
+CONFIG_FILE := openapi-conf.yaml
 GENERATOR := dart-network
 SPECS_DIR := ./openapi-specs
 
@@ -111,6 +112,7 @@ generate-merged-api: download-openapi-cli-if-not-exists download-codegen-if-not-
 	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
 	   -i $(MERGED_SPEC_FILE) \
 	   -g $(GENERATOR) \
+	   -c $(CONFIG_FILE) \
 	   -p pubName=$(MERGED_PUB_NAME) \
 	   -o $(MERGED_OUTPUT_DIR)
 
@@ -120,6 +122,7 @@ generate-crm-api: download-openapi-cli-if-not-exists download-codegen-if-not-exi
 	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
 	   -i $(CRM_SPEC_FILE) \
 	   -g $(GENERATOR) \
+	   -c $(CONFIG_FILE) \
 	   -p pubName=$(CRM_PUB_NAME) \
 	   -o $(CRM_OUTPUT_DIR)
 
@@ -129,6 +132,7 @@ generate-employee-api: download-openapi-cli-if-not-exists download-codegen-if-no
 	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
 	   -i $(EMPLOYEE_SPEC_FILE) \
 	   -g $(GENERATOR) \
+	   -c $(CONFIG_FILE) \
 	   -p pubName=$(EMPLOYEE_PUB_NAME) \
 	   -o $(EMPLOYEE_OUTPUT_DIR)
 
@@ -138,6 +142,7 @@ generate-notification-api: download-openapi-cli-if-not-exists download-codegen-i
 	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
 	   -i $(NOTIFICATION_SPEC_FILE) \
 	   -g $(GENERATOR) \
+	   -c $(CONFIG_FILE) \
 	   -p pubName=$(NOTIFICATION_PUB_NAME) \
 	   -o $(NOTIFICATION_OUTPUT_DIR)
 
@@ -147,6 +152,7 @@ generate-resource-api: download-openapi-cli-if-not-exists download-codegen-if-no
 	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
 	   -i $(RESOURCE_SPEC_FILE) \
 	   -g $(GENERATOR) \
+	   -c $(CONFIG_FILE) \
 	   -p pubName=$(RESOURCE_PUB_NAME) \
 	   -o $(RESOURCE_OUTPUT_DIR)
 
@@ -156,6 +162,7 @@ generate-sale-api: download-openapi-cli-if-not-exists download-codegen-if-not-ex
 	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
 	   -i $(SALE_SPEC_FILE) \
 	   -g $(GENERATOR) \
+	   -c $(CONFIG_FILE) \
 	   -p pubName=$(SALE_PUB_NAME) \
 	   -o $(SALE_OUTPUT_DIR)
 
@@ -165,6 +172,7 @@ generate-suggestion-api: download-openapi-cli-if-not-exists download-codegen-if-
 	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
 	   -i $(SUGGESTION_SPEC_FILE) \
 	   -g $(GENERATOR) \
+	   -c $(CONFIG_FILE) \
 	   -p pubName=$(SUGGESTION_PUB_NAME) \
 	   -o $(SUGGESTION_OUTPUT_DIR)
 
@@ -174,6 +182,7 @@ generate-user-api: download-openapi-cli-if-not-exists download-codegen-if-not-ex
 	java -cp $(OPENAPI_CODEGEN_JAR):$(CUSTOM_CODEGEN_JAR) org.openapitools.codegen.OpenAPIGenerator generate \
 	   -i $(USER_SPEC_FILE) \
 	   -g $(GENERATOR) \
+	   -c $(CONFIG_FILE) \
 	   -p pubName=$(USER_PUB_NAME) \
 	   -o $(USER_OUTPUT_DIR)
 

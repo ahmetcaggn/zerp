@@ -2,15 +2,14 @@ import 'package:dart_network_layer_dio/dart_network_layer_dio.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
+import 'package:zerp_tenant/product/service/auth/auth_storage_service.dart';
 
 @injectable
 class NetworkManager {
-  NetworkManager(this._cubitAuth)
+  NetworkManager(this._cubitAuth, this._authStorageService)
     : apiInvoker = DioNetworkInvoker.fromDio(
         Dio(
-          BaseOptions(
-            baseUrl: 'https://dev.api.femrek.dev',
-          ),
+          BaseOptions(baseUrl: 'https://zerpapi.femrek.dev'),
         ),
       ),
       remoteLogInvoker = DioNetworkInvoker.fromBaseUrl(
@@ -18,6 +17,13 @@ class NetworkManager {
       ) {
     apiInvoker.dio.interceptors.add(
       QueuedInterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final accessToken = await _authStorageService.accessToken;
+          if (accessToken != null) {
+            options.headers['Authorization'] = 'Bearer $accessToken';
+          }
+          handler.next(options);
+        },
         onError: (error, handler) async {
           if (error.response?.statusCode == 401) {
             await _checkSessionAfterUnauthorized();
@@ -32,6 +38,7 @@ class NetworkManager {
   final DioNetworkInvoker remoteLogInvoker;
 
   final CubitAuth _cubitAuth;
+  final AuthStorageService _authStorageService;
 
   Future<void>? _ongoingUnauthorizedCheck;
 

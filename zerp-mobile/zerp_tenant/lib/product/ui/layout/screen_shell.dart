@@ -48,8 +48,10 @@ class ScreenShell extends StatelessWidget {
               tabsRouter.setActiveIndex(index);
               Navigator.of(context).pop();
             },
+            onTapProfile: () {
+              unawaited(context.router.push(const RouteProfile()));
+            },
             onTapSettings: () {
-              Navigator.of(context).pop();
               unawaited(context.router.push(const RouteSettings()));
             },
           ),

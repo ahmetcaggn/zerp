@@ -5,12 +5,14 @@ class AppDrawer extends StatelessWidget {
   const AppDrawer({
     required this.activeIndex,
     required this.onSelectSection,
+    required this.onTapProfile,
     required this.onTapSettings,
     super.key,
   });
 
   final int activeIndex;
   final ValueChanged<int> onSelectSection;
+  final VoidCallback onTapProfile;
   final VoidCallback onTapSettings;
 
   @override
@@ -85,6 +87,11 @@ class AppDrawer extends StatelessWidget {
             onTap: () => onSelectSection(5),
           ),
           const Divider(),
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: Text(context.t.shell.profile),
+            onTap: onTapProfile,
+          ),
           ListTile(
             leading: const Icon(Icons.settings),
             title: Text(context.t.shell.settings),
