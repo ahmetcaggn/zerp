@@ -10,23 +10,23 @@
 import 'package:openapi_crm/api.dart';
 import 'package:test/test.dart';
 
-// tests for UpdateTeamRequest
+// tests for TeamMemberCandidateResponse
 void main() {
-  // final instance = UpdateTeamRequest();
+  // final instance = TeamMemberCandidateResponse();
 
-  group('test UpdateTeamRequest', () {
-    // String name
-    test('to test the property `name`', () async {
+  group('test TeamMemberCandidateResponse', () {
+    // String id
+    test('to test the property `id`', () async {
       // TODO
     });
 
-    // String description
-    test('to test the property `description`', () async {
+    // String username
+    test('to test the property `username`', () async {
       // TODO
     });
 
-    // String type
-    test('to test the property `type`', () async {
+    // String email
+    test('to test the property `email`', () async {
       // TODO
     });
 

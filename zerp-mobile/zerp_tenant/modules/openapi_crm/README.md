@@ -76,6 +76,7 @@ Class | Method | HTTP request | Description
 *TeamsGetListTeamsApi* | [**getListTeams**](doc//TeamsGetListTeamsApi.md#) | **GET** /crm/teams | GetList: Get paginated list of entities with filtering
 *TeamsGetManyTeamsApi* | [**getManyTeams**](doc//TeamsGetManyTeamsApi.md#) | **GET** /crm/teams/many | GetMany: Get multiple entities by IDs
 *TeamsGetOneTeamApi* | [**getOneTeam**](doc//TeamsGetOneTeamApi.md#) | **GET** /crm/teams/{id} | GetOne: Get single entity by ID
+*TeamsListTeamMemberCandidatesApi* | [**listTeamMemberCandidates**](doc//TeamsListTeamMemberCandidatesApi.md#) | **GET** /crm/teams/{id}/member-candidates | 
 *TeamsPatchManyTeamsApi* | [**patchManyTeams**](doc//TeamsPatchManyTeamsApi.md#) | **PATCH** /crm/teams | UpdateMany: Update multiple entities
 *TeamsPatchTeamApi* | [**patchTeam**](doc//TeamsPatchTeamApi.md#) | **PATCH** /crm/teams/{id} | Update: Update an existing entity
 *TeamsRemoveTeamMemberApi* | [**removeTeamMember**](doc//TeamsRemoveTeamMemberApi.md#) | **DELETE** /crm/teams/{id}/members/{userId} | 
@@ -95,6 +96,7 @@ Class | Method | HTTP request | Description
 
  - [AddCommentRequest](doc//AddCommentRequest.md)
  - [AddMemberRequest](doc//AddMemberRequest.md)
+ - [ApiResponseListTeamMemberCandidateResponse](doc//ApiResponseListTeamMemberCandidateResponse.md)
  - [ApiResponseListTeamResponse](doc//ApiResponseListTeamResponse.md)
  - [ApiResponseListTicketResponse](doc//ApiResponseListTicketResponse.md)
  - [ApiResponseListUUID](doc//ApiResponseListUUID.md)
@@ -112,6 +114,7 @@ Class | Method | HTTP request | Description
  - [Meta](doc//Meta.md)
  - [Parameter](doc//Parameter.md)
  - [SlaTrackingResponse](doc//SlaTrackingResponse.md)
+ - [TeamMemberCandidateResponse](doc//TeamMemberCandidateResponse.md)
  - [TeamMemberResponse](doc//TeamMemberResponse.md)
  - [TeamResponse](doc//TeamResponse.md)
  - [TicketAssignmentResponse](doc//TicketAssignmentResponse.md)

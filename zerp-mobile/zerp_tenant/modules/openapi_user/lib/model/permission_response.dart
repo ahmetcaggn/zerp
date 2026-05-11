@@ -210,6 +210,7 @@ class PermissionResponseTargetTypeEnum {
   static const TEAM = PermissionResponseTargetTypeEnum._(r'TEAM');
   static const TEAM_MEMBER = PermissionResponseTargetTypeEnum._(r'TEAM_MEMBER');
   static const SHOP = PermissionResponseTargetTypeEnum._(r'SHOP');
+  static const SHOP_TABLE = PermissionResponseTargetTypeEnum._(r'SHOP_TABLE');
   static const STOCK_MOVEMENT = PermissionResponseTargetTypeEnum._(r'STOCK_MOVEMENT');
   static const STOCK_COUNT = PermissionResponseTargetTypeEnum._(r'STOCK_COUNT');
   static const PRODUCT = PermissionResponseTargetTypeEnum._(r'PRODUCT');
@@ -236,6 +237,7 @@ class PermissionResponseTargetTypeEnum {
     TEAM,
     TEAM_MEMBER,
     SHOP,
+    SHOP_TABLE,
     STOCK_MOVEMENT,
     STOCK_COUNT,
     PRODUCT,
@@ -297,6 +299,7 @@ class PermissionResponseTargetTypeEnumTypeTransformer {
         case r'TEAM': return PermissionResponseTargetTypeEnum.TEAM;
         case r'TEAM_MEMBER': return PermissionResponseTargetTypeEnum.TEAM_MEMBER;
         case r'SHOP': return PermissionResponseTargetTypeEnum.SHOP;
+        case r'SHOP_TABLE': return PermissionResponseTargetTypeEnum.SHOP_TABLE;
         case r'STOCK_MOVEMENT': return PermissionResponseTargetTypeEnum.STOCK_MOVEMENT;
         case r'STOCK_COUNT': return PermissionResponseTargetTypeEnum.STOCK_COUNT;
         case r'PRODUCT': return PermissionResponseTargetTypeEnum.PRODUCT;

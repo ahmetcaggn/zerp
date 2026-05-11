@@ -14,6 +14,7 @@ class UpdateTeamRequest extends Schema {
   UpdateTeamRequest({
     this.name,
     this.description,
+    this.type,
   });
 
   ///
@@ -32,22 +33,26 @@ class UpdateTeamRequest extends Schema {
   ///
   final String? description;
 
+  final UpdateTeamRequestTypeEnum? type;
+
   /// The factory instance for creating [UpdateTeamRequest] from JSON.
   static const factory = UpdateTeamRequestFactory();
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UpdateTeamRequest &&
     other.name == name &&
-    other.description == description;
+    other.description == description &&
+    other.type == type;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (name == null ? 0 : name!.hashCode) +
-    (description == null ? 0 : description!.hashCode);
+    (description == null ? 0 : description!.hashCode) +
+    (type == null ? 0 : type!.hashCode);
 
   @override
-  String toString() => 'UpdateTeamRequest[name=$name, description=$description]';
+  String toString() => 'UpdateTeamRequest[name=$name, description=$description, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -60,6 +65,11 @@ class UpdateTeamRequest extends Schema {
       json[r'description'] = this.description;
     } else {
       json[r'description'] = null;
+    }
+    if (this.type != null) {
+      json[r'type'] = this.type;
+    } else {
+      json[r'type'] = null;
     }
     return json;
   }
@@ -85,6 +95,7 @@ class UpdateTeamRequest extends Schema {
       return UpdateTeamRequest(
         name: json[r'name'] is String ? json[r'name'] as String : null,
         description: json[r'description'] is String ? json[r'description'] as String : null,
+        type: UpdateTeamRequestTypeEnum.fromJson(json[r'type']),
       );
     }
     return null;
@@ -142,4 +153,78 @@ class UpdateTeamRequestFactory extends JsonSchemaFactory<UpdateTeamRequest> {
   @override
   UpdateTeamRequest fromJson(dynamic json) => UpdateTeamRequest.fromJson(json)!;
 }
+
+
+class UpdateTeamRequestTypeEnum {
+  /// Instantiate a new enum with the provided [value].
+  const UpdateTeamRequestTypeEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const SERVICE_LEVEL = UpdateTeamRequestTypeEnum._(r'SERVICE_LEVEL');
+  static const QUESTION = UpdateTeamRequestTypeEnum._(r'QUESTION');
+
+  /// List of all possible values in this [enum][UpdateTeamRequestTypeEnum].
+  static const values = <UpdateTeamRequestTypeEnum>[
+    SERVICE_LEVEL,
+    QUESTION,
+  ];
+
+  static UpdateTeamRequestTypeEnum? fromJson(dynamic value) => UpdateTeamRequestTypeEnumTypeTransformer().decode(value);
+
+  static List<UpdateTeamRequestTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <UpdateTeamRequestTypeEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = UpdateTeamRequestTypeEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [UpdateTeamRequestTypeEnum] to String,
+/// and [decode] dynamic data back to [UpdateTeamRequestTypeEnum].
+class UpdateTeamRequestTypeEnumTypeTransformer {
+  factory UpdateTeamRequestTypeEnumTypeTransformer() => _instance ??= const UpdateTeamRequestTypeEnumTypeTransformer._();
+
+  const UpdateTeamRequestTypeEnumTypeTransformer._();
+
+  String encode(UpdateTeamRequestTypeEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a UpdateTeamRequestTypeEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  UpdateTeamRequestTypeEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'SERVICE_LEVEL': return UpdateTeamRequestTypeEnum.SERVICE_LEVEL;
+        case r'QUESTION': return UpdateTeamRequestTypeEnum.QUESTION;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [UpdateTeamRequestTypeEnumTypeTransformer] instance.
+  static UpdateTeamRequestTypeEnumTypeTransformer? _instance;
+}
+
 

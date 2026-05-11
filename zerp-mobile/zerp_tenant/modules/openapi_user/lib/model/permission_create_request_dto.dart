@@ -193,6 +193,7 @@ class PermissionCreateRequestDTOTargetTypeEnum {
   static const TEAM = PermissionCreateRequestDTOTargetTypeEnum._(r'TEAM');
   static const TEAM_MEMBER = PermissionCreateRequestDTOTargetTypeEnum._(r'TEAM_MEMBER');
   static const SHOP = PermissionCreateRequestDTOTargetTypeEnum._(r'SHOP');
+  static const SHOP_TABLE = PermissionCreateRequestDTOTargetTypeEnum._(r'SHOP_TABLE');
   static const STOCK_MOVEMENT = PermissionCreateRequestDTOTargetTypeEnum._(r'STOCK_MOVEMENT');
   static const STOCK_COUNT = PermissionCreateRequestDTOTargetTypeEnum._(r'STOCK_COUNT');
   static const PRODUCT = PermissionCreateRequestDTOTargetTypeEnum._(r'PRODUCT');
@@ -219,6 +220,7 @@ class PermissionCreateRequestDTOTargetTypeEnum {
     TEAM,
     TEAM_MEMBER,
     SHOP,
+    SHOP_TABLE,
     STOCK_MOVEMENT,
     STOCK_COUNT,
     PRODUCT,
@@ -280,6 +282,7 @@ class PermissionCreateRequestDTOTargetTypeEnumTypeTransformer {
         case r'TEAM': return PermissionCreateRequestDTOTargetTypeEnum.TEAM;
         case r'TEAM_MEMBER': return PermissionCreateRequestDTOTargetTypeEnum.TEAM_MEMBER;
         case r'SHOP': return PermissionCreateRequestDTOTargetTypeEnum.SHOP;
+        case r'SHOP_TABLE': return PermissionCreateRequestDTOTargetTypeEnum.SHOP_TABLE;
         case r'STOCK_MOVEMENT': return PermissionCreateRequestDTOTargetTypeEnum.STOCK_MOVEMENT;
         case r'STOCK_COUNT': return PermissionCreateRequestDTOTargetTypeEnum.STOCK_COUNT;
         case r'PRODUCT': return PermissionCreateRequestDTOTargetTypeEnum.PRODUCT;

@@ -16,6 +16,7 @@ class TeamResponse extends Schema {
     this.id,
     this.name,
     this.description,
+    this.type,
     this.isActive,
     this.members = const [],
   });
@@ -50,6 +51,14 @@ class TeamResponse extends Schema {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
+  final String? type;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
   final bool? isActive;
 
   final List<TeamMemberResponse> members;
@@ -62,6 +71,7 @@ class TeamResponse extends Schema {
     other.id == id &&
     other.name == name &&
     other.description == description &&
+    other.type == type &&
     other.isActive == isActive &&
     other.members == members;
 
@@ -71,11 +81,12 @@ class TeamResponse extends Schema {
     (id == null ? 0 : id!.hashCode) +
     (name == null ? 0 : name!.hashCode) +
     (description == null ? 0 : description!.hashCode) +
+    (type == null ? 0 : type!.hashCode) +
     (isActive == null ? 0 : isActive!.hashCode) +
     (members.hashCode);
 
   @override
-  String toString() => 'TeamResponse[id=$id, name=$name, description=$description, isActive=$isActive, members=$members]';
+  String toString() => 'TeamResponse[id=$id, name=$name, description=$description, type=$type, isActive=$isActive, members=$members]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -93,6 +104,11 @@ class TeamResponse extends Schema {
       json[r'description'] = this.description;
     } else {
       json[r'description'] = null;
+    }
+    if (this.type != null) {
+      json[r'type'] = this.type;
+    } else {
+      json[r'type'] = null;
     }
     if (this.isActive != null) {
       json[r'isActive'] = this.isActive;
@@ -125,6 +141,7 @@ class TeamResponse extends Schema {
         id: json[r'id'] is String ? json[r'id'] as String : null,
         name: json[r'name'] is String ? json[r'name'] as String : null,
         description: json[r'description'] is String ? json[r'description'] as String : null,
+        type: json[r'type'] is String ? json[r'type'] as String : null,
         isActive: json[r'isActive'] is bool ? json[r'isActive'] as bool : null,
         members: TeamMemberResponse.listFromJson(json[r'members']),
       );

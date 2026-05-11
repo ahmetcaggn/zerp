@@ -54,7 +54,7 @@ class GetListStockMovementCommand extends OpenapiDefinitionBaseRequest<ApiRespon
     if (sort != null) QueryParameter(key: r'_sort', value: sort),
     if (order != null) QueryParameter(key: r'_order', value: order),
     if (embed != null) QueryParameter(key: r'_embed', value: embed),
-    QueryParameter(key: r'allParams', value: allParams),
+    ...allParams.entries.map((e) => QueryParameter(key: e.key, value: e.value.toString())),
   ];
 
   @override

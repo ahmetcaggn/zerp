@@ -275,17 +275,13 @@ class CreateTicketRequestTypeEnum {
 
   String toJson() => value;
 
-  static const BUG = CreateTicketRequestTypeEnum._(r'BUG');
-  static const FEATURE_REQUEST = CreateTicketRequestTypeEnum._(r'FEATURE_REQUEST');
+  static const SERVICE_LEVEL = CreateTicketRequestTypeEnum._(r'SERVICE_LEVEL');
   static const QUESTION = CreateTicketRequestTypeEnum._(r'QUESTION');
-  static const INCIDENT = CreateTicketRequestTypeEnum._(r'INCIDENT');
 
   /// List of all possible values in this [enum][CreateTicketRequestTypeEnum].
   static const values = <CreateTicketRequestTypeEnum>[
-    BUG,
-    FEATURE_REQUEST,
+    SERVICE_LEVEL,
     QUESTION,
-    INCIDENT,
   ];
 
   static CreateTicketRequestTypeEnum? fromJson(dynamic value) => CreateTicketRequestTypeEnumTypeTransformer().decode(value);
@@ -324,10 +320,8 @@ class CreateTicketRequestTypeEnumTypeTransformer {
   CreateTicketRequestTypeEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'BUG': return CreateTicketRequestTypeEnum.BUG;
-        case r'FEATURE_REQUEST': return CreateTicketRequestTypeEnum.FEATURE_REQUEST;
+        case r'SERVICE_LEVEL': return CreateTicketRequestTypeEnum.SERVICE_LEVEL;
         case r'QUESTION': return CreateTicketRequestTypeEnum.QUESTION;
-        case r'INCIDENT': return CreateTicketRequestTypeEnum.INCIDENT;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

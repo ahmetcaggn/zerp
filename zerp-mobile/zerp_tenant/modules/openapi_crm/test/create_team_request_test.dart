@@ -25,6 +25,11 @@ void main() {
       // TODO
     });
 
+    // String type
+    test('to test the property `type`', () async {
+      // TODO
+    });
+
 
   });
 

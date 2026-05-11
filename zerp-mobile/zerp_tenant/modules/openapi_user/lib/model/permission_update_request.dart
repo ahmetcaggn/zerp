@@ -193,6 +193,7 @@ class PermissionUpdateRequestTargetTypeEnum {
   static const TEAM = PermissionUpdateRequestTargetTypeEnum._(r'TEAM');
   static const TEAM_MEMBER = PermissionUpdateRequestTargetTypeEnum._(r'TEAM_MEMBER');
   static const SHOP = PermissionUpdateRequestTargetTypeEnum._(r'SHOP');
+  static const SHOP_TABLE = PermissionUpdateRequestTargetTypeEnum._(r'SHOP_TABLE');
   static const STOCK_MOVEMENT = PermissionUpdateRequestTargetTypeEnum._(r'STOCK_MOVEMENT');
   static const STOCK_COUNT = PermissionUpdateRequestTargetTypeEnum._(r'STOCK_COUNT');
   static const PRODUCT = PermissionUpdateRequestTargetTypeEnum._(r'PRODUCT');
@@ -219,6 +220,7 @@ class PermissionUpdateRequestTargetTypeEnum {
     TEAM,
     TEAM_MEMBER,
     SHOP,
+    SHOP_TABLE,
     STOCK_MOVEMENT,
     STOCK_COUNT,
     PRODUCT,
@@ -280,6 +282,7 @@ class PermissionUpdateRequestTargetTypeEnumTypeTransformer {
         case r'TEAM': return PermissionUpdateRequestTargetTypeEnum.TEAM;
         case r'TEAM_MEMBER': return PermissionUpdateRequestTargetTypeEnum.TEAM_MEMBER;
         case r'SHOP': return PermissionUpdateRequestTargetTypeEnum.SHOP;
+        case r'SHOP_TABLE': return PermissionUpdateRequestTargetTypeEnum.SHOP_TABLE;
         case r'STOCK_MOVEMENT': return PermissionUpdateRequestTargetTypeEnum.STOCK_MOVEMENT;
         case r'STOCK_COUNT': return PermissionUpdateRequestTargetTypeEnum.STOCK_COUNT;
         case r'PRODUCT': return PermissionUpdateRequestTargetTypeEnum.PRODUCT;

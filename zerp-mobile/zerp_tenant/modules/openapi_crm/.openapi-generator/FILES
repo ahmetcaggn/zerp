@@ -4,6 +4,7 @@ README.md
 analysis_options.yaml
 doc/AddCommentRequest.md
 doc/AddMemberRequest.md
+doc/ApiResponseListTeamMemberCandidateResponse.md
 doc/ApiResponseListTeamResponse.md
 doc/ApiResponseListTicketResponse.md
 doc/ApiResponseListUUID.md
@@ -21,6 +22,7 @@ doc/CreateTicketRequest.md
 doc/Meta.md
 doc/Parameter.md
 doc/SlaTrackingResponse.md
+doc/TeamMemberCandidateResponse.md
 doc/TeamMemberResponse.md
 doc/TeamResponse.md
 doc/TeamTicketsAddTicketCommentApi.md
@@ -39,6 +41,7 @@ doc/TeamsDeleteTeamApi.md
 doc/TeamsGetListTeamsApi.md
 doc/TeamsGetManyTeamsApi.md
 doc/TeamsGetOneTeamApi.md
+doc/TeamsListTeamMemberCandidatesApi.md
 doc/TeamsPatchManyTeamsApi.md
 doc/TeamsPatchTeamApi.md
 doc/TeamsRemoveTeamMemberApi.md
@@ -62,6 +65,7 @@ lib/base/api_config.dart
 lib/base/base_request.dart
 lib/model/add_comment_request.dart
 lib/model/add_member_request.dart
+lib/model/api_response_list_team_member_candidate_response.dart
 lib/model/api_response_list_team_response.dart
 lib/model/api_response_list_ticket_response.dart
 lib/model/api_response_list_uuid.dart
@@ -79,6 +83,7 @@ lib/model/create_ticket_request.dart
 lib/model/meta.dart
 lib/model/parameter.dart
 lib/model/sla_tracking_response.dart
+lib/model/team_member_candidate_response.dart
 lib/model/team_member_response.dart
 lib/model/team_response.dart
 lib/model/ticket_assignment_response.dart
@@ -102,6 +107,7 @@ lib/requests/teams/delete_team_command.dart
 lib/requests/teams/get_list_teams_command.dart
 lib/requests/teams/get_many_teams_command.dart
 lib/requests/teams/get_one_team_command.dart
+lib/requests/teams/list_team_member_candidates_command.dart
 lib/requests/teams/patch_many_teams_command.dart
 lib/requests/teams/patch_team_command.dart
 lib/requests/teams/remove_team_member_command.dart
@@ -118,6 +124,7 @@ lib/requests/tenant_tickets/update_tenant_ticket_command.dart
 pubspec.yaml
 test/add_comment_request_test.dart
 test/add_member_request_test.dart
+test/api_response_list_team_member_candidate_response_test.dart
 test/api_response_list_team_response_test.dart
 test/api_response_list_ticket_response_test.dart
 test/api_response_list_uuid_test.dart
@@ -135,6 +142,7 @@ test/create_ticket_request_test.dart
 test/meta_test.dart
 test/parameter_test.dart
 test/sla_tracking_response_test.dart
+test/team_member_candidate_response_test.dart
 test/team_member_response_test.dart
 test/team_response_test.dart
 test/team_tickets/add_ticket_comment_command_test.dart
@@ -153,6 +161,7 @@ test/teams/delete_team_command_test.dart
 test/teams/get_list_teams_command_test.dart
 test/teams/get_many_teams_command_test.dart
 test/teams/get_one_team_command_test.dart
+test/teams/list_team_member_candidates_command_test.dart
 test/teams/patch_many_teams_command_test.dart
 test/teams/patch_team_command_test.dart
 test/teams/remove_team_member_command_test.dart

@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **id** | **String** |  | [optional] 
 **name** | **String** |  | [optional] 
 **description** | **String** |  | [optional] 
+**type** | **String** |  | [optional] 
 **isActive** | **bool** |  | [optional] 
 **members** | [**List<TeamMemberResponse>**](TeamMemberResponse.md) |  | [optional] [default to const []]
 

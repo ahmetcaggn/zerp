@@ -30,6 +30,11 @@ void main() {
       // TODO
     });
 
+    // String type
+    test('to test the property `type`', () async {
+      // TODO
+    });
+
     // bool isActive
     test('to test the property `isActive`', () async {
       // TODO
