@@ -83,7 +83,7 @@ public interface IResourceController<T, LT, C, U, ID> {
             @RequestParam(name = "_order", required = false, defaultValue = "ASC") String _order,
             @Parameter(description = "Optional parameter to embed related resources (implementation-specific)")
             @RequestParam(name = "_embed", required = false) String _embed,
-            @Parameter(description = "Additional query parameters for filtering by entity fields", hidden = true)
+            @Parameter(description = "Additional query parameters for filtering by entity fields")
             @RequestParam Map<String, String> allParams
     );
 
