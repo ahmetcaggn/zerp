@@ -1,5 +1,8 @@
 package org.zerp.common.resource.config;
 
+import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.media.IntegerSchema;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -162,8 +165,9 @@ public class ResourcesOpenAPIConfig {
     }
 
     @Bean
-    public OpenApiCustomizer removeDuplicateGenericTag() {
+    public OpenApiCustomizer openApiConfiguration() {
         return openApi -> {
+            // Insert server URLs from config
             if (serverUrls != null && !serverUrls.isEmpty()) {
                 List<Server> servers = serverUrls.stream()
                         .filter(url -> !url.isBlank())
@@ -174,14 +178,27 @@ public class ResourcesOpenAPIConfig {
                 }
             }
 
+            // Clean operations AND check if generic tag is needed. Also add header info to getList operations.
             AtomicBoolean isGenericTagUsedAlone = new AtomicBoolean(false);
-
-            // Clean operations AND check if generic tag is needed
             openApi.getPaths().values().stream()
                     .flatMap(pathItem -> pathItem.readOperations().stream())
                     .forEach(operation -> {
-                        List<String> tags = operation.getTags();
+                        // Add header info if it is a getList
+                        final String currentOperationId = operation.getOperationId();
+                        if ("getList".equals(currentOperationId)) {
+                            if (operation.getResponses() != null) {
+                                ApiResponse okResponse = operation.getResponses().get("200");
+                                if (okResponse != null) {
+                                    Header xTotalCount = new Header()
+                                            .description("Total number of entities matching the filter")
+                                            .schema(new IntegerSchema());
+                                    okResponse.addHeaderObject("X-Total-Count", xTotalCount);
+                                }
+                            }
+                        }
 
+                        // Check if have multiple tags
+                        List<String> tags = operation.getTags();
                         if (tags != null && tags.contains(GENERIC_TAG)) {
                             if (tags.size() > 1) {
                                 // CASE 1: Generic tag + Specific tag exist.
@@ -192,7 +209,6 @@ public class ResourcesOpenAPIConfig {
                                 // Singular operations: singularize the tag (getPost, createPost, …)
                                 // Plural  operations: keep the tag as-is  (listPosts, getManyPosts, …)
                                 String resourceTag = tags.getFirst();
-                                String currentOperationId = operation.getOperationId();
                                 if (resourceTag != null && currentOperationId != null) {
                                     String resourceName;
                                     if (SINGULAR_OPERATION_IDS.contains(currentOperationId)) {
