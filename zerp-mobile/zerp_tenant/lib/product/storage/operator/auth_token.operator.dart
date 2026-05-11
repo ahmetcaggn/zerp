@@ -4,7 +4,7 @@ import 'package:zerp_tenant/product/model/auth_tokens.dart';
 import 'package:zerp_tenant/product/storage/core/storage_base_operator.dart';
 import 'package:zerp_tenant/product/storage/model/auth_token.storage_model.dart';
 
-@injectable
+@lazySingleton
 class AuthTokenOperator extends SingleStorageOperator<AuthTokenStorageModel> {
   AuthTokenOperator(this._s);
 

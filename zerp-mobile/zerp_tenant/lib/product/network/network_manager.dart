@@ -4,7 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
 import 'package:zerp_tenant/product/service/auth/auth_storage_service.dart';
 
-@injectable
+@lazySingleton
 class NetworkManager {
   NetworkManager(this._cubitAuth, this._authStorageService)
     : apiInvoker = DioNetworkInvoker.fromDio(

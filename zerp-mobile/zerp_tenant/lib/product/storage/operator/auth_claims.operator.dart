@@ -4,7 +4,7 @@ import 'package:zerp_tenant/product/storage/core/storage_base_operator.dart';
 import 'package:zerp_tenant/product/storage/model/auth_claims.storage_model.dart';
 import 'package:zerp_tenant/product/storage/storage_initializer.dart';
 
-@injectable
+@lazySingleton
 class AuthClaimsOperator extends SingleStorageOperator<AuthClaimsStorageModel> {
   static const String _keyAuthClaims = 'auth_claims';
 

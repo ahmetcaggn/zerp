@@ -17,7 +17,7 @@ enum _RefreshAttemptStatus {
   transientFailure,
 }
 
-@injectable
+@lazySingleton
 final class AuthService with LoggerMixin<AuthService> {
   AuthService(this._appAuth, this._authStorageService);
 

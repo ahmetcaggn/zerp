@@ -13,7 +13,7 @@ import 'package:zerp_tenant/product/storage/operator/device_id.operator.dart';
 /// - Device ID: Persisted securely using platform-specific secure storage
 /// - Session ID: Generated fresh on each app launch
 /// - Device Metadata: OS, model, manufacturer, etc.
-@injectable
+@lazySingleton
 final class DeviceIdGenerator implements IDeviceDataGenerator {
   DeviceIdGenerator(this._deviceIdOperator);
 

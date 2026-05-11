@@ -40,26 +40,28 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final serviceModule = _$ServiceModule();
     gh.factory<_i477.CubitProfile>(() => _i477.CubitProfile());
-    gh.factory<_i301.AuthClaimsOperator>(() => _i301.AuthClaimsOperator());
-    gh.factory<_i447.DeviceIdOperator>(() => _i447.DeviceIdOperator());
     gh.lazySingleton<_i337.FlutterAppAuth>(() => serviceModule.appAuth);
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => serviceModule.secureStorage,
     );
     gh.lazySingleton<_i139.CubitError>(() => _i139.CubitError());
-    gh.factory<_i600.DeviceIdGenerator>(
+    gh.lazySingleton<_i301.AuthClaimsOperator>(
+      () => _i301.AuthClaimsOperator(),
+    );
+    gh.lazySingleton<_i447.DeviceIdOperator>(() => _i447.DeviceIdOperator());
+    gh.lazySingleton<_i600.DeviceIdGenerator>(
       () => _i600.DeviceIdGenerator(gh<_i447.DeviceIdOperator>()),
     );
-    gh.factory<_i145.AuthTokenOperator>(
+    gh.lazySingleton<_i145.AuthTokenOperator>(
       () => _i145.AuthTokenOperator(gh<_i558.FlutterSecureStorage>()),
     );
-    gh.factory<_i40.AuthStorageService>(
+    gh.lazySingleton<_i40.AuthStorageService>(
       () => _i40.AuthStorageService(
         gh<_i145.AuthTokenOperator>(),
         gh<_i301.AuthClaimsOperator>(),
       ),
     );
-    gh.factory<_i238.AuthService>(
+    gh.lazySingleton<_i238.AuthService>(
       () => _i238.AuthService(
         gh<_i337.FlutterAppAuth>(),
         gh<_i40.AuthStorageService>(),
@@ -71,19 +73,19 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i40.AuthStorageService>(),
       ),
     );
-    gh.factory<_i475.NetworkManager>(
+    gh.lazySingleton<_i475.NetworkManager>(
       () => _i475.NetworkManager(
         gh<_i200.CubitAuth>(),
         gh<_i40.AuthStorageService>(),
       ),
     );
-    gh.factory<_i84.AuthGuard>(
+    gh.singleton<_i84.AuthGuard>(
       () => _i84.AuthGuard(
         gh<_i40.AuthStorageService>(),
         gh<_i238.AuthService>(),
       ),
     );
-    gh.factory<_i545.PermissionService>(
+    gh.lazySingleton<_i545.PermissionService>(
       () => _i545.PermissionService(
         networkManager: gh<_i475.NetworkManager>(),
         authStorageService: gh<_i40.AuthStorageService>(),

@@ -6,7 +6,7 @@ import 'package:zerp_tenant/product/error/http_exception.dart';
 import 'package:zerp_tenant/product/error/unauthenticated_exception.dart';
 import 'package:zerp_tenant/product/service/service_base.dart';
 
-@injectable
+@lazySingleton
 final class PermissionService extends ServiceBase
     with LoggerMixin<PermissionService> {
   PermissionService({

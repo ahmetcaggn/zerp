@@ -9,7 +9,7 @@ import 'package:zerp_tenant/product/storage/model/auth_token.storage_model.dart'
 import 'package:zerp_tenant/product/storage/operator/auth_claims.operator.dart';
 import 'package:zerp_tenant/product/storage/operator/auth_token.operator.dart';
 
-@injectable
+@lazySingleton
 final class AuthStorageService with LoggerMixin<AuthStorageService> {
   AuthStorageService(
     this._authTokenOperator,

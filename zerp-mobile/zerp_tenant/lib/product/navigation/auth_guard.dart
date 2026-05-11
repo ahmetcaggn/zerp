@@ -4,7 +4,7 @@ import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/service/auth/auth_service.dart';
 import 'package:zerp_tenant/product/service/auth/auth_storage_service.dart';
 
-@injectable
+@singleton
 class AuthGuard extends AutoRouteGuard {
   AuthGuard(this._authStorageService, this._authService);
 

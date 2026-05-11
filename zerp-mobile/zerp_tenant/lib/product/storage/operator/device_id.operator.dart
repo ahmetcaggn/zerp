@@ -4,7 +4,7 @@ import 'package:zerp_tenant/product/storage/core/storage_base_operator.dart';
 import 'package:zerp_tenant/product/storage/model/device_id.storage_model.dart';
 import 'package:zerp_tenant/product/storage/storage_initializer.dart';
 
-@injectable
+@lazySingleton
 class DeviceIdOperator extends SingleStorageOperator<DeviceIdStorageModel> {
   static const String _key = 'device_id';
 
