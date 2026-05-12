@@ -4,7 +4,9 @@ import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/error/error_to_present.dart';
 import 'package:zerp_tenant/product/error/http_exception.dart';
 import 'package:zerp_tenant/product/error/unauthenticated_exception.dart';
+import 'package:zerp_tenant/product/network/page_response.dart';
 import 'package:zerp_tenant/product/service/service_base.dart';
+import 'package:zerp_tenant/product/util/network_result_extension.dart';
 
 @lazySingleton
 final class PermissionService extends ServiceBase
@@ -16,7 +18,9 @@ final class PermissionService extends ServiceBase
     required super.cubitAuth,
   });
 
-  Future<List<PermissionResponse>> getAllOwnedPermissions() async {
+  Future<PageResponse<PermissionResponse>> getAllOwnedPermissions([
+    PageRequest pageRequest = PageRequest.all,
+  ]) async {
     late final String userId;
     try {
       userId = await getUserId();
@@ -38,11 +42,31 @@ final class PermissionService extends ServiceBase
       rethrow;
     }
 
+    return _getPermissions(
+      pageRequest: pageRequest,
+      additionalParams: {'userId.eq': userId},
+    );
+  }
+
+  Future<PageResponse<PermissionResponse>> getPermissionsOfUser({
+    required String userId,
+    PageRequest pageRequest = PageRequest.all,
+  }) async {
+    return _getPermissions(
+      pageRequest: pageRequest,
+      additionalParams: {'userId.eq': userId},
+    );
+  }
+
+  Future<PageResponse<PermissionResponse>> _getPermissions({
+    required PageRequest pageRequest,
+    required Map<String, String> additionalParams,
+  }) async {
     final res = await invoker.send(
       GetListPermissionsCommand(
-        start: 0,
-        end: 10_000,
-        allParams: {'userId.eq': userId},
+        start: pageRequest.start,
+        end: pageRequest.end,
+        allParams: additionalParams,
       ),
     );
 
@@ -61,8 +85,22 @@ final class PermissionService extends ServiceBase
 
       case SuccessResponseResult<ApiResponseListPermissionResponse>():
         final permissions = res.data.data;
+        final totalCount = res.totalCountHeader;
+        if (totalCount == null) {
+          log.severe('Total count header is missing in the response');
+          cubitError.enqueue(
+            const ErrorToPresent(
+              message: 'Total count of permissions is missing in the response',
+            ),
+          );
+        }
+
         log.info('Fetched ${permissions.length} permissions');
-        return permissions;
+        return PageResponse(
+          req: pageRequest,
+          items: permissions,
+          totalCount: totalCount,
+        );
 
       case SpecifiedResponseResult<ApiResponseListPermissionResponse>():
         log.warning('Received unsuccessful response: ${res.statusCode}');

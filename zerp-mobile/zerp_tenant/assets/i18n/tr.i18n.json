@@ -51,5 +51,19 @@
     "permissions": {
       "title": "İzinler"
     }
+  },
+  "permissionViewer": {
+    "title": "İzinler",
+    "total": "Toplam izin: $count",
+    "empty": "Henüz izin yok",
+    "manage": "İzinleri yönet"
+  },
+  "widgets": {
+    "permissionViewer": {
+      "title": "İzinler",
+      "total": "Toplam izin: $count",
+      "empty": "Henüz izin yok",
+      "manage": "İzinleri yönet"
+    }
   }
 }

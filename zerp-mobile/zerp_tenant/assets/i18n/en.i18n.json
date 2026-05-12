@@ -51,5 +51,19 @@
     "permissions": {
       "title": "Permissions"
     }
+  },
+  "permissionViewer": {
+    "title": "Permissions",
+    "total": "Total permissions: $count",
+    "empty": "No permissions yet",
+    "manage": "Manage permissions"
+  },
+  "widgets": {
+    "permissionViewer": {
+      "title": "Permissions",
+      "total": "Total permissions: $count",
+      "empty": "No permissions yet",
+      "manage": "Manage permissions"
+    }
   }
 }

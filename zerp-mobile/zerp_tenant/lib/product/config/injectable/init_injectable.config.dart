@@ -14,6 +14,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
+import '../../../feature/permission_viewer/cubit/cubit_permission_view.dart'
+    as _i871;
 import '../../../feature/profile/cubit/cubit_profile.dart' as _i477;
 import '../../../feature/profile/cubit/permission/cubit_profile_permissions.dart'
     as _i170;
@@ -92,6 +94,9 @@ extension GetItInjectableX on _i174.GetIt {
         cubitError: gh<_i139.CubitError>(),
         cubitAuth: gh<_i200.CubitAuth>(),
       ),
+    );
+    gh.factory<_i871.CubitPermissionView>(
+      () => _i871.CubitPermissionView(gh<_i545.PermissionService>()),
     );
     gh.factory<_i170.CubitProfilePermissions>(
       () => _i170.CubitProfilePermissions(gh<_i545.PermissionService>()),

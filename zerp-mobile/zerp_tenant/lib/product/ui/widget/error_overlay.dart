@@ -11,7 +11,7 @@ class ErrorOverlay extends StatelessWidget with LoggerMixinConst<ErrorOverlay> {
   Widget build(BuildContext context) {
     return BlocBuilder<CubitError, StateError>(
       builder: (context, state) {
-        log.info('Building ErrorOverlay with state: $state');
+        log.fine('Building ErrorOverlay with state: $state');
         if (state.messages.isEmpty) {
           return const SizedBox.shrink();
         }

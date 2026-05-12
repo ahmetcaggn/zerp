@@ -38,7 +38,7 @@ dependencies:
     path: modules/openapi_suggestion
   openapi_user:
     path: modules/openapi_user
-  dart_network_layer_dio: 1.0.0-dev.11
+  dart_network_layer_dio: 1.0.0-dev.12
   dio: ^5.9.0
 
   # Storage
