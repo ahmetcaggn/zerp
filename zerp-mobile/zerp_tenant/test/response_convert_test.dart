@@ -67,8 +67,7 @@ void main() {
           expect(employee?.id, '37bcbc9b-02f6-4a17-84ff-6c8b412ef51a');
 
         case NetworkErrorResult<ApiResponseEmployeeResponseDto>():
-          print(result.error.stackTrace);
-          fail('Network error: ${result.error}');
+          fail('Network error: ${result.error}\n${result.error.stackTrace}');
         case SpecifiedResponseResult<ApiResponseEmployeeResponseDto>():
           fail('Unsuccessful response: ${result.statusCode}');
       }
