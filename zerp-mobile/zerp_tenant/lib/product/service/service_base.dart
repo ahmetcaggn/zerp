@@ -55,4 +55,34 @@ abstract class ServiceBase {
 
     return userId;
   }
+
+  NetworkErrorBase onNetworkError<T extends Schema>(NetworkErrorResult<T> res) {
+    _log.warning(
+      'Network error while fetching $T: ${res.error.message}',
+      res.error,
+      res.error.stackTrace,
+    );
+    if (res.error is! RequestCancelledError) {
+      cubitError.enqueue(
+        ErrorToPresent(
+          message: 'Failed to fetch $T: ${res.error.message}',
+        ),
+      );
+    }
+    return res.error;
+  }
+
+  Exception onUnsuccessfulResponse<T extends Schema>(
+    SpecifiedResponseResult<T> res,
+  ) {
+    _log.warning(
+      'Unsuccessful response while fetching $T: ${res.statusCode} ${res.type}',
+    );
+    cubitError.enqueue(
+      ErrorToPresent(
+        message: 'Failed to fetch $T: ${res.statusCode} ${res.type}',
+      ),
+    );
+    return Exception('Unsuccessful response: ${res.statusCode} ${res.type}');
+  }
 }

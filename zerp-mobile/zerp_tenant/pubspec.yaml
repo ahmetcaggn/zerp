@@ -38,7 +38,7 @@ dependencies:
     path: modules/openapi_suggestion
   openapi_user:
     path: modules/openapi_user
-  dart_network_layer_dio: 1.0.0-dev.11
+  dart_network_layer_dio: 1.0.0-dev.12
   dio: ^5.9.0
 
   # Storage
@@ -75,6 +75,7 @@ dev_dependencies:
   json_serializable: ^6.13.1
   slang_build_runner: ^4.14.0
   very_good_analysis: ^10.2.0
+  http_test_server: ^0.1.1
 
 flutter:
   uses-material-design: true

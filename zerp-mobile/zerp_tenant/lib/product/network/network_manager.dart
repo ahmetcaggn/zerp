@@ -2,12 +2,13 @@ import 'package:dart_network_layer_dio/dart_network_layer_dio.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
+import 'package:zerp_tenant/product/network/api_network_invoker.dart';
 import 'package:zerp_tenant/product/service/auth/auth_storage_service.dart';
 
 @lazySingleton
 class NetworkManager {
   NetworkManager(this._cubitAuth, this._authStorageService)
-    : apiInvoker = DioNetworkInvoker.fromDio(
+    : apiInvoker = ApiNetworkInvoker.fromDio(
         Dio(
           BaseOptions(baseUrl: 'https://zerpapi.femrek.dev'),
         ),

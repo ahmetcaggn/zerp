@@ -8,10 +8,22 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:dart_network_layer_core/dart_network_layer_core.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'meta.dart';
 import 'parameter.dart';
 import 'user_response_dto.dart';
 
+
+part 'api_response_user_response_dto.g.dart';
+
+
+
+@JsonSerializable(
+  checked: true,
+  createToJson: true,
+  disallowUnrecognizedKeys: false,
+  explicitToJson: true,
+)
 class ApiResponseUserResponseDTO extends Schema {
   /// Returns a new [ApiResponseUserResponseDTO] instance.
   ApiResponseUserResponseDTO({
@@ -23,139 +35,36 @@ class ApiResponseUserResponseDTO extends Schema {
     this.parameters = const [],
   });
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'success')
   final bool? success;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'statusCode')
   final int? statusCode;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'message')
   final String? message;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'data')
   final UserResponseDTO? data;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'meta')
   final Meta? meta;
 
+  @JsonKey(name: r'parameters')
   final List<Parameter> parameters;
 
   /// The factory instance for creating [ApiResponseUserResponseDTO] from JSON.
   static const factory = ApiResponseUserResponseDTOFactory();
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is ApiResponseUserResponseDTO &&
-    other.success == success &&
-    other.statusCode == statusCode &&
-    other.message == message &&
-    other.data == data &&
-    other.meta == meta &&
-    other.parameters == parameters;
+  factory ApiResponseUserResponseDTO.fromJson(Map<String, dynamic> json) => _$ApiResponseUserResponseDTOFromJson(json);
 
-  @override
-  int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (success == null ? 0 : success!.hashCode) +
-    (statusCode == null ? 0 : statusCode!.hashCode) +
-    (message == null ? 0 : message!.hashCode) +
-    (data == null ? 0 : data!.hashCode) +
-    (meta == null ? 0 : meta!.hashCode) +
-    (parameters.hashCode);
-
-  @override
-  String toString() => 'ApiResponseUserResponseDTO[success=$success, statusCode=$statusCode, message=$message, data=$data, meta=$meta, parameters=$parameters]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.success != null) {
-      json[r'success'] = this.success;
-    } else {
-      json[r'success'] = null;
-    }
-    if (this.statusCode != null) {
-      json[r'statusCode'] = this.statusCode;
-    } else {
-      json[r'statusCode'] = null;
-    }
-    if (this.message != null) {
-      json[r'message'] = this.message;
-    } else {
-      json[r'message'] = null;
-    }
-    if (this.data != null) {
-      json[r'data'] = this.data;
-    } else {
-      json[r'data'] = null;
-    }
-    if (this.meta != null) {
-      json[r'meta'] = this.meta;
-    } else {
-      json[r'meta'] = null;
-    }
-      json[r'parameters'] = this.parameters;
-    return json;
-  }
-
-  /// Returns a new [ApiResponseUserResponseDTO] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static ApiResponseUserResponseDTO? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "ApiResponseUserResponseDTO[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "ApiResponseUserResponseDTO[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return ApiResponseUserResponseDTO(
-        success: json[r'success'] is bool ? json[r'success'] as bool : null,
-        statusCode: json[r'statusCode'] is int ? json[r'statusCode'] as int : null,
-        message: json[r'message'] is String ? json[r'message'] as String : null,
-        data: UserResponseDTO.fromJson(json[r'data']),
-        meta: Meta.fromJson(json[r'meta']),
-        parameters: Parameter.listFromJson(json[r'parameters']),
-      );
-    }
-    return null;
-  }
+  Map<String, dynamic> toJson() => _$ApiResponseUserResponseDTOToJson(this);
 
   static List<ApiResponseUserResponseDTO> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ApiResponseUserResponseDTO>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = ApiResponseUserResponseDTO.fromJson(row);
+        final value = ApiResponseUserResponseDTO.fromJson(row as Map<String, dynamic>);
         if (value != null) {
           result.add(value);
         }
@@ -169,7 +78,7 @@ class ApiResponseUserResponseDTO extends Schema {
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = ApiResponseUserResponseDTO.fromJson(entry.value);
+        final value = ApiResponseUserResponseDTO.fromJson(entry.value as Map<String, dynamic>);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -177,30 +86,15 @@ class ApiResponseUserResponseDTO extends Schema {
     }
     return map;
   }
-
-  // maps a json object with a list of ApiResponseUserResponseDTO-objects as value to a dart map
-  static Map<String, List<ApiResponseUserResponseDTO>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<ApiResponseUserResponseDTO>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = ApiResponseUserResponseDTO.listFromJson(entry.value, growable: growable,);
-      }
-    }
-    return map;
-  }
-
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
 }
 
-/// Factory for creating [ApiResponseUserResponseDTO] instances from JSON data.
 class ApiResponseUserResponseDTOFactory extends JsonSchemaFactory<ApiResponseUserResponseDTO> {
   const ApiResponseUserResponseDTOFactory();
 
   @override
-  ApiResponseUserResponseDTO fromJson(dynamic json) => ApiResponseUserResponseDTO.fromJson(json)!;
+  ApiResponseUserResponseDTO fromJson(dynamic json) => ApiResponseUserResponseDTO.fromJson(json as Map<String, dynamic>);
 }
+
+
+
 

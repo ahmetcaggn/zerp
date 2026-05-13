@@ -189,18 +189,18 @@ packages:
     dependency: transitive
     description:
       name: dart_network_layer_core
-      sha256: "2287c66989576603c71f896ec8e9d3021fdd79aa006a182772388c2489900745"
+      sha256: "822609130c85ec2263b4f4289d186860c1197ae110fe46ef4d6b43d6204e5ab5"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0-dev.11"
+    version: "1.0.0-dev.12"
   dart_network_layer_dio:
     dependency: "direct main"
     description:
       name: dart_network_layer_dio
-      sha256: c577401f270c592cd6d294cee285ff151913f790b1f3085bca9284988bcc8504
+      sha256: "1972ec8b4fb2ce758b7342c784b29de9bed9fe71dfe28ca5e857cab6b4102445"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0-dev.11"
+    version: "1.0.0-dev.12"
   dart_style:
     dependency: transitive
     description:
@@ -453,6 +453,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  http_test_server:
+    dependency: "direct dev"
+    description:
+      name: http_test_server
+      sha256: "7160d5a2cab873e6c75bc88959c73a2e3256316fe4cd5202920d78e823336979"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.1"
   injectable:
     dependency: "direct main"
     description:

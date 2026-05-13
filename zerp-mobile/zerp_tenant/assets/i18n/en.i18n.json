@@ -44,12 +44,104 @@
   },
   "common": {
     "hello": "Hello $name",
-    "save": "Save"
+    "save": "Save",
+    "required": "Required",
+    "error": "Error: $message",
+    "unknown": "Unknown",
+    "ok": "OK"
+  },
+  "employee": {
+    "list": {
+      "title": "Employees ($total)",
+      "loading": "Loading...",
+      "error": "Failed to load employees. Please try again.",
+      "retry": "Retry",
+      "statusUnknown": "Unknown Status",
+      "noEmployees": "No employees yet",
+      "create": "Create Employee"
+    },
+    "create": {
+      "title": "Create Employee",
+      "username": "Username",
+      "check": "Check",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "tempPassword": "Temporary Password",
+      "phoneNumber": "Phone Number (Optional)",
+      "submit": "Create",
+      "success": "Employee created successfully!",
+      "checkUsernameFirst": "Please check username availability first",
+      "required": "${target} is required",
+      "usernameTaken": "Username is already taken"
+    },
+    "edit": {
+      "title": "Edit Employee",
+      "firstName": "First Name *",
+      "lastName": "Last Name *",
+      "email": "Email *",
+      "phoneNumber": "Phone Number",
+      "nationalId": "National ID",
+      "salary": "Salary",
+      "submit": "Submit",
+      "success": "Employee updated successfully!"
+    },
+    "details": {
+      "title": "Employee Details",
+      "username": "Username",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phoneNumber": "Phone Number",
+      "nationalId": "National ID",
+      "dateOfBirth": "Date of Birth",
+      "hireDate": "Hire Date",
+      "salary": "Salary",
+      "manager": "Manager",
+      "terminationDate": "Termination Date",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "contacts": "Contacts",
+      "contactPerson": "Person: $name",
+      "relationship": "Relationship: $relationship",
+      "errors": {
+        "missingId": "Employee ID is missing for $name",
+        "noIdProvided": "Employee ID is not provided"
+      }
+    }
   },
   "profile": {
     "title": "Profile",
     "permissions": {
       "title": "Permissions"
+    }
+  },
+  "permissionViewer": {
+    "title": "Permissions",
+    "total": "Total permissions: $count",
+    "empty": "No permissions yet",
+    "manage": "Manage permissions",
+    "target": "Target: $targetType",
+    "id": "ID: $targetId"
+  },
+  "permissionManage": {
+    "title": "Create Permission",
+    "action": "Action *",
+    "targetType": "Target Type *",
+    "targetId": "Target ID (Optional for global actions)",
+    "targetIdHint": "Enter ID for $type",
+    "submit": "Create Permission",
+    "success": "Permission created successfully",
+    "errorSelectAction": "Please select action and target type",
+    "errorLoadActions": "Failed to load permission actions: $error",
+    "errorCreatePermission": "Failed to create permission: $error"
+  },
+  "widgets": {
+    "permissionViewer": {
+      "title": "Permissions",
+      "total": "Total permissions: $count",
+      "empty": "No permissions yet",
+      "manage": "Manage permissions"
     }
   }
 }

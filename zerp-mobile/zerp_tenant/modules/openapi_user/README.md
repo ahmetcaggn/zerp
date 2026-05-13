@@ -41,14 +41,14 @@ Please follow the [installation procedure](#installation--usage) and then run th
 import 'package:openapi_user/api.dart';
 
 
-final api_instance = FeignKeycloakCreateUser1Api();
-final keycloakCreateUserRequestDTO = KeycloakCreateUserRequestDTO(); // KeycloakCreateUserRequestDTO | 
+final api_instance = PermissionsCreatePermissionApi();
+final permissionCreateRequestDTO = PermissionCreateRequestDTO(); // PermissionCreateRequestDTO | 
 
 try {
-    final result = api_instance.createUser1(keycloakCreateUserRequestDTO);
+    final result = api_instance.createPermission(permissionCreateRequestDTO);
     print(result);
 } catch (e) {
-    print('Exception when calling FeignKeycloakCreateUser1Api->createUser1: $e\n');
+    print('Exception when calling PermissionsCreatePermissionApi->createPermission: $e\n');
 }
 
 ```
@@ -59,10 +59,6 @@ All URIs are relative to *https://zerpapi.femrek.dev*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*FeignKeycloakCreateUser1Api* | [**createUser1**](doc//FeignKeycloakCreateUser1Api.md#) | **POST** /feign/keycloak/users | 
-*FeignKeycloakDeleteUser2Api* | [**deleteUser2**](doc//FeignKeycloakDeleteUser2Api.md#) | **DELETE** /feign/keycloak/users/{id} | 
-*FeignUserCheckUserExistsApi* | [**checkUserExists**](doc//FeignUserCheckUserExistsApi.md#) | **POST** /feign/users | 
-*FeignUserDeleteUser1Api* | [**deleteUser1**](doc//FeignUserDeleteUser1Api.md#) | **DELETE** /feign/users/{id} | 
 *PermissionsCreatePermissionApi* | [**createPermission**](doc//PermissionsCreatePermissionApi.md#) | **POST** /user/permissions | Create: Create a new entity
 *PermissionsDeleteManyPermissionsApi* | [**deleteManyPermissions**](doc//PermissionsDeleteManyPermissionsApi.md#) | **DELETE** /user/permissions | DeleteMany: Delete multiple entities
 *PermissionsDeletePermissionApi* | [**deletePermission**](doc//PermissionsDeletePermissionApi.md#) | **DELETE** /user/permissions/{id} | Delete: Delete a single entity
@@ -87,26 +83,20 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
- - [ApiResponseKeycloakCreateUserResponseDTO](doc//ApiResponseKeycloakCreateUserResponseDTO.md)
  - [ApiResponseListLong](doc//ApiResponseListLong.md)
- - [ApiResponseListPermissionAction](doc//ApiResponseListPermissionAction.md)
  - [ApiResponseListPermissionResponse](doc//ApiResponseListPermissionResponse.md)
  - [ApiResponseListUUID](doc//ApiResponseListUUID.md)
  - [ApiResponseListUserResponseDTO](doc//ApiResponseListUserResponseDTO.md)
+ - [ApiResponseMapPermissionActionListPermissionTargetType](doc//ApiResponseMapPermissionActionListPermissionTargetType.md)
  - [ApiResponsePermissionResponse](doc//ApiResponsePermissionResponse.md)
- - [ApiResponseUserCheckResponseDTO](doc//ApiResponseUserCheckResponseDTO.md)
  - [ApiResponseUserResponseDTO](doc//ApiResponseUserResponseDTO.md)
  - [ApiResponseUsernameCheckResponseDTO](doc//ApiResponseUsernameCheckResponseDTO.md)
  - [ApiResponseVoid](doc//ApiResponseVoid.md)
- - [KeycloakCreateUserRequestDTO](doc//KeycloakCreateUserRequestDTO.md)
- - [KeycloakCreateUserResponseDTO](doc//KeycloakCreateUserResponseDTO.md)
  - [Meta](doc//Meta.md)
  - [Parameter](doc//Parameter.md)
  - [PermissionCreateRequestDTO](doc//PermissionCreateRequestDTO.md)
  - [PermissionResponse](doc//PermissionResponse.md)
  - [PermissionUpdateRequest](doc//PermissionUpdateRequest.md)
- - [UserCheckResponseDTO](doc//UserCheckResponseDTO.md)
- - [UserCreateIfNotExistRequestDTO](doc//UserCreateIfNotExistRequestDTO.md)
  - [UserResponseDTO](doc//UserResponseDTO.md)
  - [UsernameCheckResponseDTO](doc//UsernameCheckResponseDTO.md)
 

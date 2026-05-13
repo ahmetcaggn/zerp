@@ -16,7 +16,7 @@ class CubitProfilePermissions extends BaseCubit<StateProfilePermissions>
     emit(const StateProfilePermissionsLoading());
     try {
       final permissions = await _permissionService.getAllOwnedPermissions();
-      emit(StateProfilePermissionsLoaded(permissions: permissions));
+      emit(StateProfilePermissionsLoaded(permissions: permissions.items));
     } on Object catch (e) {
       log.severe('Error loading permissions: $e');
       emit(
