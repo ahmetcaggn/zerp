@@ -10,5 +10,8 @@ environment:
   sdk: '>=3.6.0 <4.0.0'
 dependencies:
   dart_network_layer_core: '1.0.0-dev.12'
+  json_annotation: ^4.9.0
 dev_dependencies:
   test: '>=1.21.6 <2.0.0'
+  build_runner: ^2.4.0
+  json_serializable: ^6.9.0

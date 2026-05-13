@@ -8,76 +8,40 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:dart_network_layer_core/dart_network_layer_core.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+
+part 'user_check_response_dto.g.dart';
+
+
+
+@JsonSerializable(
+  checked: true,
+  createToJson: true,
+  disallowUnrecognizedKeys: false,
+  explicitToJson: true,
+)
 class UserCheckResponseDTO extends Schema {
   /// Returns a new [UserCheckResponseDTO] instance.
   UserCheckResponseDTO({
     this.valid,
   });
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'valid')
   final bool? valid;
 
   /// The factory instance for creating [UserCheckResponseDTO] from JSON.
   static const factory = UserCheckResponseDTOFactory();
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is UserCheckResponseDTO &&
-    other.valid == valid;
+  factory UserCheckResponseDTO.fromJson(Map<String, dynamic> json) => _$UserCheckResponseDTOFromJson(json);
 
-  @override
-  int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (valid == null ? 0 : valid!.hashCode);
-
-  @override
-  String toString() => 'UserCheckResponseDTO[valid=$valid]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.valid != null) {
-      json[r'valid'] = this.valid;
-    } else {
-      json[r'valid'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [UserCheckResponseDTO] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static UserCheckResponseDTO? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UserCheckResponseDTO[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UserCheckResponseDTO[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return UserCheckResponseDTO(
-        valid: json[r'valid'] is bool ? json[r'valid'] as bool : null,
-      );
-    }
-    return null;
-  }
+  Map<String, dynamic> toJson() => _$UserCheckResponseDTOToJson(this);
 
   static List<UserCheckResponseDTO> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <UserCheckResponseDTO>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = UserCheckResponseDTO.fromJson(row);
+        final value = UserCheckResponseDTO.fromJson(row as Map<String, dynamic>);
         if (value != null) {
           result.add(value);
         }
@@ -91,7 +55,7 @@ class UserCheckResponseDTO extends Schema {
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = UserCheckResponseDTO.fromJson(entry.value);
+        final value = UserCheckResponseDTO.fromJson(entry.value as Map<String, dynamic>);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -99,30 +63,15 @@ class UserCheckResponseDTO extends Schema {
     }
     return map;
   }
-
-  // maps a json object with a list of UserCheckResponseDTO-objects as value to a dart map
-  static Map<String, List<UserCheckResponseDTO>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<UserCheckResponseDTO>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = UserCheckResponseDTO.listFromJson(entry.value, growable: growable,);
-      }
-    }
-    return map;
-  }
-
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
 }
 
-/// Factory for creating [UserCheckResponseDTO] instances from JSON data.
 class UserCheckResponseDTOFactory extends JsonSchemaFactory<UserCheckResponseDTO> {
   const UserCheckResponseDTOFactory();
 
   @override
-  UserCheckResponseDTO fromJson(dynamic json) => UserCheckResponseDTO.fromJson(json)!;
+  UserCheckResponseDTO fromJson(dynamic json) => UserCheckResponseDTO.fromJson(json as Map<String, dynamic>);
 }
+
+
+
 

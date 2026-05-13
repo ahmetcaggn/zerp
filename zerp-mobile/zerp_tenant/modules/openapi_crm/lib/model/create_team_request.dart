@@ -8,7 +8,19 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:dart_network_layer_core/dart_network_layer_core.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+
+part 'create_team_request.g.dart';
+
+
+
+@JsonSerializable(
+  checked: true,
+  createToJson: true,
+  disallowUnrecognizedKeys: false,
+  explicitToJson: true,
+)
 class CreateTeamRequest extends Schema {
   /// Returns a new [CreateTeamRequest] instance.
   CreateTeamRequest({
@@ -17,95 +29,27 @@ class CreateTeamRequest extends Schema {
     this.type,
   });
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'name')
   final String? name;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'description')
   final String? description;
 
+  @JsonKey(name: r'type')
   final CreateTeamRequestTypeEnum? type;
 
   /// The factory instance for creating [CreateTeamRequest] from JSON.
   static const factory = CreateTeamRequestFactory();
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is CreateTeamRequest &&
-    other.name == name &&
-    other.description == description &&
-    other.type == type;
+  factory CreateTeamRequest.fromJson(Map<String, dynamic> json) => _$CreateTeamRequestFromJson(json);
 
-  @override
-  int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (name == null ? 0 : name!.hashCode) +
-    (description == null ? 0 : description!.hashCode) +
-    (type == null ? 0 : type!.hashCode);
-
-  @override
-  String toString() => 'CreateTeamRequest[name=$name, description=$description, type=$type]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.name != null) {
-      json[r'name'] = this.name;
-    } else {
-      json[r'name'] = null;
-    }
-    if (this.description != null) {
-      json[r'description'] = this.description;
-    } else {
-      json[r'description'] = null;
-    }
-    if (this.type != null) {
-      json[r'type'] = this.type;
-    } else {
-      json[r'type'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [CreateTeamRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CreateTeamRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CreateTeamRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CreateTeamRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CreateTeamRequest(
-        name: json[r'name'] is String ? json[r'name'] as String : null,
-        description: json[r'description'] is String ? json[r'description'] as String : null,
-        type: CreateTeamRequestTypeEnum.fromJson(json[r'type']),
-      );
-    }
-    return null;
-  }
+  Map<String, dynamic> toJson() => _$CreateTeamRequestToJson(this);
 
   static List<CreateTeamRequest> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CreateTeamRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = CreateTeamRequest.fromJson(row);
+        final value = CreateTeamRequest.fromJson(row as Map<String, dynamic>);
         if (value != null) {
           result.add(value);
         }
@@ -119,7 +63,7 @@ class CreateTeamRequest extends Schema {
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CreateTeamRequest.fromJson(entry.value);
+        final value = CreateTeamRequest.fromJson(entry.value as Map<String, dynamic>);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -127,104 +71,31 @@ class CreateTeamRequest extends Schema {
     }
     return map;
   }
-
-  // maps a json object with a list of CreateTeamRequest-objects as value to a dart map
-  static Map<String, List<CreateTeamRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<CreateTeamRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CreateTeamRequest.listFromJson(entry.value, growable: growable,);
-      }
-    }
-    return map;
-  }
-
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
 }
 
-/// Factory for creating [CreateTeamRequest] instances from JSON data.
 class CreateTeamRequestFactory extends JsonSchemaFactory<CreateTeamRequest> {
   const CreateTeamRequestFactory();
 
   @override
-  CreateTeamRequest fromJson(dynamic json) => CreateTeamRequest.fromJson(json)!;
+  CreateTeamRequest fromJson(dynamic json) => CreateTeamRequest.fromJson(json as Map<String, dynamic>);
 }
 
 
-class CreateTeamRequestTypeEnum {
-  /// Instantiate a new enum with the provided [value].
-  const CreateTeamRequestTypeEnum._(this.value);
 
-  /// The underlying value of this enum member.
-  final String value;
+enum CreateTeamRequestTypeEnum {
+@JsonValue(r'SERVICE_LEVEL')
+SERVICE_LEVEL(r'SERVICE_LEVEL'),
+@JsonValue(r'QUESTION')
+QUESTION(r'QUESTION');
 
-  @override
-  String toString() => value;
+const CreateTeamRequestTypeEnum(this.value);
 
-  String toJson() => value;
+final String value;
 
-  static const SERVICE_LEVEL = CreateTeamRequestTypeEnum._(r'SERVICE_LEVEL');
-  static const QUESTION = CreateTeamRequestTypeEnum._(r'QUESTION');
-
-  /// List of all possible values in this [enum][CreateTeamRequestTypeEnum].
-  static const values = <CreateTeamRequestTypeEnum>[
-    SERVICE_LEVEL,
-    QUESTION,
-  ];
-
-  static CreateTeamRequestTypeEnum? fromJson(dynamic value) => CreateTeamRequestTypeEnumTypeTransformer().decode(value);
-
-  static List<CreateTeamRequestTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <CreateTeamRequestTypeEnum>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CreateTeamRequestTypeEnum.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
-  }
+@override
+String toString() => value;
 }
 
-/// Transformation class that can [encode] an instance of [CreateTeamRequestTypeEnum] to String,
-/// and [decode] dynamic data back to [CreateTeamRequestTypeEnum].
-class CreateTeamRequestTypeEnumTypeTransformer {
-  factory CreateTeamRequestTypeEnumTypeTransformer() => _instance ??= const CreateTeamRequestTypeEnumTypeTransformer._();
 
-  const CreateTeamRequestTypeEnumTypeTransformer._();
-
-  String encode(CreateTeamRequestTypeEnum data) => data.value;
-
-  /// Decodes a [dynamic value][data] to a CreateTeamRequestTypeEnum.
-  ///
-  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
-  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
-  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
-  ///
-  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
-  /// and users are still using an old app with the old code.
-  CreateTeamRequestTypeEnum? decode(dynamic data, {bool allowNull = true}) {
-    if (data != null) {
-      switch (data) {
-        case r'SERVICE_LEVEL': return CreateTeamRequestTypeEnum.SERVICE_LEVEL;
-        case r'QUESTION': return CreateTeamRequestTypeEnum.QUESTION;
-        default:
-          if (!allowNull) {
-            throw ArgumentError('Unknown enum value to decode: $data');
-          }
-      }
-    }
-    return null;
-  }
-
-  /// Singleton [CreateTeamRequestTypeEnumTypeTransformer] instance.
-  static CreateTeamRequestTypeEnumTypeTransformer? _instance;
-}
 
 

@@ -1,2 +1,3 @@
 additionalProperties:
+  serializationLibrary: json_serializable
   dartNetworkLayerVersion: "1.0.0-dev.12"

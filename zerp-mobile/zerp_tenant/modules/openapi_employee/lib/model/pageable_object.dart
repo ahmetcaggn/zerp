@@ -8,8 +8,20 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:dart_network_layer_core/dart_network_layer_core.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'sort_object.dart';
 
+
+part 'pageable_object.g.dart';
+
+
+
+@JsonSerializable(
+  checked: true,
+  createToJson: true,
+  disallowUnrecognizedKeys: false,
+  explicitToJson: true,
+)
 class PageableObject extends Schema {
   /// Returns a new [PageableObject] instance.
   PageableObject({
@@ -21,149 +33,36 @@ class PageableObject extends Schema {
     this.unpaged,
   });
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'offset')
   final int? offset;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'pageNumber')
   final int? pageNumber;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'pageSize')
   final int? pageSize;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'paged')
   final bool? paged;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'sort')
   final SortObject? sort;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'unpaged')
   final bool? unpaged;
 
   /// The factory instance for creating [PageableObject] from JSON.
   static const factory = PageableObjectFactory();
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is PageableObject &&
-    other.offset == offset &&
-    other.pageNumber == pageNumber &&
-    other.pageSize == pageSize &&
-    other.paged == paged &&
-    other.sort == sort &&
-    other.unpaged == unpaged;
+  factory PageableObject.fromJson(Map<String, dynamic> json) => _$PageableObjectFromJson(json);
 
-  @override
-  int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (offset == null ? 0 : offset!.hashCode) +
-    (pageNumber == null ? 0 : pageNumber!.hashCode) +
-    (pageSize == null ? 0 : pageSize!.hashCode) +
-    (paged == null ? 0 : paged!.hashCode) +
-    (sort == null ? 0 : sort!.hashCode) +
-    (unpaged == null ? 0 : unpaged!.hashCode);
-
-  @override
-  String toString() => 'PageableObject[offset=$offset, pageNumber=$pageNumber, pageSize=$pageSize, paged=$paged, sort=$sort, unpaged=$unpaged]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.offset != null) {
-      json[r'offset'] = this.offset;
-    } else {
-      json[r'offset'] = null;
-    }
-    if (this.pageNumber != null) {
-      json[r'pageNumber'] = this.pageNumber;
-    } else {
-      json[r'pageNumber'] = null;
-    }
-    if (this.pageSize != null) {
-      json[r'pageSize'] = this.pageSize;
-    } else {
-      json[r'pageSize'] = null;
-    }
-    if (this.paged != null) {
-      json[r'paged'] = this.paged;
-    } else {
-      json[r'paged'] = null;
-    }
-    if (this.sort != null) {
-      json[r'sort'] = this.sort;
-    } else {
-      json[r'sort'] = null;
-    }
-    if (this.unpaged != null) {
-      json[r'unpaged'] = this.unpaged;
-    } else {
-      json[r'unpaged'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [PageableObject] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static PageableObject? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "PageableObject[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "PageableObject[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return PageableObject(
-        offset: json[r'offset'] is int ? json[r'offset'] as int : null,
-        pageNumber: json[r'pageNumber'] is int ? json[r'pageNumber'] as int : null,
-        pageSize: json[r'pageSize'] is int ? json[r'pageSize'] as int : null,
-        paged: json[r'paged'] is bool ? json[r'paged'] as bool : null,
-        sort: SortObject.fromJson(json[r'sort']),
-        unpaged: json[r'unpaged'] is bool ? json[r'unpaged'] as bool : null,
-      );
-    }
-    return null;
-  }
+  Map<String, dynamic> toJson() => _$PageableObjectToJson(this);
 
   static List<PageableObject> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <PageableObject>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = PageableObject.fromJson(row);
+        final value = PageableObject.fromJson(row as Map<String, dynamic>);
         if (value != null) {
           result.add(value);
         }
@@ -177,7 +76,7 @@ class PageableObject extends Schema {
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = PageableObject.fromJson(entry.value);
+        final value = PageableObject.fromJson(entry.value as Map<String, dynamic>);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -185,30 +84,15 @@ class PageableObject extends Schema {
     }
     return map;
   }
-
-  // maps a json object with a list of PageableObject-objects as value to a dart map
-  static Map<String, List<PageableObject>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<PageableObject>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = PageableObject.listFromJson(entry.value, growable: growable,);
-      }
-    }
-    return map;
-  }
-
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
 }
 
-/// Factory for creating [PageableObject] instances from JSON data.
 class PageableObjectFactory extends JsonSchemaFactory<PageableObject> {
   const PageableObjectFactory();
 
   @override
-  PageableObject fromJson(dynamic json) => PageableObject.fromJson(json)!;
+  PageableObject fromJson(dynamic json) => PageableObject.fromJson(json as Map<String, dynamic>);
 }
+
+
+
 

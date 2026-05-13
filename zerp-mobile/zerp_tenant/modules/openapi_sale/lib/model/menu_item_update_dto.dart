@@ -8,7 +8,19 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:dart_network_layer_core/dart_network_layer_core.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+
+part 'menu_item_update_dto.g.dart';
+
+
+
+@JsonSerializable(
+  checked: true,
+  createToJson: true,
+  disallowUnrecognizedKeys: false,
+  explicitToJson: true,
+)
 class MenuItemUpdateDTO extends Schema {
   /// Returns a new [MenuItemUpdateDTO] instance.
   MenuItemUpdateDTO({
@@ -19,125 +31,33 @@ class MenuItemUpdateDTO extends Schema {
     this.productIds = const [],
   });
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'name')
   final String? name;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'description')
   final String? description;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'price')
   final num? price;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'imageId')
   final String? imageId;
 
+  @JsonKey(name: r'productIds')
   final List<String> productIds;
 
   /// The factory instance for creating [MenuItemUpdateDTO] from JSON.
   static const factory = MenuItemUpdateDTOFactory();
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is MenuItemUpdateDTO &&
-    other.name == name &&
-    other.description == description &&
-    other.price == price &&
-    other.imageId == imageId &&
-    other.productIds == productIds;
+  factory MenuItemUpdateDTO.fromJson(Map<String, dynamic> json) => _$MenuItemUpdateDTOFromJson(json);
 
-  @override
-  int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (name == null ? 0 : name!.hashCode) +
-    (description == null ? 0 : description!.hashCode) +
-    (price == null ? 0 : price!.hashCode) +
-    (imageId == null ? 0 : imageId!.hashCode) +
-    (productIds.hashCode);
-
-  @override
-  String toString() => 'MenuItemUpdateDTO[name=$name, description=$description, price=$price, imageId=$imageId, productIds=$productIds]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.name != null) {
-      json[r'name'] = this.name;
-    } else {
-      json[r'name'] = null;
-    }
-    if (this.description != null) {
-      json[r'description'] = this.description;
-    } else {
-      json[r'description'] = null;
-    }
-    if (this.price != null) {
-      json[r'price'] = this.price;
-    } else {
-      json[r'price'] = null;
-    }
-    if (this.imageId != null) {
-      json[r'imageId'] = this.imageId;
-    } else {
-      json[r'imageId'] = null;
-    }
-      json[r'productIds'] = this.productIds;
-    return json;
-  }
-
-  /// Returns a new [MenuItemUpdateDTO] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static MenuItemUpdateDTO? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "MenuItemUpdateDTO[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "MenuItemUpdateDTO[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return MenuItemUpdateDTO(
-        name: json[r'name'] is String ? json[r'name'] as String : null,
-        description: json[r'description'] is String ? json[r'description'] as String : null,
-        price: num.parse('${json[r'price']}'),
-        imageId: json[r'imageId'] is String ? json[r'imageId'] as String : null,
-        productIds: json[r'productIds'] is Iterable
-            ? (json[r'productIds'] as Iterable).cast<String>().toList(growable: false)
-            : const [],
-      );
-    }
-    return null;
-  }
+  Map<String, dynamic> toJson() => _$MenuItemUpdateDTOToJson(this);
 
   static List<MenuItemUpdateDTO> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <MenuItemUpdateDTO>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = MenuItemUpdateDTO.fromJson(row);
+        final value = MenuItemUpdateDTO.fromJson(row as Map<String, dynamic>);
         if (value != null) {
           result.add(value);
         }
@@ -151,7 +71,7 @@ class MenuItemUpdateDTO extends Schema {
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = MenuItemUpdateDTO.fromJson(entry.value);
+        final value = MenuItemUpdateDTO.fromJson(entry.value as Map<String, dynamic>);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -159,30 +79,15 @@ class MenuItemUpdateDTO extends Schema {
     }
     return map;
   }
-
-  // maps a json object with a list of MenuItemUpdateDTO-objects as value to a dart map
-  static Map<String, List<MenuItemUpdateDTO>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<MenuItemUpdateDTO>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = MenuItemUpdateDTO.listFromJson(entry.value, growable: growable,);
-      }
-    }
-    return map;
-  }
-
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
 }
 
-/// Factory for creating [MenuItemUpdateDTO] instances from JSON data.
 class MenuItemUpdateDTOFactory extends JsonSchemaFactory<MenuItemUpdateDTO> {
   const MenuItemUpdateDTOFactory();
 
   @override
-  MenuItemUpdateDTO fromJson(dynamic json) => MenuItemUpdateDTO.fromJson(json)!;
+  MenuItemUpdateDTO fromJson(dynamic json) => MenuItemUpdateDTO.fromJson(json as Map<String, dynamic>);
 }
+
+
+
 

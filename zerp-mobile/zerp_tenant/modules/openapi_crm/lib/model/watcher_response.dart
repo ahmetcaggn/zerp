@@ -8,7 +8,19 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:dart_network_layer_core/dart_network_layer_core.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+
+part 'watcher_response.g.dart';
+
+
+
+@JsonSerializable(
+  checked: true,
+  createToJson: true,
+  disallowUnrecognizedKeys: false,
+  explicitToJson: true,
+)
 class WatcherResponse extends Schema {
   /// Returns a new [WatcherResponse] instance.
   WatcherResponse({
@@ -16,85 +28,24 @@ class WatcherResponse extends Schema {
     this.addedAt,
   });
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'watcherId')
   final String? watcherId;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
+  @JsonKey(name: r'addedAt')
   final DateTime? addedAt;
 
   /// The factory instance for creating [WatcherResponse] from JSON.
   static const factory = WatcherResponseFactory();
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is WatcherResponse &&
-    other.watcherId == watcherId &&
-    other.addedAt == addedAt;
+  factory WatcherResponse.fromJson(Map<String, dynamic> json) => _$WatcherResponseFromJson(json);
 
-  @override
-  int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (watcherId == null ? 0 : watcherId!.hashCode) +
-    (addedAt == null ? 0 : addedAt!.hashCode);
-
-  @override
-  String toString() => 'WatcherResponse[watcherId=$watcherId, addedAt=$addedAt]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.watcherId != null) {
-      json[r'watcherId'] = this.watcherId;
-    } else {
-      json[r'watcherId'] = null;
-    }
-    if (this.addedAt != null) {
-      json[r'addedAt'] = this.addedAt!.toUtc().toIso8601String();
-    } else {
-      json[r'addedAt'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [WatcherResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static WatcherResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "WatcherResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "WatcherResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return WatcherResponse(
-        watcherId: json[r'watcherId'] is String ? json[r'watcherId'] as String : null,
-        addedAt: json[r'addedAt'] != null ? DateTime.parse(json[r'addedAt'].toString()) : null,
-      );
-    }
-    return null;
-  }
+  Map<String, dynamic> toJson() => _$WatcherResponseToJson(this);
 
   static List<WatcherResponse> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <WatcherResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = WatcherResponse.fromJson(row);
+        final value = WatcherResponse.fromJson(row as Map<String, dynamic>);
         if (value != null) {
           result.add(value);
         }
@@ -108,7 +59,7 @@ class WatcherResponse extends Schema {
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = WatcherResponse.fromJson(entry.value);
+        final value = WatcherResponse.fromJson(entry.value as Map<String, dynamic>);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -116,30 +67,15 @@ class WatcherResponse extends Schema {
     }
     return map;
   }
-
-  // maps a json object with a list of WatcherResponse-objects as value to a dart map
-  static Map<String, List<WatcherResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<WatcherResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = WatcherResponse.listFromJson(entry.value, growable: growable,);
-      }
-    }
-    return map;
-  }
-
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
 }
 
-/// Factory for creating [WatcherResponse] instances from JSON data.
 class WatcherResponseFactory extends JsonSchemaFactory<WatcherResponse> {
   const WatcherResponseFactory();
 
   @override
-  WatcherResponse fromJson(dynamic json) => WatcherResponse.fromJson(json)!;
+  WatcherResponse fromJson(dynamic json) => WatcherResponse.fromJson(json as Map<String, dynamic>);
 }
+
+
+
 

@@ -1,6 +1,6 @@
 OPENAPI_CODEGEN_VERSION := 7.20.0
 OPENAPI_CODEGEN_JAR := ./openapi-generator-cli-$(OPENAPI_CODEGEN_VERSION).jar
-CUSTOM_CODEGEN_VERSION := 0.1.12
+CUSTOM_CODEGEN_VERSION := 0.1.14
 CUSTOM_CODEGEN_JAR := ./openapi-dart-network-codegen-$(CUSTOM_CODEGEN_VERSION).jar
 CONFIG_FILE := openapi-conf.yaml
 GENERATOR := dart-network
@@ -216,13 +216,13 @@ generate-user-api-and-pub-get: generate-user-api
 	cd $(USER_OUTPUT_DIR) && flutter pub get
 
 generate-all-apis-and-pub-get: generate-all-apis
-	cd $(CRM_OUTPUT_DIR) && flutter pub get
-	cd $(EMPLOYEE_OUTPUT_DIR) && flutter pub get
-	cd $(NOTIFICATION_OUTPUT_DIR) && flutter pub get
-	cd $(RESOURCE_OUTPUT_DIR) && flutter pub get
-	cd $(SALE_OUTPUT_DIR) && flutter pub get
-	cd $(SUGGESTION_OUTPUT_DIR) && flutter pub get
-	cd $(USER_OUTPUT_DIR) && flutter pub get
+	cd $(CRM_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
+	cd $(EMPLOYEE_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
+	cd $(NOTIFICATION_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
+	cd $(RESOURCE_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
+	cd $(SALE_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
+	cd $(SUGGESTION_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
+	cd $(USER_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
 	echo "All APIs generated and dependencies installed!"
 
 # fetch and generate and pub get
@@ -252,13 +252,13 @@ fetch-and-generate-user-api-and-pub-get: download-user-spec generate-user-api
 	cd $(USER_OUTPUT_DIR) && flutter pub get
 
 fetch-and-generate-all-apis-and-pub-get: download-all-specs generate-all-apis
-	cd $(CRM_OUTPUT_DIR) && flutter pub get
-	cd $(EMPLOYEE_OUTPUT_DIR) && flutter pub get
-	cd $(NOTIFICATION_OUTPUT_DIR) && flutter pub get
-	cd $(RESOURCE_OUTPUT_DIR) && flutter pub get
-	cd $(SALE_OUTPUT_DIR) && flutter pub get
-	cd $(SUGGESTION_OUTPUT_DIR) && flutter pub get
-	cd $(USER_OUTPUT_DIR) && flutter pub get
+	cd $(CRM_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
+	cd $(EMPLOYEE_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
+	cd $(NOTIFICATION_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
+	cd $(RESOURCE_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
+	cd $(SALE_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
+	cd $(SUGGESTION_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
+	cd $(USER_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
 	echo "All APIs fetched, generated, and dependencies installed!"
 
 pub-get-all-modules:

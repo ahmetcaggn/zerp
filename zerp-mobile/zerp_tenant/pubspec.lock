@@ -453,6 +453,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  http_test_server:
+    dependency: "direct dev"
+    description:
+      name: http_test_server
+      sha256: "7160d5a2cab873e6c75bc88959c73a2e3256316fe4cd5202920d78e823336979"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.1"
   injectable:
     dependency: "direct main"
     description:
