@@ -1,6 +1,6 @@
 OPENAPI_CODEGEN_VERSION := 7.20.0
 OPENAPI_CODEGEN_JAR := ./openapi-generator-cli-$(OPENAPI_CODEGEN_VERSION).jar
-CUSTOM_CODEGEN_VERSION := 0.1.14
+CUSTOM_CODEGEN_VERSION := 0.1.17
 CUSTOM_CODEGEN_JAR := ./openapi-dart-network-codegen-$(CUSTOM_CODEGEN_VERSION).jar
 CONFIG_FILE := openapi-conf.yaml
 GENERATOR := dart-network
@@ -228,28 +228,28 @@ generate-all-apis-and-pub-get: generate-all-apis
 # fetch and generate and pub get
 
 fetch-and-generate-merged-api-and-pub-get: download-merged-spec generate-merged-api
-	cd $(MERGED_OUTPUT_DIR) && flutter pub get
+	cd $(MERGED_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
 
 fetch-and-generate-crm-api-and-pub-get: download-crm-spec generate-crm-api
-	cd $(CRM_OUTPUT_DIR) && flutter pub get
+	cd $(CRM_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
 
 fetch-and-generate-employee-api-and-pub-get: download-employee-spec generate-employee-api
-	cd $(EMPLOYEE_OUTPUT_DIR) && flutter pub get
+	cd $(EMPLOYEE_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
 
 fetch-and-generate-notification-api-and-pub-get: download-notification-spec generate-notification-api
-	cd $(NOTIFICATION_OUTPUT_DIR) && flutter pub get
+	cd $(NOTIFICATION_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
 
 fetch-and-generate-resource-api-and-pub-get: download-resource-spec generate-resource-api
-	cd $(RESOURCE_OUTPUT_DIR) && flutter pub get
+	cd $(RESOURCE_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
 
 fetch-and-generate-sale-api-and-pub-get: download-sale-spec generate-sale-api
-	cd $(SALE_OUTPUT_DIR) && flutter pub get
+	cd $(SALE_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
 
 fetch-and-generate-suggestion-api-and-pub-get: download-suggestion-spec generate-suggestion-api
-	cd $(SUGGESTION_OUTPUT_DIR) && flutter pub get
+	cd $(SUGGESTION_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
 
 fetch-and-generate-user-api-and-pub-get: download-user-spec generate-user-api
-	cd $(USER_OUTPUT_DIR) && flutter pub get
+	cd $(USER_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
 
 fetch-and-generate-all-apis-and-pub-get: download-all-specs generate-all-apis
 	cd $(CRM_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs

@@ -10,11 +10,11 @@
 import 'package:openapi_user/api.dart';
 import 'package:test/test.dart';
 
-// tests for ApiResponseListPermissionAction
+// tests for ApiResponseMapPermissionActionListPermissionTargetType
 void main() {
-  // final instance = ApiResponseListPermissionAction();
+  // final instance = ApiResponseMapPermissionActionListPermissionTargetType();
 
-  group('test ApiResponseListPermissionAction', () {
+  group('test ApiResponseMapPermissionActionListPermissionTargetType', () {
     // bool success
     test('to test the property `success`', () async {
       // TODO
@@ -30,7 +30,7 @@ void main() {
       // TODO
     });
 
-    // List<String> data (default value: const [])
+    // Map<String, List<String>> data (default value: const {})
     test('to test the property `data`', () async {
       // TODO
     });

@@ -104,12 +104,12 @@ class StockCountDTOFactory extends JsonSchemaFactory<StockCountDTO> {
 
 
 enum StockCountDTOStatusEnum {
-@JsonValue(r'DRAFT')
-DRAFT(r'DRAFT'),
-@JsonValue(r'IN_PROGRESS')
-IN_PROGRESS(r'IN_PROGRESS'),
-@JsonValue(r'COMPLETED')
-COMPLETED(r'COMPLETED');
+@JsonValue('DRAFT')
+DRAFT('DRAFT'),
+@JsonValue('IN_PROGRESS')
+IN_PROGRESS('IN_PROGRESS'),
+@JsonValue('COMPLETED')
+COMPLETED('COMPLETED');
 
 const StockCountDTOStatusEnum(this.value);
 

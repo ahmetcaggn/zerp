@@ -91,16 +91,16 @@ class EmployeeContactDtoFactory extends JsonSchemaFactory<EmployeeContactDto> {
 
 
 enum EmployeeContactDtoTypeEnum {
-@JsonValue(r'WORK_PHONE')
-WORK_PHONE(r'WORK_PHONE'),
-@JsonValue(r'PERSONAL_PHONE')
-PERSONAL_PHONE(r'PERSONAL_PHONE'),
-@JsonValue(r'WORK_EMAIL')
-WORK_EMAIL(r'WORK_EMAIL'),
-@JsonValue(r'PERSONAL_EMAIL')
-PERSONAL_EMAIL(r'PERSONAL_EMAIL'),
-@JsonValue(r'EMERGENCY_CONTACT')
-EMERGENCY_CONTACT(r'EMERGENCY_CONTACT');
+@JsonValue('WORK_PHONE')
+WORK_PHONE('WORK_PHONE'),
+@JsonValue('PERSONAL_PHONE')
+PERSONAL_PHONE('PERSONAL_PHONE'),
+@JsonValue('WORK_EMAIL')
+WORK_EMAIL('WORK_EMAIL'),
+@JsonValue('PERSONAL_EMAIL')
+PERSONAL_EMAIL('PERSONAL_EMAIL'),
+@JsonValue('EMERGENCY_CONTACT')
+EMERGENCY_CONTACT('EMERGENCY_CONTACT');
 
 const EmployeeContactDtoTypeEnum(this.value);
 

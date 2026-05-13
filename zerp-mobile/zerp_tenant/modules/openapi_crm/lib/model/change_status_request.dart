@@ -75,18 +75,18 @@ class ChangeStatusRequestFactory extends JsonSchemaFactory<ChangeStatusRequest> 
 
 
 enum ChangeStatusRequestStatusEnum {
-@JsonValue(r'OPEN')
-OPEN(r'OPEN'),
-@JsonValue(r'IN_PROGRESS')
-IN_PROGRESS(r'IN_PROGRESS'),
-@JsonValue(r'WAITING_CUSTOMER')
-WAITING_CUSTOMER(r'WAITING_CUSTOMER'),
-@JsonValue(r'RESOLVED')
-RESOLVED(r'RESOLVED'),
-@JsonValue(r'CLOSED')
-CLOSED(r'CLOSED'),
-@JsonValue(r'CANCELLED')
-CANCELLED(r'CANCELLED');
+@JsonValue('OPEN')
+OPEN('OPEN'),
+@JsonValue('IN_PROGRESS')
+IN_PROGRESS('IN_PROGRESS'),
+@JsonValue('WAITING_CUSTOMER')
+WAITING_CUSTOMER('WAITING_CUSTOMER'),
+@JsonValue('RESOLVED')
+RESOLVED('RESOLVED'),
+@JsonValue('CLOSED')
+CLOSED('CLOSED'),
+@JsonValue('CANCELLED')
+CANCELLED('CANCELLED');
 
 const ChangeStatusRequestStatusEnum(this.value);
 

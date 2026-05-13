@@ -79,10 +79,10 @@ class AddMemberRequestFactory extends JsonSchemaFactory<AddMemberRequest> {
 
 
 enum AddMemberRequestRoleEnum {
-@JsonValue(r'LEADER')
-LEADER(r'LEADER'),
-@JsonValue(r'MEMBER')
-MEMBER(r'MEMBER');
+@JsonValue('LEADER')
+LEADER('LEADER'),
+@JsonValue('MEMBER')
+MEMBER('MEMBER');
 
 const AddMemberRequestRoleEnum(this.value);
 

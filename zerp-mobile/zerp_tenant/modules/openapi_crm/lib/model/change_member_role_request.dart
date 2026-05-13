@@ -75,10 +75,10 @@ class ChangeMemberRoleRequestFactory extends JsonSchemaFactory<ChangeMemberRoleR
 
 
 enum ChangeMemberRoleRequestRoleEnum {
-@JsonValue(r'LEADER')
-LEADER(r'LEADER'),
-@JsonValue(r'MEMBER')
-MEMBER(r'MEMBER');
+@JsonValue('LEADER')
+LEADER('LEADER'),
+@JsonValue('MEMBER')
+MEMBER('MEMBER');
 
 const ChangeMemberRoleRequestRoleEnum(this.value);
 

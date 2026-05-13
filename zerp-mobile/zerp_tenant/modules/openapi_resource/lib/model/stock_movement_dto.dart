@@ -115,20 +115,20 @@ class StockMovementDTOFactory extends JsonSchemaFactory<StockMovementDTO> {
 
 
 enum StockMovementDTOTypeEnum {
-@JsonValue(r'PURCHASE')
-PURCHASE(r'PURCHASE'),
-@JsonValue(r'SALE')
-SALE(r'SALE'),
-@JsonValue(r'WASTE')
-WASTE(r'WASTE'),
-@JsonValue(r'ADJUSTMENT')
-ADJUSTMENT(r'ADJUSTMENT'),
-@JsonValue(r'TRANSFER')
-TRANSFER(r'TRANSFER'),
-@JsonValue(r'RETURN')
-RETURN(r'RETURN'),
-@JsonValue(r'STOCK_COUNT_CORRECTION')
-STOCK_COUNT_CORRECTION(r'STOCK_COUNT_CORRECTION');
+@JsonValue('PURCHASE')
+PURCHASE('PURCHASE'),
+@JsonValue('SALE')
+SALE('SALE'),
+@JsonValue('WASTE')
+WASTE('WASTE'),
+@JsonValue('ADJUSTMENT')
+ADJUSTMENT('ADJUSTMENT'),
+@JsonValue('TRANSFER')
+TRANSFER('TRANSFER'),
+@JsonValue('RETURN')
+RETURN('RETURN'),
+@JsonValue('STOCK_COUNT_CORRECTION')
+STOCK_COUNT_CORRECTION('STOCK_COUNT_CORRECTION');
 
 const StockMovementDTOTypeEnum(this.value);
 

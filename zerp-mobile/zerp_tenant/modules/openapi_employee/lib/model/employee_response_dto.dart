@@ -133,20 +133,20 @@ class EmployeeResponseDtoFactory extends JsonSchemaFactory<EmployeeResponseDto> 
 
 
 enum EmployeeResponseDtoStatusEnum {
-@JsonValue(r'ACTIVE')
-ACTIVE(r'ACTIVE'),
-@JsonValue(r'TERMINATED')
-TERMINATED(r'TERMINATED'),
-@JsonValue(r'SUSPENDED')
-SUSPENDED(r'SUSPENDED'),
-@JsonValue(r'ON_LEAVE')
-ON_LEAVE(r'ON_LEAVE'),
-@JsonValue(r'RETIRED')
-RETIRED(r'RETIRED'),
-@JsonValue(r'PROBATION')
-PROBATION(r'PROBATION'),
-@JsonValue(r'DELETED')
-DELETED(r'DELETED');
+@JsonValue('ACTIVE')
+ACTIVE('ACTIVE'),
+@JsonValue('TERMINATED')
+TERMINATED('TERMINATED'),
+@JsonValue('SUSPENDED')
+SUSPENDED('SUSPENDED'),
+@JsonValue('ON_LEAVE')
+ON_LEAVE('ON_LEAVE'),
+@JsonValue('RETIRED')
+RETIRED('RETIRED'),
+@JsonValue('PROBATION')
+PROBATION('PROBATION'),
+@JsonValue('DELETED')
+DELETED('DELETED');
 
 const EmployeeResponseDtoStatusEnum(this.value);
 

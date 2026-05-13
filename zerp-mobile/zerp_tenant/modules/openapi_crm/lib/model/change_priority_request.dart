@@ -75,14 +75,14 @@ class ChangePriorityRequestFactory extends JsonSchemaFactory<ChangePriorityReque
 
 
 enum ChangePriorityRequestPriorityEnum {
-@JsonValue(r'LOW')
-LOW(r'LOW'),
-@JsonValue(r'MEDIUM')
-MEDIUM(r'MEDIUM'),
-@JsonValue(r'HIGH')
-HIGH(r'HIGH'),
-@JsonValue(r'CRITICAL')
-CRITICAL(r'CRITICAL');
+@JsonValue('LOW')
+LOW('LOW'),
+@JsonValue('MEDIUM')
+MEDIUM('MEDIUM'),
+@JsonValue('HIGH')
+HIGH('HIGH'),
+@JsonValue('CRITICAL')
+CRITICAL('CRITICAL');
 
 const ChangePriorityRequestPriorityEnum(this.value);
 

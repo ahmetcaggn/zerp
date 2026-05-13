@@ -13,7 +13,7 @@ Method | HTTP request | Description
 
 
 # **getAllPermissions**
-> ApiResponseListPermissionAction getAllPermissions()
+> ApiResponseMapPermissionActionListPermissionTargetType getAllPermissions()
 
 
 
@@ -36,7 +36,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-[**ApiResponseListPermissionAction**](ApiResponseListPermissionAction.md)
+[**ApiResponseMapPermissionActionListPermissionTargetType**](ApiResponseMapPermissionActionListPermissionTargetType.md)
 
 ### Authorization
 

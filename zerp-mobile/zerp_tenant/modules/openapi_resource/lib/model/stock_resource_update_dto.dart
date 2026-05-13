@@ -91,16 +91,16 @@ class StockResourceUpdateDTOFactory extends JsonSchemaFactory<StockResourceUpdat
 
 
 enum StockResourceUpdateDTOUnitTypeEnum {
-@JsonValue(r'PIECE')
-PIECE(r'PIECE'),
-@JsonValue(r'GRAM')
-GRAM(r'GRAM'),
-@JsonValue(r'KILOGRAM')
-KILOGRAM(r'KILOGRAM'),
-@JsonValue(r'MILLILITER')
-MILLILITER(r'MILLILITER'),
-@JsonValue(r'LITER')
-LITER(r'LITER');
+@JsonValue('PIECE')
+PIECE('PIECE'),
+@JsonValue('GRAM')
+GRAM('GRAM'),
+@JsonValue('KILOGRAM')
+KILOGRAM('KILOGRAM'),
+@JsonValue('MILLILITER')
+MILLILITER('MILLILITER'),
+@JsonValue('LITER')
+LITER('LITER');
 
 const StockResourceUpdateDTOUnitTypeEnum(this.value);
 

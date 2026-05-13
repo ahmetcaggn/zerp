@@ -91,14 +91,14 @@ class CreateTicketRequestFactory extends JsonSchemaFactory<CreateTicketRequest> 
 
 
 enum CreateTicketRequestPriorityEnum {
-@JsonValue(r'LOW')
-LOW(r'LOW'),
-@JsonValue(r'MEDIUM')
-MEDIUM(r'MEDIUM'),
-@JsonValue(r'HIGH')
-HIGH(r'HIGH'),
-@JsonValue(r'CRITICAL')
-CRITICAL(r'CRITICAL');
+@JsonValue('LOW')
+LOW('LOW'),
+@JsonValue('MEDIUM')
+MEDIUM('MEDIUM'),
+@JsonValue('HIGH')
+HIGH('HIGH'),
+@JsonValue('CRITICAL')
+CRITICAL('CRITICAL');
 
 const CreateTicketRequestPriorityEnum(this.value);
 
@@ -111,10 +111,10 @@ String toString() => value;
 
 
 enum CreateTicketRequestTypeEnum {
-@JsonValue(r'SERVICE_LEVEL')
-SERVICE_LEVEL(r'SERVICE_LEVEL'),
-@JsonValue(r'QUESTION')
-QUESTION(r'QUESTION');
+@JsonValue('SERVICE_LEVEL')
+SERVICE_LEVEL('SERVICE_LEVEL'),
+@JsonValue('QUESTION')
+QUESTION('QUESTION');
 
 const CreateTicketRequestTypeEnum(this.value);
 

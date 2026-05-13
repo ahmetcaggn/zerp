@@ -16,7 +16,7 @@ void main() {
   // final instance = PermissionsGetAllPermissionsApi();
 
   group('tests for PermissionsGetAllPermissionsApi', () {
-    //Future<ApiResponseListPermissionAction> getAllPermissions() async
+    //Future<ApiResponseMapPermissionActionListPermissionTargetType> getAllPermissions() async
     test('test getAllPermissions', () async {
       // TODO
     });

@@ -9,9 +9,9 @@ import 'package:openapi_employee/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **offset** | **int** |  | [optional] 
+**paged** | **bool** |  | [optional] 
 **pageNumber** | **int** |  | [optional] 
 **pageSize** | **int** |  | [optional] 
-**paged** | **bool** |  | [optional] 
 **sort** | [**SortObject**](SortObject.md) |  | [optional] 
 **unpaged** | **bool** |  | [optional] 
 

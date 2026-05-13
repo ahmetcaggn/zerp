@@ -83,10 +83,10 @@ class UpdateTeamRequestFactory extends JsonSchemaFactory<UpdateTeamRequest> {
 
 
 enum UpdateTeamRequestTypeEnum {
-@JsonValue(r'SERVICE_LEVEL')
-SERVICE_LEVEL(r'SERVICE_LEVEL'),
-@JsonValue(r'QUESTION')
-QUESTION(r'QUESTION');
+@JsonValue('SERVICE_LEVEL')
+SERVICE_LEVEL('SERVICE_LEVEL'),
+@JsonValue('QUESTION')
+QUESTION('QUESTION');
 
 const UpdateTeamRequestTypeEnum(this.value);
 
