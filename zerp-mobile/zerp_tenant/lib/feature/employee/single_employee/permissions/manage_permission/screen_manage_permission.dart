@@ -7,6 +7,7 @@ import 'package:openapi_user/api.dart';
 import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_permission_viewer.dart';
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/cubit_permissions.dart';
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/manage_permission/cubit/cubit_manage_permission.dart';
+import 'package:zerp_tenant/feature/employee/single_employee/permissions/manage_permission/view/view_manage_permission_action_selector.dart';
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/manage_permission/view/view_manage_permission_target_selector.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
@@ -90,23 +91,35 @@ class _ManagePermissionViewState extends State<_ManagePermissionView>
               key: formKey,
               child: ListView(
                 children: [
-                  DropdownButtonFormField<String>(
+                  TextFormField(
+                    key: ValueKey(selectedActionStr),
                     initialValue: selectedActionStr,
+                    readOnly: true,
                     decoration: InputDecoration(
                       labelText: context.t.permissionManage.action,
+                      suffixIcon: const Icon(Icons.arrow_drop_down),
                     ),
-                    items: availableActions.map((action) {
-                      return DropdownMenuItem(
-                        value: action,
-                        child: Text(action),
+                    onTap: () {
+                      unawaited(
+                        showModalBottomSheet<void>(
+                          context: context,
+                          isScrollControlled: true,
+                          useSafeArea: true,
+                          builder: (context) {
+                            return ViewManagePermissionActionSelector(
+                              actions: availableActions,
+                              initialAction: selectedActionStr,
+                              onSelected: (value) {
+                                setState(() {
+                                  selectedActionStr = value;
+                                  selectedTargetType = null;
+                                  targetIdController.clear();
+                                });
+                              },
+                            );
+                          },
+                        ),
                       );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedActionStr = value;
-                        selectedTargetType = null;
-                        targetIdController.clear();
-                      });
                     },
                     validator: (val) =>
                         val == null ? context.t.common.required : null,
