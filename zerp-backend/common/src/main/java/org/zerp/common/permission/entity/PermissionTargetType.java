@@ -1,49 +1,54 @@
 package org.zerp.common.permission.entity;
 
 public enum PermissionTargetType {
-    TENANT_ROOT,
+    TENANT_ROOT(null),
 
-    TENANT,
+    TENANT(TENANT_ROOT),
 
-    USER,
+    USER(TENANT),
 
-    STOCK_RESOURCE,
-
-    EMPLOYEE,
+    EMPLOYEE(TENANT),
 
     // ticket
-    TICKET,
-    TICKET_HISTORY,
-    TICKET_COMMENT,
-    TICKET_ASSIGNMENT,
-    TICKET_ATTACHMENT,
-    TICKET_SLA_TRACKING,
-    TICKET_WATCHER,
+    TICKET(TENANT),
+    TICKET_HISTORY(TICKET),
+    TICKET_COMMENT(TICKET),
+    TICKET_ASSIGNMENT(TICKET),
+    TICKET_ATTACHMENT(TICKET),
+    TICKET_SLA_TRACKING(TICKET),
+    TICKET_WATCHER(TICKET),
 
     // team
-    TEAM,
-    TEAM_MEMBER,
+    TEAM(TENANT),
+    TEAM_MEMBER(TEAM),
 
     // shop
-    SHOP,
-    SHOP_TABLE,
+    SHOP(TENANT),
+    SHOP_TABLE(SHOP),
 
     // stock management
-    STOCK_MOVEMENT,
-    STOCK_COUNT,
+    STOCK_COUNT(SHOP),
+    STOCK_RESOURCE(SHOP),
+    STOCK_MOVEMENT(STOCK_RESOURCE),
 
-    // product management
-    PRODUCT,
-    PRODUCT_RECIPE,
-    PRODUCT_EXTRA_OPTION,
+    // product
+    PRODUCT(SHOP),
+    PRODUCT_RECIPE(PRODUCT),
+    PRODUCT_EXTRA_OPTION(PRODUCT),
 
-    // menu management
-    MENU,
-    MENU_CATEGORY,
-    MENU_ITEM,
+    // menu
+    MENU(SHOP),
+    MENU_CATEGORY(MENU),
+    MENU_ITEM(MENU_CATEGORY),
     ;
 
-    static PermissionTargetType fromType(Class<Permittable> type) {
+    public final PermissionTargetType parent;
+
+    PermissionTargetType(PermissionTargetType parent) {
+        this.parent = parent;
+    }
+
+    static PermissionTargetType fromType(Class<? extends Permittable> type) {
         final var annotation = type.getAnnotation(PermissionTargetTypeAnnotation.class);
         if (annotation == null) {
             throw new IllegalArgumentException("Class " + type.getName() +

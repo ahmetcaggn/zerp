@@ -1,5 +1,6 @@
 package org.zerp.user.controller.feign;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping("/feign/keycloak/users")
 @Tag(name = "Feign Keycloak", description = "API for creating Keycloak users, used by other services via Feign client")
+@Hidden
 public class FeignKeycloakController {
     private final FeignKeycloakService service;
 
