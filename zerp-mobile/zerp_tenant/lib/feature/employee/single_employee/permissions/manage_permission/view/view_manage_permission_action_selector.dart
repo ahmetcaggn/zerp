@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 class ViewManagePermissionActionSelector extends StatefulWidget {
   const ViewManagePermissionActionSelector({
@@ -66,10 +67,10 @@ class _ViewManagePermissionActionSelectorState
           child: TextField(
             controller: searchController,
             autofocus: true,
-            decoration: const InputDecoration(
-              hintText: 'Search actions...',
-              prefixIcon: Icon(Icons.search),
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              hintText: context.t.permissionManage.searchActions,
+              prefixIcon: const Icon(Icons.search),
+              border: const OutlineInputBorder(),
             ),
           ),
         ),

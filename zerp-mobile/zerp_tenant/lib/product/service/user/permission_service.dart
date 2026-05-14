@@ -7,6 +7,9 @@ import 'package:zerp_tenant/product/network/page_response.dart';
 import 'package:zerp_tenant/product/service/service_base.dart';
 import 'package:zerp_tenant/product/util/network_result_extension.dart';
 
+typedef PermissionTargetType =
+    ApiResponseMapPermissionActionListPermissionTargetType;
+
 @lazySingleton
 final class PermissionService extends ServiceBase
     with LoggerMixin<PermissionService> {
@@ -57,24 +60,32 @@ final class PermissionService extends ServiceBase
     }
   }
 
-  Future<ApiResponseMapPermissionActionListPermissionTargetType>
-  getPermissionActions() async {
+  Future<void> deletePermission({required int id}) async {
+    final command = DeletePermissionCommand(id: id);
+    final res = await invoker.send(command);
+
+    switch (res) {
+      case SuccessResponseResult<ApiResponseVoid>():
+        log.info('Successfully deleted permission with ID: $id');
+        return;
+      case NetworkErrorResult<ApiResponseVoid>():
+        throw onNetworkError(res);
+      case SpecifiedResponseResult<ApiResponseVoid>():
+        throw onUnsuccessfulResponse(res);
+    }
+  }
+
+  Future<PermissionTargetType> getPermissionActions() async {
     final command = GetAllPermissionsCommand();
     final res = await invoker.send(command);
 
     switch (res) {
-      case SuccessResponseResult<
-        ApiResponseMapPermissionActionListPermissionTargetType
-      >():
+      case SuccessResponseResult<PermissionTargetType>():
         log.info('Successfully fetched permission actions');
         return res.data;
-      case NetworkErrorResult<
-        ApiResponseMapPermissionActionListPermissionTargetType
-      >():
+      case NetworkErrorResult<PermissionTargetType>():
         throw onNetworkError(res);
-      case SpecifiedResponseResult<
-        ApiResponseMapPermissionActionListPermissionTargetType
-      >():
+      case SpecifiedResponseResult<PermissionTargetType>():
         throw onUnsuccessfulResponse(res);
     }
   }

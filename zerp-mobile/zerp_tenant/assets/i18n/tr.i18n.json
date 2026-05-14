@@ -48,7 +48,9 @@
     "required": "Zorunlu",
     "error": "Hata: $message",
     "unknown": "Bilinmiyor",
-    "ok": "Tamam"
+    "ok": "Tamam",
+    "cancel": "İptal",
+    "delete": "Sil"
   },
   "employee": {
     "list": {
@@ -122,7 +124,11 @@
     "empty": "Henüz yetki yok",
     "manage": "Yetkileri yönet",
     "target": "Hedef: $targetType",
-    "id": "ID: $targetId"
+    "id": "ID: $targetId",
+    "deleteTitle": "Yetkiyi Sil",
+    "deleteMessage": "Bu yetkiyi silmek istediğinizden emin misiniz?",
+    "errorLoad": "Yetkiler yüklenemedi: $error",
+    "errorDelete": "Yetki silinemedi: $error"
   },
   "permissionManage": {
     "title": "Yetki Oluştur",
@@ -134,7 +140,8 @@
     "success": "Yetki başarıyla oluşturuldu",
     "errorSelectAction": "Lütfen eylem ve hedef türünü seçin",
     "errorLoadActions": "Yetki eylemleri yüklenemedi: $error",
-    "errorCreatePermission": "Yetki oluşturulamadı: $error"
+    "errorCreatePermission": "Yetki oluşturulamadı: $error",
+    "searchActions": "Eylemlerde ara..."
   },
   "widgets": {
     "permissionViewer": {

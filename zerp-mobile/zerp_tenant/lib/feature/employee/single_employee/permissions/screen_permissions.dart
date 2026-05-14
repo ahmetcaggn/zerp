@@ -30,7 +30,9 @@ class _ScreenPermissionsState extends State<ScreenPermissions> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) {
-        final cubit = getIt<CubitPermissions>();
+        final cubit = getIt<CubitPermissions>(
+          param1: widget.cubitPermissionViewer,
+        );
         unawaited(cubit.loadPermissions(userId: widget.employeeId));
         return cubit;
       },
@@ -213,6 +215,41 @@ class _PermissionEntry extends StatelessWidget {
             if (targetId != null && targetId.isNotEmpty)
               Text(context.t.permissionViewer.id(targetId: targetId)),
           ],
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete_outline),
+          color: Theme.of(context).colorScheme.error,
+          onPressed: () async {
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text(context.t.permissionViewer.deleteTitle),
+                content: Text(
+                  context.t.permissionViewer.deleteMessage,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text(context.t.common.cancel),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                    child: Text(context.t.common.delete),
+                  ),
+                ],
+              ),
+            );
+
+            if (confirm == true && permission.id != null && context.mounted) {
+              await context.read<CubitPermissions>().deletePermission(
+                id: permission.id!,
+                userId: employeeId,
+              );
+            }
+          },
         ),
       ),
     );

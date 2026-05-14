@@ -131,6 +131,17 @@ extension GetItInjectableX on _i174.GetIt {
         cubitAuth: gh<_i200.CubitAuth>(),
       ),
     );
+    gh.factoryParam<
+      _i1073.CubitPermissions,
+      _i102.CubitPermissionViewer,
+      dynamic
+    >(
+      (_cubitPermissionViewer, _) => _i1073.CubitPermissions(
+        _cubitPermissionViewer,
+        gh<_i545.PermissionService>(),
+        gh<_i139.CubitError>(),
+      ),
+    );
     gh.factory<_i657.CubitCreateEmployee>(
       () => _i657.CubitCreateEmployee(gh<_i93.EmployeeService>()),
     );
@@ -142,9 +153,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i102.CubitPermissionViewer>(
       () => _i102.CubitPermissionViewer(gh<_i545.PermissionService>()),
-    );
-    gh.factory<_i1073.CubitPermissions>(
-      () => _i1073.CubitPermissions(gh<_i545.PermissionService>()),
     );
     gh.factory<_i170.CubitProfilePermissions>(
       () => _i170.CubitProfilePermissions(gh<_i545.PermissionService>()),

@@ -48,7 +48,9 @@
     "required": "Required",
     "error": "Error: $message",
     "unknown": "Unknown",
-    "ok": "OK"
+    "ok": "OK",
+    "cancel": "Cancel",
+    "delete": "Delete"
   },
   "employee": {
     "list": {
@@ -122,7 +124,11 @@
     "empty": "No permissions yet",
     "manage": "Manage permissions",
     "target": "Target: $targetType",
-    "id": "ID: $targetId"
+    "id": "ID: $targetId",
+    "deleteTitle": "Delete Permission",
+    "deleteMessage": "Are you sure you want to delete this permission?",
+    "errorLoad": "Failed to load permissions: $error",
+    "errorDelete": "Failed to delete permission: $error"
   },
   "permissionManage": {
     "title": "Create Permission",
@@ -134,7 +140,8 @@
     "success": "Permission created successfully",
     "errorSelectAction": "Please select action and target type",
     "errorLoadActions": "Failed to load permission actions: $error",
-    "errorCreatePermission": "Failed to create permission: $error"
+    "errorCreatePermission": "Failed to create permission: $error",
+    "searchActions": "Search actions..."
   },
   "widgets": {
     "permissionViewer": {
