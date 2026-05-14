@@ -17,13 +17,13 @@ import 'package:zerp_tenant/feature/dashboard/view/screen_dashboard.dart'
 import 'package:zerp_tenant/feature/employee/create_employee/screen_create_employee.dart'
     as _i2;
 import 'package:zerp_tenant/feature/employee/cubit/cubit_employee.dart' as _i18;
-import 'package:zerp_tenant/feature/employee/edit_employee/screen_edit_employee.dart'
-    as _i4;
 import 'package:zerp_tenant/feature/employee/screen_employee.dart' as _i5;
 import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_permission_viewer.dart'
     as _i21;
 import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_single_employee.dart'
     as _i19;
+import 'package:zerp_tenant/feature/employee/single_employee/edit_employee/screen_edit_employee.dart'
+    as _i4;
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/cubit_permissions.dart'
     as _i20;
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/manage_permission/screen_manage_permission.dart'

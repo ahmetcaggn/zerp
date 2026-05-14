@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:openapi_employee/api.dart';
 import 'package:zerp_tenant/feature/employee/cubit/cubit_employee.dart';
-import 'package:zerp_tenant/feature/employee/edit_employee/cubit/cubit_edit_employee.dart';
 import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_single_employee.dart';
+import 'package:zerp_tenant/feature/employee/single_employee/edit_employee/cubit_edit_employee.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
@@ -155,11 +155,9 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
                   decoration: InputDecoration(
                     labelText: context.t.employee.edit.firstName,
                   ),
-                  validator:
-                      (val) =>
-                          (val == null || val.isEmpty)
-                              ? context.t.common.required
-                              : null,
+                  validator: (val) => (val == null || val.isEmpty)
+                      ? context.t.common.required
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -167,11 +165,9 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
                   decoration: InputDecoration(
                     labelText: context.t.employee.edit.lastName,
                   ),
-                  validator:
-                      (val) =>
-                          (val == null || val.isEmpty)
-                              ? context.t.common.required
-                              : null,
+                  validator: (val) => (val == null || val.isEmpty)
+                      ? context.t.common.required
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -180,11 +176,9 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
                   decoration: InputDecoration(
                     labelText: context.t.employee.edit.email,
                   ),
-                  validator:
-                      (val) =>
-                          (val == null || val.isEmpty)
-                              ? context.t.common.required
-                              : null,
+                  validator: (val) => (val == null || val.isEmpty)
+                      ? context.t.common.required
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -217,10 +211,9 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
                     final isLoading = state is StateEditEmployeeLoading;
                     return ElevatedButton(
                       onPressed: isLoading ? null : submit,
-                      child:
-                          isLoading
-                              ? const CircularProgressIndicator()
-                              : Text(context.t.employee.edit.submit),
+                      child: isLoading
+                          ? const CircularProgressIndicator()
+                          : Text(context.t.employee.edit.submit),
                     );
                   },
                 ),
