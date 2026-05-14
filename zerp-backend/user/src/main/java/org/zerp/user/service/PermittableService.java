@@ -14,7 +14,9 @@ import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermittableRepository;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
+import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.user.dto.permittable.PermittableResponseDTO;
+import org.zerp.user.permission.PermittablePermissionEvaluator;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,9 +28,12 @@ public class PermittableService
         implements IResourceService<PermittableResponseDTO, PermittableResponseDTO, Void, Void, UUID> {
     private final PermittableRepository permittableRepository;
     private final FilterRefiner filterRefiner;
+    private final PermittablePermissionEvaluator permissionEvaluator;
+    private final CurrentUserIdResolver currentUserIdResolver;
 
     @Override
     public Page<PermittableResponseDTO> findWithFilters(Map<String, String> filters, Pageable pageable) {
+        UUID userId = currentUserIdResolver.resolve();
         String targetTypeStr = filters.get("targetType");
         if (targetTypeStr == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "targetType filter is required");
@@ -59,15 +64,19 @@ public class PermittableService
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No entity mapped to targetType: " + targetType);
         }
 
-        Specification<?> spec = filterRefiner.refinedOrBadRequest(entityFilters, entityClass);
-
-        Page<Permittable> page = permittableRepository.findAllByTargetType(targetType, spec, pageable);
+        Page<Permittable> page = fetchWithSecurity(targetType, entityClass, entityFilters, userId, pageable);
 
         List<PermittableResponseDTO> dtos = page.getContent().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
 
         return new PageImpl<>(dtos, pageable, page.getTotalElements());
+    }
+
+    private <T> Page<Permittable> fetchWithSecurity(PermissionTargetType targetType, Class<T> entityClass, Map<String, String> filters, UUID userId, Pageable pageable) {
+        Specification<T> spec = filterRefiner.refinedOrBadRequest(filters, entityClass);
+        spec = spec.and(permissionEvaluator.filterRead(userId));
+        return permittableRepository.findAllByTargetType(targetType, spec, pageable);
     }
 
     private String resolveParentField(PermissionTargetType targetType) {
