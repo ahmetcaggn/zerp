@@ -157,6 +157,7 @@ class _CreatePermissionViewState extends State<_CreatePermissionView>
                       ViewCreatePermissionTargetSelector(
                         targetIdController: targetIdController,
                         selectedTargetType: selectedTargetType!,
+                        allowedTargetTypes: availableTargetTypes,
                       ),
                     ],
                     const SizedBox(height: 32),

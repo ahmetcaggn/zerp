@@ -50,7 +50,10 @@
     "unknown": "Bilinmiyor",
     "ok": "Tamam",
     "cancel": "İptal",
-    "delete": "Sil"
+    "delete": "Sil",
+    "search": "Ara",
+    "select": "Seç",
+    "noData": "Veri yok"
   },
   "employee": {
     "list": {

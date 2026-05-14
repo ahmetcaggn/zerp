@@ -9,6 +9,8 @@ import 'package:zerp_tenant/product/util/network_result_extension.dart';
 
 typedef PermissionTargetType =
     ApiResponseMapPermissionActionListPermissionTargetType;
+typedef PermissionTargetTypeEnum =
+    ApiResponseMapPermissionActionListPermissionTargetTypeDataEnum;
 
 @lazySingleton
 final class PermissionService extends ServiceBase
@@ -90,22 +92,54 @@ final class PermissionService extends ServiceBase
     }
   }
 
+  Future<List<PermittableResponseDTO>> getPermittableList({
+    required PermissionTargetTypeEnum targetType,
+    String? parentId,
+  }) async {
+    const pageRequest = PageRequest.all;
+    final command = GetListPermittablesCommand(
+      start: pageRequest.start,
+      end: pageRequest.end,
+      allParams: {
+        'targetType': targetType.value,
+        'parentId': ?parentId,
+      },
+    );
+    final res = await invoker.send(command);
+
+    switch (res) {
+      case SuccessResponseResult<ApiResponseListPermittableResponseDTO>():
+        log.info(
+          'Successfully fetched permittable list for '
+          'targetType: ${targetType.value}, '
+          'parentId: $parentId. '
+          'Count: ${res.data.data.length}',
+        );
+        return res.data.data;
+
+      case NetworkErrorResult<ApiResponseListPermittableResponseDTO>():
+        throw onNetworkError(res);
+      case SpecifiedResponseResult<ApiResponseListPermittableResponseDTO>():
+        throw onUnsuccessfulResponse(res);
+    }
+  }
+
   Future<PageResponse<PermissionResponse>> getAllOwnedPermissions([
     PageRequest pageRequest = PageRequest.all,
   ]) async {
     late final String userId;
     try {
       userId = await getUserId();
-    } on UnauthenticatedException catch (e) {
-      log.warning('User is unauthenticated: $e');
+    } on UnauthenticatedException catch (e, s) {
+      log.warning('User is unauthenticated: $e', e, s);
       cubitError.enqueue(
         const ErrorToPresent(
           message: 'Failed to get user ID: User is unauthenticated',
         ),
       );
       rethrow;
-    } on Object catch (e) {
-      log.severe('Error getting user ID: $e');
+    } on Object catch (e, s) {
+      log.severe('Error getting user ID: $e', e, s);
       cubitError.enqueue(
         ErrorToPresent(
           message: 'Failed to get user ID: $e',

@@ -60,14 +60,16 @@ class CubitCreatePermission extends BaseCubit<StateCreatePermission>
     );
 
     try {
-      await _permissionService.createPermission(
-        request: PermissionCreateRequestDTO(
-          userId: employeeId,
-          targetType: targetType,
-          action: action,
-          targetId: targetId,
-        ),
+      final permission = PermissionCreateRequestDTO(
+        userId: employeeId,
+        targetType: targetType,
+        action: action,
+        targetId: targetId,
       );
+      log.info(
+        'Creating permission: ${permission.toJson()}',
+      );
+      await _permissionService.createPermission(request: permission);
       emit(const StateCreatePermissionSuccess());
       unawaited(cubitPermissions.loadPermissions(userId: employeeId));
     } on Object catch (e, s) {

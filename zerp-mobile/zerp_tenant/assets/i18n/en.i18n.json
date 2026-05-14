@@ -50,7 +50,10 @@
     "unknown": "Unknown",
     "ok": "OK",
     "cancel": "Cancel",
-    "delete": "Delete"
+    "delete": "Delete",
+    "search": "Search",
+    "select": "Select",
+    "noData": "No data available"
   },
   "employee": {
     "list": {
