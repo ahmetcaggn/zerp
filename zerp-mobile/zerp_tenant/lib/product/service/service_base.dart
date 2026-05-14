@@ -1,14 +1,15 @@
 import 'package:dart_network_layer_dio/dart_network_layer_dio.dart';
+import 'package:meta/meta.dart';
 import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/error/cubit_error.dart';
 import 'package:zerp_tenant/product/error/unauthenticated_exception.dart';
-import 'package:zerp_tenant/product/network/network_manager.dart';
+import 'package:zerp_tenant/product/network/network_invoker/api_network_invoker.dart';
 import 'package:zerp_tenant/product/service/auth/auth_storage_service.dart';
 
 abstract class ServiceBase {
   ServiceBase({
-    required this.networkManager,
+    required this.invoker,
     required this.authStorageService,
     required this.cubitError,
     required this.cubitAuth,
@@ -16,13 +17,12 @@ abstract class ServiceBase {
 
   late final Logger _log = logger('ServiceBase');
 
-  final NetworkManager networkManager;
+  final ApiNetworkInvoker invoker;
   final AuthStorageService authStorageService;
   final CubitError cubitError;
   final CubitAuth cubitAuth;
 
-  DioNetworkInvoker get invoker => networkManager.apiInvoker;
-
+  @protected
   Future<String> getUserId() async {
     late final String userId;
     final claims = await authStorageService.authClaimsIfValid;
@@ -56,6 +56,7 @@ abstract class ServiceBase {
     return userId;
   }
 
+  @protected
   NetworkErrorBase onNetworkError<T extends Schema>(NetworkErrorResult<T> res) {
     _log.warning(
       'Network error while fetching $T: ${res.error.message}',
@@ -72,6 +73,7 @@ abstract class ServiceBase {
     return res.error;
   }
 
+  @protected
   Exception onUnsuccessfulResponse<T extends Schema>(
     SpecifiedResponseResult<T> res,
   ) {

@@ -11,7 +11,7 @@ import 'package:zerp_tenant/product/util/network_result_extension.dart';
 final class PermissionService extends ServiceBase
     with LoggerMixin<PermissionService> {
   PermissionService({
-    required super.networkManager,
+    required super.invoker,
     required super.authStorageService,
     required super.cubitError,
     required super.cubitAuth,

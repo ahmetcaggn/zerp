@@ -9,7 +9,7 @@ import 'package:zerp_tenant/product/util/network_result_extension.dart';
 @lazySingleton
 class EmployeeService extends ServiceBase with LoggerMixin<EmployeeService> {
   EmployeeService({
-    required super.networkManager,
+    required super.invoker,
     required super.authStorageService,
     required super.cubitError,
     required super.cubitAuth,

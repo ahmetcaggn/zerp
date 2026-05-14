@@ -9,7 +9,7 @@ import 'package:zerp_tenant/product/service/service_base.dart';
 final class UsernameService extends ServiceBase
     with LoggerMixin<UsernameService> {
   UsernameService({
-    required super.networkManager,
+    required super.invoker,
     required super.authStorageService,
     required super.cubitError,
     required super.cubitAuth,

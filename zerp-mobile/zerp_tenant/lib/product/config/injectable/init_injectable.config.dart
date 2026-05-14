@@ -36,7 +36,8 @@ import '../../cubit/root_cubit/auth/cubit_auth.dart' as _i200;
 import '../../cubit/root_cubit/error/cubit_error.dart' as _i139;
 import '../../navigation/app_route.dart' as _i795;
 import '../../navigation/auth_guard.dart' as _i84;
-import '../../network/network_manager.dart' as _i475;
+import '../../network/network_invoker/api_network_invoker.dart' as _i1073;
+import '../../network/network_invoker/remote_log_network_invoker.dart' as _i693;
 import '../../service/auth/auth_service.dart' as _i238;
 import '../../service/auth/auth_storage_service.dart' as _i40;
 import '../../service/employee/employee_service.dart' as _i93;
@@ -62,6 +63,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => serviceModule.secureStorage,
     );
     gh.lazySingleton<_i139.CubitError>(() => _i139.CubitError());
+    gh.lazySingleton<_i693.RemoteLogNetworkInvoker>(
+      () => _i693.RemoteLogNetworkInvoker(),
+    );
     gh.lazySingleton<_i301.AuthClaimsOperator>(
       () => _i301.AuthClaimsOperator(),
     );
@@ -90,8 +94,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i40.AuthStorageService>(),
       ),
     );
-    gh.lazySingleton<_i475.NetworkManager>(
-      () => _i475.NetworkManager(
+    gh.lazySingleton<_i1073.ApiNetworkInvoker>(
+      () => _i1073.ApiNetworkInvoker(
         gh<_i200.CubitAuth>(),
         gh<_i40.AuthStorageService>(),
       ),
@@ -102,9 +106,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i238.AuthService>(),
       ),
     );
+    gh.singleton<_i795.AppRoute>(() => _i795.AppRoute(gh<_i84.AuthGuard>()));
     gh.lazySingleton<_i93.EmployeeService>(
       () => _i93.EmployeeService(
-        networkManager: gh<_i475.NetworkManager>(),
+        invoker: gh<_i1073.ApiNetworkInvoker>(),
         authStorageService: gh<_i40.AuthStorageService>(),
         cubitError: gh<_i139.CubitError>(),
         cubitAuth: gh<_i200.CubitAuth>(),
@@ -112,7 +117,7 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i545.PermissionService>(
       () => _i545.PermissionService(
-        networkManager: gh<_i475.NetworkManager>(),
+        invoker: gh<_i1073.ApiNetworkInvoker>(),
         authStorageService: gh<_i40.AuthStorageService>(),
         cubitError: gh<_i139.CubitError>(),
         cubitAuth: gh<_i200.CubitAuth>(),
@@ -120,11 +125,20 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i868.UsernameService>(
       () => _i868.UsernameService(
-        networkManager: gh<_i475.NetworkManager>(),
+        invoker: gh<_i1073.ApiNetworkInvoker>(),
         authStorageService: gh<_i40.AuthStorageService>(),
         cubitError: gh<_i139.CubitError>(),
         cubitAuth: gh<_i200.CubitAuth>(),
       ),
+    );
+    gh.factory<_i657.CubitCreateEmployee>(
+      () => _i657.CubitCreateEmployee(gh<_i93.EmployeeService>()),
+    );
+    gh.factory<_i828.CubitEmployee>(
+      () => _i828.CubitEmployee(gh<_i93.EmployeeService>()),
+    );
+    gh.factory<_i463.CubitSingleEmployee>(
+      () => _i463.CubitSingleEmployee(gh<_i93.EmployeeService>()),
     );
     gh.factory<_i102.CubitPermissionViewer>(
       () => _i102.CubitPermissionViewer(gh<_i545.PermissionService>()),
@@ -152,18 +166,8 @@ extension GetItInjectableX on _i174.GetIt {
         cubitSingleEmployee,
       ),
     );
-    gh.singleton<_i795.AppRoute>(() => _i795.AppRoute(gh<_i84.AuthGuard>()));
     gh.factory<_i914.CubitCreateEmployeeUsername>(
       () => _i914.CubitCreateEmployeeUsername(gh<_i868.UsernameService>()),
-    );
-    gh.factory<_i657.CubitCreateEmployee>(
-      () => _i657.CubitCreateEmployee(gh<_i93.EmployeeService>()),
-    );
-    gh.factory<_i828.CubitEmployee>(
-      () => _i828.CubitEmployee(gh<_i93.EmployeeService>()),
-    );
-    gh.factory<_i463.CubitSingleEmployee>(
-      () => _i463.CubitSingleEmployee(gh<_i93.EmployeeService>()),
     );
     return this;
   }
