@@ -65,7 +65,7 @@ class _PermissionsView extends StatelessWidget {
               final cubit = context.read<CubitPermissions>();
               unawaited(
                 context.router.push(
-                  RouteManagePermission(
+                  RouteCreatePermission(
                     employeeId: employeeId,
                     cubitPermission: cubit,
                     cubitPermissionViewer: cubitPermissionViewer,

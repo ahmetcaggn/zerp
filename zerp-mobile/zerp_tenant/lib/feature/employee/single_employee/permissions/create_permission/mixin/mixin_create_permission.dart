@@ -1,6 +1,6 @@
-part of '../screen_manage_permission.dart';
+part of '../screen_create_permission.dart';
 
-mixin _MixinManagePermission on State<_ManagePermissionView> {
+mixin _MixinCreatePermission on State<_CreatePermissionView> {
   final formKey = GlobalKey<FormState>();
 
   String? selectedActionStr;
@@ -26,7 +26,11 @@ mixin _MixinManagePermission on State<_ManagePermissionView> {
     if (formKey.currentState?.validate() ?? false) {
       if (selectedActionStr == null || selectedTargetType == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.t.permissionManage.errorSelectAction)),
+          SnackBar(
+            content: Text(
+              context.t.employee.details.permissionCreate.errorSelectAction,
+            ),
+          ),
         );
         return;
       }
@@ -46,7 +50,7 @@ mixin _MixinManagePermission on State<_ManagePermissionView> {
             orElse: () => PermissionCreateRequestDTOTargetTypeEnum.USER,
           );
 
-      await context.read<CubitManagePermission>().savePermission(
+      await context.read<CubitCreatePermission>().savePermission(
         employeeId: widget.employeeId,
         targetType: targetTypeEnum,
         action: actionEnum,
@@ -59,16 +63,18 @@ mixin _MixinManagePermission on State<_ManagePermissionView> {
     _isSubmitting = false;
   }
 
-  void _listener(BuildContext context, StateManagePermission state) {
-    if (state is StateManagePermissionSuccess) {
+  void _listener(BuildContext context, StateCreatePermission state) {
+    if (state is StateCreatePermissionSuccess) {
       setState(() {
         _isSubmitting = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.t.permissionManage.success)),
+        SnackBar(
+          content: Text(context.t.employee.details.permissionCreate.success),
+        ),
       );
       unawaited(context.router.maybePop());
-    } else if (state is StateManagePermissionError) {
+    } else if (state is StateCreatePermissionError) {
       setState(() {
         _isSubmitting = false;
       });

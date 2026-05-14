@@ -5,21 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:openapi_user/api.dart';
 import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_permission_viewer.dart';
+import 'package:zerp_tenant/feature/employee/single_employee/permissions/create_permission/cubit/cubit_create_permission.dart';
+import 'package:zerp_tenant/feature/employee/single_employee/permissions/create_permission/view/view_create_permission_action_selector.dart';
+import 'package:zerp_tenant/feature/employee/single_employee/permissions/create_permission/view/view_create_permission_target_selector.dart';
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/cubit_permissions.dart';
-import 'package:zerp_tenant/feature/employee/single_employee/permissions/manage_permission/cubit/cubit_manage_permission.dart';
-import 'package:zerp_tenant/feature/employee/single_employee/permissions/manage_permission/view/view_manage_permission_action_selector.dart';
-import 'package:zerp_tenant/feature/employee/single_employee/permissions/manage_permission/view/view_manage_permission_target_selector.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
-part 'mixin/mixin_manage_permission.dart';
+part 'mixin/mixin_create_permission.dart';
 
 typedef PermissionTargetType =
     ApiResponseMapPermissionActionListPermissionTargetTypeDataEnum;
 
 @RoutePage()
-class ScreenManagePermission extends StatelessWidget {
-  const ScreenManagePermission({
+class ScreenCreatePermission extends StatelessWidget {
+  const ScreenCreatePermission({
     required this.employeeId,
     required this.cubitPermission,
     required this.cubitPermissionViewer,
@@ -34,47 +34,47 @@ class ScreenManagePermission extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          getIt<CubitManagePermission>(param1: cubitPermission),
-      child: _ManagePermissionView(employeeId: employeeId),
+          getIt<CubitCreatePermission>(param1: cubitPermission),
+      child: _CreatePermissionView(employeeId: employeeId),
     );
   }
 }
 
-class _ManagePermissionView extends StatefulWidget {
-  const _ManagePermissionView({required this.employeeId});
+class _CreatePermissionView extends StatefulWidget {
+  const _CreatePermissionView({required this.employeeId});
 
   final String employeeId;
 
   @override
-  State<_ManagePermissionView> createState() => _ManagePermissionViewState();
+  State<_CreatePermissionView> createState() => _CreatePermissionViewState();
 }
 
-class _ManagePermissionViewState extends State<_ManagePermissionView>
-    with _MixinManagePermission {
+class _CreatePermissionViewState extends State<_CreatePermissionView>
+    with _MixinCreatePermission {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.t.permissionManage.title),
+        title: Text(context.t.employee.details.permissionCreate.title),
       ),
-      body: BlocConsumer<CubitManagePermission, StateManagePermission>(
+      body: BlocConsumer<CubitCreatePermission, StateCreatePermission>(
         listener: _listener,
         builder: (context, state) {
-          if (state is StateManagePermissionLoading) {
+          if (state is StateCreatePermissionLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (state is StateManagePermissionError &&
-              state is! StateManagePermissionLoaded) {
+          if (state is StateCreatePermissionError &&
+              state is! StateCreatePermissionLoaded) {
             return Center(
               child: Text(state.message),
             );
           }
 
-          final isSaving = state is StateManagePermissionSaving;
+          final isSaving = state is StateCreatePermissionSaving;
 
           var actionMap = <String, List<PermissionTargetType>>{};
-          if (state is StateManagePermissionLoaded) {
+          if (state is StateCreatePermissionLoaded) {
             actionMap = state.actionTargetTypes;
           }
 
@@ -94,7 +94,8 @@ class _ManagePermissionViewState extends State<_ManagePermissionView>
                     initialValue: selectedActionStr,
                     readOnly: true,
                     decoration: InputDecoration(
-                      labelText: context.t.permissionManage.action,
+                      labelText:
+                          context.t.employee.details.permissionCreate.action,
                       suffixIcon: const Icon(Icons.arrow_drop_down),
                     ),
                     onTap: () {
@@ -104,7 +105,7 @@ class _ManagePermissionViewState extends State<_ManagePermissionView>
                           isScrollControlled: true,
                           useSafeArea: true,
                           builder: (context) {
-                            return ViewManagePermissionActionSelector(
+                            return ViewCreatePermissionActionSelector(
                               actions: availableActions,
                               initialAction: selectedActionStr,
                               onSelected: (value) {
@@ -128,7 +129,12 @@ class _ManagePermissionViewState extends State<_ManagePermissionView>
                     DropdownButtonFormField<PermissionTargetType>(
                       initialValue: selectedTargetType,
                       decoration: InputDecoration(
-                        labelText: context.t.permissionManage.targetType,
+                        labelText: context
+                            .t
+                            .employee
+                            .details
+                            .permissionCreate
+                            .targetType,
                       ),
                       items: availableTargetTypes.map((type) {
                         return DropdownMenuItem(
@@ -148,7 +154,7 @@ class _ManagePermissionViewState extends State<_ManagePermissionView>
 
                     if (selectedTargetType != null) ...[
                       const SizedBox(height: 16),
-                      ViewManagePermissionTargetSelector(
+                      ViewCreatePermissionTargetSelector(
                         targetIdController: targetIdController,
                         selectedTargetType: selectedTargetType!,
                       ),
@@ -162,7 +168,9 @@ class _ManagePermissionViewState extends State<_ManagePermissionView>
                         : submit,
                     child: isSaving
                         ? const CircularProgressIndicator()
-                        : Text(context.t.permissionManage.submit),
+                        : Text(
+                            context.t.employee.details.permissionCreate.submit,
+                          ),
                   ),
                 ],
               ),

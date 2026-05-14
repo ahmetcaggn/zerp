@@ -32,7 +32,7 @@ class AppRoute extends RootStackRouter {
     AutoRoute(page: RouteCreateEmployee.page),
     AutoRoute(page: RouteEditEmployee.page),
     AutoRoute(page: RoutePermissions.page),
-    AutoRoute(page: RouteManagePermission.page),
+    AutoRoute(page: RouteCreatePermission.page),
 
     // standalone routes
     AutoRoute(page: RouteAuth.page),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
-class ViewManagePermissionActionSelector extends StatefulWidget {
-  const ViewManagePermissionActionSelector({
+class ViewCreatePermissionActionSelector extends StatefulWidget {
+  const ViewCreatePermissionActionSelector({
     required this.actions,
     required this.onSelected,
     this.initialAction,
@@ -14,12 +14,12 @@ class ViewManagePermissionActionSelector extends StatefulWidget {
   final String? initialAction;
 
   @override
-  State<ViewManagePermissionActionSelector> createState() =>
-      _ViewManagePermissionActionSelectorState();
+  State<ViewCreatePermissionActionSelector> createState() =>
+      _ViewCreatePermissionActionSelectorState();
 }
 
-class _ViewManagePermissionActionSelectorState
-    extends State<ViewManagePermissionActionSelector> {
+class _ViewCreatePermissionActionSelectorState
+    extends State<ViewCreatePermissionActionSelector> {
   late List<String> filteredActions;
   final TextEditingController searchController = TextEditingController();
 
@@ -68,7 +68,8 @@ class _ViewManagePermissionActionSelectorState
             controller: searchController,
             autofocus: true,
             decoration: InputDecoration(
-              hintText: context.t.permissionManage.searchActions,
+              hintText:
+                  context.t.employee.details.permissionCreate.searchActions,
               prefixIcon: const Icon(Icons.search),
               border: const OutlineInputBorder(),
             ),

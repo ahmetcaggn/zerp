@@ -13,21 +13,21 @@ import 'package:auto_route/auto_route.dart' as _i16;
 import 'package:flutter/material.dart' as _i17;
 import 'package:zerp_tenant/feature/auth/view/screen_auth.dart' as _i1;
 import 'package:zerp_tenant/feature/dashboard/view/screen_dashboard.dart'
-    as _i3;
+    as _i4;
 import 'package:zerp_tenant/feature/employee/create_employee/screen_create_employee.dart'
     as _i2;
 import 'package:zerp_tenant/feature/employee/cubit/cubit_employee.dart' as _i18;
-import 'package:zerp_tenant/feature/employee/screen_employee.dart' as _i5;
+import 'package:zerp_tenant/feature/employee/screen_employee.dart' as _i6;
 import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_permission_viewer.dart'
-    as _i21;
-import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_single_employee.dart'
-    as _i19;
-import 'package:zerp_tenant/feature/employee/single_employee/edit_employee/screen_edit_employee.dart'
-    as _i4;
-import 'package:zerp_tenant/feature/employee/single_employee/permissions/cubit_permissions.dart'
     as _i20;
-import 'package:zerp_tenant/feature/employee/single_employee/permissions/manage_permission/screen_manage_permission.dart'
-    as _i6;
+import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_single_employee.dart'
+    as _i21;
+import 'package:zerp_tenant/feature/employee/single_employee/edit_employee/screen_edit_employee.dart'
+    as _i5;
+import 'package:zerp_tenant/feature/employee/single_employee/permissions/create_permission/screen_create_permission.dart'
+    as _i3;
+import 'package:zerp_tenant/feature/employee/single_employee/permissions/cubit_permissions.dart'
+    as _i19;
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/screen_permissions.dart'
     as _i8;
 import 'package:zerp_tenant/feature/employee/single_employee/screen_single_employee.dart'
@@ -154,7 +154,83 @@ class RouteCreateEmployeeArgs {
 }
 
 /// generated route for
-/// [_i3.ScreenDashboard]
+/// [_i3.ScreenCreatePermission]
+class RouteCreatePermission
+    extends _i16.PageRouteInfo<RouteCreatePermissionArgs> {
+  RouteCreatePermission({
+    required String employeeId,
+    required _i19.CubitPermissions cubitPermission,
+    required _i20.CubitPermissionViewer cubitPermissionViewer,
+    _i17.Key? key,
+    List<_i16.PageRouteInfo>? children,
+  }) : super(
+         RouteCreatePermission.name,
+         args: RouteCreatePermissionArgs(
+           employeeId: employeeId,
+           cubitPermission: cubitPermission,
+           cubitPermissionViewer: cubitPermissionViewer,
+           key: key,
+         ),
+         initialChildren: children,
+       );
+
+  static const String name = 'RouteCreatePermission';
+
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<RouteCreatePermissionArgs>();
+      return _i3.ScreenCreatePermission(
+        employeeId: args.employeeId,
+        cubitPermission: args.cubitPermission,
+        cubitPermissionViewer: args.cubitPermissionViewer,
+        key: args.key,
+      );
+    },
+  );
+}
+
+class RouteCreatePermissionArgs {
+  const RouteCreatePermissionArgs({
+    required this.employeeId,
+    required this.cubitPermission,
+    required this.cubitPermissionViewer,
+    this.key,
+  });
+
+  final String employeeId;
+
+  final _i19.CubitPermissions cubitPermission;
+
+  final _i20.CubitPermissionViewer cubitPermissionViewer;
+
+  final _i17.Key? key;
+
+  @override
+  String toString() {
+    return 'RouteCreatePermissionArgs{employeeId: $employeeId, cubitPermission: $cubitPermission, cubitPermissionViewer: $cubitPermissionViewer, key: $key}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! RouteCreatePermissionArgs) return false;
+    return employeeId == other.employeeId &&
+        cubitPermission == other.cubitPermission &&
+        cubitPermissionViewer == other.cubitPermissionViewer &&
+        key == other.key;
+  }
+
+  @override
+  int get hashCode =>
+      employeeId.hashCode ^
+      cubitPermission.hashCode ^
+      cubitPermissionViewer.hashCode ^
+      key.hashCode;
+}
+
+/// generated route for
+/// [_i4.ScreenDashboard]
 class RouteDashboard extends _i16.PageRouteInfo<void> {
   const RouteDashboard({List<_i16.PageRouteInfo>? children})
     : super(RouteDashboard.name, initialChildren: children);
@@ -164,17 +240,17 @@ class RouteDashboard extends _i16.PageRouteInfo<void> {
   static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
-      return const _i3.ScreenDashboard();
+      return const _i4.ScreenDashboard();
     },
   );
 }
 
 /// generated route for
-/// [_i4.ScreenEditEmployee]
+/// [_i5.ScreenEditEmployee]
 class RouteEditEmployee extends _i16.PageRouteInfo<RouteEditEmployeeArgs> {
   RouteEditEmployee({
     required String employeeId,
-    required _i19.CubitSingleEmployee cubitSingleEmployee,
+    required _i21.CubitSingleEmployee cubitSingleEmployee,
     required _i18.CubitEmployee cubitEmployee,
     _i17.Key? key,
     List<_i16.PageRouteInfo>? children,
@@ -195,7 +271,7 @@ class RouteEditEmployee extends _i16.PageRouteInfo<RouteEditEmployeeArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<RouteEditEmployeeArgs>();
-      return _i4.ScreenEditEmployee(
+      return _i5.ScreenEditEmployee(
         employeeId: args.employeeId,
         cubitSingleEmployee: args.cubitSingleEmployee,
         cubitEmployee: args.cubitEmployee,
@@ -215,7 +291,7 @@ class RouteEditEmployeeArgs {
 
   final String employeeId;
 
-  final _i19.CubitSingleEmployee cubitSingleEmployee;
+  final _i21.CubitSingleEmployee cubitSingleEmployee;
 
   final _i18.CubitEmployee cubitEmployee;
 
@@ -245,7 +321,7 @@ class RouteEditEmployeeArgs {
 }
 
 /// generated route for
-/// [_i5.ScreenEmployee]
+/// [_i6.ScreenEmployee]
 class RouteEmployee extends _i16.PageRouteInfo<void> {
   const RouteEmployee({List<_i16.PageRouteInfo>? children})
     : super(RouteEmployee.name, initialChildren: children);
@@ -255,85 +331,9 @@ class RouteEmployee extends _i16.PageRouteInfo<void> {
   static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
-      return const _i5.ScreenEmployee();
+      return const _i6.ScreenEmployee();
     },
   );
-}
-
-/// generated route for
-/// [_i6.ScreenManagePermission]
-class RouteManagePermission
-    extends _i16.PageRouteInfo<RouteManagePermissionArgs> {
-  RouteManagePermission({
-    required String employeeId,
-    required _i20.CubitPermissions cubitPermission,
-    required _i21.CubitPermissionViewer cubitPermissionViewer,
-    _i17.Key? key,
-    List<_i16.PageRouteInfo>? children,
-  }) : super(
-         RouteManagePermission.name,
-         args: RouteManagePermissionArgs(
-           employeeId: employeeId,
-           cubitPermission: cubitPermission,
-           cubitPermissionViewer: cubitPermissionViewer,
-           key: key,
-         ),
-         initialChildren: children,
-       );
-
-  static const String name = 'RouteManagePermission';
-
-  static _i16.PageInfo page = _i16.PageInfo(
-    name,
-    builder: (data) {
-      final args = data.argsAs<RouteManagePermissionArgs>();
-      return _i6.ScreenManagePermission(
-        employeeId: args.employeeId,
-        cubitPermission: args.cubitPermission,
-        cubitPermissionViewer: args.cubitPermissionViewer,
-        key: args.key,
-      );
-    },
-  );
-}
-
-class RouteManagePermissionArgs {
-  const RouteManagePermissionArgs({
-    required this.employeeId,
-    required this.cubitPermission,
-    required this.cubitPermissionViewer,
-    this.key,
-  });
-
-  final String employeeId;
-
-  final _i20.CubitPermissions cubitPermission;
-
-  final _i21.CubitPermissionViewer cubitPermissionViewer;
-
-  final _i17.Key? key;
-
-  @override
-  String toString() {
-    return 'RouteManagePermissionArgs{employeeId: $employeeId, cubitPermission: $cubitPermission, cubitPermissionViewer: $cubitPermissionViewer, key: $key}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! RouteManagePermissionArgs) return false;
-    return employeeId == other.employeeId &&
-        cubitPermission == other.cubitPermission &&
-        cubitPermissionViewer == other.cubitPermissionViewer &&
-        key == other.key;
-  }
-
-  @override
-  int get hashCode =>
-      employeeId.hashCode ^
-      cubitPermission.hashCode ^
-      cubitPermissionViewer.hashCode ^
-      key.hashCode;
 }
 
 /// generated route for
@@ -357,7 +357,7 @@ class RouteMenu extends _i16.PageRouteInfo<void> {
 class RoutePermissions extends _i16.PageRouteInfo<RoutePermissionsArgs> {
   RoutePermissions({
     required String employeeId,
-    required _i21.CubitPermissionViewer cubitPermissionViewer,
+    required _i20.CubitPermissionViewer cubitPermissionViewer,
     _i17.Key? key,
     List<_i16.PageRouteInfo>? children,
   }) : super(
@@ -394,7 +394,7 @@ class RoutePermissionsArgs {
 
   final String employeeId;
 
-  final _i21.CubitPermissionViewer cubitPermissionViewer;
+  final _i20.CubitPermissionViewer cubitPermissionViewer;
 
   final _i17.Key? key;
 

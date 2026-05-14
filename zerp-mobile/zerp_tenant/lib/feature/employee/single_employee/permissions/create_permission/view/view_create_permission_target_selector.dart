@@ -5,8 +5,8 @@ import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 typedef PermissionTargetType =
     ApiResponseMapPermissionActionListPermissionTargetTypeDataEnum;
 
-class ViewManagePermissionTargetSelector extends StatelessWidget {
-  const ViewManagePermissionTargetSelector({
+class ViewCreatePermissionTargetSelector extends StatelessWidget {
+  const ViewCreatePermissionTargetSelector({
     required this.targetIdController,
     required this.selectedTargetType,
     super.key,
@@ -26,8 +26,8 @@ class ViewManagePermissionTargetSelector extends StatelessWidget {
         return TextFormField(
           controller: targetIdController,
           decoration: InputDecoration(
-            labelText: context.t.permissionManage.targetId,
-            hintText: context.t.permissionManage.targetIdHint(
+            labelText: context.t.employee.details.permissionCreate.targetId,
+            hintText: context.t.employee.details.permissionCreate.targetIdHint(
               type: selectedTargetType.value,
             ),
           ),

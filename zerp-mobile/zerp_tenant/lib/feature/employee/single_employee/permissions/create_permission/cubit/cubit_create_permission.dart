@@ -12,12 +12,12 @@ typedef PermissionTargetType =
     ApiResponseMapPermissionActionListPermissionTargetTypeDataEnum;
 
 @injectable
-class CubitManagePermission extends BaseCubit<StateManagePermission>
-    with LoggerMixin<CubitManagePermission> {
-  CubitManagePermission(
+class CubitCreatePermission extends BaseCubit<StateCreatePermission>
+    with LoggerMixin<CubitCreatePermission> {
+  CubitCreatePermission(
     this._permissionService,
     @factoryParam this.cubitPermissions,
-  ) : super(const StateManagePermissionLoading()) {
+  ) : super(const StateCreatePermissionLoading()) {
     unawaited(_loadActions());
   }
 
@@ -28,15 +28,17 @@ class CubitManagePermission extends BaseCubit<StateManagePermission>
     try {
       final res = await _permissionService.getPermissionActions();
       emit(
-        StateManagePermissionLoaded(
+        StateCreatePermissionLoaded(
           actionTargetTypes: res.data,
         ),
       );
     } on Object catch (e, s) {
       log.severe('Failed to load permission actions: $e', e, s);
       emit(
-        StateManagePermissionError(
-          message: t.permissionManage.errorLoadActions(error: e.toString()),
+        StateCreatePermissionError(
+          message: t.employee.details.permissionCreate.errorLoadActions(
+            error: e.toString(),
+          ),
         ),
       );
     }
@@ -49,10 +51,10 @@ class CubitManagePermission extends BaseCubit<StateManagePermission>
     String? targetId,
   }) async {
     final currentState = state;
-    if (currentState is! StateManagePermissionLoaded) return;
+    if (currentState is! StateCreatePermissionLoaded) return;
 
     emit(
-      StateManagePermissionSaving(
+      StateCreatePermissionSaving(
         actionTargetTypes: currentState.actionTargetTypes,
       ),
     );
@@ -66,12 +68,12 @@ class CubitManagePermission extends BaseCubit<StateManagePermission>
           targetId: targetId,
         ),
       );
-      emit(const StateManagePermissionSuccess());
+      emit(const StateCreatePermissionSuccess());
       unawaited(cubitPermissions.loadPermissions(userId: employeeId));
     } on Object catch (e, s) {
       log.severe('Failed to create permission: $e', e, s);
       emit(
-        StateManagePermissionLoaded(
+        StateCreatePermissionLoaded(
           actionTargetTypes: currentState.actionTargetTypes,
         ),
       );
@@ -79,30 +81,30 @@ class CubitManagePermission extends BaseCubit<StateManagePermission>
   }
 }
 
-sealed class StateManagePermission {
-  const StateManagePermission();
+sealed class StateCreatePermission {
+  const StateCreatePermission();
 }
 
-final class StateManagePermissionLoading extends StateManagePermission {
-  const StateManagePermissionLoading();
+final class StateCreatePermissionLoading extends StateCreatePermission {
+  const StateCreatePermissionLoading();
 }
 
-final class StateManagePermissionLoaded extends StateManagePermission {
-  const StateManagePermissionLoaded({required this.actionTargetTypes});
+final class StateCreatePermissionLoaded extends StateCreatePermission {
+  const StateCreatePermissionLoaded({required this.actionTargetTypes});
 
   final Map<String, List<PermissionTargetType>> actionTargetTypes;
 }
 
-final class StateManagePermissionSaving extends StateManagePermissionLoaded {
-  const StateManagePermissionSaving({required super.actionTargetTypes});
+final class StateCreatePermissionSaving extends StateCreatePermissionLoaded {
+  const StateCreatePermissionSaving({required super.actionTargetTypes});
 }
 
-final class StateManagePermissionSuccess extends StateManagePermission {
-  const StateManagePermissionSuccess();
+final class StateCreatePermissionSuccess extends StateCreatePermission {
+  const StateCreatePermissionSuccess();
 }
 
-final class StateManagePermissionError extends StateManagePermission {
-  const StateManagePermissionError({required this.message});
+final class StateCreatePermissionError extends StateCreatePermission {
+  const StateCreatePermissionError({required this.message});
 
   final String message;
 }

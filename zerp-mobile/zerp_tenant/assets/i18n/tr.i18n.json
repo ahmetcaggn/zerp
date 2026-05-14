@@ -109,6 +109,19 @@
       "errors": {
         "missingId": "$name için çalışan ID'si eksik",
         "noIdProvided": "Çalışan ID'si sağlanmadı"
+      },
+      "permissionCreate": {
+        "title": "Yetki Oluştur",
+        "action": "Eylem *",
+        "targetType": "Hedef Türü *",
+        "targetId": "Hedef ID (Global eylemler için opsiyonel)",
+        "targetIdHint": "$type için ID girin",
+        "submit": "Yetki Oluştur",
+        "success": "Yetki başarıyla oluşturuldu",
+        "errorSelectAction": "Lütfen eylem ve hedef türünü seçin",
+        "errorLoadActions": "Yetki eylemleri yüklenemedi: $error",
+        "errorCreatePermission": "Yetki oluşturulamadı: $error",
+        "searchActions": "Eylemlerde ara..."
       }
     }
   },
@@ -129,19 +142,6 @@
     "deleteMessage": "Bu yetkiyi silmek istediğinizden emin misiniz?",
     "errorLoad": "Yetkiler yüklenemedi: $error",
     "errorDelete": "Yetki silinemedi: $error"
-  },
-  "permissionManage": {
-    "title": "Yetki Oluştur",
-    "action": "Eylem *",
-    "targetType": "Hedef Türü *",
-    "targetId": "Hedef ID (Global eylemler için opsiyonel)",
-    "targetIdHint": "$type için ID girin",
-    "submit": "Yetki Oluştur",
-    "success": "Yetki başarıyla oluşturuldu",
-    "errorSelectAction": "Lütfen eylem ve hedef türünü seçin",
-    "errorLoadActions": "Yetki eylemleri yüklenemedi: $error",
-    "errorCreatePermission": "Yetki oluşturulamadı: $error",
-    "searchActions": "Eylemlerde ara..."
   },
   "widgets": {
     "permissionViewer": {
