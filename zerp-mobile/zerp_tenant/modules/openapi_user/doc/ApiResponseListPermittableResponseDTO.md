@@ -1,4 +1,4 @@
-# openapi_user.model.ApiResponseListUUID
+# openapi_user.model.ApiResponseListPermittableResponseDTO
 
 ## Load the model package
 ```dart
@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 **success** | **bool** |  | [optional] 
 **statusCode** | **int** |  | [optional] 
 **message** | **String** |  | [optional] 
-**data** | **List<String>** |  | [optional] [default to const []]
+**data** | [**List<PermittableResponseDTO>**](PermittableResponseDTO.md) |  | [optional] [default to const []]
 **meta** | [**Meta**](Meta.md) |  | [optional] 
 **parameters** | [**List<Parameter>**](Parameter.md) |  | [optional] [default to const []]
 

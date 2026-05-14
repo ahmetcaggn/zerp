@@ -69,23 +69,18 @@ Class | Method | HTTP request | Description
 *PermissionsPatchManyPermissionsApi* | [**patchManyPermissions**](doc//PermissionsPatchManyPermissionsApi.md#) | **PATCH** /user/permissions | UpdateMany: Update multiple entities
 *PermissionsPatchPermissionApi* | [**patchPermission**](doc//PermissionsPatchPermissionApi.md#) | **PATCH** /user/permissions/{id} | Update: Update an existing entity
 *PermissionsUpdatePermissionApi* | [**updatePermission**](doc//PermissionsUpdatePermissionApi.md#) | **PUT** /user/permissions/{id} | Update: Update an existing entity
+*PermittablesGetListPermittablesApi* | [**getListPermittables**](doc//PermittablesGetListPermittablesApi.md#) | **GET** /user/permittables | GetList: Get paginated list of entities with filtering
 *UsernamesCheckUsernameApi* | [**checkUsername**](doc//UsernamesCheckUsernameApi.md#) | **GET** /user/usernames/check | 
-*UsersCreateUserApi* | [**createUser**](doc//UsersCreateUserApi.md#) | **POST** /user | Create: Create a new entity
-*UsersDeleteManyUsersApi* | [**deleteManyUsers**](doc//UsersDeleteManyUsersApi.md#) | **DELETE** /user | DeleteMany: Delete multiple entities
-*UsersDeleteUserApi* | [**deleteUser**](doc//UsersDeleteUserApi.md#) | **DELETE** /user/{id} | Delete: Delete a single entity
 *UsersGetListUsersApi* | [**getListUsers**](doc//UsersGetListUsersApi.md#) | **GET** /user | GetList: Get paginated list of entities with filtering
 *UsersGetManyUsersApi* | [**getManyUsers**](doc//UsersGetManyUsersApi.md#) | **GET** /user/many | GetMany: Get multiple entities by IDs
 *UsersGetOneUserApi* | [**getOneUser**](doc//UsersGetOneUserApi.md#) | **GET** /user/{id} | GetOne: Get single entity by ID
-*UsersPatchManyUsersApi* | [**patchManyUsers**](doc//UsersPatchManyUsersApi.md#) | **PATCH** /user | UpdateMany: Update multiple entities
-*UsersPatchUserApi* | [**patchUser**](doc//UsersPatchUserApi.md#) | **PATCH** /user/{id} | Update: Update an existing entity
-*UsersUpdateUserApi* | [**updateUser**](doc//UsersUpdateUserApi.md#) | **PUT** /user/{id} | Update: Update an existing entity
 
 
 ## Documentation For Models
 
  - [ApiResponseListLong](doc//ApiResponseListLong.md)
  - [ApiResponseListPermissionResponse](doc//ApiResponseListPermissionResponse.md)
- - [ApiResponseListUUID](doc//ApiResponseListUUID.md)
+ - [ApiResponseListPermittableResponseDTO](doc//ApiResponseListPermittableResponseDTO.md)
  - [ApiResponseListUserResponseDTO](doc//ApiResponseListUserResponseDTO.md)
  - [ApiResponseMapPermissionActionListPermissionTargetType](doc//ApiResponseMapPermissionActionListPermissionTargetType.md)
  - [ApiResponsePermissionResponse](doc//ApiResponsePermissionResponse.md)
@@ -97,6 +92,7 @@ Class | Method | HTTP request | Description
  - [PermissionCreateRequestDTO](doc//PermissionCreateRequestDTO.md)
  - [PermissionResponse](doc//PermissionResponse.md)
  - [PermissionUpdateRequest](doc//PermissionUpdateRequest.md)
+ - [PermittableResponseDTO](doc//PermittableResponseDTO.md)
  - [UserResponseDTO](doc//UserResponseDTO.md)
  - [UsernameCheckResponseDTO](doc//UsernameCheckResponseDTO.md)
 

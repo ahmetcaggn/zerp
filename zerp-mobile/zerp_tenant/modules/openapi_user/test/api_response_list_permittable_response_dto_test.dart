@@ -10,11 +10,11 @@
 import 'package:openapi_user/api.dart';
 import 'package:test/test.dart';
 
-// tests for ApiResponseListUUID
+// tests for ApiResponseListPermittableResponseDTO
 void main() {
-  // final instance = ApiResponseListUUID();
+  // final instance = ApiResponseListPermittableResponseDTO();
 
-  group('test ApiResponseListUUID', () {
+  group('test ApiResponseListPermittableResponseDTO', () {
     // bool success
     test('to test the property `success`', () async {
       // TODO
@@ -30,7 +30,7 @@ void main() {
       // TODO
     });
 
-    // List<String> data (default value: const [])
+    // List<PermittableResponseDTO> data (default value: const [])
     test('to test the property `data`', () async {
       // TODO
     });
