@@ -59,6 +59,14 @@ public class TicketAssignmentEntity extends BaseEntity implements Permittable {
     private LocalDateTime unassignedAt;
 
     @Override
+    public String getTitle() {
+        if (team == null || ticket == null) {
+            return String.format("Assignment-%s", id);
+        }
+        return String.format("%s -> %s", ticket.getTitle(), team.getTitle());
+    }
+
+    @Override
     public Permittable getParent() {
         return ticket;
     }

@@ -36,6 +36,11 @@ public class MenuItem extends BaseEntity implements Permittable {
     private BigDecimal price;
 
     @Override
+    public String getTitle() {
+        return name;
+    }
+
+    @Override
     public Permittable getParent() {
         return category;
     }

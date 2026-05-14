@@ -48,7 +48,7 @@ public enum PermissionTargetType {
         this.parent = parent;
     }
 
-    static PermissionTargetType fromType(Class<? extends Permittable> type) {
+    public static PermissionTargetType fromType(Class<? extends Permittable> type) {
         final var annotation = type.getAnnotation(PermissionTargetTypeAnnotation.class);
         if (annotation == null) {
             throw new IllegalArgumentException("Class " + type.getName() +

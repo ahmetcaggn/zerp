@@ -11,7 +11,8 @@ import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
-import org.zerp.common.permission.service.PermittableService;
+import org.zerp.common.permission.service.CommonPermissionService;
+
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -21,7 +22,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class StockResourcePermissionEvaluator {
     private final PermissionRepository permissionRepository;
-    private final PermittableService permittableService;
+    private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID userId, StockResource target) {
         UUID stockResourceId;
@@ -163,17 +164,17 @@ public class StockResourcePermissionEvaluator {
     public Specification<StockResource> filterRead(UUID userId) {
         log.trace("Creating filterRead specification for userId: {}", userId);
 
-        boolean hasRootPermission = permittableService.hasRootPermission(userId, PermissionAction.READ_STOCK_RESOURCE);
+        boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_STOCK_RESOURCE);
         if (hasRootPermission) {
             log.debug("User {} has root permission for READ_STOCK_RESOURCE, returning unrestricted specification", userId);
             return Specification.unrestricted();
         }
 
-        Set<UUID> permittedStockResourceIds = permittableService.getAllPermitted(
+        Set<UUID> permittedStockResourceIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.STOCK_RESOURCE, PermissionAction.READ_STOCK_RESOURCE);
-        Set<UUID> permittedShopIds = permittableService.getAllPermitted(
+        Set<UUID> permittedShopIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.SHOP, PermissionAction.READ_STOCK_RESOURCE);
-        Set<UUID> permittedTenantIds = permittableService.getAllPermitted(
+        Set<UUID> permittedTenantIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.TENANT, PermissionAction.READ_STOCK_RESOURCE);
 
         log.debug("user {} permitted: {} stock resources, {} tenants",

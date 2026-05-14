@@ -14,7 +14,7 @@ import java.util.UUID;
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class PermittableService {
+public class CommonPermissionService {
     private final PermissionRepository permissionRepository;
 
     public boolean hasRootPermission(UUID userId, PermissionAction action) {

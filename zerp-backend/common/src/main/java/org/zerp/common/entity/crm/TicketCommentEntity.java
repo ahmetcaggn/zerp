@@ -30,7 +30,7 @@ public class TicketCommentEntity extends BaseEntity implements Permittable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_id", nullable = false)
     private TicketEntity ticket;
@@ -42,15 +42,28 @@ public class TicketCommentEntity extends BaseEntity implements Permittable {
     @Column(name = "author_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private AuthorType authorType;
-    
+
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
-    
+
     @Column(name = "is_internal", nullable = false)
     private Boolean isInternal;
-    
+
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TicketAttachmentEntity> attachments = new ArrayList<>();
+
+    @Override
+    public String getTitle() {
+        String content = getContent();
+        if (content == null) content = "";
+        if (author == null) {
+            return String.format("Comment: %s", content.length() > 20 ? content.substring(0, 20) + "..." : content);
+        }
+        return String.format(
+                "%s: %s",
+                author.getTitle(),
+                content.length() > 20 ? content.substring(0, 20) + "..." : content);
+    }
 
     @Override
     public Permittable getParent() {

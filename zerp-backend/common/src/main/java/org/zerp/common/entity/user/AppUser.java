@@ -32,6 +32,11 @@ public class AppUser extends BaseEntity implements Permittable {
     protected Tenant tenant;
 
     @Override
+    public String getTitle() {
+        return username;
+    }
+
+    @Override
     public Permittable getParent() {
         return tenant;
     }

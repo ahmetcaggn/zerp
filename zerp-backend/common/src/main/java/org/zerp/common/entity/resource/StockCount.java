@@ -45,6 +45,14 @@ public class StockCount extends BaseEntity implements Permittable {
     private List<StockCountItem> items = new ArrayList<>();
 
     @Override
+    public String getTitle() {
+        if (shop == null) {
+            return String.format("Stock Count - %s", countDate.toString());
+        }
+        return String.format("%s-%s", shop.getTitle(), countDate.toString());
+    }
+
+    @Override
     public Permittable getParent() {
         return shop;
     }

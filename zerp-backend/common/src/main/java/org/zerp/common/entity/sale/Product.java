@@ -67,6 +67,11 @@ public class Product extends BaseEntity implements Permittable {
     private List<ProductExtraOption> extraOptions = new ArrayList<>();
 
     @Override
+    public String getTitle() {
+        return name;
+    }
+
+    @Override
     public Permittable getParent() {
         return shop;
     }

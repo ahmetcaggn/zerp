@@ -39,6 +39,11 @@ public class Tenant extends CommonBaseEntity implements Permittable {
     private String website;
 
     @Override
+    public String getTitle() {
+        return name;
+    }
+
+    @Override
     public Permittable getParent() {
         return TenantRoot.INSTANCE;
     }

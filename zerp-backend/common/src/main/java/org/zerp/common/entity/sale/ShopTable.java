@@ -38,6 +38,14 @@ public class ShopTable extends BaseEntity implements Permittable {
     private Shop shop;
 
     @Override
+    public String getTitle() {
+        if (shop == null) {
+            return name;
+        }
+        return String.format("%s (%s-%s)", name, shop.getTitle(), floor);
+    }
+
+    @Override
     public Permittable getParent() {
         return shop;
     }

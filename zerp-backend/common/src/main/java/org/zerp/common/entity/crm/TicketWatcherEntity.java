@@ -40,6 +40,14 @@ public class TicketWatcherEntity implements Permittable {
     private LocalDateTime addedAt;
 
     @Override
+    public String getTitle() {
+        if (user == null) {
+            return String.format("Watcher-%s", ticket.getTitle());
+        }
+        return String.format("%s-%s", user.getTitle(), ticket.getTitle());
+    }
+
+    @Override
     public Permittable getParent() {
         return ticket;
     }

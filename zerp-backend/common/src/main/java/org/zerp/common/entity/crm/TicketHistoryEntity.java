@@ -26,7 +26,6 @@ import java.util.UUID;
 @SQLRestriction("deleted = false")
 @PermissionTargetTypeAnnotation(type = PermissionTargetType.TICKET_HISTORY)
 public class TicketHistoryEntity extends BaseEntity implements Permittable {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -54,6 +53,14 @@ public class TicketHistoryEntity extends BaseEntity implements Permittable {
 
     @Column(name = "occurred_at", nullable = false)
     private LocalDateTime occurredAt;
+
+    @Override
+    public String getTitle() {
+        return String.format("%s-%s (%s)",
+                eventType != null ? eventType.name() : "UNKNOWN_EVENT",
+                actorParty != null ? actorParty.getTitle() : "UNKNOWN_ACTOR",
+                ticket != null ? ticket.getTitle() : "UNKNOWN_TICKET");
+    }
 
     @Override
     public Permittable getParent() {

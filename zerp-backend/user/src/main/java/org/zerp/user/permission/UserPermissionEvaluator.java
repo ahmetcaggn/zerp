@@ -9,7 +9,7 @@ import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
-import org.zerp.common.permission.service.PermittableService;
+import org.zerp.common.permission.service.CommonPermissionService;
 
 import java.util.List;
 import java.util.Set;
@@ -20,7 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserPermissionEvaluator {
     private final PermissionRepository permissionRepository;
-    private final PermittableService permittableService;
+    private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID requesterId, AppUser target) {
         List<Permission> permissions = permissionRepository.findAllByUserAndUserHierarchy(
@@ -37,9 +37,9 @@ public class UserPermissionEvaluator {
     }
 
     public Specification<AppUser> filterRead(UUID requesterId) {
-        Set<UUID> permittedUserIds = permittableService.getAllPermitted(
+        Set<UUID> permittedUserIds = commonPermissionService.getAllPermitted(
                 requesterId, PermissionTargetType.USER, PermissionAction.READ_USER);
-        Set<UUID> permittedTenantIds = permittableService.getAllPermitted(
+        Set<UUID> permittedTenantIds = commonPermissionService.getAllPermitted(
                 requesterId, PermissionTargetType.TENANT, PermissionAction.READ_USER);
 
         log.debug("User {} has read permissions for {} users and {} tenants",

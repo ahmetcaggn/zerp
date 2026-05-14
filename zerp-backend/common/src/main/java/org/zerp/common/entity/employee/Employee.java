@@ -62,6 +62,11 @@ public class Employee extends AppUser implements Permittable {
     }
 
     @Override
+    public String getTitle() {
+        return String.format("%s (%s %s)", username, firstName, lastName);
+    }
+
+    @Override
     public Permittable getParent() {
         return tenant;
     }

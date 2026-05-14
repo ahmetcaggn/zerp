@@ -59,6 +59,11 @@ public class Shop extends BaseEntity implements Permittable {
     private List<ShopTable> tables;
 
     @Override
+    public String getTitle() {
+        return name;
+    }
+
+    @Override
     public Permittable getParent() {
         return tenant;
     }
