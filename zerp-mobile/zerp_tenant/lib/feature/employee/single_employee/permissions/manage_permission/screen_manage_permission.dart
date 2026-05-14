@@ -33,10 +33,8 @@ class ScreenManagePermission extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<CubitManagePermission>(
-        param1: cubitPermission,
-        param2: cubitPermissionViewer,
-      ),
+      create: (context) =>
+          getIt<CubitManagePermission>(param1: cubitPermission),
       child: _ManagePermissionView(employeeId: employeeId),
     );
   }

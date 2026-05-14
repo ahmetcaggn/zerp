@@ -4,6 +4,7 @@ import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_permission_viewer.dart';
 import 'package:zerp_tenant/product/cubit/base_cubit.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/error/cubit_error.dart';
+import 'package:zerp_tenant/product/network/page_response.dart';
 import 'package:zerp_tenant/product/service/user/permission_service.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
@@ -26,12 +27,7 @@ class CubitPermissions extends BaseCubit<StatePermissions>
       final permissions = await _permissionService.getPermissionsOfUser(
         userId: userId,
       );
-      emit(
-        StatePermissionsLoaded(
-          permissions: permissions.items,
-          totalCount: permissions.totalCount,
-        ),
-      );
+      updatePermissions(permissions);
     } on Object catch (e) {
       log.severe('Error loading permissions: $e');
       emit(
@@ -49,7 +45,6 @@ class CubitPermissions extends BaseCubit<StatePermissions>
     try {
       await _permissionService.deletePermission(id: id);
       await loadPermissions(userId: userId);
-      await _cubitPermissionViewer.loadPermissions(userId: userId);
     } on Object catch (e) {
       log.severe('Error deleting permission: $e');
       _cubitError.enqueue(
@@ -58,6 +53,16 @@ class CubitPermissions extends BaseCubit<StatePermissions>
         ),
       );
     }
+  }
+
+  void updatePermissions(PageResponse<PermissionResponse> response) {
+    emit(
+      StatePermissionsLoaded(
+        permissions: response.items,
+        totalCount: response.totalCount,
+      ),
+    );
+    _cubitPermissionViewer.updatePermissions(response);
   }
 }
 

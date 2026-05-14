@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:injectable/injectable.dart';
 import 'package:openapi_user/api.dart';
 import 'package:remote_logging/remote_logging.dart';
@@ -22,18 +24,25 @@ class CubitPermissionViewer extends BaseCubit<StatePermissionViewer>
         pageRequest: const PageRequest(start: 0, end: _previewCount),
         userId: userId,
       );
-      emit(
-        StatePermissionViewerLoaded(
-          permissions: permissions.items,
-          totalCount: permissions.totalCount,
-        ),
-      );
+      updatePermissions(permissions);
     } on Object catch (e) {
       log.severe('Error loading permissions: $e');
       emit(
         StatePermissionViewerError('Failed to load permissions: $e'),
       );
     }
+  }
+
+  void updatePermissions(PageResponse<PermissionResponse> response) {
+    emit(
+      StatePermissionViewerLoaded(
+        permissions: response.items.sublist(
+          0,
+          math.min(response.items.length, _previewCount),
+        ),
+        totalCount: response.totalCount,
+      ),
+    );
   }
 }
 

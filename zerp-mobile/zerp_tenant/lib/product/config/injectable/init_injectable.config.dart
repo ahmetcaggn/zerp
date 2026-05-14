@@ -151,22 +151,21 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i463.CubitSingleEmployee>(
       () => _i463.CubitSingleEmployee(gh<_i93.EmployeeService>()),
     );
+    gh.factoryParam<
+      _i185.CubitManagePermission,
+      _i1073.CubitPermissions,
+      dynamic
+    >(
+      (cubitPermissions, _) => _i185.CubitManagePermission(
+        gh<_i545.PermissionService>(),
+        cubitPermissions,
+      ),
+    );
     gh.factory<_i102.CubitPermissionViewer>(
       () => _i102.CubitPermissionViewer(gh<_i545.PermissionService>()),
     );
     gh.factory<_i170.CubitProfilePermissions>(
       () => _i170.CubitProfilePermissions(gh<_i545.PermissionService>()),
-    );
-    gh.factoryParam<
-      _i185.CubitManagePermission,
-      _i1073.CubitPermissions,
-      _i102.CubitPermissionViewer
-    >(
-      (cubitPermissions, cubitPermissionViewer) => _i185.CubitManagePermission(
-        gh<_i545.PermissionService>(),
-        cubitPermissions,
-        cubitPermissionViewer,
-      ),
     );
     gh.factoryParam<
       _i632.CubitEditEmployee,
