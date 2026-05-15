@@ -5,7 +5,7 @@ import UnauthorizedPage from '@/app/[locale]/unauthorized/page'
 
 describe('UnauthorizedPage', () => {
   it('renders unauthorized heading', () => {
-    render(<UnauthorizedPage params={{ locale: 'en' }} />)
+    render(<UnauthorizedPage params={Promise.resolve({ locale: 'en' })} />)
 
     expect(screen.getByText('Unauthorized')).toBeInTheDocument()
   })

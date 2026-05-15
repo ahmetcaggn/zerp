@@ -1,5 +1,5 @@
-import { TenantDashboard } from '@/modules/tenant/ui/tenant-dashboard'
+import { DashboardPageContent } from '@/modules/tenant/ui/dashboard-page-content'
 
 export default function DashboardPage() {
-  return <TenantDashboard />
+  return <DashboardPageContent />
 }

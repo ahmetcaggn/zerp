@@ -18,6 +18,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 import { useMenus, useDeleteMenu } from '../../../hooks/use-menus'
@@ -27,6 +28,8 @@ import { MenuFormDialog } from './menu-form-dialog'
 export function MenuList() {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
 
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -36,6 +39,7 @@ export function MenuList() {
   const { data, isLoading } = useMenus({
     pagination: { page: page + 1, perPage: rowsPerPage },
     sort: { field: 'name', order: 'ASC' },
+    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
   })
 
   const { mutate: deleteMenu } = useDeleteMenu()

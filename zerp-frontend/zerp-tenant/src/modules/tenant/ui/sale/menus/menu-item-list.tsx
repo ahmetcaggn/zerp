@@ -22,6 +22,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 import { useMenuItems, useDeleteMenuItem } from '../../../hooks/use-menu-items'
@@ -32,6 +33,8 @@ import { MenuItemFormDialog } from './menu-item-form-dialog'
 export function MenuItemList() {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
 
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -39,13 +42,19 @@ export function MenuItemList() {
   const [formOpen, setFormOpen] = useState(false)
   const [editItem, setEditItem] = useState<MenuItemResponseDto | null>(null)
 
-  const { data: categoriesResult } = useMenuCategories({ pagination: { page: 1, perPage: 200 } })
+  const { data: categoriesResult } = useMenuCategories({
+    pagination: { page: 1, perPage: 200 },
+    ...(selectedShopId ? { filter: { 'menu.shop.id': selectedShopId } } : {}),
+  })
   const categories = categoriesResult?.data ?? []
 
   const { data, isLoading } = useMenuItems({
     pagination: { page: page + 1, perPage: rowsPerPage },
     sort: { field: 'name', order: 'ASC' },
-    filter: filterCategoryId ? { categoryId: filterCategoryId } : {},
+    filter: {
+      ...(selectedShopId ? { 'category.menu.shop.id': selectedShopId } : {}),
+      ...(filterCategoryId ? { categoryId: filterCategoryId } : {}),
+    },
   })
 
   const { mutate: deleteMenuItem } = useDeleteMenuItem()

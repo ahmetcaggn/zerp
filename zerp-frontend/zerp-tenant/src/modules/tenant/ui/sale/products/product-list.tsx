@@ -21,6 +21,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook'
 import TuneIcon from '@mui/icons-material/Tune'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 import { useProducts, useDeleteProduct } from '../../../hooks/use-products'
@@ -32,6 +33,8 @@ import { ProductExtraOptionDialog } from './product-extra-option-dialog'
 export function ProductList() {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
 
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -45,6 +48,7 @@ export function ProductList() {
   const { data, isLoading } = useProducts({
     pagination: { page: page + 1, perPage: rowsPerPage },
     sort: { field: 'name', order: 'ASC' },
+    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
   })
 
   const { mutate: deleteProduct } = useDeleteProduct()

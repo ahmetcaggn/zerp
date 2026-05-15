@@ -3,6 +3,7 @@ import { Box, Button, Typography } from '@mui/material'
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber'
 import GroupsIcon from '@mui/icons-material/Groups'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
 import SendIcon from '@mui/icons-material/Send'
 import InventoryIcon from '@mui/icons-material/Inventory'
 import type { Route } from 'next'
@@ -23,6 +24,7 @@ export function DashboardQuickActions() {
     },
     { label: t('dashboard.newTicketAction'), icon: <ConfirmationNumberIcon />, href: ROUTES.tickets },
     { label: t('dashboard.viewStockAction'), icon: <InventoryIcon />, href: ROUTES.stock },
+    { label: t('dashboard.openCashierAction'), icon: <PointOfSaleIcon />, href: ROUTES.sale },
   ]
 
   return (

@@ -10,11 +10,11 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 import { useCreateMenu, useUpdateMenu } from '../../../hooks/use-menus'
 import type { MenuResponseDto } from '../../../types/sale'
-import { MOCK_SHOP_ID } from '../../../types/sale'
 
 interface Props {
   open: boolean
@@ -26,6 +26,7 @@ interface Props {
 export function MenuFormDialog({ open, mode, menu, onClose }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { scope } = useShopScope()
 
   const [name, setName] = useState(menu?.name ?? '')
   const [description, setDescription] = useState(menu?.description ?? '')
@@ -39,8 +40,13 @@ export function MenuFormDialog({ open, mode, menu, onClose }: Props) {
     if (!name.trim()) return
 
     if (mode === 'create') {
+      if (scope.mode !== 'SHOP') {
+        showToast('Bu işlem için önce bir mağaza seçin.', { severity: 'warning' })
+        return
+      }
+
       createMenu(
-        { name: name.trim(), ...(description.trim() && { description: description.trim() }), shopId: MOCK_SHOP_ID },
+        { name: name.trim(), ...(description.trim() && { description: description.trim() }), shopId: scope.shopId },
         {
           onSuccess: () => {
             showToast(t('sale.menu.createdToast'))

@@ -19,6 +19,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import BuildCircleIcon from '@mui/icons-material/BuildCircle'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { useStockResources } from '../../hooks/use-stock-resources'
 import type { StockResourceResponseDto, StockMovementType } from '../../types/stock'
@@ -28,6 +29,8 @@ import { StockMovementFormDialog } from './stock-movement-form-dialog'
 export function StockResourceList() {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
 
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -41,6 +44,7 @@ export function StockResourceList() {
   const { data, isLoading, error } = useStockResources({
     pagination: { page: page + 1, perPage: rowsPerPage },
     sort: { field: 'name', order: 'ASC' },
+    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
   })
 
   // if (error) showToast('error', error.message || 'Error loading resources')
