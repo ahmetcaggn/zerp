@@ -28,10 +28,4 @@ public interface UserServiceClient {
 
     @PutMapping("/feign/keycloak/users/{id}")
     ResponseEntity<ApiResponse<KeycloakUpdateUserResponseDTO>> updateKeycloakUser(@PathVariable UUID id, @RequestBody KeycloakUpdateUserRequestDTO request);
-
-    @PostMapping("/feign/users")
-    ResponseEntity<ApiResponse<UserCheckResponseDTO>> saveUserToDb(@RequestBody UserCreateIfNotExistRequestDTO request);
-
-    @DeleteMapping("/feign/users/{id}")
-    ResponseEntity<ApiResponse<Void>> deleteUserFromDb(@PathVariable UUID id);
 }
