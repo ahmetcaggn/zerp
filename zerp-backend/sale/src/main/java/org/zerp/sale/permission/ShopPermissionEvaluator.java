@@ -11,7 +11,7 @@ import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
-import org.zerp.common.permission.service.PermittableService;
+import org.zerp.common.permission.service.CommonPermissionService;
 
 import java.util.List;
 import java.util.Set;
@@ -23,7 +23,7 @@ import java.util.UUID;
 public class ShopPermissionEvaluator {
 
     private final PermissionRepository permissionRepository;
-    private final PermittableService permittableService;
+    private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID userId, Shop target) {
         UUID shopId;
@@ -46,17 +46,16 @@ public class ShopPermissionEvaluator {
     public Specification<Shop> filterRead(UUID userId) {
         log.trace("Creating filterRead specification for userId: {}", userId);
 
-        boolean hasRootPermission = permittableService.hasRootPermission(userId, PermissionAction.READ_SHOP);
+        boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_SHOP);
         if (hasRootPermission) {
             return Specification.unrestricted();
         }
 
-        Set<UUID> permittedShopIds = permittableService.getAllPermitted(
+        Set<UUID> permittedShopIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.SHOP, PermissionAction.READ_SHOP);
-        Set<UUID> permittedTenantIds = permittableService.getAllPermitted(
+        Set<UUID> permittedTenantIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.TENANT, PermissionAction.READ_SHOP);
 
-        //Todo Tenant_root levelinde de vermek gerekiyorsa buraya eklenebilir.
         return Specification.anyOf(
                 (root, _, _) -> root.get("id").in(permittedShopIds),
                 (root, _, _) -> root.get("tenantId").in(permittedTenantIds)

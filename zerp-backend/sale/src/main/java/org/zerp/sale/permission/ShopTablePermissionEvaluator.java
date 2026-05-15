@@ -11,7 +11,7 @@ import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
-import org.zerp.common.permission.service.PermittableService;
+import org.zerp.common.permission.service.CommonPermissionService;
 
 import java.util.List;
 import java.util.Set;
@@ -23,7 +23,7 @@ import java.util.UUID;
 public class ShopTablePermissionEvaluator {
 
     private final PermissionRepository permissionRepository;
-    private final PermittableService permittableService;
+    private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID userId, ShopTable target) {
         UUID tableId;
@@ -101,16 +101,16 @@ public class ShopTablePermissionEvaluator {
     public Specification<ShopTable> filterRead(UUID userId) {
         log.trace("Creating filterRead specification for userId: {}", userId);
 
-        boolean hasRootPermission = permittableService.hasRootPermission(userId, PermissionAction.READ_SHOP_TABLE);
+        boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_SHOP_TABLE);
         if (hasRootPermission) {
             return Specification.unrestricted();
         }
 
-        Set<UUID> permittedTableIds = permittableService.getAllPermitted(
+        Set<UUID> permittedTableIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.SHOP_TABLE, PermissionAction.READ_SHOP_TABLE);
-        Set<UUID> permittedShopIds = permittableService.getAllPermitted(
+        Set<UUID> permittedShopIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.SHOP, PermissionAction.READ_SHOP_TABLE);
-        Set<UUID> permittedTenantIds = permittableService.getAllPermitted(
+        Set<UUID> permittedTenantIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.TENANT, PermissionAction.READ_SHOP_TABLE);
 
         return Specification.anyOf(

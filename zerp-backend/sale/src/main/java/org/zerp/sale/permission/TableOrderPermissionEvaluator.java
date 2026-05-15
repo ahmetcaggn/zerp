@@ -11,7 +11,7 @@ import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
-import org.zerp.common.permission.service.PermittableService;
+import org.zerp.common.permission.service.CommonPermissionService;
 
 import java.util.List;
 import java.util.Set;
@@ -23,7 +23,7 @@ import java.util.UUID;
 public class TableOrderPermissionEvaluator {
 
     private final PermissionRepository permissionRepository;
-    private final PermittableService permittableService;
+    private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID userId, TableOrder target) {
         UUID orderId;
@@ -106,18 +106,18 @@ public class TableOrderPermissionEvaluator {
     public Specification<TableOrder> filterRead(UUID userId) {
         log.trace("Creating filterRead specification for userId: {}", userId);
 
-        boolean hasRootPermission = permittableService.hasRootPermission(userId, PermissionAction.READ_TABLE_ORDER);
+        boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_TABLE_ORDER);
         if (hasRootPermission) {
             return Specification.unrestricted();
         }
 
-        Set<UUID> permittedOrderIds = permittableService.getAllPermitted(
+        Set<UUID> permittedOrderIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.TABLE_ORDER, PermissionAction.READ_TABLE_ORDER);
-        Set<UUID> permittedTableIds = permittableService.getAllPermitted(
+        Set<UUID> permittedTableIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.SHOP_TABLE, PermissionAction.READ_TABLE_ORDER);
-        Set<UUID> permittedShopIds = permittableService.getAllPermitted(
+        Set<UUID> permittedShopIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.SHOP, PermissionAction.READ_TABLE_ORDER);
-        Set<UUID> permittedTenantIds = permittableService.getAllPermitted(
+        Set<UUID> permittedTenantIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.TENANT, PermissionAction.READ_TABLE_ORDER);
 
         return Specification.anyOf(

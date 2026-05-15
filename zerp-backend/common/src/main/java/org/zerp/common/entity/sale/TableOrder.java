@@ -50,6 +50,11 @@ public class TableOrder extends BaseEntity implements Permittable {
     private List<TableOrderItem> items = new ArrayList<>();
 
     @Override
+    public String getTitle() {
+        return String.format("%s-%s", shop.getName(), getCreatedAt());
+    }
+
+    @Override
     public Permittable getParent() {
         return shopTable;
     }
