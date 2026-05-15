@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import org.zerp.common.dto.ApiResponse;
 import org.zerp.common.dto.feign.user.keycloak.KeycloakCreateUserRequestDTO;
 import org.zerp.common.dto.feign.user.keycloak.KeycloakCreateUserResponseDTO;
+import org.zerp.common.dto.feign.user.keycloak.KeycloakUpdateUserRequestDTO;
+import org.zerp.common.dto.feign.user.keycloak.KeycloakUpdateUserResponseDTO;
 import org.zerp.user.service.FeignKeycloakService;
 
 import java.util.UUID;
@@ -31,5 +33,12 @@ public class FeignKeycloakController {
     ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable UUID id) {
         service.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @PutMapping("/{id}")
+    ResponseEntity<ApiResponse<KeycloakUpdateUserResponseDTO>> updateUser(
+            @PathVariable UUID id,
+            @Valid @RequestBody KeycloakUpdateUserRequestDTO body) {
+        return ResponseEntity.ok(ApiResponse.success(service.updateUser(id, body)));
     }
 }
