@@ -18,6 +18,7 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useShopTables } from '../../../hooks/use-shop-tables'
 import { useTableOrders } from '../../../hooks/use-table-orders'
 import type { ShopTableResponseDto, TableOrderResponseDto } from '../../../types/sale'
@@ -122,12 +123,15 @@ function getStatusColor(status: string): 'default' | 'success' | 'warning' | 'er
 
 export function CashierView() {
   const { t } = useI18n()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
   const [selectedTable, setSelectedTable] = useState<ShopTableResponseDto | null>(null)
   const [orderDialogOpen, setOrderDialogOpen] = useState(false)
 
   const { data: tablesData, isLoading: isTablesLoading } = useShopTables({
     pagination: { page: 1, perPage: 100 },
     sort: { field: 'name', order: 'ASC' },
+    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
   })
 
   const tables = tablesData?.data ?? []

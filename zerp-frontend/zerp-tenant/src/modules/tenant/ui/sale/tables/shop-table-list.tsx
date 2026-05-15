@@ -21,6 +21,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 import { useShopTables, useDeleteShopTable } from '../../../hooks/use-shop-tables'
@@ -37,6 +38,8 @@ const statusColorMap: Record<ShopTableStatus, 'success' | 'warning' | 'error' | 
 export function ShopTableList() {
   const { t, locale } = useI18n()
   const { showToast } = useToast()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
 
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -46,6 +49,7 @@ export function ShopTableList() {
   const { data, isLoading } = useShopTables({
     pagination: { page: page + 1, perPage: rowsPerPage },
     sort: { field: 'name', order: 'ASC' },
+    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
   })
 
   const { mutate: deleteTable } = useDeleteShopTable()

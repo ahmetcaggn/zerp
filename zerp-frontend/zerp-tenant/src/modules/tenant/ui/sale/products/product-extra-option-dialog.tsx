@@ -25,6 +25,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 import {
@@ -74,13 +75,18 @@ const EMPTY_FORM = (): OptionFormState => ({
 export function ProductExtraOptionDialog({ open, product, onClose }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
 
   const { data: optionsResult, isLoading } = useProductExtraOptions({
     filter: { productId: product.id },
   })
   const options = optionsResult?.data ?? []
 
-  const { data: resourcesResult } = useStockResources({ pagination: { page: 1, perPage: 200 } })
+  const { data: resourcesResult } = useStockResources({
+    pagination: { page: 1, perPage: 200 },
+    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+  })
   const stockResources = resourcesResult?.data ?? []
 
   const { mutate: createOption, isPending: isCreating } = useCreateProductExtraOption()

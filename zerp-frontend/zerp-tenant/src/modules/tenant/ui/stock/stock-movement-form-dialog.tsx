@@ -14,6 +14,7 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { useCreateStockMovement, useStockMovements } from '../../hooks/use-stock-movements'
 import { useStockResources } from '../../hooks/use-stock-resources'
@@ -33,10 +34,14 @@ const MOVEMENT_TYPES: StockMovementType[] = [
 export function StockMovementFormDialog({ open, onClose, preselectedResourceId, preselectedType }: StockMovementFormDialogProps) {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
   
   const createMutation = useCreateStockMovement()
   const { refetch: refetchMovements } = useStockMovements()
-  const { data: resourcesResponse, refetch: refetchResources } = useStockResources()
+  const { data: resourcesResponse, refetch: refetchResources } = useStockResources({
+    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+  })
 
   const [formData, setFormData] = useState<CreateStockMovementRequestDto>({
     stockResourceId: preselectedResourceId || '',

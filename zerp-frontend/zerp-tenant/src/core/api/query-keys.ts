@@ -15,6 +15,7 @@ export const queryKeys = {
     menuItems:           ['tenant', 'menu-items'] as const,
     shopTables:          ['tenant', 'shop-tables'] as const,
     tableOrders:         ['tenant', 'table-orders'] as const,
+    shops:               ['tenant', 'shops'] as const,
   },
   client: {
     stores: ['client', 'stores'] as const,

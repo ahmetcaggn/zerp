@@ -135,6 +135,9 @@ public enum PermissionAction {
     READ_MENU_ITEM(MENU_ITEM),
 
     // SHOP_TABLE level
+    READ_SHOP(SHOP),
+
+    // SHOP_TABLE level
     ADMIN_SHOP_TABLE(SHOP_TABLE),
     UPDATE_SHOP_TABLE(SHOP_TABLE),
     DELETE_SHOP_TABLE(SHOP_TABLE),

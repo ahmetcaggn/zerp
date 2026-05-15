@@ -2,9 +2,6 @@
 
 export type UnitType = 'PIECE' | 'GRAM' | 'KILOGRAM' | 'MILLILITER' | 'LITER'
 
-// TODO: Replace with real shop ID from shop selector
-export const MOCK_SHOP_ID = '00000000-0000-0000-0000-000000000000'
-
 // ─── Product ─────────────────────────────────────────────────────────────────
 
 export interface ProductResponseDto {

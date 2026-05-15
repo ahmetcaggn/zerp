@@ -5,6 +5,7 @@ import { Box, Chip, IconButton, Typography } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import type { Route } from 'next'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useShopTables } from '../../hooks/use-shop-tables'
 import { useMenuCategories } from '../../hooks/use-menu-categories'
 import { useMenuItems } from '../../hooks/use-menu-items'
@@ -40,6 +41,8 @@ const STATUS_I18N_KEY: Record<string, string> = {
 
 export function PosView() {
   const { locale, t } = useI18n()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
   const router = useRouter()
   const searchParams = useSearchParams()
   const tableId = searchParams.get('tableId')
@@ -49,15 +52,22 @@ export function PosView() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [orderNote, setOrderNote] = useState('')
 
-  const { data: tablesData } = useShopTables({ pagination: { page: 1, perPage: 100 } })
+  const { data: tablesData } = useShopTables({
+    pagination: { page: 1, perPage: 100 },
+    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+  })
   const { data: catData, isLoading: isCatLoading } = useMenuCategories({
     pagination: { page: 1, perPage: 100 },
     sort: { field: 'name', order: 'ASC' },
+    ...(selectedShopId ? { filter: { 'menu.shop.id': selectedShopId } } : {}),
   })
   const { data: itemsData, isLoading: isItemsLoading } = useMenuItems({
     pagination: { page: 1, perPage: 200 },
     sort: { field: 'name', order: 'ASC' },
-    ...(selectedCategoryId ? { filter: { 'menuCategory.id': selectedCategoryId } } : {}),
+    filter: {
+      ...(selectedShopId ? { 'category.menu.shop.id': selectedShopId } : {}),
+      ...(selectedCategoryId ? { 'menuCategory.id': selectedCategoryId } : {}),
+    },
   })
   const { data: ordersData } = useTableOrders({
     filter: { 'shopTable.id': tableId ?? '__none__', status: 'OPEN' },
@@ -212,4 +222,3 @@ export function PosView() {
     </Box>
   )
 }
-

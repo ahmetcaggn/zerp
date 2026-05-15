@@ -6,6 +6,7 @@ import { I18nProvider } from '@/core/i18n/i18n-provider'
 import type { MessageDictionary } from '@/core/i18n/messages'
 import { AppQueryProvider } from '@/core/providers/query-provider'
 import { AppThemeProvider } from '@/core/providers/theme-provider'
+import { ShopScopeProvider } from '@/core/providers/shop-scope-provider'
 import { ToastProvider } from '@/core/providers/toast-provider'
 import type { Locale } from '@/core/types/common'
 
@@ -24,7 +25,9 @@ export function AppProviders({
         <AuthProvider>
           <I18nProvider locale={locale} messages={messages}>
             <AppThemeProvider>
-              <ToastProvider>{children}</ToastProvider>
+              <ShopScopeProvider>
+                <ToastProvider>{children}</ToastProvider>
+              </ShopScopeProvider>
             </AppThemeProvider>
           </I18nProvider>
         </AuthProvider>

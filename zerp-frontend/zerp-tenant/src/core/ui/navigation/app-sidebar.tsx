@@ -31,6 +31,7 @@ import type { Route } from 'next'
 import { usePathname, useRouter } from 'next/navigation'
 import { appConfig } from '@/core/config/app-config'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 
 const DRAWER_WIDTH = 240
 const COLLAPSED_DRAWER_WIDTH = 64
@@ -52,15 +53,19 @@ interface SidebarAction {
   href: string
 }
 
-const SIDEBAR_ACTIONS: SidebarAction[] = [
+const GLOBAL_SIDEBAR_ACTIONS: SidebarAction[] = [
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon />, href: '/dashboard' },
+  { id: 'employees', labelKey: 'nav.employees', icon: <PeopleAltRoundedIcon />, href: '/employees' },
+  { id: 'tickets', labelKey: 'nav.tickets', icon: <SupportAgentRoundedIcon />, href: '/tickets' },
+  { id: 'notifications', labelKey: 'nav.notifications', icon: <NotificationsRoundedIcon />, href: '/notifications' },
+]
+
+const SHOP_SIDEBAR_ACTIONS: SidebarAction[] = [
   { id: 'dashboard', labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon />, href: '/dashboard' },
   { id: 'catalog', labelKey: 'nav.sale', icon: <MenuBookRoundedIcon />, href: '/catalog' },
   { id: 'tables', labelKey: 'nav.tables', icon: <TableRestaurantRoundedIcon />, href: '/tables' },
   { id: 'sale', labelKey: 'nav.cashier', icon: <PointOfSaleRoundedIcon />, href: '/sale' },
   { id: 'stock', labelKey: 'nav.stock', icon: <InventoryRoundedIcon />, href: '/stock' },
-  { id: 'employees', labelKey: 'nav.employees', icon: <PeopleAltRoundedIcon />, href: '/employees' },
-  { id: 'tickets', labelKey: 'nav.tickets', icon: <SupportAgentRoundedIcon />, href: '/tickets' },
-  { id: 'notifications', labelKey: 'nav.notifications', icon: <NotificationsRoundedIcon />, href: '/notifications' },
 ]
 
 export function AppSidebar({ locale }: { locale: string }) {
@@ -70,6 +75,9 @@ export function AppSidebar({ locale }: { locale: string }) {
   const router = useRouter()
   const pathname = usePathname()
   const { t } = useI18n()
+  const { scope } = useShopScope()
+  const isShopScope = scope.mode === 'SHOP'
+  const sidebarActions = isShopScope ? SHOP_SIDEBAR_ACTIONS : GLOBAL_SIDEBAR_ACTIONS
 
   const handleToggle = () => setIsExpanded((prev) => !prev)
 
@@ -94,6 +102,8 @@ export function AppSidebar({ locale }: { locale: string }) {
           height: '100vh',
           overflowX: 'hidden',
           width: isExpanded ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
+          borderRight: '2px solid',
+          borderRightColor: isShopScope ? 'primary.main' : 'divider',
           transition: theme.transitions.create('width', {
             easing: theme.transitions.easing.sharp,
             duration: isExpanded
@@ -139,7 +149,7 @@ export function AppSidebar({ locale }: { locale: string }) {
 
       {/* Nav items */}
       <List sx={{ pt: 1 }}>
-        {SIDEBAR_ACTIONS.map((action) => {
+        {sidebarActions.map((action) => {
           const hrefWithLocale = `/${locale}${action.href}`
           const isSelected = pathname.startsWith(hrefWithLocale)
 

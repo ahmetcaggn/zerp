@@ -8,6 +8,7 @@ import AddIcon from '@mui/icons-material/Add'
 import TableRestaurantIcon from '@mui/icons-material/TableRestaurant'
 import type { Route } from 'next'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useShopTables, useDeleteShopTable } from '../../hooks/use-shop-tables'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
@@ -19,6 +20,8 @@ type StatusFilter = 'ALL' | ShopTableStatus
 
 export function FloorView() {
   const { locale, t } = useI18n()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
 
   const FILTERS: { label: string; value: StatusFilter; color: 'default' | 'success' | 'error' | 'warning' }[] = [
     { label: t('pos.filterAll'),          value: 'ALL',          color: 'default' },
@@ -37,6 +40,7 @@ export function FloorView() {
   const { data, isLoading } = useShopTables({
     pagination: { page: 1, perPage: 200 },
     sort: { field: 'name', order: 'ASC' },
+    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
   })
   const { mutate: deleteTable } = useDeleteShopTable()
 

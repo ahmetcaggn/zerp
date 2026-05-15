@@ -14,11 +14,14 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useStockCounts } from '../../hooks/use-stock-counts'
 import { StockCountFormDialog } from './stock-count-form-dialog'
 
 export function StockCountList() {
   const { t } = useI18n()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
 
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -26,6 +29,7 @@ export function StockCountList() {
 
   const { data, isLoading } = useStockCounts({
     pagination: { page: page + 1, perPage: rowsPerPage },
+    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
   })
 
   return (

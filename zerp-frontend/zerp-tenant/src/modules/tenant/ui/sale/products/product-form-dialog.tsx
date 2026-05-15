@@ -12,11 +12,11 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 import { useCreateProduct, useUpdateProduct } from '../../../hooks/use-products'
 import type { ProductResponseDto } from '../../../types/sale'
-import { MOCK_SHOP_ID } from '../../../types/sale'
 
 interface Props {
   open: boolean
@@ -28,6 +28,7 @@ interface Props {
 export function ProductFormDialog({ open, mode, product, onClose }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { scope } = useShopScope()
 
   const [name, setName] = useState(product?.name ?? '')
   const [description, setDescription] = useState(product?.description ?? '')
@@ -57,8 +58,13 @@ export function ProductFormDialog({ open, mode, product, onClose }: Props) {
     }
 
     if (mode === 'create') {
+      if (scope.mode !== 'SHOP') {
+        showToast('Bu işlem için önce bir mağaza seçin.', { severity: 'warning' })
+        return
+      }
+
       createProduct(
-        { ...shared, shopId: MOCK_SHOP_ID },
+        { ...shared, shopId: scope.shopId },
         {
           onSuccess: () => {
             showToast(t('sale.product.createdToast'))

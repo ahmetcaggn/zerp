@@ -372,6 +372,23 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
               WHERE p.userId = :userId
                 AND p.action = :action
                 AND (
+                     (:shopId IS NOT NULL AND p.targetType = 'SHOP' AND p.targetId = :shopId)
+                  OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)
+                  OR (p.targetType = 'TENANT_ROOT' AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID})
+                )
+            """)
+    List<Permission> findAllByUserAndShopHierarchy(
+            @Param("userId") UUID userId,
+            @Param("action") PermissionAction action,
+            @Param("shopId") UUID shopId,
+            @Param("tenantId") UUID tenantId
+    );
+
+    @Query("""
+            SELECT p FROM Permission p
+              WHERE p.userId = :userId
+                AND p.action = :action
+                AND (
                      (:tableId IS NOT NULL AND p.targetType = 'SHOP_TABLE' AND p.targetId = :tableId)
                   OR (:shopId IS NOT NULL AND p.targetType = 'SHOP' AND p.targetId = :shopId)
                   OR (:tenantId IS NOT NULL AND p.targetType = 'TENANT' AND p.targetId = :tenantId)

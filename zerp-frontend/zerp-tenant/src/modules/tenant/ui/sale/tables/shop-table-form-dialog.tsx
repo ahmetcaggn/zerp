@@ -14,11 +14,11 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 import { useCreateShopTable, useUpdateShopTable } from '../../../hooks/use-shop-tables'
 import type { ShopTableResponseDto, ShopTableStatus } from '../../../types/sale'
-import { MOCK_SHOP_ID } from '../../../types/sale'
 
 const TABLE_STATUSES: ShopTableStatus[] = ['AVAILABLE', 'RESERVED', 'OCCUPIED', 'OUT_OF_ORDER']
 
@@ -32,6 +32,7 @@ interface Props {
 export function ShopTableFormDialog({ open, mode, table, onClose }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { scope } = useShopScope()
 
   const [name, setName] = useState(table?.name ?? '')
   const [description, setDescription] = useState(table?.description ?? '')
@@ -48,6 +49,11 @@ export function ShopTableFormDialog({ open, mode, table, onClose }: Props) {
     if (!name.trim()) return
 
     if (mode === 'create') {
+      if (scope.mode !== 'SHOP') {
+        showToast('Bu işlem için önce bir mağaza seçin.', { severity: 'warning' })
+        return
+      }
+
       createTable(
         {
           name: name.trim(),
@@ -55,7 +61,7 @@ export function ShopTableFormDialog({ open, mode, table, onClose }: Props) {
           capacity: parseInt(capacity, 10),
           floor: parseInt(floor, 10),
           status,
-          shopId: MOCK_SHOP_ID,
+          shopId: scope.shopId,
         },
         {
           onSuccess: () => {
