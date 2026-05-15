@@ -34,9 +34,9 @@ class PageEmployeeListResponseDto extends Schema {
     this.number,
     this.pageable,
     this.sort,
+    this.numberOfElements,
     this.first,
     this.last,
-    this.numberOfElements,
     this.empty,
   });
 
@@ -61,14 +61,14 @@ class PageEmployeeListResponseDto extends Schema {
   @JsonKey(name: r'sort')
   final SortObject? sort;
 
+  @JsonKey(name: r'numberOfElements')
+  final int? numberOfElements;
+
   @JsonKey(name: r'first')
   final bool? first;
 
   @JsonKey(name: r'last')
   final bool? last;
-
-  @JsonKey(name: r'numberOfElements')
-  final int? numberOfElements;
 
   @JsonKey(name: r'empty')
   final bool? empty;

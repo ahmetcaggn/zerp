@@ -125,8 +125,6 @@ TEAM('TEAM'),
 TEAM_MEMBER('TEAM_MEMBER'),
 @JsonValue('SHOP')
 SHOP('SHOP'),
-@JsonValue('SHOP_TABLE')
-SHOP_TABLE('SHOP_TABLE'),
 @JsonValue('STOCK_COUNT')
 STOCK_COUNT('STOCK_COUNT'),
 @JsonValue('STOCK_RESOURCE')
@@ -144,7 +142,11 @@ MENU('MENU'),
 @JsonValue('MENU_CATEGORY')
 MENU_CATEGORY('MENU_CATEGORY'),
 @JsonValue('MENU_ITEM')
-MENU_ITEM('MENU_ITEM');
+MENU_ITEM('MENU_ITEM'),
+@JsonValue('SHOP_TABLE')
+SHOP_TABLE('SHOP_TABLE'),
+@JsonValue('TABLE_ORDER')
+TABLE_ORDER('TABLE_ORDER');
 
 const ApiResponseMapPermissionActionListPermissionTargetTypeDataEnum(this.value);
 

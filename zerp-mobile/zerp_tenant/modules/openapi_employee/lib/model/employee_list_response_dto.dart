@@ -25,6 +25,7 @@ class EmployeeListResponseDto extends Schema {
   /// Returns a new [EmployeeListResponseDto] instance.
   EmployeeListResponseDto({
     this.id,
+    this.username,
     this.firstName,
     this.lastName,
     this.email,
@@ -34,6 +35,9 @@ class EmployeeListResponseDto extends Schema {
 
   @JsonKey(name: r'id')
   final String? id;
+
+  @JsonKey(name: r'username')
+  final String? username;
 
   @JsonKey(name: r'firstName')
   final String? firstName;
