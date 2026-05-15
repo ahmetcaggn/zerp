@@ -127,9 +127,8 @@ public class FeignKeycloakService {
     public void deleteUser(UUID userId) {
         log.info("Deleting user from Keycloak with id: {}", userId);
         String realm = keycloakAdminProperties.getRealm();
-        try {
-            keycloakAdminClient.realm(realm).users().delete(userId.toString());
-            log.info("User {} successfully deleted from Keycloak", userId);
+        try (Response response = keycloakAdminClient.realm(realm).users().delete(userId.toString())) {
+            log.info("User {} successfully deleted from Keycloak, status: {}", userId, response.getStatus());
         } catch (Exception e) {
             log.error("Failed to delete user {} from Keycloak: {}", userId, e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to delete user from Keycloak", e);
