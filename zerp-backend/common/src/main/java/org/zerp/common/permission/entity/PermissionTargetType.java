@@ -1,54 +1,56 @@
 package org.zerp.common.permission.entity;
 
 public enum PermissionTargetType {
-    TENANT_ROOT(null),
+    TENANT_ROOT(null, null),
 
-    TENANT(TENANT_ROOT),
+    TENANT(TENANT_ROOT, null),
 
-    USER(TENANT),
+    USER(TENANT, "tenantId"),
 
-    EMPLOYEE(TENANT),
+    EMPLOYEE(TENANT, "tenantId"),
 
     // ticket
-    TICKET(TENANT),
-    TICKET_HISTORY(TICKET),
-    TICKET_COMMENT(TICKET),
-    TICKET_ASSIGNMENT(TICKET),
-    TICKET_ATTACHMENT(TICKET),
-    TICKET_SLA_TRACKING(TICKET),
-    TICKET_WATCHER(TICKET),
+    TICKET(TENANT, "tenantId"),
+    TICKET_HISTORY(TICKET, "ticket.id"),
+    TICKET_COMMENT(TICKET, "ticket.id"),
+    TICKET_ASSIGNMENT(TICKET, "ticket.id"),
+    TICKET_ATTACHMENT(TICKET, "ticket.id"),
+    TICKET_SLA_TRACKING(TICKET, "ticket.id"),
+    TICKET_WATCHER(TICKET, "ticket.id"),
 
     // team
-    TEAM(TENANT),
-    TEAM_MEMBER(TEAM),
+    TEAM(TENANT, "tenantId"),
+    TEAM_MEMBER(TEAM, "team.id"),
 
     // shop
-    SHOP(TENANT),
+    SHOP(TENANT, "tenantId"),
 
     // stock management
-    STOCK_COUNT(SHOP),
-    STOCK_RESOURCE(SHOP),
-    STOCK_MOVEMENT(STOCK_RESOURCE),
+    STOCK_COUNT(SHOP, "shop.id"),
+    STOCK_RESOURCE(SHOP, "shop.id"),
+    STOCK_MOVEMENT(STOCK_RESOURCE, "stockResource.id"),
 
     // product
-    PRODUCT(SHOP),
-    PRODUCT_RECIPE(PRODUCT),
-    PRODUCT_EXTRA_OPTION(PRODUCT),
+    PRODUCT(SHOP, "shop.id"),
+    PRODUCT_RECIPE(PRODUCT, "product.id"),
+    PRODUCT_EXTRA_OPTION(PRODUCT, "product.id"),
 
     // menu
-    MENU(SHOP),
-    MENU_CATEGORY(MENU),
-    MENU_ITEM(MENU_CATEGORY),
+    MENU(SHOP, "shop.id"),
+    MENU_CATEGORY(MENU, "menu.id"),
+    MENU_ITEM(MENU_CATEGORY, "menuCategory.id"),
 
     // table management
-    SHOP_TABLE(SHOP),
-    TABLE_ORDER(SHOP_TABLE),
+    SHOP_TABLE(SHOP, "shop.id"),
+    TABLE_ORDER(SHOP_TABLE, "shop_table.id"),
     ;
 
     public final PermissionTargetType parent;
+    public final String parentIdFilter;
 
-    PermissionTargetType(PermissionTargetType parent) {
+    PermissionTargetType(PermissionTargetType parent, String parentIdFilter) {
         this.parent = parent;
+        this.parentIdFilter = parentIdFilter;
     }
 
     public static PermissionTargetType fromType(Class<? extends Permittable> type) {

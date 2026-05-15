@@ -53,9 +53,8 @@ public class PermittableService
         // Handle parentId filter if present
         if (entityFilters.containsKey("parentId")) {
             String parentId = entityFilters.remove("parentId");
-            String parentField = resolveParentField(targetType);
-            if (parentField != null) {
-                entityFilters.put(parentField, parentId);
+            if (targetType.parentIdFilter != null) {
+                entityFilters.put(targetType.parentIdFilter, parentId);
             }
         }
 
@@ -77,20 +76,6 @@ public class PermittableService
         Specification<T> spec = filterRefiner.refinedOrBadRequest(filters, entityClass);
         spec = spec.and(permissionEvaluator.filterRead(userId));
         return permittableRepository.findAllByTargetType(targetType, spec, pageable);
-    }
-
-    private String resolveParentField(PermissionTargetType targetType) {
-        return switch (targetType) {
-            case USER, EMPLOYEE, TICKET, TEAM, SHOP -> "tenantId";
-            case TICKET_HISTORY, TICKET_COMMENT, TICKET_ASSIGNMENT, TICKET_ATTACHMENT, TICKET_SLA_TRACKING, TICKET_WATCHER -> "ticket.id";
-            case TEAM_MEMBER -> "team.id";
-            case SHOP_TABLE, STOCK_COUNT, STOCK_RESOURCE, PRODUCT, MENU -> "shop.id";
-            case STOCK_MOVEMENT -> "stockResource.id";
-            case PRODUCT_RECIPE, PRODUCT_EXTRA_OPTION -> "product.id";
-            case MENU_CATEGORY -> "menu.id";
-            case MENU_ITEM -> "menuCategory.id";
-            default -> null;
-        };
     }
 
     @Override
