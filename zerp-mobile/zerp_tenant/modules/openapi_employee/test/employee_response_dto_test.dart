@@ -20,6 +20,11 @@ void main() {
       // TODO
     });
 
+    // String username
+    test('to test the property `username`', () async {
+      // TODO
+    });
+
     // String firstName
     test('to test the property `firstName`', () async {
       // TODO

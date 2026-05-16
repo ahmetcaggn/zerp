@@ -14,6 +14,7 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { useCreateStockResource, useUpdateStockResource, useStockResources } from '../../hooks/use-stock-resources'
 import type { StockResourceResponseDto, CreateStockResourceRequestDto, UnitType } from '../../types/stock'
@@ -29,6 +30,8 @@ const UNIT_TYPES: UnitType[] = ['PIECE', 'GRAM', 'KILOGRAM', 'MILLILITER', 'LITE
 export function StockResourceFormDialog({ open, onClose, initialData }: StockResourceFormDialogProps) {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : ''
   
   const createMutation = useCreateStockResource()
   const updateMutation = useUpdateStockResource()
@@ -37,7 +40,7 @@ export function StockResourceFormDialog({ open, onClose, initialData }: StockRes
   const [formData, setFormData] = useState<CreateStockResourceRequestDto>({
     name: initialData?.name || '',
     description: initialData?.description || '',
-    shopId: initialData?.shopId || '00000000-0000-0000-0000-000000000000', // Mock shop ID for now
+    shopId: initialData?.shopId || selectedShopId,
     unitType: initialData?.unitType || 'PIECE',
     quantity: initialData?.quantity || 0,
     reorderThreshold: initialData?.reorderThreshold || 0,
@@ -50,12 +53,17 @@ export function StockResourceFormDialog({ open, onClose, initialData }: StockRes
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!initialData && scope.mode !== 'SHOP') {
+      showToast('Bu işlem için önce bir mağaza seçin.', { severity: 'warning' })
+      return
+    }
+
     try {
       if (initialData) {
         await updateMutation.mutateAsync({ id: initialData.id, data: formData })
         showToast('Stock updated successfully', { severity: 'success' })
       } else {
-        await createMutation.mutateAsync(formData)
+        await createMutation.mutateAsync({ ...formData, shopId: selectedShopId })
         showToast('Stock created successfully', { severity: 'success' })
       }
       refetch()

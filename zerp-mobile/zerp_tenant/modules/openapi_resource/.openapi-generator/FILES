@@ -31,6 +31,8 @@ doc/StockMovementCreateStockMovementApi.md
 doc/StockMovementDTO.md
 doc/StockMovementDeleteManyStockMovementApi.md
 doc/StockMovementDeleteStockMovementApi.md
+doc/StockMovementFeignControllerCreateBulkApi.md
+doc/StockMovementFeignRequest.md
 doc/StockMovementGetListStockMovementApi.md
 doc/StockMovementGetManyStockMovementApi.md
 doc/StockMovementGetOneStockMovementApi.md
@@ -69,6 +71,7 @@ lib/model/stock_count_item_update_dto.dart
 lib/model/stock_count_update_dto.dart
 lib/model/stock_movement_create_dto.dart
 lib/model/stock_movement_dto.dart
+lib/model/stock_movement_feign_request.dart
 lib/model/stock_resource_create_dto.dart
 lib/model/stock_resource_dto.dart
 lib/model/stock_resource_update_dto.dart
@@ -90,6 +93,7 @@ lib/requests/stock_movement/get_one_stock_movement_command.dart
 lib/requests/stock_movement/patch_many_stock_movement_command.dart
 lib/requests/stock_movement/patch_stock_movement_command.dart
 lib/requests/stock_movement/update_stock_movement_command.dart
+lib/requests/stock_movement_feign_controller/create_bulk_command.dart
 lib/requests/stock_resource/create_stock_resource_command.dart
 lib/requests/stock_resource/delete_many_stock_resource_command.dart
 lib/requests/stock_resource/delete_stock_resource_command.dart
@@ -135,6 +139,8 @@ test/stock_movement/patch_stock_movement_command_test.dart
 test/stock_movement/update_stock_movement_command_test.dart
 test/stock_movement_create_dto_test.dart
 test/stock_movement_dto_test.dart
+test/stock_movement_feign_controller/create_bulk_command_test.dart
+test/stock_movement_feign_request_test.dart
 test/stock_resource/create_stock_resource_command_test.dart
 test/stock_resource/delete_many_stock_resource_command_test.dart
 test/stock_resource/delete_stock_resource_command_test.dart

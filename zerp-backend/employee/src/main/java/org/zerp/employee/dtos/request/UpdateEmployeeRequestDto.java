@@ -12,6 +12,7 @@ import java.util.UUID;
 
 @Data
 public class UpdateEmployeeRequestDto {
+    private String username;
 
     private String firstName;
 

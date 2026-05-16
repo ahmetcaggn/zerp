@@ -55,6 +55,11 @@ public class StockResource extends BaseEntity implements Permittable {
     private BigDecimal costPerUnit;
 
     @Override
+    public String getTitle() {
+        return name;
+    }
+
+    @Override
     public Permittable getParent() {
         return shop;
     }

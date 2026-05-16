@@ -11,12 +11,12 @@ import 'package:dart_network_layer_core/dart_network_layer_core.dart';
 
 import '../../base/base_request.dart';
 
-import '../../model/api_response_list_permission_action.dart';
+import '../../model/api_response_map_permission_action_list_permission_target_type.dart';
 
 
 ///
 /// GET /user/permissions/actions
-class GetAllPermissionsCommand extends OpenapiDefinitionBaseRequest<ApiResponseListPermissionAction> {
+class GetAllPermissionsCommand extends OpenapiDefinitionBaseRequest<ApiResponseMapPermissionActionListPermissionTargetType> {
   GetAllPermissionsCommand();
 
 
@@ -30,14 +30,14 @@ class GetAllPermissionsCommand extends OpenapiDefinitionBaseRequest<ApiResponseL
   HttpRequestMethod get method => HttpRequestMethod.get;
 
   @override
-  SchemaFactory<ApiResponseListPermissionAction> get defaultResponseFactory => ApiResponseListPermissionAction.factory;
+  SchemaFactory<ApiResponseMapPermissionActionListPermissionTargetType> get defaultResponseFactory => ApiResponseMapPermissionActionListPermissionTargetType.factory;
 
   @override
   SchemaFactory get defaultErrorResponseFactory => AnyDataSchema.factory;
 
   @override
   Map<int, SchemaFactory> get responseFactories => {
-    200: ApiResponseListPermissionAction.factory,
+    200: ApiResponseMapPermissionActionListPermissionTargetType.factory,
   };
 
   @override

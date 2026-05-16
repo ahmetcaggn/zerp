@@ -11,34 +11,20 @@ import java.util.UUID;
 
 @Data
 public class EmployeeResponseDto {
-
     private UUID id;
-
+    private String username;
     private String firstName;
-
     private String lastName;
-
     private String email;
-
     private String phoneNumber;
-
     private String nationalId;
-
     private LocalDate dateOfBirth;
-
     private LocalDate hireDate;
-
     private LocalDate terminationDate;
-
     private EmploymentStatus status;
-
     private ManagerDto manager;
-
     private BigDecimal salary;
-
     private List<EmployeeContactResponseDto> contacts;
-
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
 }

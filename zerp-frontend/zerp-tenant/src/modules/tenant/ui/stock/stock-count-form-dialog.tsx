@@ -10,6 +10,7 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { useCreateStockCount, useStockCounts } from '../../hooks/use-stock-counts'
 import type { CreateStockCountRequestDto } from '../../types/stock'
@@ -22,12 +23,13 @@ interface StockCountFormDialogProps {
 export function StockCountFormDialog({ open, onClose }: StockCountFormDialogProps) {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { scope } = useShopScope()
   
   const createMutation = useCreateStockCount()
   const { refetch } = useStockCounts()
 
   const [formData, setFormData] = useState<CreateStockCountRequestDto>({
-    shopId: '00000000-0000-0000-0000-000000000000', // Mock shop ID
+    shopId: scope.mode === 'SHOP' ? scope.shopId : '',
     countDate: new Date().toISOString().split('T')[0],
     notes: '',
   })
@@ -38,8 +40,13 @@ export function StockCountFormDialog({ open, onClose }: StockCountFormDialogProp
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (scope.mode !== 'SHOP') {
+      showToast('Bu işlem için önce bir mağaza seçin.', { severity: 'warning' })
+      return
+    }
+
     try {
-      await createMutation.mutateAsync(formData)
+      await createMutation.mutateAsync({ ...formData, shopId: scope.shopId })
       showToast('Count session created successfully', { severity: 'success' })
       refetch()
       onClose()

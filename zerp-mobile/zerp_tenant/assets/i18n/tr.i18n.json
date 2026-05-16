@@ -44,12 +44,114 @@
   },
   "common": {
     "hello": "Merhaba $name",
-    "save": "Kaydet"
+    "save": "Kaydet",
+    "required": "Zorunlu",
+    "error": "Hata: $message",
+    "unknown": "Bilinmiyor",
+    "ok": "Tamam",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "search": "Ara",
+    "select": "Seç",
+    "noData": "Veri yok"
+  },
+  "employee": {
+    "list": {
+      "title": "Çalışanlar ($total)",
+      "loading": "Yükleniyor...",
+      "error": "Çalışanlar yüklenemedi. Lütfen tekrar deneyin.",
+      "retry": "Tekrar Dene",
+      "statusUnknown": "Durum Bilinmiyor",
+      "noEmployees": "Henüz çalışan yok",
+      "create": "Çalışan Oluştur"
+    },
+    "create": {
+      "title": "Çalışan Oluştur",
+      "username": "Kullanıcı Adı",
+      "check": "Kontrol Et",
+      "firstName": "Ad",
+      "lastName": "Soyad",
+      "email": "E-posta",
+      "tempPassword": "Geçici Şifre",
+      "phoneNumber": "Telefon Numarası (Opsiyonel)",
+      "submit": "Oluştur",
+      "success": "Çalışan başarıyla oluşturuldu!",
+      "checkUsernameFirst": "Lütfen önce kullanıcı adı uygunluğunu kontrol edin",
+      "required": "${target} gereklidir",
+      "usernameTaken": "Bu kullanıcı adı zaten alınmış"
+    },
+    "edit": {
+      "title": "Çalışanı Düzenle",
+      "firstName": "Ad *",
+      "lastName": "Soyad *",
+      "email": "E-posta *",
+      "phoneNumber": "Telefon Numarası",
+      "nationalId": "TC Kimlik No",
+      "salary": "Maaş",
+      "submit": "Gönder",
+      "success": "Çalışan başarıyla güncellendi!"
+    },
+    "details": {
+      "title": "Çalışan Detayları",
+      "username": "Kullanıcı Adı",
+      "firstName": "Ad",
+      "lastName": "Soyad",
+      "email": "E-posta",
+      "phoneNumber": "Telefon Numarası",
+      "nationalId": "TC Kimlik No",
+      "dateOfBirth": "Doğum Tarihi",
+      "hireDate": "İşe Giriş Tarihi",
+      "salary": "Maaş",
+      "manager": "Yönetici",
+      "terminationDate": "İşten Çıkış Tarihi",
+      "createdAt": "Oluşturulma Tarihi",
+      "updatedAt": "Güncellenme Tarihi",
+      "contacts": "İletişim Bilgileri",
+      "contactPerson": "Kişi: $name",
+      "relationship": "Yakınlık: $relationship",
+      "errors": {
+        "missingId": "$name için çalışan ID'si eksik",
+        "noIdProvided": "Çalışan ID'si sağlanmadı"
+      },
+      "permissionCreate": {
+        "title": "Yetki Oluştur",
+        "action": "Eylem *",
+        "targetType": "Hedef Türü *",
+        "targetId": "Hedef ID (Global eylemler için opsiyonel)",
+        "targetIdHint": "$type için ID girin",
+        "submit": "Yetki Oluştur",
+        "success": "Yetki başarıyla oluşturuldu",
+        "errorSelectAction": "Lütfen eylem ve hedef türünü seçin",
+        "errorLoadActions": "Yetki eylemleri yüklenemedi: $error",
+        "errorCreatePermission": "Yetki oluşturulamadı: $error",
+        "searchActions": "Eylemlerde ara..."
+      }
+    }
   },
   "profile": {
     "title": "Profil",
     "permissions": {
-      "title": "İzinler"
+      "title": "Yetkiler"
+    }
+  },
+  "permissionViewer": {
+    "title": "Yetkiler",
+    "total": "Toplam yetki: $count",
+    "empty": "Henüz yetki yok",
+    "manage": "Yetkileri yönet",
+    "target": "Hedef: $targetType",
+    "id": "ID: $targetId",
+    "deleteTitle": "Yetkiyi Sil",
+    "deleteMessage": "Bu yetkiyi silmek istediğinizden emin misiniz?",
+    "errorLoad": "Yetkiler yüklenemedi: $error",
+    "errorDelete": "Yetki silinemedi: $error"
+  },
+  "widgets": {
+    "permissionViewer": {
+      "title": "Yetkiler",
+      "total": "Toplam yetki: $count",
+      "empty": "Henüz yetki yok",
+      "manage": "Yetkileri yönet"
     }
   }
 }

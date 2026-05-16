@@ -54,6 +54,11 @@ public class TeamEntity extends BaseEntity implements Permittable {
     private List<TeamMemberEntity> members = new ArrayList<>();
 
     @Override
+    public String getTitle() {
+        return name;
+    }
+
+    @Override
     public Permittable getParent() {
         return tenant;
     }

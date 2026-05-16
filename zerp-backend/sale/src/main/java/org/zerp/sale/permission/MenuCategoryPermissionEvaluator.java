@@ -11,7 +11,8 @@ import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
-import org.zerp.common.permission.service.PermittableService;
+import org.zerp.common.permission.service.CommonPermissionService;
+
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -21,7 +22,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MenuCategoryPermissionEvaluator {
     private final PermissionRepository permissionRepository;
-    private final PermittableService permittableService;
+    private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID userId, MenuCategory target) {
         UUID categoryId;
@@ -105,18 +106,18 @@ public class MenuCategoryPermissionEvaluator {
     public Specification<MenuCategory> filterRead(UUID userId) {
         log.trace("Creating filterRead specification for userId: {}", userId);
 
-        boolean hasRootPermission = permittableService.hasRootPermission(userId, PermissionAction.READ_MENU_CATEGORY);
+        boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_MENU_CATEGORY);
         if (hasRootPermission) {
             return Specification.unrestricted();
         }
 
-        Set<UUID> permittedCategoryIds = permittableService.getAllPermitted(
+        Set<UUID> permittedCategoryIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.MENU_CATEGORY, PermissionAction.READ_MENU_CATEGORY);
-        Set<UUID> permittedMenuIds = permittableService.getAllPermitted(
+        Set<UUID> permittedMenuIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.MENU, PermissionAction.READ_MENU_CATEGORY);
-        Set<UUID> permittedShopIds = permittableService.getAllPermitted(
+        Set<UUID> permittedShopIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.SHOP, PermissionAction.READ_MENU_CATEGORY);
-        Set<UUID> permittedTenantIds = permittableService.getAllPermitted(
+        Set<UUID> permittedTenantIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.TENANT, PermissionAction.READ_MENU_CATEGORY);
 
         return Specification.anyOf(

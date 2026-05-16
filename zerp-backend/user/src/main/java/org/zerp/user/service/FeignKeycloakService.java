@@ -4,6 +4,7 @@ import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.dto.feign.user.keycloak.KeycloakCreateUserRequestDTO;
 import org.zerp.common.dto.feign.user.keycloak.KeycloakCreateUserResponseDTO;
+import org.zerp.common.dto.feign.user.keycloak.KeycloakUpdateUserRequestDTO;
+import org.zerp.common.dto.feign.user.keycloak.KeycloakUpdateUserResponseDTO;
 import org.zerp.user.config.KeycloakAdminProperties;
 
 import java.util.*;
@@ -124,13 +127,36 @@ public class FeignKeycloakService {
     public void deleteUser(UUID userId) {
         log.info("Deleting user from Keycloak with id: {}", userId);
         String realm = keycloakAdminProperties.getRealm();
-        try {
-            keycloakAdminClient.realm(realm).users().delete(userId.toString());
-            log.info("User {} successfully deleted from Keycloak", userId);
+        try (Response response = keycloakAdminClient.realm(realm).users().delete(userId.toString())) {
+            log.info("User {} successfully deleted from Keycloak, status: {}", userId, response.getStatus());
         } catch (Exception e) {
             log.error("Failed to delete user {} from Keycloak: {}", userId, e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to delete user from Keycloak", e);
         }
     }
 
+    public KeycloakUpdateUserResponseDTO updateUser(UUID userId, KeycloakUpdateUserRequestDTO data) {
+        log.info("Updating user in Keycloak for userId: {}", userId);
+
+        String realm = keycloakAdminProperties.getRealm();
+        UsersResource usersResource = keycloakAdminClient.realm(realm).users();
+
+        try {
+            UserResource userResource = usersResource.get(userId.toString());
+            UserRepresentation user = userResource.toRepresentation();
+            if (data.getEmail() != null) {
+                user.setEmail(data.getEmail());
+            }
+            if (data.getUsername() != null) {
+                user.setUsername(data.getUsername());
+            }
+
+            userResource.update(user);
+            log.info("User {} successfully updated in Keycloak", userId);
+            return KeycloakUpdateUserResponseDTO.builder().build();
+        } catch (Exception e) {
+            log.error("Error updating user in Keycloak for userId {}: {}", userId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to update user in Keycloak", e);
+        }
+    }
 }

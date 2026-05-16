@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.dto.feign.resource.StockMovementFeignRequest;
 import org.zerp.common.entity.resource.StockMovement;
+import org.zerp.common.entity.resource.StockMovementType;
 import org.zerp.common.entity.resource.StockResource;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
@@ -173,6 +175,35 @@ public class StockMovementService implements
             }
         }
         return deleted;
+    }
+
+    /**
+     * Internal entry point for inter-service stock movement creation (e.g. from sale service via Feign).
+     * Bypasses user permission checks; tenantId is taken from the request.
+     */
+    @Transactional
+    public void createInternal(StockMovementFeignRequest req) {
+        StockResource resource = stockResourceRepository.findById(req.getStockResourceId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "StockResource not found: " + req.getStockResourceId()));
+
+        BigDecimal previous = resource.getQuantity();
+        BigDecimal next = calculateNewQuantity(previous, req.getQuantity(), req.getType().name());
+
+        StockMovement movement = new StockMovement();
+        movement.setStockResource(resource);
+        movement.setType(req.getType());
+        movement.setQuantity(req.getQuantity());
+        movement.setPreviousQuantity(previous);
+        movement.setNewQuantity(next);
+        movement.setReferenceType(req.getReferenceType());
+        movement.setReferenceId(req.getReferenceId());
+        movement.setNotes(req.getNotes());
+        movement.setTenantId(req.getTenantId());
+
+        repository.save(movement);
+
+        log.info("Internal StockMovement created: resource={}, type={}, qty={}", resource.getId(), req.getType(), req.getQuantity());
     }
 
     private BigDecimal calculateNewQuantity(BigDecimal current, BigDecimal delta, String movementType) {

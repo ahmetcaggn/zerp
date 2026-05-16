@@ -16,6 +16,7 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 import { useCreateMenuItem, useUpdateMenuItem } from '../../../hooks/use-menu-items'
@@ -34,6 +35,8 @@ interface Props {
 export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId, onClose }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
 
   const [name, setName] = useState(menuItem?.name ?? '')
   const [description, setDescription] = useState(menuItem?.description ?? '')
@@ -42,10 +45,16 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
   const [categoryId, setCategoryId] = useState(menuItem?.categoryId ?? preselectedCategoryId ?? '')
   const [productIds, setProductIds] = useState<string[]>(menuItem?.productIds ?? [])
 
-  const { data: categoriesResult } = useMenuCategories({ pagination: { page: 1, perPage: 200 } })
+  const { data: categoriesResult } = useMenuCategories({
+    pagination: { page: 1, perPage: 200 },
+    ...(selectedShopId ? { filter: { 'menu.shop.id': selectedShopId } } : {}),
+  })
   const categories = categoriesResult?.data ?? []
 
-  const { data: productsResult } = useProducts({ pagination: { page: 1, perPage: 1000 } })
+  const { data: productsResult } = useProducts({
+    pagination: { page: 1, perPage: 1000 },
+    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+  })
   const products = productsResult?.data ?? []
 
   const { mutate: createMenuItem, isPending: isCreating } = useCreateMenuItem()

@@ -22,10 +22,12 @@ export function createResourceHooks<
     [...(baseKey as unknown[]), 'detail', id] as const
 
   return {
-    useList: (params: RaListParams = {}) =>
+    useList: (params: RaListParams = {}, options?: { refetchInterval?: number; refetchOnWindowFocus?: boolean }) =>
       useQuery({
         queryKey: listKey(params),
         queryFn: () => client.getList(params),
+        refetchInterval: options?.refetchInterval,
+        refetchOnWindowFocus: options?.refetchOnWindowFocus,
       }),
 
     useOne: (id: ID | undefined) =>

@@ -32,6 +32,11 @@ public class MenuCategory extends BaseEntity implements Permittable {
     private Set<MenuItem> menuItems;
 
     @Override
+    public String getTitle() {
+        return name;
+    }
+
+    @Override
     public Permittable getParent() {
         return menu;
     }

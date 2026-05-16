@@ -16,6 +16,11 @@ public class TenantRoot implements Permittable {
     private final UUID id = ID;
 
     @Override
+    public String getTitle() {
+        return "ROOT";
+    }
+
+    @Override
     public Permittable getParent() {
         // in permittable hierarchy, tenant is the root, so it has no parent
         return null;

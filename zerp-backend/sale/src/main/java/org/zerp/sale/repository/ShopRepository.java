@@ -1,10 +1,10 @@
 package org.zerp.sale.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.zerp.common.entity.Shop;
 
 import java.util.UUID;
 
-public interface ShopRepository extends JpaRepository<Shop, UUID> {
+public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificationExecutor<Shop> {
 }
-

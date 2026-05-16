@@ -130,6 +130,7 @@ public class ProductRecipeService implements
     @Transactional
     public ProductRecipeDTO update(UUID uuid, ProductRecipeUpdateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
+        UUID tenantId = currentTenantIdResolver.resolve();
         ProductRecipe recipe = repository.findById(uuid).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "ProductRecipe not found"));
         if (!permissionEvaluator.canUpdate(userId, recipe)) {
@@ -144,6 +145,7 @@ public class ProductRecipeService implements
                 ProductRecipeItem item = mapper.toItemEntity(itemDTO);
                 item.setStockResource(stockResourceRepository.getReferenceById(itemDTO.getStockResourceId()));
                 item.setRecipe(recipe);
+                item.setTenantId(tenantId);
                 recipe.getItems().add(item);
             });
         }

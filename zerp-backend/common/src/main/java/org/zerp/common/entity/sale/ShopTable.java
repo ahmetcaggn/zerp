@@ -2,6 +2,8 @@ package org.zerp.common.entity.sale;
 
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -14,6 +16,8 @@ import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 import org.zerp.common.permission.entity.Permittable;
+import org.zerp.common.permission.entity.PermissionTargetType;
+import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 
 import java.util.UUID;
 
@@ -31,11 +35,20 @@ public class ShopTable extends BaseEntity implements Permittable {
     private int capacity;
     private int floor;
 
+    @Enumerated(EnumType.STRING)
     private ShopTableStatus status;
 
     @ManyToOne
     @JoinColumn(name = "shop_id")
     private Shop shop;
+
+    @Override
+    public String getTitle() {
+        if (shop == null) {
+            return name;
+        }
+        return String.format("%s (%s-%s)", name, shop.getTitle(), floor);
+    }
 
     @Override
     public Permittable getParent() {

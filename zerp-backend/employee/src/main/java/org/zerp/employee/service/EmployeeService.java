@@ -1,5 +1,7 @@
 package org.zerp.employee.service;
 
+
+import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -14,6 +16,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.dto.ApiResponse;
 import org.zerp.common.dto.feign.user.keycloak.KeycloakCreateUserRequestDTO;
 import org.zerp.common.dto.feign.user.keycloak.KeycloakCreateUserResponseDTO;
+import org.zerp.common.dto.feign.user.keycloak.KeycloakUpdateUserRequestDTO;
+import org.zerp.common.dto.feign.user.keycloak.KeycloakUpdateUserResponseDTO;
 import org.zerp.common.dto.user.UsernameCheckResponseDTO;
 import org.zerp.common.error.filter.FilterError;
 import org.zerp.common.error.filter.FilterErrorUtils;
@@ -197,9 +201,25 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
 
         validateUniqueConstraints(data.getEmail(), data.getNationalId(), id);
 
+        String email = data.getEmail();
+        String username = data.getUsername();
+
+        boolean emailChanged = email != null && !email.equals(employee.getEmail());
+        boolean usernameChanged = username != null && !username.equals(employee.getUsername());
+
+        if (emailChanged || usernameChanged) {
+            syncWithKeycloak(id,
+                    emailChanged ? email : employee.getEmail(),
+                    usernameChanged ? username : employee.getUsername());
+        }
+
+        if (data.getUsername() != null) employee.setUsername(data.getUsername());
+
         if (data.getFirstName() != null) employee.setFirstName(data.getFirstName());
         if (data.getLastName() != null) employee.setLastName(data.getLastName());
-        if (data.getEmail() != null) employee.setEmail(data.getEmail());
+        if (data.getEmail() != null) {
+            employee.setEmail(data.getEmail());
+        }
         if (data.getPhoneNumber() != null) employee.setPhoneNumber(data.getPhoneNumber());
         if (data.getNationalId() != null) employee.setNationalId(data.getNationalId());
         if (data.getDateOfBirth() != null) employee.setDateOfBirth(data.getDateOfBirth());
@@ -238,7 +258,17 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
 
         String email = fields.containsKey("email") ? (String) fields.get("email") : null;
         String nationalId = fields.containsKey("nationalId") ? (String) fields.get("nationalId") : null;
+        String username = fields.containsKey("username") ? (String) fields.get("username") : null;
         validateUniqueConstraints(email, nationalId, id);
+
+        boolean emailChanged = email != null && !email.equals(employee.getEmail());
+        boolean usernameChanged = username != null && !username.equals(employee.getUsername());
+
+        if (emailChanged || usernameChanged) {
+            syncWithKeycloak(id,
+                    emailChanged ? email : employee.getEmail(),
+                    usernameChanged ? username : employee.getUsername());
+        }
 
         applyFieldUpdates(employee, fields);
 
@@ -352,6 +382,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
     }
 
     private void applyFieldUpdates(Employee employee, Map<String, Object> fields) {
+        if (fields.containsKey("username")) employee.setUsername((String) fields.get("username"));
         if (fields.containsKey("firstName")) employee.setFirstName((String) fields.get("firstName"));
         if (fields.containsKey("lastName")) employee.setLastName((String) fields.get("lastName"));
         if (fields.containsKey("email")) employee.setEmail((String) fields.get("email"));
@@ -367,6 +398,23 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
             employee.setStatus(EmploymentStatus.valueOf(fields.get("status").toString()));
         if (fields.containsKey("salary"))
             employee.setSalary(new BigDecimal(fields.get("salary").toString()));
+    }
+
+    private void syncWithKeycloak(UUID employeeId, String email, String username) {
+        log.info("Syncing with Keycloak for employee: {} (email: {}, username: {})", employeeId, email, username);
+        KeycloakUpdateUserRequestDTO keycloakRequest = KeycloakUpdateUserRequestDTO.builder()
+                .email(email)
+                .username(username)
+                .build();
+        try {
+            userServiceClient.updateKeycloakUser(employeeId, keycloakRequest);
+        } catch (FeignException e) {
+            log.error("Feign error while syncing with Keycloak for employee: {}. Status: {}, Error: {}",
+                    employeeId, e.status(), e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                    String.format("Failed to sync with Keycloak for employee ID: %s. " +
+                            "The User service returned an error or is unavailable.", employeeId), e);
+        }
     }
 
     private void updateContacts(Employee employee, List<EmployeeContactDto> contactDtos) {

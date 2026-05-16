@@ -44,6 +44,14 @@ public class TeamMemberEntity implements Permittable {
     private LocalDateTime joinedAt;
 
     @Override
+    public String getTitle() {
+        if (user == null || team == null) {
+            return String.format("TeamMember-%s", id);
+        }
+        return user.getTitle() + " in " + team.getName();
+    }
+
+    @Override
     public Permittable getParent() {
         return team;
     }

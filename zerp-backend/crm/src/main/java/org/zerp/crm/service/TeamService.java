@@ -21,7 +21,7 @@ import org.zerp.common.error.filter.FilterError;
 import org.zerp.common.error.filter.FilterErrorUtils;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
-import org.zerp.common.permission.service.PermittableService;
+import org.zerp.common.permission.service.CommonPermissionService;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentUserIdResolver;
@@ -50,7 +50,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     private final CurrentUserIdResolver currentUserIdResolver;
     private final FilterRefiner filterRefiner;
     private final CrmPermissionEvaluator permissionEvaluator;
-    private final PermittableService permittableService;
+    private final CommonPermissionService commonPermissionService;
 
     @Value("${app.crm.system-tenant-id:00000000-0000-0000-0000-000000000000}")
     private UUID systemTenantId;
@@ -311,11 +311,11 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         ensureCanCreateTeamMember(actorUserId, team);
 
         UUID resolvedSystemTenantId = resolveSystemTenantIdOrThrow();
-        Set<UUID> permittedUserIds = permittableService.getAllPermitted(
+        Set<UUID> permittedUserIds = commonPermissionService.getAllPermitted(
                 actorUserId, PermissionTargetType.USER, PermissionAction.READ_USER);
-        Set<UUID> permittedTenantIds = permittableService.getAllPermitted(
+        Set<UUID> permittedTenantIds = commonPermissionService.getAllPermitted(
                 actorUserId, PermissionTargetType.TENANT, PermissionAction.READ_USER);
-        boolean hasRootReadUser = permittableService.hasRootPermission(actorUserId, PermissionAction.READ_USER);
+        boolean hasRootReadUser = commonPermissionService.hasRootPermission(actorUserId, PermissionAction.READ_USER);
 
         boolean hasTenantScopeReadUser = hasRootReadUser || permittedTenantIds.contains(resolvedSystemTenantId);
 

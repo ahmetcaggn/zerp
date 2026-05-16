@@ -28,7 +28,14 @@ public class MenuItemFilterSpecGenerator implements IFilterSpecGenerator<MenuIte
             return generateGlobalSearchSpecification(value);
         }
 
-        return (root, query, cb) -> filterProcessor.generatePredicate(parts, value, operator, root, query, cb);
+        if ("menuCategory".equals(parts.getFirst())) {
+            // Support legacy filter prefix; entity field is named "category".
+            parts = new java.util.ArrayList<>(parts);
+            parts.set(0, "category");
+        }
+
+        final List<String> finalParts = parts;
+        return (root, query, cb) -> filterProcessor.generatePredicate(finalParts, value, operator, root, query, cb);
     }
 
     @Override

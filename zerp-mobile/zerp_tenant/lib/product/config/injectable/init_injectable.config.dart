@@ -14,6 +14,21 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
+import '../../../feature/employee/create_employee/cubit/cubit_create_employee.dart'
+    as _i657;
+import '../../../feature/employee/create_employee/cubit/cubit_create_employee_username.dart'
+    as _i914;
+import '../../../feature/employee/cubit/cubit_employee.dart' as _i828;
+import '../../../feature/employee/single_employee/cubit/cubit_permission_viewer.dart'
+    as _i102;
+import '../../../feature/employee/single_employee/cubit/cubit_single_employee.dart'
+    as _i463;
+import '../../../feature/employee/single_employee/edit_employee/cubit_edit_employee.dart'
+    as _i632;
+import '../../../feature/employee/single_employee/permissions/create_permission/cubit/cubit_create_permission.dart'
+    as _i713;
+import '../../../feature/employee/single_employee/permissions/cubit_permissions.dart'
+    as _i1073;
 import '../../../feature/profile/cubit/cubit_profile.dart' as _i477;
 import '../../../feature/profile/cubit/permission/cubit_profile_permissions.dart'
     as _i170;
@@ -21,10 +36,13 @@ import '../../cubit/root_cubit/auth/cubit_auth.dart' as _i200;
 import '../../cubit/root_cubit/error/cubit_error.dart' as _i139;
 import '../../navigation/app_route.dart' as _i795;
 import '../../navigation/auth_guard.dart' as _i84;
-import '../../network/network_manager.dart' as _i475;
+import '../../network/network_invoker/api_network_invoker.dart' as _i1073;
+import '../../network/network_invoker/remote_log_network_invoker.dart' as _i693;
 import '../../service/auth/auth_service.dart' as _i238;
 import '../../service/auth/auth_storage_service.dart' as _i40;
+import '../../service/employee/employee_service.dart' as _i93;
 import '../../service/user/permission_service.dart' as _i545;
+import '../../service/user/username_service.dart' as _i868;
 import '../../storage/operator/auth_claims.operator.dart' as _i301;
 import '../../storage/operator/auth_token.operator.dart' as _i145;
 import '../../storage/operator/device_id.operator.dart' as _i447;
@@ -45,6 +63,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => serviceModule.secureStorage,
     );
     gh.lazySingleton<_i139.CubitError>(() => _i139.CubitError());
+    gh.lazySingleton<_i693.RemoteLogNetworkInvoker>(
+      () => _i693.RemoteLogNetworkInvoker(),
+    );
     gh.lazySingleton<_i301.AuthClaimsOperator>(
       () => _i301.AuthClaimsOperator(),
     );
@@ -73,8 +94,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i40.AuthStorageService>(),
       ),
     );
-    gh.lazySingleton<_i475.NetworkManager>(
-      () => _i475.NetworkManager(
+    gh.lazySingleton<_i1073.ApiNetworkInvoker>(
+      () => _i1073.ApiNetworkInvoker(
         gh<_i200.CubitAuth>(),
         gh<_i40.AuthStorageService>(),
       ),
@@ -85,18 +106,80 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i238.AuthService>(),
       ),
     );
-    gh.lazySingleton<_i545.PermissionService>(
-      () => _i545.PermissionService(
-        networkManager: gh<_i475.NetworkManager>(),
+    gh.singleton<_i795.AppRoute>(() => _i795.AppRoute(gh<_i84.AuthGuard>()));
+    gh.lazySingleton<_i93.EmployeeService>(
+      () => _i93.EmployeeService(
+        invoker: gh<_i1073.ApiNetworkInvoker>(),
         authStorageService: gh<_i40.AuthStorageService>(),
         cubitError: gh<_i139.CubitError>(),
         cubitAuth: gh<_i200.CubitAuth>(),
       ),
     );
+    gh.lazySingleton<_i545.PermissionService>(
+      () => _i545.PermissionService(
+        invoker: gh<_i1073.ApiNetworkInvoker>(),
+        authStorageService: gh<_i40.AuthStorageService>(),
+        cubitError: gh<_i139.CubitError>(),
+        cubitAuth: gh<_i200.CubitAuth>(),
+      ),
+    );
+    gh.lazySingleton<_i868.UsernameService>(
+      () => _i868.UsernameService(
+        invoker: gh<_i1073.ApiNetworkInvoker>(),
+        authStorageService: gh<_i40.AuthStorageService>(),
+        cubitError: gh<_i139.CubitError>(),
+        cubitAuth: gh<_i200.CubitAuth>(),
+      ),
+    );
+    gh.factoryParam<
+      _i1073.CubitPermissions,
+      _i102.CubitPermissionViewer,
+      dynamic
+    >(
+      (_cubitPermissionViewer, _) => _i1073.CubitPermissions(
+        _cubitPermissionViewer,
+        gh<_i545.PermissionService>(),
+        gh<_i139.CubitError>(),
+      ),
+    );
+    gh.factory<_i657.CubitCreateEmployee>(
+      () => _i657.CubitCreateEmployee(gh<_i93.EmployeeService>()),
+    );
+    gh.factory<_i828.CubitEmployee>(
+      () => _i828.CubitEmployee(gh<_i93.EmployeeService>()),
+    );
+    gh.factory<_i463.CubitSingleEmployee>(
+      () => _i463.CubitSingleEmployee(gh<_i93.EmployeeService>()),
+    );
+    gh.factoryParam<
+      _i713.CubitCreatePermission,
+      _i1073.CubitPermissions,
+      dynamic
+    >(
+      (cubitPermissions, _) => _i713.CubitCreatePermission(
+        gh<_i545.PermissionService>(),
+        cubitPermissions,
+      ),
+    );
+    gh.factory<_i102.CubitPermissionViewer>(
+      () => _i102.CubitPermissionViewer(gh<_i545.PermissionService>()),
+    );
     gh.factory<_i170.CubitProfilePermissions>(
       () => _i170.CubitProfilePermissions(gh<_i545.PermissionService>()),
     );
-    gh.singleton<_i795.AppRoute>(() => _i795.AppRoute(gh<_i84.AuthGuard>()));
+    gh.factoryParam<
+      _i632.CubitEditEmployee,
+      _i463.CubitSingleEmployee,
+      dynamic
+    >(
+      (cubitSingleEmployee, _) => _i632.CubitEditEmployee(
+        gh<_i93.EmployeeService>(),
+        cubitSingleEmployee,
+      ),
+    );
+    gh.factory<_i914.CubitCreateEmployeeUsername>(
+      () => _i914.CubitCreateEmployeeUsername(gh<_i868.UsernameService>()),
+    );
     return this;
   }
 }

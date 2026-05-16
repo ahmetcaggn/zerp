@@ -12,7 +12,7 @@ import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
-import org.zerp.common.permission.service.PermittableService;
+import org.zerp.common.permission.service.CommonPermissionService;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -122,7 +122,7 @@ public class CrmPermissionEvaluator {
     }
 
     private final PermissionRepository permissionRepository;
-    private final PermittableService permittableService;
+    private final CommonPermissionService commonPermissionService;
 
     @PostConstruct
     void validateCrmPermissionCoverage() {
@@ -177,11 +177,11 @@ public class CrmPermissionEvaluator {
     }
 
     public Specification<TeamEntity> filterReadTeams(UUID userId) {
-        Set<UUID> permittedTeamIds = permittableService.getAllPermitted(
+        Set<UUID> permittedTeamIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.TEAM, PermissionAction.READ_TEAM);
-        Set<UUID> permittedTenantIds = permittableService.getAllPermitted(
+        Set<UUID> permittedTenantIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.TENANT, PermissionAction.READ_TEAM);
-        boolean hasTenantRootAccess = permittableService.hasRootPermission(
+        boolean hasTenantRootAccess = commonPermissionService.hasRootPermission(
                 userId, PermissionAction.READ_TEAM);
 
         log.info("user {} permitted: {} teams, {} tenants, tenant root access: {}",
@@ -260,15 +260,15 @@ public class CrmPermissionEvaluator {
     }
 
     public Specification<TicketEntity> filterReadTickets(UUID userId) {
-        Set<UUID> permittedTicketIds = permittableService.getAllPermitted(
+        Set<UUID> permittedTicketIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.TICKET, PermissionAction.READ_TICKET);
-        Set<UUID> permittedTenantIds = permittableService.getAllPermitted(
+        Set<UUID> permittedTenantIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.TENANT, PermissionAction.READ_TICKET);
-        Set<UUID> permittedTeamIds = permittableService.getAllPermitted(
+        Set<UUID> permittedTeamIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.TEAM, PermissionAction.READ_TICKET);
-        Set<UUID> permittedUserIds = permittableService.getAllPermitted(
+        Set<UUID> permittedUserIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.USER, PermissionAction.READ_TICKET);
-        boolean hasTenantRootAccess = permittableService.hasRootPermission(
+        boolean hasTenantRootAccess = commonPermissionService.hasRootPermission(
                 userId, PermissionAction.READ_TICKET);
 
         log.debug("user {} permitted: {} tickets, {} tenants, {} teams, {} users, tenant root access: {}",

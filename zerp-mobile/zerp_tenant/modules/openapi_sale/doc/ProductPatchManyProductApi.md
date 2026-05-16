@@ -25,7 +25,7 @@ import 'package:openapi_sale/api.dart';
 
 final api_instance = ProductPatchManyProductApi();
 final requestBody = Map<String, Object>(); // Map<String, Object> | 
-final id = [[1,2,3]]; // List<String> | List of entity IDs to update
+final id = [[1, 2, 3]]; // List<String> | List of entity IDs to update
 
 try {
     final result = api_instance.patchManyProduct(requestBody, id);

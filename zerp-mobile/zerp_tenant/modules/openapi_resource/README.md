@@ -77,6 +77,7 @@ Class | Method | HTTP request | Description
 *StockMovementPatchManyStockMovementApi* | [**patchManyStockMovement**](doc//StockMovementPatchManyStockMovementApi.md#) | **PATCH** /resource/stock-movements | UpdateMany: Update multiple entities
 *StockMovementPatchStockMovementApi* | [**patchStockMovement**](doc//StockMovementPatchStockMovementApi.md#) | **PATCH** /resource/stock-movements/{id} | Update: Update an existing entity
 *StockMovementUpdateStockMovementApi* | [**updateStockMovement**](doc//StockMovementUpdateStockMovementApi.md#) | **PUT** /resource/stock-movements/{id} | Update: Update an existing entity
+*StockMovementFeignControllerCreateBulkApi* | [**createBulk**](doc//StockMovementFeignControllerCreateBulkApi.md#) | **POST** /feign/resource/stock-movements/bulk | 
 *StockResourceCreateStockResourceApi* | [**createStockResource**](doc//StockResourceCreateStockResourceApi.md#) | **POST** /resource/stock-resources | Create: Create a new entity
 *StockResourceDeleteManyStockResourceApi* | [**deleteManyStockResource**](doc//StockResourceDeleteManyStockResourceApi.md#) | **DELETE** /resource/stock-resources | DeleteMany: Delete multiple entities
 *StockResourceDeleteStockResourceApi* | [**deleteStockResource**](doc//StockResourceDeleteStockResourceApi.md#) | **DELETE** /resource/stock-resources/{id} | Delete: Delete a single entity
@@ -107,6 +108,7 @@ Class | Method | HTTP request | Description
  - [StockCountUpdateDTO](doc//StockCountUpdateDTO.md)
  - [StockMovementCreateDTO](doc//StockMovementCreateDTO.md)
  - [StockMovementDTO](doc//StockMovementDTO.md)
+ - [StockMovementFeignRequest](doc//StockMovementFeignRequest.md)
  - [StockResourceCreateDTO](doc//StockResourceCreateDTO.md)
  - [StockResourceDTO](doc//StockResourceDTO.md)
  - [StockResourceUpdateDTO](doc//StockResourceUpdateDTO.md)

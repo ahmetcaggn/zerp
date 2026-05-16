@@ -7,7 +7,6 @@ const push = vi.fn()
 const signOut = vi.fn()
 const mediaQueryMock = vi.fn()
 
-let pathname = '/tr'
 let sessionStatus: 'authenticated' | 'unauthenticated' | 'loading' = 'unauthenticated'
 
 vi.mock('@mui/material/useMediaQuery', () => ({
@@ -15,7 +14,6 @@ vi.mock('@mui/material/useMediaQuery', () => ({
 }))
 
 vi.mock('next/navigation', () => ({
-  usePathname: () => pathname,
   useRouter: () => ({ push }),
 }))
 
@@ -48,9 +46,18 @@ vi.mock('@/core/ui/feedback/theme-toggle', () => ({
   ThemeToggle: () => <button type="button">Theme</button>,
 }))
 
+vi.mock('@/core/providers/shop-scope-provider', () => ({
+  useShopScope: () => ({
+    scope: { mode: 'GLOBAL' },
+    shops: [],
+    isLoading: false,
+    setGlobalScope: vi.fn(),
+    setShopScope: vi.fn(),
+  }),
+}))
+
 describe('AppTopbar', () => {
   beforeEach(() => {
-    pathname = '/tr'
     sessionStatus = 'unauthenticated'
     push.mockReset()
     signOut.mockReset()
@@ -59,12 +66,9 @@ describe('AppTopbar', () => {
   })
 
   it('renders inline desktop actions and hides menu toggle on desktop', () => {
-    pathname = '/tr/dashboard'
-
     render(<AppTopbar locale="tr" />)
 
     expect(screen.queryByLabelText(/open menu/i)).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Dashboard' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Logout' })).not.toBeInTheDocument()
   })
@@ -76,13 +80,12 @@ describe('AppTopbar', () => {
 
     fireEvent.click(screen.getByLabelText(/open menu/i))
 
-    expect(screen.getByRole('button', { name: 'Dashboard' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument()
 
     fireEvent.click(screen.getByLabelText(/close menu/i))
 
     await waitFor(() => {
-      expect(screen.queryByRole('button', { name: 'Dashboard' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Login' })).not.toBeInTheDocument()
     })
   })
 
@@ -96,6 +99,6 @@ describe('AppTopbar', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Logout' }))
 
     expect(signOut).toHaveBeenCalledTimes(1)
-    expect(signOut).toHaveBeenCalledWith({ callbackUrl: '/tr/login' })
+    expect(signOut).toHaveBeenCalledWith({ callbackUrl: '/api/sso-logout' })
   })
 })

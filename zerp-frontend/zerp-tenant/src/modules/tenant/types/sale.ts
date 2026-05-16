@@ -2,9 +2,6 @@
 
 export type UnitType = 'PIECE' | 'GRAM' | 'KILOGRAM' | 'MILLILITER' | 'LITER'
 
-// TODO: Replace with real shop ID from shop selector
-export const MOCK_SHOP_ID = '00000000-0000-0000-0000-000000000000'
-
 // ─── Product ─────────────────────────────────────────────────────────────────
 
 export interface ProductResponseDto {
@@ -191,6 +188,86 @@ export interface CreateMenuCategoryRequestDto {
 export interface UpdateMenuCategoryRequestDto {
   name?: string
   description?: string
+}
+
+// ─── Shop Table ──────────────────────────────────────────────────────────────
+
+export type ShopTableStatus = 'AVAILABLE' | 'RESERVED' | 'OCCUPIED' | 'OUT_OF_ORDER'
+
+export interface ShopTableResponseDto {
+  id: string
+  name: string
+  description?: string
+  capacity: number
+  floor: number
+  status: ShopTableStatus
+  shopId: string
+  shopName?: string
+  tenantId: string
+}
+
+export type ShopTableListResponseDto = ShopTableResponseDto
+
+export interface CreateShopTableRequestDto {
+  name: string
+  description?: string
+  capacity: number
+  floor: number
+  status: ShopTableStatus
+  shopId: string
+}
+
+export interface UpdateShopTableRequestDto {
+  name?: string
+  description?: string
+  capacity?: number
+  floor?: number
+  status?: ShopTableStatus
+}
+
+// ─── Table Order ──────────────────────────────────────────────────────────────
+
+export type TableOrderStatus = 'OPEN' | 'PAID' | 'CANCELLED'
+
+export interface TableOrderItemDto {
+  id: string
+  menuItemId: string
+  menuItemName?: string
+  quantity: number
+  unitPrice: number
+  notes?: string
+}
+
+export interface TableOrderItemCreateDto {
+  menuItemId: string
+  quantity: number
+  notes?: string
+}
+
+export interface TableOrderResponseDto {
+  id: string
+  shopTableId: string
+  shopTableName?: string
+  shopId: string
+  shopName?: string
+  status: TableOrderStatus
+  note?: string
+  items: TableOrderItemDto[]
+  tenantId: string
+}
+
+export type TableOrderListResponseDto = TableOrderResponseDto
+
+export interface CreateTableOrderRequestDto {
+  tableId: string
+  note?: string
+  items: TableOrderItemCreateDto[]
+}
+
+export interface UpdateTableOrderRequestDto {
+  status?: TableOrderStatus
+  note?: string
+  items?: TableOrderItemCreateDto[]
 }
 
 // ─── Menu Item ────────────────────────────────────────────────────────────────

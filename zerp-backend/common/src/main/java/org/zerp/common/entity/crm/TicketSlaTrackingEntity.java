@@ -25,21 +25,21 @@ import java.util.UUID;
 @SQLRestriction("deleted = false")
 @PermissionTargetTypeAnnotation(type = PermissionTargetType.TICKET_SLA_TRACKING)
 public class TicketSlaTrackingEntity extends BaseEntity implements Permittable {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_id", nullable = false, unique = true)
     private TicketEntity ticket;
-    
+
     @Column(name = "first_response_due_at")
     private LocalDateTime firstResponseDueAt;
-    
+
     @Column(name = "first_response_at")
     private LocalDateTime firstResponseAt;
-    
+
     @Column(name = "is_first_response_breached", nullable = false)
     private Boolean isFirstResponseBreached = false;
 
@@ -48,18 +48,26 @@ public class TicketSlaTrackingEntity extends BaseEntity implements Permittable {
 
     @Column(name = "paused_at")
     private LocalDateTime pausedAt;
-    
+
     @Column(name = "resolution_due_at")
     private LocalDateTime resolutionDueAt;
-    
+
     @Column(name = "resolution_at")
     private LocalDateTime resolutionAt;
-    
+
     @Column(name = "is_resolution_breached", nullable = false)
     private Boolean isResolutionBreached = false;
-    
+
     @Column(name = "total_paused_time_minutes")
     private Integer totalPausedTimeMinutes = 0;
+
+    @Override
+    public String getTitle() {
+        if (ticket == null) {
+            return "SLA-UNKNOWN_TICKET";
+        }
+        return String.format("SLA-%s", ticket.getTitle());
+    }
 
     @Override
     public Permittable getParent() {

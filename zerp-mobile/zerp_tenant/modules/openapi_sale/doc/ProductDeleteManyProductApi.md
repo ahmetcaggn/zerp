@@ -24,7 +24,7 @@ Deletes multiple entities in a single operation. Implements ra-spring-data-provi
 import 'package:openapi_sale/api.dart';
 
 final api_instance = ProductDeleteManyProductApi();
-final id = [[1,2,3]]; // List<String> | List of entity IDs to delete
+final id = [[1, 2, 3]]; // List<String> | List of entity IDs to delete
 
 try {
     final result = api_instance.deleteManyProduct(id);

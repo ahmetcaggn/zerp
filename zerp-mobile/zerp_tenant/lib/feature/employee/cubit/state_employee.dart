@@ -1,14 +1,28 @@
-import 'package:equatable/equatable.dart';
+import 'package:openapi_employee/api.dart';
+import 'package:zerp_tenant/product/network/page_response.dart';
 
-class StateEmployee extends Equatable {
-  const StateEmployee({this.isLoading = false});
+sealed class StateEmployee {
+  const StateEmployee();
+}
 
-  final bool isLoading;
+final class StateEmployeeInitial extends StateEmployee {
+  const StateEmployeeInitial();
+}
 
-  StateEmployee copyWith({bool? isLoading}) {
-    return StateEmployee(isLoading: isLoading ?? this.isLoading);
-  }
+final class StateEmployeeLoading extends StateEmployee {
+  const StateEmployeeLoading();
+}
 
-  @override
-  List<Object?> get props => [isLoading];
+final class StateEmployeeLoaded extends StateEmployee {
+  const StateEmployeeLoaded({
+    required this.data,
+  });
+
+  final PageResponse<EmployeeListResponseDto> data;
+}
+
+final class StateEmployeeError extends StateEmployee {
+  const StateEmployeeError({required this.message});
+
+  final String message;
 }

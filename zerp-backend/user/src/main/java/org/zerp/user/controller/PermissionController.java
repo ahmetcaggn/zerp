@@ -14,7 +14,11 @@ import org.zerp.user.dto.permission.PermissionResponse;
 import org.zerp.user.dto.permission.PermissionUpdateRequest;
 import org.zerp.user.service.PermissionService;
 
+import org.zerp.common.permission.entity.PermissionTargetType;
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user/permissions")
@@ -29,7 +33,20 @@ public class PermissionController extends ResourceController<PermissionResponse,
     }
 
     @GetMapping("/actions")
-    ResponseEntity<ApiResponse<List<PermissionAction>>> getAllPermissions() {
-        return ResponseEntity.ok(ApiResponse.success(service.getAllPermissions()));
+    ResponseEntity<ApiResponse<Map<PermissionAction, List<PermissionTargetType>>>> getAllPermissions() {
+        List<PermissionAction> actions = service.getAllPermissions();
+        Map<PermissionAction, List<PermissionTargetType>> actionHierarchyMap = new EnumMap<>(PermissionAction.class);
+
+        for (PermissionAction action : actions) {
+            List<PermissionTargetType> hierarchy = new ArrayList<>();
+            PermissionTargetType current = action.minTargetType;
+            while (current != null) {
+                hierarchy.add(current);
+                current = current.parent;
+            }
+            actionHierarchyMap.put(action, hierarchy);
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(actionHierarchyMap));
     }
 }

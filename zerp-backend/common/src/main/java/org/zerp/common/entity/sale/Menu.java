@@ -34,6 +34,11 @@ public class Menu extends BaseEntity implements Permittable {
     private Set<MenuCategory> menuCategories = new HashSet<>();
 
     @Override
+    public String getTitle() {
+        return name;
+    }
+
+    @Override
     public Permittable getParent() {
         return shop;
     }

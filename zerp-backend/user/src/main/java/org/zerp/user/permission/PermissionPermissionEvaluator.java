@@ -11,7 +11,7 @@ import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
-import org.zerp.common.permission.repository.PermittableTenantRepository;
+import org.zerp.common.permission.repository.PermittableRepository;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.user.repository.UserRepository;
 
@@ -24,7 +24,7 @@ public class PermissionPermissionEvaluator {
     private final PermissionRepository permissionRepository;
     private final CurrentTenantIdResolver tenantIdResolver;
     private final UserRepository userRepository;
-    private final PermittableTenantRepository permittableTenantRepository;
+    private final PermittableRepository permittableRepository;
 
     public boolean canRead(UUID userId, Permission target) {
         log.debug("Checking if user {} can read permission {} for user {}",
@@ -135,7 +135,7 @@ public class PermissionPermissionEvaluator {
                     yield true;
                 }
 
-                UUID resourceTenantId = permittableTenantRepository
+                UUID resourceTenantId = permittableRepository
                         .findTenantIdByIdAndTargetType(target.getTargetId(), target.getTargetType())
                         .orElse(null);
 

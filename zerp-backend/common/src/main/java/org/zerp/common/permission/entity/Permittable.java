@@ -5,5 +5,7 @@ import java.util.UUID;
 public interface Permittable {
     UUID getId();
 
+    String getTitle();
+
     Permittable getParent();
 }

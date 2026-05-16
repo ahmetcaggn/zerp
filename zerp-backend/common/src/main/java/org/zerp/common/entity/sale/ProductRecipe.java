@@ -43,6 +43,11 @@ public class ProductRecipe extends BaseEntity implements Permittable {
     private List<ProductRecipeItem> items = new ArrayList<>();
 
     @Override
+    public String getTitle() {
+        return name;
+    }
+
+    @Override
     public Permittable getParent() {
         return product;
     }

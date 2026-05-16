@@ -14,6 +14,7 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 import { useCreateMenuCategory, useUpdateMenuCategory } from '../../../hooks/use-menu-categories'
@@ -31,12 +32,17 @@ interface Props {
 export function MenuCategoryFormDialog({ open, mode, category, preselectedMenuId, onClose }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
 
   const [name, setName] = useState(category?.name ?? '')
   const [description, setDescription] = useState(category?.description ?? '')
   const [menuId, setMenuId] = useState(category?.menuId ?? preselectedMenuId ?? '')
 
-  const { data: menusResult } = useMenus({ pagination: { page: 1, perPage: 200 } })
+  const { data: menusResult } = useMenus({
+    pagination: { page: 1, perPage: 200 },
+    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+  })
   const menus = menusResult?.data ?? []
 
   const { mutate: createCategory, isPending: isCreating } = useCreateMenuCategory()

@@ -54,6 +54,11 @@ public class TicketAttachmentEntity extends BaseEntity implements Permittable {
     private LocalDateTime uploadedAt;
 
     @Override
+    public String getTitle() {
+        return fileName;
+    }
+
+    @Override
     public Permittable getParent() {
         return comment;
     }

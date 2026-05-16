@@ -7,25 +7,31 @@ import MenuRoundedIcon from '@mui/icons-material/MenuRounded'
 import {
   AppBar,
   Button,
+  CircularProgress,
   Divider,
   Drawer,
+  FormControl,
   IconButton,
+  InputLabel,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  MenuItem,
+  Select,
   Stack,
   Toolbar,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import { usePathname, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import type { ReactElement } from 'react'
 import { useMemo, useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { responsiveLayout } from '@/core/theme/layout'
 import { LocaleSwitcher } from '@/core/ui/feedback/locale-switcher'
 import { ThemeToggle } from '@/core/ui/feedback/theme-toggle'
@@ -60,12 +66,15 @@ const TOPBAR_ACTIONS: readonly TopbarAction[] = [
 export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
   const { status } = useSession()
   const router = useRouter()
-  const pathname = usePathname()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { t } = useI18n()
   const [isDrawerOpen, setDrawerOpen] = useState(false)
   const isAuthenticated = status === 'authenticated'
+  const { scope, shops, isLoading: isLoadingShops, setGlobalScope, setShopScope } = useShopScope()
+  const shopLabel = locale === 'tr' ? 'Mağaza' : 'Shop'
+  const allShopsLabel = locale === 'tr' ? 'Tüm Mağazalar' : 'All Shops'
+  const scopeValue = scope.mode === 'SHOP' ? scope.shopId : 'GLOBAL'
 
   const visibleActions = useMemo(
     () =>
@@ -107,12 +116,45 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
         <Toolbar
           disableGutters
           sx={{
-            justifyContent: 'flex-end',
+            justifyContent: 'space-between',
             gap: { xs: 1, sm: 2 },
             minHeight: responsiveLayout.toolbarMinHeight,
             px: responsiveLayout.toolbarPaddingX,
           }}
         >
+          <Stack direction="row" alignItems="center" sx={{ minWidth: { xs: 160, sm: 260 } }}>
+            {isAuthenticated && (
+              <FormControl size="small" fullWidth>
+                <InputLabel>{shopLabel}</InputLabel>
+                <Select
+                  label={shopLabel}
+                  value={scopeValue}
+                  onChange={(event) => {
+                    const selectedValue = event.target.value
+                    if (selectedValue === 'GLOBAL') {
+                      setGlobalScope()
+                      return
+                    }
+
+                    const selectedShop = shops.find((shop) => shop.id === selectedValue)
+                    if (selectedShop) {
+                      setShopScope(selectedShop)
+                    }
+                  }}
+                  disabled={isLoadingShops}
+                >
+                  <MenuItem value="GLOBAL">{allShopsLabel}</MenuItem>
+                  {shops.map((shop) => (
+                    <MenuItem key={shop.id} value={shop.id}>
+                      {shop.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+            {isAuthenticated && isLoadingShops && <CircularProgress size={18} sx={{ ml: 1 }} />}
+          </Stack>
+
           {isMobile ? (
             <Stack alignItems="center" direction="row" gap={0.5}>
               <LocaleSwitcher locale={locale} />
