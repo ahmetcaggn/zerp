@@ -6,6 +6,11 @@ interface RequestOptions extends RequestInit {
   _retry?: boolean
 }
 
+export interface ListResult<T> {
+  data: T[]
+  total: number
+}
+
 export function parseApiEnvelope<T>(payload: unknown): T {
   if (
     payload &&
@@ -23,7 +28,10 @@ export function parseApiEnvelope<T>(payload: unknown): T {
 export class BaseHttpClient {
   constructor(private readonly baseUrl = '/api') {}
 
-  async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+  private async rawFetch(
+    endpoint: string,
+    options: RequestOptions = {},
+  ): Promise<{ payload: unknown; response: Response }> {
     if (sessionManager.isSessionExpired) {
       throw new ApiError('Session expired', 401)
     }
@@ -57,7 +65,7 @@ export class BaseHttpClient {
         throw new ApiError('Session expired', 401)
       }
 
-      return this.request<T>(endpoint, {
+      return this.rawFetch(endpoint, {
         ...options,
         _retry: true,
       })
@@ -71,7 +79,58 @@ export class BaseHttpClient {
       throw new ApiError(message, response.status, apiPayload ?? undefined)
     }
 
+    return { payload, response }
+  }
+
+  async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+    const { payload } = await this.rawFetch(endpoint, options)
     return parseApiEnvelope<T>(payload)
+  }
+
+  async requestList<T>(
+    endpoint: string,
+    options: RequestOptions = {},
+  ): Promise<ListResult<T>> {
+    const { payload, response } = await this.rawFetch(endpoint, {
+      ...options,
+      method: 'GET',
+    })
+
+    const data = parseApiEnvelope<T[]>(payload)
+    const total = Number(response.headers.get('X-Total-Count') ?? 0)
+    return { data, total }
+  }
+
+  get<T>(endpoint: string, options?: Omit<RequestOptions, 'method' | 'body'>): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'GET' })
+  }
+
+  post<T>(endpoint: string, body: unknown, options?: Omit<RequestOptions, 'method' | 'body'>): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
+  }
+
+  put<T>(endpoint: string, body: unknown, options?: Omit<RequestOptions, 'method' | 'body'>): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'PUT',
+      body: JSON.stringify(body),
+    })
+  }
+
+  patch<T>(endpoint: string, body: unknown, options?: Omit<RequestOptions, 'method' | 'body'>): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    })
+  }
+
+  del<T>(endpoint: string, options?: Omit<RequestOptions, 'method' | 'body'>): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'DELETE' })
   }
 
   private async safeJson(response: Response): Promise<unknown> {

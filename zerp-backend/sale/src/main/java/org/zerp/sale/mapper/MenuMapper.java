@@ -18,5 +18,6 @@ public interface MenuMapper {
     @Mapping(source = "tenantId", target = "tenantId")
     MenuDTO toDTO(Menu entity);
 
+    @Mapping(target = "active", ignore = true)
     void updateEntityFromDTO(MenuUpdateDTO dto, @MappingTarget Menu entity);
 }

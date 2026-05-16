@@ -2,6 +2,7 @@ package org.zerp.common.entity.sale;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.base.BaseEntity;
@@ -25,6 +26,9 @@ public class Menu extends BaseEntity implements Permittable {
 
     private String name;
     private String description;
+    @Column(nullable = false)
+    @ColumnDefault("FALSE")
+    private boolean isActive = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id", nullable = false)

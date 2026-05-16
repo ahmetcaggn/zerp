@@ -1,16 +1,13 @@
-package org.zerp.sale.dto.menu;
+package org.zerp.sale.dto.publicsale;
 
 import lombok.Data;
 
 import java.util.UUID;
 
 @Data
-public class MenuDTO {
+public class PublicActiveMenuDTO {
     private UUID id;
     private String name;
     private String description;
     private boolean isActive;
-    private UUID shopId;
-    private String shopName;
-    private UUID tenantId;
 }

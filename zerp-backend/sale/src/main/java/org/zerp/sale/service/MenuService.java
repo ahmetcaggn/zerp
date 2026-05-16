@@ -93,6 +93,7 @@ public class MenuService implements
         menu.setShop(shop);
         menu.setTenantId(tenantId);
         Menu saved = repository.save(menu);
+        enforceSingleActiveMenu(saved);
         log.info("Created Menu with id: {}", saved.getId());
         return mapper.toDTO(saved);
     }
@@ -108,6 +109,7 @@ public class MenuService implements
         }
         applyFieldUpdates(menu, data);
         Menu updated = repository.save(menu);
+        enforceSingleActiveMenu(updated);
         log.info("Patched Menu with id: {}", uuid);
         return mapper.toDTO(updated);
     }
@@ -122,7 +124,11 @@ public class MenuService implements
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Menu");
         }
         mapper.updateEntityFromDTO(data, menu);
+        if (data.getIsActive() != null) {
+            menu.setActive(data.getIsActive());
+        }
         Menu updated = repository.save(menu);
+        enforceSingleActiveMenu(updated);
         log.info("Updated Menu with id: {}", uuid);
         return mapper.toDTO(updated);
     }
@@ -173,6 +179,14 @@ public class MenuService implements
     private void applyFieldUpdates(Menu menu, Map<String, Object> fields) {
         if (fields.containsKey("name")) menu.setName((String) fields.get("name"));
         if (fields.containsKey("description")) menu.setDescription((String) fields.get("description"));
+        if (fields.containsKey("isActive")) menu.setActive((Boolean) fields.get("isActive"));
+    }
+
+    private void enforceSingleActiveMenu(Menu menu) {
+        if (!menu.isActive()) {
+            return;
+        }
+        repository.deactivateOtherActiveMenus(menu.getShop().getId(), menu.getId());
     }
 
     private Shop resolveShop(UUID shopId) {

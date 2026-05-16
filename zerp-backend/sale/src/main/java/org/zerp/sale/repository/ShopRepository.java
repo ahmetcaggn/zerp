@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.zerp.common.entity.Shop;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificationExecutor<Shop> {
@@ -24,4 +25,5 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
               AND s.id <> :shopId
             """)
     boolean existsByTenantIdAndNameIgnoreCaseAndIdNot(UUID tenantId, String name, UUID shopId);
+    List<Shop> findAllByOrderByNameAsc();
 }

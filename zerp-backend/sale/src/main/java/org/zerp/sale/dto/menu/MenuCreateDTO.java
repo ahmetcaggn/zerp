@@ -8,5 +8,6 @@ import java.util.UUID;
 public class MenuCreateDTO {
     private String name;
     private String description;
+    private boolean isActive = false;
     private UUID shopId;
 }

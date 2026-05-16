@@ -1,17 +1,39 @@
 'use client'
 
 import { useState } from 'react'
-import { Grid, InputAdornment, Stack, TextField, Typography } from '@mui/material'
+import { Grid, Stack, TextField, Typography } from '@mui/material'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
-import { MOCK_RESTAURANTS } from '../data/mock'
+import { usePublicShops } from '../hooks/use-public-sale'
 import { RestaurantCard } from './restaurant-card'
+import type { Restaurant } from '../types'
+
+function mapShopToRestaurant(shop: {
+  id: string
+  name: string
+  description?: string
+  address?: string
+  city?: string
+  country?: string
+}): Restaurant {
+  return {
+    id: shop.id,
+    name: shop.name,
+    description: shop.description || [shop.address, shop.city, shop.country].filter(Boolean).join(', ') || '—',
+    isOpen: true,
+    rating: 4.5,
+    categories: [],
+  }
+}
 
 export function RestaurantList() {
   const { t } = useI18n()
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: shops = [], isLoading, isError } = usePublicShops()
 
-  const filteredRestaurants = MOCK_RESTAURANTS.filter((restaurant) =>
+  const restaurants = shops.map(mapShopToRestaurant)
+
+  const filteredRestaurants = restaurants.filter((restaurant) =>
     restaurant.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
@@ -34,6 +56,9 @@ export function RestaurantList() {
         onChange={(e) => setSearchTerm(e.target.value)}
         sx={{ maxWidth: 500 }}
       />
+
+      {isLoading && <Typography color="text.secondary">{t('common.loading')}</Typography>}
+      {isError && <Typography color="error">{t('restaurants.loadFailed')}</Typography>}
 
       <Grid container spacing={3}>
         {filteredRestaurants.map((restaurant) => (

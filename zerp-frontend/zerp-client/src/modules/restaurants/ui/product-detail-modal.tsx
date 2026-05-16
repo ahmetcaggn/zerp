@@ -81,7 +81,7 @@ export function ProductDetailModal({ open, onClose, product }: ProductDetailModa
                 <Typography variant="body2">{product.weight}</Typography>
               </Box>
             )}
-            {product.calories && (
+            {product.calories !== undefined && product.calories !== null && (
               <Box>
                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
                   {t('productDetail.calories')}

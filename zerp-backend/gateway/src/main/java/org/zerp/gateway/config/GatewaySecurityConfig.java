@@ -206,6 +206,7 @@ public class GatewaySecurityConfig {
                         .pathMatchers("/employee", "/employee/**").authenticated()
                         .pathMatchers("/notification", "/notification/**").authenticated()
                         .pathMatchers("/resource", "/resource/**").authenticated()
+                        .pathMatchers("/sale/public/**").permitAll()
                         .pathMatchers("/sale", "/sale/**").authenticated()
                         .pathMatchers("/user", "/user/**").authenticated()
                         .pathMatchers("/suggestion", "/suggestion/**").authenticated()

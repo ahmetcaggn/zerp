@@ -6,4 +6,5 @@ import lombok.Data;
 public class MenuUpdateDTO {
     private String name;
     private String description;
+    private Boolean isActive;
 }
