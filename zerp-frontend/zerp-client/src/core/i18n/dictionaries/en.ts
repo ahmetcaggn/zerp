@@ -46,6 +46,10 @@ export const enMessages = {
     loadFailed: 'Failed to load data. Please try again.',
     changeStore: 'Change Store',
     allCategories: 'All',
+    discoveryTitle: 'What would you like to eat?',
+    discoverySubtitle: 'Explore categories and jump into any section for full details.',
+    seeAllCategory: 'See All',
+    previewEmpty: 'No preview products found in this category.',
   },
   welcome: {
     title: 'Welcome',

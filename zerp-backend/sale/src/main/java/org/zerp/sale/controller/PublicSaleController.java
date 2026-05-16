@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.context.RequestContext;
 import org.zerp.common.dto.ApiResponse;
-import org.zerp.sale.dto.publicsale.PublicProductDTO;
+import org.zerp.sale.dto.publicsale.PublicMenuItemDTO;
 import org.zerp.sale.dto.publicsale.PublicShopDTO;
 import org.zerp.sale.dto.publicsale.PublicShopMenuResponseDTO;
 import org.zerp.sale.service.PublicSaleService;
@@ -46,8 +46,8 @@ public class PublicSaleController {
         return ResponseEntity.ok(buildResponse(publicSaleService.getActiveMenuWithCategories(shopId)));
     }
 
-    @GetMapping("/shops/{shopId}/categories/{categoryId}/products")
-    public ResponseEntity<ApiResponse<List<PublicProductDTO>>> getCategoryProducts(
+    @GetMapping("/shops/{shopId}/categories/{categoryId}/menu-items")
+    public ResponseEntity<ApiResponse<List<PublicMenuItemDTO>>> getCategoryMenuItems(
             @PathVariable UUID shopId,
             @PathVariable UUID categoryId,
             @RequestParam(name = "_start", defaultValue = "0") int start,
@@ -64,7 +64,7 @@ public class PublicSaleController {
         Sort direction = Sort.by(Sort.Direction.fromString(order), sort);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, direction);
 
-        Page<PublicProductDTO> page = publicSaleService.getProductsByCategory(shopId, categoryId, pageable);
+        Page<PublicMenuItemDTO> page = publicSaleService.getMenuItemsByCategory(shopId, categoryId, pageable);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(page.getTotalElements()));
         headers.add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "X-Total-Count");

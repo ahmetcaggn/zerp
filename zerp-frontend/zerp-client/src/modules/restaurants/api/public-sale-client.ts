@@ -1,7 +1,7 @@
 import { httpClient } from '@/core/api/http-client'
 import type {
-  PublicCategoryProductsParams,
-  PublicProductDto,
+  PublicCategoryMenuItemsParams,
+  PublicMenuItemDto,
   PublicShopDto,
   PublicShopMenuResponseDto,
 } from '../types'
@@ -14,8 +14,8 @@ export async function getPublicShopMenu(shopId: string): Promise<PublicShopMenuR
   return httpClient.get<PublicShopMenuResponseDto>(`/sale/public/shops/${shopId}/menu`)
 }
 
-export async function getPublicCategoryProducts(params: PublicCategoryProductsParams): Promise<{
-  data: PublicProductDto[]
+export async function getPublicCategoryMenuItems(params: PublicCategoryMenuItemsParams): Promise<{
+  data: PublicMenuItemDto[]
   total: number
 }> {
   const { shopId, categoryId, start, end, sort = 'name', order = 'ASC' } = params
@@ -25,7 +25,9 @@ export async function getPublicCategoryProducts(params: PublicCategoryProductsPa
     _sort: sort,
     _order: order,
   })
-  return httpClient.requestList<PublicProductDto>(
-    `/sale/public/shops/${shopId}/categories/${categoryId}/products?${query.toString()}`,
+  return httpClient.requestList<PublicMenuItemDto>(
+    `/sale/public/shops/${shopId}/categories/${categoryId}/menu-items?${query.toString()}`,
   )
 }
+
+export const getPublicCategoryProducts = getPublicCategoryMenuItems

@@ -46,6 +46,10 @@ export const trMessages = {
     loadFailed: 'Veriler yüklenemedi. Lütfen tekrar deneyin.',
     changeStore: 'Mağaza Değiştir',
     allCategories: 'Tümü',
+    discoveryTitle: 'Ne yemek istersin?',
+    discoverySubtitle: 'Kategorileri keşfet, beğendiğin bölümden tüm ürünleri görüntüle.',
+    seeAllCategory: 'Tümünü Gör',
+    previewEmpty: 'Bu kategoride gösterilecek ürün bulunamadı.',
   },
   welcome: {
     title: 'Hoş Geldiniz',

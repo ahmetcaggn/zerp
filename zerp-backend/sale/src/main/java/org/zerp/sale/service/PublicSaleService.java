@@ -11,15 +11,15 @@ import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.sale.Menu;
 import org.zerp.common.entity.sale.MenuCategory;
-import org.zerp.common.entity.sale.Product;
+import org.zerp.common.entity.sale.MenuItem;
 import org.zerp.sale.dto.publicsale.PublicActiveMenuDTO;
+import org.zerp.sale.dto.publicsale.PublicMenuItemDTO;
 import org.zerp.sale.dto.publicsale.PublicMenuCategoryDTO;
-import org.zerp.sale.dto.publicsale.PublicProductDTO;
 import org.zerp.sale.dto.publicsale.PublicShopDTO;
 import org.zerp.sale.dto.publicsale.PublicShopMenuResponseDTO;
 import org.zerp.sale.repository.MenuCategoryRepository;
+import org.zerp.sale.repository.MenuItemRepository;
 import org.zerp.sale.repository.MenuRepository;
-import org.zerp.sale.repository.ProductRepository;
 import org.zerp.sale.repository.ShopRepository;
 
 import java.util.List;
@@ -32,7 +32,7 @@ public class PublicSaleService {
     private final ShopRepository shopRepository;
     private final MenuRepository menuRepository;
     private final MenuCategoryRepository menuCategoryRepository;
-    private final ProductRepository productRepository;
+    private final MenuItemRepository menuItemRepository;
 
     @Transactional(readOnly = true)
     public List<PublicShopDTO> listShops() {
@@ -65,20 +65,20 @@ public class PublicSaleService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PublicProductDTO> getProductsByCategory(UUID shopId, UUID categoryId, Pageable pageable) {
+    public Page<PublicMenuItemDTO> getMenuItemsByCategory(UUID shopId, UUID categoryId, Pageable pageable) {
         ensureShopExists(shopId);
         Menu activeMenu = menuRepository.findFirstByShopIdAndIsActiveTrue(shopId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No active menu found for this shop"));
 
-        Page<Product> page = productRepository
-                .findByShopIdAndMenuItemCategoryIdAndMenuItemCategoryMenuIdAndIsActiveTrue(
-                        shopId,
+        Page<MenuItem> page = menuItemRepository
+                .findByCategoryIdAndCategoryMenuIdAndCategoryMenuShopId(
                         categoryId,
                         activeMenu.getId(),
+                        shopId,
                         pageable
                 );
-        log.debug("Found {} products for public category listing", page.getTotalElements());
-        return page.map(this::toPublicProduct);
+        log.debug("Found {} menu items for public category listing", page.getTotalElements());
+        return page.map(this::toPublicMenuItem);
     }
 
     private void ensureShopExists(UUID shopId) {
@@ -121,16 +121,15 @@ public class PublicSaleService {
         return dto;
     }
 
-    private PublicProductDTO toPublicProduct(Product product) {
-        PublicProductDTO dto = new PublicProductDTO();
-        dto.setId(product.getId());
-        dto.setName(product.getName());
-        dto.setDescription(product.getDescription());
-        dto.setPrice(product.getPrice());
-        dto.setImageId(product.getImageId());
-        dto.setMenuItemId(product.getMenuItem() != null ? product.getMenuItem().getId() : null);
-        dto.setPreparationTime(product.getPreparationTime());
-        dto.setAvailable(product.isActive());
+    private PublicMenuItemDTO toPublicMenuItem(MenuItem menuItem) {
+        PublicMenuItemDTO dto = new PublicMenuItemDTO();
+        dto.setId(menuItem.getId());
+        dto.setName(menuItem.getName());
+        dto.setDescription(menuItem.getDescription());
+        dto.setPrice(menuItem.getPrice());
+        dto.setImageId(menuItem.getImageId());
+        dto.setCategoryId(menuItem.getCategory() != null ? menuItem.getCategory().getId() : null);
+        dto.setAvailable(true);
         return dto;
     }
 }

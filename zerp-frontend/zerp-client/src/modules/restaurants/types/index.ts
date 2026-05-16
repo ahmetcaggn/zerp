@@ -58,18 +58,17 @@ export interface PublicShopMenuResponseDto {
   message?: string
 }
 
-export interface PublicProductDto {
+export interface PublicMenuItemDto {
   id: string
   name: string
   description?: string
   price: number
   imageId?: string
-  menuItemId?: string
-  preparationTime?: number
+  categoryId?: string
   isAvailable: boolean
 }
 
-export interface PublicCategoryProductsParams {
+export interface PublicCategoryMenuItemsParams {
   shopId: string
   categoryId: string
   start: number

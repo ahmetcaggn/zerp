@@ -4,11 +4,11 @@ import { useQuery } from '@tanstack/react-query'
 
 import { queryKeys } from '@/core/api/query-keys'
 import {
-  getPublicCategoryProducts,
+  getPublicCategoryMenuItems,
   getPublicShopMenu,
   getPublicShops,
 } from '../api/public-sale-client'
-import type { PublicCategoryProductsParams } from '../types'
+import type { PublicCategoryMenuItemsParams } from '../types'
 
 export function usePublicShops() {
   return useQuery({
@@ -25,7 +25,7 @@ export function usePublicShopMenu(shopId: string) {
   })
 }
 
-export function usePublicCategoryProducts(params: PublicCategoryProductsParams | null) {
+export function usePublicCategoryMenuItems(params: PublicCategoryMenuItemsParams | null) {
   return useQuery({
     queryKey: [
       ...queryKeys.client.restaurants.products,
@@ -36,7 +36,9 @@ export function usePublicCategoryProducts(params: PublicCategoryProductsParams |
       params?.sort ?? null,
       params?.order ?? null,
     ],
-    queryFn: () => getPublicCategoryProducts(params as PublicCategoryProductsParams),
+    queryFn: () => getPublicCategoryMenuItems(params as PublicCategoryMenuItemsParams),
     enabled: !!params?.shopId && !!params?.categoryId,
   })
 }
+
+export const usePublicCategoryProducts = usePublicCategoryMenuItems
