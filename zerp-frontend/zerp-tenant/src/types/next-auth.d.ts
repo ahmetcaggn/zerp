@@ -7,6 +7,7 @@ declare module 'next-auth' {
     error?: string
     user: DefaultSession['user'] & {
       roles: AppRole[]
+      userId?: string
       tenantId?: string
     }
   }
@@ -17,6 +18,7 @@ declare module 'next-auth/jwt' {
     encryptedTokens?: string
     accessTokenExpires?: number
     roles?: AppRole[]
+    userId?: string
     tenantId?: string
     idToken?: string
     error?: string

@@ -29,6 +29,8 @@
         <module>sale</module>
         <module>suggestion</module>
         <module>user</module>
+
+        <module>s3repository</module>
 <!--          <module>socket_service</module>-->
 
         <!-- debug -->
@@ -64,6 +66,13 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <!-- Feign -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>4.3.0</version>
         </dependency>
 
         <!-- Spring Boot Actuator -->

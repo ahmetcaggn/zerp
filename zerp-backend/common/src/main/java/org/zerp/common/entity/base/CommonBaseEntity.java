@@ -7,6 +7,7 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -23,10 +24,12 @@ import java.util.UUID;
 @EntityListeners(AuditingEntityListener.class)
 public class CommonBaseEntity implements Serializable {
     @CreatedDate
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at", nullable = false, updatable = false)
     protected LocalDateTime createdAt;
 
     @LastModifiedDate
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "updated_at", nullable = false)
     protected LocalDateTime updatedAt;
 
@@ -42,10 +45,12 @@ public class CommonBaseEntity implements Serializable {
     protected LocalDateTime deletedAt;
 
     @Column(name = "deleted", nullable = false)
+    @ColumnDefault("false")
     protected Boolean deleted = false;
 
     @Version
     @Column(name = "version", nullable = false)
+    @ColumnDefault("0")
     protected Long version;
 }
 

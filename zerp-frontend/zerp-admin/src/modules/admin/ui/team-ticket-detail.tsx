@@ -1,6 +1,9 @@
 'use client'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import AttachFileIcon from '@mui/icons-material/AttachFile'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import DownloadIcon from '@mui/icons-material/Download'
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove'
 import SendIcon from '@mui/icons-material/Send'
 import {
@@ -20,6 +23,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useRouter } from 'next/navigation'
+import type { ChangeEvent } from 'react'
 import { useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
@@ -27,6 +31,7 @@ import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
+import { teamTicketClient } from '../api/team-ticket-client'
 import {
   useAddTeamTicketComment,
   useAssignTeamTicket,
@@ -35,7 +40,9 @@ import {
   useCloseTeamTicket,
   useTeamTicket,
   useUnassignTeamTicket,
+  useUploadTeamTicketAttachment,
 } from '../hooks/use-team-tickets'
+import type { AttachmentResponse } from '../types/ticket'
 import type { TicketPriorityString, TicketStatusString } from '../types/ticket'
 
 const STATUS_COLOR: Record<
@@ -80,6 +87,32 @@ function isUuid(value: string): boolean {
   return UUID_REGEX.test(value)
 }
 
+function formatFileSize(size?: number): string {
+  if (typeof size !== 'number' || Number.isNaN(size) || size < 0) {
+    return '—'
+  }
+
+  if (size < 1024) {
+    return `${size} B`
+  }
+
+  const kb = size / 1024
+  if (kb < 1024) {
+    return `${kb.toFixed(1)} KB`
+  }
+
+  const mb = kb / 1024
+  return `${mb.toFixed(1)} MB`
+}
+
+function toTimestamp(value?: string): number {
+  if (!value) {
+    return 0
+  }
+  const timestamp = new Date(value).getTime()
+  return Number.isNaN(timestamp) ? 0 : timestamp
+}
+
 export function TeamTicketDetail({ id }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
@@ -96,6 +129,7 @@ export function TeamTicketDetail({ id }: Props) {
   const { mutate: changePriority, isPending: isChangingPriority } = useChangeTeamTicketPriority()
   const { mutate: assignTicket, isPending: isAssigning } = useAssignTeamTicket()
   const { mutate: unassignTicket, isPending: isUnassigning } = useUnassignTeamTicket()
+  const { mutate: uploadAttachment, isPending: isUploadingAttachment } = useUploadTeamTicketAttachment()
   const { hasPermission, isLoadingPermissions } = useCurrentUserPermissions()
   const canReadTicket = hasPermission(PermissionActions.READ_TICKET)
   const { data: ticket, isLoading, error } = useTeamTicket(id, {
@@ -109,6 +143,8 @@ export function TeamTicketDetail({ id }: Props) {
   const canUpdateTicketAssignment = hasPermission(PermissionActions.UPDATE_TICKET_ASSIGNMENT)
   const canDeleteTicketAssignment = hasPermission(PermissionActions.DELETE_TICKET_ASSIGNMENT)
   const canReadTicketSlaTracking = hasPermission(PermissionActions.READ_TICKET_SLA_TRACKING)
+  const canReadTicketAttachment = hasPermission(PermissionActions.READ_TICKET_ATTACHMENT)
+  const canCreateTicketAttachment = hasPermission(PermissionActions.CREATE_TICKET_ATTACHMENT)
   const trimmedAssignTeamId = assignTeamId.trim()
   const trimmedAssignAgentId = assignAgentId.trim()
   const isAssignTeamIdValid = trimmedAssignTeamId ? isUuid(trimmedAssignTeamId) : true
@@ -155,6 +191,14 @@ export function TeamTicketDetail({ id }: Props) {
   const assignmentActionBlockedReason = isClosed
     ? 'Talep kapalı olduğu için atama işlemi yapılamaz.'
     : null
+  const attachmentUploadBlockedReason = isClosed
+    ? 'Talep kapalı olduğu için ek yüklenemez.'
+    : null
+  const ticketAttachments = canReadTicketAttachment
+    ? [...(ticket.attachments ?? [])].sort((left, right) => {
+        return toTimestamp(right.uploadedAt) - toTimestamp(left.uploadedAt)
+      })
+    : []
   const externalComments = canReadTicketComment
     ? (ticket.comments ?? []).filter((comment) => !comment.isInternal)
     : []
@@ -266,6 +310,40 @@ export function TeamTicketDetail({ id }: Props) {
       onSuccess: () => showToast('Atama kaldırıldı.', { severity: 'success' }),
       onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
     })
+  }
+
+  function handleAttachmentSelected(event: ChangeEvent<HTMLInputElement>) {
+    const selectedFile = event.target.files?.[0]
+    event.target.value = ''
+
+    if (!selectedFile) {
+      return
+    }
+
+    if (!canCreateTicketAttachment) {
+      showToast('Ek yükleme yetkiniz yok.', { severity: 'warning' })
+      return
+    }
+
+    if (isClosed) {
+      showToast('Talep kapalı olduğu için ek yüklenemez.', { severity: 'warning' })
+      return
+    }
+
+    uploadAttachment(
+      { id, file: selectedFile },
+      {
+        onSuccess: () => showToast('Ek yüklendi.', { severity: 'success' }),
+        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      },
+    )
+  }
+
+  function buildAttachmentUrl(attachment: AttachmentResponse): string | null {
+    if (!attachment.id) {
+      return null
+    }
+    return teamTicketClient.getAttachmentUrl(id, attachment.id)
   }
 
   return (
@@ -386,6 +464,89 @@ export function TeamTicketDetail({ id }: Props) {
           <Typography variant="body1">{ticket.description}</Typography>
         </Paper>
       )}
+
+      <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Typography variant="subtitle2">Ekler ({ticketAttachments.length})</Typography>
+          {canCreateTicketAttachment && (
+            <Tooltip title={attachmentUploadBlockedReason ?? ''}>
+              <span>
+                <Button
+                  size="small"
+                  component="label"
+                  startIcon={<CloudUploadIcon fontSize="small" />}
+                  disabled={isUploadingAttachment || Boolean(attachmentUploadBlockedReason)}
+                >
+                  Ek Yükle
+                  <input
+                    hidden
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={handleAttachmentSelected}
+                  />
+                </Button>
+              </span>
+            </Tooltip>
+          )}
+        </Box>
+
+        {!canReadTicketAttachment ? (
+          <Typography variant="body2" color="text.secondary">
+            Ekleri görüntüleme yetkiniz yok.
+          </Typography>
+        ) : ticketAttachments.length === 0 ? (
+          <Typography variant="body2" color="text.secondary">
+            Bu talepte ek bulunmuyor.
+          </Typography>
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+            {ticketAttachments.map((attachment, index) => {
+              const fileLabel = attachment.fileName?.trim() || attachment.storageKey || 'Dosya'
+              const attachmentUrl = buildAttachmentUrl(attachment)
+
+              return (
+                <Paper
+                  key={attachment.id ?? `${attachment.storageKey ?? fileLabel}-${index}`}
+                  variant="outlined"
+                  sx={{ p: 1.5, borderStyle: 'dashed' }}
+                >
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'center' }}>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                        <AttachFileIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
+                          {fileLabel}
+                        </Typography>
+                      </Box>
+                      <Typography variant="caption" color="text.secondary">
+                        {formatFileSize(attachment.fileSize)}
+                        {attachment.contentType ? ` · ${attachment.contentType}` : ''}
+                        {attachment.uploadedAt ? ` · ${attachment.uploadedAt}` : ''}
+                      </Typography>
+                    </Box>
+                    {attachmentUrl ? (
+                      <Button
+                        component="a"
+                        href={attachmentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        size="small"
+                        startIcon={<DownloadIcon fontSize="small" />}
+                      >
+                        Aç
+                      </Button>
+                    ) : (
+                      <Button size="small" disabled>
+                        Aç
+                      </Button>
+                    )}
+                  </Box>
+                </Paper>
+              )
+            })}
+          </Box>
+        )}
+      </Paper>
 
       <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
         <Box

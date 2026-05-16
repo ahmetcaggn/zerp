@@ -8,6 +8,7 @@ import { teamTicketClient } from '../api/team-ticket-client'
 import type {
   AddCommentRequest,
   AssignTicketRequest,
+  AttachmentResponse,
   ChangePriorityRequest,
   ChangeStatusRequest,
   CreateTicketRequest,
@@ -104,6 +105,18 @@ export function useUnassignTeamTicket() {
   return useMutation({
     mutationFn: (id: string) => teamTicketClient.unassign(id),
     onSuccess: (_, id) => {
+      qc.invalidateQueries({ queryKey: queryKeys.admin.teamTickets })
+      qc.invalidateQueries({ queryKey: ticketDetailKey(id) })
+    },
+  })
+}
+
+export function useUploadTeamTicketAttachment() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }): Promise<AttachmentResponse> =>
+      teamTicketClient.uploadAttachment(id, file),
+    onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.teamTickets })
       qc.invalidateQueries({ queryKey: ticketDetailKey(id) })
     },
