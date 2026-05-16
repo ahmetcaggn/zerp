@@ -205,6 +205,11 @@ class _DetailsView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             _DetailRow(
+              icon: Icons.person_outline,
+              label: context.t.employee.details.username,
+              value: employee.username,
+            ),
+            _DetailRow(
               icon: Icons.email_outlined,
               label: context.t.employee.details.email,
               value: employee.email,

@@ -12,6 +12,10 @@ extension EmployeeListResponseExtension on EmployeeListResponseDto {
       return '';
     }
   }
+
+  String get presentableName {
+    return '$username ($fullName)';
+  }
 }
 
 extension EmployeeResponseExtension on EmployeeResponseDto {
@@ -25,5 +29,9 @@ extension EmployeeResponseExtension on EmployeeResponseDto {
     } else {
       return '';
     }
+  }
+
+  String get presentableName {
+    return '$username ($fullName)';
   }
 }

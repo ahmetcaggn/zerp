@@ -193,7 +193,7 @@ class _EmployeeEntry extends StatelessWidget
           ),
         ),
         title: Text(
-          employee.fullName,
+          employee.presentableName,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Padding(
