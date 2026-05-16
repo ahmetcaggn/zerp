@@ -8,6 +8,15 @@ mixin _MixinCreateEmployee on State<_CreateEmployeeView> {
   final emailController = TextEditingController();
   final tempPasswordController = TextEditingController();
   final phoneController = TextEditingController();
+  final nationalIdController = TextEditingController();
+  final salaryController = TextEditingController();
+  final managerIdController = TextEditingController();
+
+  DateTime? dateOfBirth;
+  DateTime hireDate = DateTime.now();
+  CreateEmployeeRequestDtoStatusEnum? status =
+      CreateEmployeeRequestDtoStatusEnum.ACTIVE;
+  bool isActive = true;
 
   bool submitLock = false;
 
@@ -19,6 +28,9 @@ mixin _MixinCreateEmployee on State<_CreateEmployeeView> {
     emailController.dispose();
     tempPasswordController.dispose();
     phoneController.dispose();
+    nationalIdController.dispose();
+    salaryController.dispose();
+    managerIdController.dispose();
     super.dispose();
   }
 
@@ -53,10 +65,20 @@ mixin _MixinCreateEmployee on State<_CreateEmployeeView> {
         lastName: lastNameController.text.trim(),
         email: emailController.text.trim(),
         tempPassword: tempPasswordController.text,
-        hireDate: DateTime.now(),
+        hireDate: hireDate,
         phoneNumber: phoneController.text.isNotEmpty
             ? phoneController.text.trim()
             : null,
+        nationalId: nationalIdController.text.isNotEmpty
+            ? nationalIdController.text.trim()
+            : null,
+        salary: double.tryParse(salaryController.text),
+        managerId: managerIdController.text.isNotEmpty
+            ? managerIdController.text.trim()
+            : null,
+        dateOfBirth: dateOfBirth,
+        status: status,
+        isActive: isActive,
       );
 
       await context.read<CubitCreateEmployee>().createEmployee(dto);

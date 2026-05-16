@@ -78,7 +78,14 @@
       "success": "Çalışan başarıyla oluşturuldu!",
       "checkUsernameFirst": "Lütfen önce kullanıcı adı uygunluğunu kontrol edin",
       "required": "${target} gereklidir",
-      "usernameTaken": "Bu kullanıcı adı zaten alınmış"
+      "usernameTaken": "Bu kullanıcı adı zaten alınmış",
+      "nationalId": "TC Kimlik No",
+      "dateOfBirth": "Doğum Tarihi",
+      "hireDate": "İşe Giriş Tarihi",
+      "salary": "Maaş",
+      "manager": "Yönetici ID",
+      "status": "Durum",
+      "isActive": "Aktif mi"
     },
     "edit": {
       "title": "Çalışanı Düzenle",
@@ -88,6 +95,10 @@
       "phoneNumber": "Telefon Numarası",
       "nationalId": "TC Kimlik No",
       "salary": "Maaş",
+      "dateOfBirth": "Doğum Tarihi",
+      "hireDate": "İşe Giriş Tarihi",
+      "status": "Durum",
+      "manager": "Yönetici ID",
       "submit": "Gönder",
       "success": "Çalışan başarıyla güncellendi!"
     },

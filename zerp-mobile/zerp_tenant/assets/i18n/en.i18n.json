@@ -78,7 +78,14 @@
       "success": "Employee created successfully!",
       "checkUsernameFirst": "Please check username availability first",
       "required": "${target} is required",
-      "usernameTaken": "Username is already taken"
+      "usernameTaken": "Username is already taken",
+      "nationalId": "National ID",
+      "dateOfBirth": "Date of Birth",
+      "hireDate": "Hire Date",
+      "salary": "Salary",
+      "manager": "Manager ID",
+      "status": "Status",
+      "isActive": "Is Active"
     },
     "edit": {
       "title": "Edit Employee",
@@ -88,6 +95,10 @@
       "phoneNumber": "Phone Number",
       "nationalId": "National ID",
       "salary": "Salary",
+      "dateOfBirth": "Date of Birth",
+      "hireDate": "Hire Date",
+      "status": "Status",
+      "manager": "Manager ID",
       "submit": "Submit",
       "success": "Employee updated successfully!"
     },

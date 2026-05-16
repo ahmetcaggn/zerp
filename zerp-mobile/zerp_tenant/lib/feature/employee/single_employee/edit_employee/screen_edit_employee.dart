@@ -65,6 +65,11 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
   late TextEditingController phoneController;
   late TextEditingController nationalIdController;
   late TextEditingController salaryController;
+  late TextEditingController managerIdController;
+
+  DateTime? dateOfBirth;
+  DateTime? hireDate;
+  UpdateEmployeeRequestDtoStatusEnum? status;
 
   @override
   void initState() {
@@ -92,6 +97,17 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
     salaryController = TextEditingController(
       text: employee?.salary?.toString() ?? '',
     );
+    managerIdController = TextEditingController(
+      text: employee?.manager?.id ?? '',
+    );
+    dateOfBirth = employee?.dateOfBirth;
+    hireDate = employee?.hireDate;
+    status = employee != null && employee.status != null
+        ? UpdateEmployeeRequestDtoStatusEnum.values.firstWhere(
+            (e) => e.value == employee!.status!.value,
+            orElse: () => UpdateEmployeeRequestDtoStatusEnum.ACTIVE,
+          )
+        : null;
   }
 
   @override
@@ -103,6 +119,7 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
     phoneController.dispose();
     nationalIdController.dispose();
     salaryController.dispose();
+    managerIdController.dispose();
     super.dispose();
   }
 
@@ -126,6 +143,12 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
             ? nationalIdController.text
             : null,
         salary: num.tryParse(salaryController.text),
+        managerId: managerIdController.text.isNotEmpty
+            ? managerIdController.text
+            : null,
+        dateOfBirth: dateOfBirth,
+        hireDate: hireDate,
+        status: status,
       );
       unawaited(
         context.read<CubitEditEmployee>().updateEmployee(
@@ -221,6 +244,30 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
                     labelText: context.t.employee.edit.salary,
                   ),
                 ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: managerIdController,
+                  decoration: InputDecoration(
+                    labelText: context.t.employee.edit.manager,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _DateField(
+                  label: context.t.employee.edit.dateOfBirth,
+                  selectedDate: dateOfBirth,
+                  onDateSelected: (date) => setState(() => dateOfBirth = date),
+                ),
+                const SizedBox(height: 16),
+                _DateField(
+                  label: context.t.employee.edit.hireDate,
+                  selectedDate: hireDate,
+                  onDateSelected: (date) => setState(() => hireDate = date),
+                ),
+                const SizedBox(height: 16),
+                _StatusDropdown(
+                  value: status,
+                  onChanged: (val) => setState(() => status = val),
+                ),
                 const SizedBox(height: 32),
                 BlocBuilder<CubitEditEmployee, StateEditEmployee>(
                   builder: (context, state) {
@@ -238,6 +285,73 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DateField extends StatelessWidget {
+  const _DateField({
+    required this.label,
+    required this.selectedDate,
+    required this.onDateSelected,
+  });
+
+  final String label;
+  final DateTime? selectedDate;
+  final ValueChanged<DateTime> onDateSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        final date = await showDatePicker(
+          context: context,
+          initialDate: selectedDate ?? DateTime.now(),
+          firstDate: DateTime(1900),
+          lastDate: DateTime(2100),
+        );
+        if (date != null) {
+          onDateSelected(date);
+        }
+      },
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          suffixIcon: const Icon(Icons.calendar_today),
+        ),
+        child: Text(
+          selectedDate == null
+              ? ''
+              : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusDropdown extends StatelessWidget {
+  const _StatusDropdown({
+    required this.value,
+    required this.onChanged,
+  });
+
+  final UpdateEmployeeRequestDtoStatusEnum? value;
+  final ValueChanged<UpdateEmployeeRequestDtoStatusEnum?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<UpdateEmployeeRequestDtoStatusEnum>(
+      initialValue: value,
+      decoration: InputDecoration(
+        labelText: context.t.employee.edit.status,
+      ),
+      items: UpdateEmployeeRequestDtoStatusEnum.values.map((e) {
+        return DropdownMenuItem(
+          value: e,
+          child: Text(e.value),
+        );
+      }).toList(),
+      onChanged: onChanged,
     );
   }
 }

@@ -76,6 +76,34 @@ class _CreateEmployeeViewState extends State<_CreateEmployeeView>
                 _PasswordField(controller: tempPasswordController),
                 const SizedBox(height: 16),
                 _PhoneField(controller: phoneController),
+                const SizedBox(height: 16),
+                _NationalIdField(controller: nationalIdController),
+                const SizedBox(height: 16),
+                _SalaryField(controller: salaryController),
+                const SizedBox(height: 16),
+                _ManagerIdField(controller: managerIdController),
+                const SizedBox(height: 16),
+                _DateField(
+                  label: context.t.employee.create.dateOfBirth,
+                  selectedDate: dateOfBirth,
+                  onDateSelected: (date) => setState(() => dateOfBirth = date),
+                ),
+                const SizedBox(height: 16),
+                _DateField(
+                  label: '${context.t.employee.create.hireDate} *',
+                  selectedDate: hireDate,
+                  onDateSelected: (date) => setState(() => hireDate = date),
+                ),
+                const SizedBox(height: 16),
+                _StatusDropdown(
+                  value: status,
+                  onChanged: (val) => setState(() => status = val),
+                ),
+                const SizedBox(height: 16),
+                _IsActiveSwitch(
+                  value: isActive,
+                  onChanged: (val) => setState(() => isActive = val),
+                ),
                 const SizedBox(height: 32),
                 BlocBuilder<CubitCreateEmployee, StateCreateEmployee>(
                   builder: (context, state) {
@@ -213,6 +241,141 @@ class _PhoneField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: context.t.employee.create.phoneNumber,
       ),
+    );
+  }
+}
+
+class _NationalIdField extends StatelessWidget {
+  const _NationalIdField({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: context.t.employee.create.nationalId,
+      ),
+    );
+  }
+}
+
+class _SalaryField extends StatelessWidget {
+  const _SalaryField({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: context.t.employee.create.salary,
+      ),
+    );
+  }
+}
+
+class _ManagerIdField extends StatelessWidget {
+  const _ManagerIdField({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: context.t.employee.create.manager,
+      ),
+    );
+  }
+}
+
+class _DateField extends StatelessWidget {
+  const _DateField({
+    required this.label,
+    required this.selectedDate,
+    required this.onDateSelected,
+  });
+
+  final String label;
+  final DateTime? selectedDate;
+  final ValueChanged<DateTime> onDateSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        final date = await showDatePicker(
+          context: context,
+          initialDate: selectedDate ?? DateTime.now(),
+          firstDate: DateTime(1900),
+          lastDate: DateTime(2100),
+        );
+        if (date != null) {
+          onDateSelected(date);
+        }
+      },
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          suffixIcon: const Icon(Icons.calendar_today),
+        ),
+        child: Text(
+          selectedDate == null
+              ? ''
+              : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusDropdown extends StatelessWidget {
+  const _StatusDropdown({
+    required this.value,
+    required this.onChanged,
+  });
+
+  final CreateEmployeeRequestDtoStatusEnum? value;
+  final ValueChanged<CreateEmployeeRequestDtoStatusEnum?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<CreateEmployeeRequestDtoStatusEnum>(
+      initialValue: value,
+      decoration: InputDecoration(
+        labelText: context.t.employee.create.status,
+      ),
+      items: CreateEmployeeRequestDtoStatusEnum.values.map((e) {
+        return DropdownMenuItem(
+          value: e,
+          child: Text(e.value),
+        );
+      }).toList(),
+      onChanged: onChanged,
+    );
+  }
+}
+
+class _IsActiveSwitch extends StatelessWidget {
+  const _IsActiveSwitch({
+    required this.value,
+    required this.onChanged,
+  });
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile(
+      title: Text(context.t.employee.create.isActive),
+      value: value,
+      onChanged: onChanged,
     );
   }
 }
