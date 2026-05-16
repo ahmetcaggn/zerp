@@ -26,10 +26,9 @@ class CubitCreatePermissionTarget extends BaseCubit<StateCreatePermissionTarget>
     final index = allowedTargetTypes.indexOf(selectedTargetType);
     if (index != -1) {
       final fullHierarchy = allowedTargetTypes.sublist(index).reversed.toList();
-      hierarchy =
-          fullHierarchy
-              .where((type) => type != PermissionTargetType.TENANT_ROOT)
-              .toList();
+      hierarchy = fullHierarchy
+          .where((type) => type != PermissionTargetType.TENANT_ROOT)
+          .toList();
     } else {
       hierarchy = [selectedTargetType];
     }
@@ -65,7 +64,9 @@ class CubitCreatePermissionTarget extends BaseCubit<StateCreatePermissionTarget>
       return;
     }
 
-    final parentId = index == 0 ? null : state.selectedIds[hierarchy[index - 1]];
+    final parentId = index == 0
+        ? null
+        : state.selectedIds[hierarchy[index - 1]];
     if (index > 0 && parentId == null) return;
 
     emit(state.copyWith(loadingLevels: {...state.loadingLevels, type}));
@@ -82,7 +83,7 @@ class CubitCreatePermissionTarget extends BaseCubit<StateCreatePermissionTarget>
         // Check next level
         await _checkAutoSelect(index + 1);
       }
-    } catch (e) {
+    } on Object catch (e) {
       log.severe('Failed to auto-select target for $type: $e', e);
     } finally {
       emit(
