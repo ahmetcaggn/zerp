@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dart_network_layer_dio/dart_network_layer_dio.dart';
 import 'package:meta/meta.dart';
 import 'package:remote_logging/remote_logging.dart';
@@ -77,14 +79,46 @@ abstract class ServiceBase {
   Exception onUnsuccessfulResponse<T extends Schema>(
     SpecifiedResponseResult<T> res,
   ) {
+    final data = res.data;
+    late final String message;
+    if (data is AnyDataSchema) {
+      final payload = data.data;
+      if (payload is String) {
+        try {
+          final payloadMap = jsonDecode(payload) as Map<String, dynamic>;
+          message =
+              payloadMap['message']?.toString() ??
+              payloadMap['error']?.toString() ??
+              payloadMap['error']?.toString() ??
+              payloadMap.toString();
+        } on Object catch (e) {
+          _log.warning(
+            'Failed to parse error response payload as JSON: $e. '
+            'Using raw string as message.',
+            e,
+          );
+          message = payload;
+          return Exception('Unsuccessful response: ${res.statusCode} $message');
+        }
+      } else if (payload is Map<String, dynamic>) {
+        message =
+            payload['message']?.toString() ??
+            payload['error']?.toString() ??
+            payload['error']?.toString() ??
+            payload.toString();
+      } else {
+        message = '${payload.runtimeType} - $payload';
+      }
+    }
+
     _log.warning(
-      'Unsuccessful response while fetching $T: ${res.statusCode} ${res.type}',
+      'Unsuccessful response while fetching $T: ${res.statusCode} $message',
     );
     cubitError.enqueue(
       ErrorToPresent(
-        message: 'Failed to fetch $T: ${res.statusCode} ${res.type}',
+        message: 'Failed to fetch $T: ${res.statusCode} $message',
       ),
     );
-    return Exception('Unsuccessful response: ${res.statusCode} ${res.type}');
+    return Exception('Unsuccessful response: ${res.statusCode} $message');
   }
 }

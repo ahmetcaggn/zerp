@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:openapi_employee/api.dart';
 import 'package:zerp_tenant/feature/employee/cubit/cubit_employee.dart';
+import 'package:zerp_tenant/feature/employee/cubit/cubit_employee_username.dart';
 import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_single_employee.dart';
 import 'package:zerp_tenant/feature/employee/single_employee/edit_employee/cubit_edit_employee.dart';
+import 'package:zerp_tenant/feature/employee/view/widget_username_field.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
@@ -25,9 +27,14 @@ class ScreenEditEmployee extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          getIt<CubitEditEmployee>(param1: cubitSingleEmployee),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              getIt<CubitEditEmployee>(param1: cubitSingleEmployee),
+        ),
+        BlocProvider(create: (_) => getIt<CubitEmployeeUsername>()),
+      ],
       child: _EditEmployeeView(
         employeeId: employeeId,
         cubitEmployee: cubitEmployee,
@@ -51,6 +58,7 @@ class _EditEmployeeView extends StatefulWidget {
 
 class _EditEmployeeViewState extends State<_EditEmployeeView> {
   final formKey = GlobalKey<FormState>();
+  late TextEditingController usernameController;
   late TextEditingController firstNameController;
   late TextEditingController lastNameController;
   late TextEditingController emailController;
@@ -70,6 +78,8 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
       employee = state.data;
     }
 
+    usernameController = TextEditingController(text: employee?.username ?? '');
+
     firstNameController = TextEditingController(
       text: employee?.firstName ?? '',
     );
@@ -86,6 +96,7 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
 
   @override
   void dispose() {
+    usernameController.dispose();
     firstNameController.dispose();
     lastNameController.dispose();
     emailController.dispose();
@@ -98,6 +109,9 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
   void submit() {
     if (formKey.currentState?.validate() ?? false) {
       final request = UpdateEmployeeRequestDto(
+        username: usernameController.text.isNotEmpty
+            ? usernameController.text
+            : null,
         firstName: firstNameController.text.isNotEmpty
             ? firstNameController.text
             : null,
@@ -150,6 +164,8 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
             key: formKey,
             child: ListView(
               children: [
+                WidgetUsernameField(usernameController: usernameController),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: firstNameController,
                   decoration: InputDecoration(

@@ -7,11 +7,10 @@ import 'package:zerp_tenant/product/cubit/base_cubit.dart';
 import 'package:zerp_tenant/product/service/user/username_service.dart';
 
 @injectable
-final class CubitCreateEmployeeUsername
-    extends BaseCubit<StateCreateEmployeeUsername>
-    with LoggerMixin<CubitCreateEmployeeUsername> {
-  CubitCreateEmployeeUsername(this._usernameService)
-    : super(const StateCreateEmployeeUsernameInitial());
+final class CubitEmployeeUsername extends BaseCubit<StateEmployeeUsername>
+    with LoggerMixin<CubitEmployeeUsername> {
+  CubitEmployeeUsername(this._usernameService)
+    : super(const StateEmployeeUsernameInitial());
 
   final UsernameService _usernameService;
 
@@ -21,7 +20,7 @@ final class CubitCreateEmployeeUsername
   CheckUsernameCommand? _request;
 
   void onChanged(String value) {
-    emit(const StateCreateEmployeeUsernameInitial());
+    emit(const StateEmployeeUsernameInitial());
     final request = _request;
     if (request != null) {
       if (request.result == null) {
@@ -42,57 +41,52 @@ final class CubitCreateEmployeeUsername
   Future<void> checkUsernameAvailable(String username) async {
     if (username.contains(' ')) {
       emit(
-        const StateCreateEmployeeUsernameError(
+        const StateEmployeeUsernameError(
           'Username cannot contain spaces.',
         ),
       );
       return;
     }
 
-    emit(const StateCreateEmployeeUsernameLoading());
+    emit(const StateEmployeeUsernameLoading());
     try {
       _request = CheckUsernameCommand(username: username);
       final isAvailable = await _usernameService.isUsernameAvailable(_request!);
       if (isAvailable) {
-        emit(const StateCreateEmployeeUsernameAvailable());
+        emit(const StateEmployeeUsernameAvailable());
       } else {
-        emit(const StateCreateEmployeeUsernameTaken());
+        emit(const StateEmployeeUsernameTaken());
       }
     } on RequestCancelledError catch (_) {
     } on Object catch (e) {
       log.severe('Error checking username availability $e', e);
-      emit(StateCreateEmployeeUsernameError('Error checking username: $e'));
+      emit(StateEmployeeUsernameError('Error checking username: $e'));
     }
   }
 }
 
-sealed class StateCreateEmployeeUsername {
-  const StateCreateEmployeeUsername();
+sealed class StateEmployeeUsername {
+  const StateEmployeeUsername();
 }
 
-final class StateCreateEmployeeUsernameInitial
-    extends StateCreateEmployeeUsername {
-  const StateCreateEmployeeUsernameInitial();
+final class StateEmployeeUsernameInitial extends StateEmployeeUsername {
+  const StateEmployeeUsernameInitial();
 }
 
-final class StateCreateEmployeeUsernameLoading
-    extends StateCreateEmployeeUsername {
-  const StateCreateEmployeeUsernameLoading();
+final class StateEmployeeUsernameLoading extends StateEmployeeUsername {
+  const StateEmployeeUsernameLoading();
 }
 
-final class StateCreateEmployeeUsernameAvailable
-    extends StateCreateEmployeeUsername {
-  const StateCreateEmployeeUsernameAvailable();
+final class StateEmployeeUsernameAvailable extends StateEmployeeUsername {
+  const StateEmployeeUsernameAvailable();
 }
 
-final class StateCreateEmployeeUsernameTaken
-    extends StateCreateEmployeeUsername {
-  const StateCreateEmployeeUsernameTaken();
+final class StateEmployeeUsernameTaken extends StateEmployeeUsername {
+  const StateEmployeeUsernameTaken();
 }
 
-final class StateCreateEmployeeUsernameError
-    extends StateCreateEmployeeUsername {
-  const StateCreateEmployeeUsernameError(this.message);
+final class StateEmployeeUsernameError extends StateEmployeeUsername {
+  const StateEmployeeUsernameError(this.message);
 
   final String message;
 }

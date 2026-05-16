@@ -25,6 +25,7 @@ part 'update_employee_request_dto.g.dart';
 class UpdateEmployeeRequestDto extends Schema {
   /// Returns a new [UpdateEmployeeRequestDto] instance.
   UpdateEmployeeRequestDto({
+    this.username,
     this.firstName,
     this.lastName,
     this.email,
@@ -38,6 +39,9 @@ class UpdateEmployeeRequestDto extends Schema {
     this.salary,
     this.contacts = const [],
   });
+
+  @JsonKey(name: r'username')
+  final String? username;
 
   @JsonKey(name: r'firstName')
   final String? firstName;

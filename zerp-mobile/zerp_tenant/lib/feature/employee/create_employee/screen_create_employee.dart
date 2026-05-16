@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:openapi_employee/api.dart';
 import 'package:zerp_tenant/feature/employee/create_employee/cubit/cubit_create_employee.dart';
-import 'package:zerp_tenant/feature/employee/create_employee/cubit/cubit_create_employee_username.dart';
 import 'package:zerp_tenant/feature/employee/create_employee/view/create_employee_success_dialog.dart';
 import 'package:zerp_tenant/feature/employee/cubit/cubit_employee.dart';
+import 'package:zerp_tenant/feature/employee/cubit/cubit_employee_username.dart';
+import 'package:zerp_tenant/feature/employee/view/widget_username_field.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/error/cubit_error.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
@@ -27,8 +28,8 @@ class ScreenCreateEmployee extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => getIt<CubitCreateEmployee>()),
-        BlocProvider(create: (context) => getIt<CubitCreateEmployeeUsername>()),
+        BlocProvider(create: (_) => getIt<CubitCreateEmployee>()),
+        BlocProvider(create: (_) => getIt<CubitEmployeeUsername>()),
       ],
       child: _CreateEmployeeView(cubitEmployee: cubitEmployee),
     );
@@ -62,7 +63,9 @@ class _CreateEmployeeViewState extends State<_CreateEmployeeView>
             key: formKey,
             child: ListView(
               children: [
-                _UsernameRow(usernameController: usernameController),
+                WidgetUsernameField(
+                  usernameController: usernameController,
+                ),
                 const SizedBox(height: 16),
                 _FirstNameField(controller: firstNameController),
                 const SizedBox(height: 16),
@@ -231,79 +234,5 @@ class _SubmitButton extends StatelessWidget {
           ? const CircularProgressIndicator()
           : Text(context.t.employee.create.submit),
     );
-  }
-}
-
-class _UsernameRow extends StatelessWidget {
-  const _UsernameRow({
-    required this.usernameController,
-  });
-
-  final TextEditingController usernameController;
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<
-      CubitCreateEmployeeUsername,
-      StateCreateEmployeeUsername
-    >(
-      builder: (context, state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextFormField(
-              controller: usernameController,
-              decoration: InputDecoration(
-                labelText: '${context.t.employee.create.username} *',
-                suffixIcon: _getSuffixIcon(state),
-              ),
-              validator: (val) =>
-                  (val == null ||
-                      val.isEmpty ||
-                      val.length < 3 ||
-                      val.length > 255)
-                  ? context.t.employee.create.required(
-                      target: t.employee.create.username,
-                    )
-                  : null,
-              onChanged: (value) {
-                context.read<CubitCreateEmployeeUsername>().onChanged(value);
-              },
-            ),
-            if (state is StateCreateEmployeeUsernameError)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  state.message,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
-              )
-            else if (state is StateCreateEmployeeUsernameTaken)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  context.t.employee.create.usernameTaken,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-
-  Icon? _getSuffixIcon(StateCreateEmployeeUsername state) {
-    switch (state) {
-      case StateCreateEmployeeUsernameInitial():
-        return null;
-      case StateCreateEmployeeUsernameLoading():
-        return null;
-      case StateCreateEmployeeUsernameAvailable():
-        return const Icon(Icons.check, color: Colors.green);
-      case StateCreateEmployeeUsernameTaken():
-        return const Icon(Icons.close, color: Colors.red);
-      case StateCreateEmployeeUsernameError():
-        return const Icon(Icons.error, color: Colors.orange);
-    }
   }
 }

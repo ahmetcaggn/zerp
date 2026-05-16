@@ -16,9 +16,8 @@ import 'package:injectable/injectable.dart' as _i526;
 
 import '../../../feature/employee/create_employee/cubit/cubit_create_employee.dart'
     as _i657;
-import '../../../feature/employee/create_employee/cubit/cubit_create_employee_username.dart'
-    as _i914;
 import '../../../feature/employee/cubit/cubit_employee.dart' as _i828;
+import '../../../feature/employee/cubit/cubit_employee_username.dart' as _i229;
 import '../../../feature/employee/single_employee/cubit/cubit_permission_viewer.dart'
     as _i102;
 import '../../../feature/employee/single_employee/cubit/cubit_single_employee.dart'
@@ -177,8 +176,8 @@ extension GetItInjectableX on _i174.GetIt {
         cubitSingleEmployee,
       ),
     );
-    gh.factory<_i914.CubitCreateEmployeeUsername>(
-      () => _i914.CubitCreateEmployeeUsername(gh<_i868.UsernameService>()),
+    gh.factory<_i229.CubitEmployeeUsername>(
+      () => _i229.CubitEmployeeUsername(gh<_i868.UsernameService>()),
     );
     return this;
   }
