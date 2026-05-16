@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/state_auth.dart';
@@ -13,7 +14,7 @@ import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 import 'package:zerp_tenant/product/ui/theme/app_theme.dart';
 import 'package:zerp_tenant/product/ui/widget/error_overlay.dart';
 
-class AppRoot extends StatelessWidget {
+class AppRoot extends StatelessWidget with LoggerMixinConst<AppRoot> {
   const AppRoot({super.key});
 
   @override
@@ -36,6 +37,29 @@ class AppRoot extends StatelessWidget {
 
             if (state is StateAuthAuthenticated &&
                 currentRouteName != RouteShell.name) {
+              if (currentRouteName == RouteAuth.name) {
+                final args = appRouter.current.args as RouteAuthArgs?;
+                final callerRoute = args?.callerRoute;
+                if (callerRoute != null && callerRoute.isNotEmpty) {
+                  unawaited(
+                    appRouter
+                        .replaceAll([const RouteShell()])
+                        .then(
+                          (_) => appRouter.pushPath(callerRoute),
+                        ),
+                  );
+                  return;
+                } else {
+                  log.warning(
+                    'User authenticated and on auth route, '
+                    'but no callerRoute provided.',
+                  );
+                }
+              }
+              log.warning(
+                'User authenticated but not on shell route. '
+                'Current route: ${appRouter.current.name}',
+              );
               unawaited(appRouter.replaceAll([const RouteShell()]));
             }
 

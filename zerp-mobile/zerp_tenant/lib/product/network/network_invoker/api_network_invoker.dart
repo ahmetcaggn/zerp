@@ -28,6 +28,19 @@ final class ApiNetworkInvoker extends DioNetworkInvoker
         onError: (error, handler) async {
           if (error.response?.statusCode == 401) {
             await _checkSessionAfterUnauthorized();
+
+            final options = error.requestOptions;
+            final accessToken = await _authStorageService.accessToken;
+            if (accessToken != null) {
+              options.headers['Authorization'] = 'Bearer $accessToken';
+            }
+
+            try {
+              final response = await dio.fetch<dynamic>(options);
+              return handler.resolve(response);
+            } on DioException catch (e) {
+              return handler.next(e);
+            }
           }
           handler.next(error);
         },
