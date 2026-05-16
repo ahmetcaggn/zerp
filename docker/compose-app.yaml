@@ -43,6 +43,12 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
       EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE}
+      app.image.baseUrl: ${IMAGE_SERVER_URL:-https://www.zerp.com/api}
+      s3.repository.endpoint: http://minio:9000
+      user.thumbor.host: http://thumbor:8888
+      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-zerp-images}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-admin1234}
       spring.config.import: optional:file:/config/crm.properties
     volumes:
       - ../zerp-backend/local/docker-config/crm.docker.properties:/config/crm.properties:ro

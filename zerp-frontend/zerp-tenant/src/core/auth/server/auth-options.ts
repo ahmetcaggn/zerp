@@ -22,6 +22,9 @@ function getAuthCookieName(): string {
 type TokenPayload = {
   realm_access?: { roles?: string[] }
   resource_access?: Record<string, { roles?: string[] }>
+  sub?: unknown
+  userId?: unknown
+  user_id?: unknown
   tenantId?: unknown
   tenant_id?: unknown
   tenant?: unknown
@@ -91,6 +94,25 @@ function parseTenantIdFromTokens(idToken?: string, accessToken?: string): string
   )
 }
 
+function parseUserIdFromTokens(
+  idToken?: string,
+  accessToken?: string,
+  fallbackSub?: string,
+): string | undefined {
+  const idPayload = parseJwtPayload(idToken)
+  const accessPayload = parseJwtPayload(accessToken)
+
+  return (
+    asUuid(idPayload?.sub) ??
+    asUuid(idPayload?.userId) ??
+    asUuid(idPayload?.user_id) ??
+    asUuid(accessPayload?.sub) ??
+    asUuid(accessPayload?.userId) ??
+    asUuid(accessPayload?.user_id) ??
+    asUuid(fallbackSub)
+  )
+}
+
 function isAppRole(value: string): value is AppRole {
   return (
     value === 'tenant_owner' ||
@@ -140,12 +162,18 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       refreshed.id_token ?? tokens.idToken,
       refreshed.access_token ?? tokens.accessToken,
     )
+    const userId = parseUserIdFromTokens(
+      refreshed.id_token ?? tokens.idToken,
+      refreshed.access_token ?? tokens.accessToken,
+      token.sub,
+    )
 
     return {
       ...token,
       encryptedTokens: updatedEncryptedTokens,
       accessTokenExpires: Date.now() + refreshed.expires_in * 1000,
       roles: parsedRoles.length ? parsedRoles : (token.roles as AppRole[]),
+      userId: userId ?? (token.userId as string | undefined),
       tenantId: tenantId ?? token.tenantId,
       error: undefined,
     }
@@ -185,6 +213,11 @@ export const authOptions: NextAuthOptions = {
 
         const parsedRoles = parseRolesFromIdToken(account.id_token)
         const tenantId = parseTenantIdFromTokens(account.id_token, account.access_token)
+        const userId = parseUserIdFromTokens(
+          account.id_token,
+          account.access_token,
+          account.providerAccountId,
+        )
 
         return {
           ...token,
@@ -192,6 +225,7 @@ export const authOptions: NextAuthOptions = {
           accessTokenExpires: (account.expires_at ?? 0) * 1000,
           idToken: account.id_token,
           roles: parsedRoles.length ? parsedRoles : defaultRoleByVariant(),
+          userId,
           tenantId,
           error: undefined,
         }
@@ -223,6 +257,7 @@ export const authOptions: NextAuthOptions = {
       session.user = {
         ...session.user,
         roles: (token.roles as AppRole[]) ?? defaultRoleByVariant(),
+        userId: token.userId as string | undefined,
         tenantId: token.tenantId as string | undefined,
       }
       return session

@@ -1,16 +1,22 @@
 package org.zerp.crm.service;
 
+import feign.FeignException;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.crm.IssueType;
 import org.zerp.common.entity.crm.TeamMemberEntity;
@@ -31,6 +37,7 @@ import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
+import org.zerp.crm.feign.ThumborFeignClient;
 import org.zerp.crm.permission.CrmPermissionEvaluator;
 import org.zerp.crm.dto.ticket.AddCommentRequest;
 import org.zerp.crm.dto.ticket.AttachmentResponse;
@@ -39,6 +46,7 @@ import org.zerp.crm.dto.ticket.ChangePriorityRequest;
 import org.zerp.crm.dto.ticket.ChangeStatusRequest;
 import org.zerp.crm.dto.ticket.CommentResponse;
 import org.zerp.crm.dto.ticket.CreateTicketRequest;
+import org.zerp.crm.dto.ticket.TicketAttachmentContentResponse;
 import org.zerp.crm.dto.ticket.TicketResponse;
 import org.zerp.crm.dto.ticket.UpdateTicketRequest;
 import org.zerp.crm.dto.ticket.WatcherResponse;
@@ -47,7 +55,10 @@ import org.zerp.crm.repository.TeamRepository;
 import org.zerp.crm.repository.TicketRepository;
 import org.zerp.crm.service.ticket.TicketResponseMapper;
 import org.zerp.crm.service.ticket.TicketValueParser;
+import org.zerp.s3repository.dto.S3FileDTO;
+import org.zerp.s3repository.repository.S3ImageRepository;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +85,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     private static final String REFERENCE_TYPE_TICKET_ASSIGNMENT = "TICKET_ASSIGNMENT";
     private static final String REFERENCE_TYPE_TICKET_COMMENT = "TICKET_COMMENT";
     private static final String REFERENCE_TYPE_TEAM = "TEAM";
+    private static final String DEFAULT_CONTENT_TYPE = MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
     private final TicketRepository ticketRepository;
     private final TeamMemberRepository teamMemberRepository;
@@ -85,9 +97,14 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     private final CurrentUserIdResolver currentUserIdResolver;
     private final FilterRefiner filterRefiner;
     private final CrmPermissionEvaluator permissionEvaluator;
+    private final S3ImageRepository s3ImageRepository;
+    private final ThumborFeignClient thumborFeignClient;
 
     @Value("${app.crm.system-tenant-id:00000000-0000-0000-0000-000000000000}")
     private UUID systemTenantId;
+
+    @Value("${app.crm.ticket-attachments.folder:crmAttachments}")
+    private String ticketAttachmentFolder;
 
     // -- Resource service methods --
 
@@ -478,6 +495,97 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         return toAuthorizedResponse(userId, saved);
     }
 
+    public AttachmentResponse addAttachment(UUID ticketId, MultipartFile file) {
+        UUID userId = resolveCurrentUserIdOrThrow();
+        TicketEntity ticket = findOrThrow(ticketId);
+        ensureCanCreateTicketAttachment(userId, ticket, null);
+        validateCommentable(ticket);
+        validateAttachmentFile(file);
+
+        byte[] fileBytes;
+        try {
+            fileBytes = file.getBytes();
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to read attachment file", e);
+        }
+
+        String attachmentFolder = resolveAttachmentFolder();
+        S3FileDTO uploadedFile;
+        try {
+            uploadedFile = s3ImageRepository.create(attachmentFolder, fileBytes);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+
+        UUID tenantId = ticket.getTenantId();
+        if (tenantId == null) {
+            cleanupTicketAttachmentUpload(attachmentFolder, uploadedFile.getFileName());
+            throw new IllegalStateException("Tenant not found");
+        }
+
+        try {
+            TicketAttachmentEntity attachment = new TicketAttachmentEntity();
+            attachment.setTicket(ticket);
+            attachment.setComment(null);
+            attachment.setFileName(resolveAttachmentFileName(file, uploadedFile.getFileName()));
+            attachment.setFileSize(file.getSize());
+            attachment.setContentType(resolveAttachmentContentType(file));
+            attachment.setStorageKey(uploadedFile.getFileName());
+            attachment.setUploadedBy(userId.hashCode());
+            attachment.setUploadedAt(LocalDateTime.now());
+            attachment.setTenantId(tenantId);
+
+            ticket.getAttachments().add(attachment);
+            ticket.setUpdatedAt(LocalDateTime.now());
+            ticketRepository.save(ticket);
+
+            return toAttachmentResponse(attachment);
+        } catch (RuntimeException e) {
+            cleanupTicketAttachmentUpload(attachmentFolder, uploadedFile.getFileName());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to save ticket attachment", e);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public TicketAttachmentContentResponse getAttachmentContent(UUID ticketId, UUID attachmentId) {
+        UUID userId = resolveCurrentUserIdOrThrow();
+        TicketEntity ticket = findOrThrow(ticketId);
+        TicketAttachmentEntity attachment = findTicketAttachmentOrThrow(ticket, attachmentId);
+        ensureCanReadTicketAttachment(userId, ticket, attachment.getComment(), attachment);
+
+        ResponseEntity<byte[]> thumborResponse;
+        try {
+            thumborResponse = thumborFeignClient.getFile(resolveAttachmentFolder(), attachment.getStorageKey());
+        } catch (FeignException.NotFound e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Attachment not found on thumbor: " + attachment.getStorageKey(),
+                    e
+            );
+        } catch (FeignException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "Failed to fetch attachment from thumbor",
+                    e
+            );
+        }
+
+        if (!thumborResponse.getStatusCode().is2xxSuccessful() || thumborResponse.getBody() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Attachment not found on thumbor: " + attachment.getStorageKey()
+            );
+        }
+
+        MediaType contentType = thumborResponse.getHeaders().getContentType();
+        if (contentType == null) {
+            contentType = parseMediaTypeOrDefault(attachment.getContentType());
+        }
+
+        Resource resource = new ByteArrayResource(thumborResponse.getBody());
+        return new TicketAttachmentContentResponse(resource, contentType);
+    }
+
     public TicketResponse closeTicket(UUID ticketId) {
         UUID userId = resolveCurrentUserIdOrThrow();
         TicketEntity entity = findOrThrow(ticketId);
@@ -647,6 +755,86 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     private void validateCommentable(TicketEntity entity) {
         if (entity.getStatus() == TicketStatus.CLOSED || entity.getStatus() == TicketStatus.CANCELLED) {
             throw new IllegalStateException("Cannot make a comment on a closed or cancelled ticket");
+        }
+    }
+
+    private void validateAttachmentFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Attachment file is required");
+        }
+    }
+
+    private String resolveAttachmentFileName(MultipartFile file, String fallbackFileName) {
+        String originalFileName = file.getOriginalFilename();
+        if (originalFileName == null || originalFileName.isBlank()) {
+            return fallbackFileName;
+        }
+        return originalFileName.trim();
+    }
+
+    private String resolveAttachmentContentType(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType == null || contentType.isBlank()) {
+            return DEFAULT_CONTENT_TYPE;
+        }
+        return contentType.trim();
+    }
+
+    private MediaType parseMediaTypeOrDefault(String rawContentType) {
+        if (rawContentType == null || rawContentType.isBlank()) {
+            return MediaType.APPLICATION_OCTET_STREAM;
+        }
+
+        try {
+            return MediaType.parseMediaType(rawContentType);
+        } catch (IllegalArgumentException ignored) {
+            return MediaType.APPLICATION_OCTET_STREAM;
+        }
+    }
+
+    private TicketAttachmentEntity findTicketAttachmentOrThrow(TicketEntity ticket, UUID attachmentId) {
+        if (attachmentId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "attachmentId is required");
+        }
+
+        return ticket.getAttachments().stream()
+                .filter(attachment -> attachmentId.equals(attachment.getId()))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Attachment not found: " + attachmentId
+                ));
+    }
+
+    private AttachmentResponse toAttachmentResponse(TicketAttachmentEntity attachment) {
+        return new AttachmentResponse(
+                attachment.getId(),
+                attachment.getFileName(),
+                attachment.getFileSize(),
+                attachment.getContentType(),
+                attachment.getStorageKey(),
+                attachment.getUploadedBy(),
+                attachment.getUploadedAt()
+        );
+    }
+
+    private String resolveAttachmentFolder() {
+        if (ticketAttachmentFolder == null || ticketAttachmentFolder.isBlank()) {
+            return "crmAttachments";
+        }
+
+        String folder = ticketAttachmentFolder.trim();
+        if (folder.endsWith("/")) {
+            return folder.substring(0, folder.length() - 1);
+        }
+        return folder;
+    }
+
+    private void cleanupTicketAttachmentUpload(String folder, String storageKey) {
+        try {
+            s3ImageRepository.delete(folder, storageKey);
+        } catch (RuntimeException cleanupEx) {
+            log.error("failed to rollback uploaded ticket attachment with storage key {}", storageKey, cleanupEx);
         }
     }
 
@@ -1029,6 +1217,17 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
 
     private void ensureCanReadTicketAttachment(UUID userId, TicketEntity ticket) {
         if (!permissionEvaluator.canReadTicketAttachment(userId, toTicketAttachmentParent(ticket))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Ticket attachment");
+        }
+    }
+
+    private void ensureCanReadTicketAttachment(
+            UUID userId,
+            TicketEntity ticket,
+            TicketCommentEntity comment,
+            TicketAttachmentEntity attachment
+    ) {
+        if (!permissionEvaluator.canReadTicketAttachment(userId, toTicketAttachmentTarget(ticket, comment, attachment))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Ticket attachment");
         }
     }

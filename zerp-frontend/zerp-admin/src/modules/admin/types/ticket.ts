@@ -62,9 +62,10 @@ export interface AddCommentRequest {
 export interface AttachmentResponse {
   id?: string
   fileName?: string
-  fileType?: string
-  fileSizeBytes?: number
-  fileUrl?: string
+  fileSize?: number
+  contentType?: string
+  storageKey?: string
+  uploadedBy?: number
   uploadedAt?: string
 }
 

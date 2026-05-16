@@ -13,11 +13,13 @@ export function useAuth() {
   }, [session?.user?.roles])
 
   const tenantId = session?.user?.tenantId
+  const userId = session?.user?.userId
 
   return {
     status,
     session,
     roles,
+    userId,
     tenantId,
     isAuthenticated: status === 'authenticated',
     hasRole: (requiredRoles: AppRole[]) => requiredRoles.some((role) => roles.includes(role)),

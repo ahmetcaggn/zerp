@@ -1,5 +1,8 @@
 'use client'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import AttachFileIcon from '@mui/icons-material/AttachFile'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import DownloadIcon from '@mui/icons-material/Download'
 import EditIcon from '@mui/icons-material/Edit'
 import SendIcon from '@mui/icons-material/Send'
 import {
@@ -18,13 +21,17 @@ import {
   Typography,
 } from '@mui/material'
 import { useRouter } from 'next/navigation'
+import type { ChangeEvent } from 'react'
 import { useState } from 'react'
 
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
-import { useAddTicketComment, usePatchTicket, useTicket } from '../hooks/use-tickets'
+import { ticketClient } from '../api/ticket-client'
+import { useAddTicketComment, usePatchTicket, useTicket, useUploadTicketAttachment } from '../hooks/use-tickets'
 import type {
+  AttachmentResponse,
   TicketPriorityString,
   TicketStatusString,
   TicketTypeString,
@@ -62,6 +69,32 @@ function formatDate(value?: string): string {
   return date.toLocaleString('tr-TR')
 }
 
+function formatFileSize(size?: number): string {
+  if (typeof size !== 'number' || Number.isNaN(size) || size < 0) {
+    return '—'
+  }
+
+  if (size < 1024) {
+    return `${size} B`
+  }
+
+  const kb = size / 1024
+  if (kb < 1024) {
+    return `${kb.toFixed(1)} KB`
+  }
+
+  const mb = kb / 1024
+  return `${mb.toFixed(1)} MB`
+}
+
+function toTimestamp(value?: string): number {
+  if (!value) {
+    return 0
+  }
+  const timestamp = new Date(value).getTime()
+  return Number.isNaN(timestamp) ? 0 : timestamp
+}
+
 export function TicketDetail({ id }: Props) {
   const router = useRouter()
   const { showToast } = useToast()
@@ -74,9 +107,14 @@ export function TicketDetail({ id }: Props) {
   const [editCustomAttributes, setEditCustomAttributes] = useState('{}')
   const [commentText, setCommentText] = useState('')
 
+  const { hasPermission, isLoadingPermissions } = useCurrentUserPermissions()
+  const canReadTicketAttachment = hasPermission(PermissionActions.READ_TICKET_ATTACHMENT)
+  const canCreateTicketAttachment = hasPermission(PermissionActions.CREATE_TICKET_ATTACHMENT)
+
   const { data: ticket, isLoading, error } = useTicket(id)
   const { mutate: patchTicket, isPending: isSaving } = usePatchTicket()
   const { mutate: addComment, isPending: isCommenting } = useAddTicketComment()
+  const { mutate: uploadAttachment, isPending: isUploadingAttachment } = useUploadTicketAttachment()
 
   const comments = (ticket?.comments ?? []).filter((comment) => !comment.isInternal).sort((a, b) => {
     const left = new Date(a.createdAt ?? '').getTime()
@@ -105,6 +143,14 @@ export function TicketDetail({ id }: Props) {
   const tags = Array.from(currentTicket.tags ?? [])
   const isClosed = status === 'CLOSED' || status === 'CANCELLED'
   const isEditLocked = status === 'IN_PROGRESS'
+  const attachmentUploadBlockedReason = isClosed
+    ? 'Kapalı taleplere ek yüklenemez.'
+    : null
+  const ticketAttachments = canReadTicketAttachment
+    ? [...(currentTicket.attachments ?? [])].sort((left, right) => {
+        return toTimestamp(right.uploadedAt) - toTimestamp(left.uploadedAt)
+      })
+    : []
 
   function openEditDialog() {
     if (isEditLocked) {
@@ -187,6 +233,40 @@ export function TicketDetail({ id }: Props) {
         onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
       },
     )
+  }
+
+  function handleAttachmentSelected(event: ChangeEvent<HTMLInputElement>) {
+    const selectedFile = event.target.files?.[0]
+    event.target.value = ''
+
+    if (!selectedFile) {
+      return
+    }
+
+    if (!canCreateTicketAttachment) {
+      showToast('Ek yükleme yetkiniz yok.', { severity: 'warning' })
+      return
+    }
+
+    if (isClosed) {
+      showToast('Kapalı taleplere ek yüklenemez.', { severity: 'warning' })
+      return
+    }
+
+    uploadAttachment(
+      { id, file: selectedFile },
+      {
+        onSuccess: () => showToast('Ek yüklendi.', { severity: 'success' }),
+        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      },
+    )
+  }
+
+  function buildAttachmentUrl(attachment: AttachmentResponse): string | null {
+    if (attachment.id === undefined || attachment.id === null) {
+      return null
+    }
+    return ticketClient.getAttachmentUrl(id, attachment.id)
   }
 
   return (
@@ -280,6 +360,89 @@ export function TicketDetail({ id }: Props) {
             </Typography>
           </Paper>
         </Box>
+      </Paper>
+
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Typography variant="subtitle1">Ekler ({ticketAttachments.length})</Typography>
+          {canCreateTicketAttachment && (
+            <Button
+              size="small"
+              component="label"
+              startIcon={<CloudUploadIcon fontSize="small" />}
+              disabled={isUploadingAttachment || Boolean(attachmentUploadBlockedReason)}
+            >
+              Ek Yükle
+              <input
+                hidden
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                onChange={handleAttachmentSelected}
+              />
+            </Button>
+          )}
+        </Box>
+
+        {isLoadingPermissions ? (
+          <Typography color="text.secondary" variant="body2">
+            Ek yetkileri yükleniyor...
+          </Typography>
+        ) : !canReadTicketAttachment ? (
+          <Typography color="text.secondary" variant="body2">
+            Ekleri görüntüleme yetkiniz yok.
+          </Typography>
+        ) : ticketAttachments.length === 0 ? (
+          <Typography color="text.secondary" variant="body2">
+            Ek bulunmuyor.
+          </Typography>
+        ) : (
+          <Stack spacing={1.25}>
+            {ticketAttachments.map((attachment, index) => {
+              const fileLabel = attachment.fileName?.trim() || attachment.storageKey || 'Dosya'
+              const attachmentUrl = buildAttachmentUrl(attachment)
+
+              return (
+                <Paper
+                  key={attachment.id ?? `${attachment.storageKey ?? fileLabel}-${index}`}
+                  variant="outlined"
+                  sx={{ p: 1.5, borderStyle: 'dashed' }}
+                >
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'center' }}>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                        <AttachFileIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
+                          {fileLabel}
+                        </Typography>
+                      </Box>
+                      <Typography variant="caption" color="text.secondary">
+                        {formatFileSize(attachment.fileSize)}
+                        {attachment.contentType ? ` · ${attachment.contentType}` : ''}
+                        {attachment.uploadedAt ? ` · ${formatDate(attachment.uploadedAt)}` : ''}
+                      </Typography>
+                    </Box>
+                    {attachmentUrl ? (
+                      <Button
+                        component="a"
+                        href={attachmentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        size="small"
+                        startIcon={<DownloadIcon fontSize="small" />}
+                      >
+                        Aç
+                      </Button>
+                    ) : (
+                      <Button size="small" disabled>
+                        Aç
+                      </Button>
+                    )}
+                  </Box>
+                </Paper>
+              )
+            })}
+          </Stack>
+        )}
       </Paper>
 
       <Paper variant="outlined" sx={{ p: 2 }}>

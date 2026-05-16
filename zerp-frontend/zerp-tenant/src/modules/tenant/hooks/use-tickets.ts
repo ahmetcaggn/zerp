@@ -5,7 +5,7 @@ import { queryKeys } from '@/core/api/query-keys'
 import { createResourceHooks } from '@/core/api/resource-hooks'
 
 import { ticketClient } from '../api/ticket-client'
-import type { AddCommentRequest } from '../types/ticket'
+import type { AddCommentRequest, AttachmentResponse } from '../types/ticket'
 
 const {
   useList: useTickets,
@@ -25,6 +25,18 @@ export function useAddTicketComment() {
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: AddCommentRequest }) =>
       ticketClient.addComment(id, body),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: queryKeys.tenant.tickets })
+      qc.invalidateQueries({ queryKey: ticketDetailKey(id) })
+    },
+  })
+}
+
+export function useUploadTicketAttachment() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }): Promise<AttachmentResponse> =>
+      ticketClient.uploadAttachment(id, file),
     onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: queryKeys.tenant.tickets })
       qc.invalidateQueries({ queryKey: ticketDetailKey(id) })
