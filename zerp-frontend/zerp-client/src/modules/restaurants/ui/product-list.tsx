@@ -142,7 +142,7 @@ export function ProductList({ restaurantId }: ProductListProps) {
       name: publicMenuItem.name,
       description: publicMenuItem.description,
       price: Number(publicMenuItem.price),
-      imageUrl: undefined,
+      imageUrl: "https://placehold.co/400",
       category: categoryName,
       isAvailable: publicMenuItem.isAvailable,
       ...DEFAULT_PRODUCT_DETAIL_FIELDS,

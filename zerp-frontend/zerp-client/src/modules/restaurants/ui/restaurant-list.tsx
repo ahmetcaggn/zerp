@@ -20,6 +20,7 @@ function mapShopToRestaurant(shop: {
     id: shop.id,
     name: shop.name,
     description: shop.description || [shop.address, shop.city, shop.country].filter(Boolean).join(', ') || '—',
+    imageUrl: `https://placehold.co/600x400?text=${encodeURIComponent(shop.name)}`,
     isOpen: true,
     rating: 4.5,
     categories: [],

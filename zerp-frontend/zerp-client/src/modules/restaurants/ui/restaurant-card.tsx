@@ -44,7 +44,7 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
         <Box sx={{ position: 'relative', width: '100%', pt: '56.25%' /* 16:9 Aspect Ratio */ }}>
           <CardMedia
             component="img"
-            image={restaurant.imageUrl || 'https://via.placeholder.com/400x225?text=No+Image'}
+            image={restaurant.imageUrl || `https://placehold.co/600x400?text=${encodeURIComponent(restaurant.name)}`}
             alt={restaurant.name}
             sx={{
               position: 'absolute',
