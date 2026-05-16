@@ -147,6 +147,9 @@ public class FeignKeycloakService {
             if (data.getEmail() != null) {
                 user.setEmail(data.getEmail());
             }
+            if (data.getUsername() != null) {
+                user.setUsername(data.getUsername());
+            }
 
             userResource.update(user);
             log.info("User {} successfully updated in Keycloak", userId);
