@@ -1,4 +1,8 @@
 'use client'
+import AddIcon from '@mui/icons-material/Add'
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
+import DeleteIcon from '@mui/icons-material/Delete'
+import VisibilityIcon from '@mui/icons-material/Visibility'
 import {
   Box,
   Button,
@@ -17,20 +21,21 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
-import VisibilityIcon from '@mui/icons-material/Visibility'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
-import { useDeleteEmployee, useEmployeeSearch, useEmployees } from '../hooks/use-employees'
+
+import { useDeleteEmployee, useEmployees,useEmployeeSearch } from '../hooks/use-employees'
+import type { EmployeeListResponseDto } from '../types/employee'
 import type { EmploymentStatusValue } from '../types/employee'
 import { DeletedEmployees } from './deleted-employees'
 import { EmployeeFormDialog } from './employee-form-dialog'
+import { EmployeePermissionsDialog } from './employee-permissions-dialog'
 
 const STATUS_COLOR: Record<
   EmploymentStatusValue,
@@ -55,15 +60,13 @@ export function EmployeeList() {
   const [searchInput, setSearchInput] = useState('')
   const [debouncedKeyword, setDebouncedKeyword] = useState('')
   const [formOpen, setFormOpen] = useState(false)
+  const [permissionDialogEmployee, setPermissionDialogEmployee] =
+    useState<EmployeeListResponseDto | undefined>(undefined)
 
   useEffect(() => {
     const id = setTimeout(() => setDebouncedKeyword(searchInput.trim()), 400)
     return () => clearTimeout(id)
   }, [searchInput])
-
-  useEffect(() => {
-    setPage(0)
-  }, [debouncedKeyword])
 
   const params = {
     pagination: { page: page + 1, perPage: rowsPerPage },
@@ -106,7 +109,10 @@ export function EmployeeList() {
             size="small"
             placeholder={t('employees.searchPlaceholder')}
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={(e) => {
+              setSearchInput(e.target.value)
+              setPage(0)
+            }}
             sx={{ mb: 2, width: 320 }}
           />
 
@@ -157,6 +163,14 @@ export function EmployeeList() {
                           <VisibilityIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
+                      <Tooltip title={t('employees.permissionsDialogTitle')}>
+                        <IconButton
+                          size="small"
+                          onClick={() => setPermissionDialogEmployee(emp)}
+                        >
+                          <AdminPanelSettingsIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                       <Tooltip title={t('employees.deleteButton')}>
                         <IconButton
                           size="small"
@@ -204,6 +218,11 @@ export function EmployeeList() {
         open={formOpen}
         mode="create"
         onClose={() => setFormOpen(false)}
+      />
+      <EmployeePermissionsDialog
+        open={Boolean(permissionDialogEmployee)}
+        employee={permissionDialogEmployee}
+        onClose={() => setPermissionDialogEmployee(undefined)}
       />
     </Box>
   )
