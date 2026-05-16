@@ -26,6 +26,8 @@ import '../../../feature/employee/single_employee/edit_employee/cubit_edit_emplo
     as _i632;
 import '../../../feature/employee/single_employee/permissions/create_permission/cubit/cubit_create_permission.dart'
     as _i713;
+import '../../../feature/employee/single_employee/permissions/create_permission/cubit/cubit_create_permission_target.dart'
+    as _i316;
 import '../../../feature/employee/single_employee/permissions/cubit_permissions.dart'
     as _i1073;
 import '../../../feature/profile/cubit/cubit_profile.dart' as _i477;
@@ -162,6 +164,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i102.CubitPermissionViewer>(
       () => _i102.CubitPermissionViewer(gh<_i545.PermissionService>()),
+    );
+    gh.factory<_i316.CubitCreatePermissionTarget>(
+      () => _i316.CubitCreatePermissionTarget(gh<_i545.PermissionService>()),
     );
     gh.factory<_i170.CubitProfilePermissions>(
       () => _i170.CubitProfilePermissions(gh<_i545.PermissionService>()),
