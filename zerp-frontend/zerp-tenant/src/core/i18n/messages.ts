@@ -177,6 +177,24 @@ export interface MessageDictionary {
     statusField: string
     salaryField: string
     managerField: string
+    permissionsSectionTitle: string
+    permissionsSectionDescription: string
+    permissionActionField: string
+    permissionTargetTypeField: string
+    permissionTargetField: string
+    permissionSearchPlaceholder: string
+    permissionAddButton: string
+    permissionNoOptions: string
+    permissionAlreadyAdded: string
+    permissionUnsupportedTargetType: string
+    permissionAssignPartialError: string
+    permissionsDialogTitle: string
+    permissionsDialogSubtitle: string
+    permissionsSearchField: string
+    permissionsEmptyState: string
+    permissionRemoveButton: string
+    permissionAssignedToast: string
+    permissionRemovedToast: string
     addContactButton: string
     contactTypeLabel: string
     contactValueField: string

@@ -1,4 +1,9 @@
 'use client'
+import AddIcon from '@mui/icons-material/Add'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+import DeleteIcon from '@mui/icons-material/Delete'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
 import {
   Box,
   Button,
@@ -11,19 +16,21 @@ import {
   IconButton,
   InputAdornment,
   InputLabel,
+  List,
+  ListItem,
+  ListItemText,
   MenuItem,
   Select,
   TextField,
   Typography,
 } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
+
+import { permissionClient } from '../api/permission-client'
 import {
   useCreateEmployee,
   useEmployees,
@@ -32,11 +39,14 @@ import {
 import { useUsernameCheck } from '../hooks/use-username-check'
 import {
   ContactType,
-  EmploymentStatus,
   type CreateEmployeeRequestDto,
   type EmployeeContactDto,
   type EmployeeResponseDto,
+  EmploymentStatus,
 } from '../types/employee'
+import type { PermissionAssignmentInput, PermissionDraftAssignment } from '../types/permission'
+import { prettifyPermissionEnumName, toPermissionKey } from '../types/permission'
+import { PermissionAssignmentBuilder } from './permission-assignment-builder'
 
 interface Props {
   open: boolean
@@ -80,6 +90,21 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
       relationship: c.relationship,
     })) ?? [],
   )
+  const [draftPermissions, setDraftPermissions] = useState<PermissionDraftAssignment[]>([])
+
+  const existingDraftPermissionKeys = useMemo(() => {
+    const keys = new Set<string>()
+    for (const permission of draftPermissions) {
+      keys.add(
+        toPermissionKey({
+          action: permission.action,
+          targetType: permission.targetType,
+          targetId: permission.targetId,
+        }),
+      )
+    }
+    return keys
+  }, [draftPermissions])
 
   const { data: managersResult } = useEmployees({ pagination: { page: 1, perPage: 50 } })
   const managerOptions = managersResult?.data ?? []
@@ -119,7 +144,27 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
         return
       }
       createEmployee({ username, tempPassword, ...sharedFields }, {
-        onSuccess: () => {
+        onSuccess: async (createdEmployee) => {
+          const createdEmployeeUserId =
+            createdEmployee?.id !== undefined ? String(createdEmployee.id) : undefined
+
+          if (createdEmployeeUserId && draftPermissions.length > 0) {
+            try {
+              await Promise.all(
+                draftPermissions.map((permission) =>
+                  permissionClient.create({
+                    userId: createdEmployeeUserId,
+                    action: permission.action,
+                    targetType: permission.targetType,
+                    targetId: permission.targetId,
+                  }),
+                ),
+              )
+            } catch {
+              showToast(t('employees.permissionAssignPartialError'), { severity: 'warning' })
+            }
+          }
+
           showToast(t('employees.employeeCreatedToast'), { severity: 'success' })
           onClose()
         },
@@ -151,6 +196,22 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
     setContacts((prev) =>
       prev.map((c, i) => (i === index ? { ...c, [field]: value } : c)),
     )
+  }
+
+  function addDraftPermission(permission: PermissionAssignmentInput) {
+    setDraftPermissions((prev) => [
+      ...prev,
+      {
+        action: permission.action,
+        targetType: permission.targetType,
+        targetId: permission.targetId,
+        targetTitle: permission.targetTitle,
+      },
+    ])
+  }
+
+  function removeDraftPermission(index: number) {
+    setDraftPermissions((prev) => prev.filter((_, i) => i !== index))
   }
 
   return (
@@ -325,6 +386,40 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
               ))}
             </Select>
           </FormControl>
+
+          {mode === 'create' && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <PermissionAssignmentBuilder
+                disabled={isPending}
+                existingKeys={existingDraftPermissionKeys}
+                onAdd={addDraftPermission}
+              />
+
+              {draftPermissions.length > 0 && (
+                <List dense disablePadding>
+                  {draftPermissions.map((permission, index) => (
+                    <ListItem
+                      key={`${permission.action}-${permission.targetType}-${permission.targetId}-${index}`}
+                      secondaryAction={
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => removeDraftPermission(index)}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      }
+                    >
+                      <ListItemText
+                        primary={`${prettifyPermissionEnumName(permission.action)} · ${prettifyPermissionEnumName(permission.targetType)}`}
+                        secondary={`${permission.targetTitle} (${permission.targetId})`}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </Box>
+          )}
 
           <Box>
             <Box
