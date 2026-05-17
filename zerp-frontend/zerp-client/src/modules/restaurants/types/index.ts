@@ -65,7 +65,8 @@ export interface PublicMenuItemDto {
   price: number
   imageId?: string
   categoryId?: string
-  isAvailable: boolean
+  isAvailable?: boolean
+  available?: boolean
 }
 
 export interface PublicCategoryMenuItemsParams {
@@ -75,4 +76,19 @@ export interface PublicCategoryMenuItemsParams {
   end: number
   sort?: string
   order?: 'ASC' | 'DESC'
+}
+
+export interface CreatePublicCartOrderItemRequest {
+  menuItemId: string
+  quantity: number
+  notes?: string
+}
+
+export interface CreatePublicCartOrderRequest {
+  note?: string
+  items: CreatePublicCartOrderItemRequest[]
+}
+
+export interface CreatePublicCartOrderResponse {
+  id: string
 }

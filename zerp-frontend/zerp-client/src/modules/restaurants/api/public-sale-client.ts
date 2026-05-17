@@ -1,5 +1,7 @@
 import { httpClient } from '@/core/api/http-client'
 import type {
+  CreatePublicCartOrderRequest,
+  CreatePublicCartOrderResponse,
   PublicCategoryMenuItemsParams,
   PublicMenuItemDto,
   PublicShopDto,
@@ -31,3 +33,13 @@ export async function getPublicCategoryMenuItems(params: PublicCategoryMenuItems
 }
 
 export const getPublicCategoryProducts = getPublicCategoryMenuItems
+
+export async function createPublicCartOrder(
+  shopId: string,
+  payload: CreatePublicCartOrderRequest,
+): Promise<CreatePublicCartOrderResponse> {
+  return httpClient.post<CreatePublicCartOrderResponse>(
+    `/sale/public/shops/${shopId}/cart-orders`,
+    payload,
+  )
+}

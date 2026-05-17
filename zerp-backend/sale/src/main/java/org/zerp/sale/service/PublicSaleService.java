@@ -2,6 +2,7 @@ package org.zerp.sale.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,12 @@ import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.sale.Menu;
 import org.zerp.common.entity.sale.MenuCategory;
 import org.zerp.common.entity.sale.MenuItem;
+import org.zerp.common.entity.sale.PublicCartOrder;
+import org.zerp.common.entity.sale.PublicCartOrderItem;
 import org.zerp.sale.dto.publicsale.PublicActiveMenuDTO;
+import org.zerp.sale.dto.publicsale.PublicCartOrderCreateRequest;
+import org.zerp.sale.dto.publicsale.PublicCartOrderCreateResponse;
+import org.zerp.sale.dto.publicsale.PublicCartOrderItemCreateRequest;
 import org.zerp.sale.dto.publicsale.PublicMenuItemDTO;
 import org.zerp.sale.dto.publicsale.PublicMenuCategoryDTO;
 import org.zerp.sale.dto.publicsale.PublicShopDTO;
@@ -20,8 +26,11 @@ import org.zerp.sale.dto.publicsale.PublicShopMenuResponseDTO;
 import org.zerp.sale.repository.MenuCategoryRepository;
 import org.zerp.sale.repository.MenuItemRepository;
 import org.zerp.sale.repository.MenuRepository;
+import org.zerp.sale.repository.PublicCartOrderItemRepository;
+import org.zerp.sale.repository.PublicCartOrderRepository;
 import org.zerp.sale.repository.ShopRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,6 +42,8 @@ public class PublicSaleService {
     private final MenuRepository menuRepository;
     private final MenuCategoryRepository menuCategoryRepository;
     private final MenuItemRepository menuItemRepository;
+    private final PublicCartOrderRepository publicCartOrderRepository;
+    private final PublicCartOrderItemRepository publicCartOrderItemRepository;
 
     @Transactional(readOnly = true)
     public List<PublicShopDTO> listShops() {
@@ -79,6 +90,60 @@ public class PublicSaleService {
                 );
         log.debug("Found {} menu items for public category listing", page.getTotalElements());
         return page.map(this::toPublicMenuItem);
+    }
+
+    @Transactional
+    public PublicCartOrderCreateResponse createPublicCartOrder(UUID shopId, PublicCartOrderCreateRequest request) {
+        if (request == null || request.getItems() == null || request.getItems().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "items is required");
+        }
+        LocalDateTime now = LocalDateTime.now();
+
+        Shop shop = shopRepository.findById(shopId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shop not found"));
+
+        PublicCartOrder order = new PublicCartOrder();
+        order.setShop(shop);
+        order.setNote(request.getNote());
+        order.setCreatedAt(now);
+
+        for (PublicCartOrderItemCreateRequest itemRequest : request.getItems()) {
+            if (itemRequest == null || itemRequest.getMenuItemId() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "menuItemId is required");
+            }
+            if (itemRequest.getQuantity() <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "quantity must be greater than 0");
+            }
+
+            MenuItem menuItem = menuItemRepository
+                    .findByIdAndCategoryMenuShopId(itemRequest.getMenuItemId(), shopId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "MenuItem not found for shop: " + itemRequest.getMenuItemId()));
+
+            PublicCartOrderItem item = new PublicCartOrderItem();
+            item.setPublicCartOrder(order);
+            item.setMenuItem(menuItem);
+            item.setQuantity(itemRequest.getQuantity());
+            item.setUnitPrice(menuItem.getPrice());
+            item.setNotes(itemRequest.getNotes());
+            item.setCreatedAt(now);
+            order.getItems().add(item);
+        }
+
+        PublicCartOrder saved = publicCartOrderRepository.save(order);
+        PublicCartOrderCreateResponse response = new PublicCartOrderCreateResponse();
+        response.setId(saved.getId());
+        return response;
+    }
+
+    @Scheduled(cron = "${sale.public-cart.cleanup-cron:0 0 3 * * *}")
+    @Transactional
+    public void cleanupExpiredPublicCartOrders() {
+        LocalDateTime cutoff = LocalDateTime.now().minusHours(24);
+        int deletedItems = publicCartOrderItemRepository.deleteByOrderCreatedAtBefore(cutoff);
+        int deletedOrders = publicCartOrderRepository.deleteByCreatedAtBefore(cutoff);
+        if (deletedItems > 0 || deletedOrders > 0) {
+            log.info("Deleted {} expired public cart orders and {} items older than {}", deletedOrders, deletedItems, cutoff);
+        }
     }
 
     private void ensureShopExists(UUID shopId) {

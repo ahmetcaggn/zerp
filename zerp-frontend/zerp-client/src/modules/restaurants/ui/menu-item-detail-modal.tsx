@@ -14,18 +14,20 @@ import {
 } from '@mui/material'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
-import type { Product } from '../types'
 
-interface ProductDetailModalProps {
+import type { Product as MenuItem } from '../types'
+
+interface MenuItemDetailModalProps {
   open: boolean
   onClose: () => void
-  product: Product | null
+  menuItem: MenuItem | null
+  onAddToCart?: (menuItem: MenuItem) => void
 }
 
-export function ProductDetailModal({ open, onClose, product }: ProductDetailModalProps) {
+export function MenuItemDetailModal({ open, onClose, menuItem, onAddToCart }: MenuItemDetailModalProps) {
   const { t } = useI18n()
 
-  if (!product) return null
+  if (!menuItem) return null
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -36,8 +38,8 @@ export function ProductDetailModal({ open, onClose, product }: ProductDetailModa
         {/* Ürün Görseli */}
         <Box 
           component="img"
-          src={product.imageUrl || 'https://via.placeholder.com/600x400?text=No+Image'}
-          alt={product.name}
+          src={menuItem.imageUrl || 'https://via.placeholder.com/600x400?text=No+Image'}
+          alt={menuItem.name}
           sx={{ width: '100%', height: 250, objectFit: 'cover', borderRadius: 2, mb: 2 }}
         />
 
@@ -45,26 +47,26 @@ export function ProductDetailModal({ open, onClose, product }: ProductDetailModa
           {/* Başlık ve Fiyat */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <Typography variant="h5" fontWeight="bold">
-              {product.name}
+              {menuItem.name}
             </Typography>
             <Typography variant="h6" color="primary.main" fontWeight="bold">
-              {t('restaurants.price', { price: product.price })}
+              {t('restaurants.price', { price: menuItem.price })}
             </Typography>
           </Box>
           <Typography color="text.secondary">
-            {product.description}
+            {menuItem.description}
           </Typography>
 
           <Divider />
 
           {/* İçindekiler */}
-          {product.ingredients && product.ingredients.length > 0 && (
+          {menuItem.ingredients && menuItem.ingredients.length > 0 && (
             <Box>
               <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
                 {t('productDetail.ingredients')}
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {product.ingredients.map((ingredient) => (
+                {menuItem.ingredients.map((ingredient) => (
                   <Chip key={ingredient} label={ingredient} size="small" variant="outlined" />
                 ))}
               </Box>
@@ -73,34 +75,34 @@ export function ProductDetailModal({ open, onClose, product }: ProductDetailModa
 
           {/* Gramaj ve Kalori */}
           <Box sx={{ display: 'flex', gap: 4 }}>
-            {product.weight && (
+            {menuItem.weight && (
               <Box>
                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
                   {t('productDetail.weight')}
                 </Typography>
-                <Typography variant="body2">{product.weight}</Typography>
+                <Typography variant="body2">{menuItem.weight}</Typography>
               </Box>
             )}
-            {product.calories !== undefined && product.calories !== null && (
+            {menuItem.calories !== undefined && menuItem.calories !== null && (
               <Box>
                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
                   {t('productDetail.calories')}
                 </Typography>
                 <Typography variant="body2">
-                  {t('productDetail.kcal', { value: product.calories })}
+                  {t('productDetail.kcal', { value: menuItem.calories })}
                 </Typography>
               </Box>
             )}
           </Box>
 
           {/* Alerjenler */}
-          {product.allergens && product.allergens.length > 0 && (
+          {menuItem.allergens && menuItem.allergens.length > 0 && (
             <Box>
               <Typography variant="subtitle2" fontWeight="bold" color="error.main" gutterBottom>
                 {t('productDetail.allergens')}
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {product.allergens.map((allergen) => (
+                {menuItem.allergens.map((allergen) => (
                   <Chip key={allergen} label={allergen} size="small" color="error" variant="outlined" />
                 ))}
               </Box>
@@ -113,7 +115,11 @@ export function ProductDetailModal({ open, onClose, product }: ProductDetailModa
         <Button onClick={onClose} color="inherit">
           {t('productDetail.close')}
         </Button>
-        <Button variant="contained" disabled={!product.isAvailable}>
+        <Button
+          variant="contained"
+          disabled={!menuItem.isAvailable}
+          onClick={() => onAddToCart?.(menuItem)}
+        >
           {t('restaurants.addToCart')}
         </Button>
       </DialogActions>

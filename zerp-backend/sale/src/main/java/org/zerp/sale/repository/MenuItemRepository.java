@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import org.zerp.common.entity.sale.MenuItem;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -19,4 +20,6 @@ public interface MenuItemRepository extends
             UUID shopId,
             Pageable pageable
     );
+
+    Optional<MenuItem> findByIdAndCategoryMenuShopId(UUID id, UUID shopId);
 }

@@ -1,14 +1,15 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 
 import { queryKeys } from '@/core/api/query-keys'
 import {
+  createPublicCartOrder,
   getPublicCategoryMenuItems,
   getPublicShopMenu,
   getPublicShops,
 } from '../api/public-sale-client'
-import type { PublicCategoryMenuItemsParams } from '../types'
+import type { CreatePublicCartOrderRequest, PublicCategoryMenuItemsParams } from '../types'
 
 export function usePublicShops() {
   return useQuery({
@@ -42,3 +43,10 @@ export function usePublicCategoryMenuItems(params: PublicCategoryMenuItemsParams
 }
 
 export const usePublicCategoryProducts = usePublicCategoryMenuItems
+
+export function useCreatePublicCartOrder() {
+  return useMutation({
+    mutationFn: ({ shopId, payload }: { shopId: string; payload: CreatePublicCartOrderRequest }) =>
+      createPublicCartOrder(shopId, payload),
+  })
+}

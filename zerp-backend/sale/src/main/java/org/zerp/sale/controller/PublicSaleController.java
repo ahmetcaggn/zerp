@@ -11,13 +11,17 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.context.RequestContext;
 import org.zerp.common.dto.ApiResponse;
+import org.zerp.sale.dto.publicsale.PublicCartOrderCreateRequest;
+import org.zerp.sale.dto.publicsale.PublicCartOrderCreateResponse;
 import org.zerp.sale.dto.publicsale.PublicMenuItemDTO;
 import org.zerp.sale.dto.publicsale.PublicShopDTO;
 import org.zerp.sale.dto.publicsale.PublicShopMenuResponseDTO;
@@ -69,6 +73,15 @@ public class PublicSaleController {
         headers.add("X-Total-Count", String.valueOf(page.getTotalElements()));
         headers.add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "X-Total-Count");
         return new ResponseEntity<>(buildResponse(page.getContent()), headers, HttpStatus.OK);
+    }
+
+    @PostMapping("/shops/{shopId}/cart-orders")
+    public ResponseEntity<ApiResponse<PublicCartOrderCreateResponse>> createCartOrder(
+            @PathVariable UUID shopId,
+            @RequestBody PublicCartOrderCreateRequest request
+    ) {
+        PublicCartOrderCreateResponse response = publicSaleService.createPublicCartOrder(shopId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(buildResponse(response));
     }
 
     private <T> ApiResponse<T> buildResponse(T data) {

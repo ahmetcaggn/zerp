@@ -10,14 +10,16 @@ import {
 } from '@mui/material'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
-import type { Product } from '../types'
 
-interface ProductCardProps {
-  product: Product
+import type { Product as MenuItem } from '../types'
+
+interface MenuItemCardProps {
+  menuItem: MenuItem
   onClick?: () => void
+  onAddToCart?: () => void
 }
 
-export function ProductCard({ product, onClick }: ProductCardProps) {
+export function MenuItemCard({ menuItem, onClick, onAddToCart }: MenuItemCardProps) {
   const { t } = useI18n()
 
   return (
@@ -46,14 +48,14 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
           borderRadius: 1, 
           objectFit: 'cover' 
         }}
-        image={product.imageUrl || 'https://via.placeholder.com/150?text=No+Image'}
-        alt={product.name}
+        image={menuItem.imageUrl || 'https://via.placeholder.com/150?text=No+Image'}
+        alt={menuItem.name}
       />
       <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, ml: { xs: 0, sm: 2 }, mt: { xs: 1, sm: 0 } }}>
         <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5, gap: 1 }}>
             <Typography variant="subtitle1" fontWeight="bold" sx={{ wordBreak: 'break-word' }}>
-              {product.name}
+              {menuItem.name}
             </Typography>
             <Typography 
               variant="subtitle1" 
@@ -61,20 +63,20 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
               fontWeight="bold" 
               sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
             >
-              {t('restaurants.price', { price: product.price })}
+              {t('restaurants.price', { price: menuItem.price })}
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {product.description}
+            {menuItem.description}
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button 
               variant="contained" 
               size="small" 
-              disabled={!product.isAvailable}
+              disabled={!menuItem.isAvailable}
               onClick={(e) => {
                 e.stopPropagation(); // prevent card click
-                // Sepete ekle mantığı buraya gelecek
+                onAddToCart?.()
               }}
             >
               {t('restaurants.addToCart')}

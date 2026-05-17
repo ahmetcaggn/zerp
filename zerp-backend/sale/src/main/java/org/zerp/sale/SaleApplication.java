@@ -7,6 +7,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {"org.zerp.sale", "org.zerp.common"})
@@ -14,6 +15,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaRepositories(basePackages = {"org.zerp.sale.repository", "org.zerp.common.permission.repository"})
 @EnableJpaAuditing
 @EnableFeignClients
+@EnableScheduling
 public class SaleApplication {
     static void main(String[] args) {
         SpringApplication.run(SaleApplication.class, args);
