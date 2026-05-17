@@ -10,7 +10,7 @@ class ScreenSale extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: context.t.shell.sales,
+      title: context.t.sale.title,
       body: Center(child: Text(context.t.feature.sale)),
     );
   }

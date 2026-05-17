@@ -10,8 +10,7 @@ class SectionStock extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SectionCard(
       icon: Icons.inventory_2_outlined,
-      title: context.t.shell.stock,
-      description: context.t.section.stock,
+      title: context.t.dashboard.section.stock,
       onTap: () => context.router.push(const RouteStock()),
     );
   }
@@ -21,13 +20,11 @@ class _SectionCard extends StatelessWidget {
   const _SectionCard({
     required this.icon,
     required this.title,
-    required this.description,
     required this.onTap,
   });
 
   final IconData icon;
   final String title;
-  final String description;
   final VoidCallback onTap;
 
   @override
@@ -65,13 +62,6 @@ class _SectionCard extends StatelessWidget {
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],

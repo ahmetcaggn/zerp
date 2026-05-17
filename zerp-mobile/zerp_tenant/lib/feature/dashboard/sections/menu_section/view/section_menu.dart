@@ -10,8 +10,7 @@ class SectionMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SectionCard(
       icon: Icons.restaurant_menu_outlined,
-      title: context.t.shell.menu,
-      description: context.t.section.menu,
+      title: context.t.dashboard.section.menu,
       onTap: () => context.router.push(const RouteMenu()),
     );
   }
@@ -21,13 +20,11 @@ class _SectionCard extends StatelessWidget {
   const _SectionCard({
     required this.icon,
     required this.title,
-    required this.description,
     required this.onTap,
   });
 
   final IconData icon;
   final String title;
-  final String description;
   final VoidCallback onTap;
 
   @override
@@ -65,13 +62,6 @@ class _SectionCard extends StatelessWidget {
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],

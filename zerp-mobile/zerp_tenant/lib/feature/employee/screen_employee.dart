@@ -30,7 +30,7 @@ class ScreenEmployee extends StatelessWidget {
       child: Builder(
         builder: (context) {
           return AppScaffold(
-            title: context.t.shell.employees,
+            title: context.t.employee.title,
             actions: [
               IconButton(
                 icon: const Icon(Icons.person_add_outlined),
@@ -89,8 +89,6 @@ class _EmployeeListHeader extends StatelessWidget {
     );
   }
 }
-
-
 
 final class _EmployeeList extends StatelessWidget
     with LoggerMixin<ScreenEmployee> {

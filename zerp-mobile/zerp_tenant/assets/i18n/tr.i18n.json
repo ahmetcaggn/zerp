@@ -3,16 +3,6 @@
     "name": "Zerp Tenant",
     "menu": "Menü"
   },
-  "shell": {
-    "dashboard": "Panel",
-    "employees": "Çalışanlar",
-    "menu": "Menü",
-    "sales": "Satışlar",
-    "stock": "Stok",
-    "store": "Mağaza",
-    "profile": "Profil",
-    "settings": "Ayarlar"
-  },
   "auth": {
     "login": "Giriş Yap",
     "signUp": "Kayıt Ol",
@@ -35,12 +25,30 @@
     "profile": "Profil",
     "settings": "Ayarlar"
   },
-  "section": {
-    "employee": "Çalışan Bölümü",
-    "menu": "Menü Bölümü",
-    "sale": "Satış Bölümü",
-    "stock": "Stok Bölümü",
-    "store": "Mağaza Bölümü"
+  "dashboard": {
+    "title": "Panel",
+    "section": {
+      "employee": "Çalışanlar",
+      "menu": "Menüler",
+      "sale": "Satışlar",
+      "stock": "Stok Durumu",
+      "store": "Mağazalar"
+    }
+  },
+  "menu": {
+    "title": "Menüler"
+  },
+  "sale": {
+    "title": "Satışlar"
+  },
+  "stock": {
+    "title": "Stok Durumu"
+  },
+  "store": {
+    "title": "Mağazalar"
+  },
+  "settings": {
+    "title": "Ayarlar"
   },
   "common": {
     "hello": "Merhaba $name",
@@ -56,6 +64,7 @@
     "noData": "Veri yok"
   },
   "employee": {
+    "title": "Çalışanlar",
     "list": {
       "title": "Çalışanlar ($total)",
       "loading": "Yükleniyor...",

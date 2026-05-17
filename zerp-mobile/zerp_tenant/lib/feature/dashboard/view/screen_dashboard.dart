@@ -16,7 +16,7 @@ class ScreenDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: context.t.shell.dashboard,
+      title: context.t.dashboard.title,
       drawer: const AppDrawer(),
       body: ListView(
         padding: const EdgeInsets.all(16),

@@ -10,7 +10,7 @@ class ScreenStore extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: context.t.shell.store,
+      title: context.t.store.title,
       body: Center(child: Text(context.t.feature.store)),
     );
   }

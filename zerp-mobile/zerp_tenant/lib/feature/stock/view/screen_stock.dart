@@ -10,7 +10,7 @@ class ScreenStock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: context.t.shell.stock,
+      title: context.t.stock.title,
       body: Center(child: Text(context.t.feature.stock)),
     );
   }

@@ -1,5 +1,12 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:openapi_employee/api.dart';
+import 'package:zerp_tenant/feature/employee/cubit/cubit_employee.dart';
+import 'package:zerp_tenant/feature/employee/cubit/state_employee.dart';
+import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
@@ -8,11 +15,106 @@ class SectionEmployee extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _SectionCard(
-      icon: Icons.people_outline,
-      title: context.t.shell.employees,
-      description: context.t.section.employee,
-      onTap: () => context.router.push(const RouteEmployee()),
+    return BlocProvider(
+      create: (_) {
+        final cubit = getIt<CubitEmployee>();
+        unawaited(cubit.loadEmployees());
+        return cubit;
+      },
+      child: BlocBuilder<CubitEmployee, StateEmployee>(
+        builder: (context, state) {
+          Widget? extra;
+
+          if (state is StateEmployeeLoaded) {
+            final total = state.data.totalCount;
+            final active = state.data.items
+                .where(
+                  (e) => e.status == EmployeeListResponseDtoStatusEnum.ACTIVE,
+                )
+                .length;
+
+            extra = Row(
+              children: [
+                _MetaChip(
+                  label: 'Total: $total',
+                  icon: Icons.group_outlined,
+                ),
+                const SizedBox(width: 8),
+                _MetaChip(
+                  label: 'Active: $active',
+                  icon: Icons.check_circle_outline,
+                  isPrimary: true,
+                ),
+              ],
+            );
+          } else if (state is StateEmployeeLoading) {
+            extra = const SizedBox(
+              height: 16,
+              width: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+              ),
+            );
+          }
+
+          return _SectionCard(
+            icon: Icons.people_outline,
+            title: context.t.dashboard.section.employee,
+            extra: extra,
+            onTap: () => context.router.push(const RouteEmployee()),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _MetaChip extends StatelessWidget {
+  const _MetaChip({
+    required this.label,
+    required this.icon,
+    this.isPrimary = false,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool isPrimary;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isPrimary
+            ? colorScheme.primaryContainer
+            : colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 14,
+            color: isPrimary
+                ? colorScheme.onPrimaryContainer
+                : colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: isPrimary
+                  ? colorScheme.onPrimaryContainer
+                  : colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -21,14 +123,14 @@ class _SectionCard extends StatelessWidget {
   const _SectionCard({
     required this.icon,
     required this.title,
-    required this.description,
     required this.onTap,
+    this.extra,
   });
 
   final IconData icon;
   final String title;
-  final String description;
   final VoidCallback onTap;
+  final Widget? extra;
 
   @override
   Widget build(BuildContext context) {
@@ -68,12 +170,10 @@ class _SectionCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
+                    if (extra != null) ...[
+                      const SizedBox(height: 8),
+                      extra!,
+                    ],
                   ],
                 ),
               ),

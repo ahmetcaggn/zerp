@@ -40,38 +40,38 @@ class AppDrawer extends StatelessWidget {
 
           ListTile(
             leading: const Icon(Icons.people),
-            title: Text(context.t.shell.employees),
+            title: Text(context.t.employee.title),
             onTap: () => _navigate(context, const RouteEmployee()),
           ),
           ListTile(
             leading: const Icon(Icons.restaurant_menu),
-            title: Text(context.t.shell.menu),
+            title: Text(context.t.menu.title),
             onTap: () => _navigate(context, const RouteMenu()),
           ),
           ListTile(
             leading: const Icon(Icons.shopping_cart),
-            title: Text(context.t.shell.sales),
+            title: Text(context.t.sale.title),
             onTap: () => _navigate(context, const RouteSale()),
           ),
           ListTile(
             leading: const Icon(Icons.inventory),
-            title: Text(context.t.shell.stock),
+            title: Text(context.t.stock.title),
             onTap: () => _navigate(context, const RouteStock()),
           ),
           ListTile(
             leading: const Icon(Icons.store),
-            title: Text(context.t.shell.store),
+            title: Text(context.t.store.title),
             onTap: () => _navigate(context, const RouteStore()),
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.person),
-            title: Text(context.t.shell.profile),
+            title: Text(context.t.profile.title),
             onTap: () => _navigate(context, const RouteProfile()),
           ),
           ListTile(
             leading: const Icon(Icons.settings),
-            title: Text(context.t.shell.settings),
+            title: Text(context.t.settings.title),
             onTap: () => _navigate(context, const RouteSettings()),
           ),
         ],

@@ -15,7 +15,7 @@ class _ScreenSettingsState extends State<ScreenSettings> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: context.t.shell.settings,
+      title: context.t.settings.title,
       body: Center(child: Text(context.t.feature.settings)),
     );
   }
