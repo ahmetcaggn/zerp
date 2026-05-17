@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.dao.DataAccessException;
@@ -40,6 +41,8 @@ import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.crm.feign.ThumborFeignClient;
 import org.zerp.crm.permission.CrmPermissionEvaluator;
 import org.zerp.crm.dto.ticket.AddCommentRequest;
+import org.zerp.crm.dto.ticket.AssignmentTeamCandidateResponse;
+import org.zerp.crm.dto.ticket.AssignmentTeamMemberCandidateResponse;
 import org.zerp.crm.dto.ticket.AttachmentResponse;
 import org.zerp.crm.dto.ticket.AssignTicketRequest;
 import org.zerp.crm.dto.ticket.ChangePriorityRequest;
@@ -61,8 +64,10 @@ import org.zerp.s3repository.repository.S3ImageRepository;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -296,7 +301,6 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         entity.setReporter(toAppUserReference(userId));
         entity.setCreatedAt(LocalDateTime.now());
 
-        ensureCanCreateTicketSlaTracking(userId, entity);
         initializeSla(entity, priority);
         TicketEntity saved = ticketRepository.save(entity);
         addHistory(saved, TicketHistoryEntity.EventType.CREATED,
@@ -368,7 +372,6 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     public TicketResponse assignTicket(UUID ticketId, AssignTicketRequest request) {
         UUID userId = resolveCurrentUserIdOrThrow();
         TicketEntity entity = findOrThrow(ticketId);
-        ensureCanCreateTicketAssignment(userId, entity);
         validateAssignable(entity);
         TeamEntity assignmentTeam = resolveAssignmentTeamOrThrow(request);
         AppUser assignmentAgent = resolveAssignmentAgentOrThrow(request, assignmentTeam);
@@ -376,6 +379,11 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         TicketAssignmentEntity assignment = entity.getCurrentAssignment();
         boolean hasExistingAssignment = assignment != null;
         boolean isReassignment = hasExistingAssignment && Boolean.TRUE.equals(assignment.getActive());
+        if (isReassignment) {
+            ensureCanUpdateTicketAssignment(userId, entity, assignment);
+        } else {
+            ensureCanCreateTicketAssignment(userId, entity);
+        }
 
         if (!hasExistingAssignment) {
             assignment = new TicketAssignmentEntity();
@@ -586,6 +594,82 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         return new TicketAttachmentContentResponse(resource, contentType);
     }
 
+    @Transactional(readOnly = true)
+    public Page<AssignmentTeamCandidateResponse> findAssignmentTeamCandidates(
+            UUID ticketId,
+            String searchQuery,
+            Pageable pageable
+    ) {
+        UUID userId = resolveCurrentUserIdOrThrow();
+        TicketEntity ticket = findOrThrow(ticketId);
+        ensureCanChangeTicketAssignment(userId, ticket);
+
+        UUID resolvedSystemTenantId = resolveSystemTenantIdOrThrow();
+        Specification<TeamEntity> specification = (root, _, cb) -> cb.and(
+                cb.equal(root.get("tenantId"), resolvedSystemTenantId),
+                cb.isTrue(root.get("isActive"))
+        );
+
+        if (searchQuery != null && !searchQuery.isBlank()) {
+            String normalizedSearch = searchQuery.trim().toLowerCase();
+            UUID teamIdFilter = parseUuidOrNull(normalizedSearch);
+
+            specification = specification.and((root, _, cb) -> cb.or(
+                    cb.like(cb.lower(root.get("name")), "%" + normalizedSearch + "%"),
+                    cb.like(cb.lower(root.get("type").as(String.class)), "%" + normalizedSearch + "%"),
+                    teamIdFilter != null ? cb.equal(root.get("id"), teamIdFilter) : cb.disjunction()
+            ));
+        }
+
+        return teamRepository.findAll(specification, pageable)
+                .map(team -> new AssignmentTeamCandidateResponse(
+                        team.getId(),
+                        team.getName(),
+                        team.getType() != null ? team.getType().name() : null,
+                        formatTeamLabel(team)
+                ));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AssignmentTeamMemberCandidateResponse> findAssignmentTeamMemberCandidates(
+            UUID ticketId,
+            UUID teamId,
+            String searchQuery,
+            Pageable pageable
+    ) {
+        UUID userId = resolveCurrentUserIdOrThrow();
+        TicketEntity ticket = findOrThrow(ticketId);
+        ensureCanChangeTicketAssignment(userId, ticket);
+
+        TeamEntity team = findAssignableTeamOrThrow(teamId);
+        List<TeamMemberEntity> members = team.getMembers().stream()
+                .filter(Objects::nonNull)
+                .filter(member -> member.getUser() != null && member.getUser().getId() != null)
+                .filter(member -> member.getRole() != null && AGENT_TEAM_MEMBER_ROLES.contains(member.getRole()))
+                .filter(member -> matchesAssignmentMemberSearch(member, searchQuery))
+                .sorted(Comparator
+                        .comparing((TeamMemberEntity member) -> resolveUserDisplayName(member.getUser()),
+                                String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(member -> member.getUser().getId()))
+                .toList();
+
+        List<AssignmentTeamMemberCandidateResponse> responses = members.stream()
+                .map(member -> {
+                    AppUser user = member.getUser();
+                    String displayName = resolveUserDisplayName(user);
+                    return new AssignmentTeamMemberCandidateResponse(
+                            user.getId(),
+                            displayName,
+                            user.getEmail(),
+                            member.getRole().name(),
+                            formatUserLabel(user, displayName)
+                    );
+                })
+                .toList();
+
+        return toPage(responses, pageable);
+    }
+
     public TicketResponse closeTicket(UUID ticketId) {
         UUID userId = resolveCurrentUserIdOrThrow();
         TicketEntity entity = findOrThrow(ticketId);
@@ -684,13 +768,16 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
             assignment = new TicketAssignmentEntity();
             ticket.setCurrentAssignment(assignment);
         }
+        AppUser leastLoadedAgent = resolveLeastLoadedAssignableAgent(assignmentTeam);
 
         assignment.setTicket(ticket);
         assignment.setTeam(assignmentTeam);
-        assignment.setAgentParty(null);
+        assignment.setAgentParty(leastLoadedAgent);
         assignment.setAssignedByParty(toAppUserReference(assignedByUserId));
         assignment.setActive(true);
-        assignment.setReason("Auto-assigned by ticket type");
+        assignment.setReason(leastLoadedAgent != null
+                ? "Auto-assigned by ticket type and lowest active workload"
+                : "Auto-assigned by ticket type");
         assignment.setAssignedAt(LocalDateTime.now());
         assignment.setUnassignedAt(null);
         assignment.setTenantId(ticket.getTenantId());
@@ -700,7 +787,10 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         }
 
         addHistory(ticket, TicketHistoryEntity.EventType.ASSIGNED,
-                String.format("Ticket auto-assigned to team: %s", assignmentTeam.getId()),
+                leastLoadedAgent != null
+                        ? String.format("Ticket auto-assigned to team %s and agent %s",
+                        assignmentTeam.getId(), leastLoadedAgent.getId())
+                        : String.format("Ticket auto-assigned to team: %s", assignmentTeam.getId()),
                 REFERENCE_TYPE_TEAM,
                 assignmentTeam.getId());
     }
@@ -718,6 +808,9 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         UUID resolvedSystemTenantId = resolveSystemTenantIdOrThrow();
         if (!resolvedSystemTenantId.equals(team.getTenantId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Team must belong to system tenant");
+        }
+        if (!Boolean.TRUE.equals(team.getIsActive())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Team must be active for assignment");
         }
 
         return team;
@@ -744,6 +837,28 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         }
 
         return agent;
+    }
+
+    private AppUser resolveLeastLoadedAssignableAgent(TeamEntity team) {
+        if (team == null || team.getId() == null) {
+            return null;
+        }
+
+        return team.getMembers().stream()
+                .filter(Objects::nonNull)
+                .filter(member -> member.getUser() != null && member.getUser().getId() != null)
+                .filter(member -> member.getRole() != null && AGENT_TEAM_MEMBER_ROLES.contains(member.getRole()))
+                .min(Comparator
+                        .comparingLong((TeamMemberEntity member) ->
+                                ticketRepository.countByCurrentAssignmentTeamIdAndCurrentAssignmentAgentPartyIdAndCurrentAssignmentActiveTrue(
+                                        team.getId(),
+                                        member.getUser().getId()
+                                ))
+                        .thenComparing(TeamMemberEntity::getJoinedAt,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(member -> member.getUser().getId()))
+                .map(TeamMemberEntity::getUser)
+                .orElse(null);
     }
 
     private void validateAssignable(TicketEntity entity) {
@@ -790,6 +905,114 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         } catch (IllegalArgumentException ignored) {
             return MediaType.APPLICATION_OCTET_STREAM;
         }
+    }
+
+    private boolean matchesAssignmentMemberSearch(TeamMemberEntity member, String searchQuery) {
+        if (searchQuery == null || searchQuery.isBlank()) {
+            return true;
+        }
+
+        AppUser user = member.getUser();
+        String normalized = searchQuery.trim().toLowerCase();
+        String displayName = resolveUserDisplayName(user).toLowerCase();
+        String username = user != null && user.getUsername() != null ? user.getUsername().toLowerCase() : "";
+        String email = user != null && user.getEmail() != null ? user.getEmail().toLowerCase() : "";
+        String userId = user != null && user.getId() != null ? user.getId().toString().toLowerCase() : "";
+        String role = member.getRole() != null ? member.getRole().name().toLowerCase() : "";
+
+        return displayName.contains(normalized)
+                || username.contains(normalized)
+                || email.contains(normalized)
+                || userId.contains(normalized)
+                || role.contains(normalized);
+    }
+
+    private String resolveUserDisplayName(AppUser user) {
+        if (user == null) {
+            return "Unknown";
+        }
+
+        if (user instanceof org.zerp.common.entity.employee.Employee employee) {
+            String fullName = ((employee.getFirstName() != null ? employee.getFirstName().trim() : "") + " "
+                    + (employee.getLastName() != null ? employee.getLastName().trim() : "")).trim();
+            if (!fullName.isBlank()) {
+                return fullName;
+            }
+        }
+
+        if (user.getUsername() != null && !user.getUsername().isBlank()) {
+            return user.getUsername().trim();
+        }
+        if (user.getEmail() != null && !user.getEmail().isBlank()) {
+            return user.getEmail().trim();
+        }
+        return user.getId() != null ? user.getId().toString() : "Unknown";
+    }
+
+    private String formatUserLabel(AppUser user, String displayName) {
+        String base = displayName != null && !displayName.isBlank()
+                ? displayName
+                : resolveUserDisplayName(user);
+        return user != null && user.getId() != null
+                ? base + " (" + user.getId() + ")"
+                : base;
+    }
+
+    private String formatTeamLabel(TeamEntity team) {
+        if (team == null) {
+            return "Unknown";
+        }
+
+        String name = team.getName() != null && !team.getName().isBlank() ? team.getName().trim() : "Unnamed Team";
+        String type = team.getType() != null ? team.getType().name() : "UNKNOWN";
+        return team.getId() != null
+                ? String.format("%s (%s) - %s", name, type, team.getId())
+                : String.format("%s (%s)", name, type);
+    }
+
+    private UUID parseUuidOrNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return UUID.fromString(value.trim());
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
+    }
+
+    private TeamEntity findAssignableTeamOrThrow(UUID teamId) {
+        if (teamId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "teamId is required");
+        }
+
+        TeamEntity team = entityManager.find(TeamEntity.class, teamId);
+        if (team == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found: " + teamId);
+        }
+
+        UUID resolvedSystemTenantId = resolveSystemTenantIdOrThrow();
+        if (!resolvedSystemTenantId.equals(team.getTenantId())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found: " + teamId);
+        }
+        if (!Boolean.TRUE.equals(team.getIsActive())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Team must be active for assignment");
+        }
+        return team;
+    }
+
+    private <T> Page<T> toPage(List<T> items, Pageable pageable) {
+        if (items.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        int offset = Math.toIntExact(pageable.getOffset());
+        if (offset >= items.size()) {
+            return new PageImpl<>(List.of(), pageable, items.size());
+        }
+
+        int end = Math.min(offset + pageable.getPageSize(), items.size());
+        return new PageImpl<>(items.subList(offset, end), pageable, items.size());
     }
 
     private TicketAttachmentEntity findTicketAttachmentOrThrow(TicketEntity ticket, UUID attachmentId) {
@@ -904,7 +1127,6 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
             String referenceType,
             UUID referenceId) {
         UUID userId = resolveCurrentUserIdOrThrow();
-        ensureCanCreateTicketHistory(userId, entity);
         UUID tenantId = entity.getTenantId();
         if (tenantId == null) {
             throw new IllegalStateException("Tenant not found");
@@ -1039,19 +1261,6 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         );
     }
 
-    private CrmPermissionEvaluator.TicketChildTarget toTicketHistoryTarget(
-            TicketEntity ticket,
-            TicketHistoryEntity history
-    ) {
-        return new CrmPermissionEvaluator.TicketChildTarget(
-                history != null ? history.getId() : null,
-                ticket.getId(),
-                ticket.getTenantId(),
-                getActiveAssignedTeamId(ticket),
-                getActiveAssignedAgentId(ticket)
-        );
-    }
-
     private CrmPermissionEvaluator.TicketChildTarget toTicketCommentTarget(
             TicketEntity ticket,
             TicketCommentEntity comment
@@ -1093,19 +1302,6 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         );
     }
 
-    private CrmPermissionEvaluator.TicketChildTarget toTicketSlaTrackingTarget(
-            TicketEntity ticket,
-            TicketSlaTrackingEntity slaTracking
-    ) {
-        return new CrmPermissionEvaluator.TicketChildTarget(
-                slaTracking != null ? slaTracking.getId() : null,
-                ticket.getId(),
-                ticket.getTenantId(),
-                getActiveAssignedTeamId(ticket),
-                getActiveAssignedAgentId(ticket)
-        );
-    }
-
     private CrmPermissionEvaluator.TicketChildTarget toTicketWatcherTarget(
             TicketEntity ticket,
             TicketWatcherEntity watcher
@@ -1140,30 +1336,6 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     private void ensureCanDeleteTicket(UUID userId, TicketEntity ticket) {
         if (!permissionEvaluator.canDeleteTicket(userId, toTicketTarget(ticket))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Ticket");
-        }
-    }
-
-    private void ensureCanReadTicketHistory(UUID userId, TicketEntity ticket) {
-        if (!permissionEvaluator.canReadTicketHistory(userId, toTicketParent(ticket))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Ticket history");
-        }
-    }
-
-    private void ensureCanCreateTicketHistory(UUID userId, TicketEntity ticket) {
-        if (!permissionEvaluator.canCreateTicketHistory(userId, toTicketParent(ticket))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Ticket history");
-        }
-    }
-
-    private void ensureCanUpdateTicketHistory(UUID userId, TicketEntity ticket, TicketHistoryEntity history) {
-        if (!permissionEvaluator.canUpdateTicketHistory(userId, toTicketHistoryTarget(ticket, history))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Ticket history");
-        }
-    }
-
-    private void ensureCanDeleteTicketHistory(UUID userId, TicketEntity ticket, TicketHistoryEntity history) {
-        if (!permissionEvaluator.canDeleteTicketHistory(userId, toTicketHistoryTarget(ticket, history))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Ticket history");
         }
     }
 
@@ -1213,6 +1385,15 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         if (!permissionEvaluator.canDeleteTicketAssignment(userId, toTicketAssignmentTarget(ticket, assignment))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Ticket assignment");
         }
+    }
+
+    private void ensureCanChangeTicketAssignment(UUID userId, TicketEntity ticket) {
+        TicketAssignmentEntity currentAssignment = ticket.getCurrentAssignment();
+        if (currentAssignment != null && Boolean.TRUE.equals(currentAssignment.getActive())) {
+            ensureCanUpdateTicketAssignment(userId, ticket, currentAssignment);
+            return;
+        }
+        ensureCanCreateTicketAssignment(userId, ticket);
     }
 
     private void ensureCanReadTicketAttachment(UUID userId, TicketEntity ticket) {
@@ -1279,30 +1460,6 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     ) {
         if (!permissionEvaluator.canDeleteTicketAttachment(userId, toTicketAttachmentTarget(ticket, comment, attachment))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Ticket attachment");
-        }
-    }
-
-    private void ensureCanCreateTicketSlaTracking(UUID userId, TicketEntity ticket) {
-        if (!permissionEvaluator.canCreateTicketSlaTracking(userId, toTicketParent(ticket))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Ticket SLA tracking");
-        }
-    }
-
-    private void ensureCanReadTicketSlaTracking(UUID userId, TicketEntity ticket) {
-        if (!permissionEvaluator.canReadTicketSlaTracking(userId, toTicketParent(ticket))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Ticket SLA tracking");
-        }
-    }
-
-    private void ensureCanUpdateTicketSlaTracking(UUID userId, TicketEntity ticket, TicketSlaTrackingEntity slaTracking) {
-        if (!permissionEvaluator.canUpdateTicketSlaTracking(userId, toTicketSlaTrackingTarget(ticket, slaTracking))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Ticket SLA tracking");
-        }
-    }
-
-    private void ensureCanDeleteTicketSlaTracking(UUID userId, TicketEntity ticket, TicketSlaTrackingEntity slaTracking) {
-        if (!permissionEvaluator.canDeleteTicketSlaTracking(userId, toTicketSlaTrackingTarget(ticket, slaTracking))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Ticket SLA tracking");
         }
     }
 

@@ -6,13 +6,16 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.Tenant;
+import org.zerp.common.entity.employee.Employee;
 import org.zerp.common.entity.crm.IssueType;
 import org.zerp.common.entity.crm.TeamEntity;
 import org.zerp.common.entity.crm.TeamMemberEntity;
@@ -28,12 +31,14 @@ import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.crm.permission.CrmPermissionEvaluator;
 import org.zerp.crm.dto.team.*;
 import org.zerp.crm.repository.AppUserRepository;
+import org.zerp.crm.repository.TeamMemberRepository;
 import org.zerp.crm.repository.TeamRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -46,6 +51,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         CreateTeamRequest, UpdateTeamRequest, UUID> {
     private final TeamRepository teamRepository;
     private final AppUserRepository appUserRepository;
+    private final TeamMemberRepository teamMemberRepository;
     private final EntityManager entityManager;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final FilterRefiner filterRefiner;
@@ -248,11 +254,35 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         AppUser appUser = findAppUserOrThrow(request.userId());
         ensureMemberTenantMatchesTeamTenant(appUser, entity);
 
+        TeamMemberEntity existingMembership = teamMemberRepository.findFirstByUserId(request.userId()).orElse(null);
+        if (existingMembership != null) {
+            UUID existingTeamId = existingMembership.getTeam() != null
+                    ? existingMembership.getTeam().getId()
+                    : null;
+            if (entity.getId() != null && entity.getId().equals(existingTeamId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        String.format("User %s is already a member of this team", request.userId())
+                );
+            }
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    String.format(
+                            "User %s is already a member of team %s. A user can belong to only one team at a time.",
+                            request.userId(),
+                            existingTeamId
+                    )
+            );
+        }
+
         boolean alreadyMember = entity.getMembers().stream()
                 .anyMatch(m -> m.getUser() != null && request.userId().equals(m.getUser().getId()));
         if (alreadyMember) {
-            throw new IllegalArgumentException(
-                    String.format("User %s is already a member of this team", request.userId()));
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    String.format("User %s is already a member of this team", request.userId())
+            );
         }
 
         TeamMemberEntity member = new TeamMemberEntity();
@@ -303,7 +333,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
     @Transactional(readOnly = true)
     public Page<TeamMemberCandidateResponse> findMemberCandidates(
             UUID teamId,
-            String usernameSearch,
+            String searchQuery,
             Pageable pageable
     ) {
         UUID actorUserId = resolveCurrentUserId();
@@ -323,30 +353,40 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
             return Page.empty(pageable);
         }
 
-        Specification<AppUser> specification = (root, query, cb) ->
+        Specification<AppUser> specification = (root, _, cb) ->
                 cb.equal(root.get("tenantId"), resolvedSystemTenantId);
 
         if (!hasTenantScopeReadUser) {
-            specification = specification.and((root, query, cb) -> root.get("id").in(permittedUserIds));
+            specification = specification.and((root, _, cb) -> root.get("id").in(permittedUserIds));
         }
 
-        if (usernameSearch != null && !usernameSearch.isBlank()) {
-            String normalizedSearch = usernameSearch.trim().toLowerCase();
-            specification = specification.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("username")), "%" + normalizedSearch + "%"));
-        }
-
-        List<UUID> existingMemberUserIds = team.getMembers().stream()
-                .map(TeamMemberEntity::getUser)
-                .filter(user -> user != null && user.getId() != null)
-                .map(AppUser::getId)
+        List<UUID> occupiedUserIds = teamMemberRepository.findAllMemberUserIds().stream()
+                .filter(Objects::nonNull)
                 .toList();
-        if (!existingMemberUserIds.isEmpty()) {
-            specification = specification.and((root, query, cb) -> cb.not(root.get("id").in(existingMemberUserIds)));
+        if (!occupiedUserIds.isEmpty()) {
+            specification = specification.and((root, _, cb) -> cb.not(root.get("id").in(occupiedUserIds)));
         }
 
-        return appUserRepository.findAll(specification, pageable)
-                .map(user -> new TeamMemberCandidateResponse(user.getId(), user.getUsername(), user.getEmail()));
+        Sort sort = pageable.getSort().isSorted() ? pageable.getSort() : Sort.by(Sort.Direction.ASC, "username");
+        List<AppUser> users = appUserRepository.findAll(specification, sort);
+        List<AppUser> filteredUsers = users.stream()
+                .filter(user -> matchesUserCandidateSearch(user, searchQuery))
+                .toList();
+
+        List<TeamMemberCandidateResponse> responses = filteredUsers.stream()
+                .map(user -> {
+                    String displayName = resolveUserDisplayName(user);
+                    return new TeamMemberCandidateResponse(
+                            user.getId(),
+                            displayName,
+                            formatUserLabel(user, displayName),
+                            user.getUsername(),
+                            user.getEmail()
+                    );
+                })
+                .toList();
+
+        return toPage(responses, pageable);
     }
 
     // ─── Helpers ───
@@ -384,6 +424,8 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
                 .map(m -> new TeamMemberResponse(
                         m.getId(),
                         m.getUser() != null ? m.getUser().getId() : null,
+                        resolveUserDisplayName(m.getUser()),
+                        m.getUser() != null ? m.getUser().getEmail() : null,
                         m.getRole().name(),
                         m.getJoinedAt()))
                 .collect(Collectors.toList());
@@ -412,6 +454,68 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "AppUser tenant must match Team tenant");
         }
+    }
+
+    private boolean matchesUserCandidateSearch(AppUser user, String searchQuery) {
+        if (searchQuery == null || searchQuery.isBlank()) {
+            return true;
+        }
+
+        String normalized = searchQuery.trim().toLowerCase();
+        String displayName = resolveUserDisplayName(user).toLowerCase();
+        String username = user.getUsername() != null ? user.getUsername().toLowerCase() : "";
+        String email = user.getEmail() != null ? user.getEmail().toLowerCase() : "";
+        String userId = user.getId() != null ? user.getId().toString().toLowerCase() : "";
+
+        return displayName.contains(normalized)
+                || username.contains(normalized)
+                || email.contains(normalized)
+                || userId.contains(normalized);
+    }
+
+    private String resolveUserDisplayName(AppUser user) {
+        if (user == null) {
+            return "Unknown";
+        }
+
+        if (user instanceof Employee employee) {
+            String fullName = ((employee.getFirstName() != null ? employee.getFirstName().trim() : "") + " "
+                    + (employee.getLastName() != null ? employee.getLastName().trim() : "")).trim();
+            if (!fullName.isBlank()) {
+                return fullName;
+            }
+        }
+
+        if (user.getUsername() != null && !user.getUsername().isBlank()) {
+            return user.getUsername().trim();
+        }
+        if (user.getEmail() != null && !user.getEmail().isBlank()) {
+            return user.getEmail().trim();
+        }
+        return user.getId() != null ? user.getId().toString() : "Unknown";
+    }
+
+    private String formatUserLabel(AppUser user, String displayName) {
+        String base = displayName != null && !displayName.isBlank()
+                ? displayName
+                : resolveUserDisplayName(user);
+        return user != null && user.getId() != null
+                ? base + " (" + user.getId() + ")"
+                : base;
+    }
+
+    private <T> Page<T> toPage(List<T> items, Pageable pageable) {
+        if (items.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        int offset = Math.toIntExact(pageable.getOffset());
+        if (offset >= items.size()) {
+            return new PageImpl<>(List.of(), pageable, items.size());
+        }
+
+        int end = Math.min(offset + pageable.getPageSize(), items.size());
+        return new PageImpl<>(items.subList(offset, end), pageable, items.size());
     }
 
     private Specification<TeamEntity> buildSpecificationFromFilters(Map<String, String> filters) {
