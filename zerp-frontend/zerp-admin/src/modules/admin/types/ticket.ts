@@ -72,9 +72,27 @@ export interface AttachmentResponse {
 export interface TicketAssignmentResponse {
   id?: string
   teamId?: string
+  teamName?: string
+  teamType?: string
   agentPartyId?: string
+  agentDisplayName?: string
   active?: boolean
   assignedAt?: string
+}
+
+export interface AssignmentTeamCandidateResponse {
+  id: string
+  name: string
+  type: IssueTypeValue
+  displayLabel: string
+}
+
+export interface AssignmentTeamMemberCandidateResponse {
+  userId: string
+  displayName: string
+  email?: string
+  role: string
+  displayLabel: string
 }
 
 export interface CommentResponse {

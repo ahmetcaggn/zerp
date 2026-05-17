@@ -1,12 +1,16 @@
 import { parseApiEnvelope } from '@/core/api/base-http-client'
 import { httpClient } from '@/core/api/http-client'
 import { createResourceClient } from '@/core/api/resource-client'
+import type { RaListParams, RaListResult } from '@/core/api/resource-types'
+import { toRaQueryString } from '@/core/api/resource-types'
 import type { ApiErrorPayload } from '@/core/types/api'
 import { ApiError } from '@/core/types/api'
 
 import type {
   AddCommentRequest,
   AssignTicketRequest,
+  AssignmentTeamCandidateResponse,
+  AssignmentTeamMemberCandidateResponse,
   AttachmentResponse,
   ChangePriorityRequest,
   ChangeStatusRequest,
@@ -14,6 +18,15 @@ import type {
   TicketResponse,
   UpdateTicketRequest,
 } from '../types/ticket'
+
+interface AssignmentTeamCandidateListParams extends RaListParams {
+  query?: string
+}
+
+interface AssignmentTeamMemberCandidateListParams extends RaListParams {
+  query?: string
+  teamId: string
+}
 
 const base = createResourceClient<
   TicketResponse,
@@ -43,6 +56,35 @@ export const teamTicketClient = {
 
   unassign: (id: string): Promise<TicketResponse> =>
     httpClient.del<TicketResponse>(`/crm/tickets/${id}/assign`),
+
+  listAssignmentTeams: (
+    id: string,
+    params: AssignmentTeamCandidateListParams = {},
+  ): Promise<RaListResult<AssignmentTeamCandidateResponse>> => {
+    const { query: searchQuery, ...listParams } = params
+    const query = new URLSearchParams(toRaQueryString(listParams))
+    if (searchQuery && searchQuery.trim()) {
+      query.set('query', searchQuery.trim())
+    }
+    return httpClient.requestList<AssignmentTeamCandidateResponse>(
+      `/crm/tickets/${id}/assignment-candidates/teams?${query.toString()}`,
+    )
+  },
+
+  listAssignmentTeamMembers: (
+    id: string,
+    params: AssignmentTeamMemberCandidateListParams,
+  ): Promise<RaListResult<AssignmentTeamMemberCandidateResponse>> => {
+    const { query: searchQuery, teamId, ...listParams } = params
+    const query = new URLSearchParams(toRaQueryString(listParams))
+    query.set('teamId', teamId)
+    if (searchQuery && searchQuery.trim()) {
+      query.set('query', searchQuery.trim())
+    }
+    return httpClient.requestList<AssignmentTeamMemberCandidateResponse>(
+      `/crm/tickets/${id}/assignment-candidates/members?${query.toString()}`,
+    )
+  },
 
   uploadAttachment: (id: string, file: File): Promise<AttachmentResponse> =>
     uploadTicketAttachment(id, file),

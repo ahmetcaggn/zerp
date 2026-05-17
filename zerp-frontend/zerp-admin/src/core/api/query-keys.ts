@@ -13,6 +13,8 @@ export const queryKeys = {
     teams: ['admin', 'teams'] as const,
     teamMemberCandidates: ['admin', 'team-member-candidates'] as const,
     teamTickets: ['admin', 'team-tickets'] as const,
+    ticketAssignmentTeams: ['admin', 'ticket-assignment-teams'] as const,
+    ticketAssignmentTeamMembers: ['admin', 'ticket-assignment-team-members'] as const,
     permissions: ['admin', 'permissions'] as const,
   },
 }

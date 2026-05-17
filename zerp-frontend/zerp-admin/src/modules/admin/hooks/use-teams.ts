@@ -49,12 +49,15 @@ export function useAddTeamMember() {
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: AddMemberRequest }) =>
       teamClient.addMember(id, body),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.admin.teams }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.admin.teams })
+      qc.invalidateQueries({ queryKey: queryKeys.admin.teamMemberCandidates })
+    },
   })
 }
 
 interface TeamMemberCandidateListParams extends RaListParams {
-  username?: string
+  query?: string
 }
 
 export function useTeamMemberCandidates(
@@ -75,7 +78,10 @@ export function useRemoveTeamMember() {
   return useMutation({
     mutationFn: ({ id, userId }: { id: string; userId: string }) =>
       teamClient.removeMember(id, userId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.admin.teams }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.admin.teams })
+      qc.invalidateQueries({ queryKey: queryKeys.admin.teamMemberCandidates })
+    },
   })
 }
 
