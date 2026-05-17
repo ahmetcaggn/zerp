@@ -18,10 +18,10 @@ export function usePublicShops() {
   })
 }
 
-export function usePublicShopMenu(shopId: string) {
+export function usePublicShopMenu(shopId: string, language: 'TR' | 'EN') {
   return useQuery({
-    queryKey: [...queryKeys.client.restaurants.menu, shopId],
-    queryFn: () => getPublicShopMenu(shopId),
+    queryKey: [...queryKeys.client.restaurants.menu, shopId, language],
+    queryFn: () => getPublicShopMenu(shopId, language),
     enabled: !!shopId,
   })
 }
@@ -32,6 +32,7 @@ export function usePublicCategoryMenuItems(params: PublicCategoryMenuItemsParams
       ...queryKeys.client.restaurants.products,
       params?.shopId ?? null,
       params?.categoryId ?? null,
+      params?.language ?? null,
       params?.start ?? null,
       params?.end ?? null,
       params?.sort ?? null,

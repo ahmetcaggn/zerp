@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.sale.Menu;
+import org.zerp.common.entity.sale.MenuLanguage;
 import org.zerp.common.entity.sale.MenuCategory;
 import org.zerp.common.entity.sale.MenuItem;
 import org.zerp.common.entity.sale.PublicCartOrder;
@@ -32,6 +33,7 @@ import org.zerp.sale.repository.ShopRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Log4j2
@@ -53,13 +55,13 @@ public class PublicSaleService {
     }
 
     @Transactional(readOnly = true)
-    public PublicShopMenuResponseDTO getActiveMenuWithCategories(UUID shopId) {
-        ensureShopExists(shopId);
+    public PublicShopMenuResponseDTO getActiveMenuWithCategories(UUID shopId, MenuLanguage requestedLanguage) {
+        Shop shop = ensureShopExists(shopId);
 
         PublicShopMenuResponseDTO response = new PublicShopMenuResponseDTO();
         response.setShopId(shopId);
 
-        Menu activeMenu = menuRepository.findFirstByShopIdAndIsActiveTrue(shopId).orElse(null);
+        Menu activeMenu = resolveActiveMenuWithFallback(shop, requestedLanguage).orElse(null);
         if (activeMenu == null) {
             response.setActiveMenu(null);
             response.setCategories(List.of());
@@ -76,9 +78,14 @@ public class PublicSaleService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PublicMenuItemDTO> getMenuItemsByCategory(UUID shopId, UUID categoryId, Pageable pageable) {
-        ensureShopExists(shopId);
-        Menu activeMenu = menuRepository.findFirstByShopIdAndIsActiveTrue(shopId)
+    public Page<PublicMenuItemDTO> getMenuItemsByCategory(
+            UUID shopId,
+            UUID categoryId,
+            Pageable pageable,
+            MenuLanguage requestedLanguage
+    ) {
+        Shop shop = ensureShopExists(shopId);
+        Menu activeMenu = resolveActiveMenuWithFallback(shop, requestedLanguage)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No active menu found for this shop"));
 
         Page<MenuItem> page = menuItemRepository
@@ -146,10 +153,25 @@ public class PublicSaleService {
         }
     }
 
-    private void ensureShopExists(UUID shopId) {
-        if (!shopRepository.existsById(shopId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Shop not found");
+    private Shop ensureShopExists(UUID shopId) {
+        return shopRepository.findById(shopId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shop not found"));
+    }
+
+    private Optional<Menu> resolveActiveMenuWithFallback(Shop shop, MenuLanguage requestedLanguage) {
+        UUID shopId = shop.getId();
+        MenuLanguage defaultLanguage = shop.getDefaultMenuLanguage() == null
+                ? MenuLanguage.TR
+                : shop.getDefaultMenuLanguage();
+
+        if (requestedLanguage != null) {
+            Optional<Menu> requestedMenu = menuRepository.findFirstByShopIdAndLanguageAndIsActiveTrue(shopId, requestedLanguage);
+            if (requestedMenu.isPresent()) {
+                return requestedMenu;
+            }
         }
+
+        return menuRepository.findFirstByShopIdAndLanguageAndIsActiveTrue(shopId, defaultLanguage);
     }
 
     private PublicShopDTO toPublicShop(Shop entity) {
@@ -175,6 +197,7 @@ public class PublicSaleService {
         dto.setName(menu.getName());
         dto.setDescription(menu.getDescription());
         dto.setActive(menu.isActive());
+        dto.setLanguage(menu.getLanguage() == null ? MenuLanguage.TR : menu.getLanguage());
         return dto;
     }
 

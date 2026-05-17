@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.Shop;
+import org.zerp.common.entity.sale.MenuLanguage;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentUserIdResolver;
@@ -19,6 +20,7 @@ import org.zerp.sale.permission.ShopPermissionEvaluator;
 import org.zerp.sale.repository.ShopRepository;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -74,8 +76,19 @@ public class ShopService implements IResourceService<ShopDTO, ShopDTO, Void, Voi
     }
 
     @Override
+    @Transactional
     public ShopDTO patch(UUID id, Map<String, Object> data) {
-        throw new UnsupportedOperationException("Patch operation is not supported for Shop resource");
+        UUID userId = currentUserIdResolver.resolve();
+        Shop shop = repository.findById(id).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Shop not found"));
+
+        if (!permissionEvaluator.canPatch(userId, shop)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to patch Shop");
+        }
+
+        applyFieldUpdates(shop, data);
+        Shop updated = repository.save(shop);
+        return mapper.toDTO(updated);
     }
 
     @Override
@@ -96,5 +109,37 @@ public class ShopService implements IResourceService<ShopDTO, ShopDTO, Void, Voi
     @Override
     public List<UUID> deleteMany(List<UUID> ids) {
         throw new UnsupportedOperationException("Bulk delete operation is not supported for Shop resource");
+    }
+
+    private void applyFieldUpdates(Shop shop, Map<String, Object> fields) {
+        if (fields == null || fields.isEmpty()) {
+            return;
+        }
+
+        if (fields.containsKey("defaultMenuLanguage")) {
+            shop.setDefaultMenuLanguage(resolveMenuLanguage(fields.get("defaultMenuLanguage")));
+        }
+    }
+
+    private MenuLanguage resolveMenuLanguage(Object rawValue) {
+        switch (rawValue) {
+            case null -> {
+                return MenuLanguage.TR;
+            }
+            case MenuLanguage language -> {
+                return language;
+            }
+            case String languageValue -> {
+                try {
+                    return MenuLanguage.valueOf(languageValue.trim().toUpperCase(Locale.ROOT));
+                } catch (IllegalArgumentException ignored) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported menu language: " + rawValue);
+                }
+            }
+            default -> {
+            }
+        }
+
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported menu language: " + rawValue);
     }
 }

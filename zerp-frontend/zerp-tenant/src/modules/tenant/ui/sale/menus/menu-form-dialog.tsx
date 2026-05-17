@@ -6,15 +6,21 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
+  Switch,
   TextField,
 } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 import { useCreateMenu, useUpdateMenu } from '../../../hooks/use-menus'
-import type { MenuResponseDto } from '../../../types/sale'
+import type { MenuLanguage, MenuResponseDto } from '../../../types/sale'
 
 interface Props {
   open: boolean
@@ -30,6 +36,15 @@ export function MenuFormDialog({ open, mode, menu, onClose }: Props) {
 
   const [name, setName] = useState(menu?.name ?? '')
   const [description, setDescription] = useState(menu?.description ?? '')
+  const [language, setLanguage] = useState<MenuLanguage>(menu?.language ?? 'TR')
+  const [active, setActive] = useState(menu?.active ?? false)
+
+  useEffect(() => {
+    setName(menu?.name ?? '')
+    setDescription(menu?.description ?? '')
+    setLanguage(menu?.language ?? 'TR')
+    setActive(menu?.active ?? false)
+  }, [menu, open])
 
   const { mutate: createMenu, isPending: isCreating } = useCreateMenu()
   const { mutate: updateMenu, isPending: isUpdating } = useUpdateMenu()
@@ -46,7 +61,13 @@ export function MenuFormDialog({ open, mode, menu, onClose }: Props) {
       }
 
       createMenu(
-        { name: name.trim(), ...(description.trim() && { description: description.trim() }), shopId: scope.shopId },
+        {
+          name: name.trim(),
+          ...(description.trim() && { description: description.trim() }),
+          active,
+          language,
+          shopId: scope.shopId,
+        },
         {
           onSuccess: () => {
             showToast(t('sale.menu.createdToast'))
@@ -59,7 +80,12 @@ export function MenuFormDialog({ open, mode, menu, onClose }: Props) {
       updateMenu(
         {
           id: menu.id,
-          data: { name: name.trim(), ...(description.trim() && { description: description.trim() }) },
+          data: {
+            name: name.trim(),
+            ...(description.trim() && { description: description.trim() }),
+            language,
+            active,
+          },
         },
         {
           onSuccess: () => {
@@ -94,6 +120,21 @@ export function MenuFormDialog({ open, mode, menu, onClose }: Props) {
               multiline
               rows={2}
               fullWidth
+            />
+            <FormControl fullWidth>
+              <InputLabel>{t('sale.menu.form.language')}</InputLabel>
+              <Select
+                value={language}
+                label={t('sale.menu.form.language')}
+                onChange={(e) => setLanguage(e.target.value as MenuLanguage)}
+              >
+                <MenuItem value="TR">{t('sale.menu.language.tr')}</MenuItem>
+                <MenuItem value="EN">{t('sale.menu.language.en')}</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControlLabel
+              control={<Switch checked={active} onChange={(e) => setActive(e.target.checked)} />}
+              label={t('sale.menu.form.isActive')}
             />
           </Box>
         </DialogContent>

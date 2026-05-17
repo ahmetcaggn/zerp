@@ -6,10 +6,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.Shop;
+import org.zerp.common.entity.sale.Menu;
+import org.zerp.common.entity.sale.MenuLanguage;
 import org.zerp.common.entity.sale.MenuItem;
 import org.zerp.common.entity.sale.PublicCartOrder;
+import org.zerp.sale.dto.publicsale.PublicShopMenuResponseDTO;
 import org.zerp.sale.dto.publicsale.PublicCartOrderCreateRequest;
 import org.zerp.sale.dto.publicsale.PublicCartOrderCreateResponse;
 import org.zerp.sale.dto.publicsale.PublicCartOrderItemCreateRequest;
@@ -23,6 +28,7 @@ import org.zerp.sale.repository.ShopRepository;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,6 +59,123 @@ class PublicSaleServiceTest {
 
     @InjectMocks
     private PublicSaleService publicSaleService;
+
+    @Test
+    void getActiveMenuWithCategoriesReturnsRequestedLanguageMenu() {
+        UUID shopId = UUID.randomUUID();
+        UUID requestedMenuId = UUID.randomUUID();
+
+        Shop shop = new Shop();
+        shop.setId(shopId);
+        shop.setDefaultMenuLanguage(MenuLanguage.EN);
+
+        Menu requestedMenu = new Menu();
+        requestedMenu.setId(requestedMenuId);
+        requestedMenu.setName("TR Menu");
+        requestedMenu.setLanguage(MenuLanguage.TR);
+        requestedMenu.setActive(true);
+
+        when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
+        when(menuRepository.findFirstByShopIdAndLanguageAndIsActiveTrue(shopId, MenuLanguage.TR))
+                .thenReturn(Optional.of(requestedMenu));
+        when(menuCategoryRepository.findByMenuIdOrderByNameAsc(requestedMenuId)).thenReturn(Collections.emptyList());
+
+        PublicShopMenuResponseDTO response = publicSaleService.getActiveMenuWithCategories(shopId, MenuLanguage.TR);
+
+        assertThat(response.getActiveMenu()).isNotNull();
+        assertThat(response.getActiveMenu().getId()).isEqualTo(requestedMenuId);
+        assertThat(response.getActiveMenu().getLanguage()).isEqualTo(MenuLanguage.TR);
+        verify(menuRepository, never()).findFirstByShopIdAndLanguageAndIsActiveTrue(shopId, MenuLanguage.EN);
+    }
+
+    @Test
+    void getActiveMenuWithCategoriesFallsBackToShopDefaultLanguage() {
+        UUID shopId = UUID.randomUUID();
+        UUID defaultMenuId = UUID.randomUUID();
+
+        Shop shop = new Shop();
+        shop.setId(shopId);
+        shop.setDefaultMenuLanguage(MenuLanguage.EN);
+
+        Menu defaultMenu = new Menu();
+        defaultMenu.setId(defaultMenuId);
+        defaultMenu.setName("EN Menu");
+        defaultMenu.setLanguage(MenuLanguage.EN);
+        defaultMenu.setActive(true);
+
+        when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
+        when(menuRepository.findFirstByShopIdAndLanguageAndIsActiveTrue(shopId, MenuLanguage.TR))
+                .thenReturn(Optional.empty());
+        when(menuRepository.findFirstByShopIdAndLanguageAndIsActiveTrue(shopId, MenuLanguage.EN))
+                .thenReturn(Optional.of(defaultMenu));
+        when(menuCategoryRepository.findByMenuIdOrderByNameAsc(defaultMenuId)).thenReturn(Collections.emptyList());
+
+        PublicShopMenuResponseDTO response = publicSaleService.getActiveMenuWithCategories(shopId, MenuLanguage.TR);
+
+        assertThat(response.getActiveMenu()).isNotNull();
+        assertThat(response.getActiveMenu().getId()).isEqualTo(defaultMenuId);
+        assertThat(response.getActiveMenu().getLanguage()).isEqualTo(MenuLanguage.EN);
+    }
+
+    @Test
+    void getActiveMenuWithCategoriesReturnsMissingWhenNoLanguageMatches() {
+        UUID shopId = UUID.randomUUID();
+
+        Shop shop = new Shop();
+        shop.setId(shopId);
+        shop.setDefaultMenuLanguage(MenuLanguage.EN);
+
+        when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
+        when(menuRepository.findFirstByShopIdAndLanguageAndIsActiveTrue(shopId, MenuLanguage.TR))
+                .thenReturn(Optional.empty());
+        when(menuRepository.findFirstByShopIdAndLanguageAndIsActiveTrue(shopId, MenuLanguage.EN))
+                .thenReturn(Optional.empty());
+
+        PublicShopMenuResponseDTO response = publicSaleService.getActiveMenuWithCategories(shopId, MenuLanguage.TR);
+
+        assertThat(response.getActiveMenu()).isNull();
+        assertThat(response.getCategories()).isEmpty();
+        assertThat(response.getMessage()).contains("No active menu");
+    }
+
+    @Test
+    void getMenuItemsByCategoryUsesDefaultLanguageWhenRequestedIsMissing() {
+        UUID shopId = UUID.randomUUID();
+        UUID categoryId = UUID.randomUUID();
+        UUID menuId = UUID.randomUUID();
+
+        Shop shop = new Shop();
+        shop.setId(shopId);
+        shop.setDefaultMenuLanguage(MenuLanguage.EN);
+
+        Menu fallbackMenu = new Menu();
+        fallbackMenu.setId(menuId);
+        fallbackMenu.setLanguage(MenuLanguage.EN);
+        fallbackMenu.setActive(true);
+
+        MenuItem menuItem = new MenuItem();
+        menuItem.setId(UUID.randomUUID());
+        menuItem.setName("Americano");
+        menuItem.setPrice(BigDecimal.valueOf(95));
+
+        when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
+        when(menuRepository.findFirstByShopIdAndLanguageAndIsActiveTrue(shopId, MenuLanguage.TR))
+                .thenReturn(Optional.empty());
+        when(menuRepository.findFirstByShopIdAndLanguageAndIsActiveTrue(shopId, MenuLanguage.EN))
+                .thenReturn(Optional.of(fallbackMenu));
+        when(menuItemRepository.findByCategoryIdAndCategoryMenuIdAndCategoryMenuShopId(
+                eq(categoryId),
+                eq(menuId),
+                eq(shopId),
+                any()
+        )).thenReturn(new PageImpl<>(List.of(menuItem), PageRequest.of(0, 20), 1));
+
+        var page = publicSaleService.getMenuItemsByCategory(shopId, categoryId, PageRequest.of(0, 20), MenuLanguage.TR);
+
+        assertThat(page.getTotalElements()).isEqualTo(1);
+        assertThat(page.getContent()).hasSize(1);
+        assertThat(page.getContent().getFirst().getName()).isEqualTo("Americano");
+    }
 
     @Test
     void createPublicCartOrderCreatesOrderWithUnitPriceSnapshot() {

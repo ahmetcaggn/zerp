@@ -31,7 +31,7 @@ import { useI18n } from '@/core/i18n/i18n-provider'
 import { getPublicCategoryMenuItems } from '../api/public-sale-client'
 import { DEFAULT_PRODUCT_DETAIL_FIELDS } from '../data/defaults'
 import { useCreatePublicCartOrder, usePublicCategoryMenuItems, usePublicShopMenu, usePublicShops } from '../hooks/use-public-sale'
-import type { Product as MenuItem } from '../types'
+import type { MenuLanguage, Product as MenuItem } from '../types'
 import {
   addItemToCart,
   buildCartOrderPayload,
@@ -52,6 +52,7 @@ const ALL_CATEGORY_ID = '__all__'
 
 export function MenuItemList({ restaurantId }: MenuItemListProps) {
   const { t, locale } = useI18n()
+  const requestedMenuLanguage: MenuLanguage = locale === 'tr' ? 'TR' : 'EN'
   const router = useRouter()
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null)
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null)
@@ -68,7 +69,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
     data: shopMenuResponse,
     isLoading: isLoadingMenu,
     isError: isMenuError,
-  } = usePublicShopMenu(restaurantId)
+  } = usePublicShopMenu(restaurantId, requestedMenuLanguage)
 
   const createPublicCartOrderMutation = useCreatePublicCartOrder()
 
@@ -113,6 +114,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
     ? {
         shopId: restaurantId,
         categoryId: selectedCategoryId,
+        language: requestedMenuLanguage,
         start: (page - 1) * PAGE_SIZE,
         end: page * PAGE_SIZE,
         sort: 'name' as const,
@@ -132,6 +134,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
         ...queryKeys.client.restaurants.products,
         'preview',
         restaurantId,
+        requestedMenuLanguage,
         category.id,
         PREVIEW_LIMIT,
       ],
@@ -139,6 +142,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
         getPublicCategoryMenuItems({
           shopId: restaurantId,
           categoryId: category.id,
+          language: requestedMenuLanguage,
           start: 0,
           end: PREVIEW_LIMIT,
           sort: 'name',

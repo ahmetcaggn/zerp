@@ -61,4 +61,26 @@ public class ShopPermissionEvaluator {
                 (root, _, _) -> root.get("tenantId").in(permittedTenantIds)
         );
     }
+
+    public boolean canUpdate(UUID userId, Shop target) {
+        UUID shopId;
+        UUID tenantId;
+        try {
+            shopId = target.getId();
+            tenantId = target.getTenantId();
+        } catch (NullPointerException e) {
+            log.error("Null pointer while evaluating canUpdate for Shop userId={}", userId, e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid shop structure");
+        }
+
+        List<Permission> result = permissionRepository.findAllByUserAndShopHierarchy(
+                userId, PermissionAction.UPDATE_SHOP, shopId, tenantId);
+        boolean canUpdate = !result.isEmpty();
+        log.debug("canUpdate result for user {} on shop {} - permitted: {}", userId, shopId, canUpdate);
+        return canUpdate;
+    }
+
+    public boolean canPatch(UUID userId, Shop target) {
+        return canUpdate(userId, target);
+    }
 }

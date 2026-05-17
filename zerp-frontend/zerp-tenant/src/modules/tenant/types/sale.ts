@@ -1,6 +1,7 @@
 // Sale module TypeScript types — mirrors zerp-backend sale DTOs
 
 export type UnitType = 'PIECE' | 'GRAM' | 'KILOGRAM' | 'MILLILITER' | 'LITER'
+export type MenuLanguage = 'TR' | 'EN'
 
 // ─── Product ─────────────────────────────────────────────────────────────────
 
@@ -148,6 +149,8 @@ export interface MenuResponseDto {
   id: string
   name: string
   description?: string
+  active: boolean
+  language?: MenuLanguage
   shopId: string
   shopName?: string
   tenantId: string
@@ -158,12 +161,16 @@ export type MenuListResponseDto = MenuResponseDto
 export interface CreateMenuRequestDto {
   name: string
   description?: string
+  active?: boolean
+  language: MenuLanguage
   shopId: string
 }
 
 export interface UpdateMenuRequestDto {
   name?: string
   description?: string
+  active?: boolean
+  language?: MenuLanguage
 }
 
 // ─── Menu Category ────────────────────────────────────────────────────────────

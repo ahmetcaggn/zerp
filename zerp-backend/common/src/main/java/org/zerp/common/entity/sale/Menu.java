@@ -30,6 +30,11 @@ public class Menu extends BaseEntity implements Permittable {
     @ColumnDefault("FALSE")
     private boolean isActive = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @ColumnDefault("'TR'")
+    private MenuLanguage language = MenuLanguage.TR;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id", nullable = false)
     private Shop shop;

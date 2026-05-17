@@ -8,5 +8,6 @@ import org.zerp.sale.dto.shop.ShopDTO;
 @Mapper(componentModel = "spring")
 public interface ShopMapper {
     @Mapping(source = "tenantId", target = "tenantId")
+    @Mapping(source = "defaultMenuLanguage", target = "defaultMenuLanguage")
     ShopDTO toDTO(Shop entity);
 }

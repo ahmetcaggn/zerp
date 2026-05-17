@@ -12,6 +12,7 @@ interface ShopScopeContextValue {
   scope: ShopScope
   shops: ShopResponseDto[]
   isLoading: boolean
+  refreshShops: () => Promise<unknown>
   setGlobalScope: () => void
   setShopScope: (shop: ShopResponseDto) => void
 }
@@ -37,7 +38,7 @@ export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
   const [scope, setScope] = useState<ShopScope>({ mode: 'GLOBAL' })
   const [persistedShopId, setPersistedShopId] = useState<string | null>(null)
   const isAuthenticated = status === 'authenticated'
-  const { data, isLoading } = useShops(
+  const { data, isLoading, refetch } = useShops(
     {
       pagination: { page: 1, perPage: 500 },
       sort: { field: 'name', order: 'ASC' },
@@ -82,6 +83,7 @@ export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
       scope,
       shops,
       isLoading,
+      refreshShops: () => refetch(),
       setGlobalScope: () => {
         setScope({ mode: 'GLOBAL' })
         persistShopId(null)
@@ -91,7 +93,7 @@ export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
         persistShopId(shop.id)
       },
     }),
-    [scope, shops, isLoading],
+    [scope, shops, isLoading, refetch],
   )
 
   return <ShopScopeContext.Provider value={value}>{children}</ShopScopeContext.Provider>

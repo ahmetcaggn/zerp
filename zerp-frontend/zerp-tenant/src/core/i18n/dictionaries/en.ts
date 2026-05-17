@@ -366,9 +366,25 @@ export const enMessages = {
       createdToast: 'Menu created.',
       updatedToast: 'Menu updated.',
       deletedToast: 'Menu deleted.',
+      language: {
+        tr: 'Turkish',
+        en: 'English',
+      },
+      defaultLanguage: {
+        label: 'Shop Default Menu Language',
+        updatedToast: 'Shop default menu language updated.',
+      },
+      activationModal: {
+        title: 'Activate Menu',
+        description:
+          'If you confirm, other active menus in {language} for this shop will be deactivated automatically.',
+        confirm: 'Confirm and Activate',
+      },
       form: {
         name: 'Menu Name',
         description: 'Description',
+        language: 'Language',
+        isActive: 'Active',
       },
     },
     category: {

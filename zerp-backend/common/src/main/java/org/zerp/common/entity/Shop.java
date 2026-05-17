@@ -1,6 +1,9 @@
 package org.zerp.common.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,9 +15,11 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
+import org.zerp.common.entity.sale.MenuLanguage;
 import org.zerp.common.entity.sale.ShopTable;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
@@ -52,6 +57,11 @@ public class Shop extends BaseEntity implements Permittable {
     private String phone;
     private String email;
     private String website;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @ColumnDefault("'TR'")
+    private MenuLanguage defaultMenuLanguage = MenuLanguage.TR;
 
     @ManyToOne
     @JoinColumn(name = "tenant_id", insertable = false, updatable = false)

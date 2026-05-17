@@ -326,9 +326,25 @@ export const trMessages = {
       createdToast: 'Menü oluşturuldu.',
       updatedToast: 'Menü güncellendi.',
       deletedToast: 'Menü silindi.',
+      language: {
+        tr: 'Türkçe',
+        en: 'İngilizce',
+      },
+      defaultLanguage: {
+        label: 'Mağaza Varsayılan Menü Dili',
+        updatedToast: 'Mağaza varsayılan menü dili güncellendi.',
+      },
+      activationModal: {
+        title: 'Menüyü Aktif Et',
+        description:
+          'Onaylarsanız bu mağazada {language} dili için aktif olan diğer menüler otomatik olarak pasife alınacaktır.',
+        confirm: 'Onayla ve Aktif Et',
+      },
       form: {
         name: 'Menü Adı',
         description: 'Açıklama',
+        language: 'Dil',
+        isActive: 'Aktif',
       },
     },
     category: {

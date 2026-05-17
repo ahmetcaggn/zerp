@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.context.RequestContext;
 import org.zerp.common.dto.ApiResponse;
+import org.zerp.common.entity.sale.MenuLanguage;
 import org.zerp.sale.dto.publicsale.PublicCartOrderCreateRequest;
 import org.zerp.sale.dto.publicsale.PublicCartOrderCreateResponse;
 import org.zerp.sale.dto.publicsale.PublicMenuItemDTO;
@@ -46,14 +47,18 @@ public class PublicSaleController {
     }
 
     @GetMapping("/shops/{shopId}/menu")
-    public ResponseEntity<ApiResponse<PublicShopMenuResponseDTO>> getActiveMenu(@PathVariable UUID shopId) {
-        return ResponseEntity.ok(buildResponse(publicSaleService.getActiveMenuWithCategories(shopId)));
+    public ResponseEntity<ApiResponse<PublicShopMenuResponseDTO>> getActiveMenu(
+            @PathVariable UUID shopId,
+            @RequestParam(name = "language", required = false) MenuLanguage language
+    ) {
+        return ResponseEntity.ok(buildResponse(publicSaleService.getActiveMenuWithCategories(shopId, language)));
     }
 
     @GetMapping("/shops/{shopId}/categories/{categoryId}/menu-items")
     public ResponseEntity<ApiResponse<List<PublicMenuItemDTO>>> getCategoryMenuItems(
             @PathVariable UUID shopId,
             @PathVariable UUID categoryId,
+            @RequestParam(name = "language", required = false) MenuLanguage language,
             @RequestParam(name = "_start", defaultValue = "0") int start,
             @RequestParam(name = "_end", defaultValue = "20") int end,
             @RequestParam(name = "_sort", defaultValue = "name") String sort,
@@ -68,7 +73,7 @@ public class PublicSaleController {
         Sort direction = Sort.by(Sort.Direction.fromString(order), sort);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, direction);
 
-        Page<PublicMenuItemDTO> page = publicSaleService.getMenuItemsByCategory(shopId, categoryId, pageable);
+        Page<PublicMenuItemDTO> page = publicSaleService.getMenuItemsByCategory(shopId, categoryId, pageable, language);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(page.getTotalElements()));
         headers.add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "X-Total-Count");

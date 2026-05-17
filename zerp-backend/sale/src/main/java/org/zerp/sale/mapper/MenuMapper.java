@@ -16,6 +16,7 @@ public interface MenuMapper {
     @Mapping(source = "shop.id", target = "shopId")
     @Mapping(source = "shop.name", target = "shopName")
     @Mapping(source = "tenantId", target = "tenantId")
+    @Mapping(source = "language", target = "language")
     MenuDTO toDTO(Menu entity);
 
     @Mapping(target = "active", ignore = true)

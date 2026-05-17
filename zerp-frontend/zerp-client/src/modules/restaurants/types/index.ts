@@ -1,3 +1,5 @@
+export type MenuLanguage = 'TR' | 'EN'
+
 export interface Product {
   id: string
   name: string
@@ -43,6 +45,7 @@ export interface PublicActiveMenuDto {
   name: string
   description?: string
   isActive: boolean
+  language?: MenuLanguage
 }
 
 export interface PublicMenuCategoryDto {
@@ -72,6 +75,7 @@ export interface PublicMenuItemDto {
 export interface PublicCategoryMenuItemsParams {
   shopId: string
   categoryId: string
+  language: MenuLanguage
   start: number
   end: number
   sort?: string
