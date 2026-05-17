@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart' hide RouteSettings;
 
-/// AppMainScaffold is the main scaffold component used across the application.
+/// AppScaffold is the main scaffold component used across the application.
 ///
 /// This widget provides a consistent layout structure for all screens except
 /// authentication and settings screens.
@@ -10,10 +10,11 @@ import 'package:flutter/material.dart' hide RouteSettings;
 /// - Standardized Material Design Scaffold implementation
 /// - Built-in support for FAB (Floating Action Button)
 /// - Flexible body content
-class AppMainScaffold extends StatelessWidget {
-  const AppMainScaffold({
+class AppScaffold extends StatelessWidget {
+  const AppScaffold({
     required this.body,
     required this.title,
+    this.actions = const [],
     this.drawer,
     this.floatingActionButton,
     this.floatingActionButtonLocation,
@@ -31,6 +32,9 @@ class AppMainScaffold extends StatelessWidget {
 
   /// The title displayed in the AppBar (dynamic)
   final String title;
+
+  /// Optional list of action widgets for the AppBar, which defaults to empty.
+  final List<Widget> actions;
 
   /// Optional drawer widget
   final Widget? drawer;
@@ -64,6 +68,7 @@ class AppMainScaffold extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
+        actions: actions,
         elevation: 2,
       ),
       body: body,

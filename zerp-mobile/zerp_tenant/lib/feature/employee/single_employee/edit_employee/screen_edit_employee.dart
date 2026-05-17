@@ -10,6 +10,7 @@ import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_single_
 import 'package:zerp_tenant/feature/employee/single_employee/edit_employee/cubit_edit_employee.dart';
 import 'package:zerp_tenant/feature/employee/view/widget_username_field.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
+import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @RoutePage()
@@ -175,10 +176,8 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.t.employee.edit.title),
-      ),
+    return AppScaffold(
+      title: context.t.employee.edit.title,
       body: BlocListener<CubitEditEmployee, StateEditEmployee>(
         listener: _listener,
         child: Padding(

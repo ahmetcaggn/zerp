@@ -36,14 +36,14 @@ class AppRoot extends StatelessWidget with LoggerMixinConst<AppRoot> {
             final currentRouteName = appRouter.current.name;
 
             if (state is StateAuthAuthenticated &&
-                currentRouteName != RouteShell.name) {
+                currentRouteName != RouteDashboard.name) {
               if (currentRouteName == RouteAuth.name) {
                 final args = appRouter.current.args as RouteAuthArgs?;
                 final callerRoute = args?.callerRoute;
                 if (callerRoute != null && callerRoute.isNotEmpty) {
                   unawaited(
                     appRouter
-                        .replaceAll([const RouteShell()])
+                        .replaceAll([const RouteDashboard()])
                         .then(
                           (_) => appRouter.pushPath(callerRoute),
                         ),
@@ -60,7 +60,7 @@ class AppRoot extends StatelessWidget with LoggerMixinConst<AppRoot> {
                 'User authenticated but not on shell route. '
                 'Current route: ${appRouter.current.name}',
               );
-              unawaited(appRouter.replaceAll([const RouteShell()]));
+              unawaited(appRouter.replaceAll([const RouteDashboard()]));
             }
 
             if (state is StateAuthUnauthenticated &&

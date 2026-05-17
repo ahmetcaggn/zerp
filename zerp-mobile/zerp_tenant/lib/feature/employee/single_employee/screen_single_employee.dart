@@ -10,6 +10,7 @@ import 'package:zerp_tenant/feature/employee/single_employee/view/permissions_vi
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/error/cubit_error.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
+import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 import 'package:zerp_tenant/product/util/employee_response_extensions.dart';
 
@@ -51,27 +52,25 @@ class _View extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.t.employee.details.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () {
-              final cubit = context.read<CubitSingleEmployee>();
-              unawaited(
-                context.router.push(
-                  RouteEditEmployee(
-                    employeeId: employeeId,
-                    cubitSingleEmployee: cubit,
-                    cubitEmployee: cubitEmployee,
-                  ),
+    return AppScaffold(
+      title: context.t.employee.details.title,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.edit_outlined),
+          onPressed: () {
+            final cubit = context.read<CubitSingleEmployee>();
+            unawaited(
+              context.router.push(
+                RouteEditEmployee(
+                  employeeId: employeeId,
+                  cubitSingleEmployee: cubit,
+                  cubitEmployee: cubitEmployee,
                 ),
-              );
-            },
-          ),
-        ],
-      ),
+              ),
+            );
+          },
+        ),
+      ],
       body: const _EmployeeViewer(),
     );
   }
