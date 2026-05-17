@@ -53,9 +53,9 @@ export const trMessages = {
   teamTickets: {
     title: 'Takim Talepleri',
     emptyState: 'Henuz talep bulunmuyor.',
-    addComment: 'Yorum Ekle',
+    addComment: 'Mesaj Yaz',
     closeTicket: 'Talebi Kapat',
-    commentPlaceholder: 'Yorumunuzu yazin...',
+    commentPlaceholder: 'Mesajinizi yazin...',
   },
   assignedTickets: {
     title: 'Bana Atanan Talepler',

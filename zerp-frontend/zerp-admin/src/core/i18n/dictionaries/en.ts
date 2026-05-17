@@ -53,9 +53,9 @@ export const enMessages = {
   teamTickets: {
     title: 'Team Tickets',
     emptyState: 'No tickets found.',
-    addComment: 'Add Comment',
+    addComment: 'Write Message',
     closeTicket: 'Close Ticket',
-    commentPlaceholder: 'Write your comment...',
+    commentPlaceholder: 'Write your message...',
   },
   assignedTickets: {
     title: 'Assigned Tickets',

@@ -13,7 +13,7 @@ import type {
 } from '../types/team'
 
 interface TeamMemberCandidateListParams extends RaListParams {
-  username?: string
+  query?: string
 }
 
 const base = createResourceClient<
@@ -40,10 +40,10 @@ export const teamClient = {
     id: string,
     params: TeamMemberCandidateListParams = {},
   ): Promise<RaListResult<TeamMemberCandidateResponse>> => {
-    const { username, ...listParams } = params
+    const { query: searchQuery, ...listParams } = params
     const query = new URLSearchParams(toRaQueryString(listParams))
-    if (username && username.trim()) {
-      query.set('username', username.trim())
+    if (searchQuery && searchQuery.trim()) {
+      query.set('query', searchQuery.trim())
     }
     return httpClient.requestList<TeamMemberCandidateResponse>(
       `/crm/teams/${id}/member-candidates?${query.toString()}`,

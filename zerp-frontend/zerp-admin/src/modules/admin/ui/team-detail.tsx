@@ -28,7 +28,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
@@ -60,6 +60,7 @@ export function TeamDetail({ id }: Props) {
   const [editOpen, setEditOpen] = useState(false)
   const [selectedCandidateId, setSelectedCandidateId] = useState('')
   const [candidateSearch, setCandidateSearch] = useState('')
+  const [debouncedCandidateSearch, setDebouncedCandidateSearch] = useState('')
   const [candidatePage, setCandidatePage] = useState(1)
   const [addMemberRole, setAddMemberRole] = useState<string>(TeamMemberRole.Member)
   const [showAddMember, setShowAddMember] = useState(false)
@@ -82,7 +83,24 @@ export function TeamDetail({ id }: Props) {
   const canReadUser = hasPermission(PermissionActions.READ_USER)
   const canCreateTeamMemberWithUserList = canCreateTeamMember && canReadUser
 
-  const normalizedCandidateSearch = candidateSearch.trim()
+  useEffect(() => {
+    const normalizedInput = candidateSearch.trim()
+    if (!normalizedInput) {
+      setDebouncedCandidateSearch('')
+      return
+    }
+
+    const timer = window.setTimeout(() => {
+      setDebouncedCandidateSearch(normalizedInput)
+    }, 1000)
+
+    return () => window.clearTimeout(timer)
+  }, [candidateSearch])
+
+  const normalizedCandidateSearch = debouncedCandidateSearch.trim()
+  const isDebouncing =
+    candidateSearch.trim().length > 0 &&
+    candidateSearch.trim() !== debouncedCandidateSearch
   const {
     data: candidateResult,
     isLoading: isLoadingCandidates,
@@ -92,7 +110,7 @@ export function TeamDetail({ id }: Props) {
     {
       pagination: { page: candidatePage, perPage: CANDIDATE_PAGE_SIZE },
       sort: { field: 'username', order: 'ASC' },
-      username: normalizedCandidateSearch || undefined,
+      query: normalizedCandidateSearch || undefined,
     },
     {
       enabled: canCreateTeamMemberWithUserList && showAddMember,
@@ -166,6 +184,9 @@ export function TeamDetail({ id }: Props) {
       {
         onSuccess: () => {
           setSelectedCandidateId('')
+          setCandidateSearch('')
+          setDebouncedCandidateSearch('')
+          setCandidatePage(1)
           setShowAddMember(false)
           showToast('Üye eklendi.', { severity: 'success' })
         },
@@ -232,6 +253,7 @@ export function TeamDetail({ id }: Props) {
                 if (!next) {
                   setSelectedCandidateId('')
                   setCandidateSearch('')
+                  setDebouncedCandidateSearch('')
                   setCandidatePage(1)
                 }
                 return next
@@ -257,37 +279,24 @@ export function TeamDetail({ id }: Props) {
               gap: 2,
               gridTemplateColumns: {
                 xs: '1fr',
-                md: '1.2fr 1.2fr 160px auto',
+                md: 'minmax(0,1fr) 190px auto',
               },
-              alignItems: 'flex-end',
+              alignItems: 'flex-start',
             }}
           >
             <TextField
               size="small"
-              label="Kullanıcı Ara (username)"
+              label="Kullanıcı Ara"
               value={candidateSearch}
               onChange={(event) => {
                 setCandidateSearch(event.target.value)
+                setSelectedCandidateId('')
                 setCandidatePage(1)
               }}
-              helperText="Sadece system tenant kullanıcıları listelenir."
+              helperText="Ad soyad, username, email veya ID ile arayın. 1 saniye sonra sonuçlar listelenir."
+              sx={{ minWidth: 0 }}
             />
-            <FormControl size="small" sx={{ minWidth: 240 }}>
-              <InputLabel>Kullanıcı</InputLabel>
-              <Select
-                value={effectiveSelectedCandidateId}
-                label="Kullanıcı"
-                onChange={(event) => setSelectedCandidateId(event.target.value)}
-                disabled={isLoadingCandidates}
-              >
-                {candidateUsers.map((candidate) => (
-                  <MenuItem key={candidate.id} value={candidate.id}>
-                    {candidate.username} ({candidate.email})
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl size="small" sx={{ minWidth: 140 }}>
+            <FormControl size="small" sx={{ width: '100%' }}>
               <InputLabel>Rol</InputLabel>
               <Select
                 value={addMemberRole}
@@ -302,13 +311,18 @@ export function TeamDetail({ id }: Props) {
               variant="contained"
               onClick={handleAddMember}
               disabled={isAddingMember || !effectiveSelectedCandidateId}
+              sx={{ height: 40, minWidth: 96 }}
             >
               Ekle
             </Button>
           </Box>
 
-          <Box sx={{ mt: 1 }}>
-            {isLoadingCandidates || isFetchingCandidates ? (
+          <Box sx={{ mt: 1.5 }}>
+            {isDebouncing ? (
+              <Typography variant="body2" color="text.secondary">
+                Arama için bekleniyor...
+              </Typography>
+            ) : isLoadingCandidates || isFetchingCandidates ? (
               <Typography variant="body2" color="text.secondary">
                 Kullanıcılar yükleniyor...
               </Typography>
@@ -323,15 +337,59 @@ export function TeamDetail({ id }: Props) {
             )}
           </Box>
 
-          <TablePagination
-            component="div"
-            count={candidateTotal}
-            page={Math.max(candidatePage - 1, 0)}
-            rowsPerPage={CANDIDATE_PAGE_SIZE}
-            rowsPerPageOptions={[CANDIDATE_PAGE_SIZE]}
-            onPageChange={(_, nextPage) => setCandidatePage(nextPage + 1)}
-            onRowsPerPageChange={() => {}}
-          />
+          {!isDebouncing && candidateUsers.length > 0 && (
+            <Box
+              sx={{
+                mt: 1.5,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                maxHeight: 240,
+                overflowY: 'auto',
+              }}
+            >
+              {candidateUsers.map((candidate) => {
+                const isSelected = effectiveSelectedCandidateId === candidate.id
+                return (
+                  <Box
+                    key={candidate.id}
+                    onClick={() => setSelectedCandidateId(candidate.id)}
+                    sx={{
+                      px: 1.5,
+                      py: 1,
+                      borderBottom: '1px solid',
+                      borderBottomColor: 'divider',
+                      cursor: 'pointer',
+                      bgcolor: isSelected ? 'action.selected' : 'transparent',
+                      '&:last-of-type': {
+                        borderBottom: 'none',
+                      },
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                      },
+                    }}
+                  >
+                    <Typography variant="body2">{candidate.displayName}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {candidate.displayLabel}
+                    </Typography>
+                  </Box>
+                )
+              })}
+            </Box>
+          )}
+
+          {!isDebouncing && candidateTotal > 0 && (
+            <TablePagination
+              component="div"
+              count={candidateTotal}
+              page={Math.max(candidatePage - 1, 0)}
+              rowsPerPage={CANDIDATE_PAGE_SIZE}
+              rowsPerPageOptions={[CANDIDATE_PAGE_SIZE]}
+              onPageChange={(_, nextPage) => setCandidatePage(nextPage + 1)}
+              onRowsPerPageChange={() => {}}
+            />
+          )}
         </Paper>
       )}
 
@@ -340,7 +398,7 @@ export function TeamDetail({ id }: Props) {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>Kullanıcı ID</TableCell>
+              <TableCell>Üye</TableCell>
               <TableCell>Rol</TableCell>
               <TableCell>Katılım Tarihi</TableCell>
               <TableCell align="right">İşlemler</TableCell>
@@ -349,7 +407,21 @@ export function TeamDetail({ id }: Props) {
           <TableBody>
             {currentTeam.members?.map((member, index) => (
               <TableRow key={member.id ?? `${member.userId ?? 'member'}-${index}`} hover>
-                <TableCell>{member.userId ?? '—'}</TableCell>
+                <TableCell>
+                  <Typography variant="body2">
+                    {member.displayName ?? member.userId ?? '—'}
+                  </Typography>
+                  {member.userId && (
+                    <Typography variant="caption" color="text.secondary">
+                      {member.userId}
+                    </Typography>
+                  )}
+                  {member.email && (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                      {member.email}
+                    </Typography>
+                  )}
+                </TableCell>
                 <TableCell>
                   <Chip
                     label={member.role === 'LEADER' ? t('teams.roleLeader') : t('teams.roleMember')}

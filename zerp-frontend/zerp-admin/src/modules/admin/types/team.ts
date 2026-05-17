@@ -3,12 +3,16 @@ import type { IssueTypeValue } from './ticket'
 export interface TeamMemberResponse {
   id?: string
   userId?: string
+  displayName?: string
+  email?: string
   role?: TeamMemberRoleValue
   joinedAt?: string
 }
 
 export interface TeamMemberCandidateResponse {
   id: string
+  displayName: string
+  displayLabel: string
   username: string
   email: string
 }
