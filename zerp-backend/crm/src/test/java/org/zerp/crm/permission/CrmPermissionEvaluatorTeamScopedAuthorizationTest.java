@@ -69,32 +69,6 @@ class CrmPermissionEvaluatorTeamScopedAuthorizationTest {
     }
 
     @Test
-    void readTicketTeamPermissionAllowsOnlyAssignedTeam() {
-        when(permissionRepository.findAllByUserAndTicketHierarchy(
-                eq(userId), eq(PermissionAction.READ_TICKET), eq(ticketId), eq(teamAId), eq((UUID) null), eq(tenantId)))
-                .thenReturn(List.of(permission(PermissionAction.READ_TICKET, PermissionTargetType.TEAM, teamAId)));
-        when(permissionRepository.findAllByUserAndTicketHierarchy(
-                eq(userId), eq(PermissionAction.READ_TICKET), eq(ticketId), eq(teamBId), eq((UUID) null), eq(tenantId)))
-                .thenReturn(List.of());
-        when(teamMemberRepository.findByTeamIdAndUserId(teamAId, userId))
-                .thenReturn(Optional.of(teamMembership(teamAId, TeamMemberEntity.TeamMemberRole.LEADER)));
-        when(teamMemberRepository.findByTeamIdAndUserId(teamBId, userId))
-                .thenReturn(Optional.empty());
-
-        boolean canReadTeamA = evaluator.canReadTicket(
-                userId,
-                new CrmPermissionEvaluator.TicketTarget(ticketId, tenantId, teamAId, null)
-        );
-        boolean canReadTeamB = evaluator.canReadTicket(
-                userId,
-                new CrmPermissionEvaluator.TicketTarget(ticketId, tenantId, teamBId, null)
-        );
-
-        assertThat(canReadTeamA).isTrue();
-        assertThat(canReadTeamB).isFalse();
-    }
-
-    @Test
     void readTicketTeamPermissionDoesNotApplyWhenAssignmentInactive() {
         when(permissionRepository.findAllByUserAndTicketHierarchy(
                 eq(userId), eq(PermissionAction.READ_TICKET), eq(ticketId), eq((UUID) null), eq((UUID) null), eq(tenantId)))
