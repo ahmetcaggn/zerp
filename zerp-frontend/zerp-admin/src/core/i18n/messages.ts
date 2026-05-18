@@ -52,6 +52,25 @@ export interface MessageDictionary {
     inactiveLabel: string
     roleLeader: string
     roleMember: string
+    permissionsSectionTitle: string
+    permissionsSectionDescription: string
+    permissionActionField: string
+    permissionSearchPlaceholder: string
+    permissionTargetTypeField: string
+    permissionTargetField: string
+    permissionNoOptions: string
+    permissionAlreadyAdded: string
+    permissionAddButton: string
+    permissionsDialogTitle: string
+    permissionsDialogSubtitle: string
+    permissionsSearchField: string
+    permissionsEmptyState: string
+    actionsColumnLabel: string
+    permissionRemoveButton: string
+    closeButtonLabel: string
+    permissionAssignedToast: string
+    permissionRemovedToast: string
+    permissionAssignPartialError: string
   }
   teamTickets: {
     title: string
