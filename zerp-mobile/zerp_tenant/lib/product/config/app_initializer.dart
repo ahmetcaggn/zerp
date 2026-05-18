@@ -19,7 +19,7 @@ abstract final class AppInitializer {
     await StorageInitializer.initialize();
 
     // localization
-    LocaleSettings.useDeviceLocaleSync();
+    await LocaleSettings.useDeviceLocale();
 
     // logging
     final loggerHelper = await RemoteLogging.init(
