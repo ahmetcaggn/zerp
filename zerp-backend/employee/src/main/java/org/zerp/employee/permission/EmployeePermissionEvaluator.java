@@ -10,6 +10,8 @@ import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
 import org.zerp.common.permission.service.CommonPermissionService;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 
 import java.util.List;
 import java.util.Set;
@@ -83,7 +85,10 @@ public class EmployeePermissionEvaluator {
 
 		return Specification.anyOf(
 				(root, _, _) -> root.get("id").in(permittedEmployeeIds),
-				(root, _, cb) -> root.get("tenant").get("id").in(permittedTenantIds)
+				(root, _, cb) -> {
+					Join<Object, Object> tenantJoin = root.join("tenant", JoinType.INNER);
+					return tenantJoin.get("id").in(permittedTenantIds);
+				}
 		);
 	}
 }
