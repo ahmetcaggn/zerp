@@ -129,7 +129,16 @@ public class FilterProcessor {
                 return result;
             } else if (Enum.class.isAssignableFrom(type)) {
                 //noinspection unchecked,rawtypes
-                Enum<?> result = Enum.valueOf((Class<Enum>) type.asSubclass(Enum.class), value);
+                Class<Enum> enumClass = (Class<Enum>) type.asSubclass(Enum.class);
+                for (Enum<?> enumConstant : enumClass.getEnumConstants()) {
+                    if (enumConstant.name().equalsIgnoreCase(value)) {
+                        log.trace("Successfully converted to Enum (case-insensitive): original={}, result={}, enumType={}",
+                                value, enumConstant, type.getSimpleName());
+                        return enumConstant;
+                    }
+                }
+                // Fallback to default Enum.valueOf to let it throw standard exception if not found
+                Enum<?> result = Enum.valueOf(enumClass, value);
                 log.trace("Successfully converted to Enum: original={}, result={}, enumType={}",
                         value, result, type.getSimpleName());
                 return result;
