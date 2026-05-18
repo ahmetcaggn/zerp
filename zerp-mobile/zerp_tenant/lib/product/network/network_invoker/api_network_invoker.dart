@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
+import 'package:zerp_tenant/product/network/api_url_helper.dart';
 import 'package:zerp_tenant/product/service/auth/auth_storage_service.dart';
 
 @lazySingleton
@@ -13,7 +14,7 @@ final class ApiNetworkInvoker extends DioNetworkInvoker
   ApiNetworkInvoker(this._cubitAuth, this._authStorageService)
     : super.fromDio(
         Dio(
-          BaseOptions(baseUrl: 'https://zerpapi.femrek.dev'),
+          BaseOptions(baseUrl: ApiUrlHelper.defaultBaseUrl),
         ),
       ) {
     dio.interceptors.add(
@@ -46,6 +47,11 @@ final class ApiNetworkInvoker extends DioNetworkInvoker
         },
       ),
     );
+  }
+
+  void updateBaseUrl(String url) {
+    dio.options.baseUrl = url;
+    log.info('API base URL updated to: $url');
   }
 
   final CubitAuth _cubitAuth;

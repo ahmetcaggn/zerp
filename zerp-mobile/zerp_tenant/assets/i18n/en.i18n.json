@@ -48,7 +48,20 @@
     "title": "Stores"
   },
   "settings": {
-    "title": "Settings"
+    "title": "Settings",
+    "apiUrlTitle": "API Base URL Configuration",
+    "apiUrlSubtitle": "Configure the base API host URL for network requests.",
+    "activeUrl": "Active Base URL",
+    "predefinedUrls": "Predefined Server URLs",
+    "customUrl": "Custom Server URL",
+    "customUrlHint": "Enter custom API URL (e.g., http://10.0.2.2:8080)",
+    "invalidUrl": "Please enter a valid HTTP/HTTPS URL",
+    "saveSuccess": "Settings saved and active API URL updated successfully!",
+    "noPredefined": "No predefined server URLs found",
+    "statusChecking": "Checking Connection...",
+    "statusConnected": "Connected",
+    "statusDisconnected": "Offline",
+    "statusUnknown": "Unknown Status"
   },
   "common": {
     "hello": "Hello $name",

@@ -48,7 +48,20 @@
     "title": "Mağazalar"
   },
   "settings": {
-    "title": "Ayarlar"
+    "title": "Ayarlar",
+    "apiUrlTitle": "API Sunucu Adresi Yapılandırması",
+    "apiUrlSubtitle": "Ağ istekleri için kullanılacak ana API sunucu adresini yapılandırın.",
+    "activeUrl": "Aktif Sunucu Adresi",
+    "predefinedUrls": "Tanımlı Sunucu Adresleri",
+    "customUrl": "Özel Sunucu Adresi",
+    "customUrlHint": "Özel API adresi girin (örn. http://10.0.2.2:8080)",
+    "invalidUrl": "Lütfen geçerli bir HTTP/HTTPS adresi girin",
+    "saveSuccess": "Ayarlar kaydedildi ve aktif API sunucu adresi güncellendi!",
+    "noPredefined": "Tanımlı sunucu adresi bulunamadı",
+    "statusChecking": "Bağlantı Kontrol Ediliyor...",
+    "statusConnected": "Bağlantı Kuruldu",
+    "statusDisconnected": "Çevrimdışı",
+    "statusUnknown": "Bilinmeyen Durum"
   },
   "common": {
     "hello": "Merhaba $name",
