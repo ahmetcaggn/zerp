@@ -24,10 +24,14 @@ public class S3Initialize {
                 log.debug("Bucket '{}' already exists and is owned by you. Skipping bucket creation.",
                         properties.bucketName());
             } else {
-                throw e;
+                log.warn("S3Exception occurred during bucket '{}' creation: {}",
+                        properties.bucketName(), e.getMessage());
             }
         } catch (IllegalArgumentException e) {
             log.warn("Bucket name '{}' is not valid. Skipping bucket creation: {}",
+                    properties.bucketName(), e.getMessage());
+        } catch (Exception e) {
+            log.warn("Failed to initialize S3 bucket '{}'. S3 features may not work: {}",
                     properties.bucketName(), e.getMessage());
         }
     }
