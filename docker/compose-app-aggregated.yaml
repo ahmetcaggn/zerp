@@ -29,14 +29,6 @@ services:
         SERVICE: aggregated
     container_name: zerp-aggregated
     hostname: aggregated
-    ports:
-      - "8081:8081"
-      - "8082:8082"
-      - "8083:8083"
-      - "8084:8084"
-      - "8085:8085"
-      - "8086:8086"
-      - "8087:8087"
     environment:
       SPRING_PROFILES_ACTIVE: ${AGGREGATED_SPRING_PROFILES_ACTIVE}
       LOG4J2_CONFIG_PATH: ${AGGREGATED_LOG4J2_CONFIG_PATH}

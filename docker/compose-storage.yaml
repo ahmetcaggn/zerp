@@ -7,9 +7,6 @@ services:
     ports:
       - "9090:9090" # admin panel
       - "9000:9000" # api
-    #expose:
-      #- "9000"
-      #- "9090"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
@@ -22,8 +19,6 @@ services:
     restart: unless-stopped
     ports:
       - "8888:8888"
-    #expose:
-      #- "8888"
     environment:
       LOG_LEVEL: "warning"
 
