@@ -138,6 +138,7 @@ public class FilterProcessor {
                     }
                 }
                 // Fallback to default Enum.valueOf to let it throw standard exception if not found
+                @SuppressWarnings("unchecked")
                 Enum<?> result = Enum.valueOf(enumClass, value);
                 log.trace("Successfully converted to Enum: original={}, result={}, enumType={}",
                         value, result, type.getSimpleName());
