@@ -7,9 +7,11 @@ spring.datasource.password=
 
 eureka.client.service-url.defaultZone=http://localhost:8761/eureka/
 
+app.crm.system-tenant-id=00000000-0000-0000-0000-000000000000
+
 s3.repository.bucket-name=zerp-images
 s3.repository.username=admin
 s3.repository.password=admin1234
 
-user.thumbor.host=THUMBOR_HOST:http://localhost:8000/
+user.thumbor.host=http://localhost:8000/
 s3.repository.endpoint=http://localhost:9000
