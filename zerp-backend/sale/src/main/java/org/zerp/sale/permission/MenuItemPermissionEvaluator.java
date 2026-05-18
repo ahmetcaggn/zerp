@@ -133,7 +133,7 @@ public class MenuItemPermissionEvaluator {
                 (root, _, _) -> root.get("category").get("id").in(permittedCategoryIds),
                 (root, _, _) -> root.get("category").get("menu").get("id").in(permittedMenuIds),
                 (root, _, _) -> root.get("category").get("menu").get("shop").get("id").in(permittedShopIds),
-                (root, _, _) -> root.get("category").get("menu").get("shop").get("tenant").get("id").in(permittedTenantIds)
+                (root, _, _) -> root.get("tenantId").in(permittedTenantIds)
         );
     }
 }

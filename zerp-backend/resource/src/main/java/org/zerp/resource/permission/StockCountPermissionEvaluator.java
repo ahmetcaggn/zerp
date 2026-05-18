@@ -115,7 +115,7 @@ public class StockCountPermissionEvaluator {
         return Specification.anyOf(
                 (root, _, _) -> root.get("id").in(permittedStockCountIds),
                 (root, _, _) -> root.get("shop").get("id").in(permittedShopIds),
-                (root, _, _) -> root.get("shop").get("tenant").get("id").in(permittedTenantIds)
+                (root, _, _) -> root.get("tenantId").in(permittedTenantIds)
         );
     }
 }

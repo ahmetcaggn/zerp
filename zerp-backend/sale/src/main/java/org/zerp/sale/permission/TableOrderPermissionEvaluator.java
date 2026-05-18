@@ -124,7 +124,7 @@ public class TableOrderPermissionEvaluator {
                 (root, _, _) -> root.get("id").in(permittedOrderIds),
                 (root, _, _) -> root.get("shopTable").get("id").in(permittedTableIds),
                 (root, _, _) -> root.get("shop").get("id").in(permittedShopIds),
-                (root, _, _) -> root.get("shop").get("tenant").get("id").in(permittedTenantIds)
+                (root, _, _) -> root.get("tenantId").in(permittedTenantIds)
         );
     }
 }

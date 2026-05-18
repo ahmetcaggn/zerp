@@ -83,7 +83,7 @@ public class EmployeePermissionEvaluator {
 
 		return Specification.anyOf(
 				(root, _, _) -> root.get("id").in(permittedEmployeeIds),
-				(root, _, _) -> root.get("tenant").get("id").in(permittedTenantIds)
+				(root, _, _) -> root.get("tenantId").in(permittedTenantIds)
 		);
 	}
 }

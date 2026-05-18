@@ -114,7 +114,7 @@ public class ProductPermissionEvaluator {
         return Specification.anyOf(
                 (root, _, _) -> root.get("id").in(permittedProductIds),
                 (root, _, _) -> root.get("shop").get("id").in(permittedShopIds),
-                (root, _, _) -> root.get("shop").get("tenant").get("id").in(permittedTenantIds)
+                (root, _, _) -> root.get("tenantId").in(permittedTenantIds)
         );
     }
 }
