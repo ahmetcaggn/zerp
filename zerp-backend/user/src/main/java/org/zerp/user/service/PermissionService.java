@@ -23,6 +23,7 @@ import org.zerp.user.dto.permission.PermissionCreateRequestDTO;
 import org.zerp.user.dto.permission.PermissionResponse;
 import org.zerp.user.dto.permission.PermissionUpdateRequest;
 import org.zerp.user.mapper.PermissionMapper;
+import org.zerp.user.permission.PermissionActionTargetPolicy;
 import org.zerp.user.permission.PermissionPermissionEvaluator;
 
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import java.util.UUID;
 public class PermissionService implements IResourceService<PermissionResponse, PermissionResponse, PermissionCreateRequestDTO, PermissionUpdateRequest, Long> {
     private final PermissionRepository repository;
     private final PermissionPermissionEvaluator permissionEvaluator;
+    private final PermissionActionTargetPolicy actionTargetPolicy;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final FilterRefiner filterRefiner;
     private final PermissionMapper permissionMapper;
@@ -250,13 +252,13 @@ public class PermissionService implements IResourceService<PermissionResponse, P
     }
 
     public List<PermissionAction> getAllPermissions() {
-        if (!permissionEvaluator.canReadPermissionActions(resolveCurrentUserId())) {
-            log.warn("User {} attempted to read Permission actions without sufficient permissions",
-                    resolveCurrentUserId());
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "You don't have permission to read Permission actions");
-        }
+        ensureCanReadPermissionActions();
         return List.of(PermissionAction.values());
+    }
+
+    public Map<PermissionAction, List<PermissionTargetType>> getAssignablePermissionTargets() {
+        ensureCanReadPermissionActions();
+        return actionTargetPolicy.getAssignableTargetsByAction();
     }
 
     private void validateRequiredFields(PermissionCreateRequestDTO request) {
@@ -284,6 +286,13 @@ public class PermissionService implements IResourceService<PermissionResponse, P
         if (userId == null || targetType == null || targetId == null || action == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "userId, targetType, targetId and action are required");
+        }
+
+        if (!actionTargetPolicy.isAssignable(action, targetType)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Action " + action + " cannot be assigned to targetType " + targetType
+            );
         }
     }
 
@@ -338,5 +347,15 @@ public class PermissionService implements IResourceService<PermissionResponse, P
 
     private UUID resolveCurrentUserId() {
         return currentUserIdResolver.resolve();
+    }
+
+    private void ensureCanReadPermissionActions() {
+        UUID userId = resolveCurrentUserId();
+        if (!permissionEvaluator.canReadPermissionActions(userId)) {
+            log.warn("User {} attempted to read Permission actions without sufficient permissions",
+                    userId);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You don't have permission to read Permission actions");
+        }
     }
 }

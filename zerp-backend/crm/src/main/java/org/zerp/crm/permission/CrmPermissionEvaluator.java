@@ -12,6 +12,7 @@ import org.zerp.common.entity.crm.TicketEntity;
 import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
+import org.zerp.common.permission.entity.PermissionActionSets;
 import org.zerp.common.permission.repository.PermissionRepository;
 import org.zerp.common.permission.service.CommonPermissionService;
 import org.zerp.crm.repository.TeamMemberRepository;
@@ -77,23 +78,6 @@ public class CrmPermissionEvaluator {
             PermissionAction.READ_TICKET_WATCHER,
             PermissionAction.UPDATE_TICKET_WATCHER,
             PermissionAction.DELETE_TICKET_WATCHER
-    );
-
-    private static final Set<PermissionAction> ASSIGNMENT_SCOPED_TICKET_ACTIONS = EnumSet.of(
-            PermissionAction.READ_TICKET,
-            PermissionAction.UPDATE_TICKET,
-            PermissionAction.READ_TICKET_ASSIGNMENT,
-            PermissionAction.CREATE_TICKET_ASSIGNMENT,
-            PermissionAction.UPDATE_TICKET_ASSIGNMENT,
-            PermissionAction.DELETE_TICKET_ASSIGNMENT,
-            PermissionAction.READ_TICKET_COMMENT,
-            PermissionAction.CREATE_TICKET_COMMENT,
-            PermissionAction.READ_TICKET_HISTORY,
-            PermissionAction.READ_TICKET_SLA_TRACKING,
-            PermissionAction.CREATE_TICKET_ATTACHMENT,
-            PermissionAction.READ_TICKET_ATTACHMENT,
-            PermissionAction.UPDATE_TICKET_ATTACHMENT,
-            PermissionAction.DELETE_TICKET_ATTACHMENT
     );
 
     public record TenantRootParent() {
@@ -757,6 +741,6 @@ public class CrmPermissionEvaluator {
     }
 
     private boolean isAssignmentScopedTicketAction(PermissionAction action) {
-        return ASSIGNMENT_SCOPED_TICKET_ACTIONS.contains(action);
+        return PermissionActionSets.ASSIGNMENT_SCOPED_TICKET_ACTIONS.contains(action);
     }
 }
