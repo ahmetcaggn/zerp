@@ -40,6 +40,8 @@ interface Props {
   onAdd: (assignment: PermissionAssignmentInput) => void
   existingKeys?: ReadonlySet<string>
   disabled?: boolean
+  i18nPrefix?: 'teams' | 'employees'
+  prefilledTargets?: Partial<Record<string, PermittableOption>>
 }
 
 function formatTargetOptionLabel(option: PermittableOption): string {
@@ -54,7 +56,13 @@ function toPermittableOption(item: PermittableResponseDto): PermittableOption | 
   }
 }
 
-export function PermissionAssignmentBuilder({ onAdd, existingKeys, disabled = false }: Props) {
+export function PermissionAssignmentBuilder({
+  onAdd,
+  existingKeys,
+  disabled = false,
+  i18nPrefix = 'teams',
+  prefilledTargets,
+}: Props) {
   const { t } = useI18n()
   const {
     data: actionHierarchy,
@@ -151,6 +159,10 @@ export function PermissionAssignmentBuilder({ onAdd, existingKeys, disabled = fa
   const isDuplicate = Boolean(assignmentKey && existingKeys?.has(assignmentKey))
   const isAnyTargetLoading = targetQueries.some((query) => query.isLoading || query.isFetching)
 
+  function prefixedLabel(key: string): string {
+    return t(`${i18nPrefix}.${key}`)
+  }
+
   function resetTargetSelections() {
     setSelectedTargetsByType({})
     setSearchByType({})
@@ -164,7 +176,22 @@ export function PermissionAssignmentBuilder({ onAdd, existingKeys, disabled = fa
 
   function handleTargetTypeChange(targetType: PermissionTargetType | null) {
     setSelectedTargetType(targetType)
-    resetTargetSelections()
+    
+    if (targetType) {
+      const chain = getSelectableTargetChain(targetType)
+      const newSelections: Record<string, PermittableOption | null> = {}
+      for (const t of chain) {
+        if (prefilledTargets?.[t]) {
+          newSelections[t] = prefilledTargets[t] as PermittableOption
+        } else {
+          break
+        }
+      }
+      setSelectedTargetsByType(newSelections)
+    } else {
+      setSelectedTargetsByType({})
+    }
+    setSearchByType({})
   }
 
   function handleTargetSelection(
@@ -198,9 +225,9 @@ export function PermissionAssignmentBuilder({ onAdd, existingKeys, disabled = fa
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-      <Typography variant="subtitle2">{t('teams.permissionsSectionTitle')}</Typography>
+      <Typography variant="subtitle2">{prefixedLabel('permissionsSectionTitle')}</Typography>
       <Typography variant="body2" color="text.secondary">
-        {t('teams.permissionsSectionDescription')}
+        {prefixedLabel('permissionsSectionDescription')}
       </Typography>
 
       <Autocomplete
@@ -211,11 +238,12 @@ export function PermissionAssignmentBuilder({ onAdd, existingKeys, disabled = fa
         disabled={disabled || isActionsLoading}
         loading={isActionsLoading}
         getOptionLabel={(option) => prettifyPermissionEnumName(option)}
+        ListboxProps={{ style: { maxHeight: 250 } }}
         renderInput={(params) => (
           <TextField
             {...params}
-            label={t('teams.permissionActionField')}
-            placeholder={t('teams.permissionSearchPlaceholder')}
+            label={prefixedLabel('permissionActionField')}
+            placeholder={prefixedLabel('permissionSearchPlaceholder')}
             error={Boolean(actionsError)}
           />
         )}
@@ -228,8 +256,9 @@ export function PermissionAssignmentBuilder({ onAdd, existingKeys, disabled = fa
         onChange={(_, value) => handleTargetTypeChange(value)}
         disabled={disabled || !selectedAction}
         getOptionLabel={(option) => prettifyPermissionEnumName(option)}
+        ListboxProps={{ style: { maxHeight: 250 } }}
         renderInput={(params) => (
-          <TextField {...params} label={t('teams.permissionTargetTypeField')} />
+          <TextField {...params} label={prefixedLabel('permissionTargetTypeField')} />
         )}
       />
 
@@ -252,13 +281,14 @@ export function PermissionAssignmentBuilder({ onAdd, existingKeys, disabled = fa
             onChange={(_, value) => handleTargetSelection(targetType, index, value)}
             disabled={disabled || !parentSelected}
             loading={query.isLoading || query.isFetching}
-            noOptionsText={t('teams.permissionNoOptions')}
+            noOptionsText={prefixedLabel('permissionNoOptions')}
             isOptionEqualToValue={(option, value) => option.id === value.id}
             getOptionLabel={(option) => formatTargetOptionLabel(option)}
+            ListboxProps={{ style: { maxHeight: 250 } }}
             renderInput={(params) => (
               <TextField
                 {...params}
-                label={`${t('teams.permissionTargetField')} · ${prettifyPermissionEnumName(targetType)}`}
+                label={`${prefixedLabel('permissionTargetField')} · ${prettifyPermissionEnumName(targetType)}`}
                 error={Boolean(query.error)}
               />
             )}
@@ -268,7 +298,7 @@ export function PermissionAssignmentBuilder({ onAdd, existingKeys, disabled = fa
 
       <Divider />
 
-      {isDuplicate && <Alert severity="info">{t('teams.permissionAlreadyAdded')}</Alert>}
+      {isDuplicate && <Alert severity="info">{prefixedLabel('permissionAlreadyAdded')}</Alert>}
 
       <Button
         variant="outlined"
@@ -284,7 +314,7 @@ export function PermissionAssignmentBuilder({ onAdd, existingKeys, disabled = fa
           isAnyTargetLoading
         }
       >
-        {t('teams.permissionAddButton')}
+        {prefixedLabel('permissionAddButton')}
       </Button>
     </Box>
   )

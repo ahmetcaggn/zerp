@@ -5,6 +5,8 @@ export const ROUTES = {
   login: '/login',
   register: '/register',
   dashboard: '/dashboard',
+  tenants: '/tenants',
+  shops: '/shops',
   teams: '/teams',
   teamTickets: '/team-tickets',
   assignedTickets: '/assigned-tickets',
@@ -15,6 +17,8 @@ export const PUBLIC_PATHS = [ROUTES.root, ROUTES.login, ROUTES.register] as cons
 export const AUTH_PATHS = [ROUTES.login, ROUTES.register] as const
 export const PROTECTED_PATHS = [
   ROUTES.dashboard,
+  ROUTES.tenants,
+  ROUTES.shops,
   ROUTES.teams,
   ROUTES.teamTickets,
   ROUTES.assignedTickets,

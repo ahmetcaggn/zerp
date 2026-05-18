@@ -1,5 +1,6 @@
 'use client'
 
+import ApartmentRoundedIcon from '@mui/icons-material/ApartmentRounded'
 import AssignmentTurnedInRoundedIcon from '@mui/icons-material/AssignmentTurnedInRounded'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
@@ -38,6 +39,7 @@ const COLLAPSED_DRAWER_WIDTH = 72
 
 type SidebarLabelKey =
   | 'nav.dashboard'
+  | 'nav.tenants'
   | 'nav.teamManagement'
   | 'nav.ticketManagement'
   | 'nav.assignedTickets'
@@ -58,6 +60,12 @@ const TEAM_PERMISSION_ACTIONS: readonly PermissionAction[] = [
   PermissionActions.CREATE_TEAM_MEMBER,
   PermissionActions.UPDATE_TEAM_MEMBER,
   PermissionActions.DELETE_TEAM_MEMBER,
+]
+
+const TENANT_PERMISSION_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.READ_TENANT,
+  PermissionActions.UPDATE_TENANT,
+  PermissionActions.ADMIN_TENANT,
 ]
 
 const TICKET_MANAGEMENT_ACTIONS: readonly PermissionAction[] = [
@@ -84,9 +92,23 @@ export function AppSidebar({ locale }: { locale: 'tr' | 'en' }) {
   const { t } = useI18n()
   const { hasPermission, hasAnyPermission, isLoadingPermissions } = useCurrentUserPermissions()
 
+  const canViewTenants = hasAnyPermission(TENANT_PERMISSION_ACTIONS)
   const canViewTeamManagement = hasAnyPermission(TEAM_PERMISSION_ACTIONS)
   const canViewTicketManagement = hasAnyPermission(TICKET_MANAGEMENT_ACTIONS)
   const canViewAssignedTickets = hasPermission(PermissionActions.READ_TICKET)
+
+  const tenantActions = useMemo<SidebarAction[]>(() => {
+    const actions: SidebarAction[] = []
+    if (canViewTenants) {
+      actions.push({
+        id: 'tenants',
+        labelKey: 'nav.tenants',
+        icon: <ApartmentRoundedIcon />,
+        href: ROUTES.tenants,
+      })
+    }
+    return actions
+  }, [canViewTenants])
 
   const crmActions = useMemo<SidebarAction[]>(() => {
     const actions: SidebarAction[] = []
@@ -234,13 +256,14 @@ export function AppSidebar({ locale }: { locale: 'tr' | 'en' }) {
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
           <CircularProgress size={20} />
         </Box>
-      ) : crmActions.length > 0 ? (
+      ) : tenantActions.length > 0 || crmActions.length > 0 ? (
         <List sx={{ pt: 0 }}>
           {isExpanded && (
             <Typography variant="caption" color="text.secondary" sx={{ px: 3, py: 1.25, display: 'block' }}>
               {t('nav.crm')}
             </Typography>
           )}
+          {tenantActions.map((action) => renderAction(action, true))}
           {crmActions.map((action) => renderAction(action, true))}
         </List>
       ) : null}
