@@ -17,11 +17,12 @@ class EmployeeService extends ServiceBase with LoggerMixin<EmployeeService> {
 
   Future<PageResponse<EmployeeListResponseDto>> getEmployees({
     PageRequest pageRequest = PageRequest.all,
+    Map<String, String> queryParams = const {},
   }) async {
     final request = GetListEmployeesCommand(
       start: pageRequest.start,
       end: pageRequest.end,
-      allParams: {},
+      allParams: queryParams,
     );
 
     final res = await invoker.send(request);

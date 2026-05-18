@@ -1,11 +1,7 @@
-import 'dart:async';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:openapi_employee/api.dart';
-import 'package:zerp_tenant/feature/employee/cubit/cubit_employee.dart';
-import 'package:zerp_tenant/feature/employee/cubit/state_employee.dart';
+import 'package:zerp_tenant/feature/dashboard/sections/employee_section/cubit_section_employee.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
@@ -16,38 +12,27 @@ class SectionEmployee extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) {
-        final cubit = getIt<CubitEmployee>();
-        unawaited(cubit.loadEmployees());
-        return cubit;
-      },
-      child: BlocBuilder<CubitEmployee, StateEmployee>(
+      create: (_) => getIt<CubitSectionEmployee>(),
+      child: BlocBuilder<CubitSectionEmployee, StateSectionEmployee>(
         builder: (context, state) {
           Widget? extra;
 
-          if (state is StateEmployeeLoaded) {
-            final total = state.data.totalCount;
-            final active = state.data.items
-                .where(
-                  (e) => e.status == EmployeeListResponseDtoStatusEnum.ACTIVE,
-                )
-                .length;
-
+          if (state is StateSectionEmployeeLoaded) {
             extra = Row(
               children: [
                 _MetaChip(
-                  label: 'Total: $total',
+                  label: 'Total: ${state.totalCount}',
                   icon: Icons.group_outlined,
                 ),
                 const SizedBox(width: 8),
                 _MetaChip(
-                  label: 'Active: $active',
+                  label: 'Active: ${state.activeCount}',
                   icon: Icons.check_circle_outline,
                   isPrimary: true,
                 ),
               ],
             );
-          } else if (state is StateEmployeeLoading) {
+          } else if (state is StateSectionEmployeeLoading) {
             extra = const SizedBox(
               height: 16,
               width: 16,

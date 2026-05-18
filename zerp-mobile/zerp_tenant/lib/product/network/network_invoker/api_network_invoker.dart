@@ -7,6 +7,7 @@ import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
 import 'package:zerp_tenant/product/network/api_url_helper.dart';
 import 'package:zerp_tenant/product/service/auth/auth_storage_service.dart';
+import 'package:zerp_tenant/product/util/query_parameter_extensions.dart';
 
 @lazySingleton
 final class ApiNetworkInvoker extends DioNetworkInvoker
@@ -17,6 +18,7 @@ final class ApiNetworkInvoker extends DioNetworkInvoker
           BaseOptions(baseUrl: ApiUrlHelper.defaultBaseUrl),
         ),
       ) {
+    dio.interceptors.add(_DioLoggerInterceptor());
     dio.interceptors.add(
       QueuedInterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -63,6 +65,7 @@ final class ApiNetworkInvoker extends DioNetworkInvoker
   ) async {
     log.fine(
       'Sending request: ${request.runtimeType} '
+      '${request.path}?${request.queryParameters.toStringValue()} '
       'with data: ${request.payload.toLogString()}',
     );
     final result = await super.send(request);
@@ -112,5 +115,49 @@ final class ApiNetworkInvoker extends DioNetworkInvoker
       _ongoingUnauthorizedCheck = null;
       completer.complete();
     }
+  }
+}
+
+final class _DioLoggerInterceptor extends LogInterceptor
+    with LoggerMixin<_DioLoggerInterceptor> {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    log.fine(
+      'Dio Request: ${options.method} ${options.uri} '
+      'Headers: ${options.headers} '
+      'Query Parameters: ${options.queryParameters} '
+      'Data: ${options.data}',
+    );
+    handler.next(options);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    log.warning(
+      'Dio Error: ${err.message} '
+      'Request: ${err.requestOptions.method} ${err.requestOptions.uri} '
+      'Headers: ${err.requestOptions.headers} '
+      'Query Parameters: ${err.requestOptions.queryParameters} '
+      'Data: ${err.requestOptions.data} '
+      'Error Details: ${err.error}',
+      err,
+      err.stackTrace,
+    );
+    handler.next(err);
+  }
+
+  @override
+  void onResponse(
+    Response<dynamic> response,
+    ResponseInterceptorHandler handler,
+  ) {
+    log.fine(
+      'Dio Response: ${response.statusCode} ${response.requestOptions.method} '
+      '${response.requestOptions.uri} '
+      'Headers: ${response.headers} '
+      'Query Parameters: ${response.requestOptions.queryParameters} '
+      'Data: ${response.data}',
+    );
+    handler.next(response);
   }
 }

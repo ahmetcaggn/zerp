@@ -66,6 +66,7 @@
   "common": {
     "hello": "Merhaba $name",
     "save": "Kaydet",
+    "refresh": "Yenile",
     "required": "Zorunlu",
     "error": "Hata: $message",
     "unknown": "Bilinmiyor",

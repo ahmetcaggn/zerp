@@ -66,6 +66,7 @@
   "common": {
     "hello": "Hello $name",
     "save": "Save",
+    "refresh": "Refresh",
     "required": "Required",
     "error": "Error: $message",
     "unknown": "Unknown",

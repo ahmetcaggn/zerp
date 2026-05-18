@@ -12,8 +12,7 @@
 import 'package:auto_route/auto_route.dart' as _i16;
 import 'package:flutter/material.dart' as _i17;
 import 'package:zerp_tenant/feature/auth/view/screen_auth.dart' as _i1;
-import 'package:zerp_tenant/feature/dashboard/view/screen_dashboard.dart'
-    as _i4;
+import 'package:zerp_tenant/feature/dashboard/screen_dashboard.dart' as _i4;
 import 'package:zerp_tenant/feature/employee/create_employee/screen_create_employee.dart'
     as _i2;
 import 'package:zerp_tenant/feature/employee/cubit/cubit_employee.dart' as _i18;
