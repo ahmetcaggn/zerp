@@ -16,8 +16,6 @@ export interface ProductResponseDto {
   typeName?: string
   metricId?: string
   metricName?: string
-  menuItemId?: string
-  price: number
   preparationTime?: number
   isActive: boolean
   tenantId: string
@@ -32,8 +30,6 @@ export interface CreateProductRequestDto {
   shopId: string
   typeId?: string
   metricId?: string
-  menuItemId?: string
-  price: number
   preparationTime?: number
   isActive?: boolean
 }
@@ -44,8 +40,6 @@ export interface UpdateProductRequestDto {
   imageId?: string
   typeId?: string
   metricId?: string
-  menuItemId?: string
-  price?: number
   preparationTime?: number
   isActive?: boolean
 }
@@ -279,6 +273,11 @@ export interface UpdateTableOrderRequestDto {
 
 // ─── Menu Item ────────────────────────────────────────────────────────────────
 
+export interface MenuItemProductItemDto {
+  productId: string
+  quantity: number
+}
+
 export interface MenuItemResponseDto {
   id: string
   name: string
@@ -287,7 +286,7 @@ export interface MenuItemResponseDto {
   imageId?: string
   categoryId: string
   categoryName?: string
-  productIds?: string[]
+  productItems?: MenuItemProductItemDto[]
   tenantId: string
 }
 
@@ -299,7 +298,7 @@ export interface CreateMenuItemRequestDto {
   price: number
   imageId?: string
   categoryId: string
-  productIds?: string[]
+  productItems?: MenuItemProductItemDto[]
 }
 
 export interface UpdateMenuItemRequestDto {
@@ -307,5 +306,11 @@ export interface UpdateMenuItemRequestDto {
   description?: string
   price?: number
   imageId?: string
-  productIds?: string[]
+  productItems?: MenuItemProductItemDto[]
+}
+
+export interface MenuItemImageUploadResponseDto {
+  imageId: string
+  contentType: string
+  originalFileName: string
 }

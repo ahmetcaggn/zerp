@@ -1,21 +1,23 @@
 'use client'
-import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { Box, Chip, IconButton, Typography } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import { Box, Chip, IconButton, Typography } from '@mui/material'
 import type { Route } from 'next'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
-import { useShopTables } from '../../hooks/use-shop-tables'
-import { useMenuCategories } from '../../hooks/use-menu-categories'
-import { useMenuItems } from '../../hooks/use-menu-items'
-import { useTableOrders, useCreateTableOrder, usePatchTableOrder, useUpdateTableOrder, useDeleteTableOrder } from '../../hooks/use-table-orders'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
-import { CategoryChips } from './category-chips'
-import { ProductGrid } from './product-grid'
-import { OrderPanel } from './order-panel'
+
+import { useMenuCategories } from '../../hooks/use-menu-categories'
+import { useMenuItems } from '../../hooks/use-menu-items'
+import { useShopTables } from '../../hooks/use-shop-tables'
+import { useCreateTableOrder, useDeleteTableOrder,usePatchTableOrder, useTableOrders, useUpdateTableOrder } from '../../hooks/use-table-orders'
 import type { MenuItemResponseDto, TableOrderResponseDto } from '../../types/sale'
+import { CategoryChips } from './category-chips'
+import { OrderPanel } from './order-panel'
+import { ProductGrid } from './product-grid'
 
 export interface CartItem {
   menuItemId: string
@@ -66,7 +68,7 @@ export function PosView() {
     sort: { field: 'name', order: 'ASC' },
     filter: {
       ...(selectedShopId ? { 'category.menu.shop.id': selectedShopId } : {}),
-      ...(selectedCategoryId ? { 'menuCategory.id': selectedCategoryId } : {}),
+      ...(selectedCategoryId ? { 'category.id': selectedCategoryId } : {}),
     },
   })
   const { data: ordersData } = useTableOrders({

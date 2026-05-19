@@ -1,6 +1,7 @@
 'use client'
 
 import { CircularProgress, Container, Stack, Typography } from '@mui/material'
+import type { Route } from 'next'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
 import { useEffect } from 'react'
@@ -17,14 +18,14 @@ export default function LoginPage() {
 
   useEffect(() => {
     const locale = params.locale || 'tr'
+    const callbackUrl = searchParams.get('callbackUrl') || `/${locale}/dashboard`
 
     if (status === 'authenticated') {
-      router.replace(`/${locale}/dashboard`)
+      router.replace(callbackUrl as Route)
       return
     }
 
     if (status === 'unauthenticated') {
-      const callbackUrl = searchParams.get('callbackUrl') || `/${locale}/dashboard`
       void signIn('keycloak', { callbackUrl })
     }
   }, [params.locale, router, searchParams, status])

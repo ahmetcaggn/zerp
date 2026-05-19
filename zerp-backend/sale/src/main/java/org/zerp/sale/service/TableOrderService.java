@@ -13,6 +13,7 @@ import org.zerp.common.dto.feign.resource.StockMovementFeignRequest;
 import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.resource.StockMovementType;
 import org.zerp.common.entity.sale.MenuItem;
+import org.zerp.common.entity.sale.MenuItemProduct;
 import org.zerp.common.entity.sale.Product;
 import org.zerp.common.entity.sale.ProductRecipe;
 import org.zerp.common.entity.sale.ProductRecipeItem;
@@ -252,22 +253,27 @@ public class TableOrderService implements
 
     /**
      * Builds stock movement requests inside the active transaction so all lazy
-     * collections (MenuItem.products, ProductRecipe.items, etc.) are still accessible.
+     * collections (MenuItem.productLinks, ProductRecipe.items, etc.) are still accessible.
      * The resulting list contains only plain POJOs and is safe to hand off to an async thread.
      */
     private List<StockMovementFeignRequest> buildStockMovementRequests(TableOrder order) {
         List<StockMovementFeignRequest> requests = new ArrayList<>();
         for (TableOrderItem item : order.getItems()) {
             MenuItem menuItem = item.getMenuItem();
-            List<Product> products = menuItem.getProducts();
-            if (products == null || products.isEmpty()) continue;
+            List<MenuItemProduct> productLinks = menuItem.getProductLinks();
+            if (productLinks == null || productLinks.isEmpty()) continue;
 
-            for (Product product : products) {
+            for (MenuItemProduct productLink : productLinks) {
+                Product product = productLink.getProduct();
                 List<ProductRecipe> defaultRecipes = product.getRecipes();
                 for (ProductRecipe recipe : defaultRecipes) {
                     for (ProductRecipeItem recipeItem : recipe.getItems()) {
+                        int menuItemQuantity = productLink.getQuantity() == null || productLink.getQuantity() < 1
+                                ? 1
+                                : productLink.getQuantity();
                         BigDecimal qty = recipeItem.getQuantity()
-                                .multiply(BigDecimal.valueOf(item.getQuantity()));
+                                .multiply(BigDecimal.valueOf(item.getQuantity()))
+                                .multiply(BigDecimal.valueOf(menuItemQuantity));
                         requests.add(StockMovementFeignRequest.builder()
                                 .stockResourceId(recipeItem.getStockResource().getId())
                                 .type(StockMovementType.SALE)
