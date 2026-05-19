@@ -24,10 +24,21 @@ interface MenuItemDetailModalProps {
   onAddToCart?: (menuItem: MenuItem) => void
 }
 
+function buildOriginalImageUrl(imageId?: string): string | null {
+  if (!imageId) {
+    return null
+  }
+  return `/api/sale/public/images/${encodeURIComponent(imageId)}?size=ORIGINAL`
+}
+
 export function MenuItemDetailModal({ open, onClose, menuItem, onAddToCart }: MenuItemDetailModalProps) {
   const { t } = useI18n()
 
   if (!menuItem) return null
+  const imageSrc =
+    buildOriginalImageUrl(menuItem.imageId) ??
+    menuItem.imageUrl ??
+    'https://via.placeholder.com/600x400?text=No+Image'
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -38,7 +49,7 @@ export function MenuItemDetailModal({ open, onClose, menuItem, onAddToCart }: Me
         {/* Ürün Görseli */}
         <Box 
           component="img"
-          src={menuItem.imageUrl || 'https://via.placeholder.com/600x400?text=No+Image'}
+          src={imageSrc}
           alt={menuItem.name}
           sx={{ width: '100%', height: 250, objectFit: 'cover', borderRadius: 2, mb: 2 }}
         />

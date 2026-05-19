@@ -5,6 +5,7 @@ export interface Product {
   name: string
   description?: string
   price: number
+  imageId?: string
   imageUrl?: string
   category: string
   isAvailable: boolean

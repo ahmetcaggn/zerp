@@ -84,7 +84,7 @@ function buildPublicImageUrl(imageId?: string): string {
   if (!imageId) {
     return PREVIEW_IMAGE_FALLBACK
   }
-  return `/api/sale/public/images/${encodeURIComponent(imageId)}`
+  return `/api/sale/public/images/${encodeURIComponent(imageId)}?size=ORIGINAL`
 }
 
 function MenuItemPreviewCard({

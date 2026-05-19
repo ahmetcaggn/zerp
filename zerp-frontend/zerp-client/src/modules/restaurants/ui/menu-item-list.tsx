@@ -48,6 +48,14 @@ interface MenuItemListProps {
 const PAGE_SIZE = 12
 const PREVIEW_LIMIT = 4
 const ALL_CATEGORY_ID = '__all__'
+const MENU_IMAGE_FALLBACK_URL = 'https://placehold.co/400'
+
+type PublicImageSize = 'SMALL' | 'ORIGINAL'
+
+function buildPublicMenuItemImageUrl(imageId: string, size: PublicImageSize = 'SMALL'): string {
+  const encodedImageId = encodeURIComponent(imageId)
+  return `/api/sale/public/images/${encodedImageId}?size=${size}`
+}
 
 export function MenuItemList({ restaurantId }: MenuItemListProps) {
   const { t, locale } = useI18n()
@@ -165,14 +173,15 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
 
   function mapToMenuItem(publicMenuItem: PublicMenuItemDto, categoryName: string): MenuItem {
     const imageUrl = publicMenuItem.imageId
-      ? `/api/sale/public/images/${encodeURIComponent(publicMenuItem.imageId)}`
-      : 'https://placehold.co/400'
+      ? buildPublicMenuItemImageUrl(publicMenuItem.imageId, 'SMALL')
+      : MENU_IMAGE_FALLBACK_URL
 
     return {
       id: publicMenuItem.id,
       name: publicMenuItem.name,
       description: publicMenuItem.description,
       price: Number(publicMenuItem.price),
+      imageId: publicMenuItem.imageId,
       imageUrl,
       category: categoryName,
       isAvailable: publicMenuItem.isAvailable ?? publicMenuItem.available ?? true,

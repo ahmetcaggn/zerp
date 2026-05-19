@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.context.RequestContext;
 import org.zerp.common.dto.ApiResponse;
+import org.zerp.common.dto.user.ImageSize;
 import org.zerp.common.entity.sale.MenuLanguage;
 import org.zerp.sale.dto.publicsale.PublicCartOrderCreateRequest;
 import org.zerp.sale.dto.publicsale.PublicCartOrderCreateResponse;
@@ -33,6 +34,7 @@ import org.zerp.sale.dto.publicsale.PublicShopMenuResponseDTO;
 import org.zerp.sale.service.PublicSaleService;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -95,8 +97,11 @@ public class PublicSaleController {
     }
 
     @GetMapping("/images/{imageId}")
-    public ResponseEntity<Resource> getMenuItemImage(@PathVariable String imageId) {
-        PublicImageContentResponse response = publicSaleService.getMenuItemImage(imageId);
+    public ResponseEntity<Resource> getMenuItemImage(
+            @PathVariable String imageId,
+            @RequestParam(name = "size", required = false) String size
+    ) {
+        PublicImageContentResponse response = publicSaleService.getMenuItemImage(imageId, resolveImageSize(size));
         MediaType contentType = response.contentType() != null
                 ? response.contentType()
                 : MediaType.APPLICATION_OCTET_STREAM;
@@ -105,6 +110,17 @@ public class PublicSaleController {
                 .contentType(contentType)
                 .cacheControl(CacheControl.maxAge(7, TimeUnit.DAYS).cachePublic())
                 .body(response.resource());
+    }
+
+    private ImageSize resolveImageSize(String size) {
+        if (size == null || size.isBlank()) {
+            return ImageSize.SMALL;
+        }
+        try {
+            return ImageSize.valueOf(size.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image size: " + size);
+        }
     }
 
     private <T> ApiResponse<T> buildResponse(T data) {

@@ -156,11 +156,12 @@ public class PublicSaleService {
     }
 
     @Transactional(readOnly = true)
-    public PublicImageContentResponse getMenuItemImage(String imageId) {
+    public PublicImageContentResponse getMenuItemImage(String imageId, ImageSize imageSize) {
         String normalizedImageId = normalizeImageId(imageId);
+        ImageSize resolvedSize = imageSize == null ? ImageSize.SMALL : imageSize;
         ResponseEntity<byte[]> thumborResponse;
         try {
-            thumborResponse = thumborFeignClient.getProfileImage(normalizedImageId, ImageSize.SMALL);
+            thumborResponse = thumborFeignClient.getProfileImage(normalizedImageId, resolvedSize);
         } catch (FeignException.NotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found: " + normalizedImageId, e);
         } catch (FeignException e) {
