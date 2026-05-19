@@ -122,6 +122,7 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
             weight: weight.trim() || null,
             ingredients: parseCommaSeparatedList(ingredientsInput),
             allergens: parseCommaSeparatedList(allergensInput),
+            categoryId,
             productItems,
           },
         },
@@ -212,7 +213,6 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
                 value={categoryId}
                 label={t('sale.menuItem.form.categoryId')}
                 onChange={(e) => setCategoryId(e.target.value)}
-                disabled={mode === 'edit'}
               >
                 {categories.map((c) => (
                   <MenuItem key={c.id} value={c.id}>

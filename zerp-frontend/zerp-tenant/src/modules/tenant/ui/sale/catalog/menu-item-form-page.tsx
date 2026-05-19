@@ -580,6 +580,7 @@ export function MenuItemFormPage({
           weight: value.weight.trim() || null,
           ingredients: value.ingredients,
           allergens: value.allergens,
+          categoryId: value.categoryId,
           productItems: value.productItems,
         },
       },
@@ -635,12 +636,11 @@ export function MenuItemFormPage({
           }}
           categories={categories}
           products={products}
-          lockCategory
           selectedCategoryLabel={categories.find((item) => item.id === menuItem.categoryId)?.name}
           showLinkedProducts={showLinkedProducts}
           isPending={isPending}
           onOpenProduct={(id) => goTo(`${ROUTES.catalog}/products/${id}`)}
-          onCancel={() => goTo(`${ROUTES.catalog}/categories/${menuItem.categoryId}`)}
+          onCancel={(categoryId) => goTo(categoryId ? `${ROUTES.catalog}/categories/${categoryId}` : ROUTES.catalog)}
           onSubmit={(value) => handleUpdate(menuItem, value)}
         />
       </Box>

@@ -84,6 +84,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
     () => shops.find((shop) => shop.id === restaurantId),
     [shops, restaurantId],
   )
+  const tenantValue = restaurant?.tenantName ?? restaurant?.tenantId
 
   const categories = useMemo(
     () => shopMenuResponse?.categories ?? [],
@@ -275,9 +276,16 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
     <>
       <Stack spacing={4}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-          <Typography variant="h4" fontWeight="bold">
-            {restaurant?.name ?? t('restaurants.title')} - {t('restaurants.productsTitle')}
-          </Typography>
+          <Stack spacing={0.5}>
+            {tenantValue && (
+              <Typography variant="overline" color="text.secondary">
+                {tenantValue}
+              </Typography>
+            )}
+            <Typography variant="h4" fontWeight="bold">
+              {restaurant?.name ?? t('restaurants.title')} - {t('restaurants.productsTitle')}
+            </Typography>
+          </Stack>
           <Stack direction="row" spacing={1.5}>
             <Button
               variant="contained"

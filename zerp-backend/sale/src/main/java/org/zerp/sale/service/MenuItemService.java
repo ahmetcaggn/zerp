@@ -138,10 +138,28 @@ public class MenuItemService implements
     @Transactional
     public MenuItemDTO update(UUID uuid, MenuItemUpdateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
+        UUID tenantId = currentTenantIdResolver.resolve();
         MenuItem item = repository.findById(uuid).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "MenuItem not found"));
         if (!permissionEvaluator.canUpdate(userId, item)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update MenuItem");
+        }
+
+        if (data.getCategoryId() != null && (item.getCategory() == null || !data.getCategoryId().equals(item.getCategory().getId()))) {
+            if (!permissionEvaluator.canCreate(userId, data.getCategoryId(), tenantId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to move MenuItem to this category");
+            }
+            MenuCategory newCategory = categoryRepository.findById(data.getCategoryId()).orElseThrow(() ->
+                    new ResponseStatusException(HttpStatus.NOT_FOUND, "MenuCategory not found"));
+
+            UUID categoryTenantId = newCategory.getMenu() != null && newCategory.getMenu().getShop() != null
+                    ? newCategory.getMenu().getShop().getTenantId()
+                    : null;
+            if (!Objects.equals(categoryTenantId, tenantId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Category does not belong to current tenant");
+            }
+
+            item.setCategory(newCategory);
         }
         
         mapper.updateEntityFromDTO(data, item);

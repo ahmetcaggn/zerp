@@ -22,6 +22,7 @@ import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useShopTables } from '../../../hooks/use-shop-tables'
 import { useTableOrders } from '../../../hooks/use-table-orders'
 import type { ShopTableResponseDto, TableOrderResponseDto } from '../../../types/sale'
+import { getBaseLineTotal, getBaseUnitPrice } from '../shared/order-pricing'
 import { TableOrderDialog } from '../tables/table-order-dialog'
 
 function TableOrderSummary({ table }: { table: ShopTableResponseDto }) {
@@ -79,14 +80,23 @@ function TableOrderSummary({ table }: { table: ShopTableResponseDto }) {
                       {item.menuItemName ?? item.menuItemId}
                     </Typography>
                     {item.selectedExtraOptions && item.selectedExtraOptions.length > 0 && (
-                      <Typography variant="caption" color="text.secondary">
-                        + {item.selectedExtraOptions.map(option => option.name).join(', ')}
+                      <Box sx={{ mt: 0.25 }}>
+                        {item.selectedExtraOptions.map(option => (
+                          <Typography key={option.extraOptionId} variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                            + {option.name} ({option.price.toFixed(2)} ₺)
+                          </Typography>
+                        ))}
+                      </Box>
+                    )}
+                    {item.notes && (
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25, fontStyle: 'italic' }}>
+                        {t('sale.tableOrder.form.notes')}: {item.notes}
                       </Typography>
                     )}
                   </TableCell>
                   <TableCell align="center">{item.quantity}</TableCell>
-                  <TableCell align="right">{item.unitPrice.toFixed(2)} ₺</TableCell>
-                  <TableCell align="right">{(item.unitPrice * item.quantity).toFixed(2)} ₺</TableCell>
+                  <TableCell align="right">{getBaseUnitPrice(item.unitPrice, item.selectedExtraOptions).toFixed(2)} ₺</TableCell>
+                  <TableCell align="right">{getBaseLineTotal(item.unitPrice, item.quantity, item.selectedExtraOptions).toFixed(2)} ₺</TableCell>
                 </TableRow>
               ))}
             </TableBody>

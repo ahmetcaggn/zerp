@@ -34,6 +34,7 @@ import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 import { useTableOrders, useCreateTableOrder, usePatchTableOrder } from '../../../hooks/use-table-orders'
 import { useMenuItems } from '../../../hooks/use-menu-items'
+import { getBaseUnitPrice } from '../shared/order-pricing'
 import type {
   ShopTableResponseDto,
   TableOrderItemCreateDto,
@@ -235,9 +236,13 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
                             {item.menuItemName ?? item.menuItemId}
                           </Typography>
                           {item.selectedExtraOptions && item.selectedExtraOptions.length > 0 && (
-                            <Typography variant="caption" color="text.secondary">
-                              + {item.selectedExtraOptions.map(option => option.name).join(', ')}
-                            </Typography>
+                            <Box sx={{ mt: 0.25 }}>
+                              {item.selectedExtraOptions.map(option => (
+                                <Typography key={option.extraOptionId} variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                                  + {option.name} ({option.price.toFixed(2)} ₺)
+                                </Typography>
+                              ))}
+                            </Box>
                           )}
                         </TableCell>
                         <TableCell>
@@ -250,7 +255,7 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
                             sx={{ width: 70 }}
                           />
                         </TableCell>
-                        <TableCell>{item.unitPrice} ₺</TableCell>
+                        <TableCell>{getBaseUnitPrice(item.unitPrice, item.selectedExtraOptions).toFixed(2)} ₺</TableCell>
                         <TableCell>
                           <TextField
                             size="small"
@@ -279,13 +284,17 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
                             {item.menuItemName ?? item.menuItemId}
                           </Typography>
                           {item.selectedExtraOptions && item.selectedExtraOptions.length > 0 && (
-                            <Typography variant="caption" color="text.secondary">
-                              + {item.selectedExtraOptions.map(option => option.name).join(', ')}
-                            </Typography>
+                            <Box sx={{ mt: 0.25 }}>
+                              {item.selectedExtraOptions.map(option => (
+                                <Typography key={option.extraOptionId} variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                                  + {option.name} ({option.price.toFixed(2)} ₺)
+                                </Typography>
+                              ))}
+                            </Box>
                           )}
                         </TableCell>
                         <TableCell>{item.quantity}</TableCell>
-                        <TableCell>{item.unitPrice} ₺</TableCell>
+                        <TableCell>{getBaseUnitPrice(item.unitPrice, item.selectedExtraOptions).toFixed(2)} ₺</TableCell>
                         <TableCell>{item.notes ?? '—'}</TableCell>
                         <TableCell>
                           <Tooltip title={t('common.edit')}>

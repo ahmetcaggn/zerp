@@ -88,8 +88,14 @@ export function PosView() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null)
   const [cart, setCart] = useState<CartItem[]>([])
   const [orderNote, setOrderNote] = useState('')
+  const [activeEditOrderId, setActiveEditOrderId] = useState<string | null>(null)
   const [extraDialogOpen, setExtraDialogOpen] = useState(false)
   const [pendingItemForExtra, setPendingItemForExtra] = useState<MenuItemResponseDto | null>(null)
+  const [pendingAddTarget, setPendingAddTarget] = useState<
+    | { type: 'cart' }
+    | { type: 'order'; orderId: string; quantity: number; notes?: string }
+    | null
+  >(null)
 
   const { data: tablesData } = useShopTables({
     pagination: { page: 1, perPage: 100 },
@@ -127,8 +133,8 @@ export function PosView() {
   const table = tablesData?.data?.find(t => t.id === tableId)
   const categories = catData?.data ?? []
   const menuItems = itemsData?.data ?? []
-  const existingOrders = ordersData?.data ?? []
-  const extraOptions = extraOptionsData?.data ?? []
+  const existingOrders = useMemo(() => ordersData?.data ?? [], [ordersData?.data])
+  const extraOptions = useMemo(() => extraOptionsData?.data ?? [], [extraOptionsData?.data])
 
   const selectableExtraOptions = useMemo(() => {
     if (!pendingItemForExtra) return []
@@ -163,14 +169,58 @@ export function PosView() {
   }
 
   function handleProductAdd(item: MenuItemResponseDto) {
+    const targetOrderId = activeEditOrderId && existingOrders.some(order => order.id === activeEditOrderId)
+      ? activeEditOrderId
+      : null
     const productIds = new Set((item.productItems ?? []).map(product => product.productId))
     const itemOptions = extraOptions.filter(option => productIds.has(option.productId))
     if (itemOptions.length === 0) {
-      addToCart(item, [])
+      if (targetOrderId) {
+        appendItemToOrder(targetOrderId, item, 1, undefined, [])
+      } else {
+        addToCart(item, [])
+      }
       return
     }
     setPendingItemForExtra(item)
+    setPendingAddTarget(
+      targetOrderId
+        ? { type: 'order', orderId: targetOrderId, quantity: 1 }
+        : { type: 'cart' },
+    )
     setExtraDialogOpen(true)
+  }
+
+  function appendItemToOrder(
+    orderId: string,
+    menuItem: MenuItemResponseDto,
+    quantity: number,
+    notes: string | undefined,
+    selectedOptions: ProductExtraOptionResponseDto[],
+  ) {
+    const order = existingOrders.find((it) => it.id === orderId)
+    if (!order) return
+    const updatedItems = [
+      ...order.items.map((item) => ({
+        menuItemId: item.menuItemId,
+        quantity: item.quantity,
+        notes: item.notes,
+        selectedExtraOptionIds: item.selectedExtraOptions?.map(option => option.extraOptionId),
+      })),
+      {
+        menuItemId: menuItem.id,
+        quantity,
+        notes,
+        selectedExtraOptionIds: selectedOptions.map(option => option.id),
+      },
+    ]
+    updateOrder(
+      { id: order.id, data: { note: order.note, items: updatedItems } },
+      {
+        onSuccess: () => showToast(t('pos.orderUpdatedToast')),
+        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      },
+    )
   }
 
   function updateQuantity(cartKey: string, delta: number) {
@@ -223,6 +273,16 @@ export function PosView() {
     )
   }
 
+  function handleUpdateOrderNote(orderId: string, note: string) {
+    patchOrder(
+      { id: orderId, fields: { note: note.trim() ? note : undefined } },
+      {
+        onSuccess: () => showToast(t('pos.orderUpdatedToast')),
+        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      },
+    )
+  }
+
   function handlePlaceOrder() {
     if (!tableId || cart.length === 0) return
     createOrder(
@@ -250,11 +310,22 @@ export function PosView() {
   function handleExtraDialogClose() {
     setExtraDialogOpen(false)
     setPendingItemForExtra(null)
+    setPendingAddTarget(null)
   }
 
   function handleExtraDialogConfirm(selectedOptions: ProductExtraOptionResponseDto[]) {
-    if (pendingItemForExtra) {
-      addToCart(pendingItemForExtra, selectedOptions)
+    if (pendingItemForExtra && pendingAddTarget) {
+      if (pendingAddTarget.type === 'cart') {
+        addToCart(pendingItemForExtra, selectedOptions)
+      } else {
+        appendItemToOrder(
+          pendingAddTarget.orderId,
+          pendingItemForExtra,
+          pendingAddTarget.quantity,
+          pendingAddTarget.notes,
+          selectedOptions,
+        )
+      }
     }
     handleExtraDialogClose()
   }
@@ -312,7 +383,12 @@ export function PosView() {
           onRemove={removeFromCart}
           onPlaceOrder={handlePlaceOrder}
           onCancelOrder={handleCancelOrder}
+          onUpdateOrderNote={handleUpdateOrderNote}
           onUpdateOrderItemQty={handleUpdateOrderItemQty}
+          activeEditOrderId={activeEditOrderId}
+          onToggleEditOrder={(orderId) => {
+            setActiveEditOrderId(prev => (prev === orderId ? null : orderId))
+          }}
           isPending={isPending || isPatchPending || isUpdatePending || isDeletePending}
         />
       </Box>
