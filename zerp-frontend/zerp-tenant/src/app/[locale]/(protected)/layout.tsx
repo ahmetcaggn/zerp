@@ -9,6 +9,7 @@ import type { Locale } from '@/core/types/common'
 import { AppTopbar } from '@/core/ui/feedback/app-topbar'
 import { AppSidebar } from '@/core/ui/navigation/app-sidebar'
 import { ShopScopeGuard } from '@/core/ui/navigation/shop-scope-guard'
+import { ShopScopeResetBoundary } from '@/core/ui/navigation/shop-scope-reset-boundary'
 
 export default async function ProtectedLayout({
   children,
@@ -35,14 +36,21 @@ export default async function ProtectedLayout({
       <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <AppTopbar locale={locale as Locale} />
         <ShopScopeGuard locale={locale as Locale} />
-        <Box component="main" sx={{ flexGrow: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
-          <Container
-            maxWidth={false}
-            sx={{ ...responsivePageSx.protectedContainer, flexGrow: 1, display: 'flex', flexDirection: 'column' }}
-          >
-            {children}
-          </Container>
-        </Box>
+        <ShopScopeResetBoundary>
+          <Box component="main" sx={{ flexGrow: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+            <Container
+              maxWidth={false}
+              sx={{
+                ...responsivePageSx.protectedContainer,
+                flexGrow: 1,
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              {children}
+            </Container>
+          </Box>
+        </ShopScopeResetBoundary>
       </Box>
     </Box>
   )
