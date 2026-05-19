@@ -1,7 +1,10 @@
 'use client'
+import { useMutation } from '@tanstack/react-query'
+
 import { queryKeys } from '@/core/api/query-keys'
 import { createResourceHooks } from '@/core/api/resource-hooks'
-import { tableOrderClient } from '../api/table-order-client'
+
+import { previewPublicCartOrder, tableOrderClient } from '../api/table-order-client'
 
 const {
   useList: useTableOrders,
@@ -12,11 +15,19 @@ const {
   useDelete: useDeleteTableOrder,
 } = createResourceHooks(queryKeys.tenant.tableOrders, tableOrderClient)
 
+function usePreviewPublicCartOrder() {
+  return useMutation({
+    mutationFn: ({ code, tableId }: { code: string; tableId: string }) =>
+      previewPublicCartOrder(code, tableId),
+  })
+}
+
 export {
-  useTableOrders,
-  useTableOrder,
   useCreateTableOrder,
-  useUpdateTableOrder,
-  usePatchTableOrder,
   useDeleteTableOrder,
+  usePatchTableOrder,
+  usePreviewPublicCartOrder,
+  useTableOrder,
+  useTableOrders,
+  useUpdateTableOrder,
 }

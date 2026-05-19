@@ -19,6 +19,8 @@ import org.zerp.common.entity.sale.ProductExtraOptionItem;
 import org.zerp.common.entity.sale.Product;
 import org.zerp.common.entity.sale.ProductRecipe;
 import org.zerp.common.entity.sale.ProductRecipeItem;
+import org.zerp.common.entity.sale.PublicCartOrder;
+import org.zerp.common.entity.sale.PublicCartOrderItem;
 import org.zerp.common.entity.sale.ShopTable;
 import org.zerp.common.entity.sale.TableOrder;
 import org.zerp.common.entity.sale.TableOrderItem;
@@ -30,6 +32,8 @@ import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.sale.client.ResourceServiceClient;
+import org.zerp.sale.dto.tableorder.PublicCartOrderPreviewDTO;
+import org.zerp.sale.dto.tableorder.PublicCartOrderPreviewItemDTO;
 import org.zerp.sale.dto.tableorder.TableOrderCreateDTO;
 import org.zerp.sale.dto.tableorder.TableOrderDTO;
 import org.zerp.sale.dto.tableorder.TableOrderItemCreateDTO;
@@ -39,6 +43,7 @@ import org.zerp.sale.permission.TableOrderPermissionEvaluator;
 import org.zerp.sale.repository.MenuItemRepository;
 import org.zerp.sale.repository.ProductRecipeRepository;
 import org.zerp.sale.repository.ProductExtraOptionRepository;
+import org.zerp.sale.repository.PublicCartOrderRepository;
 import org.zerp.sale.repository.ShopTableRepository;
 import org.zerp.sale.repository.TableOrderRepository;
 
@@ -48,6 +53,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -59,12 +65,15 @@ import java.util.concurrent.CompletableFuture;
 public class TableOrderService implements
         IResourceService<TableOrderDTO, TableOrderDTO, TableOrderCreateDTO, TableOrderUpdateDTO, UUID> {
 
+    private static final String PUBLIC_CART_ORDER_CODE_PATTERN = "^[A-Z0-9]{6}$";
+
     private final TableOrderPermissionEvaluator permissionEvaluator;
     private final TableOrderRepository repository;
     private final ShopTableRepository shopTableRepository;
     private final MenuItemRepository menuItemRepository;
     private final ProductRecipeRepository productRecipeRepository;
     private final ProductExtraOptionRepository productExtraOptionRepository;
+    private final PublicCartOrderRepository publicCartOrderRepository;
     private final ResourceServiceClient resourceServiceClient;
     private final TableOrderMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
@@ -143,6 +152,39 @@ public class TableOrderService implements
 
         log.info("Created TableOrder with id: {}", saved.getId());
         return mapper.toDTO(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public PublicCartOrderPreviewDTO previewPublicCartOrder(String code, UUID tableId) {
+        UUID userId = currentUserIdResolver.resolve();
+        UUID tenantId = currentTenantIdResolver.resolve();
+        ShopTable shopTable = resolveShopTable(tableId);
+        Shop shop = shopTable.getShop();
+        if (shop == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ShopTable has no shop");
+        }
+
+        if (!permissionEvaluator.canCreate(userId, shop.getId(), tenantId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create TableOrder");
+        }
+
+        String normalizedCode = normalizePublicCartOrderCode(code);
+        PublicCartOrder publicOrder = publicCartOrderRepository.findByCode(normalizedCode)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "QR siparişi bulunamadı."));
+        if (publicOrder.getShop() == null || !shop.getId().equals(publicOrder.getShop().getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bu QR siparişi seçili masanın şubesine ait değil.");
+        }
+        if (publicOrder.getItems() == null || publicOrder.getItems().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PublicCartOrder has no items");
+        }
+
+        PublicCartOrderPreviewDTO dto = new PublicCartOrderPreviewDTO();
+        dto.setId(publicOrder.getId());
+        dto.setCode(publicOrder.getCode());
+        dto.setShopId(shop.getId());
+        dto.setNote(publicOrder.getNote());
+        dto.setItems(publicOrder.getItems().stream().map(this::toPublicCartOrderPreviewItem).toList());
+        return dto;
     }
 
     @Override
@@ -268,6 +310,37 @@ public class TableOrderService implements
         selectedExtraOptions.forEach(extra -> extra.setTableOrderItem(item));
         item.getSelectedExtraOptions().addAll(selectedExtraOptions);
         return item;
+    }
+
+    private String normalizePublicCartOrderCode(String code) {
+        if (code == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Geçerli bir sipariş kodu girin.");
+        }
+        String normalizedCode = code.trim().toUpperCase(Locale.ROOT);
+        if (!normalizedCode.matches(PUBLIC_CART_ORDER_CODE_PATTERN)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Geçerli bir sipariş kodu girin.");
+        }
+        return normalizedCode;
+    }
+
+    private PublicCartOrderPreviewItemDTO toPublicCartOrderPreviewItem(PublicCartOrderItem item) {
+        if (item == null || item.getMenuItem() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PublicCartOrder has an invalid item");
+        }
+        if (item.getQuantity() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PublicCartOrder has an item with invalid quantity");
+        }
+        if (item.getUnitPrice() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PublicCartOrder has an item with invalid unit price");
+        }
+
+        PublicCartOrderPreviewItemDTO dto = new PublicCartOrderPreviewItemDTO();
+        dto.setMenuItemId(item.getMenuItem().getId());
+        dto.setMenuItemName(item.getMenuItem().getName());
+        dto.setQuantity(item.getQuantity());
+        dto.setUnitPrice(item.getUnitPrice());
+        dto.setNotes(item.getNotes());
+        return dto;
     }
 
     private List<TableOrderItemSelectedExtraOption> resolveSelectedExtraOptions(

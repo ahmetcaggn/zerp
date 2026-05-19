@@ -103,4 +103,5 @@ export interface CreatePublicCartOrderRequest {
 
 export interface CreatePublicCartOrderResponse {
   id: string
+  code: string
 }

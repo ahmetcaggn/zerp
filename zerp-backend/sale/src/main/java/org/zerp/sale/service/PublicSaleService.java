@@ -42,13 +42,20 @@ import org.zerp.sale.repository.ShopRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.security.SecureRandom;
 import java.util.UUID;
 
 @Log4j2
 @Service
 @RequiredArgsConstructor
 public class PublicSaleService {
+    private static final String PUBLIC_CART_CODE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final int PUBLIC_CART_CODE_LENGTH = 6;
+    private static final int PUBLIC_CART_CODE_MAX_ATTEMPTS = 10;
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     private final ShopRepository shopRepository;
     private final MenuRepository menuRepository;
     private final MenuCategoryRepository menuCategoryRepository;
@@ -123,6 +130,7 @@ public class PublicSaleService {
 
         PublicCartOrder order = new PublicCartOrder();
         order.setShop(shop);
+        order.setCode(generateUniquePublicCartOrderCode());
         order.setNote(request.getNote());
         order.setCreatedAt(now);
 
@@ -152,6 +160,7 @@ public class PublicSaleService {
         PublicCartOrder saved = publicCartOrderRepository.save(order);
         PublicCartOrderCreateResponse response = new PublicCartOrderCreateResponse();
         response.setId(saved.getId());
+        response.setCode(saved.getCode());
         return response;
     }
 
@@ -195,6 +204,27 @@ public class PublicSaleService {
     private Shop ensureShopExists(UUID shopId) {
         return shopRepository.findById(shopId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shop not found"));
+    }
+
+    private String generateUniquePublicCartOrderCode() {
+        for (int attempt = 1; attempt <= PUBLIC_CART_CODE_MAX_ATTEMPTS; attempt++) {
+            String code = generatePublicCartOrderCode();
+            if (!publicCartOrderRepository.existsByCode(code)) {
+                return code;
+            }
+            log.warn("Generated duplicate public cart order code {} on attempt {}", code, attempt);
+        }
+
+        log.error("Failed to generate unique public cart order code after {} attempts", PUBLIC_CART_CODE_MAX_ATTEMPTS);
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not generate order code. Please try again.");
+    }
+
+    private String generatePublicCartOrderCode() {
+        StringBuilder code = new StringBuilder(PUBLIC_CART_CODE_LENGTH);
+        for (int i = 0; i < PUBLIC_CART_CODE_LENGTH; i++) {
+            code.append(PUBLIC_CART_CODE_ALPHABET.charAt(RANDOM.nextInt(PUBLIC_CART_CODE_ALPHABET.length())));
+        }
+        return code.toString().toUpperCase(Locale.ROOT);
     }
 
     private Optional<Menu> resolveActiveMenuWithFallback(Shop shop, MenuLanguage requestedLanguage) {

@@ -58,7 +58,7 @@ export const enMessages = {
     orderNote: 'Order note (optional)',
     generateQr: 'Generate QR',
     cartSubmitFailed: 'Could not save cart. Please try again.',
-    orderUuid: 'Order UUID',
+    orderCode: 'Order Code',
     qrCodeAlt: 'Order QR code',
   },
   welcome: {

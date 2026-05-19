@@ -58,7 +58,7 @@ export const trMessages = {
     orderNote: 'Sipariş notu (opsiyonel)',
     generateQr: 'QR Oluştur',
     cartSubmitFailed: 'Sepet kaydedilemedi. Lütfen tekrar deneyin.',
-    orderUuid: 'Sipariş UUID',
+    orderCode: 'Sipariş Kodu',
     qrCodeAlt: 'Sipariş QR kodu',
   },
   welcome: {

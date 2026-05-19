@@ -30,6 +30,9 @@ public class PublicCartOrder {
     @JoinColumn(name = "shop_id", nullable = false)
     private Shop shop;
 
+    @Column(name = "code", nullable = false, unique = true, length = 6)
+    private String code;
+
     private String note;
 
     @OneToMany(mappedBy = "publicCartOrder", cascade = CascadeType.ALL, orphanRemoval = true)

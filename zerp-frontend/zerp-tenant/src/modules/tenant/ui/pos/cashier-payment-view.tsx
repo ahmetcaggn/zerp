@@ -19,6 +19,7 @@ import CreditCardIcon from '@mui/icons-material/CreditCard'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useShopTables } from '../../hooks/use-shop-tables'
 import { useTableOrders, usePatchTableOrder, useUpdateTableOrder } from '../../hooks/use-table-orders'
 import { useToast } from '@/core/providers/toast-provider'
@@ -699,12 +700,15 @@ function TableOrderDetails({ table }: { table: ShopTableResponseDto }) {
 
 export function CashierPaymentView() {
   const { t } = useI18n()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
   const [selectedTable, setSelectedTable] = useState<ShopTableResponseDto | null>(null)
 
   const { data: tablesData, isLoading } = useShopTables(
     {
       pagination: { page: 1, perPage: 200 },
       sort: { field: 'name', order: 'ASC' },
+      ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
     },
     { refetchInterval: POLL_INTERVAL, refetchOnWindowFocus: true }
   )

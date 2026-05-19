@@ -279,6 +279,22 @@ export interface UpdateTableOrderRequestDto {
   items?: TableOrderItemCreateDto[]
 }
 
+export interface PublicCartOrderPreviewItemDto {
+  menuItemId: string
+  menuItemName?: string
+  quantity: number
+  unitPrice: number
+  notes?: string
+}
+
+export interface PublicCartOrderPreviewDto {
+  id: string
+  code: string
+  shopId: string
+  note?: string
+  items: PublicCartOrderPreviewItemDto[]
+}
+
 // ─── Menu Item ────────────────────────────────────────────────────────────────
 
 export interface MenuItemProductItemDto {

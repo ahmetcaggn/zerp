@@ -51,7 +51,7 @@ export function MenuItemDetailModal({ open, onClose, menuItem, onAddToCart }: Me
           component="img"
           src={imageSrc}
           alt={menuItem.name}
-          sx={{ width: '100%', height: 250, objectFit: 'cover', borderRadius: 2, mb: 2 }}
+          sx={{ width: '100%', height: 250, objectFit: 'contain', borderRadius: 2, mb: 2}}
         />
 
         <Stack spacing={2}>

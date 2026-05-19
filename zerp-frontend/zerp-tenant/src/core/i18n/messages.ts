@@ -39,6 +39,18 @@ export interface MessageDictionary {
     addWithSelectedExtra: string
     changeStatusMenu: string
     tableStatusUpdatedToast: string
+    importQrButton: string
+    importQrTitle: string
+    importQrDescription: string
+    importQrManualLabel: string
+    importQrManualPlaceholder: string
+    importQrSubmit: string
+    importQrCameraStart: string
+    importQrCameraStop: string
+    importQrCameraUnsupported: string
+    importQrCameraError: string
+    importQrInvalid: string
+    importQrSuccess: string
   }
   sale: {
     cashier: {

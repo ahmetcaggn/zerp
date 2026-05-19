@@ -18,18 +18,21 @@ import {
   useCreateTableOrder,
   useDeleteTableOrder,
   usePatchTableOrder,
+  usePreviewPublicCartOrder,
   useTableOrders,
   useUpdateTableOrder,
 } from '../../hooks/use-table-orders'
 import type {
   MenuItemResponseDto,
   ProductExtraOptionResponseDto,
+  PublicCartOrderPreviewDto,
   TableOrderResponseDto,
 } from '../../types/sale'
 import { CategoryChips } from './category-chips'
 import { ExtraOptionSelectDialog } from './extra-option-select-dialog'
 import { OrderPanel } from './order-panel'
 import { ProductGrid } from './product-grid'
+import { mergeNotes, mergePublicCartOrderIntoCart } from './public-cart-order-import'
 
 export interface CartSelectedExtraOption {
   extraOptionId: string
@@ -129,6 +132,7 @@ export function PosView() {
   const { mutate: patchOrder, isPending: isPatchPending } = usePatchTableOrder()
   const { mutate: updateOrder, isPending: isUpdatePending } = useUpdateTableOrder()
   const { mutate: deleteOrder, isPending: isDeletePending } = useDeleteTableOrder()
+  const { mutate: previewPublicCartOrder, isPending: isImportPending } = usePreviewPublicCartOrder()
 
   const table = tablesData?.data?.find(t => t.id === tableId)
   const categories = catData?.data ?? []
@@ -307,6 +311,26 @@ export function PosView() {
     )
   }
 
+  function addImportedPublicCartOrder(preview: PublicCartOrderPreviewDto) {
+    setCart(prev => mergePublicCartOrderIntoCart(prev, preview))
+    setOrderNote(prev => mergeNotes(prev, preview.note) ?? '')
+  }
+
+  function handleImportPublicCartOrder(code: string, onSuccess?: () => void) {
+    if (!tableId) return
+    previewPublicCartOrder(
+      { code, tableId },
+      {
+        onSuccess: (preview) => {
+          addImportedPublicCartOrder(preview)
+          showToast(t('pos.importQrSuccess'))
+          onSuccess?.()
+        },
+        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      },
+    )
+  }
+
   function handleExtraDialogClose() {
     setExtraDialogOpen(false)
     setPendingItemForExtra(null)
@@ -389,6 +413,8 @@ export function PosView() {
           onToggleEditOrder={(orderId) => {
             setActiveEditOrderId(prev => (prev === orderId ? null : orderId))
           }}
+          onImportPublicCartOrder={handleImportPublicCartOrder}
+          isImportPending={isImportPending}
           isPending={isPending || isPatchPending || isUpdatePending || isDeletePending}
         />
       </Box>

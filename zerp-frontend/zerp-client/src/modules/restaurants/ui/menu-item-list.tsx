@@ -68,7 +68,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
   const [cartItems, setCartItems] = useState<CartItemState[]>([])
   const [cartOrderNote, setCartOrderNote] = useState('')
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false)
-  const [qrOrderId, setQrOrderId] = useState<string | null>(null)
+  const [qrOrderCode, setQrOrderCode] = useState<string | null>(null)
   const [cartError, setCartError] = useState<string | null>(null)
 
   const { data: shops = [], isLoading: isLoadingShops } = usePublicShops()
@@ -200,7 +200,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
       price: menuItem.price,
     }))
     setIsCartDrawerOpen(true)
-    setQrOrderId(null)
+    setQrOrderCode(null)
     setCartError(null)
   }
 
@@ -216,7 +216,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
         shopId: restaurantId,
         payload,
       })
-      setQrOrderId(response.id)
+      setQrOrderCode(response.code)
     } catch {
       setCartError(t('restaurants.cartSubmitFailed'))
     }
@@ -440,7 +440,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                               {previewMenuItems.length > 0 ? (
                                 <Grid container spacing={2}>
                                   {previewMenuItems.map((menuItem) => (
-                                    <Grid size={{ xs: 12, sm: 6, lg: 6 }} key={menuItem.id}>
+                                    <Grid size={{ xs: 6, sm: 6, lg: 6 }} key={menuItem.id}>
                                       <MenuItemCard
                                         menuItem={menuItem}
                                         onClick={() => setSelectedMenuItem(menuItem)}
@@ -552,7 +552,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                       size="small"
                       onClick={() => {
                         setCartItems((prev) => updateCartItemQuantity(prev, item.menuItemId, item.quantity - 1))
-                        setQrOrderId(null)
+                        setQrOrderCode(null)
                       }}
                     >
                       <RemoveIcon fontSize="small" />
@@ -562,7 +562,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                       size="small"
                       onClick={() => {
                         setCartItems((prev) => updateCartItemQuantity(prev, item.menuItemId, item.quantity + 1))
-                        setQrOrderId(null)
+                        setQrOrderCode(null)
                       }}
                     >
                       <AddIcon fontSize="small" />
@@ -575,7 +575,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                   label={t('restaurants.itemNote')}
                   value={item.notes}
                   onChange={(event) => {
-                    setQrOrderId(null)
+                    setQrOrderCode(null)
                     setCartItems((prev) => updateCartItemNotes(prev, item.menuItemId, event.target.value))
                   }}
                   multiline
@@ -593,7 +593,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                 value={cartOrderNote}
                 onChange={(event) => {
                   setCartOrderNote(event.target.value)
-                  setQrOrderId(null)
+                  setQrOrderCode(null)
                 }}
                 multiline
                 minRows={2}
@@ -615,14 +615,14 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
 
           {cartError && <Alert severity="error">{cartError}</Alert>}
 
-          {qrOrderId && (
+          {qrOrderCode && (
             <Paper variant="outlined" sx={{ p: 1.5 }}>
               <Stack spacing={1.5} alignItems="center">
                 <Typography variant="body2" color="text.secondary">
-                  {t('restaurants.orderUuid')}
+                  {t('restaurants.orderCode')}
                 </Typography>
                 <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
-                  {qrOrderId}
+                  {qrOrderCode}
                 </Typography>
                 <Box
                   role="img"
@@ -630,7 +630,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                   sx={{ width: 240, height: 240, bgcolor: 'background.paper', p: 1 }}
                 >
                   <QRCode
-                    value={qrOrderId}
+                    value={qrOrderCode}
                     size={224}
                     style={{ width: '100%', height: '100%' }}
                   />

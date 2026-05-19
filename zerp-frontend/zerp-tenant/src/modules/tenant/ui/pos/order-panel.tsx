@@ -2,11 +2,13 @@
 import AddIcon from '@mui/icons-material/Add'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import EditIcon from '@mui/icons-material/Edit'
+import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner'
 import RemoveIcon from '@mui/icons-material/Remove'
 import SendIcon from '@mui/icons-material/Send'
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined'
 import StickyNote2OutlinedIcon from '@mui/icons-material/StickyNote2Outlined'
 import {
+  Alert,
   Box,
   Button,
   Chip,
@@ -16,16 +18,18 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  Stack,
   TextField,
   Typography,
 } from '@mui/material'
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
 
 import type { ShopTableResponseDto, TableOrderResponseDto } from '../../types/sale'
 import { getBaseUnitPrice } from '../sale/shared/order-pricing'
 import type { CartItem } from './pos-view'
+import { extractPublicCartOrderCode } from './public-cart-order-import'
 
 interface Props {
   table: ShopTableResponseDto | undefined
@@ -41,7 +45,22 @@ interface Props {
   onUpdateOrderItemQty: (order: TableOrderResponseDto, itemId: string, delta: number) => void
   activeEditOrderId: string | null
   onToggleEditOrder: (orderId: string) => void
+  onImportPublicCartOrder: (code: string, onSuccess?: () => void) => void
+  isImportPending: boolean
   isPending: boolean
+}
+
+interface DetectedBarcode {
+  rawValue: string
+}
+
+interface BarcodeDetectorLike {
+  detect(source: HTMLVideoElement): Promise<DetectedBarcode[]>
+}
+
+interface BarcodeDetectorConstructor {
+  new(options?: { formats?: string[] }): BarcodeDetectorLike
+  getSupportedFormats?: () => Promise<string[]>
 }
 
 function QtyControl({
@@ -100,11 +119,21 @@ export function OrderPanel({
   onUpdateOrderItemQty,
   activeEditOrderId,
   onToggleEditOrder,
+  onImportPublicCartOrder,
+  isImportPending,
   isPending,
 }: Props) {
   const { t } = useI18n()
   const [noteDialogOrderId, setNoteDialogOrderId] = useState<string | null>(null)
   const [noteDrafts, setNoteDrafts] = useState<Record<string, string>>({})
+  const [importDialogOpen, setImportDialogOpen] = useState(false)
+  const [manualQrValue, setManualQrValue] = useState('')
+  const [importError, setImportError] = useState<string | null>(null)
+  const [isCameraActive, setIsCameraActive] = useState(false)
+  const [cameraError, setCameraError] = useState<string | null>(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+  const scanLockedRef = useRef(false)
 
   const cartTotal = cart.reduce((s, c) => s + c.price * c.quantity, 0)
   const existingTotal = existingOrders.reduce(
@@ -126,6 +155,96 @@ export function OrderPanel({
     onUpdateOrderNote(noteDialogOrderId, noteDrafts[noteDialogOrderId] ?? '')
     setNoteDialogOrderId(null)
   }
+
+  const stopCamera = useCallback(() => {
+    streamRef.current?.getTracks().forEach(track => track.stop())
+    streamRef.current = null
+    scanLockedRef.current = false
+    setIsCameraActive(false)
+  }, [])
+
+  const handleCloseImportDialog = useCallback(() => {
+    stopCamera()
+    setImportDialogOpen(false)
+    setManualQrValue('')
+    setImportError(null)
+    setCameraError(null)
+  }, [stopCamera])
+
+  const submitImport = useCallback((value: string) => {
+    const code = extractPublicCartOrderCode(value)
+    if (!code) {
+      setImportError(t('pos.importQrInvalid'))
+      return
+    }
+    setImportError(null)
+    onImportPublicCartOrder(code, handleCloseImportDialog)
+  }, [handleCloseImportDialog, onImportPublicCartOrder, t])
+
+  async function startCamera() {
+    setCameraError(null)
+    setImportError(null)
+
+    const barcodeWindow = window as Window & { BarcodeDetector?: BarcodeDetectorConstructor }
+    if (!barcodeWindow.BarcodeDetector) {
+      setCameraError(t('pos.importQrCameraUnsupported'))
+      return
+    }
+
+    const supportedFormats: string[] | undefined = await barcodeWindow.BarcodeDetector
+      .getSupportedFormats?.()
+      .catch(() => [])
+    if (supportedFormats && supportedFormats.length > 0 && !supportedFormats.includes('qr_code')) {
+      setCameraError(t('pos.importQrCameraUnsupported'))
+      return
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } },
+        audio: false,
+      })
+      streamRef.current = stream
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        await videoRef.current.play()
+      }
+      setIsCameraActive(true)
+    } catch {
+      setCameraError(t('pos.importQrCameraError'))
+    }
+  }
+
+  useEffect(() => {
+    if (!isCameraActive || !videoRef.current) return undefined
+
+    const barcodeWindow = window as Window & { BarcodeDetector?: BarcodeDetectorConstructor }
+    if (!barcodeWindow.BarcodeDetector) return undefined
+
+    const detector = new barcodeWindow.BarcodeDetector({ formats: ['qr_code'] })
+    const intervalId = window.setInterval(() => {
+      if (!videoRef.current || scanLockedRef.current) return
+      scanLockedRef.current = true
+      detector
+        .detect(videoRef.current)
+        .then((codes) => {
+          const rawValue = codes[0]?.rawValue
+          if (!rawValue) {
+            scanLockedRef.current = false
+            return
+          }
+          setManualQrValue(rawValue)
+          submitImport(rawValue)
+        })
+        .catch(() => {
+          scanLockedRef.current = false
+        })
+    }, 650)
+
+    return () => window.clearInterval(intervalId)
+  }, [isCameraActive, submitImport])
+
+  useEffect(() => () => stopCamera(), [stopCamera])
 
   return (
     <Box
@@ -154,6 +273,17 @@ export function OrderPanel({
             </Typography>
           )}
         </Box>
+        <Button
+          fullWidth
+          size="small"
+          variant="outlined"
+          startIcon={<QrCodeScannerIcon />}
+          onClick={() => setImportDialogOpen(true)}
+          disabled={!table || isPending || isImportPending}
+          sx={{ mt: 1.5, borderRadius: 2, fontWeight: 700 }}
+        >
+          {t('pos.importQrButton')}
+        </Button>
       </Box>
 
       <Box sx={{ flex: 1, overflowY: 'auto' }}>
@@ -384,6 +514,11 @@ export function OrderPanel({
                             ))}
                           </Box>
                         )}
+                        {item.notes && (
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25, fontStyle: 'italic' }}>
+                            {t('sale.tableOrder.form.notes')}: {item.notes}
+                          </Typography>
+                        )}
                         {!isSimpleLine && (
                           <Box
                             sx={{
@@ -499,6 +634,72 @@ export function OrderPanel({
         <DialogActions>
           <Button onClick={() => setNoteDialogOrderId(null)}>{t('common.cancel')}</Button>
           <Button variant="contained" disabled={isPending} onClick={handleSaveOrderNote}>{t('common.save')}</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={importDialogOpen}
+        onClose={handleCloseImportDialog}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>{t('pos.importQrTitle')}</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ pt: 0.5 }}>
+            <Typography variant="body2" color="text.secondary">
+              {t('pos.importQrDescription')}
+            </Typography>
+
+            {cameraError && <Alert severity="warning">{cameraError}</Alert>}
+            {importError && <Alert severity="error">{importError}</Alert>}
+
+            <Box
+              component="video"
+              ref={videoRef}
+              muted
+              playsInline
+              sx={{
+                display: isCameraActive ? 'block' : 'none',
+                width: '100%',
+                aspectRatio: '1 / 1',
+                objectFit: 'cover',
+                borderRadius: 2,
+                bgcolor: 'grey.900',
+              }}
+            />
+
+            <Button
+              variant={isCameraActive ? 'outlined' : 'contained'}
+              startIcon={<QrCodeScannerIcon />}
+              onClick={isCameraActive ? stopCamera : startCamera}
+              disabled={isImportPending}
+            >
+              {isCameraActive ? t('pos.importQrCameraStop') : t('pos.importQrCameraStart')}
+            </Button>
+
+            <TextField
+              label={t('pos.importQrManualLabel')}
+              placeholder={t('pos.importQrManualPlaceholder')}
+              value={manualQrValue}
+              onChange={(event) => {
+                setManualQrValue(event.target.value)
+                setImportError(null)
+              }}
+              fullWidth
+              size="small"
+              disabled={isImportPending}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseImportDialog}>{t('common.cancel')}</Button>
+          <Button
+            variant="contained"
+            disabled={isImportPending}
+            onClick={() => submitImport(manualQrValue)}
+          >
+            {isImportPending ? <CircularProgress size={20} color="inherit" /> : t('pos.importQrSubmit')}
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

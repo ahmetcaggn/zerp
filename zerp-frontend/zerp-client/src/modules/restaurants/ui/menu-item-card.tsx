@@ -46,7 +46,7 @@ export function MenuItemCard({ menuItem, onClick, onAddToCart }: MenuItemCardPro
           width: { xs: '100%', sm: 100 }, 
           height: { xs: 120, sm: 100 }, 
           borderRadius: 1, 
-          objectFit: 'cover' 
+          objectFit: 'contain' 
         }}
         image={menuItem.imageUrl || 'https://via.placeholder.com/150?text=No+Image'}
         alt={menuItem.name}

@@ -8,10 +8,15 @@ import org.springframework.stereotype.Repository;
 import org.zerp.common.entity.sale.PublicCartOrder;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface PublicCartOrderRepository extends JpaRepository<PublicCartOrder, UUID> {
+
+    boolean existsByCode(String code);
+
+    Optional<PublicCartOrder> findByCode(String code);
 
     @Modifying
     @Query("delete from PublicCartOrder p where p.createdAt < :cutoff")
