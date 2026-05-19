@@ -197,11 +197,15 @@ export function AppSidebar({ locale }: { locale: 'tr' | 'en' }) {
       sx={{
         width: isExpanded ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
         flexShrink: 0,
+        alignSelf: 'stretch',
         whiteSpace: 'nowrap',
         boxSizing: 'border-box',
       }}
       PaperProps={{
         sx: {
+          position: 'relative',
+          height: '100%',
+          minHeight: '100%',
           width: isExpanded ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
           overflowX: 'hidden',
           transition: theme.transitions.create('width', {

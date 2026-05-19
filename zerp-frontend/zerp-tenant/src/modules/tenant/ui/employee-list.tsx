@@ -22,7 +22,7 @@ import {
   Typography,
 } from '@mui/material'
 import type { Route } from 'next'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
@@ -48,11 +48,14 @@ const STATUS_COLOR: Record<
   TERMINATED: 'default',
   RETIRED: 'default',
 }
+const EMPLOYEE_TAB_KEYS = ['active', 'deleted'] as const
 
 export function EmployeeList() {
   const { t, locale } = useI18n()
   const { showToast } = useToast()
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   const [tab, setTab] = useState(0)
   const [page, setPage] = useState(0)
@@ -67,6 +70,20 @@ export function EmployeeList() {
     const id = setTimeout(() => setDebouncedKeyword(searchInput.trim()), 400)
     return () => clearTimeout(id)
   }, [searchInput])
+
+  useEffect(() => {
+    const activeTab = searchParams.get('tab')
+    const tabIndex = EMPLOYEE_TAB_KEYS.indexOf((activeTab ?? 'active') as (typeof EMPLOYEE_TAB_KEYS)[number])
+    setTab(tabIndex >= 0 ? tabIndex : 0)
+  }, [searchParams])
+
+  function handleTabChange(nextTab: number) {
+    setTab(nextTab)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('tab', EMPLOYEE_TAB_KEYS[nextTab] ?? EMPLOYEE_TAB_KEYS[0])
+    const queryString = params.toString()
+    router.replace((queryString ? `${pathname}?${queryString}` : pathname) as Route)
+  }
 
   const params = {
     pagination: { page: page + 1, perPage: rowsPerPage },
@@ -96,7 +113,7 @@ export function EmployeeList() {
         </Button>
       </Box>
 
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
+      <Tabs value={tab} onChange={(_, v) => handleTabChange(v)} sx={{ mb: 2 }}>
         <Tab label={t('employees.title')} />
         <Tab label={t('employees.deletedTitle')} />
       </Tabs>

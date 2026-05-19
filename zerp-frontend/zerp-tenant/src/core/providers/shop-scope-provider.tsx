@@ -12,6 +12,7 @@ interface ShopScopeContextValue {
   scope: ShopScope
   shops: ShopResponseDto[]
   isLoading: boolean
+  isScopeReady: boolean
   refreshShops: () => Promise<unknown>
   setGlobalScope: () => void
   setShopScope: (shop: ShopResponseDto) => void
@@ -37,6 +38,7 @@ export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
   const { status } = useSession()
   const [scope, setScope] = useState<ShopScope>({ mode: 'GLOBAL' })
   const [persistedShopId, setPersistedShopId] = useState<string | null>(null)
+  const [isStorageHydrated, setIsStorageHydrated] = useState(false)
   const isAuthenticated = status === 'authenticated'
   const { data, isLoading, refetch } = useShops(
     {
@@ -50,6 +52,7 @@ export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setPersistedShopId(tryReadPersistedShopId())
+    setIsStorageHydrated(true)
   }, [])
 
   useEffect(() => {
@@ -78,11 +81,28 @@ export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
     persistShopId(null)
   }, [isAuthenticated, persistedShopId, shops])
 
+  const isScopeReady = useMemo(() => {
+    if (!isStorageHydrated) {
+      return false
+    }
+
+    if (!isAuthenticated) {
+      return true
+    }
+
+    if (!persistedShopId) {
+      return true
+    }
+
+    return !isLoading
+  }, [isAuthenticated, isLoading, isStorageHydrated, persistedShopId])
+
   const value = useMemo<ShopScopeContextValue>(
     () => ({
       scope,
       shops,
       isLoading,
+      isScopeReady,
       refreshShops: () => refetch(),
       setGlobalScope: () => {
         setScope({ mode: 'GLOBAL' })
@@ -93,7 +113,7 @@ export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
         persistShopId(shop.id)
       },
     }),
-    [scope, shops, isLoading, refetch],
+    [scope, shops, isLoading, isScopeReady, refetch],
   )
 
   return <ShopScopeContext.Provider value={value}>{children}</ShopScopeContext.Provider>
