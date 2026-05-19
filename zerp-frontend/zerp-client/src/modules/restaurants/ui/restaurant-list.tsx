@@ -11,6 +11,8 @@ import type { Restaurant } from '../types'
 function mapShopToRestaurant(shop: {
   id: string
   name: string
+  tenantName?: string
+  tenantId?: string
   description?: string
   address?: string
   city?: string
@@ -19,6 +21,7 @@ function mapShopToRestaurant(shop: {
   return {
     id: shop.id,
     name: shop.name,
+    tenantName: shop.tenantName ?? shop.tenantId,
     description: shop.description || [shop.address, shop.city, shop.country].filter(Boolean).join(', ') || '—',
     imageUrl: `https://placehold.co/600x400?text=${encodeURIComponent(shop.name)}`,
     isOpen: true,

@@ -18,6 +18,7 @@ export interface Product {
 export interface Restaurant {
   id: string
   name: string
+  tenantName?: string
   description: string
   imageUrl?: string
   rating: number
@@ -29,6 +30,8 @@ export interface Restaurant {
 export interface PublicShopDto {
   id: string
   name: string
+  tenantName?: string
+  tenantId?: string
   description?: string
   imageId?: string
   address?: string

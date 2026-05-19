@@ -63,6 +63,11 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
           />
         </Box>
         <CardContent sx={{ flexGrow: 1, width: '100%' }}>
+          {restaurant.tenantName && (
+            <Typography variant="overline" color="text.secondary" sx={{ lineHeight: 1 }}>
+              {restaurant.tenantName}
+            </Typography>
+          )}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
             <Typography variant="h6" component="h3" fontWeight="bold">
               {restaurant.name}

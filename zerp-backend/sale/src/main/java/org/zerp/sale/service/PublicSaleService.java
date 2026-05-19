@@ -216,6 +216,8 @@ public class PublicSaleService {
     private PublicShopDTO toPublicShop(Shop entity) {
         PublicShopDTO dto = new PublicShopDTO();
         dto.setId(entity.getId());
+        dto.setTenantId(entity.getTenantId());
+        dto.setTenantName(entity.getTenant() != null ? entity.getTenant().getName() : null);
         dto.setName(entity.getName());
         dto.setDescription(entity.getDescription());
         dto.setImageId(entity.getImageId());

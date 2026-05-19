@@ -7,6 +7,8 @@ import java.util.UUID;
 @Data
 public class PublicShopDTO {
     private UUID id;
+    private UUID tenantId;
+    private String tenantName;
     private String name;
     private String description;
     private String imageId;
