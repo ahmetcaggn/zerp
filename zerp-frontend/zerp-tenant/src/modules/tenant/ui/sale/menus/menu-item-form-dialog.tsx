@@ -33,6 +33,20 @@ interface Props {
   onClose: () => void
 }
 
+function parseCommaSeparatedList(value: string): string[] {
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function stringifyCommaSeparatedList(values?: string[]): string {
+  if (!values || values.length === 0) {
+    return ''
+  }
+  return values.join(', ')
+}
+
 export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId, onClose }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
@@ -43,6 +57,12 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
   const [description, setDescription] = useState(menuItem?.description ?? '')
   const [price, setPrice] = useState(String(menuItem?.price ?? ''))
   const [imageId, setImageId] = useState(menuItem?.imageId ?? '')
+  const [calories, setCalories] = useState(
+    menuItem?.calories === null || menuItem?.calories === undefined ? '' : String(menuItem.calories),
+  )
+  const [weight, setWeight] = useState(menuItem?.weight ?? '')
+  const [ingredientsInput, setIngredientsInput] = useState(stringifyCommaSeparatedList(menuItem?.ingredients))
+  const [allergensInput, setAllergensInput] = useState(stringifyCommaSeparatedList(menuItem?.allergens))
   const [categoryId, setCategoryId] = useState(menuItem?.categoryId ?? preselectedCategoryId ?? '')
   const [productItems, setProductItems] = useState<MenuItemProductItemDto[]>(menuItem?.productItems ?? [])
 
@@ -74,6 +94,10 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
           ...(description.trim() && { description: description.trim() }),
           price: Number(price),
           ...(imageId.trim() && { imageId: imageId.trim() }),
+          ...(calories.trim() && { calories: Number(calories) }),
+          ...(weight.trim() && { weight: weight.trim() }),
+          ingredients: parseCommaSeparatedList(ingredientsInput),
+          allergens: parseCommaSeparatedList(allergensInput),
           categoryId,
           productItems,
         },
@@ -93,7 +117,11 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
             name: name.trim(),
             ...(description.trim() && { description: description.trim() }),
             price: Number(price),
-            ...(imageId.trim() && { imageId: imageId.trim() }),
+            imageId: imageId.trim() || null,
+            calories: calories.trim() ? Number(calories) : null,
+            weight: weight.trim() || null,
+            ingredients: parseCommaSeparatedList(ingredientsInput),
+            allergens: parseCommaSeparatedList(allergensInput),
             productItems,
           },
         },
@@ -148,6 +176,36 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
                 fullWidth
               />
             </Box>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField
+                label={t('sale.menuItem.form.calories')}
+                type="number"
+                value={calories}
+                onChange={(e) => setCalories(e.target.value)}
+                fullWidth
+                inputProps={{ min: 0, step: '1' }}
+              />
+              <TextField
+                label={t('sale.menuItem.form.weight')}
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                fullWidth
+              />
+            </Box>
+            <TextField
+              label={t('sale.menuItem.form.ingredients')}
+              value={ingredientsInput}
+              onChange={(e) => setIngredientsInput(e.target.value)}
+              fullWidth
+              helperText={t('sale.menuItem.form.listInputHint')}
+            />
+            <TextField
+              label={t('sale.menuItem.form.allergens')}
+              value={allergensInput}
+              onChange={(e) => setAllergensInput(e.target.value)}
+              fullWidth
+              helperText={t('sale.menuItem.form.listInputHint')}
+            />
             <FormControl fullWidth required>
               <InputLabel>{t('sale.menuItem.form.categoryId')}</InputLabel>
               <Select

@@ -29,9 +29,8 @@ import { queryKeys } from '@/core/api/query-keys'
 import { useI18n } from '@/core/i18n/i18n-provider'
 
 import { getPublicCategoryMenuItems } from '../api/public-sale-client'
-import { DEFAULT_PRODUCT_DETAIL_FIELDS } from '../data/defaults'
 import { useCreatePublicCartOrder, usePublicCategoryMenuItems, usePublicShopMenu, usePublicShops } from '../hooks/use-public-sale'
-import type { MenuLanguage, Product as MenuItem } from '../types'
+import type { MenuLanguage, Product as MenuItem, PublicMenuItemDto } from '../types'
 import {
   addItemToCart,
   buildCartOrderPayload,
@@ -164,15 +163,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
     [cartItems],
   )
 
-  function mapToMenuItem(publicMenuItem: {
-    id: string
-    name: string
-    description?: string
-    price: number
-    imageId?: string
-    isAvailable?: boolean
-    available?: boolean
-  }, categoryName: string): MenuItem {
+  function mapToMenuItem(publicMenuItem: PublicMenuItemDto, categoryName: string): MenuItem {
     const imageUrl = publicMenuItem.imageId
       ? `/api/sale/public/images/${encodeURIComponent(publicMenuItem.imageId)}`
       : 'https://placehold.co/400'
@@ -185,7 +176,10 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
       imageUrl,
       category: categoryName,
       isAvailable: publicMenuItem.isAvailable ?? publicMenuItem.available ?? true,
-      ...DEFAULT_PRODUCT_DETAIL_FIELDS,
+      ingredients: publicMenuItem.ingredients,
+      calories: publicMenuItem.calories ?? undefined,
+      weight: publicMenuItem.weight ?? undefined,
+      allergens: publicMenuItem.allergens,
     }
   }
 

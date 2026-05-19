@@ -60,54 +60,66 @@ export function MenuItemDetailModal({ open, onClose, menuItem, onAddToCart }: Me
           <Divider />
 
           {/* İçindekiler */}
-          {menuItem.ingredients && menuItem.ingredients.length > 0 && (
-            <Box>
-              <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                {t('productDetail.ingredients')}
-              </Typography>
+          <Box>
+            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+              {t('productDetail.ingredients')}
+            </Typography>
+            {menuItem.ingredients && menuItem.ingredients.length > 0 ? (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {menuItem.ingredients.map((ingredient) => (
                   <Chip key={ingredient} label={ingredient} size="small" variant="outlined" />
                 ))}
               </Box>
-            </Box>
-          )}
-
-          {/* Gramaj ve Kalori */}
-          <Box sx={{ display: 'flex', gap: 4 }}>
-            {menuItem.weight && (
-              <Box>
-                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                  {t('productDetail.weight')}
-                </Typography>
-                <Typography variant="body2">{menuItem.weight}</Typography>
-              </Box>
-            )}
-            {menuItem.calories !== undefined && menuItem.calories !== null && (
-              <Box>
-                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                  {t('productDetail.calories')}
-                </Typography>
-                <Typography variant="body2">
-                  {t('productDetail.kcal', { value: menuItem.calories })}
-                </Typography>
-              </Box>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                {t('productDetail.notAvailable')}
+              </Typography>
             )}
           </Box>
 
-          {/* Alerjenler */}
-          {menuItem.allergens && menuItem.allergens.length > 0 && (
+          {/* Gramaj ve Kalori */}
+          <Box sx={{ display: 'flex', gap: 4 }}>
             <Box>
-              <Typography variant="subtitle2" fontWeight="bold" color="error.main" gutterBottom>
-                {t('productDetail.allergens')}
+              <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                {t('productDetail.weight')}
               </Typography>
+              <Typography variant="body2" color={menuItem.weight ? undefined : 'text.secondary'}>
+                {menuItem.weight || t('productDetail.notAvailable')}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                {t('productDetail.calories')}
+              </Typography>
+              {menuItem.calories !== undefined && menuItem.calories !== null ? (
+                <Typography variant="body2">
+                  {t('productDetail.kcal', { value: menuItem.calories })}
+                </Typography>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  {t('productDetail.notAvailable')}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+
+          {/* Alerjenler */}
+          <Box>
+            <Typography variant="subtitle2" fontWeight="bold" color="error.main" gutterBottom>
+              {t('productDetail.allergens')}
+            </Typography>
+            {menuItem.allergens && menuItem.allergens.length > 0 ? (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {menuItem.allergens.map((allergen) => (
                   <Chip key={allergen} label={allergen} size="small" color="error" variant="outlined" />
                 ))}
               </Box>
-            </Box>
-          )}
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                {t('productDetail.notAvailable')}
+              </Typography>
+            )}
+          </Box>
         </Stack>
       </DialogContent>
 

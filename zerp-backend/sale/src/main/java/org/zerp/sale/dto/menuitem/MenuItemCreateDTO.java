@@ -12,6 +12,10 @@ public class MenuItemCreateDTO {
     private String description;
     private BigDecimal price;
     private String imageId;
+    private Integer calories;
+    private String weight;
+    private List<String> ingredients;
+    private List<String> allergens;
     private UUID categoryId;
     private List<MenuItemProductItemDTO> productItems;
 }

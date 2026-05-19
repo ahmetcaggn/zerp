@@ -149,7 +149,8 @@ public class MenuItemService implements
         
         handleProductAssignments(updated, data.getProductItems());
         log.info("Updated MenuItem with id: {}", uuid);
-        return mapper.toDTO(updated);
+        MenuItemDTO dto = mapper.toDTO(updated);
+        return dto;
     }
 
     @Override
@@ -247,6 +248,10 @@ public class MenuItemService implements
         if (fields.containsKey("description")) item.setDescription((String) fields.get("description"));
         if (fields.containsKey("price")) item.setPrice(new BigDecimal(fields.get("price").toString()));
         if (fields.containsKey("imageId")) item.setImageId((String) fields.get("imageId"));
+        if (fields.containsKey("calories")) item.setCalories(toInteger(fields.get("calories")));
+        if (fields.containsKey("weight")) item.setWeight((String) fields.get("weight"));
+        if (fields.containsKey("ingredients")) item.setIngredients(toStringList(fields.get("ingredients")));
+        if (fields.containsKey("allergens")) item.setAllergens(toStringList(fields.get("allergens")));
     }
 
     private void handleProductAssignments(MenuItem item, List<MenuItemProductItemDTO> newProductItems) {
@@ -297,6 +302,40 @@ public class MenuItemService implements
             result.put(item.getProductId(), quantity);
         }
         return result;
+    }
+
+    private Integer toInteger(Object rawValue) {
+        if (rawValue == null) {
+            return null;
+        }
+        if (rawValue instanceof Number number) {
+            return number.intValue();
+        }
+        try {
+            return Integer.parseInt(rawValue.toString());
+        } catch (NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "calories must be a valid number", e);
+        }
+    }
+
+    private List<String> toStringList(Object rawValue) {
+        if (rawValue == null) {
+            return new ArrayList<>();
+        }
+        if (!(rawValue instanceof List<?> rawList)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "value must be an array");
+        }
+        List<String> values = new ArrayList<>();
+        for (Object value : rawList) {
+            if (value == null) {
+                continue;
+            }
+            String normalized = value.toString().trim();
+            if (!normalized.isEmpty()) {
+                values.add(normalized);
+            }
+        }
+        return values;
     }
 
     private String resolveMenuItemImageFolder() {

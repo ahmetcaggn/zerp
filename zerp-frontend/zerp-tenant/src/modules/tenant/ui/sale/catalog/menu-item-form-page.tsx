@@ -55,12 +55,30 @@ type MenuItemFormValue = {
   description: string
   price: string
   imageId: string
+  calories: string
+  weight: string
+  ingredients: string[]
+  allergens: string[]
   categoryId: string
   productItems: MenuItemProductItemDto[]
 }
 
 const ACCEPTED_IMAGE_TYPES = 'image/jpeg,image/png,image/gif,image/webp'
 const PREVIEW_IMAGE_FALLBACK = 'https://via.placeholder.com/400x260?text=No+Image'
+
+function parseCommaSeparatedList(value: string): string[] {
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function stringifyCommaSeparatedList(values?: string[]): string {
+  if (!values || values.length === 0) {
+    return ''
+  }
+  return values.join(', ')
+}
 
 function buildPublicImageUrl(imageId?: string): string {
   if (!imageId) {
@@ -154,7 +172,11 @@ function MenuItemQuickActions({
 }) {
   const { t } = useI18n()
 
-  const categoriesPath = menuId ? `${ROUTES.catalogMenus}/${menuId}` : ROUTES.catalog
+  const categoriesPath = categoryId
+    ? `${ROUTES.catalog}/categories/${categoryId}`
+    : menuId
+      ? `${ROUTES.catalogMenus}/${menuId}`
+      : ROUTES.catalog
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 2 }}>
@@ -216,6 +238,10 @@ function MenuItemFormCard({
   const [description, setDescription] = useState(initial.description)
   const [price, setPrice] = useState(initial.price)
   const [imageId, setImageId] = useState(initial.imageId)
+  const [calories, setCalories] = useState(initial.calories)
+  const [weight, setWeight] = useState(initial.weight)
+  const [ingredientsInput, setIngredientsInput] = useState(stringifyCommaSeparatedList(initial.ingredients))
+  const [allergensInput, setAllergensInput] = useState(stringifyCommaSeparatedList(initial.allergens))
   const [categoryId, setCategoryId] = useState(initial.categoryId)
   const [productItems, setProductItems] = useState<MenuItemProductItemDto[]>(initial.productItems)
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null)
@@ -294,7 +320,18 @@ function MenuItemFormCard({
               onSubmit={(e) => {
                 e.preventDefault()
                 if (!name.trim() || !price || !categoryId) return
-                onSubmit({ name: name.trim(), description, price, imageId, categoryId, productItems })
+                onSubmit({
+                  name: name.trim(),
+                  description,
+                  price,
+                  imageId,
+                  calories,
+                  weight,
+                  ingredients: parseCommaSeparatedList(ingredientsInput),
+                  allergens: parseCommaSeparatedList(allergensInput),
+                  categoryId,
+                  productItems,
+                })
               }}
             >
               <Box sx={{ display: 'grid', gap: 2 }}>
@@ -323,6 +360,39 @@ function MenuItemFormCard({
                   required
                   fullWidth
                   inputProps={{ min: 0, step: '0.01' }}
+                />
+
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <TextField
+                    label={t('sale.menuItem.form.calories')}
+                    type="number"
+                    value={calories}
+                    onChange={(e) => setCalories(e.target.value)}
+                    fullWidth
+                    inputProps={{ min: 0, step: '1' }}
+                  />
+                  <TextField
+                    label={t('sale.menuItem.form.weight')}
+                    value={weight}
+                    onChange={(e) => setWeight(e.target.value)}
+                    fullWidth
+                  />
+                </Box>
+
+                <TextField
+                  label={t('sale.menuItem.form.ingredients')}
+                  value={ingredientsInput}
+                  onChange={(e) => setIngredientsInput(e.target.value)}
+                  fullWidth
+                  helperText={t('sale.menuItem.form.listInputHint')}
+                />
+
+                <TextField
+                  label={t('sale.menuItem.form.allergens')}
+                  value={allergensInput}
+                  onChange={(e) => setAllergensInput(e.target.value)}
+                  fullWidth
+                  helperText={t('sale.menuItem.form.listInputHint')}
                 />
 
                 <Box sx={{ display: 'grid', gap: 1 }}>
@@ -480,6 +550,10 @@ export function MenuItemFormPage({
         ...(value.description.trim() && { description: value.description.trim() }),
         price: Number(value.price),
         ...(value.imageId.trim() && { imageId: value.imageId.trim() }),
+        ...(value.calories.trim() && { calories: Number(value.calories) }),
+        ...(value.weight.trim() && { weight: value.weight.trim() }),
+        ingredients: value.ingredients,
+        allergens: value.allergens,
         categoryId: value.categoryId,
         productItems: value.productItems,
       },
@@ -501,7 +575,11 @@ export function MenuItemFormPage({
           name: value.name,
           ...(value.description.trim() && { description: value.description.trim() }),
           price: Number(value.price),
-          ...(value.imageId.trim() && { imageId: value.imageId.trim() }),
+          imageId: value.imageId.trim() || null,
+          calories: value.calories.trim() ? Number(value.calories) : null,
+          weight: value.weight.trim() || null,
+          ingredients: value.ingredients,
+          allergens: value.allergens,
           productItems: value.productItems,
         },
       },
@@ -548,6 +626,10 @@ export function MenuItemFormPage({
             description: menuItem.description ?? '',
             price: String(menuItem.price),
             imageId: menuItem.imageId ?? '',
+            calories: menuItem.calories === null || menuItem.calories === undefined ? '' : String(menuItem.calories),
+            weight: menuItem.weight ?? '',
+            ingredients: menuItem.ingredients ?? [],
+            allergens: menuItem.allergens ?? [],
             categoryId: menuItem.categoryId,
             productItems: menuItem.productItems ?? [],
           }}
@@ -586,6 +668,10 @@ export function MenuItemFormPage({
           description: '',
           price: '',
           imageId: '',
+          calories: '',
+          weight: '',
+          ingredients: [],
+          allergens: [],
           categoryId: initialCategoryId ?? '',
           productItems: [],
         }}

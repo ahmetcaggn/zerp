@@ -26,6 +26,18 @@ public class MenuItem extends BaseEntity implements Permittable {
     private String name;
     private String description;
     private String imageId;
+    private Integer calories;
+    private String weight;
+
+    @ElementCollection
+    @CollectionTable(name = "menu_item_ingredients", joinColumns = @JoinColumn(name = "menu_item_id"))
+    @Column(name = "ingredient")
+    private List<String> ingredients = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "menu_item_allergens", joinColumns = @JoinColumn(name = "menu_item_id"))
+    @Column(name = "allergen")
+    private List<String> allergens = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)

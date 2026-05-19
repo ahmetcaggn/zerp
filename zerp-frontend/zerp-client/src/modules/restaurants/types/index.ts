@@ -67,6 +67,10 @@ export interface PublicMenuItemDto {
   description?: string
   price: number
   imageId?: string
+  calories?: number | null
+  weight?: string | null
+  ingredients?: string[]
+  allergens?: string[]
   categoryId?: string
   isAvailable?: boolean
   available?: boolean

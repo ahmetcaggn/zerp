@@ -76,6 +76,7 @@ export const enMessages = {
     calories: 'Calories',
     weight: 'Weight / Portion',
     allergens: 'Allergen Warnings',
+    notAvailable: 'Not available',
     close: 'Close',
     kcal: '{value} kcal',
   },

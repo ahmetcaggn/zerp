@@ -284,6 +284,10 @@ export interface MenuItemResponseDto {
   description?: string
   price: number
   imageId?: string
+  calories?: number | null
+  weight?: string | null
+  ingredients?: string[]
+  allergens?: string[]
   categoryId: string
   categoryName?: string
   productItems?: MenuItemProductItemDto[]
@@ -296,7 +300,11 @@ export interface CreateMenuItemRequestDto {
   name: string
   description?: string
   price: number
-  imageId?: string
+  imageId?: string | null
+  calories?: number | null
+  weight?: string | null
+  ingredients?: string[]
+  allergens?: string[]
   categoryId: string
   productItems?: MenuItemProductItemDto[]
 }
@@ -305,7 +313,11 @@ export interface UpdateMenuItemRequestDto {
   name?: string
   description?: string
   price?: number
-  imageId?: string
+  imageId?: string | null
+  calories?: number | null
+  weight?: string | null
+  ingredients?: string[]
+  allergens?: string[]
   productItems?: MenuItemProductItemDto[]
 }
 

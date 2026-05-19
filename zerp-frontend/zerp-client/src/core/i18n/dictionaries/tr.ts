@@ -76,6 +76,7 @@ export const trMessages = {
     calories: 'Kalori',
     weight: 'Gramaj / Ölçü',
     allergens: 'Alerjen Uyarıları',
+    notAvailable: 'Bilgi yok',
     close: 'Kapat',
     kcal: '{value} kcal',
   },

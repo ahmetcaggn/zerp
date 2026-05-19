@@ -254,6 +254,10 @@ public class PublicSaleService {
         dto.setDescription(menuItem.getDescription());
         dto.setPrice(menuItem.getPrice());
         dto.setImageId(menuItem.getImageId());
+        dto.setCalories(menuItem.getCalories());
+        dto.setWeight(menuItem.getWeight());
+        dto.setIngredients(menuItem.getIngredients());
+        dto.setAllergens(menuItem.getAllergens());
         dto.setCategoryId(menuItem.getCategory() != null ? menuItem.getCategory().getId() : null);
         dto.setAvailable(true);
         return dto;

@@ -13,6 +13,10 @@ public class MenuItemDTO {
     private String description;
     private BigDecimal price;
     private String imageId;
+    private Integer calories;
+    private String weight;
+    private List<String> ingredients;
+    private List<String> allergens;
     private UUID categoryId;
     private String categoryName;
     private List<MenuItemProductItemDTO> productItems;
