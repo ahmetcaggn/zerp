@@ -5,10 +5,13 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import org.zerp.common.entity.sale.ProductExtraOption;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface ProductExtraOptionRepository extends
         JpaRepository<ProductExtraOption, UUID>,
         JpaSpecificationExecutor<ProductExtraOption> {
+    List<ProductExtraOption> findAllByIdIn(Collection<UUID> ids);
 }

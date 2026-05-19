@@ -197,6 +197,11 @@ function SelectionStage({
                       <Typography variant="body2" fontWeight={500}>
                         {item.quantity}× {item.menuItemName ?? item.menuItemId}
                       </Typography>
+                      {item.selectedExtraOptions && item.selectedExtraOptions.length > 0 && (
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                          + {item.selectedExtraOptions.map(option => option.name).join(', ')}
+                        </Typography>
+                      )}
                       {item.notes && (
                         <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
                           {item.notes}
@@ -292,7 +297,12 @@ function PaymentStage({
         const selectedQty = selectedQtys.get(item.id) ?? 0
         const leftQty = item.quantity - selectedQty
         if (leftQty <= 0) return []
-        return [{ menuItemId: item.menuItemId, quantity: leftQty, notes: item.notes }]
+        return [{
+          menuItemId: item.menuItemId,
+          quantity: leftQty,
+          notes: item.notes,
+          selectedExtraOptionIds: item.selectedExtraOptions?.map(option => option.extraOptionId),
+        }]
       })
 
       const isFullOrder = remainingItems.length === 0
@@ -377,11 +387,18 @@ function PaymentStage({
             {selectedItems.map(({ item, selectedQty }) => (
               <Box
                 key={item.id}
-                sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5, borderBottom: '1px solid', borderColor: 'divider' }}
+                sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5, borderBottom: '1px solid', borderColor: 'divider', gap: 1 }}
               >
-                <Typography variant="body2">
-                  {selectedQty}× {item.menuItemName ?? item.menuItemId}
-                </Typography>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="body2">
+                    {selectedQty}× {item.menuItemName ?? item.menuItemId}
+                  </Typography>
+                  {item.selectedExtraOptions && item.selectedExtraOptions.length > 0 && (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                      + {item.selectedExtraOptions.map(option => option.name).join(', ')}
+                    </Typography>
+                  )}
+                </Box>
                 <Typography variant="body2" fontWeight={700}>
                   {itemTotal(item, selectedQty).toFixed(2)} ₺
                 </Typography>

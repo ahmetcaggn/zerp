@@ -588,5 +588,12 @@ export const enMessages = {
     orderCancelledToast: 'Order cancelled',
     orderUpdatedToast: 'Order updated',
     orderDeletedToast: 'Order deleted',
+    extraOptionsTitle: 'Extra Options',
+    extraOptionsForItem: 'Select extra options for {name}',
+    extraOptionsNone: 'No extra options for this item',
+    addWithoutExtra: 'Add Without Extras',
+    addWithSelectedExtra: 'Add With Selected Extras',
+    changeStatusMenu: 'Change Status',
+    tableStatusUpdatedToast: 'Table status updated',
   },
 } as const

@@ -32,6 +32,13 @@ export interface MessageDictionary {
     orderCancelledToast: string
     orderUpdatedToast: string
     orderDeletedToast: string
+    extraOptionsTitle: string
+    extraOptionsForItem: string
+    extraOptionsNone: string
+    addWithoutExtra: string
+    addWithSelectedExtra: string
+    changeStatusMenu: string
+    tableStatusUpdatedToast: string
   }
   sale: {
     cashier: {

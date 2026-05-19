@@ -18,8 +18,8 @@ interface Props {
   existingOrders: TableOrderResponseDto[]
   orderNote: string
   onNoteChange: (v: string) => void
-  onUpdateQuantity: (menuItemId: string, delta: number) => void
-  onRemove: (menuItemId: string) => void
+  onUpdateQuantity: (cartKey: string, delta: number) => void
+  onRemove: (cartKey: string) => void
   onPlaceOrder: () => void
   onCancelOrder: (orderId: string) => void
   onUpdateOrderItemQty: (order: TableOrderResponseDto, itemId: string, delta: number) => void
@@ -155,9 +155,16 @@ export function OrderPanel({
                         onMinus={() => onUpdateOrderItemQty(order, item.id, -1)}
                         onPlus={() => onUpdateOrderItemQty(order, item.id, 1)}
                       />
-                      <Typography variant="caption" fontWeight={600} sx={{ flex: 1, minWidth: 0 }} noWrap>
-                        {item.menuItemName ?? item.menuItemId}
-                      </Typography>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="caption" fontWeight={600} noWrap>
+                          {item.menuItemName ?? item.menuItemId}
+                        </Typography>
+                        {item.selectedExtraOptions && item.selectedExtraOptions.length > 0 && (
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }} noWrap>
+                            + {item.selectedExtraOptions.map(option => option.name).join(', ')}
+                          </Typography>
+                        )}
+                      </Box>
                       <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ flexShrink: 0 }}>
                         {(item.unitPrice * item.quantity).toFixed(2)} ₺
                       </Typography>
@@ -204,7 +211,7 @@ export function OrderPanel({
               <Box sx={{ px: 1.5, py: 0.75 }}>
                 {cart.map(item => (
                   <Box
-                    key={item.menuItemId}
+                    key={item.cartKey}
                     sx={{
                       display: 'flex', alignItems: 'center', gap: 1,
                       py: 0.75, borderBottom: '1px solid', borderColor: 'action.hover',
@@ -213,18 +220,25 @@ export function OrderPanel({
                   >
                     <QtyControl
                       qty={item.quantity}
-                      onMinus={() => onUpdateQuantity(item.menuItemId, -1)}
-                      onPlus={() => onUpdateQuantity(item.menuItemId, 1)}
+                      onMinus={() => onUpdateQuantity(item.cartKey, -1)}
+                      onPlus={() => onUpdateQuantity(item.cartKey, 1)}
                     />
-                    <Typography variant="body2" fontWeight={600} sx={{ flex: 1, minWidth: 0, fontSize: '0.84rem' }} noWrap>
-                      {item.name}
-                    </Typography>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.84rem' }} noWrap>
+                        {item.name}
+                      </Typography>
+                      {item.selectedExtraOptions.length > 0 && (
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }} noWrap>
+                          + {item.selectedExtraOptions.map(option => option.name).join(', ')}
+                        </Typography>
+                      )}
+                    </Box>
                     <Typography variant="body2" fontWeight={700} color="primary.main" sx={{ flexShrink: 0 }}>
                       {(item.price * item.quantity).toFixed(2)} ₺
                     </Typography>
                     <IconButton
                       size="small"
-                      onClick={() => onRemove(item.menuItemId)}
+                      onClick={() => onRemove(item.cartKey)}
                       sx={{ color: 'error.light', width: 26, height: 26, flexShrink: 0 }}
                     >
                       <DeleteOutlineIcon sx={{ fontSize: 16 }} />

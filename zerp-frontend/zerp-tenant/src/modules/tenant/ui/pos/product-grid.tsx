@@ -16,7 +16,9 @@ interface Props {
 export function ProductGrid({ items, cart, onAdd, isLoading }: Props) {
   const { t } = useI18n()
   function getQty(id: string): number {
-    return cart.find(c => c.menuItemId === id)?.quantity ?? 0
+    return cart
+      .filter(cartItem => cartItem.menuItemId === id)
+      .reduce((sum, cartItem) => sum + cartItem.quantity, 0)
   }
 
   if (isLoading) {

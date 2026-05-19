@@ -230,6 +230,12 @@ export interface UpdateShopTableRequestDto {
 
 export type TableOrderStatus = 'OPEN' | 'PAID' | 'CANCELLED'
 
+export interface TableOrderItemSelectedExtraOptionDto {
+  extraOptionId: string
+  name: string
+  price: number
+}
+
 export interface TableOrderItemDto {
   id: string
   menuItemId: string
@@ -237,12 +243,14 @@ export interface TableOrderItemDto {
   quantity: number
   unitPrice: number
   notes?: string
+  selectedExtraOptions?: TableOrderItemSelectedExtraOptionDto[]
 }
 
 export interface TableOrderItemCreateDto {
   menuItemId: string
   quantity: number
   notes?: string
+  selectedExtraOptionIds?: string[]
 }
 
 export interface TableOrderResponseDto {

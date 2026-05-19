@@ -132,8 +132,18 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
     if (!qty || qty < 1) return
     const updatedItems = order.items.map((item) =>
       item.id === editingItemId
-        ? { menuItemId: item.menuItemId, quantity: qty, notes: editNotes || undefined }
-        : { menuItemId: item.menuItemId, quantity: item.quantity, notes: item.notes || undefined },
+        ? {
+          menuItemId: item.menuItemId,
+          quantity: qty,
+          notes: editNotes || undefined,
+          selectedExtraOptionIds: item.selectedExtraOptions?.map(option => option.extraOptionId),
+        }
+        : {
+          menuItemId: item.menuItemId,
+          quantity: item.quantity,
+          notes: item.notes || undefined,
+          selectedExtraOptionIds: item.selectedExtraOptions?.map(option => option.extraOptionId),
+        },
     )
     patchOrder(
       { id: order.id, fields: { items: updatedItems } },
@@ -150,7 +160,12 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
   function deleteItem(order: TableOrderResponseDto, itemId: string) {
     const updatedItems = order.items
       .filter((item) => item.id !== itemId)
-      .map((item) => ({ menuItemId: item.menuItemId, quantity: item.quantity, notes: item.notes || undefined }))
+      .map((item) => ({
+        menuItemId: item.menuItemId,
+        quantity: item.quantity,
+        notes: item.notes || undefined,
+        selectedExtraOptionIds: item.selectedExtraOptions?.map(option => option.extraOptionId),
+      }))
     patchOrder(
       { id: order.id, fields: { items: updatedItems } },
       {
@@ -215,7 +230,16 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
                   {order.items.map((item) =>
                     editingItemId === item.id ? (
                       <TableRow key={item.id}>
-                        <TableCell>{item.menuItemName ?? item.menuItemId}</TableCell>
+                        <TableCell>
+                          <Typography variant="body2">
+                            {item.menuItemName ?? item.menuItemId}
+                          </Typography>
+                          {item.selectedExtraOptions && item.selectedExtraOptions.length > 0 && (
+                            <Typography variant="caption" color="text.secondary">
+                              + {item.selectedExtraOptions.map(option => option.name).join(', ')}
+                            </Typography>
+                          )}
+                        </TableCell>
                         <TableCell>
                           <TextField
                             type="number"
@@ -250,7 +274,16 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
                       </TableRow>
                     ) : (
                       <TableRow key={item.id}>
-                        <TableCell>{item.menuItemName ?? item.menuItemId}</TableCell>
+                        <TableCell>
+                          <Typography variant="body2">
+                            {item.menuItemName ?? item.menuItemId}
+                          </Typography>
+                          {item.selectedExtraOptions && item.selectedExtraOptions.length > 0 && (
+                            <Typography variant="caption" color="text.secondary">
+                              + {item.selectedExtraOptions.map(option => option.name).join(', ')}
+                            </Typography>
+                          )}
+                        </TableCell>
                         <TableCell>{item.quantity}</TableCell>
                         <TableCell>{item.unitPrice} ₺</TableCell>
                         <TableCell>{item.notes ?? '—'}</TableCell>

@@ -548,5 +548,12 @@ export const trMessages = {
     orderCancelledToast: 'Sipariş iptal edildi',
     orderUpdatedToast: 'Sipariş güncellendi',
     orderDeletedToast: 'Sipariş silindi',
+    extraOptionsTitle: 'Ekstra Seçenekler',
+    extraOptionsForItem: '{name} için ekstra seçenek seçin',
+    extraOptionsNone: 'Bu ürün için ekstra seçenek yok',
+    addWithoutExtra: 'Extrasız Ekle',
+    addWithSelectedExtra: 'Seçilenlerle Ekle',
+    changeStatusMenu: 'Durum Değiştir',
+    tableStatusUpdatedToast: 'Masa durumu güncellendi',
   },
 } as const

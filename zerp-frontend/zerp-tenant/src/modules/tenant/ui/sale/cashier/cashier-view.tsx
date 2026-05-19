@@ -74,7 +74,16 @@ function TableOrderSummary({ table }: { table: ShopTableResponseDto }) {
             <TableBody>
               {order.items.map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell>{item.menuItemName ?? item.menuItemId}</TableCell>
+                  <TableCell>
+                    <Typography variant="body2">
+                      {item.menuItemName ?? item.menuItemId}
+                    </Typography>
+                    {item.selectedExtraOptions && item.selectedExtraOptions.length > 0 && (
+                      <Typography variant="caption" color="text.secondary">
+                        + {item.selectedExtraOptions.map(option => option.name).join(', ')}
+                      </Typography>
+                    )}
+                  </TableCell>
                   <TableCell align="center">{item.quantity}</TableCell>
                   <TableCell align="right">{item.unitPrice.toFixed(2)} ₺</TableCell>
                   <TableCell align="right">{(item.unitPrice * item.quantity).toFixed(2)} ₺</TableCell>
