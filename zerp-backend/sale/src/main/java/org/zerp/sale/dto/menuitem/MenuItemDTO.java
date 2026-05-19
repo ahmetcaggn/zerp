@@ -15,6 +15,6 @@ public class MenuItemDTO {
     private String imageId;
     private UUID categoryId;
     private String categoryName;
-    private List<UUID> productIds;
+    private List<MenuItemProductItemDTO> productItems;
     private UUID tenantId;
 }

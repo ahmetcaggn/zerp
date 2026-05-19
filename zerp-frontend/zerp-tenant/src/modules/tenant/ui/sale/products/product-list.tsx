@@ -91,7 +91,6 @@ export function ProductList() {
             <TableHead>
               <TableRow>
                 <TableCell>{t('sale.product.form.name')}</TableCell>
-                <TableCell>{t('sale.product.form.price')}</TableCell>
                 <TableCell>{t('sale.product.form.preparationTime')}</TableCell>
                 <TableCell>{t('sale.product.form.isActive')}</TableCell>
                 <TableCell align="right">{t('common.actions')}</TableCell>
@@ -100,7 +99,7 @@ export function ProductList() {
             <TableBody>
               {!data?.data?.length ? (
                 <TableRow>
-                  <TableCell colSpan={5} align="center">
+                  <TableCell colSpan={4} align="center">
                     {t('sale.product.emptyState')}
                   </TableCell>
                 </TableRow>
@@ -115,7 +114,6 @@ export function ProductList() {
                         </Typography>
                       )}
                     </TableCell>
-                    <TableCell>₺{product.price}</TableCell>
                     <TableCell>
                       {product.preparationTime != null ? `${product.preparationTime} dk` : '—'}
                     </TableCell>

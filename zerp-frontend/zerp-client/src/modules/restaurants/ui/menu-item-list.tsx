@@ -169,15 +169,20 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
     name: string
     description?: string
     price: number
+    imageId?: string
     isAvailable?: boolean
     available?: boolean
   }, categoryName: string): MenuItem {
+    const imageUrl = publicMenuItem.imageId
+      ? `/api/sale/public/images/${encodeURIComponent(publicMenuItem.imageId)}`
+      : 'https://placehold.co/400'
+
     return {
       id: publicMenuItem.id,
       name: publicMenuItem.name,
       description: publicMenuItem.description,
       price: Number(publicMenuItem.price),
-      imageUrl: 'https://placehold.co/400',
+      imageUrl,
       category: categoryName,
       isAvailable: publicMenuItem.isAvailable ?? publicMenuItem.available ?? true,
       ...DEFAULT_PRODUCT_DETAIL_FIELDS,

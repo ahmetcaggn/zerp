@@ -10,7 +10,6 @@ import org.zerp.common.permission.entity.Permittable;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -45,12 +44,8 @@ public class Product extends BaseEntity implements Permittable {
     @JoinColumn(name = "metric_id")
     private ProductMetric metric;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "menu_item_id")
-    private MenuItem menuItem;
-
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal price;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MenuItemProduct> menuItemLinks = new ArrayList<>();
 
     /**
      * Estimated preparation time in minutes.

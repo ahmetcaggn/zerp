@@ -4,7 +4,6 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 public class MenuItemUpdateDTO {
@@ -12,5 +11,5 @@ public class MenuItemUpdateDTO {
     private String description;
     private BigDecimal price;
     private String imageId;
-    private List<UUID> productIds;
+    private List<MenuItemProductItemDTO> productItems;
 }

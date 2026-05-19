@@ -15,7 +15,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/sale/products")
 @RequiredArgsConstructor
-@Tag(name = "Product", description = "API for managing cafe/restaurant products with recipes and pricing")
+@Tag(name = "Product", description = "API for managing cafe/restaurant products and recipes")
 public class ProductController extends
         ResourceController<ProductDTO, ProductDTO, ProductCreateDTO, ProductUpdateDTO, UUID> {
     private final ProductService service;

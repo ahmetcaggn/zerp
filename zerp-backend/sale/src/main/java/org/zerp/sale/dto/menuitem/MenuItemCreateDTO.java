@@ -13,5 +13,5 @@ public class MenuItemCreateDTO {
     private BigDecimal price;
     private String imageId;
     private UUID categoryId;
-    private List<UUID> productIds;
+    private List<MenuItemProductItemDTO> productItems;
 }

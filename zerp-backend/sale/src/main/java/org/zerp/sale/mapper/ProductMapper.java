@@ -13,7 +13,7 @@ public interface ProductMapper {
     @Mapping(target = "shop", ignore = true)
     @Mapping(target = "type", ignore = true)
     @Mapping(target = "metric", ignore = true)
-    @Mapping(target = "menuItem", ignore = true)
+    @Mapping(target = "menuItemLinks", ignore = true)
     Product toEntity(ProductCreateDTO dto);
 
     @Mapping(source = "shop.id", target = "shopId")
@@ -22,12 +22,11 @@ public interface ProductMapper {
     @Mapping(source = "type.name", target = "typeName")
     @Mapping(source = "metric.id", target = "metricId")
     @Mapping(source = "metric.name", target = "metricName")
-    @Mapping(source = "menuItem.id", target = "menuItemId")
     @Mapping(source = "tenantId", target = "tenantId")
     ProductDTO toDTO(Product entity);
 
     @Mapping(target = "type", ignore = true)
     @Mapping(target = "metric", ignore = true)
-    @Mapping(target = "menuItem", ignore = true)
+    @Mapping(target = "menuItemLinks", ignore = true)
     void updateEntityFromDTO(ProductUpdateDTO dto, @MappingTarget Product entity);
 }
