@@ -2,13 +2,20 @@ package org.zerp.sale.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import feign.FeignException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.dto.user.ImageSize;
 import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.sale.Menu;
 import org.zerp.common.entity.sale.MenuLanguage;
@@ -19,11 +26,13 @@ import org.zerp.common.entity.sale.PublicCartOrderItem;
 import org.zerp.sale.dto.publicsale.PublicActiveMenuDTO;
 import org.zerp.sale.dto.publicsale.PublicCartOrderCreateRequest;
 import org.zerp.sale.dto.publicsale.PublicCartOrderCreateResponse;
+import org.zerp.sale.dto.publicsale.PublicImageContentResponse;
 import org.zerp.sale.dto.publicsale.PublicCartOrderItemCreateRequest;
 import org.zerp.sale.dto.publicsale.PublicMenuItemDTO;
 import org.zerp.sale.dto.publicsale.PublicMenuCategoryDTO;
 import org.zerp.sale.dto.publicsale.PublicShopDTO;
 import org.zerp.sale.dto.publicsale.PublicShopMenuResponseDTO;
+import org.zerp.sale.feign.ThumborFeignClient;
 import org.zerp.sale.repository.MenuCategoryRepository;
 import org.zerp.sale.repository.MenuItemRepository;
 import org.zerp.sale.repository.MenuRepository;
@@ -46,6 +55,10 @@ public class PublicSaleService {
     private final MenuItemRepository menuItemRepository;
     private final PublicCartOrderRepository publicCartOrderRepository;
     private final PublicCartOrderItemRepository publicCartOrderItemRepository;
+    private final ThumborFeignClient thumborFeignClient;
+
+    @Value("${app.sale.menu-item-images.folder:saleMenuItems}")
+    private String menuItemImageFolder;
 
     @Transactional(readOnly = true)
     public List<PublicShopDTO> listShops() {
@@ -142,6 +155,31 @@ public class PublicSaleService {
         return response;
     }
 
+    @Transactional(readOnly = true)
+    public PublicImageContentResponse getMenuItemImage(String imageId) {
+        String normalizedImageId = normalizeImageId(imageId);
+        ResponseEntity<byte[]> thumborResponse;
+        try {
+            thumborResponse = thumborFeignClient.getProfileImage(normalizedImageId, ImageSize.SMALL);
+        } catch (FeignException.NotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found: " + normalizedImageId, e);
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to fetch image from thumbor", e);
+        }
+
+        if (!thumborResponse.getStatusCode().is2xxSuccessful() || thumborResponse.getBody() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found: " + normalizedImageId);
+        }
+
+        MediaType contentType = thumborResponse.getHeaders().getContentType();
+        if (contentType == null) {
+            contentType = MediaType.APPLICATION_OCTET_STREAM;
+        }
+
+        Resource resource = new ByteArrayResource(thumborResponse.getBody());
+        return new PublicImageContentResponse(resource, contentType);
+    }
+
     @Scheduled(cron = "${sale.public-cart.cleanup-cron:0 0 3 * * *}")
     @Transactional
     public void cleanupExpiredPublicCartOrders() {
@@ -219,5 +257,12 @@ public class PublicSaleService {
         dto.setCategoryId(menuItem.getCategory() != null ? menuItem.getCategory().getId() : null);
         dto.setAvailable(true);
         return dto;
+    }
+
+    private String normalizeImageId(String imageId) {
+        if (imageId == null || imageId.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "imageId is required");
+        }
+        return imageId.trim();
     }
 }

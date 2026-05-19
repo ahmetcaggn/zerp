@@ -3,12 +3,15 @@ package org.zerp.sale.controller;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +26,7 @@ import org.zerp.common.dto.ApiResponse;
 import org.zerp.common.entity.sale.MenuLanguage;
 import org.zerp.sale.dto.publicsale.PublicCartOrderCreateRequest;
 import org.zerp.sale.dto.publicsale.PublicCartOrderCreateResponse;
+import org.zerp.sale.dto.publicsale.PublicImageContentResponse;
 import org.zerp.sale.dto.publicsale.PublicMenuItemDTO;
 import org.zerp.sale.dto.publicsale.PublicShopDTO;
 import org.zerp.sale.dto.publicsale.PublicShopMenuResponseDTO;
@@ -30,6 +34,7 @@ import org.zerp.sale.service.PublicSaleService;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/sale/public")
@@ -87,6 +92,19 @@ public class PublicSaleController {
     ) {
         PublicCartOrderCreateResponse response = publicSaleService.createPublicCartOrder(shopId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(buildResponse(response));
+    }
+
+    @GetMapping("/images/{imageId}")
+    public ResponseEntity<Resource> getMenuItemImage(@PathVariable String imageId) {
+        PublicImageContentResponse response = publicSaleService.getMenuItemImage(imageId);
+        MediaType contentType = response.contentType() != null
+                ? response.contentType()
+                : MediaType.APPLICATION_OCTET_STREAM;
+
+        return ResponseEntity.ok()
+                .contentType(contentType)
+                .cacheControl(CacheControl.maxAge(7, TimeUnit.DAYS).cachePublic())
+                .body(response.resource());
     }
 
     private <T> ApiResponse<T> buildResponse(T data) {
