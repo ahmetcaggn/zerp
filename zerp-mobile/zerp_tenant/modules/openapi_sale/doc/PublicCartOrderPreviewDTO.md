@@ -1,0 +1,19 @@
+# openapi_sale.model.PublicCartOrderPreviewDTO
+
+## Load the model package
+```dart
+import 'package:openapi_sale/api.dart';
+```
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**id** | **String** |  | [optional] 
+**code** | **String** |  | [optional] 
+**shopId** | **String** |  | [optional] 
+**note** | **String** |  | [optional] 
+**items** | [**List<PublicCartOrderPreviewItemDTO>**](PublicCartOrderPreviewItemDTO.md) |  | [optional] [default to const []]
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

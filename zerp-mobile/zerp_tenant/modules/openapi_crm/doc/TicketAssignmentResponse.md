@@ -10,7 +10,10 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **String** |  | [optional] 
 **teamId** | **String** |  | [optional] 
+**teamName** | **String** |  | [optional] 
+**teamType** | **String** |  | [optional] 
 **agentPartyId** | **String** |  | [optional] 
+**agentDisplayName** | **String** |  | [optional] 
 **active** | **bool** |  | [optional] 
 **assignedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 

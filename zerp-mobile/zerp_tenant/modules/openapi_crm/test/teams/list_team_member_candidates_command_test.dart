@@ -16,7 +16,7 @@ void main() {
   // final instance = TeamsListTeamMemberCandidatesApi();
 
   group('tests for TeamsListTeamMemberCandidatesApi', () {
-    //Future<ApiResponseListTeamMemberCandidateResponse> listTeamMemberCandidates(String id, { int start, int end, String sort, String order, String username }) async
+    //Future<ApiResponseListTeamMemberCandidateResponse> listTeamMemberCandidates(String id, { int start, int end, String sort, String order, String query, String username }) async
     test('test listTeamMemberCandidates', () async {
       // TODO
     });

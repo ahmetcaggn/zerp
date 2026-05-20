@@ -25,8 +25,23 @@ void main() {
       // TODO
     });
 
+    // String teamName
+    test('to test the property `teamName`', () async {
+      // TODO
+    });
+
+    // String teamType
+    test('to test the property `teamType`', () async {
+      // TODO
+    });
+
     // String agentPartyId
     test('to test the property `agentPartyId`', () async {
+      // TODO
+    });
+
+    // String agentDisplayName
+    test('to test the property `agentDisplayName`', () async {
       // TODO
     });
 

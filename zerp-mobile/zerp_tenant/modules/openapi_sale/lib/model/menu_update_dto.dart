@@ -26,6 +26,8 @@ class MenuUpdateDTO extends Schema {
   MenuUpdateDTO({
     this.name,
     this.description,
+    this.isActive,
+    this.language,
   });
 
   @JsonKey(name: r'name')
@@ -33,6 +35,12 @@ class MenuUpdateDTO extends Schema {
 
   @JsonKey(name: r'description')
   final String? description;
+
+  @JsonKey(name: r'isActive')
+  final bool? isActive;
+
+  @JsonKey(name: r'language')
+  final MenuUpdateDTOLanguageEnum? language;
 
   /// The factory instance for creating [MenuUpdateDTO] from JSON.
   static const factory = MenuUpdateDTOFactory();
@@ -74,6 +82,22 @@ class MenuUpdateDTOFactory extends JsonSchemaFactory<MenuUpdateDTO> {
 
   @override
   MenuUpdateDTO fromJson(dynamic json) => MenuUpdateDTO.fromJson(json as Map<String, dynamic>);
+}
+
+
+
+enum MenuUpdateDTOLanguageEnum {
+@JsonValue('TR')
+TR('TR'),
+@JsonValue('EN')
+EN('EN');
+
+const MenuUpdateDTOLanguageEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 

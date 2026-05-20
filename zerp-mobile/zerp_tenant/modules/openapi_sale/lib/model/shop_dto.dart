@@ -27,6 +27,7 @@ class ShopDTO extends Schema {
     this.id,
     this.name,
     this.description,
+    this.defaultMenuLanguage,
     this.tenantId,
   });
 
@@ -38,6 +39,9 @@ class ShopDTO extends Schema {
 
   @JsonKey(name: r'description')
   final String? description;
+
+  @JsonKey(name: r'defaultMenuLanguage')
+  final ShopDTODefaultMenuLanguageEnum? defaultMenuLanguage;
 
   @JsonKey(name: r'tenantId')
   final String? tenantId;
@@ -82,6 +86,22 @@ class ShopDTOFactory extends JsonSchemaFactory<ShopDTO> {
 
   @override
   ShopDTO fromJson(dynamic json) => ShopDTO.fromJson(json as Map<String, dynamic>);
+}
+
+
+
+enum ShopDTODefaultMenuLanguageEnum {
+@JsonValue('TR')
+TR('TR'),
+@JsonValue('EN')
+EN('EN');
+
+const ShopDTODefaultMenuLanguageEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 

@@ -26,7 +26,10 @@ class TicketAssignmentResponse extends Schema {
   TicketAssignmentResponse({
     this.id,
     this.teamId,
+    this.teamName,
+    this.teamType,
     this.agentPartyId,
+    this.agentDisplayName,
     this.active,
     this.assignedAt,
   });
@@ -37,8 +40,17 @@ class TicketAssignmentResponse extends Schema {
   @JsonKey(name: r'teamId')
   final String? teamId;
 
+  @JsonKey(name: r'teamName')
+  final String? teamName;
+
+  @JsonKey(name: r'teamType')
+  final String? teamType;
+
   @JsonKey(name: r'agentPartyId')
   final String? agentPartyId;
+
+  @JsonKey(name: r'agentDisplayName')
+  final String? agentDisplayName;
 
   @JsonKey(name: r'active')
   final bool? active;

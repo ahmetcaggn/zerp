@@ -25,8 +25,18 @@ void main() {
       // TODO
     });
 
+    // String language
+    test('to test the property `language`', () async {
+      // TODO
+    });
+
     // String shopId
     test('to test the property `shopId`', () async {
+      // TODO
+    });
+
+    // bool active
+    test('to test the property `active`', () async {
       // TODO
     });
 

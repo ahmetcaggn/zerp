@@ -9,6 +9,8 @@ import 'package:openapi_crm/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **String** |  | [optional] 
+**displayName** | **String** |  | [optional] 
+**displayLabel** | **String** |  | [optional] 
 **username** | **String** |  | [optional] 
 **email** | **String** |  | [optional] 
 

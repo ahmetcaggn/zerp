@@ -23,6 +23,7 @@ class ListTeamMemberCandidatesCommand extends OpenapiDefinitionBaseRequest<ApiRe
     this.end,
     this.sort,
     this.order,
+    this.query,
     this.username,
   });
 
@@ -31,6 +32,7 @@ class ListTeamMemberCandidatesCommand extends OpenapiDefinitionBaseRequest<ApiRe
   final int? end;
   final String? sort;
   final String? order;
+  final String? query;
   final String? username;
 
   @override
@@ -46,6 +48,7 @@ class ListTeamMemberCandidatesCommand extends OpenapiDefinitionBaseRequest<ApiRe
     if (end != null) QueryParameter(key: r'_end', value: end),
     if (sort != null) QueryParameter(key: r'_sort', value: sort),
     if (order != null) QueryParameter(key: r'_order', value: order),
+    if (query != null) QueryParameter(key: r'query', value: query),
     if (username != null) QueryParameter(key: r'username', value: username),
   ];
 

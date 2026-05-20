@@ -14,8 +14,6 @@ Name | Type | Description | Notes
 **shopId** | **String** |  | [optional] 
 **typeId** | **String** |  | [optional] 
 **metricId** | **String** |  | [optional] 
-**menuItemId** | **String** |  | [optional] 
-**price** | **num** |  | [optional] 
 **preparationTime** | **int** |  | [optional] 
 **active** | **bool** |  | [optional] 
 

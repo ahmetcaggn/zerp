@@ -13,7 +13,7 @@ Method | HTTP request | Description
 
 
 # **listTeamMemberCandidates**
-> ApiResponseListTeamMemberCandidateResponse listTeamMemberCandidates(id, start, end, sort, order, username)
+> ApiResponseListTeamMemberCandidateResponse listTeamMemberCandidates(id, start, end, sort, order, query, username)
 
 
 
@@ -27,10 +27,11 @@ final start = 56; // int |
 final end = 56; // int | 
 final sort = sort_example; // String | 
 final order = order_example; // String | 
+final query = query_example; // String | 
 final username = username_example; // String | 
 
 try {
-    final result = api_instance.listTeamMemberCandidates(id, start, end, sort, order, username);
+    final result = api_instance.listTeamMemberCandidates(id, start, end, sort, order, query, username);
     print(result);
 } catch (e) {
     print('Exception when calling TeamsListTeamMemberCandidatesApi->listTeamMemberCandidates: $e\n');
@@ -46,6 +47,7 @@ Name | Type | Description  | Notes
  **end** | **int**|  | [optional] [default to 10]
  **sort** | **String**|  | [optional] [default to 'username']
  **order** | **String**|  | [optional] [default to 'ASC']
+ **query** | **String**|  | [optional] 
  **username** | **String**|  | [optional] 
 
 ### Return type

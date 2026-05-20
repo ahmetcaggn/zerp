@@ -65,16 +65,6 @@ void main() {
       // TODO
     });
 
-    // String menuItemId
-    test('to test the property `menuItemId`', () async {
-      // TODO
-    });
-
-    // num price
-    test('to test the property `price`', () async {
-      // TODO
-    });
-
     // int preparationTime
     test('to test the property `preparationTime`', () async {
       // TODO

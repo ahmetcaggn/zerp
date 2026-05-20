@@ -4,6 +4,8 @@ README.md
 analysis_options.yaml
 doc/AddCommentRequest.md
 doc/AddMemberRequest.md
+doc/ApiResponseListAssignmentTeamCandidateResponse.md
+doc/ApiResponseListAssignmentTeamMemberCandidateResponse.md
 doc/ApiResponseListTeamMemberCandidateResponse.md
 doc/ApiResponseListTeamResponse.md
 doc/ApiResponseListTicketResponse.md
@@ -12,6 +14,8 @@ doc/ApiResponseTeamResponse.md
 doc/ApiResponseTicketResponse.md
 doc/ApiResponseVoid.md
 doc/AssignTicketRequest.md
+doc/AssignmentTeamCandidateResponse.md
+doc/AssignmentTeamMemberCandidateResponse.md
 doc/AttachmentResponse.md
 doc/ChangeMemberRoleRequest.md
 doc/ChangePriorityRequest.md
@@ -30,6 +34,8 @@ doc/TeamTicketsAssignTicketApi.md
 doc/TeamTicketsChangeTicketPriorityApi.md
 doc/TeamTicketsChangeTicketStatusApi.md
 doc/TeamTicketsCloseTicketApi.md
+doc/TeamTicketsListAssignmentTeamCandidatesApi.md
+doc/TeamTicketsListAssignmentTeamMemberCandidatesApi.md
 doc/TeamTicketsUnassignTicketApi.md
 doc/TeamsActivateTeamApi.md
 doc/TeamsAddTeamMemberApi.md
@@ -56,6 +62,8 @@ doc/TenantTicketsPatchManyTenantTicketsApi.md
 doc/TenantTicketsPatchTenantTicketApi.md
 doc/TenantTicketsUpdateTenantTicketApi.md
 doc/TicketAssignmentResponse.md
+doc/TicketAttachmentsGetTicketAttachmentApi.md
+doc/TicketAttachmentsUploadTicketAttachmentApi.md
 doc/TicketResponse.md
 doc/UpdateTeamRequest.md
 doc/UpdateTicketRequest.md
@@ -65,6 +73,8 @@ lib/base/api_config.dart
 lib/base/base_request.dart
 lib/model/add_comment_request.dart
 lib/model/add_member_request.dart
+lib/model/api_response_list_assignment_team_candidate_response.dart
+lib/model/api_response_list_assignment_team_member_candidate_response.dart
 lib/model/api_response_list_team_member_candidate_response.dart
 lib/model/api_response_list_team_response.dart
 lib/model/api_response_list_ticket_response.dart
@@ -73,6 +83,8 @@ lib/model/api_response_team_response.dart
 lib/model/api_response_ticket_response.dart
 lib/model/api_response_void.dart
 lib/model/assign_ticket_request.dart
+lib/model/assignment_team_candidate_response.dart
+lib/model/assignment_team_member_candidate_response.dart
 lib/model/attachment_response.dart
 lib/model/change_member_role_request.dart
 lib/model/change_priority_request.dart
@@ -96,6 +108,8 @@ lib/requests/team_tickets/assign_ticket_command.dart
 lib/requests/team_tickets/change_ticket_priority_command.dart
 lib/requests/team_tickets/change_ticket_status_command.dart
 lib/requests/team_tickets/close_ticket_command.dart
+lib/requests/team_tickets/list_assignment_team_candidates_command.dart
+lib/requests/team_tickets/list_assignment_team_member_candidates_command.dart
 lib/requests/team_tickets/unassign_ticket_command.dart
 lib/requests/teams/activate_team_command.dart
 lib/requests/teams/add_team_member_command.dart
@@ -121,9 +135,13 @@ lib/requests/tenant_tickets/get_one_tenant_ticket_command.dart
 lib/requests/tenant_tickets/patch_many_tenant_tickets_command.dart
 lib/requests/tenant_tickets/patch_tenant_ticket_command.dart
 lib/requests/tenant_tickets/update_tenant_ticket_command.dart
+lib/requests/ticket_attachments/get_ticket_attachment_command.dart
+lib/requests/ticket_attachments/upload_ticket_attachment_command.dart
 pubspec.yaml
 test/add_comment_request_test.dart
 test/add_member_request_test.dart
+test/api_response_list_assignment_team_candidate_response_test.dart
+test/api_response_list_assignment_team_member_candidate_response_test.dart
 test/api_response_list_team_member_candidate_response_test.dart
 test/api_response_list_team_response_test.dart
 test/api_response_list_ticket_response_test.dart
@@ -132,6 +150,8 @@ test/api_response_team_response_test.dart
 test/api_response_ticket_response_test.dart
 test/api_response_void_test.dart
 test/assign_ticket_request_test.dart
+test/assignment_team_candidate_response_test.dart
+test/assignment_team_member_candidate_response_test.dart
 test/attachment_response_test.dart
 test/change_member_role_request_test.dart
 test/change_priority_request_test.dart
@@ -150,6 +170,8 @@ test/team_tickets/assign_ticket_command_test.dart
 test/team_tickets/change_ticket_priority_command_test.dart
 test/team_tickets/change_ticket_status_command_test.dart
 test/team_tickets/close_ticket_command_test.dart
+test/team_tickets/list_assignment_team_candidates_command_test.dart
+test/team_tickets/list_assignment_team_member_candidates_command_test.dart
 test/team_tickets/unassign_ticket_command_test.dart
 test/teams/activate_team_command_test.dart
 test/teams/add_team_member_command_test.dart
@@ -176,6 +198,8 @@ test/tenant_tickets/patch_many_tenant_tickets_command_test.dart
 test/tenant_tickets/patch_tenant_ticket_command_test.dart
 test/tenant_tickets/update_tenant_ticket_command_test.dart
 test/ticket_assignment_response_test.dart
+test/ticket_attachments/get_ticket_attachment_command_test.dart
+test/ticket_attachments/upload_ticket_attachment_command_test.dart
 test/ticket_response_test.dart
 test/update_team_request_test.dart
 test/update_ticket_request_test.dart

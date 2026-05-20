@@ -30,8 +30,6 @@ class ProductCreateDTO extends Schema {
     this.shopId,
     this.typeId,
     this.metricId,
-    this.menuItemId,
-    this.price,
     this.preparationTime,
     this.active,
   });
@@ -53,12 +51,6 @@ class ProductCreateDTO extends Schema {
 
   @JsonKey(name: r'metricId')
   final String? metricId;
-
-  @JsonKey(name: r'menuItemId')
-  final String? menuItemId;
-
-  @JsonKey(name: r'price')
-  final num? price;
 
   @JsonKey(name: r'preparationTime')
   final int? preparationTime;

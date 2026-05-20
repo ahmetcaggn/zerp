@@ -30,6 +30,11 @@ void main() {
       // TODO
     });
 
+    // List<String> selectedExtraOptionIds (default value: const [])
+    test('to test the property `selectedExtraOptionIds`', () async {
+      // TODO
+    });
+
 
   });
 

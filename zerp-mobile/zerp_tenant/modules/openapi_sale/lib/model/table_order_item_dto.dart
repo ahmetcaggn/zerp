@@ -9,6 +9,7 @@
 
 import 'package:dart_network_layer_core/dart_network_layer_core.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'table_order_item_selected_extra_option_dto.dart';
 
 
 part 'table_order_item_dto.g.dart';
@@ -30,6 +31,7 @@ class TableOrderItemDTO extends Schema {
     this.quantity,
     this.unitPrice,
     this.notes,
+    this.selectedExtraOptions = const [],
   });
 
   @JsonKey(name: r'id')
@@ -49,6 +51,9 @@ class TableOrderItemDTO extends Schema {
 
   @JsonKey(name: r'notes')
   final String? notes;
+
+  @JsonKey(name: r'selectedExtraOptions')
+  final List<TableOrderItemSelectedExtraOptionDTO> selectedExtraOptions;
 
   /// The factory instance for creating [TableOrderItemDTO] from JSON.
   static const factory = TableOrderItemDTOFactory();

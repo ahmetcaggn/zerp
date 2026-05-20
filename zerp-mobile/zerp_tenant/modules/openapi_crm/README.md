@@ -65,6 +65,8 @@ Class | Method | HTTP request | Description
 *TeamTicketsChangeTicketPriorityApi* | [**changeTicketPriority**](doc//TeamTicketsChangeTicketPriorityApi.md#) | **PATCH** /crm/tickets/{id}/priority | 
 *TeamTicketsChangeTicketStatusApi* | [**changeTicketStatus**](doc//TeamTicketsChangeTicketStatusApi.md#) | **PATCH** /crm/tickets/{id}/status | 
 *TeamTicketsCloseTicketApi* | [**closeTicket**](doc//TeamTicketsCloseTicketApi.md#) | **POST** /crm/tickets/{id}/close | 
+*TeamTicketsListAssignmentTeamCandidatesApi* | [**listAssignmentTeamCandidates**](doc//TeamTicketsListAssignmentTeamCandidatesApi.md#) | **GET** /crm/tickets/{id}/assignment-candidates/teams | 
+*TeamTicketsListAssignmentTeamMemberCandidatesApi* | [**listAssignmentTeamMemberCandidates**](doc//TeamTicketsListAssignmentTeamMemberCandidatesApi.md#) | **GET** /crm/tickets/{id}/assignment-candidates/members | 
 *TeamTicketsUnassignTicketApi* | [**unassignTicket**](doc//TeamTicketsUnassignTicketApi.md#) | **DELETE** /crm/tickets/{id}/assign | 
 *TeamsActivateTeamApi* | [**activateTeam**](doc//TeamsActivateTeamApi.md#) | **POST** /crm/teams/{id}/activate | 
 *TeamsAddTeamMemberApi* | [**addTeamMember**](doc//TeamsAddTeamMemberApi.md#) | **POST** /crm/teams/{id}/members | 
@@ -90,12 +92,16 @@ Class | Method | HTTP request | Description
 *TenantTicketsPatchManyTenantTicketsApi* | [**patchManyTenantTickets**](doc//TenantTicketsPatchManyTenantTicketsApi.md#) | **PATCH** /crm/tickets | UpdateMany: Update multiple entities
 *TenantTicketsPatchTenantTicketApi* | [**patchTenantTicket**](doc//TenantTicketsPatchTenantTicketApi.md#) | **PATCH** /crm/tickets/{id} | Update: Update an existing entity
 *TenantTicketsUpdateTenantTicketApi* | [**updateTenantTicket**](doc//TenantTicketsUpdateTenantTicketApi.md#) | **PUT** /crm/tickets/{id} | Update: Update an existing entity
+*TicketAttachmentsGetTicketAttachmentApi* | [**getTicketAttachment**](doc//TicketAttachmentsGetTicketAttachmentApi.md#) | **GET** /crm/tickets/{id}/attachments/{attachmentId} | 
+*TicketAttachmentsUploadTicketAttachmentApi* | [**uploadTicketAttachment**](doc//TicketAttachmentsUploadTicketAttachmentApi.md#) | **POST** /crm/tickets/{id}/attachments | 
 
 
 ## Documentation For Models
 
  - [AddCommentRequest](doc//AddCommentRequest.md)
  - [AddMemberRequest](doc//AddMemberRequest.md)
+ - [ApiResponseListAssignmentTeamCandidateResponse](doc//ApiResponseListAssignmentTeamCandidateResponse.md)
+ - [ApiResponseListAssignmentTeamMemberCandidateResponse](doc//ApiResponseListAssignmentTeamMemberCandidateResponse.md)
  - [ApiResponseListTeamMemberCandidateResponse](doc//ApiResponseListTeamMemberCandidateResponse.md)
  - [ApiResponseListTeamResponse](doc//ApiResponseListTeamResponse.md)
  - [ApiResponseListTicketResponse](doc//ApiResponseListTicketResponse.md)
@@ -104,6 +110,8 @@ Class | Method | HTTP request | Description
  - [ApiResponseTicketResponse](doc//ApiResponseTicketResponse.md)
  - [ApiResponseVoid](doc//ApiResponseVoid.md)
  - [AssignTicketRequest](doc//AssignTicketRequest.md)
+ - [AssignmentTeamCandidateResponse](doc//AssignmentTeamCandidateResponse.md)
+ - [AssignmentTeamMemberCandidateResponse](doc//AssignmentTeamMemberCandidateResponse.md)
  - [AttachmentResponse](doc//AttachmentResponse.md)
  - [ChangeMemberRoleRequest](doc//ChangeMemberRoleRequest.md)
  - [ChangePriorityRequest](doc//ChangePriorityRequest.md)

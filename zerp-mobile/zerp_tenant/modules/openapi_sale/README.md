@@ -41,14 +41,16 @@ Please follow the [installation procedure](#installation--usage) and then run th
 import 'package:openapi_sale/api.dart';
 
 
-final api_instance = MenuCreateMenuApi();
-final menuCreateDTO = MenuCreateDTO(); // MenuCreateDTO | 
+final api_instance = AdminShopsCheckShopNameApi();
+final tenantId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final name = name_example; // String | 
+final shopId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
 
 try {
-    final result = api_instance.createMenu(menuCreateDTO);
+    final result = api_instance.checkShopName(tenantId, name, shopId);
     print(result);
 } catch (e) {
-    print('Exception when calling MenuCreateMenuApi->createMenu: $e\n');
+    print('Exception when calling AdminShopsCheckShopNameApi->checkShopName: $e\n');
 }
 
 ```
@@ -59,6 +61,16 @@ All URIs are relative to *https://zerpapi.femrek.dev*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*AdminShopsCheckShopNameApi* | [**checkShopName**](doc//AdminShopsCheckShopNameApi.md#) | **GET** /sale/admin/shops/check-name | 
+*AdminShopsCreateAdminShopApi* | [**createAdminShop**](doc//AdminShopsCreateAdminShopApi.md#) | **POST** /sale/admin/shops | Create: Create a new entity
+*AdminShopsDeleteAdminShopApi* | [**deleteAdminShop**](doc//AdminShopsDeleteAdminShopApi.md#) | **DELETE** /sale/admin/shops/{id} | Delete: Delete a single entity
+*AdminShopsDeleteManyAdminShopsApi* | [**deleteManyAdminShops**](doc//AdminShopsDeleteManyAdminShopsApi.md#) | **DELETE** /sale/admin/shops | DeleteMany: Delete multiple entities
+*AdminShopsGetListAdminShopsApi* | [**getListAdminShops**](doc//AdminShopsGetListAdminShopsApi.md#) | **GET** /sale/admin/shops | GetList: Get paginated list of entities with filtering
+*AdminShopsGetManyAdminShopsApi* | [**getManyAdminShops**](doc//AdminShopsGetManyAdminShopsApi.md#) | **GET** /sale/admin/shops/many | GetMany: Get multiple entities by IDs
+*AdminShopsGetOneAdminShopApi* | [**getOneAdminShop**](doc//AdminShopsGetOneAdminShopApi.md#) | **GET** /sale/admin/shops/{id} | GetOne: Get single entity by ID
+*AdminShopsPatchAdminShopApi* | [**patchAdminShop**](doc//AdminShopsPatchAdminShopApi.md#) | **PATCH** /sale/admin/shops/{id} | Update: Update an existing entity
+*AdminShopsPatchManyAdminShopsApi* | [**patchManyAdminShops**](doc//AdminShopsPatchManyAdminShopsApi.md#) | **PATCH** /sale/admin/shops | UpdateMany: Update multiple entities
+*AdminShopsUpdateAdminShopApi* | [**updateAdminShop**](doc//AdminShopsUpdateAdminShopApi.md#) | **PUT** /sale/admin/shops/{id} | Update: Update an existing entity
 *MenuCreateMenuApi* | [**createMenu**](doc//MenuCreateMenuApi.md#) | **POST** /sale/menus | Create: Create a new entity
 *MenuDeleteManyMenuApi* | [**deleteManyMenu**](doc//MenuDeleteManyMenuApi.md#) | **DELETE** /sale/menus | DeleteMany: Delete multiple entities
 *MenuDeleteMenuApi* | [**deleteMenu**](doc//MenuDeleteMenuApi.md#) | **DELETE** /sale/menus/{id} | Delete: Delete a single entity
@@ -86,6 +98,7 @@ Class | Method | HTTP request | Description
 *MenuItemPatchManyMenuItemApi* | [**patchManyMenuItem**](doc//MenuItemPatchManyMenuItemApi.md#) | **PATCH** /sale/menu-items | UpdateMany: Update multiple entities
 *MenuItemPatchMenuItemApi* | [**patchMenuItem**](doc//MenuItemPatchMenuItemApi.md#) | **PATCH** /sale/menu-items/{id} | Update: Update an existing entity
 *MenuItemUpdateMenuItemApi* | [**updateMenuItem**](doc//MenuItemUpdateMenuItemApi.md#) | **PUT** /sale/menu-items/{id} | Update: Update an existing entity
+*MenuItemUploadMenuItemImageApi* | [**uploadMenuItemImage**](doc//MenuItemUploadMenuItemImageApi.md#) | **POST** /sale/menu-items/images | 
 *ProductCreateProductApi* | [**createProduct**](doc//ProductCreateProductApi.md#) | **POST** /sale/products | Create: Create a new entity
 *ProductDeleteManyProductApi* | [**deleteManyProduct**](doc//ProductDeleteManyProductApi.md#) | **DELETE** /sale/products | DeleteMany: Delete multiple entities
 *ProductDeleteProductApi* | [**deleteProduct**](doc//ProductDeleteProductApi.md#) | **DELETE** /sale/products/{id} | Delete: Delete a single entity
@@ -113,6 +126,11 @@ Class | Method | HTTP request | Description
 *ProductRecipePatchManyProductRecipeApi* | [**patchManyProductRecipe**](doc//ProductRecipePatchManyProductRecipeApi.md#) | **PATCH** /sale/product-recipes | UpdateMany: Update multiple entities
 *ProductRecipePatchProductRecipeApi* | [**patchProductRecipe**](doc//ProductRecipePatchProductRecipeApi.md#) | **PATCH** /sale/product-recipes/{id} | Update: Update an existing entity
 *ProductRecipeUpdateProductRecipeApi* | [**updateProductRecipe**](doc//ProductRecipeUpdateProductRecipeApi.md#) | **PUT** /sale/product-recipes/{id} | Update: Update an existing entity
+*PublicSaleCreateCartOrderApi* | [**createCartOrder**](doc//PublicSaleCreateCartOrderApi.md#) | **POST** /sale/public/shops/{shopId}/cart-orders | 
+*PublicSaleGetActiveMenuApi* | [**getActiveMenu**](doc//PublicSaleGetActiveMenuApi.md#) | **GET** /sale/public/shops/{shopId}/menu | 
+*PublicSaleGetCategoryMenuItemsApi* | [**getCategoryMenuItems**](doc//PublicSaleGetCategoryMenuItemsApi.md#) | **GET** /sale/public/shops/{shopId}/categories/{categoryId}/menu-items | 
+*PublicSaleGetMenuItemImageApi* | [**getMenuItemImage**](doc//PublicSaleGetMenuItemImageApi.md#) | **GET** /sale/public/images/{imageId} | 
+*PublicSaleGetShopsApi* | [**getShops**](doc//PublicSaleGetShopsApi.md#) | **GET** /sale/public/shops | 
 *ShopCreateShopApi* | [**createShop**](doc//ShopCreateShopApi.md#) | **POST** /sale/shops | Create: Create a new entity
 *ShopDeleteManyShopApi* | [**deleteManyShop**](doc//ShopDeleteManyShopApi.md#) | **DELETE** /sale/shops | DeleteMany: Delete multiple entities
 *ShopDeleteShopApi* | [**deleteShop**](doc//ShopDeleteShopApi.md#) | **DELETE** /sale/shops/{id} | Delete: Delete a single entity
@@ -139,17 +157,27 @@ Class | Method | HTTP request | Description
 *TableOrderGetOneTableOrderApi* | [**getOneTableOrder**](doc//TableOrderGetOneTableOrderApi.md#) | **GET** /sale/table-orders/{id} | GetOne: Get single entity by ID
 *TableOrderPatchManyTableOrderApi* | [**patchManyTableOrder**](doc//TableOrderPatchManyTableOrderApi.md#) | **PATCH** /sale/table-orders | UpdateMany: Update multiple entities
 *TableOrderPatchTableOrderApi* | [**patchTableOrder**](doc//TableOrderPatchTableOrderApi.md#) | **PATCH** /sale/table-orders/{id} | Update: Update an existing entity
+*TableOrderPreviewPublicCartOrderApi* | [**previewPublicCartOrder**](doc//TableOrderPreviewPublicCartOrderApi.md#) | **GET** /sale/table-orders/public-cart-orders/preview | 
 *TableOrderUpdateTableOrderApi* | [**updateTableOrder**](doc//TableOrderUpdateTableOrderApi.md#) | **PUT** /sale/table-orders/{id} | Update: Update an existing entity
 
 
 ## Documentation For Models
 
+ - [AdminShopCreateRequestDTO](doc//AdminShopCreateRequestDTO.md)
+ - [AdminShopNameCheckResponseDTO](doc//AdminShopNameCheckResponseDTO.md)
+ - [AdminShopResponseDTO](doc//AdminShopResponseDTO.md)
+ - [AdminShopUpdateRequestDTO](doc//AdminShopUpdateRequestDTO.md)
+ - [ApiResponseAdminShopNameCheckResponseDTO](doc//ApiResponseAdminShopNameCheckResponseDTO.md)
+ - [ApiResponseAdminShopResponseDTO](doc//ApiResponseAdminShopResponseDTO.md)
+ - [ApiResponseListAdminShopResponseDTO](doc//ApiResponseListAdminShopResponseDTO.md)
  - [ApiResponseListMenuCategoryDTO](doc//ApiResponseListMenuCategoryDTO.md)
  - [ApiResponseListMenuDTO](doc//ApiResponseListMenuDTO.md)
  - [ApiResponseListMenuItemDTO](doc//ApiResponseListMenuItemDTO.md)
  - [ApiResponseListProductDTO](doc//ApiResponseListProductDTO.md)
  - [ApiResponseListProductExtraOptionDTO](doc//ApiResponseListProductExtraOptionDTO.md)
  - [ApiResponseListProductRecipeDTO](doc//ApiResponseListProductRecipeDTO.md)
+ - [ApiResponseListPublicMenuItemDTO](doc//ApiResponseListPublicMenuItemDTO.md)
+ - [ApiResponseListPublicShopDTO](doc//ApiResponseListPublicShopDTO.md)
  - [ApiResponseListShopDTO](doc//ApiResponseListShopDTO.md)
  - [ApiResponseListShopTableDTO](doc//ApiResponseListShopTableDTO.md)
  - [ApiResponseListTableOrderDTO](doc//ApiResponseListTableOrderDTO.md)
@@ -160,6 +188,8 @@ Class | Method | HTTP request | Description
  - [ApiResponseProductDTO](doc//ApiResponseProductDTO.md)
  - [ApiResponseProductExtraOptionDTO](doc//ApiResponseProductExtraOptionDTO.md)
  - [ApiResponseProductRecipeDTO](doc//ApiResponseProductRecipeDTO.md)
+ - [ApiResponsePublicCartOrderCreateResponse](doc//ApiResponsePublicCartOrderCreateResponse.md)
+ - [ApiResponsePublicShopMenuResponseDTO](doc//ApiResponsePublicShopMenuResponseDTO.md)
  - [ApiResponseShopDTO](doc//ApiResponseShopDTO.md)
  - [ApiResponseShopTableDTO](doc//ApiResponseShopTableDTO.md)
  - [ApiResponseTableOrderDTO](doc//ApiResponseTableOrderDTO.md)
@@ -171,6 +201,8 @@ Class | Method | HTTP request | Description
  - [MenuDTO](doc//MenuDTO.md)
  - [MenuItemCreateDTO](doc//MenuItemCreateDTO.md)
  - [MenuItemDTO](doc//MenuItemDTO.md)
+ - [MenuItemImageUploadResponseDTO](doc//MenuItemImageUploadResponseDTO.md)
+ - [MenuItemProductItemDTO](doc//MenuItemProductItemDTO.md)
  - [MenuItemUpdateDTO](doc//MenuItemUpdateDTO.md)
  - [MenuUpdateDTO](doc//MenuUpdateDTO.md)
  - [Meta](doc//Meta.md)
@@ -188,6 +220,16 @@ Class | Method | HTTP request | Description
  - [ProductRecipeItemDTO](doc//ProductRecipeItemDTO.md)
  - [ProductRecipeUpdateDTO](doc//ProductRecipeUpdateDTO.md)
  - [ProductUpdateDTO](doc//ProductUpdateDTO.md)
+ - [PublicActiveMenuDTO](doc//PublicActiveMenuDTO.md)
+ - [PublicCartOrderCreateRequest](doc//PublicCartOrderCreateRequest.md)
+ - [PublicCartOrderCreateResponse](doc//PublicCartOrderCreateResponse.md)
+ - [PublicCartOrderItemCreateRequest](doc//PublicCartOrderItemCreateRequest.md)
+ - [PublicCartOrderPreviewDTO](doc//PublicCartOrderPreviewDTO.md)
+ - [PublicCartOrderPreviewItemDTO](doc//PublicCartOrderPreviewItemDTO.md)
+ - [PublicMenuCategoryDTO](doc//PublicMenuCategoryDTO.md)
+ - [PublicMenuItemDTO](doc//PublicMenuItemDTO.md)
+ - [PublicShopDTO](doc//PublicShopDTO.md)
+ - [PublicShopMenuResponseDTO](doc//PublicShopMenuResponseDTO.md)
  - [ShopDTO](doc//ShopDTO.md)
  - [ShopTableCreateDTO](doc//ShopTableCreateDTO.md)
  - [ShopTableDTO](doc//ShopTableDTO.md)
@@ -196,6 +238,7 @@ Class | Method | HTTP request | Description
  - [TableOrderDTO](doc//TableOrderDTO.md)
  - [TableOrderItemCreateDTO](doc//TableOrderItemCreateDTO.md)
  - [TableOrderItemDTO](doc//TableOrderItemDTO.md)
+ - [TableOrderItemSelectedExtraOptionDTO](doc//TableOrderItemSelectedExtraOptionDTO.md)
  - [TableOrderUpdateDTO](doc//TableOrderUpdateDTO.md)
 
 

@@ -34,8 +34,6 @@ class ProductDTO extends Schema {
     this.typeName,
     this.metricId,
     this.metricName,
-    this.menuItemId,
-    this.price,
     this.preparationTime,
     this.tenantId,
     this.active,
@@ -70,12 +68,6 @@ class ProductDTO extends Schema {
 
   @JsonKey(name: r'metricName')
   final String? metricName;
-
-  @JsonKey(name: r'menuItemId')
-  final String? menuItemId;
-
-  @JsonKey(name: r'price')
-  final num? price;
 
   @JsonKey(name: r'preparationTime')
   final int? preparationTime;

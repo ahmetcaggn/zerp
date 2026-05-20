@@ -41,14 +41,14 @@ Please follow the [installation procedure](#installation--usage) and then run th
 import 'package:openapi_user/api.dart';
 
 
-final api_instance = PermissionsCreatePermissionApi();
-final permissionCreateRequestDTO = PermissionCreateRequestDTO(); // PermissionCreateRequestDTO | 
+final api_instance = AdminTenantsCheckTenantNameApi();
+final name = name_example; // String | 
 
 try {
-    final result = api_instance.createPermission(permissionCreateRequestDTO);
+    final result = api_instance.checkTenantName(name);
     print(result);
 } catch (e) {
-    print('Exception when calling PermissionsCreatePermissionApi->createPermission: $e\n');
+    print('Exception when calling AdminTenantsCheckTenantNameApi->checkTenantName: $e\n');
 }
 
 ```
@@ -59,9 +59,20 @@ All URIs are relative to *https://zerpapi.femrek.dev*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*AdminTenantsCheckTenantNameApi* | [**checkTenantName**](doc//AdminTenantsCheckTenantNameApi.md#) | **GET** /user/tenants/check-name | 
+*AdminTenantsCreateAdminTenantApi* | [**createAdminTenant**](doc//AdminTenantsCreateAdminTenantApi.md#) | **POST** /user/tenants | Create: Create a new entity
+*AdminTenantsDeleteAdminTenantApi* | [**deleteAdminTenant**](doc//AdminTenantsDeleteAdminTenantApi.md#) | **DELETE** /user/tenants/{id} | Delete: Delete a single entity
+*AdminTenantsDeleteManyAdminTenantsApi* | [**deleteManyAdminTenants**](doc//AdminTenantsDeleteManyAdminTenantsApi.md#) | **DELETE** /user/tenants | DeleteMany: Delete multiple entities
+*AdminTenantsGetListAdminTenantsApi* | [**getListAdminTenants**](doc//AdminTenantsGetListAdminTenantsApi.md#) | **GET** /user/tenants | GetList: Get paginated list of entities with filtering
+*AdminTenantsGetManyAdminTenantsApi* | [**getManyAdminTenants**](doc//AdminTenantsGetManyAdminTenantsApi.md#) | **GET** /user/tenants/many | GetMany: Get multiple entities by IDs
+*AdminTenantsGetOneAdminTenantApi* | [**getOneAdminTenant**](doc//AdminTenantsGetOneAdminTenantApi.md#) | **GET** /user/tenants/{id} | GetOne: Get single entity by ID
+*AdminTenantsPatchAdminTenantApi* | [**patchAdminTenant**](doc//AdminTenantsPatchAdminTenantApi.md#) | **PATCH** /user/tenants/{id} | Update: Update an existing entity
+*AdminTenantsPatchManyAdminTenantsApi* | [**patchManyAdminTenants**](doc//AdminTenantsPatchManyAdminTenantsApi.md#) | **PATCH** /user/tenants | UpdateMany: Update multiple entities
+*AdminTenantsUpdateAdminTenantApi* | [**updateAdminTenant**](doc//AdminTenantsUpdateAdminTenantApi.md#) | **PUT** /user/tenants/{id} | Update: Update an existing entity
 *PermissionsCreatePermissionApi* | [**createPermission**](doc//PermissionsCreatePermissionApi.md#) | **POST** /user/permissions | Create: Create a new entity
 *PermissionsDeleteManyPermissionsApi* | [**deleteManyPermissions**](doc//PermissionsDeleteManyPermissionsApi.md#) | **DELETE** /user/permissions | DeleteMany: Delete multiple entities
 *PermissionsDeletePermissionApi* | [**deletePermission**](doc//PermissionsDeletePermissionApi.md#) | **DELETE** /user/permissions/{id} | Delete: Delete a single entity
+*PermissionsGetAllAssignablePermissionsApi* | [**getAllAssignablePermissions**](doc//PermissionsGetAllAssignablePermissionsApi.md#) | **GET** /user/permissions/actions-assignable | 
 *PermissionsGetAllPermissionsApi* | [**getAllPermissions**](doc//PermissionsGetAllPermissionsApi.md#) | **GET** /user/permissions/actions | 
 *PermissionsGetListPermissionsApi* | [**getListPermissions**](doc//PermissionsGetListPermissionsApi.md#) | **GET** /user/permissions | GetList: Get paginated list of entities with filtering
 *PermissionsGetManyPermissionsApi* | [**getManyPermissions**](doc//PermissionsGetManyPermissionsApi.md#) | **GET** /user/permissions/many | GetMany: Get multiple entities by IDs
@@ -81,9 +92,13 @@ Class | Method | HTTP request | Description
  - [ApiResponseListLong](doc//ApiResponseListLong.md)
  - [ApiResponseListPermissionResponse](doc//ApiResponseListPermissionResponse.md)
  - [ApiResponseListPermittableResponseDTO](doc//ApiResponseListPermittableResponseDTO.md)
+ - [ApiResponseListTenantResponseDTO](doc//ApiResponseListTenantResponseDTO.md)
+ - [ApiResponseListUUID](doc//ApiResponseListUUID.md)
  - [ApiResponseListUserResponseDTO](doc//ApiResponseListUserResponseDTO.md)
  - [ApiResponseMapPermissionActionListPermissionTargetType](doc//ApiResponseMapPermissionActionListPermissionTargetType.md)
  - [ApiResponsePermissionResponse](doc//ApiResponsePermissionResponse.md)
+ - [ApiResponseTenantNameCheckResponseDTO](doc//ApiResponseTenantNameCheckResponseDTO.md)
+ - [ApiResponseTenantResponseDTO](doc//ApiResponseTenantResponseDTO.md)
  - [ApiResponseUserResponseDTO](doc//ApiResponseUserResponseDTO.md)
  - [ApiResponseUsernameCheckResponseDTO](doc//ApiResponseUsernameCheckResponseDTO.md)
  - [ApiResponseVoid](doc//ApiResponseVoid.md)
@@ -93,6 +108,10 @@ Class | Method | HTTP request | Description
  - [PermissionResponse](doc//PermissionResponse.md)
  - [PermissionUpdateRequest](doc//PermissionUpdateRequest.md)
  - [PermittableResponseDTO](doc//PermittableResponseDTO.md)
+ - [TenantCreateRequestDTO](doc//TenantCreateRequestDTO.md)
+ - [TenantNameCheckResponseDTO](doc//TenantNameCheckResponseDTO.md)
+ - [TenantResponseDTO](doc//TenantResponseDTO.md)
+ - [TenantUpdateRequestDTO](doc//TenantUpdateRequestDTO.md)
  - [UserResponseDTO](doc//UserResponseDTO.md)
  - [UsernameCheckResponseDTO](doc//UsernameCheckResponseDTO.md)
 

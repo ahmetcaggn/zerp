@@ -9,6 +9,7 @@
 
 import 'package:dart_network_layer_core/dart_network_layer_core.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'menu_item_product_item_dto.dart';
 
 
 part 'menu_item_dto.g.dart';
@@ -29,9 +30,13 @@ class MenuItemDTO extends Schema {
     this.description,
     this.price,
     this.imageId,
+    this.calories,
+    this.weight,
+    this.ingredients = const [],
+    this.allergens = const [],
     this.categoryId,
     this.categoryName,
-    this.productIds = const [],
+    this.productItems = const [],
     this.tenantId,
   });
 
@@ -50,14 +55,26 @@ class MenuItemDTO extends Schema {
   @JsonKey(name: r'imageId')
   final String? imageId;
 
+  @JsonKey(name: r'calories')
+  final int? calories;
+
+  @JsonKey(name: r'weight')
+  final String? weight;
+
+  @JsonKey(name: r'ingredients')
+  final List<String> ingredients;
+
+  @JsonKey(name: r'allergens')
+  final List<String> allergens;
+
   @JsonKey(name: r'categoryId')
   final String? categoryId;
 
   @JsonKey(name: r'categoryName')
   final String? categoryName;
 
-  @JsonKey(name: r'productIds')
-  final List<String> productIds;
+  @JsonKey(name: r'productItems')
+  final List<MenuItemProductItemDTO> productItems;
 
   @JsonKey(name: r'tenantId')
   final String? tenantId;

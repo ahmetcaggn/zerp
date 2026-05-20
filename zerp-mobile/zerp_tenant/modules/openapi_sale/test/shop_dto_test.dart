@@ -30,6 +30,11 @@ void main() {
       // TODO
     });
 
+    // String defaultMenuLanguage
+    test('to test the property `defaultMenuLanguage`', () async {
+      // TODO
+    });
+
     // String tenantId
     test('to test the property `tenantId`', () async {
       // TODO

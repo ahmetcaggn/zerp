@@ -27,9 +27,11 @@ class MenuDTO extends Schema {
     this.id,
     this.name,
     this.description,
+    this.language,
     this.shopId,
     this.shopName,
     this.tenantId,
+    this.active,
   });
 
   @JsonKey(name: r'id')
@@ -41,6 +43,9 @@ class MenuDTO extends Schema {
   @JsonKey(name: r'description')
   final String? description;
 
+  @JsonKey(name: r'language')
+  final MenuDTOLanguageEnum? language;
+
   @JsonKey(name: r'shopId')
   final String? shopId;
 
@@ -49,6 +54,9 @@ class MenuDTO extends Schema {
 
   @JsonKey(name: r'tenantId')
   final String? tenantId;
+
+  @JsonKey(name: r'active')
+  final bool? active;
 
   /// The factory instance for creating [MenuDTO] from JSON.
   static const factory = MenuDTOFactory();
@@ -90,6 +98,22 @@ class MenuDTOFactory extends JsonSchemaFactory<MenuDTO> {
 
   @override
   MenuDTO fromJson(dynamic json) => MenuDTO.fromJson(json as Map<String, dynamic>);
+}
+
+
+
+enum MenuDTOLanguageEnum {
+@JsonValue('TR')
+TR('TR'),
+@JsonValue('EN')
+EN('EN');
+
+const MenuDTOLanguageEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 

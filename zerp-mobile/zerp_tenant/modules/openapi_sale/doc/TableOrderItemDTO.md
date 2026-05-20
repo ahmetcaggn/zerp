@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **quantity** | **int** |  | [optional] 
 **unitPrice** | **num** |  | [optional] 
 **notes** | **String** |  | [optional] 
+**selectedExtraOptions** | [**List<TableOrderItemSelectedExtraOptionDTO>**](TableOrderItemSelectedExtraOptionDTO.md) |  | [optional] [default to const []]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

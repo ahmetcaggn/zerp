@@ -45,6 +45,11 @@ void main() {
       // TODO
     });
 
+    // List<TableOrderItemSelectedExtraOptionDTO> selectedExtraOptions (default value: const [])
+    test('to test the property `selectedExtraOptions`', () async {
+      // TODO
+    });
+
 
   });
 

@@ -24,7 +24,7 @@ Retrieves multiple specific entities by their unique identifiers. Implements ra-
 import 'package:openapi_user/api.dart';
 
 final api_instance = UsersGetManyUsersApi();
-final id = [[1,5,12]]; // List<String> | List of entity IDs to retrieve
+final id = [[1, 5, 12]]; // List<String> | List of entity IDs to retrieve
 
 try {
     final result = api_instance.getManyUsers(id);

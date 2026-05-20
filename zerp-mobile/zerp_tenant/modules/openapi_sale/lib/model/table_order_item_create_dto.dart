@@ -27,6 +27,7 @@ class TableOrderItemCreateDTO extends Schema {
     this.menuItemId,
     this.quantity,
     this.notes,
+    this.selectedExtraOptionIds = const [],
   });
 
   @JsonKey(name: r'menuItemId')
@@ -37,6 +38,9 @@ class TableOrderItemCreateDTO extends Schema {
 
   @JsonKey(name: r'notes')
   final String? notes;
+
+  @JsonKey(name: r'selectedExtraOptionIds')
+  final List<String> selectedExtraOptionIds;
 
   /// The factory instance for creating [TableOrderItemCreateDTO] from JSON.
   static const factory = TableOrderItemCreateDTOFactory();

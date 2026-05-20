@@ -18,8 +18,6 @@ Name | Type | Description | Notes
 **typeName** | **String** |  | [optional] 
 **metricId** | **String** |  | [optional] 
 **metricName** | **String** |  | [optional] 
-**menuItemId** | **String** |  | [optional] 
-**price** | **num** |  | [optional] 
 **preparationTime** | **int** |  | [optional] 
 **tenantId** | **String** |  | [optional] 
 **active** | **bool** |  | [optional] 

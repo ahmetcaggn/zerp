@@ -12,8 +12,12 @@ Name | Type | Description | Notes
 **description** | **String** |  | [optional] 
 **price** | **num** |  | [optional] 
 **imageId** | **String** |  | [optional] 
+**calories** | **int** |  | [optional] 
+**weight** | **String** |  | [optional] 
+**ingredients** | **List<String>** |  | [optional] [default to const []]
+**allergens** | **List<String>** |  | [optional] [default to const []]
 **categoryId** | **String** |  | [optional] 
-**productIds** | **List<String>** |  | [optional] [default to const []]
+**productItems** | [**List<MenuItemProductItemDTO>**](MenuItemProductItemDTO.md) |  | [optional] [default to const []]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

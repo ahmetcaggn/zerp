@@ -25,12 +25,20 @@ class TeamMemberCandidateResponse extends Schema {
   /// Returns a new [TeamMemberCandidateResponse] instance.
   TeamMemberCandidateResponse({
     this.id,
+    this.displayName,
+    this.displayLabel,
     this.username,
     this.email,
   });
 
   @JsonKey(name: r'id')
   final String? id;
+
+  @JsonKey(name: r'displayName')
+  final String? displayName;
+
+  @JsonKey(name: r'displayLabel')
+  final String? displayLabel;
 
   @JsonKey(name: r'username')
   final String? username;

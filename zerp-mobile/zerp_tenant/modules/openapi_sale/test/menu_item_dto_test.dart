@@ -40,6 +40,26 @@ void main() {
       // TODO
     });
 
+    // int calories
+    test('to test the property `calories`', () async {
+      // TODO
+    });
+
+    // String weight
+    test('to test the property `weight`', () async {
+      // TODO
+    });
+
+    // List<String> ingredients (default value: const [])
+    test('to test the property `ingredients`', () async {
+      // TODO
+    });
+
+    // List<String> allergens (default value: const [])
+    test('to test the property `allergens`', () async {
+      // TODO
+    });
+
     // String categoryId
     test('to test the property `categoryId`', () async {
       // TODO
@@ -50,8 +70,8 @@ void main() {
       // TODO
     });
 
-    // List<String> productIds (default value: const [])
-    test('to test the property `productIds`', () async {
+    // List<MenuItemProductItemDTO> productItems (default value: const [])
+    test('to test the property `productItems`', () async {
       // TODO
     });
 

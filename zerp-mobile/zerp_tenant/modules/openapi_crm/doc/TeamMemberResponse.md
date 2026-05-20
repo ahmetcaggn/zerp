@@ -10,6 +10,8 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **String** |  | [optional] 
 **userId** | **String** |  | [optional] 
+**displayName** | **String** |  | [optional] 
+**email** | **String** |  | [optional] 
 **role** | **String** |  | [optional] 
 **joinedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 
