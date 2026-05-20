@@ -111,6 +111,22 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
     }
   }
 
+  Future<void> logout() async {
+    emit(const StateAuthLoading());
+    try {
+      await _authService.logout();
+      emit(const StateAuthUnauthenticated());
+      await _navigateToLoginIfNeeded();
+    } on Object catch (e, s) {
+      log.shout('Error while logging out', e, s);
+      emit(
+        StateAuthError(
+          message: t.auth.errors.logoutFailed,
+        ),
+      );
+    }
+  }
+
   Future<void> _navigateToLoginIfNeeded() async {
     if (_appRoute.current.name == RouteAuth.name) {
       return;

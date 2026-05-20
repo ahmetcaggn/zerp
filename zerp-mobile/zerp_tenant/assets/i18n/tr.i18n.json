@@ -6,13 +6,15 @@
   "auth": {
     "login": "Giriş Yap",
     "signUp": "Kayıt Ol",
+    "logout": "Çıkış Yap",
     "success": "Başarıyla giriş yapıldı",
     "fail": "Giriş başarısız oldu",
     "errors": {
       "checkFailed": "Kimlik doğrulama kontrolü başarısız oldu. Lütfen tekrar deneyin.",
       "loginNoClaims": "Giriş başarısız oldu. Lütfen bilgilerinizi kontrol edip tekrar deneyin.",
       "loginFailed": "Giriş başarısız oldu. Lütfen tekrar deneyin.",
-      "signUpFailed": "Kayıt işlemi başarısız oldu. Lütfen tekrar deneyin."
+      "signUpFailed": "Kayıt işlemi başarısız oldu. Lütfen tekrar deneyin.",
+      "logoutFailed": "Çıkış işlemi başarısız oldu. Lütfen tekrar deneyin."
     }
   },
   "feature": {
