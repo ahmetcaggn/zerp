@@ -115,6 +115,7 @@ class AppDrawer extends StatelessWidget {
       Navigator.pop(context);
       return;
     }
+    Navigator.pop(context);
     unawaited(context.router.push(route));
   }
 }
