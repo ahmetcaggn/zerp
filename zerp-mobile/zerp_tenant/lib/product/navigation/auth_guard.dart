@@ -26,7 +26,8 @@ class AuthGuard extends AutoRouteGuard {
       return;
     }
 
-    if (await _authService.tryRefreshToken()) {
+    final status = await _authService.checkSessionOnlineStatus();
+    if (status == AuthSessionOnlineStatus.valid) {
       resolver.next();
       return;
     }

@@ -110,8 +110,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i40.AuthStorageService>(),
       ),
     );
+    gh.singleton<_i84.AuthGuard>(
+      () => _i84.AuthGuard(
+        gh<_i40.AuthStorageService>(),
+        gh<_i238.AuthService>(),
+      ),
+    );
+    gh.singleton<_i795.AppRoute>(() => _i795.AppRoute(gh<_i84.AuthGuard>()));
     gh.lazySingleton<_i200.CubitAuth>(
       () => _i200.CubitAuth(
+        gh<_i795.AppRoute>(),
         gh<_i238.AuthService>(),
         gh<_i40.AuthStorageService>(),
       ),
@@ -122,13 +130,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i40.AuthStorageService>(),
       ),
     );
-    gh.singleton<_i84.AuthGuard>(
-      () => _i84.AuthGuard(
-        gh<_i40.AuthStorageService>(),
-        gh<_i238.AuthService>(),
-      ),
-    );
-    gh.singleton<_i795.AppRoute>(() => _i795.AppRoute(gh<_i84.AuthGuard>()));
     gh.lazySingleton<_i657.CubitSettings>(
       () => _i657.CubitSettings(
         gh<_i116.SettingsOperator>(),

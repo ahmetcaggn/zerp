@@ -33,32 +33,22 @@ class ScreenDashboard extends StatelessWidget {
       child: AppScaffold(
         title: context.t.dashboard.title,
         drawer: const AppDrawer(),
+        actions: const [
+          _DashboardHeaderActions(),
+        ],
         body: ListView(
           padding: const EdgeInsets.all(16),
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    context.t.feature.dashboard,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const _DashboardHeaderActions(),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const SectionEmployee(),
-            const SizedBox(height: 12),
-            const SectionMenu(),
-            const SizedBox(height: 12),
-            const SectionSale(),
-            const SizedBox(height: 12),
-            const SectionStock(),
-            const SizedBox(height: 12),
-            const SectionStore(),
+          children: const [
+            SizedBox(height: 16),
+            SectionEmployee(),
+            SizedBox(height: 12),
+            SectionMenu(),
+            SizedBox(height: 12),
+            SectionSale(),
+            SizedBox(height: 12),
+            SectionStock(),
+            SizedBox(height: 12),
+            SectionStore(),
           ],
         ),
       ),

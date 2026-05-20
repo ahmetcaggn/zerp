@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/config/device_id_generator.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
-import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/settings/cubit_settings.dart';
 import 'package:zerp_tenant/product/network/network_invoker/remote_log_network_invoker.dart';
 import 'package:zerp_tenant/product/storage/storage_initializer.dart';
@@ -40,9 +39,6 @@ abstract final class AppInitializer {
       deviceDataGenerator: getIt<DeviceIdGenerator>(),
     );
     unawaited(loggerHelper.start(getIt<RemoteLogNetworkInvoker>()));
-
-    // remote auth check at startup (guard remains local-fast)
-    unawaited(getIt<CubitAuth>().checkAuthRemote());
 
     logger('AppInitializer').config(() => 'App initialization complete');
   }
