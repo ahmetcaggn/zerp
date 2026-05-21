@@ -32,7 +32,7 @@ class CubitPermissions extends BaseCubit<StatePermissions>
       log.severe('Error loading permissions: $e');
       emit(
         StatePermissionsError(
-          t.permissionViewer.errorLoad(error: e.toString()),
+          t.employee.permissions.errorLoad(error: e.toString()),
         ),
       );
     }
@@ -49,7 +49,7 @@ class CubitPermissions extends BaseCubit<StatePermissions>
       log.severe('Error deleting permission: $e');
       _cubitError.enqueue(
         ErrorToPresent(
-          message: t.permissionViewer.errorDelete(error: e.toString()),
+          message: t.employee.permissions.errorDelete(error: e.toString()),
         ),
       );
     }

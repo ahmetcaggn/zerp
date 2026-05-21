@@ -57,7 +57,7 @@ class _PermissionsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: context.t.permissionViewer.title,
+      title: context.t.employee.permissions.title,
       actions: [
         IconButton(
           icon: const Icon(Icons.add),
@@ -120,7 +120,7 @@ class _ListSection extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                context.t.permissionViewer.total(count: totalCount),
+                context.t.employee.permissions.total(count: totalCount),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -132,7 +132,7 @@ class _ListSection extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              context.t.permissionViewer.empty,
+              context.t.employee.permissions.empty,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontStyle: FontStyle.italic,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -210,9 +210,9 @@ class _PermissionEntry extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
-            Text(context.t.permissionViewer.target(targetType: targetType)),
+            Text(context.t.employee.permissions.target(targetType: targetType)),
             if (targetId != null && targetId.isNotEmpty)
-              Text(context.t.permissionViewer.id(targetId: targetId)),
+              Text(context.t.employee.permissions.id(targetId: targetId)),
           ],
         ),
         trailing: IconButton(
@@ -222,9 +222,9 @@ class _PermissionEntry extends StatelessWidget {
             final confirm = await showDialog<bool>(
               context: context,
               builder: (context) => AlertDialog(
-                title: Text(context.t.permissionViewer.deleteTitle),
+                title: Text(context.t.employee.permissions.deleteTitle),
                 content: Text(
-                  context.t.permissionViewer.deleteMessage,
+                  context.t.employee.permissions.deleteMessage,
                 ),
                 actions: [
                   TextButton(

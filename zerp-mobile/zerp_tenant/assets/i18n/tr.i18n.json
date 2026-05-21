@@ -162,6 +162,24 @@
         "errorCreatePermission": "Yetki oluşturulamadı: $error",
         "searchActions": "Eylemlerde ara..."
       }
+    },
+    "permissionViewer": {
+      "title": "Yetkiler",
+      "total": "Toplam yetki: $count",
+      "empty": "Henüz yetki yok",
+      "manage": "Yetkileri yönet"
+    },
+    "permissions": {
+      "title": "Yetkiler",
+      "total": "Toplam yetki: $count",
+      "empty": "Henüz yetki yok",
+      "manage": "Yetkileri yönet",
+      "target": "Hedef: $targetType",
+      "id": "ID: $targetId",
+      "deleteTitle": "Yetkiyi Sil",
+      "deleteMessage": "Bu yetkiyi silmek istediğinizden emin misiniz?",
+      "errorLoad": "Yetkiler yüklenemedi: $error",
+      "errorDelete": "Yetki silinemedi: $error"
     }
   },
   "profile": {
@@ -174,26 +192,6 @@
       "empty": "Henüz yetki yok",
       "target": "Hedef: $targetType",
       "id": "ID: $targetId"
-    }
-  },
-  "permissionViewer": {
-    "title": "Yetkiler",
-    "total": "Toplam yetki: $count",
-    "empty": "Henüz yetki yok",
-    "manage": "Yetkileri yönet",
-    "target": "Hedef: $targetType",
-    "id": "ID: $targetId",
-    "deleteTitle": "Yetkiyi Sil",
-    "deleteMessage": "Bu yetkiyi silmek istediğinizden emin misiniz?",
-    "errorLoad": "Yetkiler yüklenemedi: $error",
-    "errorDelete": "Yetki silinemedi: $error"
-  },
-  "widgets": {
-    "permissionViewer": {
-      "title": "Yetkiler",
-      "total": "Toplam yetki: $count",
-      "empty": "Henüz yetki yok",
-      "manage": "Yetkileri yönet"
     }
   }
 }

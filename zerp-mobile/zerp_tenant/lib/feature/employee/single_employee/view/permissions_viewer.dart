@@ -91,7 +91,7 @@ class _PermissionsSummary extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    context.t.widgets.permissionViewer.title,
+                    context.t.employee.permissionViewer.title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -107,7 +107,9 @@ class _PermissionsSummary extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    context.t.widgets.permissionViewer.total(count: totalCount),
+                    context.t.employee.permissionViewer.total(
+                      count: totalCount,
+                    ),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Theme.of(context).colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.bold,
@@ -121,7 +123,7 @@ class _PermissionsSummary extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
-                  context.t.widgets.permissionViewer.empty,
+                  context.t.employee.permissionViewer.empty,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontStyle: FontStyle.italic,
@@ -161,7 +163,7 @@ class _PermissionsSummary extends StatelessWidget {
                         .read<CubitPermissionViewer>(),
                   ),
                 ),
-                child: Text(context.t.widgets.permissionViewer.manage),
+                child: Text(context.t.employee.permissionViewer.manage),
               ),
             ),
           ],
