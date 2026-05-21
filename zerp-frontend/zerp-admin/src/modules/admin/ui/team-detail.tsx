@@ -1,6 +1,8 @@
 'use client'
 import AddIcon from '@mui/icons-material/Add'
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import PauseIcon from '@mui/icons-material/Pause'
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove'
@@ -14,6 +16,9 @@ import {
   FormControl,
   IconButton,
   InputLabel,
+  List,
+  ListItem,
+  ListItemText,
   MenuItem,
   Paper,
   Select,
@@ -28,13 +33,14 @@ import {
   Typography,
 } from '@mui/material'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
+import { permissionClient } from '../api/permission-client'
 import {
   useActivateTeam,
   useAddTeamMember,
@@ -44,8 +50,12 @@ import {
   useTeam,
   useTeamMemberCandidates,
 } from '../hooks/use-teams'
-import { TeamMemberRole } from '../types/team'
+import type { PermissionAssignmentInput, PermissionDraftAssignment } from '../types/permission'
+import { prettifyPermissionEnumName, toPermissionKey } from '../types/permission'
+import { type TeamMemberResponse, TeamMemberRole } from '../types/team'
+import { PermissionAssignmentBuilder } from './permission-assignment-builder'
 import { TeamFormDialog } from './team-form-dialog'
+import { TeamMemberPermissionsDialog } from './team-member-permissions-dialog'
 
 interface Props {
   id: string
@@ -60,13 +70,36 @@ export function TeamDetail({ id }: Props) {
   const [editOpen, setEditOpen] = useState(false)
   const [selectedCandidateId, setSelectedCandidateId] = useState('')
   const [candidateSearch, setCandidateSearch] = useState('')
+  const [debouncedCandidateSearch, setDebouncedCandidateSearch] = useState('')
   const [candidatePage, setCandidatePage] = useState(1)
   const [addMemberRole, setAddMemberRole] = useState<string>(TeamMemberRole.Member)
   const [showAddMember, setShowAddMember] = useState(false)
+  const [draftPermissions, setDraftPermissions] = useState<PermissionDraftAssignment[]>([])
+  const [permissionDialogMember, setPermissionDialogMember] = useState<
+    TeamMemberResponse | undefined
+  >(undefined)
+
+  const existingDraftPermissionKeys = useMemo(() => {
+    const keys = new Set<string>()
+    for (const permission of draftPermissions) {
+      keys.add(
+        toPermissionKey({
+          action: permission.action,
+          targetType: permission.targetType,
+          targetId: permission.targetId,
+        }),
+      )
+    }
+    return keys
+  }, [draftPermissions])
 
   const { hasPermission, isLoadingPermissions } = useCurrentUserPermissions()
   const canReadTeam = hasPermission(PermissionActions.READ_TEAM)
-  const { data: team, isLoading, error } = useTeam(id, {
+  const {
+    data: team,
+    isLoading,
+    error,
+  } = useTeam(id, {
     enabled: canReadTeam && !isLoadingPermissions,
   })
   const { mutate: activateTeam, isPending: isActivating } = useActivateTeam()
@@ -82,7 +115,21 @@ export function TeamDetail({ id }: Props) {
   const canReadUser = hasPermission(PermissionActions.READ_USER)
   const canCreateTeamMemberWithUserList = canCreateTeamMember && canReadUser
 
-  const normalizedCandidateSearch = candidateSearch.trim()
+  useEffect(() => {
+    const normalizedInput = candidateSearch.trim()
+    const timer = window.setTimeout(
+      () => {
+        setDebouncedCandidateSearch(normalizedInput)
+      },
+      normalizedInput ? 1000 : 0,
+    )
+
+    return () => window.clearTimeout(timer)
+  }, [candidateSearch])
+
+  const normalizedCandidateSearch = debouncedCandidateSearch.trim()
+  const isDebouncing =
+    candidateSearch.trim().length > 0 && candidateSearch.trim() !== debouncedCandidateSearch
   const {
     data: candidateResult,
     isLoading: isLoadingCandidates,
@@ -92,7 +139,7 @@ export function TeamDetail({ id }: Props) {
     {
       pagination: { page: candidatePage, perPage: CANDIDATE_PAGE_SIZE },
       sort: { field: 'username', order: 'ASC' },
-      username: normalizedCandidateSearch || undefined,
+      query: normalizedCandidateSearch || undefined,
     },
     {
       enabled: canCreateTeamMemberWithUserList && showAddMember,
@@ -141,10 +188,9 @@ export function TeamDetail({ id }: Props) {
     const mutateFn = currentTeam.isActive ? deactivateTeam : activateTeam
     mutateFn(id, {
       onSuccess: () =>
-        showToast(
-          currentTeam.isActive ? 'Takım pasifleştirildi.' : 'Takım aktifleştirildi.',
-          { severity: 'success' },
-        ),
+        showToast(currentTeam.isActive ? 'Takım pasifleştirildi.' : 'Takım aktifleştirildi.', {
+          severity: 'success',
+        }),
       onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
     })
   }
@@ -155,17 +201,40 @@ export function TeamDetail({ id }: Props) {
       return
     }
 
+    const candidateId = effectiveSelectedCandidateId
+
     addMember(
       {
         id,
         body: {
-          userId: effectiveSelectedCandidateId,
+          userId: candidateId,
           role: addMemberRole as 'LEADER' | 'MEMBER',
         },
       },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
+          if (draftPermissions.length > 0) {
+            try {
+              await Promise.all(
+                draftPermissions.map((permission) =>
+                  permissionClient.create({
+                    userId: candidateId,
+                    action: permission.action,
+                    targetType: permission.targetType,
+                    targetId: permission.targetId,
+                  }),
+                ),
+              )
+            } catch {
+              showToast(t('teams.permissionAssignPartialError'), { severity: 'warning' })
+            }
+          }
+
           setSelectedCandidateId('')
+          setCandidateSearch('')
+          setDebouncedCandidateSearch('')
+          setCandidatePage(1)
+          setDraftPermissions([])
           setShowAddMember(false)
           showToast('Üye eklendi.', { severity: 'success' })
         },
@@ -174,10 +243,30 @@ export function TeamDetail({ id }: Props) {
     )
   }
 
+  function addDraftPermission(permission: PermissionAssignmentInput) {
+    setDraftPermissions((prev) => [
+      ...prev,
+      {
+        action: permission.action,
+        targetType: permission.targetType,
+        targetId: permission.targetId,
+        targetTitle: permission.targetTitle,
+      },
+    ])
+  }
+
+  function removeDraftPermission(index: number) {
+    setDraftPermissions((prev) => prev.filter((_, i) => i !== index))
+  }
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => router.back()} sx={{ color: 'text.secondary' }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => router.back()}
+          sx={{ color: 'text.secondary' }}
+        >
           Geri
         </Button>
         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -232,7 +321,9 @@ export function TeamDetail({ id }: Props) {
                 if (!next) {
                   setSelectedCandidateId('')
                   setCandidateSearch('')
+                  setDebouncedCandidateSearch('')
                   setCandidatePage(1)
+                  setDraftPermissions([])
                 }
                 return next
               })
@@ -257,37 +348,24 @@ export function TeamDetail({ id }: Props) {
               gap: 2,
               gridTemplateColumns: {
                 xs: '1fr',
-                md: '1.2fr 1.2fr 160px auto',
+                md: 'minmax(0,1fr) 190px auto',
               },
-              alignItems: 'flex-end',
+              alignItems: 'flex-start',
             }}
           >
             <TextField
               size="small"
-              label="Kullanıcı Ara (username)"
+              label="Kullanıcı Ara"
               value={candidateSearch}
               onChange={(event) => {
                 setCandidateSearch(event.target.value)
+                setSelectedCandidateId('')
                 setCandidatePage(1)
               }}
-              helperText="Sadece system tenant kullanıcıları listelenir."
+              helperText="Ad soyad, username, email veya ID ile arayın. 1 saniye sonra sonuçlar listelenir."
+              sx={{ minWidth: 0 }}
             />
-            <FormControl size="small" sx={{ minWidth: 240 }}>
-              <InputLabel>Kullanıcı</InputLabel>
-              <Select
-                value={effectiveSelectedCandidateId}
-                label="Kullanıcı"
-                onChange={(event) => setSelectedCandidateId(event.target.value)}
-                disabled={isLoadingCandidates}
-              >
-                {candidateUsers.map((candidate) => (
-                  <MenuItem key={candidate.id} value={candidate.id}>
-                    {candidate.username} ({candidate.email})
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl size="small" sx={{ minWidth: 140 }}>
+            <FormControl size="small" sx={{ width: '100%' }}>
               <InputLabel>Rol</InputLabel>
               <Select
                 value={addMemberRole}
@@ -302,13 +380,18 @@ export function TeamDetail({ id }: Props) {
               variant="contained"
               onClick={handleAddMember}
               disabled={isAddingMember || !effectiveSelectedCandidateId}
+              sx={{ height: 40, minWidth: 96 }}
             >
               Ekle
             </Button>
           </Box>
 
-          <Box sx={{ mt: 1 }}>
-            {isLoadingCandidates || isFetchingCandidates ? (
+          <Box sx={{ mt: 1.5 }}>
+            {isDebouncing ? (
+              <Typography variant="body2" color="text.secondary">
+                Arama için bekleniyor...
+              </Typography>
+            ) : isLoadingCandidates || isFetchingCandidates ? (
               <Typography variant="body2" color="text.secondary">
                 Kullanıcılar yükleniyor...
               </Typography>
@@ -323,94 +406,207 @@ export function TeamDetail({ id }: Props) {
             )}
           </Box>
 
-          <TablePagination
-            component="div"
-            count={candidateTotal}
-            page={Math.max(candidatePage - 1, 0)}
-            rowsPerPage={CANDIDATE_PAGE_SIZE}
-            rowsPerPageOptions={[CANDIDATE_PAGE_SIZE]}
-            onPageChange={(_, nextPage) => setCandidatePage(nextPage + 1)}
-            onRowsPerPageChange={() => {}}
-          />
+          {!isDebouncing && candidateUsers.length > 0 && (
+            <Box
+              sx={{
+                mt: 1.5,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                maxHeight: 240,
+                overflowY: 'auto',
+              }}
+            >
+              {candidateUsers.map((candidate) => {
+                const isSelected = effectiveSelectedCandidateId === candidate.id
+                return (
+                  <Box
+                    key={candidate.id}
+                    onClick={() => setSelectedCandidateId(candidate.id)}
+                    sx={{
+                      px: 1.5,
+                      py: 1,
+                      borderBottom: '1px solid',
+                      borderBottomColor: 'divider',
+                      cursor: 'pointer',
+                      bgcolor: isSelected ? 'action.selected' : 'transparent',
+                      '&:last-of-type': {
+                        borderBottom: 'none',
+                      },
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                      },
+                    }}
+                  >
+                    <Typography variant="body2">{candidate.displayName}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {candidate.displayLabel}
+                    </Typography>
+                  </Box>
+                )
+              })}
+            </Box>
+          )}
+
+          {!isDebouncing && candidateTotal > 0 && (
+            <TablePagination
+              component="div"
+              count={candidateTotal}
+              page={Math.max(candidatePage - 1, 0)}
+              rowsPerPage={CANDIDATE_PAGE_SIZE}
+              rowsPerPageOptions={[CANDIDATE_PAGE_SIZE]}
+              onPageChange={(_, nextPage) => setCandidatePage(nextPage + 1)}
+              onRowsPerPageChange={() => {}}
+            />
+          )}
+
+          <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <PermissionAssignmentBuilder
+              disabled={isAddingMember}
+              existingKeys={existingDraftPermissionKeys}
+              onAdd={addDraftPermission}
+            />
+
+            {draftPermissions.length > 0 && (
+              <List dense disablePadding>
+                {draftPermissions.map((permission, index) => (
+                  <ListItem
+                    key={`${permission.action}-${permission.targetType}-${permission.targetId}-${index}`}
+                    secondaryAction={
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => removeDraftPermission(index)}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    }
+                  >
+                    <ListItemText
+                      primary={`${prettifyPermissionEnumName(permission.action)} · ${prettifyPermissionEnumName(permission.targetType)}`}
+                      secondary={`${permission.targetTitle} (${permission.targetId})`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            )}
+          </Box>
         </Paper>
       )}
 
       {canReadTeamMember ? (
         (team.members?.length ?? 0) > 0 ? (
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Kullanıcı ID</TableCell>
-              <TableCell>Rol</TableCell>
-              <TableCell>Katılım Tarihi</TableCell>
-              <TableCell align="right">İşlemler</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {currentTeam.members?.map((member, index) => (
-              <TableRow key={member.id ?? `${member.userId ?? 'member'}-${index}`} hover>
-                <TableCell>{member.userId ?? '—'}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={member.role === 'LEADER' ? t('teams.roleLeader') : t('teams.roleMember')}
-                    color={member.role === 'LEADER' ? 'primary' : 'default'}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>{member.joinedAt ?? '—'}</TableCell>
-                <TableCell align="right">
-                  {canUpdateTeamMember && (
-                    <Tooltip
-                      title={
-                        member.role === 'LEADER'
-                          ? `${t('teams.roleMember')} yap`
-                          : `${t('teams.roleLeader')} yap`
-                      }
-                    >
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          if (!member.userId) return
-                          const nextRole =
-                            member.role === 'LEADER' ? ('MEMBER' as const) : ('LEADER' as const)
-                          changeMemberRole(
-                            { id, userId: member.userId, body: { role: nextRole } },
-                            {
-                              onSuccess: () => showToast('Rol güncellendi.', { severity: 'success' }),
-                              onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-                            },
-                          )
-                        }}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                  {canDeleteTeamMember && (
-                    <Tooltip title={t('teams.removeMemberButton')}>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => {
-                          if (!member.userId) return
-                          removeMember(
-                            { id, userId: member.userId },
-                            {
-                              onSuccess: () => showToast('Üye çıkarıldı.', { severity: 'success' }),
-                              onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-                            },
-                          )
-                        }}
-                      >
-                        <PersonRemoveIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                </TableCell>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Üye</TableCell>
+                <TableCell>Rol</TableCell>
+                <TableCell>Katılım Tarihi</TableCell>
+                <TableCell align="right">İşlemler</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {currentTeam.members?.map((member, index) => (
+                <TableRow key={member.id ?? `${member.userId ?? 'member'}-${index}`} hover>
+                  <TableCell>
+                    <Typography variant="body2">
+                      {member.displayName ?? member.userId ?? '—'}
+                    </Typography>
+                    {member.userId && (
+                      <Typography variant="caption" color="text.secondary">
+                        {member.userId}
+                      </Typography>
+                    )}
+                    {member.email && (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ display: 'block' }}
+                      >
+                        {member.email}
+                      </Typography>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={
+                        member.role === 'LEADER' ? t('teams.roleLeader') : t('teams.roleMember')
+                      }
+                      color={member.role === 'LEADER' ? 'primary' : 'default'}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>{member.joinedAt ?? '—'}</TableCell>
+                  <TableCell align="right">
+                    {canUpdateTeamMember && (
+                      <Tooltip title={t('teams.permissionsDialogTitle')}>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            if (!member.userId) return
+                            setPermissionDialogMember(member)
+                          }}
+                        >
+                          <AdminPanelSettingsIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    {canUpdateTeamMember && (
+                      <Tooltip
+                        title={
+                          member.role === 'LEADER'
+                            ? `${t('teams.roleMember')} yap`
+                            : `${t('teams.roleLeader')} yap`
+                        }
+                      >
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            if (!member.userId) return
+                            const nextRole =
+                              member.role === 'LEADER' ? ('MEMBER' as const) : ('LEADER' as const)
+                            changeMemberRole(
+                              { id, userId: member.userId, body: { role: nextRole } },
+                              {
+                                onSuccess: () =>
+                                  showToast('Rol güncellendi.', { severity: 'success' }),
+                                onError: (err) =>
+                                  showToast(getUserFriendlyError(err), { severity: 'error' }),
+                              },
+                            )
+                          }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    {canDeleteTeamMember && (
+                      <Tooltip title={t('teams.removeMemberButton')}>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => {
+                            if (!member.userId) return
+                            removeMember(
+                              { id, userId: member.userId },
+                              {
+                                onSuccess: () =>
+                                  showToast('Üye çıkarıldı.', { severity: 'success' }),
+                                onError: (err) =>
+                                  showToast(getUserFriendlyError(err), { severity: 'error' }),
+                              },
+                            )
+                          }}
+                        >
+                          <PersonRemoveIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         ) : (
           <Typography color="text.secondary">{t('teams.emptyState')}</Typography>
         )
@@ -418,7 +614,18 @@ export function TeamDetail({ id }: Props) {
         <Typography color="text.secondary">Üye listesini görüntüleme yetkiniz yok.</Typography>
       )}
 
-      <TeamFormDialog open={editOpen} mode="edit" team={currentTeam} onClose={() => setEditOpen(false)} />
+      <TeamMemberPermissionsDialog
+        open={Boolean(permissionDialogMember)}
+        member={permissionDialogMember}
+        onClose={() => setPermissionDialogMember(undefined)}
+      />
+
+      <TeamFormDialog
+        open={editOpen}
+        mode="edit"
+        team={currentTeam}
+        onClose={() => setEditOpen(false)}
+      />
     </Box>
   )
 }

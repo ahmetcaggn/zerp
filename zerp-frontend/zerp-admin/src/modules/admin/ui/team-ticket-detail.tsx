@@ -4,7 +4,6 @@ import AttachFileIcon from '@mui/icons-material/AttachFile'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import DownloadIcon from '@mui/icons-material/Download'
-import PersonRemoveIcon from '@mui/icons-material/PersonRemove'
 import SendIcon from '@mui/icons-material/Send'
 import {
   Alert,
@@ -18,6 +17,7 @@ import {
   MenuItem,
   Paper,
   Select,
+  TablePagination,
   TextField,
   Tooltip,
   Typography,
@@ -34,12 +34,13 @@ import { getUserFriendlyError } from '@/core/utils/error-message'
 import { teamTicketClient } from '../api/team-ticket-client'
 import {
   useAddTeamTicketComment,
+  useAssignmentTeamCandidates,
+  useAssignmentTeamMemberCandidates,
   useAssignTeamTicket,
   useChangeTeamTicketPriority,
   useChangeTeamTicketStatus,
   useCloseTeamTicket,
   useTeamTicket,
-  useUnassignTeamTicket,
   useUploadTeamTicketAttachment,
 } from '../hooks/use-team-tickets'
 import type { AttachmentResponse } from '../types/ticket'
@@ -75,16 +76,10 @@ const STATUS_OPTIONS: TicketStatusString[] = [
 
 const PRIORITY_OPTIONS: TicketPriorityString[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
 const CLOSEABLE_STATUSES: TicketStatusString[] = ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER']
+const ASSIGNMENT_CANDIDATE_PAGE_SIZE = 10
 
 interface Props {
   id: string
-}
-
-const UUID_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-
-function isUuid(value: string): boolean {
-  return UUID_REGEX.test(value)
 }
 
 function formatFileSize(size?: number): string {
@@ -113,6 +108,16 @@ function toTimestamp(value?: string): number {
   return Number.isNaN(timestamp) ? 0 : timestamp
 }
 
+type CommentAuthorType = 'CUSTOMER' | 'AGENT' | 'SYSTEM' | 'UNKNOWN'
+
+function resolveCommentAuthorType(authorType?: string): CommentAuthorType {
+  const normalized = authorType?.toUpperCase()
+  if (normalized === 'CUSTOMER' || normalized === 'AGENT' || normalized === 'SYSTEM') {
+    return normalized
+  }
+  return 'UNKNOWN'
+}
+
 export function TeamTicketDetail({ id }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
@@ -121,14 +126,17 @@ export function TeamTicketDetail({ id }: Props) {
   const [commentText, setCommentText] = useState('')
   const [showAssignForm, setShowAssignForm] = useState(false)
   const [assignTeamId, setAssignTeamId] = useState('')
+  const [assignTeamQuery, setAssignTeamQuery] = useState('')
+  const [assignTeamPage, setAssignTeamPage] = useState(1)
   const [assignAgentId, setAssignAgentId] = useState('')
+  const [assignAgentQuery, setAssignAgentQuery] = useState('')
+  const [assignAgentPage, setAssignAgentPage] = useState(1)
 
   const { mutate: addComment, isPending: isCommenting } = useAddTeamTicketComment()
   const { mutate: closeTicket, isPending: isClosing } = useCloseTeamTicket()
   const { mutate: changeStatus, isPending: isChangingStatus } = useChangeTeamTicketStatus()
   const { mutate: changePriority, isPending: isChangingPriority } = useChangeTeamTicketPriority()
   const { mutate: assignTicket, isPending: isAssigning } = useAssignTeamTicket()
-  const { mutate: unassignTicket, isPending: isUnassigning } = useUnassignTeamTicket()
   const { mutate: uploadAttachment, isPending: isUploadingAttachment } = useUploadTeamTicketAttachment()
   const { hasPermission, isLoadingPermissions } = useCurrentUserPermissions()
   const canReadTicket = hasPermission(PermissionActions.READ_TICKET)
@@ -141,14 +149,69 @@ export function TeamTicketDetail({ id }: Props) {
   const canReadTicketAssignment = hasPermission(PermissionActions.READ_TICKET_ASSIGNMENT)
   const canCreateTicketAssignment = hasPermission(PermissionActions.CREATE_TICKET_ASSIGNMENT)
   const canUpdateTicketAssignment = hasPermission(PermissionActions.UPDATE_TICKET_ASSIGNMENT)
-  const canDeleteTicketAssignment = hasPermission(PermissionActions.DELETE_TICKET_ASSIGNMENT)
   const canReadTicketSlaTracking = hasPermission(PermissionActions.READ_TICKET_SLA_TRACKING)
   const canReadTicketAttachment = hasPermission(PermissionActions.READ_TICKET_ATTACHMENT)
   const canCreateTicketAttachment = hasPermission(PermissionActions.CREATE_TICKET_ATTACHMENT)
-  const trimmedAssignTeamId = assignTeamId.trim()
-  const trimmedAssignAgentId = assignAgentId.trim()
-  const isAssignTeamIdValid = trimmedAssignTeamId ? isUuid(trimmedAssignTeamId) : true
-  const isAssignAgentIdValid = trimmedAssignAgentId ? isUuid(trimmedAssignAgentId) : true
+  const canChangeAssignmentByPermission =
+    canCreateTicketAssignment || canUpdateTicketAssignment
+  const normalizedAssignTeamQuery = assignTeamQuery.trim()
+  const normalizedAssignAgentQuery = assignAgentQuery.trim()
+  const {
+    data: assignmentTeamCandidatesResult,
+    isLoading: isLoadingAssignmentTeams,
+    isFetching: isFetchingAssignmentTeams,
+  } = useAssignmentTeamCandidates(
+    id,
+    {
+      pagination: { page: assignTeamPage, perPage: ASSIGNMENT_CANDIDATE_PAGE_SIZE },
+      sort: { field: 'name', order: 'ASC' },
+      query: normalizedAssignTeamQuery || undefined,
+    },
+    {
+      enabled:
+        canReadTicket &&
+        !isLoadingPermissions &&
+        canChangeAssignmentByPermission &&
+        showAssignForm,
+    },
+  )
+  const assignmentTeamCandidates = assignmentTeamCandidatesResult?.data ?? []
+  const assignmentTeamCandidateTotal = assignmentTeamCandidatesResult?.total ?? 0
+  const effectiveAssignTeamId = assignmentTeamCandidates.some(
+    (teamCandidate) => teamCandidate.id === assignTeamId,
+  )
+    ? assignTeamId
+    : ''
+  const {
+    data: assignmentMemberCandidatesResult,
+    isLoading: isLoadingAssignmentMembers,
+    isFetching: isFetchingAssignmentMembers,
+  } = useAssignmentTeamMemberCandidates(
+    id,
+    effectiveAssignTeamId
+      ? {
+          teamId: effectiveAssignTeamId,
+          pagination: { page: assignAgentPage, perPage: ASSIGNMENT_CANDIDATE_PAGE_SIZE },
+          sort: { field: 'joinedAt', order: 'ASC' },
+          query: normalizedAssignAgentQuery || undefined,
+        }
+      : undefined,
+    {
+      enabled:
+        canReadTicket &&
+        !isLoadingPermissions &&
+        canChangeAssignmentByPermission &&
+        showAssignForm &&
+        Boolean(effectiveAssignTeamId),
+    },
+  )
+  const assignmentMemberCandidates = assignmentMemberCandidatesResult?.data ?? []
+  const assignmentMemberCandidateTotal = assignmentMemberCandidatesResult?.total ?? 0
+  const effectiveAssignAgentId = assignmentMemberCandidates.some(
+    (memberCandidate) => memberCandidate.userId === assignAgentId,
+  )
+    ? assignAgentId
+    : ''
 
   if (isLoadingPermissions) {
     return (
@@ -181,7 +244,10 @@ export function TeamTicketDetail({ id }: Props) {
   const priority = ticket.priority as TicketPriorityString | undefined
   const isCloseable = status !== undefined && CLOSEABLE_STATUSES.includes(status)
   const isClosed = status === 'CLOSED' || status === 'CANCELLED'
-  const hasCurrentAssignment = Boolean(ticket.currentAssignment)
+  const activeAssignment = ticket.currentAssignment?.active
+    ? ticket.currentAssignment
+    : undefined
+  const hasCurrentAssignment = Boolean(activeAssignment)
   const canChangeAssignment = hasCurrentAssignment
     ? canUpdateTicketAssignment
     : canCreateTicketAssignment
@@ -205,7 +271,7 @@ export function TeamTicketDetail({ id }: Props) {
 
   function handleAddComment() {
     if (!canCreateTicketComment) {
-      showToast('Yorum ekleme yetkiniz yok.', { severity: 'warning' })
+      showToast('Mesaj yazma yetkiniz yok.', { severity: 'warning' })
       return
     }
     if (!commentText.trim()) return
@@ -214,7 +280,7 @@ export function TeamTicketDetail({ id }: Props) {
       {
         onSuccess: () => {
           setCommentText('')
-          showToast('Yorum eklendi.', { severity: 'success' })
+          showToast('Mesaj gönderildi.', { severity: 'success' })
         },
         onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
       },
@@ -260,6 +326,94 @@ export function TeamTicketDetail({ id }: Props) {
     )
   }
 
+  function handleClearAssignedAgent() {
+    if (!canUpdateTicketAssignment) {
+      showToast('Atama güncelleme yetkiniz yok.', { severity: 'warning' })
+      return
+    }
+    if (isClosed) {
+      showToast('Talep kapalı olduğu için atama düzenlenemez.', { severity: 'warning' })
+      return
+    }
+    if (!activeAssignment?.teamId) {
+      showToast('Aktif takım ataması bulunamadı.', { severity: 'warning' })
+      return
+    }
+    if (!activeAssignment.agentPartyId) {
+      showToast('Bu talepte ajan ataması zaten yok.', { severity: 'info' })
+      return
+    }
+
+    assignTicket(
+      {
+        id,
+        body: {
+          teamId: activeAssignment.teamId,
+        },
+      },
+      {
+        onSuccess: () => {
+          setAssignAgentId('')
+          showToast('Ajan ataması kaldırıldı.', { severity: 'success' })
+        },
+        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      },
+    )
+  }
+
+  function handleOpenAssignmentEditor() {
+    setShowAssignForm((prev) => {
+      const next = !prev
+      if (next) {
+        setAssignTeamId(activeAssignment?.teamId ?? '')
+        setAssignAgentId(activeAssignment?.agentPartyId ?? '')
+        setAssignTeamQuery('')
+        setAssignAgentQuery('')
+        setAssignTeamPage(1)
+        setAssignAgentPage(1)
+      } else {
+        setAssignTeamId('')
+        setAssignAgentId('')
+      }
+      return next
+    })
+  }
+
+  function handleCloseAssignmentEditor() {
+    setShowAssignForm(false)
+    setAssignTeamId('')
+    setAssignAgentId('')
+    setAssignTeamQuery('')
+    setAssignAgentQuery('')
+    setAssignTeamPage(1)
+    setAssignAgentPage(1)
+  }
+
+  function handleSaveAssignment() {
+    assignTicket(
+      {
+        id,
+        body: {
+          teamId: effectiveAssignTeamId,
+          ...(effectiveAssignAgentId && { agentPartyId: effectiveAssignAgentId }),
+        },
+      },
+      {
+        onSuccess: () => {
+          setAssignTeamId('')
+          setAssignTeamQuery('')
+          setAssignTeamPage(1)
+          setAssignAgentId('')
+          setAssignAgentQuery('')
+          setAssignAgentPage(1)
+          setShowAssignForm(false)
+          showToast('Atama yapıldı.', { severity: 'success' })
+        },
+        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      },
+    )
+  }
+
   function handleAssign() {
     if (!canChangeAssignment) {
       showToast('Talep atama yetkiniz yok.', { severity: 'warning' })
@@ -269,47 +423,12 @@ export function TeamTicketDetail({ id }: Props) {
       showToast('Talep kapalı olduğu için atama işlemi yapılamaz.', { severity: 'warning' })
       return
     }
-    if (!trimmedAssignTeamId) {
-      showToast('Takim ID zorunlu.', { severity: 'warning' })
+    if (!effectiveAssignTeamId) {
+      showToast('Lütfen listeden bir takım seçin.', { severity: 'warning' })
       return
     }
-    if (!isUuid(trimmedAssignTeamId)) {
-      showToast('Gecerli bir takim UUID degeri girin.', { severity: 'warning' })
-      return
-    }
-    if (trimmedAssignAgentId && !isUuid(trimmedAssignAgentId)) {
-      showToast('Gecerli bir ajan UUID degeri girin.', { severity: 'warning' })
-      return
-    }
-    assignTicket(
-      {
-        id,
-        body: {
-          teamId: trimmedAssignTeamId,
-          ...(trimmedAssignAgentId && { agentPartyId: trimmedAssignAgentId }),
-        },
-      },
-      {
-        onSuccess: () => {
-          setAssignTeamId('')
-          setAssignAgentId('')
-          setShowAssignForm(false)
-          showToast('Atama yapıldı.', { severity: 'success' })
-        },
-        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-      },
-    )
-  }
 
-  function handleUnassign() {
-    if (!canDeleteTicketAssignment) {
-      showToast('Atama kaldırma yetkiniz yok.', { severity: 'warning' })
-      return
-    }
-    unassignTicket(id, {
-      onSuccess: () => showToast('Atama kaldırıldı.', { severity: 'success' }),
-      onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-    })
+    handleSaveAssignment()
   }
 
   function handleAttachmentSelected(event: ChangeEvent<HTMLInputElement>) {
@@ -554,31 +673,20 @@ export function TeamTicketDetail({ id }: Props) {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            mb: ticket.currentAssignment ? 1 : 0,
+            mb: activeAssignment ? 1 : 0,
           }}
         >
           <Typography variant="subtitle2">Atama</Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            {ticket.currentAssignment && canDeleteTicketAssignment && (
-              <Button
-                size="small"
-                color="error"
-                startIcon={<PersonRemoveIcon fontSize="small" />}
-                onClick={handleUnassign}
-                disabled={isUnassigning}
-              >
-                Atamayı Kaldır
-              </Button>
-            )}
             {canChangeAssignment && (
               <Tooltip title={assignmentActionBlockedReason ?? ''}>
                 <span>
                   <Button
                     size="small"
-                    onClick={() => setShowAssignForm((prev) => !prev)}
+                    onClick={handleOpenAssignmentEditor}
                     disabled={Boolean(assignmentActionBlockedReason)}
                   >
-                    {ticket.currentAssignment ? 'Yeniden Ata' : 'Ata'}
+                    {activeAssignment ? 'Atamayı Düzenle' : 'Ata'}
                   </Button>
                 </span>
               </Tooltip>
@@ -587,10 +695,12 @@ export function TeamTicketDetail({ id }: Props) {
         </Box>
 
         {canReadTicketAssignment ? (
-          ticket.currentAssignment ? (
+          activeAssignment ? (
             <Typography variant="body2">
-              Takım ID: {ticket.currentAssignment.teamId ?? '—'}
-              {ticket.currentAssignment.agentPartyId && ` · Ajan: ${ticket.currentAssignment.agentPartyId}`}
+              Takım: {activeAssignment.teamName ?? activeAssignment.teamId ?? '—'}
+              {activeAssignment.teamType ? ` (${activeAssignment.teamType})` : ''}
+              {activeAssignment.agentPartyId &&
+                ` · Ajan: ${activeAssignment.agentDisplayName ?? activeAssignment.agentPartyId}`}
             </Typography>
           ) : (
             <Typography variant="body2" color="text.secondary">
@@ -604,48 +714,208 @@ export function TeamTicketDetail({ id }: Props) {
         )}
 
         {canChangeAssignment && showAssignForm && (
-          <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-            <TextField
-              size="small"
-              label="Takım ID"
-              value={assignTeamId}
-              onChange={(event) => setAssignTeamId(event.target.value)}
-              error={Boolean(trimmedAssignTeamId) && !isAssignTeamIdValid}
-              helperText={
-                Boolean(trimmedAssignTeamId) && !isAssignTeamIdValid
-                  ? 'Gecerli bir UUID girin.'
-                  : 'Takim system tenant altinda olmalidir.'
-              }
-              sx={{ flex: 1, minWidth: 140 }}
-            />
-            <TextField
-              size="small"
-              label="Ajan ID (opsiyonel)"
-              value={assignAgentId}
-              onChange={(event) => setAssignAgentId(event.target.value)}
-              error={Boolean(trimmedAssignAgentId) && !isAssignAgentIdValid}
-              helperText={
-                Boolean(trimmedAssignAgentId) && !isAssignAgentIdValid
-                  ? 'Gecerli bir UUID girin.'
-                  : 'Ajan, secilen takimin system tenant uyelerinden biri olmali.'
-              }
-              sx={{ flex: 1, minWidth: 160 }}
-            />
-            <Button
-              variant="contained"
-              size="small"
-              onClick={handleAssign}
-              disabled={
-                isAssigning ||
-                Boolean(assignmentActionBlockedReason) ||
-                !trimmedAssignTeamId ||
-                !isAssignTeamIdValid ||
-                !isAssignAgentIdValid
-              }
+          <Paper variant="outlined" sx={{ mt: 2, p: 2, overflowX: 'hidden' }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gap: 2,
+                gridTemplateColumns: {
+                  xs: '1fr',
+                  md: 'minmax(0,1fr) minmax(0,1fr)',
+                },
+                alignItems: 'flex-end',
+              }}
             >
-              Kaydet
-            </Button>
-          </Box>
+              <Box sx={{ minWidth: 0 }}>
+                <TextField
+                  size="small"
+                  label="Takım Ara"
+                  value={assignTeamQuery}
+                  onChange={(event) => {
+                    setAssignTeamQuery(event.target.value)
+                    setAssignTeamPage(1)
+                  }}
+                  helperText="Takım adı, tipi veya ID ile arayın."
+                  fullWidth
+                />
+                <FormControl size="small" sx={{ mt: 1, width: '100%' }}>
+                  <InputLabel>Takım</InputLabel>
+                  <Select
+                    value={effectiveAssignTeamId}
+                    label="Takım"
+                    sx={{
+                      '& .MuiSelect-select': {
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      },
+                    }}
+                    onChange={(event) => {
+                      const nextTeamId = event.target.value
+                      setAssignTeamId(nextTeamId)
+                      setAssignAgentId('')
+                      setAssignAgentQuery('')
+                      setAssignAgentPage(1)
+                    }}
+                    disabled={isLoadingAssignmentTeams}
+                  >
+                    {assignmentTeamCandidates.map((teamCandidate) => (
+                      <MenuItem key={teamCandidate.id} value={teamCandidate.id}>
+                        {teamCandidate.displayLabel}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <TablePagination
+                  component="div"
+                  count={assignmentTeamCandidateTotal}
+                  page={Math.max(assignTeamPage - 1, 0)}
+                  rowsPerPage={ASSIGNMENT_CANDIDATE_PAGE_SIZE}
+                  rowsPerPageOptions={[ASSIGNMENT_CANDIDATE_PAGE_SIZE]}
+                  onPageChange={(_, nextPage) => setAssignTeamPage(nextPage + 1)}
+                  onRowsPerPageChange={() => {}}
+                  sx={{
+                    mt: 0.5,
+                    '& .MuiTablePagination-toolbar': {
+                      minHeight: 32,
+                      px: 0,
+                      justifyContent: 'flex-start',
+                      gap: 0.75,
+                    },
+                    '& .MuiTablePagination-spacer': {
+                      display: 'none',
+                      flex: 0,
+                    },
+                    '& .MuiTablePagination-selectLabel, & .MuiTablePagination-input': {
+                      display: 'none',
+                    },
+                    '& .MuiTablePagination-displayedRows': {
+                      m: 0,
+                    },
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ minWidth: 0 }}>
+                <TextField
+                  size="small"
+                  label="Ajan Ara (opsiyonel)"
+                  value={assignAgentQuery}
+                  onChange={(event) => {
+                    setAssignAgentQuery(event.target.value)
+                    setAssignAgentPage(1)
+                  }}
+                  helperText="Ad soyad, username, email veya ID ile arayın."
+                  fullWidth
+                  disabled={!effectiveAssignTeamId}
+                />
+                <FormControl size="small" sx={{ mt: 1, width: '100%' }} disabled={!effectiveAssignTeamId || isLoadingAssignmentMembers}>
+                  <InputLabel>Ajan (Opsiyonel)</InputLabel>
+                  <Select
+                    value={effectiveAssignAgentId}
+                    label="Ajan (Opsiyonel)"
+                    sx={{
+                      '& .MuiSelect-select': {
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      },
+                    }}
+                    onChange={(event) => setAssignAgentId(event.target.value)}
+                  >
+                    <MenuItem value="">
+                      Sadece takıma ata
+                    </MenuItem>
+                    {assignmentMemberCandidates.map((memberCandidate) => (
+                      <MenuItem key={memberCandidate.userId} value={memberCandidate.userId}>
+                        {memberCandidate.displayLabel}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <TablePagination
+                  component="div"
+                  count={assignmentMemberCandidateTotal}
+                  page={Math.max(assignAgentPage - 1, 0)}
+                  rowsPerPage={ASSIGNMENT_CANDIDATE_PAGE_SIZE}
+                  rowsPerPageOptions={[ASSIGNMENT_CANDIDATE_PAGE_SIZE]}
+                  onPageChange={(_, nextPage) => setAssignAgentPage(nextPage + 1)}
+                  onRowsPerPageChange={() => {}}
+                  sx={{
+                    mt: 0.5,
+                    '& .MuiTablePagination-toolbar': {
+                      minHeight: 32,
+                      px: 0,
+                      justifyContent: 'flex-start',
+                      gap: 0.75,
+                    },
+                    '& .MuiTablePagination-spacer': {
+                      display: 'none',
+                      flex: 0,
+                    },
+                    '& .MuiTablePagination-selectLabel, & .MuiTablePagination-input': {
+                      display: 'none',
+                    },
+                    '& .MuiTablePagination-displayedRows': {
+                      m: 0,
+                    },
+                  }}
+                />
+              </Box>
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  justifyContent: { xs: 'stretch', sm: 'flex-end' },
+                  alignItems: { xs: 'stretch', sm: 'center' },
+                  gap: 1,
+                  minWidth: 0,
+                  gridColumn: { xs: '1', md: '1 / -1' },
+                  pt: { xs: 0.5, md: 0 },
+                }}
+              >
+                {activeAssignment?.agentPartyId && canUpdateTicketAssignment && (
+                  <Button
+                    variant="outlined"
+                    color="warning"
+                    size="small"
+                    onClick={handleClearAssignedAgent}
+                    disabled={isAssigning || Boolean(assignmentActionBlockedReason)}
+                  >
+                    Ajan Atamasını Kaldır
+                  </Button>
+                )}
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={handleAssign}
+                  disabled={
+                    isAssigning ||
+                    Boolean(assignmentActionBlockedReason) ||
+                    !effectiveAssignTeamId
+                  }
+                >
+                  Kaydet
+                </Button>
+                <Button
+                  variant="text"
+                  size="small"
+                  color="inherit"
+                  onClick={handleCloseAssignmentEditor}
+                  disabled={isAssigning}
+                >
+                  Vazgeç
+                </Button>
+              </Box>
+            </Box>
+
+            {(isFetchingAssignmentTeams || isFetchingAssignmentMembers) && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Adaylar güncelleniyor...
+              </Typography>
+            )}
+          </Paper>
         )}
       </Paper>
 
@@ -682,12 +952,12 @@ export function TeamTicketDetail({ id }: Props) {
       )}
 
       <Typography variant="subtitle1" sx={{ mb: 2 }}>
-        Yorumlar ({externalComments.length})
+        Mesajlar ({externalComments.length})
       </Typography>
 
       {!canReadTicketComment ? (
         <Typography color="text.secondary" sx={{ mb: 3 }}>
-          Yorumları görüntüleme yetkiniz yok.
+          Mesajları görüntüleme yetkiniz yok.
         </Typography>
       ) : externalComments.length === 0 ? (
           <Typography color="text.secondary" sx={{ mb: 3 }}>
@@ -695,23 +965,74 @@ export function TeamTicketDetail({ id }: Props) {
           </Typography>
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
-          {externalComments.map((comment, index) => (
-            <Paper
-              key={comment.id ?? `${comment.authorId ?? 'unknown'}-${comment.createdAt ?? index}`}
-              variant="outlined"
-              sx={{ p: 2 }}
-            >
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                <Typography variant="caption" color="text.secondary">
-                  {comment.authorName ?? comment.authorId ?? 'Bilinmeyen'}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {comment.createdAt}
-                </Typography>
+          {externalComments.map((comment, index) => {
+            const authorType = resolveCommentAuthorType(comment.authorType)
+            const isTenantMessage = authorType === 'CUSTOMER'
+            const isAdminMessage = authorType === 'AGENT'
+            const alignRight = isAdminMessage
+
+            return (
+              <Box
+                key={comment.id ?? `${comment.authorId ?? 'unknown'}-${comment.createdAt ?? index}`}
+                sx={{ display: 'flex', justifyContent: alignRight ? 'flex-end' : 'flex-start' }}
+              >
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    px: 1.75,
+                    py: 1.5,
+                    maxWidth: { xs: '100%', sm: '80%' },
+                    borderRadius: 2,
+                    ...(alignRight
+                      ? { borderBottomRightRadius: 0.75 }
+                      : { borderBottomLeftRadius: 0.75 }),
+                    bgcolor: (theme) => {
+                      if (isAdminMessage) {
+                        return theme.palette.mode === 'dark'
+                          ? 'rgba(46, 125, 50, 0.28)'
+                          : '#DCF8C6'
+                      }
+                      if (isTenantMessage) {
+                        return theme.palette.mode === 'dark'
+                          ? 'rgba(66, 165, 245, 0.20)'
+                          : '#E3F2FD'
+                      }
+                      return theme.palette.mode === 'dark'
+                        ? 'rgba(255, 213, 79, 0.22)'
+                        : '#FFF8E1'
+                    },
+                    borderColor: (theme) => {
+                      if (isAdminMessage) {
+                        return theme.palette.mode === 'dark'
+                          ? 'rgba(102, 187, 106, 0.5)'
+                          : '#B7E1A1'
+                      }
+                      if (isTenantMessage) {
+                        return theme.palette.mode === 'dark'
+                          ? 'rgba(66, 165, 245, 0.5)'
+                          : '#BBDEFB'
+                      }
+                      return theme.palette.mode === 'dark'
+                        ? 'rgba(255, 213, 79, 0.55)'
+                        : '#FFE082'
+                    },
+                  }}
+                >
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1.5, mb: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      {comment.authorName ?? comment.authorId ?? 'Bilinmeyen'}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {comment.createdAt}
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                    {comment.content}
+                  </Typography>
+                </Paper>
               </Box>
-              <Typography variant="body2">{comment.content}</Typography>
-            </Paper>
-          ))}
+            )
+          })}
         </Box>
       )}
 
@@ -723,7 +1044,7 @@ export function TeamTicketDetail({ id }: Props) {
           </Typography>
           {isClosed ? (
             <Typography variant="body2" color="text.secondary">
-              Talep kapalı olduğu için yorum eklenemez.
+              Talep kapalı olduğu için mesaj yazılamaz.
             </Typography>
           ) : (
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>

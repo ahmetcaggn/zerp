@@ -118,7 +118,7 @@ public class ProductExtraOptionPermissionEvaluator {
                 (root, _, _) -> root.get("id").in(permittedExtraOptionIds),
                 (root, _, _) -> root.get("product").get("id").in(permittedProductIds),
                 (root, _, _) -> root.get("product").get("shop").get("id").in(permittedShopIds),
-                (root, _, _) -> root.get("product").get("shop").get("tenant").get("id").in(permittedTenantIds)
+                (root, _, _) -> root.get("tenantId").in(permittedTenantIds)
         );
     }
 }

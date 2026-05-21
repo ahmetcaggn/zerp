@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.sale.Menu;
+import org.zerp.common.entity.sale.MenuLanguage;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
@@ -25,6 +26,7 @@ import org.zerp.sale.repository.MenuRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -48,7 +50,7 @@ public class MenuService implements
         UUID userId = currentUserIdResolver.resolve();
         Specification<Menu> spec = filterRefiner.refinedOrBadRequest(filters, Menu.class);
         spec = permissionEvaluator.filterRead(userId).and(spec);
-        Page<MenuDTO> results = repository.findAll(spec, pageable).map(mapper::toDTO);
+        Page<MenuDTO> results = repository.findAll(spec, pageable).map(this::toMenuDTO);
         log.debug("Found {} Menus", results.getTotalElements());
         return results;
     }
@@ -61,7 +63,7 @@ public class MenuService implements
         for (UUID id : uuids) {
             repository.findById(id).ifPresent(menu -> {
                 if (permissionEvaluator.canRead(userId, menu)) {
-                    results.add(mapper.toDTO(menu));
+                    results.add(toMenuDTO(menu));
                 }
             });
         }
@@ -77,7 +79,7 @@ public class MenuService implements
         if (!permissionEvaluator.canRead(userId, menu)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Menu");
         }
-        return mapper.toDTO(menu);
+        return toMenuDTO(menu);
     }
 
     @Override
@@ -92,9 +94,10 @@ public class MenuService implements
         Menu menu = mapper.toEntity(data);
         menu.setShop(shop);
         menu.setTenantId(tenantId);
+        enforceSingleActiveMenu(menu);
         Menu saved = repository.save(menu);
         log.info("Created Menu with id: {}", saved.getId());
-        return mapper.toDTO(saved);
+        return toMenuDTO(saved);
     }
 
     @Override
@@ -109,7 +112,7 @@ public class MenuService implements
         applyFieldUpdates(menu, data);
         Menu updated = repository.save(menu);
         log.info("Patched Menu with id: {}", uuid);
-        return mapper.toDTO(updated);
+        return toMenuDTO(updated);
     }
 
     @Override
@@ -122,9 +125,16 @@ public class MenuService implements
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Menu");
         }
         mapper.updateEntityFromDTO(data, menu);
+        if (data.getIsActive() != null) {
+            menu.setActive(data.getIsActive());
+            enforceSingleActiveMenu(menu);
+        }
+        if (data.getLanguage() != null) {
+            menu.setLanguage(data.getLanguage());
+        }
         Menu updated = repository.save(menu);
         log.info("Updated Menu with id: {}", uuid);
-        return mapper.toDTO(updated);
+        return toMenuDTO(updated);
     }
 
     @Override
@@ -170,9 +180,57 @@ public class MenuService implements
         return deleted;
     }
 
-    private void applyFieldUpdates(Menu menu, Map<String, Object> fields) {
+    @Transactional
+    protected void applyFieldUpdates(Menu menu, Map<String, Object> fields) {
         if (fields.containsKey("name")) menu.setName((String) fields.get("name"));
         if (fields.containsKey("description")) menu.setDescription((String) fields.get("description"));
+        if (fields.containsKey("isActive")) menu.setActive((Boolean) fields.get("isActive"));
+        if (fields.containsKey("active")) {
+            menu.setActive((Boolean) fields.get("active"));
+            enforceSingleActiveMenu(menu);
+        }
+        if (fields.containsKey("language")) {
+            menu.setLanguage(resolveMenuLanguage(fields.get("language")));
+        }
+
+    }
+
+    @Transactional
+    protected void enforceSingleActiveMenu(Menu menu) {
+        if (!menu.isActive()) {
+            return;
+        }
+        repository.deactivateOtherActiveMenus(menu.getShop().getId(), menu.getLanguage(), menu.getId());
+    }
+
+    private MenuLanguage resolveMenuLanguage(Object rawValue) {
+        switch (rawValue) {
+            case null -> {
+                return MenuLanguage.TR;
+            }
+            case MenuLanguage language -> {
+                return language;
+            }
+            case String languageValue -> {
+                try {
+                    return MenuLanguage.valueOf(languageValue.trim().toUpperCase(Locale.ROOT));
+                } catch (IllegalArgumentException ignored) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported menu language: " + rawValue);
+                }
+            }
+            default -> {
+            }
+        }
+
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported menu language: " + rawValue);
+    }
+
+    private MenuDTO toMenuDTO(Menu menu) {
+        MenuDTO dto = mapper.toDTO(menu);
+        if (dto.getLanguage() == null) {
+            dto.setLanguage(MenuLanguage.TR);
+        }
+        return dto;
     }
 
     private Shop resolveShop(UUID shopId) {

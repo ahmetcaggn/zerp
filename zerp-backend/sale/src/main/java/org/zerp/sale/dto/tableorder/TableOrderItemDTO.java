@@ -3,6 +3,7 @@ package org.zerp.sale.dto.tableorder;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -13,4 +14,5 @@ public class TableOrderItemDTO {
     private int quantity;
     private BigDecimal unitPrice;
     private String notes;
+    private List<TableOrderItemSelectedExtraOptionDTO> selectedExtraOptions;
 }

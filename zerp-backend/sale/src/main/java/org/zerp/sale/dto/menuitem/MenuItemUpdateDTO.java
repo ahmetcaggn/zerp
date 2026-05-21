@@ -11,6 +11,11 @@ public class MenuItemUpdateDTO {
     private String name;
     private String description;
     private BigDecimal price;
+    private UUID categoryId;
     private String imageId;
-    private List<UUID> productIds;
+    private Integer calories;
+    private String weight;
+    private List<String> ingredients;
+    private List<String> allergens;
+    private List<MenuItemProductItemDTO> productItems;
 }

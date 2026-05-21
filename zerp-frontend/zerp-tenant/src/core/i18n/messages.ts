@@ -32,6 +32,25 @@ export interface MessageDictionary {
     orderCancelledToast: string
     orderUpdatedToast: string
     orderDeletedToast: string
+    extraOptionsTitle: string
+    extraOptionsForItem: string
+    extraOptionsNone: string
+    addWithoutExtra: string
+    addWithSelectedExtra: string
+    changeStatusMenu: string
+    tableStatusUpdatedToast: string
+    importQrButton: string
+    importQrTitle: string
+    importQrDescription: string
+    importQrManualLabel: string
+    importQrManualPlaceholder: string
+    importQrSubmit: string
+    importQrCameraStart: string
+    importQrCameraStop: string
+    importQrCameraUnsupported: string
+    importQrCameraError: string
+    importQrInvalid: string
+    importQrSuccess: string
   }
   sale: {
     cashier: {

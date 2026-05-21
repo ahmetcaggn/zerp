@@ -2,7 +2,6 @@ package org.zerp.sale.dto.product;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
@@ -17,8 +16,6 @@ public class ProductDTO {
     private String typeName;
     private UUID metricId;
     private String metricName;
-    private UUID menuItemId;
-    private BigDecimal price;
     private Integer preparationTime;
     private boolean isActive;
     private UUID tenantId;

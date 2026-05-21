@@ -46,13 +46,17 @@ function deleteStaleAuthCookies(response: NextResponse): void {
   }
 }
 
-async function proxyApiRequest(req: NextRequest, accessToken: string): Promise<NextResponse> {
+async function proxyApiRequest(req: NextRequest, accessToken?: string): Promise<NextResponse> {
   const { pathname, search } = req.nextUrl
   const backendPath = pathname.replace(/^\/api/, '')
   const backendUrl = `${INTERNAL_API_URL}${backendPath}${search}`
 
   const headers = new Headers(req.headers)
-  headers.set('Authorization', `Bearer ${accessToken}`)
+  if (accessToken) {
+    headers.set('Authorization', `Bearer ${accessToken}`)
+  } else {
+    headers.delete('Authorization')
+  }
   headers.delete('cookie')
 
   const hasBody = req.method !== 'GET' && req.method !== 'HEAD'
@@ -125,6 +129,10 @@ export async function proxy(req: NextRequest) {
 
   // API proxy — verify session, inject Bearer token, forward to backend
   if (pathname.startsWith('/api')) {
+    if (pathname.startsWith('/api/sale/public')) {
+      return proxyApiRequest(req)
+    }
+
     const token = await getToken({
       req,
       secret: NEXTAUTH_SECRET,

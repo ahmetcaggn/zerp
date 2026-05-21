@@ -9,7 +9,7 @@ import TableRestaurantIcon from '@mui/icons-material/TableRestaurant'
 import type { Route } from 'next'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
-import { useShopTables, useDeleteShopTable } from '../../hooks/use-shop-tables'
+import { useShopTables, useDeleteShopTable, usePatchShopTable } from '../../hooks/use-shop-tables'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 import { TableCard } from './table-card'
@@ -43,6 +43,7 @@ export function FloorView() {
     ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
   })
   const { mutate: deleteTable } = useDeleteShopTable()
+  const { mutate: patchTable } = usePatchShopTable()
 
   const all = data?.data ?? []
   const filtered = statusFilter === 'ALL' ? all : all.filter(t => t.status === statusFilter)
@@ -75,6 +76,17 @@ export function FloorView() {
       onSuccess: () => showToast(t('pos.tableDeletedToast')),
       onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
     })
+  }
+
+  function handleChangeStatus(table: ShopTableResponseDto, status: ShopTableStatus) {
+    if (table.status === status) return
+    patchTable(
+      { id: table.id, fields: { status } },
+      {
+        onSuccess: () => showToast(t('pos.tableStatusUpdatedToast')),
+        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      },
+    )
   }
 
   return (
@@ -145,6 +157,7 @@ export function FloorView() {
                     onTap={handleTap}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
+                    onChangeStatus={handleChangeStatus}
                   />
                 ))}
               </Box>
@@ -159,6 +172,7 @@ export function FloorView() {
                 onTap={handleTap}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onChangeStatus={handleChangeStatus}
               />
             ))}
           </Box>

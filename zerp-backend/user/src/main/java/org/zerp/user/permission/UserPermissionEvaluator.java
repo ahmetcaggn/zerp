@@ -60,13 +60,13 @@ public class UserPermissionEvaluator {
         // If only tenant IDs have permissions
         if (permittedUserIds.isEmpty()) {
             log.trace("User {} can read by tenant membership only (count={})", requesterId, permittedTenantIds.size());
-            return (root, _, _) -> root.get("tenant").get("id").in(permittedTenantIds);
+            return (root, _, _) -> root.get("tenantId").in(permittedTenantIds);
         }
 
         // Both sets have values - use OR
         return Specification.anyOf(
                 (root, _, _) -> root.get("id").in(permittedUserIds),
-                (root, _, _) -> root.get("tenant").get("id").in(permittedTenantIds)
+                (root, _, _) -> root.get("tenantId").in(permittedTenantIds)
         );
     }
 }

@@ -1,7 +1,8 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
-import { createContext, useContext, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react'
 
 import { shopDashboardMockShops } from '@/modules/tenant/api/mock-shop-dashboard-data'
 import { useShops } from '@/modules/tenant/hooks/use-shops'
@@ -9,10 +10,21 @@ import type { ShopResponseDto, ShopScope } from '@/modules/tenant/types/shop'
 
 const STORAGE_KEY = 'tenant.shop.scope.v1'
 
+interface ScopeSwitchTransaction {
+  id: number
+  isCommitted: boolean
+}
+
 interface ShopScopeContextValue {
   scope: ShopScope
+  scopeVersion: number
+  isScopeSwitching: boolean
+  scopeSwitchTransaction: ScopeSwitchTransaction | null
   shops: ShopResponseDto[]
   isLoading: boolean
+  isScopeReady: boolean
+  refreshShops: () => Promise<unknown>
+  completeScopeSwitch: () => void
   setGlobalScope: () => void
   setShopScope: (shop: ShopResponseDto) => void
 }
@@ -33,11 +45,24 @@ function persistShopId(shopId: string | null): void {
   }
 }
 
+function getScopeKey(scope: ShopScope): string {
+  return scope.mode === 'SHOP' ? `SHOP:${scope.shopId}` : 'GLOBAL'
+}
+
+function isScopeSensitiveTenantQuery(queryKey: readonly unknown[]): boolean {
+  const [domain, resource] = queryKey
+  return domain === 'tenant' && resource !== 'shops' && resource !== 'permissions'
+}
+
 export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient()
   const { status } = useSession()
-  const [selectedShopId, setSelectedShopId] = useState<string | null>(() => tryReadPersistedShopId())
+  const [scopeVersion, setScopeVersion] = useState(0)
+  const [scopeSwitchTransaction, setScopeSwitchTransaction] = useState<ScopeSwitchTransaction | null>(null)
+  const [persistedShopId, setPersistedShopId] = useState<string | null>(() => tryReadPersistedShopId())
+  const nextTransactionIdRef = useRef(0)
   const isAuthenticated = status === 'authenticated'
-  const { data, isLoading } = useShops(
+  const { data, isLoading, refetch } = useShops(
     {
       pagination: { page: 1, perPage: 500 },
       sort: { field: 'name', order: 'ASC' },
@@ -50,50 +75,98 @@ export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
     [isAuthenticated, data?.data],
   )
 
-  const shops = useMemo(() => {
-    if (!isAuthenticated) {
-      return []
-    }
-
-    if (actualShops.length > 0) {
-      return actualShops
-    }
-
-    if (isLoading) {
-      return []
-    }
-
-    return shopDashboardMockShops
-  }, [actualShops, isAuthenticated, isLoading])
+  const shops = useMemo(
+    () => (actualShops.length > 0 ? actualShops : shopDashboardMockShops),
+    [actualShops],
+  )
 
   const scope = useMemo<ShopScope>(() => {
-    if (!isAuthenticated || !selectedShopId || shops.length === 0) {
+    if (!isAuthenticated || !persistedShopId || shops.length === 0) {
       return { mode: 'GLOBAL' }
     }
+    const matchingShop = shops.find((shop) => shop.id === persistedShopId)
 
-    const matchingShop = shops.find((shop) => shop.id === selectedShopId)
-    if (!matchingShop) {
-      return { mode: 'GLOBAL' }
+    return matchingShop ? { mode: 'SHOP', shopId: matchingShop.id, shopName: matchingShop.name } : { mode: 'GLOBAL' }
+  }, [isAuthenticated, persistedShopId, shops])
+
+  const isScopeReady = useMemo(() => {
+    if (!isAuthenticated) {
+      return true
     }
 
-    return { mode: 'SHOP', shopId: matchingShop.id, shopName: matchingShop.name }
-  }, [isAuthenticated, selectedShopId, shops])
+    if (!persistedShopId) {
+      return true
+    }
+
+    return !isLoading
+  }, [isAuthenticated, isLoading, persistedShopId])
+
+  const resetScopedState = useCallback(() => {
+    void queryClient.cancelQueries({
+      predicate: (query) => isScopeSensitiveTenantQuery(query.queryKey),
+    })
+    queryClient.removeQueries({
+      predicate: (query) => isScopeSensitiveTenantQuery(query.queryKey),
+    })
+    setScopeVersion((prev) => prev + 1)
+  }, [queryClient])
+
+  const completeScopeSwitch = useCallback(() => {
+    setScopeSwitchTransaction(null)
+  }, [])
+
+  const startScopeSwitch = useCallback(
+    (nextScope: ShopScope) => {
+      if (getScopeKey(scope) === getScopeKey(nextScope)) return
+
+      const transactionId = nextTransactionIdRef.current + 1
+      nextTransactionIdRef.current = transactionId
+      setScopeSwitchTransaction({ id: transactionId, isCommitted: false })
+
+      const commitScopeSwitch = () => {
+        const nextPersistedShopId = nextScope.mode === 'SHOP' ? nextScope.shopId : null
+        resetScopedState()
+        setPersistedShopId(nextPersistedShopId)
+        persistShopId(nextPersistedShopId)
+        setScopeSwitchTransaction((current) =>
+          current?.id === transactionId ? { ...current, isCommitted: true } : current,
+        )
+      }
+
+      window.requestAnimationFrame(commitScopeSwitch)
+    },
+    [resetScopedState, scope],
+  )
 
   const value = useMemo<ShopScopeContextValue>(
     () => ({
       scope,
+      scopeVersion,
+      isScopeSwitching: scopeSwitchTransaction !== null,
+      scopeSwitchTransaction,
       shops,
       isLoading,
+      isScopeReady,
+      refreshShops: () => refetch(),
+      completeScopeSwitch,
       setGlobalScope: () => {
-        setSelectedShopId(null)
-        persistShopId(null)
+        startScopeSwitch({ mode: 'GLOBAL' })
       },
       setShopScope: (shop) => {
-        setSelectedShopId(shop.id)
-        persistShopId(shop.id)
+        startScopeSwitch({ mode: 'SHOP', shopId: shop.id, shopName: shop.name })
       },
     }),
-    [scope, shops, isLoading],
+    [
+      scope,
+      scopeVersion,
+      scopeSwitchTransaction,
+      shops,
+      isLoading,
+      isScopeReady,
+      refetch,
+      completeScopeSwitch,
+      startScopeSwitch,
+    ],
   )
 
   return <ShopScopeContext.Provider value={value}>{children}</ShopScopeContext.Provider>

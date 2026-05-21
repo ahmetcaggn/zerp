@@ -8,6 +8,7 @@ import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_permiss
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/cubit_permissions.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
+import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @RoutePage()
@@ -55,27 +56,25 @@ class _PermissionsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.t.permissionViewer.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              final cubit = context.read<CubitPermissions>();
-              unawaited(
-                context.router.push(
-                  RouteCreatePermission(
-                    employeeId: employeeId,
-                    cubitPermission: cubit,
-                    cubitPermissionViewer: cubitPermissionViewer,
-                  ),
+    return AppScaffold(
+      title: context.t.permissionViewer.title,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () {
+            final cubit = context.read<CubitPermissions>();
+            unawaited(
+              context.router.push(
+                RouteCreatePermission(
+                  employeeId: employeeId,
+                  cubitPermission: cubit,
+                  cubitPermissionViewer: cubitPermissionViewer,
                 ),
-              );
-            },
-          ),
-        ],
-      ),
+              ),
+            );
+          },
+        ),
+      ],
       body: BlocBuilder<CubitPermissions, StatePermissions>(
         builder: (context, state) {
           return switch (state) {

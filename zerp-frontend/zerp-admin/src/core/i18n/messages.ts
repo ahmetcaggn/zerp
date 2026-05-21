@@ -13,6 +13,8 @@ export interface MessageDictionary {
     login: string
     register: string
     dashboard: string
+    tenants: string
+    shops: string
     crm: string
     teams: string
     teamManagement: string
@@ -52,6 +54,150 @@ export interface MessageDictionary {
     inactiveLabel: string
     roleLeader: string
     roleMember: string
+    permissionsSectionTitle: string
+    permissionsSectionDescription: string
+    permissionActionField: string
+    permissionSearchPlaceholder: string
+    permissionTargetTypeField: string
+    permissionTargetField: string
+    permissionNoOptions: string
+    permissionAlreadyAdded: string
+    permissionAddButton: string
+    permissionsDialogTitle: string
+    permissionsDialogSubtitle: string
+    permissionsSearchField: string
+    permissionsEmptyState: string
+    actionsColumnLabel: string
+    permissionRemoveButton: string
+    closeButtonLabel: string
+    permissionAssignedToast: string
+    permissionRemovedToast: string
+    permissionAssignPartialError: string
+  }
+  tenants: {
+    title: string
+    createButton: string
+    editButton: string
+    deleteButton: string
+    detailButton: string
+    backButton: string
+    notFound: string
+    emptyState: string
+    unauthorized: string
+    nameLabel: string
+    descriptionLabel: string
+    emailLabel: string
+    phoneLabel: string
+    cityLabel: string
+    countryLabel: string
+    websiteLabel: string
+    addressLabel: string
+    stateLabel: string
+    postalCodeLabel: string
+    imageIdLabel: string
+    cancelButton: string
+    saveButton: string
+    createdToast: string
+    updatedToast: string
+    deletedToast: string
+    validationName: string
+    nameChecking: string
+    nameAvailable: string
+    nameUnavailable: string
+    nameError: string
+    nameMinLength: string
+  }
+  employees: {
+    title: string
+    createButton: string
+    deleteButton: string
+    emptyState: string
+    unauthorized: string
+    fullNameColumnHeader: string
+    emailColumnHeader: string
+    phoneColumnHeader: string
+    statusColumnHeader: string
+    actionsColumnLabel: string
+    usernameField: string
+    usernameChecking: string
+    usernameAvailable: string
+    usernameUnavailable: string
+    usernameError: string
+    usernameMinLength: string
+    tempPasswordField: string
+    firstNameField: string
+    lastNameField: string
+    emailField: string
+    hireDateField: string
+    dateOfBirthField: string
+    phoneField: string
+    nationalIdField: string
+    statusField: string
+    salaryField: string
+    managerField: string
+    permissionsSectionTitle: string
+    permissionsSectionDescription: string
+    permissionActionField: string
+    permissionSearchPlaceholder: string
+    permissionTargetTypeField: string
+    permissionTargetField: string
+    permissionNoOptions: string
+    permissionAlreadyAdded: string
+    permissionAddButton: string
+    permissionAssignPartialError: string
+    permissionsDialogTitle: string
+    permissionsDialogSubtitle: string
+    permissionsSearchField: string
+    permissionsEmptyState: string
+    permissionRemoveButton: string
+    permissionAssignedToast: string
+    permissionRemovedToast: string
+    addContactButton: string
+    contactInfoSection: string
+    contactTypeLabel: string
+    contactValueField: string
+    employeeDeletedToast: string
+    requiredFieldsWarning: string
+    employeeCreatedToast: string
+    closeButtonLabel: string
+  }
+  shops: {
+    title: string
+    createButton: string
+    editButton: string
+    deleteButton: string
+    emptyState: string
+    unauthorized: string
+    tenantLabel: string
+    tenantRequired: string
+    nameLabel: string
+    descriptionLabel: string
+    emailLabel: string
+    phoneLabel: string
+    cityLabel: string
+    countryLabel: string
+    websiteLabel: string
+    addressLabel: string
+    stateLabel: string
+    postalCodeLabel: string
+    imageIdLabel: string
+    cancelButton: string
+    saveButton: string
+    createdToast: string
+    updatedToast: string
+    deletedToast: string
+    validationName: string
+    nameChecking: string
+    nameAvailable: string
+    nameUnavailable: string
+    nameError: string
+    nameMinLength: string
+    searchPlaceholder: string
+    searchButton: string
+    tenantAllOption: string
+    tenantSearchPlaceholder: string
+    tenantNoOptions: string
+    clearFiltersButton: string
   }
   teamTickets: {
     title: string

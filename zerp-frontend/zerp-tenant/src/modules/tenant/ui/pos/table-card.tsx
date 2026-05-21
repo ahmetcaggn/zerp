@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import {
   Box, Card, CardActionArea, Chip, IconButton,
-  Menu, MenuItem, Typography,
+  Menu, MenuItem, Divider, Typography,
 } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline'
@@ -29,9 +29,10 @@ interface Props {
   onTap: (id: string) => void
   onEdit: (table: ShopTableResponseDto) => void
   onDelete: (id: string) => void
+  onChangeStatus: (table: ShopTableResponseDto, status: ShopTableStatus) => void
 }
 
-export function TableCard({ table, onTap, onEdit, onDelete }: Props) {
+export function TableCard({ table, onTap, onEdit, onDelete, onChangeStatus }: Props) {
   const { t } = useI18n()
   const style = STATUS_STYLE[table.status]
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
@@ -111,6 +112,24 @@ export function TableCard({ table, onTap, onEdit, onDelete }: Props) {
         <MenuItem dense onClick={() => { setAnchor(null); onTap(table.id) }}>
           {t('pos.openOrderMenu')}
         </MenuItem>
+        <Divider />
+        <MenuItem dense disabled>
+          {t('pos.changeStatusMenu')}
+        </MenuItem>
+        {(['AVAILABLE', 'RESERVED', 'OCCUPIED', 'OUT_OF_ORDER'] as ShopTableStatus[]).map(status => (
+          <MenuItem
+            key={status}
+            dense
+            selected={table.status === status}
+            onClick={() => {
+              setAnchor(null)
+              onChangeStatus(table, status)
+            }}
+          >
+            {t(STATUS_KEY[status])}
+          </MenuItem>
+        ))}
+        <Divider />
         <MenuItem dense onClick={() => { setAnchor(null); onEdit(table) }}>
           {t('common.edit')}
         </MenuItem>

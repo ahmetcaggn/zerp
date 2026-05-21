@@ -1,4 +1,7 @@
 'use client'
+import AddIcon from '@mui/icons-material/Add'
+import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
 import {
   Box,
   Button,
@@ -17,15 +20,14 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
 import { useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
-import { useMenuCategories, useDeleteMenuCategory } from '../../../hooks/use-menu-categories'
+
+import { useDeleteMenuCategory,useMenuCategories } from '../../../hooks/use-menu-categories'
 import { useMenus } from '../../../hooks/use-menus'
 import type { MenuCategoryResponseDto } from '../../../types/sale'
 import { MenuCategoryFormDialog } from './menu-category-form-dialog'
@@ -53,7 +55,7 @@ export function MenuCategoryList() {
     sort: { field: 'name', order: 'ASC' },
     filter: {
       ...(selectedShopId ? { 'menu.shop.id': selectedShopId } : {}),
-      ...(filterMenuId ? { menuId: filterMenuId } : {}),
+      ...(filterMenuId ? { 'menu.id': filterMenuId } : {}),
     },
   })
 

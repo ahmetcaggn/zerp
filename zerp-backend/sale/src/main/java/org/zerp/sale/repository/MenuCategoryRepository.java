@@ -5,10 +5,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import org.zerp.common.entity.sale.MenuCategory;
 
+import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface MenuCategoryRepository extends
         JpaRepository<MenuCategory, UUID>,
         JpaSpecificationExecutor<MenuCategory> {
+    List<MenuCategory> findByMenuIdOrderByNameAsc(UUID menuId);
 }

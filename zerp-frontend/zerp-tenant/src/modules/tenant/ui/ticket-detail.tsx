@@ -95,6 +95,16 @@ function toTimestamp(value?: string): number {
   return Number.isNaN(timestamp) ? 0 : timestamp
 }
 
+type CommentAuthorType = 'CUSTOMER' | 'AGENT' | 'SYSTEM' | 'UNKNOWN'
+
+function resolveCommentAuthorType(authorType?: string): CommentAuthorType {
+  const normalized = authorType?.toUpperCase()
+  if (normalized === 'CUSTOMER' || normalized === 'AGENT' || normalized === 'SYSTEM') {
+    return normalized
+  }
+  return 'UNKNOWN'
+}
+
 export function TicketDetail({ id }: Props) {
   const router = useRouter()
   const { showToast } = useToast()
@@ -119,7 +129,7 @@ export function TicketDetail({ id }: Props) {
   const comments = (ticket?.comments ?? []).filter((comment) => !comment.isInternal).sort((a, b) => {
     const left = new Date(a.createdAt ?? '').getTime()
     const right = new Date(b.createdAt ?? '').getTime()
-    return right - left
+    return left - right
   })
 
   if (isLoading) {
@@ -228,7 +238,7 @@ export function TicketDetail({ id }: Props) {
       {
         onSuccess: () => {
           setCommentText('')
-          showToast('Yorum eklendi.', { severity: 'success' })
+          showToast('Mesaj gönderildi.', { severity: 'success' })
         },
         onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
       },
@@ -447,32 +457,83 @@ export function TicketDetail({ id }: Props) {
 
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography variant="subtitle1" sx={{ mb: 1.5 }}>
-          Yorumlar ({comments.length})
+          Mesajlar ({comments.length})
         </Typography>
 
         {comments.length === 0 ? (
           <Typography color="text.secondary" variant="body2">
-            Yorum yok.
+            Mesaj yok.
           </Typography>
         ) : (
           <Stack spacing={1.5}>
-            {comments.map((comment, index) => (
-              <Paper
-                key={comment.id ?? `${comment.authorId ?? 'unknown'}-${comment.createdAt ?? index}`}
-                variant="outlined"
-                sx={{ p: 1.5 }}
-              >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    {comment.authorName ?? comment.authorId ?? 'Bilinmeyen'}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {formatDate(comment.createdAt)}
-                  </Typography>
+            {comments.map((comment, index) => {
+              const authorType = resolveCommentAuthorType(comment.authorType)
+              const isTenantMessage = authorType === 'CUSTOMER'
+              const isAdminMessage = authorType === 'AGENT'
+              const alignRight = isTenantMessage
+
+              return (
+                <Box
+                  key={comment.id ?? `${comment.authorId ?? 'unknown'}-${comment.createdAt ?? index}`}
+                  sx={{ display: 'flex', justifyContent: alignRight ? 'flex-end' : 'flex-start' }}
+                >
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      px: 1.5,
+                      py: 1.25,
+                      maxWidth: { xs: '100%', sm: '80%' },
+                      borderRadius: 2,
+                      ...(alignRight
+                        ? { borderBottomRightRadius: 0.75 }
+                        : { borderBottomLeftRadius: 0.75 }),
+                      bgcolor: (theme) => {
+                        if (isTenantMessage) {
+                          return theme.palette.mode === 'dark'
+                            ? 'rgba(46, 125, 50, 0.28)'
+                            : '#DCF8C6'
+                        }
+                        if (isAdminMessage) {
+                          return theme.palette.mode === 'dark'
+                            ? 'rgba(66, 165, 245, 0.20)'
+                            : '#E3F2FD'
+                        }
+                        return theme.palette.mode === 'dark'
+                          ? 'rgba(255, 213, 79, 0.22)'
+                          : '#FFF8E1'
+                      },
+                      borderColor: (theme) => {
+                        if (isTenantMessage) {
+                          return theme.palette.mode === 'dark'
+                            ? 'rgba(102, 187, 106, 0.5)'
+                            : '#B7E1A1'
+                        }
+                        if (isAdminMessage) {
+                          return theme.palette.mode === 'dark'
+                            ? 'rgba(66, 165, 245, 0.5)'
+                            : '#BBDEFB'
+                        }
+                        return theme.palette.mode === 'dark'
+                          ? 'rgba(255, 213, 79, 0.55)'
+                          : '#FFE082'
+                      },
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1.5, mb: 0.5 }}>
+                      <Typography variant="caption" color="text.secondary">
+                        {comment.authorName ?? comment.authorId ?? 'Bilinmeyen'}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {formatDate(comment.createdAt)}
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                      {comment.content}
+                    </Typography>
+                  </Paper>
                 </Box>
-                <Typography variant="body2">{comment.content}</Typography>
-              </Paper>
-            ))}
+              )
+            })}
           </Stack>
         )}
       </Paper>
@@ -480,14 +541,14 @@ export function TicketDetail({ id }: Props) {
       {!isClosed && (
         <Paper variant="outlined" sx={{ p: 2 }}>
           <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            Yorum Ekle
+            Mesaj Yaz
           </Typography>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
             <TextField
               multiline
               minRows={2}
               fullWidth
-              placeholder="Yorumunuzu yazın..."
+              placeholder="Mesajınızı yazın..."
               value={commentText}
               onChange={(event) => setCommentText(event.target.value)}
               size="small"

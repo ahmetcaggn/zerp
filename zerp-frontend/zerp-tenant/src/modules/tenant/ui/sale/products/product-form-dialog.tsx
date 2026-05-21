@@ -32,7 +32,6 @@ export function ProductFormDialog({ open, mode, product, onClose }: Props) {
 
   const [name, setName] = useState(product?.name ?? '')
   const [description, setDescription] = useState(product?.description ?? '')
-  const [price, setPrice] = useState(String(product?.price ?? ''))
   const [preparationTime, setPreparationTime] = useState(
     product?.preparationTime != null ? String(product.preparationTime) : '',
   )
@@ -44,7 +43,7 @@ export function ProductFormDialog({ open, mode, product, onClose }: Props) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!name.trim() || !price) {
+    if (!name.trim()) {
       showToast(t('common.save') + ' — zorunlu alanlar eksik', { severity: 'warning' })
       return
     }
@@ -52,7 +51,6 @@ export function ProductFormDialog({ open, mode, product, onClose }: Props) {
     const shared = {
       name: name.trim(),
       ...(description.trim() && { description: description.trim() }),
-      price: Number(price),
       ...(preparationTime && { preparationTime: Number(preparationTime) }),
       isActive,
     }
@@ -111,15 +109,6 @@ export function ProductFormDialog({ open, mode, product, onClose }: Props) {
               fullWidth
             />
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField
-                label={t('sale.product.form.price')}
-                type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                required
-                fullWidth
-                inputProps={{ min: 0, step: '0.01' }}
-              />
               <TextField
                 label={t('sale.product.form.preparationTime')}
                 type="number"

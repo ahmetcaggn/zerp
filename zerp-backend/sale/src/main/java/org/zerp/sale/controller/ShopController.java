@@ -13,7 +13,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/sale/shops")
 @RequiredArgsConstructor
-@Tag(name = "Shop", description = "Read-only API for listing tenant shops")
+@Tag(name = "Shop", description = "API for listing tenant shops and updating shop sale settings")
 public class ShopController extends ResourceController<ShopDTO, ShopDTO, Void, Void, UUID> {
     private final ShopService service;
 

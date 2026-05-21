@@ -186,7 +186,7 @@ public class StockResourcePermissionEvaluator {
                 (root, _, _) ->
                         root.get("shop").get("id").in(permittedShopIds),
                 (root, _, _) ->
-                        root.get("shop").get("tenant").get("id").in(permittedTenantIds)
+                        root.get("tenantId").in(permittedTenantIds)
         );
     }
 }

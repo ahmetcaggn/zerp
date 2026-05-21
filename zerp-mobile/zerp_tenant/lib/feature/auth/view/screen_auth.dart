@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zerp_tenant/feature/auth/view/mixin/auth_mixin.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/state_auth.dart';
+import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 typedef AfterAuthCallback = void Function();
@@ -26,7 +27,8 @@ class ScreenAuth extends StatefulWidget {
 class _ScreenAuthState extends State<ScreenAuth> with AuthMixin {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
+      title: context.t.auth.login,
       body: Center(
         child: BlocBuilder<CubitAuth, StateAuth>(
           builder: (context, state) {

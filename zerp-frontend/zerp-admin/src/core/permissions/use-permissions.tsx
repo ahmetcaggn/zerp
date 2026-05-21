@@ -9,6 +9,14 @@ import { toRaQueryString } from '@/core/api/resource-types'
 import { useAuth } from '@/core/auth/client/use-auth'
 
 export const PermissionActions = {
+  READ_TENANT: 'READ_TENANT',
+  READ_SHOP: 'READ_SHOP',
+  UPDATE_TENANT: 'UPDATE_TENANT',
+  ADMIN_TENANT: 'ADMIN_TENANT',
+  CREATE_EMPLOYEE: 'CREATE_EMPLOYEE',
+  READ_EMPLOYEE: 'READ_EMPLOYEE',
+  UPDATE_EMPLOYEE: 'UPDATE_EMPLOYEE',
+  DELETE_EMPLOYEE: 'DELETE_EMPLOYEE',
   READ_TEAM: 'READ_TEAM',
   CREATE_TEAM: 'CREATE_TEAM',
   UPDATE_TEAM: 'UPDATE_TEAM',

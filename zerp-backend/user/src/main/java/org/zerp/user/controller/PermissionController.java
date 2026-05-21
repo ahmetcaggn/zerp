@@ -49,4 +49,9 @@ public class PermissionController extends ResourceController<PermissionResponse,
 
         return ResponseEntity.ok(ApiResponse.success(actionHierarchyMap));
     }
+
+    @GetMapping("/actions-assignable")
+    ResponseEntity<ApiResponse<Map<PermissionAction, List<PermissionTargetType>>>> getAllAssignablePermissions() {
+        return ResponseEntity.ok(ApiResponse.success(service.getAssignablePermissionTargets()));
+    }
 }

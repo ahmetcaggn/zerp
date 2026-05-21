@@ -4,10 +4,10 @@ import type { ShopResponseDto } from '../types/shop'
 import type { ShopDashboardData } from '../types/shop-dashboard'
 
 export const shopDashboardMockShops: ShopResponseDto[] = [
-  { id: 'shop-kadikoy', name: 'Kadıköy Şubesi', tenantId: 'tenant-mock' },
-  { id: 'shop-besiktas', name: 'Beşiktaş Şubesi', tenantId: 'tenant-mock' },
-  { id: 'shop-beyoglu', name: 'Beyoğlu Şubesi', tenantId: 'tenant-mock' },
-  { id: 'shop-uskudar', name: 'Üsküdar Şubesi', tenantId: 'tenant-mock' },
+  { id: 'shop-kadikoy', name: 'Kadıköy Şubesi', tenantId: 'tenant-mock', defaultMenuLanguage: 'TR' },
+  { id: 'shop-besiktas', name: 'Beşiktaş Şubesi', tenantId: 'tenant-mock', defaultMenuLanguage: 'TR' },
+  { id: 'shop-beyoglu', name: 'Beyoğlu Şubesi', tenantId: 'tenant-mock', defaultMenuLanguage: 'TR' },
+  { id: 'shop-uskudar', name: 'Üsküdar Şubesi', tenantId: 'tenant-mock', defaultMenuLanguage: 'TR' },
 ]
 
 const quickActions = [

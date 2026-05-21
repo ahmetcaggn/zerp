@@ -1,6 +1,7 @@
 // Sale module TypeScript types — mirrors zerp-backend sale DTOs
 
 export type UnitType = 'PIECE' | 'GRAM' | 'KILOGRAM' | 'MILLILITER' | 'LITER'
+export type MenuLanguage = 'TR' | 'EN'
 
 // ─── Product ─────────────────────────────────────────────────────────────────
 
@@ -15,8 +16,6 @@ export interface ProductResponseDto {
   typeName?: string
   metricId?: string
   metricName?: string
-  menuItemId?: string
-  price: number
   preparationTime?: number
   isActive: boolean
   tenantId: string
@@ -31,8 +30,6 @@ export interface CreateProductRequestDto {
   shopId: string
   typeId?: string
   metricId?: string
-  menuItemId?: string
-  price: number
   preparationTime?: number
   isActive?: boolean
 }
@@ -43,8 +40,6 @@ export interface UpdateProductRequestDto {
   imageId?: string
   typeId?: string
   metricId?: string
-  menuItemId?: string
-  price?: number
   preparationTime?: number
   isActive?: boolean
 }
@@ -148,6 +143,8 @@ export interface MenuResponseDto {
   id: string
   name: string
   description?: string
+  active: boolean
+  language?: MenuLanguage
   shopId: string
   shopName?: string
   tenantId: string
@@ -158,12 +155,16 @@ export type MenuListResponseDto = MenuResponseDto
 export interface CreateMenuRequestDto {
   name: string
   description?: string
+  active?: boolean
+  language: MenuLanguage
   shopId: string
 }
 
 export interface UpdateMenuRequestDto {
   name?: string
   description?: string
+  active?: boolean
+  language?: MenuLanguage
 }
 
 // ─── Menu Category ────────────────────────────────────────────────────────────
@@ -229,6 +230,12 @@ export interface UpdateShopTableRequestDto {
 
 export type TableOrderStatus = 'OPEN' | 'PAID' | 'CANCELLED'
 
+export interface TableOrderItemSelectedExtraOptionDto {
+  extraOptionId: string
+  name: string
+  price: number
+}
+
 export interface TableOrderItemDto {
   id: string
   menuItemId: string
@@ -236,12 +243,14 @@ export interface TableOrderItemDto {
   quantity: number
   unitPrice: number
   notes?: string
+  selectedExtraOptions?: TableOrderItemSelectedExtraOptionDto[]
 }
 
 export interface TableOrderItemCreateDto {
   menuItemId: string
   quantity: number
   notes?: string
+  selectedExtraOptionIds?: string[]
 }
 
 export interface TableOrderResponseDto {
@@ -270,7 +279,28 @@ export interface UpdateTableOrderRequestDto {
   items?: TableOrderItemCreateDto[]
 }
 
+export interface PublicCartOrderPreviewItemDto {
+  menuItemId: string
+  menuItemName?: string
+  quantity: number
+  unitPrice: number
+  notes?: string
+}
+
+export interface PublicCartOrderPreviewDto {
+  id: string
+  code: string
+  shopId: string
+  note?: string
+  items: PublicCartOrderPreviewItemDto[]
+}
+
 // ─── Menu Item ────────────────────────────────────────────────────────────────
+
+export interface MenuItemProductItemDto {
+  productId: string
+  quantity: number
+}
 
 export interface MenuItemResponseDto {
   id: string
@@ -278,9 +308,13 @@ export interface MenuItemResponseDto {
   description?: string
   price: number
   imageId?: string
+  calories?: number | null
+  weight?: string | null
+  ingredients?: string[]
+  allergens?: string[]
   categoryId: string
   categoryName?: string
-  productIds?: string[]
+  productItems?: MenuItemProductItemDto[]
   tenantId: string
 }
 
@@ -290,15 +324,29 @@ export interface CreateMenuItemRequestDto {
   name: string
   description?: string
   price: number
-  imageId?: string
+  imageId?: string | null
+  calories?: number | null
+  weight?: string | null
+  ingredients?: string[]
+  allergens?: string[]
   categoryId: string
-  productIds?: string[]
+  productItems?: MenuItemProductItemDto[]
 }
 
 export interface UpdateMenuItemRequestDto {
   name?: string
   description?: string
   price?: number
-  imageId?: string
-  productIds?: string[]
+  imageId?: string | null
+  calories?: number | null
+  weight?: string | null
+  ingredients?: string[]
+  allergens?: string[]
+  productItems?: MenuItemProductItemDto[]
+}
+
+export interface MenuItemImageUploadResponseDto {
+  imageId: string
+  contentType: string
+  originalFileName: string
 }

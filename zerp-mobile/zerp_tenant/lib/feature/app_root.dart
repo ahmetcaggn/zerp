@@ -8,6 +8,7 @@ import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/state_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/error/cubit_error.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/settings/cubit_settings.dart';
 import 'package:zerp_tenant/product/navigation/app_route.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
@@ -26,6 +27,7 @@ class AppRoot extends StatelessWidget with LoggerMixinConst<AppRoot> {
         providers: [
           BlocProvider(create: (_) => getIt<CubitAuth>()),
           BlocProvider(create: (_) => getIt<CubitError>()),
+          BlocProvider(create: (_) => getIt<CubitSettings>()),
         ],
         child: BlocListener<CubitAuth, StateAuth>(
           listenWhen: (previous, current) =>
@@ -36,14 +38,14 @@ class AppRoot extends StatelessWidget with LoggerMixinConst<AppRoot> {
             final currentRouteName = appRouter.current.name;
 
             if (state is StateAuthAuthenticated &&
-                currentRouteName != RouteShell.name) {
+                currentRouteName != RouteDashboard.name) {
               if (currentRouteName == RouteAuth.name) {
                 final args = appRouter.current.args as RouteAuthArgs?;
                 final callerRoute = args?.callerRoute;
                 if (callerRoute != null && callerRoute.isNotEmpty) {
                   unawaited(
                     appRouter
-                        .replaceAll([const RouteShell()])
+                        .replaceAll([const RouteDashboard()])
                         .then(
                           (_) => appRouter.pushPath(callerRoute),
                         ),
@@ -60,7 +62,7 @@ class AppRoot extends StatelessWidget with LoggerMixinConst<AppRoot> {
                 'User authenticated but not on shell route. '
                 'Current route: ${appRouter.current.name}',
               );
-              unawaited(appRouter.replaceAll([const RouteShell()]));
+              unawaited(appRouter.replaceAll([const RouteDashboard()]));
             }
 
             if (state is StateAuthUnauthenticated &&

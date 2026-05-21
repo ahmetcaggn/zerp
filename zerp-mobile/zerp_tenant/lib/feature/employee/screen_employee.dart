@@ -11,6 +11,7 @@ import 'package:zerp_tenant/feature/employee/single_employee/screen_single_emplo
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/error/cubit_error.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
+import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 import 'package:zerp_tenant/product/util/employee_response_extensions.dart';
 
@@ -26,12 +27,30 @@ class ScreenEmployee extends StatelessWidget {
         unawaited(cubit.loadEmployees());
         return cubit;
       },
-      child: Column(
-        children: [
-          const _CreateEmployeeButton(),
-          const _EmployeeListHeader(),
-          Expanded(child: _EmployeeList()),
-        ],
+      child: Builder(
+        builder: (context) {
+          return AppScaffold(
+            title: context.t.employee.title,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.person_add_outlined),
+                onPressed: () async {
+                  await context.router.push(
+                    RouteCreateEmployee(
+                      cubitEmployee: context.read<CubitEmployee>(),
+                    ),
+                  );
+                },
+              ),
+            ],
+            body: Column(
+              children: [
+                const _EmployeeListHeader(),
+                Expanded(child: _EmployeeList()),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -67,30 +86,6 @@ class _EmployeeListHeader extends StatelessWidget {
         ),
         const SizedBox(width: 16),
       ],
-    );
-  }
-}
-
-class _CreateEmployeeButton extends StatelessWidget
-    with LoggerMixinConst<ScreenEmployee> {
-  const _CreateEmployeeButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton.icon(
-          onPressed: () async {
-            await context.router.push(
-              RouteCreateEmployee(cubitEmployee: context.read<CubitEmployee>()),
-            );
-          },
-          icon: const Icon(Icons.person_add),
-          label: Text(context.t.employee.list.create),
-        ),
-      ),
     );
   }
 }

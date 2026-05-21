@@ -8,6 +8,7 @@ import 'package:zerp_tenant/feature/profile/cubit/cubit_profile.dart';
 import 'package:zerp_tenant/feature/profile/cubit/permission/cubit_profile_permissions.dart';
 import 'package:zerp_tenant/feature/profile/cubit/permission/state_profile_permissions.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
+import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @RoutePage()
@@ -35,14 +36,11 @@ class _ScreenProfileState extends State<ScreenProfile>
           },
         ),
       ],
-      child: Scaffold(
-        body: CustomScrollView(
+      child: AppScaffold(
+        title: context.t.profile.title,
+        body: const CustomScrollView(
           slivers: [
-            SliverAppBar(
-              title: Text(context.t.profile.title),
-              pinned: true,
-            ),
-            const _PermissionsSection(),
+            _PermissionsSection(),
           ],
         ),
       ),

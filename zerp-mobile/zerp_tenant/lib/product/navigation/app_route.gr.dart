@@ -12,8 +12,7 @@
 import 'package:auto_route/auto_route.dart' as _i16;
 import 'package:flutter/material.dart' as _i17;
 import 'package:zerp_tenant/feature/auth/view/screen_auth.dart' as _i1;
-import 'package:zerp_tenant/feature/dashboard/view/screen_dashboard.dart'
-    as _i4;
+import 'package:zerp_tenant/feature/dashboard/screen_dashboard.dart' as _i4;
 import 'package:zerp_tenant/feature/employee/create_employee/screen_create_employee.dart'
     as _i2;
 import 'package:zerp_tenant/feature/employee/cubit/cubit_employee.dart' as _i18;
@@ -35,10 +34,11 @@ import 'package:zerp_tenant/feature/employee/single_employee/screen_single_emplo
 import 'package:zerp_tenant/feature/menu/view/screen_menu.dart' as _i7;
 import 'package:zerp_tenant/feature/profile/view/screen_profile.dart' as _i9;
 import 'package:zerp_tenant/feature/sale/view/screen_sale.dart' as _i10;
-import 'package:zerp_tenant/feature/settings/view/screen_settings.dart' as _i11;
+import 'package:zerp_tenant/feature/settings/screen_settings.dart' as _i11;
+import 'package:zerp_tenant/feature/settings/sections/api_baseurl/screen_settings_api_baseurl.dart'
+    as _i12;
 import 'package:zerp_tenant/feature/stock/view/screen_stock.dart' as _i14;
 import 'package:zerp_tenant/feature/store/view/screen_store.dart' as _i15;
-import 'package:zerp_tenant/product/ui/layout/screen_shell.dart' as _i12;
 
 /// generated route for
 /// [_i1.ScreenAuth]
@@ -466,17 +466,17 @@ class RouteSettings extends _i16.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i12.ScreenShell]
-class RouteShell extends _i16.PageRouteInfo<void> {
-  const RouteShell({List<_i16.PageRouteInfo>? children})
-    : super(RouteShell.name, initialChildren: children);
+/// [_i12.ScreenSettingsApiBaseUrl]
+class RouteSettingsApiBaseUrl extends _i16.PageRouteInfo<void> {
+  const RouteSettingsApiBaseUrl({List<_i16.PageRouteInfo>? children})
+    : super(RouteSettingsApiBaseUrl.name, initialChildren: children);
 
-  static const String name = 'RouteShell';
+  static const String name = 'RouteSettingsApiBaseUrl';
 
   static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
-      return const _i12.ScreenShell();
+      return const _i12.ScreenSettingsApiBaseUrl();
     },
   );
 }

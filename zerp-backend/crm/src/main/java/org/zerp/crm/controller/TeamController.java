@@ -78,10 +78,12 @@ public class TeamController extends ResourceController<TeamResponse, TeamRespons
             @RequestParam(name = "_end", defaultValue = "10") int end,
             @RequestParam(name = "_sort", defaultValue = "username") String sortField,
             @RequestParam(name = "_order", defaultValue = "ASC") String sortOrder,
+            @RequestParam(name = "query", required = false) String query,
             @RequestParam(name = "username", required = false) String username
     ) {
         Pageable pageable = toPageable(start, end, sortField, sortOrder);
-        Page<TeamMemberCandidateResponse> page = teamService.findMemberCandidates(id, username, pageable);
+        String resolvedQuery = query != null ? query : username;
+        Page<TeamMemberCandidateResponse> page = teamService.findMemberCandidates(id, resolvedQuery, pageable);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(page.getTotalElements()));

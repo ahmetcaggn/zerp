@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.zerp.common.entity.crm.TeamMemberEntity;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.zerp.common.entity.crm.TeamEntity;
@@ -11,12 +12,16 @@ import org.zerp.common.entity.crm.TicketEntity;
 import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
+import org.zerp.common.permission.entity.PermissionActionSets;
 import org.zerp.common.permission.repository.PermissionRepository;
 import org.zerp.common.permission.service.CommonPermissionService;
+import org.zerp.crm.repository.TeamMemberRepository;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -75,19 +80,6 @@ public class CrmPermissionEvaluator {
             PermissionAction.DELETE_TICKET_WATCHER
     );
 
-    private static final Set<PermissionAction> ASSIGNMENT_SCOPED_TICKET_ACTIONS = EnumSet.of(
-            PermissionAction.READ_TICKET,
-            PermissionAction.UPDATE_TICKET,
-            PermissionAction.READ_TICKET_ASSIGNMENT,
-            PermissionAction.CREATE_TICKET_ASSIGNMENT,
-            PermissionAction.UPDATE_TICKET_ASSIGNMENT,
-            PermissionAction.DELETE_TICKET_ASSIGNMENT,
-            PermissionAction.READ_TICKET_COMMENT,
-            PermissionAction.CREATE_TICKET_COMMENT,
-            PermissionAction.READ_TICKET_HISTORY,
-            PermissionAction.READ_TICKET_SLA_TRACKING
-    );
-
     public record TenantRootParent() {
     }
 
@@ -123,6 +115,7 @@ public class CrmPermissionEvaluator {
 
     private final PermissionRepository permissionRepository;
     private final CommonPermissionService commonPermissionService;
+    private final TeamMemberRepository teamMemberRepository;
 
     @PostConstruct
     void validateCrmPermissionCoverage() {
@@ -284,12 +277,43 @@ public class CrmPermissionEvaluator {
                 (root, query, cb) -> root.get("tenantId").in(permittedTenantIds)
         ));
 
+        Set<UUID> leaderPermittedTeamIds = new HashSet<>();
+        Set<UUID> memberPermittedTeamIds = new HashSet<>();
         if (!permittedTeamIds.isEmpty()) {
+            List<TeamMemberEntity> memberships = teamMemberRepository.findAllByUserIdAndTeamIdIn(userId, permittedTeamIds);
+            for (TeamMemberEntity membership : memberships) {
+                if (membership == null
+                        || membership.getTeam() == null
+                        || membership.getTeam().getId() == null
+                        || membership.getRole() == null) {
+                    continue;
+                }
+                UUID membershipTeamId = membership.getTeam().getId();
+                if (membership.getRole() == TeamMemberEntity.TeamMemberRole.LEADER) {
+                    leaderPermittedTeamIds.add(membershipTeamId);
+                } else if (membership.getRole() == TeamMemberEntity.TeamMemberRole.MEMBER) {
+                    memberPermittedTeamIds.add(membershipTeamId);
+                }
+            }
+        }
+
+        if (!leaderPermittedTeamIds.isEmpty()) {
             specifications.add((root, query, cb) -> {
                 var assignmentJoin = root.join("currentAssignment", JoinType.LEFT);
                 return cb.and(
                         cb.isTrue(assignmentJoin.get("active")),
-                        assignmentJoin.get("team").get("id").in(permittedTeamIds)
+                        assignmentJoin.get("team").get("id").in(leaderPermittedTeamIds)
+                );
+            });
+        }
+
+        if (!memberPermittedTeamIds.isEmpty()) {
+            specifications.add((root, query, cb) -> {
+                var assignmentJoin = root.join("currentAssignment", JoinType.LEFT);
+                return cb.and(
+                        cb.isTrue(assignmentJoin.get("active")),
+                        assignmentJoin.get("team").get("id").in(memberPermittedTeamIds),
+                        assignmentJoin.get("agentParty").get("id").in(Set.of(userId))
                 );
             });
         }
@@ -613,7 +637,7 @@ public class CrmPermissionEvaluator {
                 userId, action, ticketId, teamScopeId, agentScopeId, tenantId
         );
 
-        boolean permitted = !result.isEmpty();
+        boolean permitted = isAssignmentScopedPermissionResultPermitted(userId, action, result, assignedTeamId, assignedAgentId);
         log.debug("Ticket hierarchy permission result - userId: {}, action: {}, permitted: {}",
                 userId, action, permitted);
         return permitted;
@@ -638,7 +662,7 @@ public class CrmPermissionEvaluator {
                 userId, action, childType, childId, ticketId, teamScopeId, agentScopeId, tenantId
         );
 
-        boolean permitted = !result.isEmpty();
+        boolean permitted = isAssignmentScopedPermissionResultPermitted(userId, action, result, assignedTeamId, assignedAgentId);
         log.debug("Ticket child hierarchy permission result - userId: {}, action: {}, childType: {}, permitted: {}",
                 userId, action, childType, permitted);
         return permitted;
@@ -663,13 +687,60 @@ public class CrmPermissionEvaluator {
                 userId, action, attachmentId, commentId, ticketId, teamScopeId, agentScopeId, tenantId
         );
 
-        boolean permitted = !result.isEmpty();
+        boolean permitted = isAssignmentScopedPermissionResultPermitted(userId, action, result, assignedTeamId, assignedAgentId);
         log.debug("Ticket attachment hierarchy permission result - userId: {}, action: {}, permitted: {}",
                 userId, action, permitted);
         return permitted;
     }
 
+    private boolean isAssignmentScopedPermissionResultPermitted(
+            UUID userId,
+            PermissionAction action,
+            List<Permission> result,
+            UUID assignedTeamId,
+            UUID assignedAgentId
+    ) {
+        if (result.isEmpty()) {
+            return false;
+        }
+        if (!isAssignmentScopedTicketAction(action)) {
+            return true;
+        }
+
+        boolean hasNonTeamGrant = result.stream()
+                .anyMatch(permission -> permission.getTargetType() != PermissionTargetType.TEAM);
+        if (hasNonTeamGrant) {
+            return true;
+        }
+
+        return isTeamScopedAssignmentGrantSatisfied(userId, assignedTeamId, assignedAgentId);
+    }
+
+    private boolean isTeamScopedAssignmentGrantSatisfied(
+            UUID userId,
+            UUID assignedTeamId,
+            UUID assignedAgentId
+    ) {
+        if (assignedTeamId == null) {
+            return false;
+        }
+
+        Optional<TeamMemberEntity> teamMembership = teamMemberRepository.findByTeamIdAndUserId(assignedTeamId, userId);
+        if (teamMembership.isEmpty() || teamMembership.get().getRole() == null) {
+            return false;
+        }
+
+        TeamMemberEntity.TeamMemberRole role = teamMembership.get().getRole();
+        if (role == TeamMemberEntity.TeamMemberRole.LEADER) {
+            return true;
+        }
+
+        return role == TeamMemberEntity.TeamMemberRole.MEMBER
+                && assignedAgentId != null
+                && assignedAgentId.equals(userId);
+    }
+
     private boolean isAssignmentScopedTicketAction(PermissionAction action) {
-        return ASSIGNMENT_SCOPED_TICKET_ACTIONS.contains(action);
+        return PermissionActionSets.ASSIGNMENT_SCOPED_TICKET_ACTIONS.contains(action);
     }
 }

@@ -13,7 +13,6 @@ import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.sale.Product;
 import org.zerp.common.entity.sale.ProductMetric;
 import org.zerp.common.entity.sale.ProductType;
-import org.zerp.common.entity.sale.MenuItem;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
@@ -23,13 +22,11 @@ import org.zerp.sale.dto.product.ProductDTO;
 import org.zerp.sale.dto.product.ProductUpdateDTO;
 import org.zerp.sale.mapper.ProductMapper;
 import org.zerp.sale.permission.ProductPermissionEvaluator;
-import org.zerp.sale.repository.MenuItemRepository;
 import org.zerp.sale.repository.ProductMetricRepository;
 import org.zerp.sale.repository.ProductTypeRepository;
 import org.zerp.sale.repository.ShopRepository;
 import org.zerp.sale.repository.ProductRepository;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +42,6 @@ public class ProductService implements
     private final ShopRepository shopRepository;
     private final ProductTypeRepository productTypeRepository;
     private final ProductMetricRepository productMetricRepository;
-    private final MenuItemRepository menuItemRepository;
     private final ProductMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final CurrentTenantIdResolver currentTenantIdResolver;
@@ -103,7 +99,6 @@ public class ProductService implements
         product.setShop(shop);
         product.setType(resolveProductType(data.getTypeId()));
         product.setMetric(resolveProductMetric(data.getMetricId()));
-        product.setMenuItem(resolveMenuItem(data.getMenuItemId()));
         product.setTenantId(tenantId);
         Product saved = repository.save(product);
         log.info("Created Product with id: {}", saved.getId());
@@ -137,7 +132,6 @@ public class ProductService implements
         mapper.updateEntityFromDTO(data, product);
         if (data.getTypeId() != null) product.setType(resolveProductType(data.getTypeId()));
         if (data.getMetricId() != null) product.setMetric(resolveProductMetric(data.getMetricId()));
-        if (data.getMenuItemId() != null) product.setMenuItem(resolveMenuItem(data.getMenuItemId()));
         Product updated = repository.save(product);
         log.info("Updated Product with id: {}", uuid);
         return mapper.toDTO(updated);
@@ -189,7 +183,6 @@ public class ProductService implements
     private void applyFieldUpdates(Product product, Map<String, Object> fields) {
         if (fields.containsKey("name")) product.setName((String) fields.get("name"));
         if (fields.containsKey("description")) product.setDescription((String) fields.get("description"));
-        if (fields.containsKey("price")) product.setPrice(new BigDecimal(fields.get("price").toString()));
         if (fields.containsKey("isActive")) product.setActive((Boolean) fields.get("isActive"));
         if (fields.containsKey("preparationTime")) product.setPreparationTime((Integer) fields.get("preparationTime"));
     }
@@ -218,11 +211,4 @@ public class ProductService implements
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ProductMetric not found"));
     }
 
-    private MenuItem resolveMenuItem(UUID menuItemId) {
-        if (menuItemId == null) {
-            return null;
-        }
-        return menuItemRepository.findById(menuItemId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "MenuItem not found"));
-    }
 }

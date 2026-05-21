@@ -1,0 +1,53 @@
+services:
+  minio:
+    image: quay.io/minio/minio:latest
+    hostname: minio
+    command: server /data --console-address ":9090"
+    restart: unless-stopped
+    ports:
+      - "9090:9090" # admin panel
+      - "9000:9000" # api
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+
+  thumbor:
+    image: beeyev/thumbor-s3:slim-alpine
+    hostname: thumbor
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    environment:
+      LOG_LEVEL: "warning"
+
+      LOADER: "thumbor_aws.loader"
+      AWS_LOADER_REGION_NAME: "local"
+      AWS_LOADER_BUCKET_NAME: ${MINIO_BUCKET_NAME}
+      AWS_LOADER_S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      AWS_LOADER_S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      AWS_LOADER_S3_ENDPOINT_URL: http://minio:9000/
+
+      RESULT_STORAGE: thumbor.result_storages.no_storage
+      AWS_RESULT_STORAGE_BUCKET_NAME: ${MINIO_CACHE_BUCKET_NAME}
+      AWS_RESULT_STORAGE_S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      AWS_RESULT_STORAGE_S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      AWS_RESULT_STORAGE_S3_ENDPOINT_URL: http://minio:9000/
+
+      RESULT_STORAGE_STORES_UNSAFE: "True"
+      ALLOW_UNSAFE_URL: "True"
+      SECURITY_KEY: 31337
+
+      RESULT_STORAGE_EXPIRATION_SECONDS: 2629746
+      QUALITY: 80
+      RESPECT_ORIENTATION: "True"
+
+      MAX_AGE: 86400
+      AUTO_PNG_TO_JPG: "False"
+      HTTP_LOADER_VALIDATE_CERTS: "False"
+    depends_on:
+      - minio
+
+volumes:
+  minio_data:

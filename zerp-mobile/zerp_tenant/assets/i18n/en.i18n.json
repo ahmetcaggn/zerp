@@ -3,16 +3,6 @@
     "name": "Zerp Tenant",
     "menu": "Menu"
   },
-  "shell": {
-    "dashboard": "Dashboard",
-    "employees": "Employees",
-    "menu": "Menu",
-    "sales": "Sales",
-    "stock": "Stock",
-    "store": "Store",
-    "profile": "Profile",
-    "settings": "Settings"
-  },
   "auth": {
     "login": "Login",
     "signUp": "Sign Up",
@@ -35,16 +25,48 @@
     "profile": "Profile",
     "settings": "Settings"
   },
-  "section": {
-    "employee": "Employee Section",
-    "menu": "Menu Section",
-    "sale": "Sale Section",
-    "stock": "Stock Section",
-    "store": "Store Section"
+  "dashboard": {
+    "title": "Dashboard",
+    "section": {
+      "employee": "Employees",
+      "menu": "Menus",
+      "sale": "Sales",
+      "stock": "Stock Status",
+      "store": "Stores"
+    }
+  },
+  "menu": {
+    "title": "Menus"
+  },
+  "sale": {
+    "title": "Sales"
+  },
+  "stock": {
+    "title": "Stock Status"
+  },
+  "store": {
+    "title": "Stores"
+  },
+  "settings": {
+    "title": "Settings",
+    "apiUrlTitle": "API Base URL Configuration",
+    "apiUrlSubtitle": "Configure the base API host URL for network requests.",
+    "activeUrl": "Active Base URL",
+    "predefinedUrls": "Predefined Server URLs",
+    "customUrl": "Custom Server URL",
+    "customUrlHint": "Enter custom API URL (e.g., http://10.0.2.2:8080)",
+    "invalidUrl": "Please enter a valid HTTP/HTTPS URL",
+    "saveSuccess": "Settings saved and active API URL updated successfully!",
+    "noPredefined": "No predefined server URLs found",
+    "statusChecking": "Checking Connection...",
+    "statusConnected": "Connected",
+    "statusDisconnected": "Offline",
+    "statusUnknown": "Unknown Status"
   },
   "common": {
     "hello": "Hello $name",
     "save": "Save",
+    "refresh": "Refresh",
     "required": "Required",
     "error": "Error: $message",
     "unknown": "Unknown",
@@ -56,6 +78,7 @@
     "noData": "No data available"
   },
   "employee": {
+    "title": "Employees",
     "list": {
       "title": "Employees ($total)",
       "loading": "Loading...",

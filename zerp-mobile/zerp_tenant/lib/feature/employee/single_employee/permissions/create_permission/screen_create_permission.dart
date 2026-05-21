@@ -10,6 +10,7 @@ import 'package:zerp_tenant/feature/employee/single_employee/permissions/create_
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/create_permission/view/view_create_permission_target_selector.dart';
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/cubit_permissions.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
+import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 part 'mixin/mixin_create_permission.dart';
@@ -53,10 +54,8 @@ class _CreatePermissionViewState extends State<_CreatePermissionView>
     with _MixinCreatePermission {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.t.employee.details.permissionCreate.title),
-      ),
+    return AppScaffold(
+      title: context.t.employee.details.permissionCreate.title,
       body: BlocConsumer<CubitCreatePermission, StateCreatePermission>(
         listener: _listener,
         builder: (context, state) {

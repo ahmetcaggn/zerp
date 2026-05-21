@@ -113,11 +113,19 @@ public class TicketResponseMapper {
         if (entity.getCurrentAssignment() != null) {
             TicketAssignmentEntity assignment = entity.getCurrentAssignment();
             UUID teamId = assignment.getTeam() != null ? assignment.getTeam().getId() : null;
+            String teamName = assignment.getTeam() != null ? assignment.getTeam().getName() : null;
+            String teamType = assignment.getTeam() != null && assignment.getTeam().getType() != null
+                    ? assignment.getTeam().getType().name()
+                    : null;
             UUID agentPartyId = assignment.getAgentParty() != null ? assignment.getAgentParty().getId() : null;
+            String agentDisplayName = resolveAuthorName(assignment.getAgentParty());
             assignmentResponse = new TicketAssignmentResponse(
                     assignment.getId(),
                     teamId,
+                    teamName,
+                    teamType,
                     agentPartyId,
+                    agentDisplayName,
                     Boolean.TRUE.equals(assignment.getActive()),
                     assignment.getAssignedAt()
             );

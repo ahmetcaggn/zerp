@@ -71,7 +71,14 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
   const { t } = useI18n()
   const [isDrawerOpen, setDrawerOpen] = useState(false)
   const isAuthenticated = status === 'authenticated'
-  const { scope, shops, isLoading: isLoadingShops, setGlobalScope, setShopScope } = useShopScope()
+  const {
+    scope,
+    shops,
+    isLoading: isLoadingShops,
+    isScopeSwitching,
+    setGlobalScope,
+    setShopScope,
+  } = useShopScope()
   const shopLabel = locale === 'tr' ? 'Mağaza' : 'Shop'
   const allShopsLabel = locale === 'tr' ? 'Tüm Mağazalar' : 'All Shops'
   const scopeValue = scope.mode === 'SHOP' ? scope.shopId : 'GLOBAL'
@@ -141,7 +148,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
                       setShopScope(selectedShop)
                     }
                   }}
-                  disabled={isLoadingShops}
+                  disabled={isLoadingShops || isScopeSwitching}
                 >
                   <MenuItem value="GLOBAL">{allShopsLabel}</MenuItem>
                   {shops.map((shop) => (
@@ -152,7 +159,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
                 </Select>
               </FormControl>
             )}
-            {isAuthenticated && isLoadingShops && <CircularProgress size={18} sx={{ ml: 1 }} />}
+            {isAuthenticated && (isLoadingShops || isScopeSwitching) && <CircularProgress size={18} sx={{ ml: 1 }} />}
           </Stack>
 
           {isMobile ? (

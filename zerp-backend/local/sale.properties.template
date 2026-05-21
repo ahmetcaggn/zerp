@@ -6,3 +6,9 @@ spring.datasource.username=
 spring.datasource.password=
 
 eureka.client.service-url.defaultZone=http://localhost:8761/eureka/
+
+user.thumbor.host=http://localhost:8888
+s3.repository.endpoint=http://localhost:9000
+s3.repository.bucket-name=zerp-images
+s3.repository.username=admin
+s3.repository.password=admin1234

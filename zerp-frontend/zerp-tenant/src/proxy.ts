@@ -185,7 +185,8 @@ export async function proxy(req: NextRequest) {
   if (isProtectedPath(pathWithoutLocale) && !isAuthenticated) {
     const redirectUrl = req.nextUrl.clone()
     redirectUrl.pathname = `/${locale}/login`
-    redirectUrl.search = `?callbackUrl=${encodeURIComponent(`/${locale}${pathWithoutLocale}`)}${search}`
+    const callbackUrl = `/${locale}${pathWithoutLocale}${search}`
+    redirectUrl.search = `?callbackUrl=${encodeURIComponent(callbackUrl)}`
     return NextResponse.redirect(redirectUrl)
   }
 

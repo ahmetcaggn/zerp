@@ -84,7 +84,7 @@ public class StockMovementPermissionEvaluator {
         return Specification.anyOf(
                 (root, _, _) -> root.get("stockResource").get("id").in(permittedStockResourceIds),
                 (root, _, _) -> root.get("stockResource").get("shop").get("id").in(permittedShopIds),
-                (root, _, _) -> root.get("stockResource").get("shop").get("tenant").get("id").in(permittedTenantIds)
+                (root, _, _) -> root.get("tenantId").in(permittedTenantIds)
         );
     }
 }

@@ -1,4 +1,4 @@
-import { ProductList } from '@/modules/restaurants/ui/product-list'
+import { MenuItemList } from '@/modules/restaurants/ui/menu-item-list'
 
 export default async function RestaurantDetailPage({
   params,
@@ -7,5 +7,5 @@ export default async function RestaurantDetailPage({
 }) {
   const { restaurantId } = await params
 
-  return <ProductList restaurantId={restaurantId} />
+  return <MenuItemList restaurantId={restaurantId} />
 }

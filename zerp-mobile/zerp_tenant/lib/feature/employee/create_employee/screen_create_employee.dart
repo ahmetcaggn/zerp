@@ -11,6 +11,7 @@ import 'package:zerp_tenant/feature/employee/cubit/cubit_employee_username.dart'
 import 'package:zerp_tenant/feature/employee/view/widget_username_field.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/error/cubit_error.dart';
+import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 part 'mixin/mixin_create_employee.dart';
@@ -51,10 +52,8 @@ class _CreateEmployeeViewState extends State<_CreateEmployeeView>
     with _MixinCreateEmployee {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.t.employee.create.title),
-      ),
+    return AppScaffold(
+      title: context.t.employee.create.title,
       body: BlocListener<CubitCreateEmployee, StateCreateEmployee>(
         listener: _listener,
         child: Padding(

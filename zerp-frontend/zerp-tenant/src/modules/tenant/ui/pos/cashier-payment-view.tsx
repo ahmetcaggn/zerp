@@ -19,11 +19,13 @@ import CreditCardIcon from '@mui/icons-material/CreditCard'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useShopTables } from '../../hooks/use-shop-tables'
 import { useTableOrders, usePatchTableOrder, useUpdateTableOrder } from '../../hooks/use-table-orders'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 import type { ShopTableResponseDto, ShopTableStatus, TableOrderResponseDto, TableOrderItemDto } from '../../types/sale'
+import { getBaseUnitPrice } from '../sale/shared/order-pricing'
 
 const POLL_INTERVAL = 8000
 
@@ -176,7 +178,12 @@ function SelectionStage({
                     {order.note}
                   </Typography>
                 )}
-                {order.items.map(item => (
+                {order.items.map(item => {
+                  const baseUnitPrice = getBaseUnitPrice(item.unitPrice, item.selectedExtraOptions)
+                  const lineTotal = itemTotal(item)
+                  const extras = item.selectedExtraOptions ?? []
+                  const isSimpleLine = item.quantity === 1 && extras.length === 0
+                  return (
                   <Box
                     key={item.id}
                     sx={{
@@ -194,20 +201,58 @@ function SelectionStage({
                       onChange={qty => onQtyChange(item.id, qty)}
                     />
                     <Box sx={{ flex: 1 }}>
-                      <Typography variant="body2" fontWeight={500}>
-                        {item.quantity}× {item.menuItemName ?? item.menuItemId}
-                      </Typography>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 1 }}>
+                        <Typography variant="body2" fontWeight={500}>
+                          {item.quantity}× {item.menuItemName ?? item.menuItemId}
+                        </Typography>
+                        <Typography variant="body2" fontWeight={700} sx={{ whiteSpace: 'nowrap' }}>
+                          {baseUnitPrice.toFixed(2)} ₺
+                        </Typography>
+                      </Box>
+                      {extras.length > 0 && (
+                        <Box sx={{ mt: 0.25, pl: 1.25 }}>
+                          {extras.map(option => (
+                            <Box key={option.extraOptionId} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 1 }}>
+                              <Typography variant="caption" color="text.secondary">
+                                + {option.name}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                                {option.price.toFixed(2)} ₺
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                      )}
+                      {!isSimpleLine && (
+                        <Box
+                          sx={{
+                            mt: 0.4,
+                            pt: 0.4,
+                            borderTop: '1px dashed',
+                            borderColor: 'divider',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'baseline',
+                            gap: 1,
+                          }}
+                        >
+                          <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                            Toplam
+                          </Typography>
+                          <Typography variant="body2" fontWeight={800}>
+                            {lineTotal.toFixed(2)} ₺
+                          </Typography>
+                        </Box>
+                      )}
                       {item.notes && (
                         <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
                           {item.notes}
                         </Typography>
                       )}
                     </Box>
-                    <Typography variant="body2" fontWeight={700}>
-                      {itemTotal(item).toFixed(2)} ₺
-                    </Typography>
                   </Box>
-                ))}
+                  )
+                })}
               </AccordionDetails>
             </Accordion>
           )
@@ -292,7 +337,12 @@ function PaymentStage({
         const selectedQty = selectedQtys.get(item.id) ?? 0
         const leftQty = item.quantity - selectedQty
         if (leftQty <= 0) return []
-        return [{ menuItemId: item.menuItemId, quantity: leftQty, notes: item.notes }]
+        return [{
+          menuItemId: item.menuItemId,
+          quantity: leftQty,
+          notes: item.notes,
+          selectedExtraOptionIds: item.selectedExtraOptions?.map(option => option.extraOptionId),
+        }]
       })
 
       const isFullOrder = remainingItems.length === 0
@@ -374,19 +424,64 @@ function PaymentStage({
                 <Chip label="Kısmi" size="small" sx={{ ml: 1, height: 16, fontSize: '0.6rem' }} />
               )}
             </Typography>
-            {selectedItems.map(({ item, selectedQty }) => (
+            {selectedItems.map(({ item, selectedQty }) => {
+              const baseUnitPrice = getBaseUnitPrice(item.unitPrice, item.selectedExtraOptions)
+              const lineTotal = itemTotal(item, selectedQty)
+              const extras = item.selectedExtraOptions ?? []
+              const isSimpleLine = selectedQty === 1 && extras.length === 0
+              return (
               <Box
                 key={item.id}
-                sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5, borderBottom: '1px solid', borderColor: 'divider' }}
+                sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5, borderBottom: '1px solid', borderColor: 'divider', gap: 1 }}
               >
-                <Typography variant="body2">
-                  {selectedQty}× {item.menuItemName ?? item.menuItemId}
-                </Typography>
-                <Typography variant="body2" fontWeight={700}>
-                  {itemTotal(item, selectedQty).toFixed(2)} ₺
-                </Typography>
+                <Box sx={{ minWidth: 0 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 1 }}>
+                    <Typography variant="body2">
+                      {selectedQty}× {item.menuItemName ?? item.menuItemId}
+                    </Typography>
+                    <Typography variant="body2" fontWeight={700} sx={{ whiteSpace: 'nowrap' }}>
+                      {baseUnitPrice.toFixed(2)} ₺
+                    </Typography>
+                  </Box>
+                  {extras.length > 0 && (
+                    <Box sx={{ mt: 0.25, pl: 1.25 }}>
+                      {extras.map(option => (
+                        <Box key={option.extraOptionId} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 1 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            + {option.name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                            {option.price.toFixed(2)} ₺
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                  {!isSimpleLine && (
+                    <Box
+                      sx={{
+                        mt: 0.4,
+                        pt: 0.4,
+                        borderTop: '1px dashed',
+                        borderColor: 'divider',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'baseline',
+                        gap: 1,
+                      }}
+                    >
+                      <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                        Toplam
+                      </Typography>
+                      <Typography variant="body2" fontWeight={800}>
+                        {lineTotal.toFixed(2)} ₺
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
               </Box>
-            ))}
+              )
+            })}
           </Box>
         ))}
 
@@ -605,12 +700,15 @@ function TableOrderDetails({ table }: { table: ShopTableResponseDto }) {
 
 export function CashierPaymentView() {
   const { t } = useI18n()
+  const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
   const [selectedTable, setSelectedTable] = useState<ShopTableResponseDto | null>(null)
 
   const { data: tablesData, isLoading } = useShopTables(
     {
       pagination: { page: 1, perPage: 200 },
       sort: { field: 'name', order: 'ASC' },
+      ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
     },
     { refetchInterval: POLL_INTERVAL, refetchOnWindowFocus: true }
   )

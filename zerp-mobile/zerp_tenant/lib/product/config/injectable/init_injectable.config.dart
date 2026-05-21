@@ -14,6 +14,17 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
+import '../../../feature/dashboard/cubit/cubit_dashboard.dart' as _i268;
+import '../../../feature/dashboard/sections/employee_section/cubit_section_employee.dart'
+    as _i129;
+import '../../../feature/dashboard/sections/menu_section/cubit_section_menu.dart'
+    as _i964;
+import '../../../feature/dashboard/sections/sale_section/cubit_section_sale.dart'
+    as _i201;
+import '../../../feature/dashboard/sections/stock_section/cubit_section_stock.dart'
+    as _i102;
+import '../../../feature/dashboard/sections/store_section/cubit_section_store.dart'
+    as _i6;
 import '../../../feature/employee/create_employee/cubit/cubit_create_employee.dart'
     as _i657;
 import '../../../feature/employee/cubit/cubit_employee.dart' as _i828;
@@ -33,12 +44,16 @@ import '../../../feature/employee/single_employee/permissions/cubit_permissions.
 import '../../../feature/profile/cubit/cubit_profile.dart' as _i477;
 import '../../../feature/profile/cubit/permission/cubit_profile_permissions.dart'
     as _i170;
+import '../../../feature/settings/sections/api_baseurl/cubit_settings_api_baseurl.dart'
+    as _i1057;
 import '../../cubit/root_cubit/auth/cubit_auth.dart' as _i200;
 import '../../cubit/root_cubit/error/cubit_error.dart' as _i139;
+import '../../cubit/root_cubit/settings/cubit_settings.dart' as _i657;
 import '../../navigation/app_route.dart' as _i795;
 import '../../navigation/auth_guard.dart' as _i84;
 import '../../network/network_invoker/api_network_invoker.dart' as _i1073;
 import '../../network/network_invoker/remote_log_network_invoker.dart' as _i693;
+import '../../service/api_status/api_status_service.dart' as _i371;
 import '../../service/auth/auth_service.dart' as _i238;
 import '../../service/auth/auth_storage_service.dart' as _i40;
 import '../../service/employee/employee_service.dart' as _i93;
@@ -47,6 +62,7 @@ import '../../service/user/username_service.dart' as _i868;
 import '../../storage/operator/auth_claims.operator.dart' as _i301;
 import '../../storage/operator/auth_token.operator.dart' as _i145;
 import '../../storage/operator/device_id.operator.dart' as _i447;
+import '../../storage/operator/settings.operator.dart' as _i116;
 import '../device_id_generator.dart' as _i600;
 import 'module/service_module.dart' as _i387;
 
@@ -59,6 +75,10 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final serviceModule = _$ServiceModule();
     gh.factory<_i477.CubitProfile>(() => _i477.CubitProfile());
+    gh.lazySingleton<_i964.CubitSectionMenu>(() => _i964.CubitSectionMenu());
+    gh.lazySingleton<_i201.CubitSectionSale>(() => _i201.CubitSectionSale());
+    gh.lazySingleton<_i102.CubitSectionStock>(() => _i102.CubitSectionStock());
+    gh.lazySingleton<_i6.CubitSectionStore>(() => _i6.CubitSectionStore());
     gh.lazySingleton<_i337.FlutterAppAuth>(() => serviceModule.appAuth);
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => serviceModule.secureStorage,
@@ -71,6 +91,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i301.AuthClaimsOperator(),
     );
     gh.lazySingleton<_i447.DeviceIdOperator>(() => _i447.DeviceIdOperator());
+    gh.lazySingleton<_i116.SettingsOperator>(() => _i116.SettingsOperator());
     gh.lazySingleton<_i600.DeviceIdGenerator>(
       () => _i600.DeviceIdGenerator(gh<_i447.DeviceIdOperator>()),
     );
@@ -108,6 +129,20 @@ extension GetItInjectableX on _i174.GetIt {
       ),
     );
     gh.singleton<_i795.AppRoute>(() => _i795.AppRoute(gh<_i84.AuthGuard>()));
+    gh.lazySingleton<_i657.CubitSettings>(
+      () => _i657.CubitSettings(
+        gh<_i116.SettingsOperator>(),
+        gh<_i1073.ApiNetworkInvoker>(),
+      ),
+    );
+    gh.lazySingleton<_i371.ApiStatusService>(
+      () => _i371.ApiStatusService(
+        invoker: gh<_i1073.ApiNetworkInvoker>(),
+        authStorageService: gh<_i40.AuthStorageService>(),
+        cubitError: gh<_i139.CubitError>(),
+        cubitAuth: gh<_i200.CubitAuth>(),
+      ),
+    );
     gh.lazySingleton<_i93.EmployeeService>(
       () => _i93.EmployeeService(
         invoker: gh<_i1073.ApiNetworkInvoker>(),
@@ -152,6 +187,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i463.CubitSingleEmployee>(
       () => _i463.CubitSingleEmployee(gh<_i93.EmployeeService>()),
     );
+    gh.lazySingleton<_i129.CubitSectionEmployee>(
+      () => _i129.CubitSectionEmployee(gh<_i93.EmployeeService>()),
+    );
     gh.factoryParam<
       _i713.CubitCreatePermission,
       _i1073.CubitPermissions,
@@ -181,8 +219,23 @@ extension GetItInjectableX on _i174.GetIt {
         cubitSingleEmployee,
       ),
     );
+    gh.factory<_i1057.CubitSettingsApiBaseUrl>(
+      () => _i1057.CubitSettingsApiBaseUrl(
+        gh<_i657.CubitSettings>(),
+        gh<_i371.ApiStatusService>(),
+      ),
+    );
     gh.factory<_i229.CubitEmployeeUsername>(
       () => _i229.CubitEmployeeUsername(gh<_i868.UsernameService>()),
+    );
+    gh.lazySingleton<_i268.CubitDashboard>(
+      () => _i268.CubitDashboard(
+        gh<_i129.CubitSectionEmployee>(),
+        gh<_i964.CubitSectionMenu>(),
+        gh<_i201.CubitSectionSale>(),
+        gh<_i102.CubitSectionStock>(),
+        gh<_i6.CubitSectionStore>(),
+      ),
     );
     return this;
   }

@@ -11,18 +11,19 @@ import {
   MenuItem,
   Select,
   TextField,
-  Checkbox,
-  ListItemText,
 } from '@mui/material'
 import { useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
-import { useCreateMenuItem, useUpdateMenuItem } from '../../../hooks/use-menu-items'
+
 import { useMenuCategories } from '../../../hooks/use-menu-categories'
+import { useCreateMenuItem, useUpdateMenuItem } from '../../../hooks/use-menu-items'
 import { useProducts } from '../../../hooks/use-products'
-import type { MenuItemResponseDto } from '../../../types/sale'
+import type { MenuItemProductItemDto, MenuItemResponseDto } from '../../../types/sale'
+import { MenuItemProductMultiSelectField } from '../shared/menu-item-product-multi-select-field'
 
 interface Props {
   open: boolean
@@ -30,6 +31,20 @@ interface Props {
   menuItem?: MenuItemResponseDto | null
   preselectedCategoryId?: string
   onClose: () => void
+}
+
+function parseCommaSeparatedList(value: string): string[] {
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function stringifyCommaSeparatedList(values?: string[]): string {
+  if (!values || values.length === 0) {
+    return ''
+  }
+  return values.join(', ')
 }
 
 export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId, onClose }: Props) {
@@ -42,8 +57,14 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
   const [description, setDescription] = useState(menuItem?.description ?? '')
   const [price, setPrice] = useState(String(menuItem?.price ?? ''))
   const [imageId, setImageId] = useState(menuItem?.imageId ?? '')
+  const [calories, setCalories] = useState(
+    menuItem?.calories === null || menuItem?.calories === undefined ? '' : String(menuItem.calories),
+  )
+  const [weight, setWeight] = useState(menuItem?.weight ?? '')
+  const [ingredientsInput, setIngredientsInput] = useState(stringifyCommaSeparatedList(menuItem?.ingredients))
+  const [allergensInput, setAllergensInput] = useState(stringifyCommaSeparatedList(menuItem?.allergens))
   const [categoryId, setCategoryId] = useState(menuItem?.categoryId ?? preselectedCategoryId ?? '')
-  const [productIds, setProductIds] = useState<string[]>(menuItem?.productIds ?? [])
+  const [productItems, setProductItems] = useState<MenuItemProductItemDto[]>(menuItem?.productItems ?? [])
 
   const { data: categoriesResult } = useMenuCategories({
     pagination: { page: 1, perPage: 200 },
@@ -53,6 +74,7 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
 
   const { data: productsResult } = useProducts({
     pagination: { page: 1, perPage: 1000 },
+    sort: { field: 'name', order: 'ASC' },
     ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
   })
   const products = productsResult?.data ?? []
@@ -72,8 +94,12 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
           ...(description.trim() && { description: description.trim() }),
           price: Number(price),
           ...(imageId.trim() && { imageId: imageId.trim() }),
+          ...(calories.trim() && { calories: Number(calories) }),
+          ...(weight.trim() && { weight: weight.trim() }),
+          ingredients: parseCommaSeparatedList(ingredientsInput),
+          allergens: parseCommaSeparatedList(allergensInput),
           categoryId,
-          productIds,
+          productItems,
         },
         {
           onSuccess: () => {
@@ -91,8 +117,13 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
             name: name.trim(),
             ...(description.trim() && { description: description.trim() }),
             price: Number(price),
-            ...(imageId.trim() && { imageId: imageId.trim() }),
-            productIds,
+            imageId: imageId.trim() || null,
+            calories: calories.trim() ? Number(calories) : null,
+            weight: weight.trim() || null,
+            ingredients: parseCommaSeparatedList(ingredientsInput),
+            allergens: parseCommaSeparatedList(allergensInput),
+            categoryId,
+            productItems,
           },
         },
         {
@@ -146,13 +177,42 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
                 fullWidth
               />
             </Box>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField
+                label={t('sale.menuItem.form.calories')}
+                type="number"
+                value={calories}
+                onChange={(e) => setCalories(e.target.value)}
+                fullWidth
+                inputProps={{ min: 0, step: '1' }}
+              />
+              <TextField
+                label={t('sale.menuItem.form.weight')}
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                fullWidth
+              />
+            </Box>
+            <TextField
+              label={t('sale.menuItem.form.ingredients')}
+              value={ingredientsInput}
+              onChange={(e) => setIngredientsInput(e.target.value)}
+              fullWidth
+              helperText={t('sale.menuItem.form.listInputHint')}
+            />
+            <TextField
+              label={t('sale.menuItem.form.allergens')}
+              value={allergensInput}
+              onChange={(e) => setAllergensInput(e.target.value)}
+              fullWidth
+              helperText={t('sale.menuItem.form.listInputHint')}
+            />
             <FormControl fullWidth required>
               <InputLabel>{t('sale.menuItem.form.categoryId')}</InputLabel>
               <Select
                 value={categoryId}
                 label={t('sale.menuItem.form.categoryId')}
                 onChange={(e) => setCategoryId(e.target.value)}
-                disabled={mode === 'edit'}
               >
                 {categories.map((c) => (
                   <MenuItem key={c.id} value={c.id}>
@@ -161,30 +221,14 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
                 ))}
               </Select>
             </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>{t('sale.menuItem.form.productIds')}</InputLabel>
-              <Select
-                multiple
-                value={productIds}
-                label={t('sale.menuItem.form.productIds')}
-                onChange={(e) => {
-                  const val = e.target.value
-                  setProductIds(typeof val === 'string' ? val.split(',') : val)
-                }}
-                renderValue={(selected) =>
-                  selected
-                    .map((id) => products.find((p) => p.id === id)?.name || id)
-                    .join(', ')
-                }
-              >
-                {products.map((p) => (
-                  <MenuItem key={p.id} value={p.id}>
-                    <Checkbox checked={productIds.includes(p.id)} />
-                    <ListItemText primary={p.name} />
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <MenuItemProductMultiSelectField
+              products={products}
+              productItems={productItems}
+              onChange={setProductItems}
+              label={t('sale.menuItem.form.productIds')}
+              placeholder={t('sale.menuItem.form.productSearchPlaceholder')}
+              quantityLabel={t('sale.menuItem.form.quantity')}
+            />
           </Box>
         </DialogContent>
         <DialogActions>

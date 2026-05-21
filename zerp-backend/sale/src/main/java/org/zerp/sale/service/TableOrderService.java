@@ -13,12 +13,18 @@ import org.zerp.common.dto.feign.resource.StockMovementFeignRequest;
 import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.resource.StockMovementType;
 import org.zerp.common.entity.sale.MenuItem;
+import org.zerp.common.entity.sale.MenuItemProduct;
+import org.zerp.common.entity.sale.ProductExtraOption;
+import org.zerp.common.entity.sale.ProductExtraOptionItem;
 import org.zerp.common.entity.sale.Product;
 import org.zerp.common.entity.sale.ProductRecipe;
 import org.zerp.common.entity.sale.ProductRecipeItem;
+import org.zerp.common.entity.sale.PublicCartOrder;
+import org.zerp.common.entity.sale.PublicCartOrderItem;
 import org.zerp.common.entity.sale.ShopTable;
 import org.zerp.common.entity.sale.TableOrder;
 import org.zerp.common.entity.sale.TableOrderItem;
+import org.zerp.common.entity.sale.TableOrderItemSelectedExtraOption;
 import org.zerp.common.entity.sale.ShopTableStatus;
 import org.zerp.common.entity.sale.TableOrderStatus;
 import org.zerp.common.resource.service.IResourceService;
@@ -26,6 +32,8 @@ import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.sale.client.ResourceServiceClient;
+import org.zerp.sale.dto.tableorder.PublicCartOrderPreviewDTO;
+import org.zerp.sale.dto.tableorder.PublicCartOrderPreviewItemDTO;
 import org.zerp.sale.dto.tableorder.TableOrderCreateDTO;
 import org.zerp.sale.dto.tableorder.TableOrderDTO;
 import org.zerp.sale.dto.tableorder.TableOrderItemCreateDTO;
@@ -34,13 +42,20 @@ import org.zerp.sale.mapper.TableOrderMapper;
 import org.zerp.sale.permission.TableOrderPermissionEvaluator;
 import org.zerp.sale.repository.MenuItemRepository;
 import org.zerp.sale.repository.ProductRecipeRepository;
+import org.zerp.sale.repository.ProductExtraOptionRepository;
+import org.zerp.sale.repository.PublicCartOrderRepository;
 import org.zerp.sale.repository.ShopTableRepository;
 import org.zerp.sale.repository.TableOrderRepository;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -50,11 +65,15 @@ import java.util.concurrent.CompletableFuture;
 public class TableOrderService implements
         IResourceService<TableOrderDTO, TableOrderDTO, TableOrderCreateDTO, TableOrderUpdateDTO, UUID> {
 
+    private static final String PUBLIC_CART_ORDER_CODE_PATTERN = "^[A-Z0-9]{6}$";
+
     private final TableOrderPermissionEvaluator permissionEvaluator;
     private final TableOrderRepository repository;
     private final ShopTableRepository shopTableRepository;
     private final MenuItemRepository menuItemRepository;
     private final ProductRecipeRepository productRecipeRepository;
+    private final ProductExtraOptionRepository productExtraOptionRepository;
+    private final PublicCartOrderRepository publicCartOrderRepository;
     private final ResourceServiceClient resourceServiceClient;
     private final TableOrderMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
@@ -133,6 +152,39 @@ public class TableOrderService implements
 
         log.info("Created TableOrder with id: {}", saved.getId());
         return mapper.toDTO(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public PublicCartOrderPreviewDTO previewPublicCartOrder(String code, UUID tableId) {
+        UUID userId = currentUserIdResolver.resolve();
+        UUID tenantId = currentTenantIdResolver.resolve();
+        ShopTable shopTable = resolveShopTable(tableId);
+        Shop shop = shopTable.getShop();
+        if (shop == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ShopTable has no shop");
+        }
+
+        if (!permissionEvaluator.canCreate(userId, shop.getId(), tenantId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create TableOrder");
+        }
+
+        String normalizedCode = normalizePublicCartOrderCode(code);
+        PublicCartOrder publicOrder = publicCartOrderRepository.findByCode(normalizedCode)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "QR siparişi bulunamadı."));
+        if (publicOrder.getShop() == null || !shop.getId().equals(publicOrder.getShop().getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bu QR siparişi seçili masanın şubesine ait değil.");
+        }
+        if (publicOrder.getItems() == null || publicOrder.getItems().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PublicCartOrder has no items");
+        }
+
+        PublicCartOrderPreviewDTO dto = new PublicCartOrderPreviewDTO();
+        dto.setId(publicOrder.getId());
+        dto.setCode(publicOrder.getCode());
+        dto.setShopId(shop.getId());
+        dto.setNote(publicOrder.getNote());
+        dto.setItems(publicOrder.getItems().stream().map(this::toPublicCartOrderPreviewItem).toList());
+        return dto;
     }
 
     @Override
@@ -240,34 +292,146 @@ public class TableOrderService implements
         MenuItem menuItem = menuItemRepository.findById(dto.getMenuItemId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "MenuItem not found: " + dto.getMenuItemId()));
+        List<TableOrderItemSelectedExtraOption> selectedExtraOptions = resolveSelectedExtraOptions(
+                dto.getSelectedExtraOptionIds(),
+                menuItem,
+                order.getTenantId()
+        );
+        BigDecimal extraTotal = selectedExtraOptions.stream()
+                .map(TableOrderItemSelectedExtraOption::getPriceSnapshot)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         TableOrderItem item = new TableOrderItem();
         item.setOrder(order);
         item.setMenuItem(menuItem);
         item.setQuantity(dto.getQuantity());
-        item.setUnitPrice(menuItem.getPrice());
+        item.setUnitPrice(menuItem.getPrice().add(extraTotal));
         item.setNotes(dto.getNotes());
         item.setTenantId(order.getTenantId());
+        selectedExtraOptions.forEach(extra -> extra.setTableOrderItem(item));
+        item.getSelectedExtraOptions().addAll(selectedExtraOptions);
         return item;
+    }
+
+    private String normalizePublicCartOrderCode(String code) {
+        if (code == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Geçerli bir sipariş kodu girin.");
+        }
+        String normalizedCode = code.trim().toUpperCase(Locale.ROOT);
+        if (!normalizedCode.matches(PUBLIC_CART_ORDER_CODE_PATTERN)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Geçerli bir sipariş kodu girin.");
+        }
+        return normalizedCode;
+    }
+
+    private PublicCartOrderPreviewItemDTO toPublicCartOrderPreviewItem(PublicCartOrderItem item) {
+        if (item == null || item.getMenuItem() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PublicCartOrder has an invalid item");
+        }
+        if (item.getQuantity() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PublicCartOrder has an item with invalid quantity");
+        }
+        if (item.getUnitPrice() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PublicCartOrder has an item with invalid unit price");
+        }
+
+        PublicCartOrderPreviewItemDTO dto = new PublicCartOrderPreviewItemDTO();
+        dto.setMenuItemId(item.getMenuItem().getId());
+        dto.setMenuItemName(item.getMenuItem().getName());
+        dto.setQuantity(item.getQuantity());
+        dto.setUnitPrice(item.getUnitPrice());
+        dto.setNotes(item.getNotes());
+        return dto;
+    }
+
+    private List<TableOrderItemSelectedExtraOption> resolveSelectedExtraOptions(
+            List<UUID> selectedExtraOptionIds,
+            MenuItem menuItem,
+            UUID tenantId
+    ) {
+        if (selectedExtraOptionIds == null || selectedExtraOptionIds.isEmpty()) {
+            return List.of();
+        }
+
+        Set<UUID> deduplicatedIds = new LinkedHashSet<>(selectedExtraOptionIds);
+        List<ProductExtraOption> options = productExtraOptionRepository.findAllByIdIn(deduplicatedIds);
+        Map<UUID, ProductExtraOption> optionsById = new HashMap<>();
+        for (ProductExtraOption option : options) {
+            optionsById.put(option.getId(), option);
+        }
+
+        Set<UUID> menuProductIds = new HashSet<>();
+        List<MenuItemProduct> productLinks = menuItem.getProductLinks();
+        if (productLinks != null) {
+            for (MenuItemProduct link : productLinks) {
+                if (link.getProduct() != null) {
+                    menuProductIds.add(link.getProduct().getId());
+                }
+            }
+        }
+
+        List<TableOrderItemSelectedExtraOption> selected = new ArrayList<>();
+        for (UUID optionId : deduplicatedIds) {
+            ProductExtraOption option = optionsById.get(optionId);
+            if (option == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid extra option: " + optionId);
+            }
+            if (!option.isActive()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inactive extra option: " + option.getName());
+            }
+            if (option.getProduct() == null || !menuProductIds.contains(option.getProduct().getId())) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Extra option does not belong to menu item: " + option.getName()
+                );
+            }
+
+            TableOrderItemSelectedExtraOption snapshot = new TableOrderItemSelectedExtraOption();
+            snapshot.setExtraOptionId(option.getId());
+            snapshot.setNameSnapshot(option.getName());
+            snapshot.setPriceSnapshot(option.getPrice() == null ? BigDecimal.ZERO : option.getPrice());
+            snapshot.setTenantId(tenantId);
+            selected.add(snapshot);
+        }
+
+        return selected;
     }
 
     /**
      * Builds stock movement requests inside the active transaction so all lazy
-     * collections (MenuItem.products, ProductRecipe.items, etc.) are still accessible.
+     * collections (MenuItem.productLinks, ProductRecipe.items, etc.) are still accessible.
      * The resulting list contains only plain POJOs and is safe to hand off to an async thread.
      */
     private List<StockMovementFeignRequest> buildStockMovementRequests(TableOrder order) {
         List<StockMovementFeignRequest> requests = new ArrayList<>();
+        Set<UUID> selectedExtraOptionIds = new HashSet<>();
+        for (TableOrderItem item : order.getItems()) {
+            for (TableOrderItemSelectedExtraOption selectedExtraOption : item.getSelectedExtraOptions()) {
+                selectedExtraOptionIds.add(selectedExtraOption.getExtraOptionId());
+            }
+        }
+        Map<UUID, ProductExtraOption> extraOptionById = new HashMap<>();
+        if (!selectedExtraOptionIds.isEmpty()) {
+            for (ProductExtraOption option : productExtraOptionRepository.findAllByIdIn(selectedExtraOptionIds)) {
+                extraOptionById.put(option.getId(), option);
+            }
+        }
+
         for (TableOrderItem item : order.getItems()) {
             MenuItem menuItem = item.getMenuItem();
-            List<Product> products = menuItem.getProducts();
-            if (products == null || products.isEmpty()) continue;
+            List<MenuItemProduct> productLinks = menuItem.getProductLinks();
+            if (productLinks == null || productLinks.isEmpty()) continue;
 
-            for (Product product : products) {
+            for (MenuItemProduct productLink : productLinks) {
+                Product product = productLink.getProduct();
                 List<ProductRecipe> defaultRecipes = product.getRecipes();
                 for (ProductRecipe recipe : defaultRecipes) {
                     for (ProductRecipeItem recipeItem : recipe.getItems()) {
+                        int menuItemQuantity = productLink.getQuantity() == null || productLink.getQuantity() < 1
+                                ? 1
+                                : productLink.getQuantity();
                         BigDecimal qty = recipeItem.getQuantity()
-                                .multiply(BigDecimal.valueOf(item.getQuantity()));
+                                .multiply(BigDecimal.valueOf(item.getQuantity()))
+                                .multiply(BigDecimal.valueOf(menuItemQuantity));
                         requests.add(StockMovementFeignRequest.builder()
                                 .stockResourceId(recipeItem.getStockResource().getId())
                                 .type(StockMovementType.SALE)
@@ -278,6 +442,26 @@ public class TableOrderService implements
                                 .tenantId(order.getTenantId())
                                 .build());
                     }
+                }
+            }
+
+            for (TableOrderItemSelectedExtraOption selectedExtraOption : item.getSelectedExtraOptions()) {
+                ProductExtraOption option = extraOptionById.get(selectedExtraOption.getExtraOptionId());
+                if (option == null || option.getItems() == null) {
+                    continue;
+                }
+                for (ProductExtraOptionItem optionItem : option.getItems()) {
+                    BigDecimal qty = optionItem.getQuantity()
+                            .multiply(BigDecimal.valueOf(item.getQuantity()));
+                    requests.add(StockMovementFeignRequest.builder()
+                            .stockResourceId(optionItem.getStockResource().getId())
+                            .type(StockMovementType.SALE)
+                            .quantity(qty)
+                            .referenceType("TABLE_ORDER")
+                            .referenceId(order.getId())
+                            .notes(option.getName() + " x" + item.getQuantity())
+                            .tenantId(order.getTenantId())
+                            .build());
                 }
             }
         }

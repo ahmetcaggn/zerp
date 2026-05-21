@@ -1,19 +1,12 @@
+import 'dart:async';
+
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart' hide RouteSettings;
+import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 class AppDrawer extends StatelessWidget {
-  const AppDrawer({
-    required this.activeIndex,
-    required this.onSelectSection,
-    required this.onTapProfile,
-    required this.onTapSettings,
-    super.key,
-  });
-
-  final int activeIndex;
-  final ValueChanged<int> onSelectSection;
-  final VoidCallback onTapProfile;
-  final VoidCallback onTapSettings;
+  const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -44,61 +37,53 @@ class AppDrawer extends StatelessWidget {
               ],
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.dashboard),
-            title: Text(context.t.shell.dashboard),
-            selected: activeIndex == 0,
-            selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
-            onTap: () => onSelectSection(0),
-          ),
+
           ListTile(
             leading: const Icon(Icons.people),
-            title: Text(context.t.shell.employees),
-            selected: activeIndex == 1,
-            selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
-            onTap: () => onSelectSection(1),
+            title: Text(context.t.employee.title),
+            onTap: () => _navigate(context, const RouteEmployee()),
           ),
           ListTile(
             leading: const Icon(Icons.restaurant_menu),
-            title: Text(context.t.shell.menu),
-            selected: activeIndex == 2,
-            selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
-            onTap: () => onSelectSection(2),
+            title: Text(context.t.menu.title),
+            onTap: () => _navigate(context, const RouteMenu()),
           ),
           ListTile(
             leading: const Icon(Icons.shopping_cart),
-            title: Text(context.t.shell.sales),
-            selected: activeIndex == 3,
-            selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
-            onTap: () => onSelectSection(3),
+            title: Text(context.t.sale.title),
+            onTap: () => _navigate(context, const RouteSale()),
           ),
           ListTile(
             leading: const Icon(Icons.inventory),
-            title: Text(context.t.shell.stock),
-            selected: activeIndex == 4,
-            selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
-            onTap: () => onSelectSection(4),
+            title: Text(context.t.stock.title),
+            onTap: () => _navigate(context, const RouteStock()),
           ),
           ListTile(
             leading: const Icon(Icons.store),
-            title: Text(context.t.shell.store),
-            selected: activeIndex == 5,
-            selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
-            onTap: () => onSelectSection(5),
+            title: Text(context.t.store.title),
+            onTap: () => _navigate(context, const RouteStore()),
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.person),
-            title: Text(context.t.shell.profile),
-            onTap: onTapProfile,
+            title: Text(context.t.profile.title),
+            onTap: () => _navigate(context, const RouteProfile()),
           ),
           ListTile(
             leading: const Icon(Icons.settings),
-            title: Text(context.t.shell.settings),
-            onTap: onTapSettings,
+            title: Text(context.t.settings.title),
+            onTap: () => _navigate(context, const RouteSettings()),
           ),
         ],
       ),
     );
+  }
+
+  void _navigate(BuildContext context, PageRouteInfo route) {
+    if (context.router.current.name == route.routeName) {
+      Navigator.pop(context);
+      return;
+    }
+    unawaited(context.router.push(route));
   }
 }
