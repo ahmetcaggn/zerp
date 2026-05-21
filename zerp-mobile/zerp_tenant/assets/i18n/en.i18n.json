@@ -77,7 +77,8 @@
     "delete": "Delete",
     "search": "Search",
     "select": "Select",
-    "noData": "No data available"
+    "noData": "No data available",
+    "clear": "Clear"
   },
   "employee": {
     "title": "Employees",
@@ -191,7 +192,10 @@
       "total": "Total permissions: $count",
       "empty": "No permissions yet",
       "target": "Target: $targetType",
-      "id": "ID: $targetId"
+      "id": "ID: $targetId",
+      "searchHint": "Search permissions...",
+      "noResults": "No permissions found matching your search",
+      "filtered": "Filtered: $count"
     }
   }
 }

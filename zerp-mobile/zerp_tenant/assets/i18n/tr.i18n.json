@@ -77,7 +77,8 @@
     "delete": "Sil",
     "search": "Ara",
     "select": "Seç",
-    "noData": "Veri yok"
+    "noData": "Veri yok",
+    "clear": "Temizle"
   },
   "employee": {
     "title": "Çalışanlar",
@@ -191,7 +192,10 @@
       "total": "Toplam yetki: $count",
       "empty": "Henüz yetki yok",
       "target": "Hedef: $targetType",
-      "id": "ID: $targetId"
+      "id": "ID: $targetId",
+      "searchHint": "Yetkilerde ara...",
+      "noResults": "Aramanızla eşleşen yetki bulunamadı",
+      "filtered": "Filtrelenen: $count"
     }
   }
 }

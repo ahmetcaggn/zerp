@@ -13,7 +13,7 @@ typedef PermissionTargetTypeEnum =
     ApiResponseMapPermissionActionListPermissionTargetTypeDataEnum;
 
 @lazySingleton
-final class PermissionService extends ServiceBase
+class PermissionService extends ServiceBase
     with LoggerMixin<PermissionService> {
   PermissionService({
     required super.invoker,
