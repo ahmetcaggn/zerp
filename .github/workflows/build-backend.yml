@@ -2,23 +2,15 @@ name: Build Backend JARs
 
 on:
   push:
-    branches:
-      - main
-      - master
-    paths:
-      - 'zerp-backend/**'
-  pull_request:
-    branches:
-      - main
-      - master
-    paths:
-      - 'zerp-backend/**'
-  workflow_dispatch:
+    tags:
+      - '*'
 
 jobs:
-  build:
-    name: Build and Package Backend
+  build-and-release:
+    name: Build, Release, and Deploy
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Code
@@ -35,10 +27,45 @@ jobs:
         working-directory: zerp-backend
         run: mvn clean package -DskipTests
 
-      - name: Upload JAR Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Collect JARs
+        run: |
+          mkdir -p staging
+          SERVICES="eureka gateway crm employee notification resource sale suggestion user aggregated"
+          for svc in $SERVICES; do
+            jar=$(find "zerp-backend/$svc/target" -maxdepth 1 -name '*.jar' \
+                  -not -name '*-plain.jar' \
+                  -not -name '*-sources.jar' \
+                  -not -name '*-javadoc.jar' 2>/dev/null | head -1)
+            if [ -n "$jar" ]; then
+              cp "$jar" "staging/${svc}.jar"
+              echo "✓ Staged: ${svc}.jar"
+            fi
+          done
+          echo ""
+          echo "=== Staged artifacts ==="
+          ls -lh staging/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: backend-jars
-          path: |
-            zerp-backend/*/target/*.jar
-          if-no-files-found: error
+          generate_release_notes: true
+          files: staging/*.jar
+
+      - name: Deploy to Server
+        if: vars.DEPLOY_ENABLED == 'true'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_SSH_HOST }}
+          username: ${{ secrets.DEPLOY_SSH_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_SSH_PORT || '22' }}
+          script: |
+            cd /opt/zerp
+            git fetch origin --tags
+            git checkout ${{ github.ref_name }}
+            TOKEN="${{ secrets.GH_PAT }}"
+            if [ -n "$TOKEN" ]; then
+              ./deploy-backend.sh --tag ${{ github.ref_name }} --repo ${{ github.repository }} --token "$TOKEN"
+            else
+              ./deploy-backend.sh --tag ${{ github.ref_name }} --repo ${{ github.repository }}
+            fi
