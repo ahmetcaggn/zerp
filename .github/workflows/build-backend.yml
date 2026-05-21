@@ -1,0 +1,44 @@
+name: Build Backend JARs
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'zerp-backend/**'
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - 'zerp-backend/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and Package Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build with Maven
+        working-directory: zerp-backend
+        run: mvn clean package -DskipTests
+
+      - name: Upload JAR Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jars
+          path: |
+            zerp-backend/*/target/*.jar
+          if-no-files-found: error
