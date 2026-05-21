@@ -1,5 +1,5 @@
-import { DashboardPageContent } from '@/modules/tenant/ui/dashboard-page-content'
+import { DashboardPageContentV2 } from '@/modules/tenant/ui/dashboard-page-content-v2'
 
 export default function DashboardPage() {
-  return <DashboardPageContent />
+  return <DashboardPageContentV2 />
 }

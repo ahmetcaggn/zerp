@@ -1,0 +1,117 @@
+import { ROUTES } from '@/core/constants/routes'
+
+import type { TenantSalesDashboardData } from '../types/sales-dashboard'
+
+export const tenantSalesDashboardMock: TenantSalesDashboardData = {
+  title: 'Satış Paneli',
+  subtitle: 'Tüm mağazalara ait satış performansı ve özet metrikler.',
+  scopeLabel: 'Tüm Mağazalar',
+  rangeLabel: 'Son 6 Ay',
+  reportDateLabel: '17 Mayıs 2026',
+  lastUpdatedAt: '2026-05-17T21:15:00+03:00',
+  metrics: [
+    {
+      id: 'totalSales',
+      label: 'Toplam Satış',
+      value: 2450680,
+      unit: 'currency',
+      delta: { value: 18.6, unit: 'percent', direction: 'up', comparisonLabel: 'Geçen aya göre' },
+    },
+    {
+      id: 'averageBasket',
+      label: 'Ortalama Sepet Tutarı',
+      value: 436,
+      unit: 'currency',
+      delta: { value: 9.2, unit: 'percent', direction: 'up', comparisonLabel: 'Geçen aya göre' },
+    },
+    {
+      id: 'totalOrders',
+      label: 'Toplam Sipariş',
+      value: 5624,
+      unit: 'count',
+      delta: { value: 14.3, unit: 'percent', direction: 'up', comparisonLabel: 'Geçen aya göre' },
+    },
+    {
+      id: 'conversionRate',
+      label: 'Dönüşüm Oranı',
+      value: 3.42,
+      unit: 'percent',
+      delta: { value: 0.8, unit: 'percent', direction: 'up', comparisonLabel: 'Geçen aya göre' },
+    },
+    {
+      id: 'totalStores',
+      label: 'Toplam Mağaza',
+      value: 24,
+      unit: 'count',
+      delta: { value: 0, unit: 'count', direction: 'neutral', comparisonLabel: 'Değişiklik yok' },
+    },
+  ],
+  trend: [
+    { label: "Ara '25", sales: 680000, orders: 2450 },
+    { label: "Oca '26", sales: 720000, orders: 2800 },
+    { label: "Şub '26", sales: 770000, orders: 3500 },
+    { label: "Mar '26", sales: 690000, orders: 3100 },
+    { label: "Nis '26", sales: 940000, orders: 4300 },
+    { label: "May '26", sales: 810000, orders: 3650 },
+  ],
+  cityDistribution: [
+    { city: 'İstanbul', storeCount: 12, percentage: 50, color: '#20b486' },
+    { city: 'Ankara', storeCount: 4, percentage: 16.7, color: '#3b82f6' },
+    { city: 'İzmir', storeCount: 3, percentage: 12.5, color: '#f59e0b' },
+    { city: 'Antalya', storeCount: 2, percentage: 8.3, color: '#8b5cf6' },
+    { city: 'Bursa', storeCount: 1, percentage: 4.2, color: '#fb7185' },
+    { city: 'Diğer', storeCount: 2, percentage: 8.3, color: '#94a3b8' },
+  ],
+  storePerformance: [
+    { storeId: 'shop-1', storeName: 'Kadıköy Şubesi', sales: 620450, orderCount: 1380 },
+    { storeId: 'shop-2', storeName: 'Beşiktaş Şubesi', sales: 480230, orderCount: 1125 },
+    { storeId: 'shop-3', storeName: 'Beyoğlu Şubesi', sales: 350120, orderCount: 860 },
+    { storeId: 'shop-4', storeName: 'Üsküdar Şubesi', sales: 280560, orderCount: 710 },
+    { storeId: 'shop-5', storeName: 'Bakırköy Şubesi', sales: 210340, orderCount: 580 },
+    { storeId: 'shop-6', storeName: 'Kadıköy 2 Şubesi', sales: 110980, orderCount: 320 },
+  ],
+  summary: [
+    { id: 'summary-total-sales', label: 'Toplam Satış', value: 2450680, unit: 'currency' },
+    { id: 'summary-total-orders', label: 'Toplam Sipariş', value: 5624, unit: 'count' },
+    { id: 'summary-average-order', label: 'Ortalama Sipariş Değeri', value: 436, unit: 'currency' },
+    { id: 'summary-top-product', label: 'En Çok Satılan Ürün', value: 'Espresso', unit: 'text' },
+    { id: 'summary-top-store', label: 'En Yüksek Satış Yapan Mağaza', value: 'Kadıköy Şubesi', unit: 'text' },
+  ],
+  quickActions: [
+    { id: 'add-employee', label: 'Çalışan Ekle', description: 'Ekip yönetim ekranına gidip yeni çalışan tanımla.', href: ROUTES.employees },
+    { id: 'send-notification', label: 'Bildirim Gönder', description: 'Mağazalara veya ekiplere hızlı duyuru oluştur.', href: ROUTES.notifications },
+    { id: 'new-ticket', label: 'Yeni Talep', description: 'Destek veya operasyon için yeni talep akışı başlat.', href: ROUTES.tickets },
+    { id: 'view-stock', label: 'Stoku Görüntüle', description: 'Kritik stok seviyelerini ve hareketleri incele.', href: ROUTES.stock },
+    { id: 'open-cashier', label: 'Kasaya Git', description: 'Anlık sipariş ve ödeme operasyonuna geç.', href: ROUTES.sale },
+  ],
+  insights: [
+    {
+      id: 'insight-1',
+      title: 'Satış hedefi aşıldı',
+      description: 'Kadıköy Şubesi günlük satış hedefinin %20 üzerine çıktı.',
+      timestampLabel: '10 dk önce',
+      tone: 'positive',
+    },
+    {
+      id: 'insight-2',
+      title: 'Yoğun sipariş saati',
+      description: 'Latte ve cold brew siparişleri öğle saatlerinde %35 arttı.',
+      timestampLabel: '30 dk önce',
+      tone: 'info',
+    },
+    {
+      id: 'insight-3',
+      title: 'Stok azalıyor',
+      description: 'Beyoğlu Şubesi\'nde kahve çekirdeği stoku kritik seviyeye indi.',
+      timestampLabel: '1 saat önce',
+      tone: 'warning',
+    },
+    {
+      id: 'insight-4',
+      title: 'Aylık rapor hazır',
+      description: 'Nisan ayı satış performans raporu indirilmeye hazır.',
+      timestampLabel: '3 saat önce',
+      tone: 'report',
+    },
+  ],
+}

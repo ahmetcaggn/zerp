@@ -1,6 +1,16 @@
 'use client'
 
-import React, { useState } from 'react'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
+import InventoryRoundedIcon from '@mui/icons-material/InventoryRounded'
+import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
+import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded'
+import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded'
+import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded'
+import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
+import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded'
+import TableRestaurantRoundedIcon from '@mui/icons-material/TableRestaurantRounded'
 import {
   Box,
   Drawer,
@@ -16,19 +26,10 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
-import InventoryRoundedIcon from '@mui/icons-material/InventoryRounded'
-import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
-import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded'
-import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded'
-import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded'
-import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
-import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded'
-import TableRestaurantRoundedIcon from '@mui/icons-material/TableRestaurantRounded'
 import type { Route } from 'next'
 import { usePathname, useRouter } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
+
 import { appConfig } from '@/core/config/app-config'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
@@ -54,14 +55,14 @@ interface SidebarAction {
 }
 
 const GLOBAL_SIDEBAR_ACTIONS: SidebarAction[] = [
-  { id: 'dashboard', labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon />, href: '/dashboard' },
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon />, href: '/test/dashboard' },
   { id: 'employees', labelKey: 'nav.employees', icon: <PeopleAltRoundedIcon />, href: '/employees' },
   { id: 'tickets', labelKey: 'nav.tickets', icon: <SupportAgentRoundedIcon />, href: '/tickets' },
   { id: 'notifications', labelKey: 'nav.notifications', icon: <NotificationsRoundedIcon />, href: '/notifications' },
 ]
 
 const SHOP_SIDEBAR_ACTIONS: SidebarAction[] = [
-  { id: 'dashboard', labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon />, href: '/dashboard' },
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon />, href: '/test/dashboard' },
   { id: 'catalog', labelKey: 'nav.sale', icon: <MenuBookRoundedIcon />, href: '/catalog' },
   { id: 'tables', labelKey: 'nav.tables', icon: <TableRestaurantRoundedIcon />, href: '/tables' },
   { id: 'sale', labelKey: 'nav.cashier', icon: <PointOfSaleRoundedIcon />, href: '/sale' },
@@ -79,6 +80,10 @@ export function AppSidebar({ locale }: { locale: string }) {
   const isShopScope = scope.mode === 'SHOP'
   const sidebarActions = isShopScope ? SHOP_SIDEBAR_ACTIONS : GLOBAL_SIDEBAR_ACTIONS
 
+  useEffect(() => {
+    setIsExpanded(!isMobile)
+  }, [isMobile])
+
   const handleToggle = () => setIsExpanded((prev) => !prev)
 
   return (
@@ -87,6 +92,7 @@ export function AppSidebar({ locale }: { locale: string }) {
       sx={{
         width: isExpanded ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
         flexShrink: 0,
+        alignSelf: 'stretch',
         whiteSpace: 'nowrap',
         boxSizing: 'border-box',
         transition: theme.transitions.create('width', {
@@ -99,7 +105,10 @@ export function AppSidebar({ locale }: { locale: string }) {
       PaperProps={{
         sx: {
           position: 'relative',
-          height: '100vh',
+          minHeight: '100%',
+          height: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
           overflowX: 'hidden',
           width: isExpanded ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
           borderRight: '2px solid',
@@ -148,7 +157,7 @@ export function AppSidebar({ locale }: { locale: string }) {
       </Box>
 
       {/* Nav items */}
-      <List sx={{ pt: 1 }}>
+      <List sx={{ pt: 1, flexGrow: 1 }}>
         {sidebarActions.map((action) => {
           const hrefWithLocale = `/${locale}${action.href}`
           const isSelected = pathname.startsWith(hrefWithLocale)

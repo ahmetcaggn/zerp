@@ -1,8 +1,9 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useMemo, useState } from 'react'
 
+import { shopDashboardMockShops } from '@/modules/tenant/api/mock-shop-dashboard-data'
 import { useShops } from '@/modules/tenant/hooks/use-shops'
 import type { ShopResponseDto, ShopScope } from '@/modules/tenant/types/shop'
 
@@ -34,8 +35,7 @@ function persistShopId(shopId: string | null): void {
 
 export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
   const { status } = useSession()
-  const [scope, setScope] = useState<ShopScope>({ mode: 'GLOBAL' })
-  const [persistedShopId, setPersistedShopId] = useState<string | null>(null)
+  const [selectedShopId, setSelectedShopId] = useState<string | null>(() => tryReadPersistedShopId())
   const isAuthenticated = status === 'authenticated'
   const { data, isLoading } = useShops(
     {
@@ -45,37 +45,39 @@ export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated,
   )
 
-  const shops = useMemo(() => (isAuthenticated ? (data?.data ?? []) : []), [isAuthenticated, data?.data])
+  const actualShops = useMemo(
+    () => (isAuthenticated ? (data?.data ?? []) : []),
+    [isAuthenticated, data?.data],
+  )
 
-  useEffect(() => {
-    setPersistedShopId(tryReadPersistedShopId())
-  }, [])
-
-  useEffect(() => {
+  const shops = useMemo(() => {
     if (!isAuthenticated) {
-      setScope((prevScope) => (prevScope.mode === 'GLOBAL' ? prevScope : { mode: 'GLOBAL' }))
-      return
+      return []
     }
 
-    if (!persistedShopId || shops.length === 0) return
-    const matchingShop = shops.find((shop) => shop.id === persistedShopId)
-    if (matchingShop) {
-      setScope((prevScope) => {
-        if (
-          prevScope.mode === 'SHOP' &&
-          prevScope.shopId === matchingShop.id &&
-          prevScope.shopName === matchingShop.name
-        ) {
-          return prevScope
-        }
-        return { mode: 'SHOP', shopId: matchingShop.id, shopName: matchingShop.name }
-      })
-      return
+    if (actualShops.length > 0) {
+      return actualShops
     }
 
-    setScope((prevScope) => (prevScope.mode === 'GLOBAL' ? prevScope : { mode: 'GLOBAL' }))
-    persistShopId(null)
-  }, [isAuthenticated, persistedShopId, shops])
+    if (isLoading) {
+      return []
+    }
+
+    return shopDashboardMockShops
+  }, [actualShops, isAuthenticated, isLoading])
+
+  const scope = useMemo<ShopScope>(() => {
+    if (!isAuthenticated || !selectedShopId || shops.length === 0) {
+      return { mode: 'GLOBAL' }
+    }
+
+    const matchingShop = shops.find((shop) => shop.id === selectedShopId)
+    if (!matchingShop) {
+      return { mode: 'GLOBAL' }
+    }
+
+    return { mode: 'SHOP', shopId: matchingShop.id, shopName: matchingShop.name }
+  }, [isAuthenticated, selectedShopId, shops])
 
   const value = useMemo<ShopScopeContextValue>(
     () => ({
@@ -83,11 +85,11 @@ export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
       shops,
       isLoading,
       setGlobalScope: () => {
-        setScope({ mode: 'GLOBAL' })
+        setSelectedShopId(null)
         persistShopId(null)
       },
       setShopScope: (shop) => {
-        setScope({ mode: 'SHOP', shopId: shop.id, shopName: shop.name })
+        setSelectedShopId(shop.id)
         persistShopId(shop.id)
       },
     }),
