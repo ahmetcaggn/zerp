@@ -167,7 +167,13 @@
   "profile": {
     "title": "Profile",
     "permissions": {
-      "title": "Permissions"
+      "title": "Permissions",
+      "viewAll": "View all permissions",
+      "errorLoad": "Failed to load permissions: $error",
+      "total": "Total permissions: $count",
+      "empty": "No permissions yet",
+      "target": "Target: $targetType",
+      "id": "ID: $targetId"
     }
   },
   "permissionViewer": {

@@ -167,7 +167,13 @@
   "profile": {
     "title": "Profil",
     "permissions": {
-      "title": "Yetkiler"
+      "title": "Yetkiler",
+      "viewAll": "Tüm yetkileri gör",
+      "errorLoad": "Yetkiler yüklenemedi: $error",
+      "total": "Toplam yetki: $count",
+      "empty": "Henüz yetki yok",
+      "target": "Hedef: $targetType",
+      "id": "ID: $targetId"
     }
   },
   "permissionViewer": {

@@ -42,8 +42,10 @@ import '../../../feature/employee/single_employee/permissions/create_permission/
 import '../../../feature/employee/single_employee/permissions/cubit_permissions.dart'
     as _i1073;
 import '../../../feature/profile/cubit/cubit_profile.dart' as _i477;
-import '../../../feature/profile/cubit/permission/cubit_profile_permissions.dart'
-    as _i170;
+import '../../../feature/profile/cubit/cubit_view_profile_permissions.dart'
+    as _i73;
+import '../../../feature/profile/permission/cubit_profile_permissions.dart'
+    as _i803;
 import '../../../feature/settings/sections/api_baseurl/cubit_settings_api_baseurl.dart'
     as _i1057;
 import '../../cubit/root_cubit/auth/cubit_auth.dart' as _i200;
@@ -207,8 +209,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i316.CubitCreatePermissionTarget>(
       () => _i316.CubitCreatePermissionTarget(gh<_i545.PermissionService>()),
     );
-    gh.factory<_i170.CubitProfilePermissions>(
-      () => _i170.CubitProfilePermissions(gh<_i545.PermissionService>()),
+    gh.factory<_i73.CubitViewProfilePermissions>(
+      () => _i73.CubitViewProfilePermissions(gh<_i545.PermissionService>()),
+    );
+    gh.factory<_i803.CubitProfilePermissions>(
+      () => _i803.CubitProfilePermissions(gh<_i545.PermissionService>()),
     );
     gh.factoryParam<
       _i632.CubitEditEmployee,
