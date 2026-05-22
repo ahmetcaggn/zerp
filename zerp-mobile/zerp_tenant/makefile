@@ -6,7 +6,7 @@ CONFIG_FILE := openapi-conf.yaml
 GENERATOR := dart-network
 SPECS_DIR := ./openapi-specs
 
-SPEC_BASE_URL ?= https://zerpapi.femrek.dev/
+SPEC_BASE_URL ?= https://api.zeerp.tech/
 
 MERGED_SPEC_URL=$(SPEC_BASE_URL)gateway/v3/api-docs/merged
 MERGED_SPEC_FILE=$(SPECS_DIR)/merged-api-spec.json

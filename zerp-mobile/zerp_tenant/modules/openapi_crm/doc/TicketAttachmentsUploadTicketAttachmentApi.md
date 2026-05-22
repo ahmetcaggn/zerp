@@ -5,7 +5,7 @@
 import 'package:openapi_crm/api.dart';
 ```
 
-All URIs are relative to *https://zerpapi.femrek.dev*
+All URIs are relative to *https://api.zeerp.tech*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------

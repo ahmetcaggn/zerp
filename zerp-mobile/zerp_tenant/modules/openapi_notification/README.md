@@ -44,7 +44,7 @@ import 'package:openapi_notification/api.dart';
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *https://zerpapi.femrek.dev*
+All URIs are relative to *https://api.zeerp.tech*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
