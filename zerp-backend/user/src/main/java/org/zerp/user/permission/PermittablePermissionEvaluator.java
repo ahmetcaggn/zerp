@@ -20,7 +20,7 @@ public class PermittablePermissionEvaluator {
     public <T> Specification<T> filterRead(UUID userId) {
         // Check for TENANT_ROOT access
         boolean hasRootAccess = permissionRepository.existsByUserAndTargetTypeAndActionAndTargetId(
-                userId, PermissionTargetType.TENANT_ROOT, PermissionAction.ADMIN_TENANT, TenantRoot.ID);
+                userId, PermissionTargetType.TENANT_ROOT, PermissionAction.ADMIN, TenantRoot.ID);
 
         if (hasRootAccess) {
             return Specification.unrestricted();
@@ -28,7 +28,7 @@ public class PermittablePermissionEvaluator {
 
         // Check for specific TENANT access
         List<UUID> allowedTenantIds = permissionRepository.findTargetIdsByUserAndTargetTypeAndAction(
-                userId, PermissionTargetType.TENANT, PermissionAction.ADMIN_TENANT);
+                userId, PermissionTargetType.TENANT, PermissionAction.ADMIN);
 
         if (allowedTenantIds.isEmpty()) {
             return (_, _, cb) -> cb.disjunction(); // No access

@@ -29,7 +29,7 @@ public class AdminTenantPermissionEvaluator {
         permittedTenantIds.addAll(commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.TENANT, PermissionAction.UPDATE_TENANT));
         permittedTenantIds.addAll(commonPermissionService.getAllPermitted(
-                userId, PermissionTargetType.TENANT, PermissionAction.ADMIN_TENANT));
+                userId, PermissionTargetType.TENANT, PermissionAction.ADMIN));
 
         if (permittedTenantIds.isEmpty()) {
             return (_, _, cb) -> cb.disjunction();
@@ -42,9 +42,10 @@ public class AdminTenantPermissionEvaluator {
         return hasRootReadScope(userId)
                 || hasTenantPermission(userId, PermissionAction.READ_TENANT, tenantId)
                 || hasTenantPermission(userId, PermissionAction.UPDATE_TENANT, tenantId)
-                || hasTenantPermission(userId, PermissionAction.ADMIN_TENANT, tenantId);
+                || hasTenantPermission(userId, PermissionAction.ADMIN, tenantId);
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean canCreate(UUID userId) {
         return hasRootAdmin(userId);
     }
@@ -52,7 +53,7 @@ public class AdminTenantPermissionEvaluator {
     public boolean canUpdate(UUID userId, UUID tenantId) {
         return hasRootUpdateScope(userId)
                 || hasTenantPermission(userId, PermissionAction.UPDATE_TENANT, tenantId)
-                || hasTenantPermission(userId, PermissionAction.ADMIN_TENANT, tenantId);
+                || hasTenantPermission(userId, PermissionAction.ADMIN, tenantId);
     }
 
     public boolean canPatch(UUID userId, UUID tenantId) {
@@ -61,7 +62,7 @@ public class AdminTenantPermissionEvaluator {
 
     public boolean canDelete(UUID userId, UUID tenantId) {
         return hasRootAdmin(userId)
-                || hasTenantPermission(userId, PermissionAction.ADMIN_TENANT, tenantId);
+                || hasTenantPermission(userId, PermissionAction.ADMIN, tenantId);
     }
 
     private boolean hasTenantPermission(UUID userId, PermissionAction action, UUID tenantId) {
@@ -70,7 +71,7 @@ public class AdminTenantPermissionEvaluator {
     }
 
     private boolean hasRootAdmin(UUID userId) {
-        return commonPermissionService.hasRootPermission(userId, PermissionAction.ADMIN_TENANT);
+        return commonPermissionService.hasRootPermission(userId, PermissionAction.ADMIN);
     }
 
     private boolean hasRootReadScope(UUID userId) {

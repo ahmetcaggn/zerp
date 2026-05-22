@@ -59,7 +59,7 @@ public class AdminShopPermissionEvaluator {
         return hasRootReadScope(userId)
                 || hasTenantPermission(userId, PermissionAction.READ_TENANT, tenantId)
                 || hasTenantPermission(userId, PermissionAction.UPDATE_TENANT, tenantId)
-                || hasTenantPermission(userId, PermissionAction.ADMIN_TENANT, tenantId)
+                || hasTenantPermission(userId, PermissionAction.ADMIN, tenantId)
                 || !permissionRepository.findAllByUserAndShopHierarchy(userId, PermissionAction.READ_SHOP, shopId, tenantId).isEmpty();
     }
 
@@ -69,7 +69,7 @@ public class AdminShopPermissionEvaluator {
         }
         return hasRootWriteScope(userId)
                 || hasTenantPermission(userId, PermissionAction.UPDATE_TENANT, tenantId)
-                || hasTenantPermission(userId, PermissionAction.ADMIN_TENANT, tenantId);
+                || hasTenantPermission(userId, PermissionAction.ADMIN, tenantId);
     }
 
     public boolean canUpdate(UUID userId, UUID tenantId) {
@@ -85,7 +85,7 @@ public class AdminShopPermissionEvaluator {
             return false;
         }
         return hasRootAdmin(userId)
-                || hasTenantPermission(userId, PermissionAction.ADMIN_TENANT, tenantId);
+                || hasTenantPermission(userId, PermissionAction.ADMIN, tenantId);
     }
 
     private Set<UUID> collectReadableTenantIds(UUID userId) {
@@ -99,7 +99,7 @@ public class AdminShopPermissionEvaluator {
                 userId, PermissionTargetType.TENANT, PermissionAction.UPDATE_TENANT
         ));
         readableTenantIds.addAll(commonPermissionService.getAllPermitted(
-                userId, PermissionTargetType.TENANT, PermissionAction.ADMIN_TENANT
+                userId, PermissionTargetType.TENANT, PermissionAction.ADMIN
         ));
         return readableTenantIds;
     }
@@ -111,7 +111,7 @@ public class AdminShopPermissionEvaluator {
     }
 
     private boolean hasRootAdmin(UUID userId) {
-        return commonPermissionService.hasRootPermission(userId, PermissionAction.ADMIN_TENANT);
+        return commonPermissionService.hasRootPermission(userId, PermissionAction.ADMIN);
     }
 
     private boolean hasRootReadScope(UUID userId) {

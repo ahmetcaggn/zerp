@@ -12,6 +12,7 @@ import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
 import org.zerp.common.permission.repository.PermittableRepository;
+import org.zerp.common.permission.service.CommonPermissionService;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.user.repository.UserRepository;
 
@@ -25,6 +26,7 @@ public class PermissionPermissionEvaluator {
     private final CurrentTenantIdResolver tenantIdResolver;
     private final UserRepository userRepository;
     private final PermittableRepository permittableRepository;
+    private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID userId, Permission target) {
         log.debug("Checking if user {} can read permission {} for user {}",
@@ -83,7 +85,7 @@ public class PermissionPermissionEvaluator {
         var readableTenantIds = permissionRepository.findTargetIdsByUserAndTargetTypeAndAction(
                 userId,
                 PermissionTargetType.TENANT,
-                PermissionAction.ADMIN_TENANT
+                PermissionAction.ADMIN
         );
 
         log.debug("user {} can read permissions for {} users via READ_PERMISSION",
@@ -164,19 +166,14 @@ public class PermissionPermissionEvaluator {
     }
 
     private boolean isAdminTenantOnRoot(UUID userId) {
-        return permissionRepository.existsByUserAndTargetTypeAndActionAndTargetId(
-                userId,
-                PermissionTargetType.TENANT_ROOT,
-                PermissionAction.ADMIN_TENANT,
-                TenantRoot.ID
-        );
+        return commonPermissionService.hasRootPermission(userId, PermissionAction.ADMIN);
     }
 
     private boolean isAdminTenant(UUID userId, UUID tenantId) {
         return permissionRepository.existsByUserAndTargetTypeAndActionAndTargetId(
                 userId,
                 PermissionTargetType.TENANT,
-                PermissionAction.ADMIN_TENANT,
+                PermissionAction.ADMIN,
                 tenantId
         );
     }
