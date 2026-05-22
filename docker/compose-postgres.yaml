@@ -1,9 +1,10 @@
 services:
   postgres:
     image: postgres:17
-    container_name: zerp-postgres
+    container_name: zerp_db
+    hostname: zerp_db
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -11,11 +12,14 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
+      - vpn-network
       - zerp-net
 
 volumes:
   postgres_data:
 
 networks:
+  vpn-network:
+    external: true
   zerp-net:
     external: true

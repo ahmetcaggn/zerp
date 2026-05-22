@@ -1,5 +1,6 @@
 services:
   eureka:
+    image: zerp-eureka:latest
     build:
       context: ..
       dockerfile: zerp-backend/docker/jre25.dockerfile
@@ -7,8 +8,6 @@ services:
         SERVICE: eureka
     container_name: zerp-eureka
     hostname: eureka
-    ports:
-      - "${EUREKA_PORT}:8761"
     environment:
       SERVICE: eureka
       MODULE_NAME: eureka
@@ -19,9 +18,12 @@ services:
     volumes:
       - ../zerp-backend/local/docker-config/eureka.docker.properties:/config/eureka.properties:ro
     networks:
+      - vpn-network
+      - cloudflare_tunnel_network
       - zerp-net
 
   aggregated:
+    image: zerp-aggregated:latest
     build:
       context: ..
       dockerfile: zerp-backend/docker/simple_jre25.dockerfile
@@ -86,6 +88,7 @@ services:
       - zerp-net
 
   gateway:
+    image: zerp-gateway:latest
     build:
       context: ..
       dockerfile: zerp-backend/docker/jre25.dockerfile
@@ -93,8 +96,6 @@ services:
         SERVICE: gateway
     container_name: zerp-gateway
     hostname: gateway
-    ports:
-      - "${GATEWAY_PORT}:8080"
     environment:
       SERVICE: gateway
       MODULE_NAME: gateway
@@ -111,8 +112,13 @@ services:
       - eureka
       - aggregated
     networks:
+      - cloudflare_tunnel_network
       - zerp-net
 
 networks:
+  vpn-network:
+    external: true
+  cloudflare_tunnel_network:
+    external: true
   zerp-net:
     external: true

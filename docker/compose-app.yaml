@@ -1,5 +1,6 @@
 services:
   eureka:
+    image: zerp-eureka:latest
     build:
       context: ..
       dockerfile: zerp-backend/docker/jre25.dockerfile
@@ -22,6 +23,7 @@ services:
       - zerp-net
 
   crm:
+    image: zerp-crm:latest
     build:
       context: ..
       dockerfile: zerp-backend/docker/jre25.dockerfile
@@ -58,6 +60,7 @@ services:
       - zerp-net
 
   employee:
+    image: zerp-employee:latest
     build:
       context: ..
       dockerfile: zerp-backend/docker/jre25.dockerfile
@@ -88,6 +91,7 @@ services:
       - zerp-net
 
   notification:
+    image: zerp-notification:latest
     build:
       context: ..
       dockerfile: zerp-backend/docker/jre25.dockerfile
@@ -124,6 +128,7 @@ services:
       - zerp-net
 
   resource:
+    image: zerp-resource:latest
     build:
       context: ..
       dockerfile: zerp-backend/docker/jre25.dockerfile
@@ -154,6 +159,7 @@ services:
       - zerp-net
 
   sale:
+    image: zerp-sale:latest
     build:
       context: ..
       dockerfile: zerp-backend/docker/jre25.dockerfile
@@ -184,6 +190,7 @@ services:
       - zerp-net
 
   suggestion:
+    image: zerp-suggestion:latest
     build:
       context: ..
       dockerfile: zerp-backend/docker/jre25.dockerfile
@@ -214,6 +221,7 @@ services:
       - zerp-net
 
   user:
+    image: zerp-user:latest
     build:
       context: ..
       dockerfile: zerp-backend/docker/jre25.dockerfile
@@ -248,6 +256,7 @@ services:
       - zerp-net
 
   gateway:
+    image: zerp-gateway:latest
     build:
       context: ..
       dockerfile: zerp-backend/docker/jre25.dockerfile
