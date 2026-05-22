@@ -31,6 +31,15 @@ class CubitSettingsApiBaseUrl extends Cubit<StateSettingsApiBaseUrl>
           ? globalState.currentApiHost
           : ApiUrlHelper.defaultBaseUrl;
 
+      emit(
+        state.copyWith(
+          isLoading: true,
+          isCheckingApiStatus: true,
+          currentApiHost: currentHost,
+          predefinedUrls: ApiUrlHelper.allBaseUrls,
+        ),
+      );
+
       // Check status on the loaded base URL
       final status = await _apiStatusService.checkApiStatus();
 

@@ -207,9 +207,9 @@ class _ActiveApiHostCard extends StatelessWidget {
                       color: status == ActuatorStatus.up
                           ? Colors.greenAccent
                           : status == ActuatorStatus.down ||
-                                  status == ActuatorStatus.outOfService
-                              ? Colors.redAccent
-                              : Colors.orangeAccent,
+                                status == ActuatorStatus.outOfService
+                          ? Colors.redAccent
+                          : Colors.orangeAccent,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -218,9 +218,9 @@ class _ActiveApiHostCard extends StatelessWidget {
                     status == ActuatorStatus.up
                         ? t.settings.statusConnected
                         : status == ActuatorStatus.down ||
-                                status == ActuatorStatus.outOfService
-                            ? t.settings.statusDisconnected
-                            : t.settings.statusUnknown,
+                              status == ActuatorStatus.outOfService
+                        ? t.settings.statusDisconnected
+                        : t.settings.statusUnknown,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onPrimary.withAlpha(180),
                     ),
@@ -383,7 +383,7 @@ class _SaveButton extends StatelessWidget {
     return SizedBox(
       height: 56,
       child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
+        onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: theme.colorScheme.primary,
           foregroundColor: theme.colorScheme.onPrimary,
@@ -392,29 +392,31 @@ class _SaveButton extends StatelessWidget {
           ),
           elevation: 2,
         ),
-        child: isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.save_rounded),
+            const SizedBox(width: 12),
+            Text(
+              t.common.save,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (isLoading) ...[
+              const SizedBox(width: 16),
+              const SizedBox(
+                width: 20,
+                height: 20,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
+                  strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation(Colors.white),
                 ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.save_rounded),
-                  const SizedBox(width: 12),
-                  Text(
-                    t.common.save,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
               ),
+            ],
+          ],
+        ),
       ),
     );
   }

@@ -15,7 +15,10 @@ final class ApiNetworkInvoker extends DioNetworkInvoker
   ApiNetworkInvoker(this._cubitAuth, this._authStorageService)
     : super.fromDio(
         Dio(
-          BaseOptions(baseUrl: ApiUrlHelper.defaultBaseUrl),
+          BaseOptions(
+            baseUrl: ApiUrlHelper.defaultBaseUrl,
+            connectTimeout: const Duration(seconds: 15),
+          ),
         ),
       ) {
     dio.interceptors.add(_DioLoggerInterceptor());
