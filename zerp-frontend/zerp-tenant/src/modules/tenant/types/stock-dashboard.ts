@@ -45,6 +45,7 @@ export interface StockDashboardMovementRow {
   resourceName: string
   type: StockDashboardMovementType
   typeLabel: string
+  movementDate: string
   quantityLabel: string
   actor: string
   timestampLabel: string

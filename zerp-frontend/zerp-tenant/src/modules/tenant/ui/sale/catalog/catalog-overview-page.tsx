@@ -41,6 +41,7 @@ import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
+import { mockCatalogByShopId } from '../../../api/mock-catalog-data'
 import { useDeleteMenu, useMenus, usePatchMenu } from '../../../hooks/use-menus'
 import { useDeleteProduct, useProducts } from '../../../hooks/use-products'
 import { useUpdateShopDefaultMenuLanguage } from '../../../hooks/use-shops'
@@ -84,8 +85,20 @@ export function CatalogOverviewPage() {
     isPending: isUpdatingDefaultLanguage,
   } = useUpdateShopDefaultMenuLanguage()
 
-  const menus = menusResult?.data ?? []
-  const products = productsResult?.data ?? []
+  const mockCatalog = selectedShopId ? mockCatalogByShopId[selectedShopId] : undefined
+  const fallbackMenus = mockCatalog?.menus ?? []
+  const fallbackProducts = mockCatalog?.products ?? []
+  const hasRealMenus = (menusResult?.data?.length ?? 0) > 0
+  const hasRealProducts = (productsResult?.data?.length ?? 0) > 0
+
+  const menus = hasRealMenus ? menusResult?.data ?? [] : fallbackMenus
+  const products = hasRealProducts
+    ? productsResult?.data ?? []
+    : fallbackProducts.slice(
+        productPage * productRowsPerPage,
+        productPage * productRowsPerPage + productRowsPerPage,
+      )
+  const productTotal = hasRealProducts ? productsResult?.total ?? 0 : fallbackProducts.length
 
   function goTo(path: string) {
     router.push(withLocale(locale, path) as Route)
@@ -367,7 +380,7 @@ export function CatalogOverviewPage() {
 
               <TablePagination
                 component="div"
-                count={productsResult?.total ?? 0}
+                count={productTotal}
                 page={productPage}
                 onPageChange={(_, newPage) => setProductPage(newPage)}
                 rowsPerPage={productRowsPerPage}

@@ -24,6 +24,7 @@ import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
+import { findMockMenuById, findMockMenuCategoriesByMenuId } from '../../../api/mock-catalog-data'
 import { useDeleteMenuCategory, useMenuCategories } from '../../../hooks/use-menu-categories'
 import { useMenu } from '../../../hooks/use-menus'
 
@@ -43,7 +44,10 @@ export function MenuCategoriesPage({ menuId }: Props) {
     filter: { 'menu.id': menuId },
   })
 
-  const categories = categoriesResult?.data ?? []
+  const fallbackMenu = findMockMenuById(menuId)
+  const fallbackCategories = findMockMenuCategoriesByMenuId(menuId)
+  const resolvedMenu = menu ?? fallbackMenu
+  const categories = (categoriesResult?.data?.length ?? 0) > 0 ? categoriesResult?.data ?? [] : fallbackCategories
 
   const { mutate: deleteCategory } = useDeleteMenuCategory()
 
@@ -66,7 +70,7 @@ export function MenuCategoriesPage({ menuId }: Props) {
     )
   }
 
-  if (!menu) {
+  if (!resolvedMenu) {
     return (
       <Box sx={{ p: 4 }}>
         <Typography color="text.secondary">{t('sale.menu.emptyState')}</Typography>
@@ -98,10 +102,10 @@ export function MenuCategoriesPage({ menuId }: Props) {
       <Card variant="outlined">
         <CardContent>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            {menu.name}
+            {resolvedMenu.name}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            {menu.description || t('sale.catalog.noDescription')}
+            {resolvedMenu.description || t('sale.catalog.noDescription')}
           </Typography>
         </CardContent>
       </Card>

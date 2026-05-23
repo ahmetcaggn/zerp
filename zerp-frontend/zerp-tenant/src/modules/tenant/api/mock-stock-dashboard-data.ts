@@ -75,10 +75,10 @@ export const stockDashboardMockByShopId: Record<string, StockDashboardData> = {
       { id: 'res-8', name: 'Yeşil Çay', category: 'Çay', categoryColor: '#65a30d', unitType: 'kg', quantity: 7, reorderThreshold: 14, unitPrice: 125, stockValue: 875, status: 'critical', statusLabel: 'Kritik' },
     ],
     movements: [
-      { id: 'mov-1', resourceName: 'Espresso Çekirdeği', type: 'purchase', typeLabel: 'Satın Alma', quantityLabel: '+16 kg', actor: 'Depo Sorumlusu', timestampLabel: '17 Mayıs 14:20', notes: 'Tedarik giriş' },
-      { id: 'mov-2', resourceName: 'Tam Yağlı Süt', type: 'consumption', typeLabel: 'Tüketim', quantityLabel: '-24 lt', actor: 'Satış Operasyonu', timestampLabel: '17 Mayıs 12:10', notes: 'Günlük kullanım' },
-      { id: 'mov-3', resourceName: 'Kağıt Bardak 12oz', type: 'adjustment', typeLabel: 'Düzeltme', quantityLabel: '-12 adet', actor: 'Vardiya Müdürü', timestampLabel: '16 Mayıs 19:45', notes: 'Sayım farkı düzeltildi' },
-      { id: 'mov-4', resourceName: 'Vanilya Şurup', type: 'purchase', typeLabel: 'Satın Alma', quantityLabel: '+6 lt', actor: 'Satın Alma', timestampLabel: '16 Mayıs 10:15', notes: 'Acil replenishment' },
+      { id: 'mov-1', resourceName: 'Espresso Çekirdeği', type: 'purchase', typeLabel: 'Satın Alma', movementDate: '2026-05-17', quantityLabel: '+16 kg', actor: 'Depo Sorumlusu', timestampLabel: '17 Mayıs 14:20', notes: 'Tedarik giriş' },
+      { id: 'mov-2', resourceName: 'Tam Yağlı Süt', type: 'consumption', typeLabel: 'Tüketim', movementDate: '2026-05-17', quantityLabel: '-24 lt', actor: 'Satış Operasyonu', timestampLabel: '17 Mayıs 12:10', notes: 'Günlük kullanım' },
+      { id: 'mov-3', resourceName: 'Kağıt Bardak 12oz', type: 'adjustment', typeLabel: 'Düzeltme', movementDate: '2026-05-16', quantityLabel: '-12 adet', actor: 'Vardiya Müdürü', timestampLabel: '16 Mayıs 19:45', notes: 'Sayım farkı düzeltildi' },
+      { id: 'mov-4', resourceName: 'Vanilya Şurup', type: 'purchase', typeLabel: 'Satın Alma', movementDate: '2026-05-16', quantityLabel: '+6 lt', actor: 'Satın Alma', timestampLabel: '16 Mayıs 10:15', notes: 'Acil replenishment' },
     ],
     counts: [
       { id: 'count-1', countDate: '2026-05-17', countDateLabel: '17 Mayıs 2026', statusLabel: 'Tamamlandı', status: 'completed', discrepancyLabel: '2 fark bulundu', responsible: 'Neslihan A.' },
@@ -145,8 +145,8 @@ export const stockDashboardMockByShopId: Record<string, StockDashboardData> = {
       { id: 'kad-4', name: 'Cheesecake Dilimi', category: 'Tatlı', categoryColor: '#f59e0b', unitType: 'adet', quantity: 22, reorderThreshold: 10, unitPrice: 28, stockValue: 616, status: 'healthy', statusLabel: 'Yeterli' },
     ],
     movements: [
-      { id: 'kad-mov-1', resourceName: 'Yulaf Sütü', type: 'purchase', typeLabel: 'Satın Alma', quantityLabel: '+10 lt', actor: 'Satın Alma', timestampLabel: '17 Mayıs 11:30', notes: 'Şube takviyesi' },
-      { id: 'kad-mov-2', resourceName: 'Mocha Sos', type: 'adjustment', typeLabel: 'Düzeltme', quantityLabel: '-2 kg', actor: 'Mağaza Müdürü', timestampLabel: '17 Mayıs 09:00', notes: 'Hasarlı ürün ayrıldı' },
+      { id: 'kad-mov-1', resourceName: 'Yulaf Sütü', type: 'purchase', typeLabel: 'Satın Alma', movementDate: '2026-05-17', quantityLabel: '+10 lt', actor: 'Satın Alma', timestampLabel: '17 Mayıs 11:30', notes: 'Şube takviyesi' },
+      { id: 'kad-mov-2', resourceName: 'Mocha Sos', type: 'adjustment', typeLabel: 'Düzeltme', movementDate: '2026-05-17', quantityLabel: '-2 kg', actor: 'Mağaza Müdürü', timestampLabel: '17 Mayıs 09:00', notes: 'Hasarlı ürün ayrıldı' },
     ],
     counts: [
       { id: 'kad-count-1', countDate: '2026-05-15', countDateLabel: '15 Mayıs 2026', statusLabel: 'Tamamlandı', status: 'completed', discrepancyLabel: 'Fark yok', responsible: 'Neslihan A.' },

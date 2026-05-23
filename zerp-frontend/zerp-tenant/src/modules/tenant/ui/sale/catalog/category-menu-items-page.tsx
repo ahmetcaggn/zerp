@@ -30,6 +30,11 @@ import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
+import {
+  findMockCategoryById,
+  findMockMenuItemsByCategoryId,
+  findMockProductsByShopId,
+} from '../../../api/mock-catalog-data'
 import { useMenuCategory } from '../../../hooks/use-menu-categories'
 import { useDeleteMenuItem, useMenuItems } from '../../../hooks/use-menu-items'
 import { useProducts } from '../../../hooks/use-products'
@@ -64,9 +69,17 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
     ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
   })
 
+  const fallbackCategory = findMockCategoryById(categoryId)
+  const fallbackItems = findMockMenuItemsByCategoryId(categoryId)
+  const fallbackProducts = selectedShopId ? findMockProductsByShopId(selectedShopId) : []
+  const resolvedCategory = category ?? fallbackCategory
+  const resolvedProducts = (productsResult?.data?.length ?? 0) > 0 ? productsResult?.data ?? [] : fallbackProducts
+  const items = (menuItemsResult?.data?.length ?? 0) > 0 ? menuItemsResult?.data ?? [] : fallbackItems
+  const itemsTotal = menuItemsResult?.total ?? fallbackItems.length
+
   const productNameMap = useMemo(
-    () => new Map((productsResult?.data ?? []).map((product) => [product.id, product.name])),
-    [productsResult?.data],
+    () => new Map(resolvedProducts.map((product) => [product.id, product.name])),
+    [resolvedProducts],
   )
 
   const { mutate: deleteMenuItem } = useDeleteMenuItem()
@@ -90,34 +103,31 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
     )
   }
 
-  if (!category) {
+  if (!resolvedCategory) {
     return (
       <Box sx={{ p: 4 }}>
         <Typography color="text.secondary">{t('sale.category.emptyState')}</Typography>
       </Box>
     )
   }
-
-  const items = menuItemsResult?.data ?? []
-
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, width: '100%', display: 'grid', gap: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
         <Button
           startIcon={<ArrowBackIcon />}
-          onClick={() => goTo(`${ROUTES.catalog}/menus/${category.menuId}`)}
+          onClick={() => goTo(`${ROUTES.catalog}/menus/${resolvedCategory.menuId}`)}
         >
           {t('sale.catalog.backToMenu')}
         </Button>
 
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="outlined" onClick={() => goTo(`${ROUTES.catalog}/categories/${category.id}/edit`)}>
+          <Button variant="outlined" onClick={() => goTo(`${ROUTES.catalog}/categories/${resolvedCategory.id}/edit`)}>
             {t('sale.category.editButton')}
           </Button>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => goTo(`${ROUTES.catalog}/menu-items/new?categoryId=${category.id}`)}
+            onClick={() => goTo(`${ROUTES.catalog}/menu-items/new?categoryId=${resolvedCategory.id}`)}
           >
             {t('sale.menuItem.createButton')}
           </Button>
@@ -127,10 +137,10 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
       <Card variant="outlined">
         <CardContent>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            {category.name}
+            {resolvedCategory.name}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            {category.description || t('sale.catalog.noDescription')}
+            {resolvedCategory.description || t('sale.catalog.noDescription')}
           </Typography>
         </CardContent>
       </Card>
@@ -209,7 +219,7 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
 
           <TablePagination
             component="div"
-            count={menuItemsResult?.total ?? 0}
+            count={itemsTotal}
             page={page}
             onPageChange={(_, newPage) => setPage(newPage)}
             rowsPerPage={rowsPerPage}

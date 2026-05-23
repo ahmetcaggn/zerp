@@ -1,8 +1,11 @@
 'use client'
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded'
 import {
+  alpha,
   Box,
   Button,
   Card,
@@ -13,9 +16,12 @@ import {
   FormHelperText,
   InputLabel,
   MenuItem,
+  Paper,
   Select,
+  Stack,
   TextField,
   Typography,
+  useTheme,
 } from '@mui/material'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
@@ -101,6 +107,7 @@ function MenuItemPreviewCard({
   selectedProducts: string[]
 }) {
   const { t } = useI18n()
+  const theme = useTheme()
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null)
 
   const resolvedImage = failedImageSrc === imageSrc ? PREVIEW_IMAGE_FALLBACK : imageSrc
@@ -112,19 +119,42 @@ function MenuItemPreviewCard({
     : '₺0.00'
 
   return (
-    <Card variant="outlined" sx={{ position: { md: 'sticky' }, top: { md: 24 } }}>
+    <Card
+      variant="outlined"
+      sx={{
+        position: { md: 'sticky' },
+        top: { md: 24 },
+        borderRadius: 6,
+        overflow: 'hidden',
+        borderColor: alpha('#2563eb', theme.palette.mode === 'dark' ? 0.24 : 0.14),
+        background: theme.palette.mode === 'dark'
+          ? 'radial-gradient(circle at top right, rgba(37,99,235,0.16), transparent 26%), linear-gradient(145deg, rgba(15,23,42,0.98), rgba(17,24,39,0.92))'
+          : 'radial-gradient(circle at top right, rgba(37,99,235,0.10), transparent 26%), linear-gradient(145deg, rgba(255,255,255,0.98), rgba(248,250,252,0.94))',
+        boxShadow: theme.palette.mode === 'dark'
+          ? '0 20px 48px rgba(2, 6, 23, 0.34)'
+          : '0 18px 40px rgba(15, 23, 42, 0.08)',
+      }}
+    >
       <CardContent>
         <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
           {t('sale.menuItem.preview.title')}
         </Typography>
 
-        <Card variant="outlined" sx={{ p: 1 }}>
+        <Card
+          variant="outlined"
+          sx={{
+            p: 1,
+            borderRadius: 4,
+            borderColor: alpha('#2563eb', 0.12),
+            backgroundColor: alpha(theme.palette.background.paper, theme.palette.mode === 'dark' ? 0.58 : 0.84),
+          }}
+        >
           <Box
             component="img"
             src={resolvedImage}
             alt={displayName}
             onError={() => setFailedImageSrc(imageSrc)}
-            sx={{ width: '100%', height: 220, objectFit: 'cover', borderRadius: 1 }}
+            sx={{ width: '100%', height: 220, objectFit: 'cover', borderRadius: 2.5 }}
           />
 
           <Box sx={{ p: 1 }}>
@@ -147,10 +177,23 @@ function MenuItemPreviewCard({
 
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
               {selectedProducts.length === 0 ? (
-                <Chip size="small" variant="outlined" label={t('sale.menuItem.preview.noProducts')} />
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  label={t('sale.menuItem.preview.noProducts')}
+                  sx={{ borderRadius: 999 }}
+                />
               ) : (
                 selectedProducts.map((productName) => (
-                  <Chip key={productName} size="small" label={productName} />
+                  <Chip
+                    key={productName}
+                    size="small"
+                    label={productName}
+                    sx={{
+                      borderRadius: 999,
+                      backgroundColor: alpha('#2563eb', 0.08),
+                    }}
+                  />
                 ))
               )}
             </Box>
@@ -180,24 +223,28 @@ function MenuItemQuickActions({
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-      <Button startIcon={<ArrowBackIcon />} onClick={() => onNavigate(categoriesPath)}>
+      <Button
+        startIcon={<ArrowBackIcon />}
+        onClick={() => onNavigate(categoriesPath)}
+        sx={{ borderRadius: 999, px: 1.6, py: 0.85 }}
+      >
         {t('sale.catalog.backToCategories')}
       </Button>
 
       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-        <Button size="small" variant="outlined" onClick={() => onNavigate(ROUTES.catalog)}>
+        <Button size="small" variant="outlined" sx={{ borderRadius: 999 }} onClick={() => onNavigate(ROUTES.catalog)}>
           {t('sale.catalog.quickCatalog')}
         </Button>
-        <Button size="small" variant="outlined" onClick={() => onNavigate(categoriesPath)}>
+        <Button size="small" variant="outlined" sx={{ borderRadius: 999 }} onClick={() => onNavigate(categoriesPath)}>
           {t('sale.catalog.quickCategories')}
         </Button>
         {menuId && (
-          <Button size="small" variant="outlined" onClick={() => onNavigate(`${ROUTES.catalogMenus}/${menuId}`)}>
+          <Button size="small" variant="outlined" sx={{ borderRadius: 999 }} onClick={() => onNavigate(`${ROUTES.catalogMenus}/${menuId}`)}>
             {t('sale.catalog.quickMenu')}
           </Button>
         )}
         {categoryId && (
-          <Button size="small" variant="outlined" onClick={() => onNavigate(`${ROUTES.catalog}/categories/${categoryId}`)}>
+          <Button size="small" variant="outlined" sx={{ borderRadius: 999 }} onClick={() => onNavigate(`${ROUTES.catalog}/categories/${categoryId}`)}>
             {t('sale.catalog.quickCategory')}
           </Button>
         )}
@@ -233,6 +280,7 @@ function MenuItemFormCard({
 }) {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const theme = useTheme()
 
   const [name, setName] = useState(initial.name)
   const [description, setDescription] = useState(initial.description)
@@ -277,6 +325,21 @@ function MenuItemFormCard({
 
   const previewImageSrc = localPreviewUrl ?? buildPublicImageUrl(imageId)
   const isSubmitDisabled = isPending || isUploadingImage
+  const accentMain = '#2563eb'
+  const accentDeep = '#163c8f'
+  const fieldSx = {
+    '& .MuiOutlinedInput-root': {
+      borderRadius: 3,
+      backgroundColor: alpha(theme.palette.background.paper, theme.palette.mode === 'dark' ? 0.56 : 0.82),
+      transition: 'box-shadow .18s ease, border-color .18s ease, transform .18s ease',
+      '&:hover': {
+        boxShadow: `0 10px 24px ${alpha(accentMain, 0.08)}`,
+      },
+      '&.Mui-focused': {
+        boxShadow: `0 14px 30px ${alpha(accentMain, 0.12)}`,
+      },
+    },
+  } as const
 
   async function handleImageSelected(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFile = event.target.files?.[0]
@@ -310,11 +373,46 @@ function MenuItemFormCard({
   return (
     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1.25fr) minmax(320px, 0.75fr)' }, gap: 3 }}>
       <Box sx={{ display: 'grid', gap: 2 }}>
-        <Card variant="outlined">
-          <CardContent>
-            <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
-              {title}
-            </Typography>
+        <Card
+          variant="outlined"
+          sx={{
+            overflow: 'hidden',
+            borderRadius: 6,
+            borderColor: alpha(accentMain, theme.palette.mode === 'dark' ? 0.24 : 0.16),
+            background: theme.palette.mode === 'dark'
+              ? 'radial-gradient(circle at top left, rgba(37,99,235,0.16), transparent 26%), linear-gradient(145deg, rgba(15,23,42,0.98), rgba(17,24,39,0.92))'
+              : 'radial-gradient(circle at top left, rgba(37,99,235,0.12), transparent 26%), linear-gradient(145deg, rgba(255,255,255,0.98), rgba(247,250,252,0.94))',
+            boxShadow: theme.palette.mode === 'dark'
+              ? '0 24px 60px rgba(2, 6, 23, 0.34)'
+              : '0 24px 56px rgba(15, 23, 42, 0.08)',
+          }}
+        >
+          <CardContent sx={{ p: { xs: 2.5, md: 4 } }}>
+            <Stack spacing={3}>
+              <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }}>
+                <Box
+                  sx={{
+                    width: 58,
+                    height: 58,
+                    borderRadius: '50%',
+                    display: 'grid',
+                    placeItems: 'center',
+                    bgcolor: alpha(accentMain, 0.12),
+                    color: accentDeep,
+                    boxShadow: `0 0 0 10px ${alpha(accentMain, 0.06)}`,
+                  }}
+                >
+                  <RestaurantMenuRoundedIcon />
+                </Box>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="h4" sx={{ fontWeight: 900, letterSpacing: '-0.03em', mb: 0.5 }}>
+                    {title}
+                  </Typography>
+                  <Typography color="text.secondary">
+                    Menu ogesini tum bagli urunleriyle birlikte profesyonel bir yuzeyde yonetin.
+                  </Typography>
+                </Box>
+              </Stack>
 
             <form
               onSubmit={(e) => {
@@ -334,13 +432,14 @@ function MenuItemFormCard({
                 })
               }}
             >
-              <Box sx={{ display: 'grid', gap: 2 }}>
+              <Stack spacing={2.25}>
                 <TextField
                   label={t('sale.menuItem.form.name')}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
                   fullWidth
+                  sx={fieldSx}
                 />
 
                 <TextField
@@ -350,6 +449,7 @@ function MenuItemFormCard({
                   multiline
                   rows={3}
                   fullWidth
+                  sx={fieldSx}
                 />
 
                 <TextField
@@ -360,9 +460,10 @@ function MenuItemFormCard({
                   required
                   fullWidth
                   inputProps={{ min: 0, step: '0.01' }}
+                  sx={fieldSx}
                 />
 
-                <Box sx={{ display: 'flex', gap: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <TextField
                     label={t('sale.menuItem.form.calories')}
                     type="number"
@@ -370,12 +471,14 @@ function MenuItemFormCard({
                     onChange={(e) => setCalories(e.target.value)}
                     fullWidth
                     inputProps={{ min: 0, step: '1' }}
+                    sx={fieldSx}
                   />
                   <TextField
                     label={t('sale.menuItem.form.weight')}
                     value={weight}
                     onChange={(e) => setWeight(e.target.value)}
                     fullWidth
+                    sx={fieldSx}
                   />
                 </Box>
 
@@ -385,6 +488,7 @@ function MenuItemFormCard({
                   onChange={(e) => setIngredientsInput(e.target.value)}
                   fullWidth
                   helperText={t('sale.menuItem.form.listInputHint')}
+                  sx={fieldSx}
                 />
 
                 <TextField
@@ -393,14 +497,26 @@ function MenuItemFormCard({
                   onChange={(e) => setAllergensInput(e.target.value)}
                   fullWidth
                   helperText={t('sale.menuItem.form.listInputHint')}
+                  sx={fieldSx}
                 />
 
-                <Box sx={{ display: 'grid', gap: 1 }}>
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    borderRadius: 4,
+                    p: 2,
+                    borderColor: alpha(theme.palette.text.primary, 0.08),
+                    backgroundColor: alpha(theme.palette.background.paper, theme.palette.mode === 'dark' ? 0.52 : 0.74),
+                    backdropFilter: 'blur(8px)',
+                  }}
+                >
+                  <Stack spacing={1}>
                   <Button
                     component="label"
                     variant="outlined"
                     startIcon={<CloudUploadIcon />}
                     disabled={isUploadingImage || isPending}
+                    sx={{ borderRadius: 999, py: 1.2 }}
                   >
                     {isUploadingImage ? t('sale.menuItem.form.imageUploading') : t('sale.menuItem.form.imageUpload')}
                     <input
@@ -415,17 +531,27 @@ function MenuItemFormCard({
                       ? `${t('sale.menuItem.form.imageReady')}: ${imageId}`
                       : t('sale.menuItem.form.imageHint')}
                   </FormHelperText>
-                </Box>
+                  </Stack>
+                </Paper>
 
                 {lockCategory ? (
-                  <Box>
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      borderRadius: 4,
+                      p: 2,
+                      borderColor: alpha(theme.palette.text.primary, 0.08),
+                      backgroundColor: alpha(theme.palette.background.paper, theme.palette.mode === 'dark' ? 0.52 : 0.74),
+                      backdropFilter: 'blur(8px)',
+                    }}
+                  >
                     <Typography variant="subtitle2">{t('sale.menuItem.form.categoryId')}</Typography>
                     <Typography variant="body2" color="text.secondary">
                       {selectedCategoryLabel || t('sale.catalog.selectedCategoryLabel')}
                     </Typography>
-                  </Box>
+                  </Paper>
                 ) : (
-                  <FormControl fullWidth required>
+                  <FormControl fullWidth required sx={fieldSx}>
                     <InputLabel>{t('sale.menuItem.form.categoryId')}</InputLabel>
                     <Select
                       value={categoryId}
@@ -451,21 +577,50 @@ function MenuItemFormCard({
                   disabled={isSubmitDisabled}
                 />
 
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, pt: 1 }}>
-                  <Button onClick={() => onCancel(categoryId)} disabled={isSubmitDisabled}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.25, pt: 0.5, flexWrap: 'wrap' }}>
+                  <Button
+                    onClick={() => onCancel(categoryId)}
+                    disabled={isSubmitDisabled}
+                    sx={{
+                      borderRadius: 999,
+                      px: 2.4,
+                      py: 1.05,
+                      color: 'text.secondary',
+                      backgroundColor: alpha(theme.palette.text.primary, 0.04),
+                    }}
+                  >
                     {t('common.cancel')}
                   </Button>
-                  <Button type="submit" variant="contained" disabled={isSubmitDisabled}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={isSubmitDisabled}
+                    startIcon={<AutoAwesomeRoundedIcon />}
+                    sx={{
+                      borderRadius: 999,
+                      px: 2.8,
+                      py: 1.1,
+                      boxShadow: `0 14px 30px ${alpha(theme.palette.primary.main, 0.28)}`,
+                    }}
+                  >
                     {isSubmitDisabled ? t('common.loading') : t('common.save')}
                   </Button>
                 </Box>
-              </Box>
+              </Stack>
             </form>
+            </Stack>
           </CardContent>
         </Card>
 
         {showLinkedProducts && (
-          <Card variant="outlined">
+          <Card
+            variant="outlined"
+            sx={{
+              borderRadius: 5,
+              borderColor: alpha('#2563eb', 0.12),
+              backgroundColor: alpha(theme.palette.background.paper, theme.palette.mode === 'dark' ? 0.6 : 0.88),
+            }}
+          >
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
                 {t('sale.catalog.linkedProductsTitle')}
@@ -480,6 +635,7 @@ function MenuItemFormCard({
                       size="small"
                       variant="outlined"
                       onClick={() => onOpenProduct(item.productId)}
+                      sx={{ borderRadius: 999 }}
                     >
                       {(products.find((product) => product.id === item.productId)?.name ?? item.productId) +
                         ` x${item.quantity}`}

@@ -5,15 +5,16 @@ import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined'
 import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded'
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
-import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined'
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined'
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded'
+import RestartAltRoundedIcon from '@mui/icons-material/RestartAltRounded'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
 import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded'
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
 import {
   alpha,
   Box,
+  Button,
   Card,
   CardContent,
   Checkbox,
@@ -30,6 +31,7 @@ import {
   Stack,
   TextField,
   Typography,
+  useMediaQuery,
   useTheme,
 } from '@mui/material'
 import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react'
@@ -120,6 +122,17 @@ const movementFilterOptions = [
   { value: 'count-adjustment', label: 'Sayım Düzeltmesi' },
   { value: 'consumption', label: 'Tüketim' },
 ] as const
+
+const movementTypeColors: Record<StockDashboardMovementType, string> = {
+  purchase: '#20b486',
+  sale: '#8b5cf6',
+  waste: '#ef4444',
+  adjustment: '#f59e0b',
+  transfer: '#3b82f6',
+  return: '#14b8a6',
+  'count-adjustment': '#f97316',
+  consumption: '#06b6d4',
+}
 
 const calendarMonthNames = [
   'Ocak',
@@ -266,6 +279,20 @@ function formatCalendarFieldValue(value: string) {
   }
 
   return `${String(parsedDate.getDate()).padStart(2, '0')} ${calendarMonthNames[parsedDate.getMonth()]} ${parsedDate.getFullYear()}`
+}
+
+function isIncomingMovement(quantityLabel: string) {
+  return quantityLabel.trim().startsWith('+')
+}
+
+function getMovementMagnitude(quantityLabel: string) {
+  const numericValue = Number(quantityLabel.replace(',', '.').match(/-?\d+(\.\d+)?/)?.[0] ?? '0')
+  return Math.abs(numericValue)
+}
+
+function getMovementUnit(quantityLabel: string) {
+  const unitMatch = quantityLabel.trim().match(/[a-zA-ZçğıöşüÇĞİÖŞÜ]+$/)
+  return unitMatch?.[0] ?? ''
 }
 
 function CalendarDateField({
@@ -783,6 +810,171 @@ function MovementTable({ rows }: { rows: StockDashboardMovementRow[] }) {
   )
 }
 
+function MovementTableV2({ rows }: { rows: StockDashboardMovementRow[] }) {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+
+  if (isMobile) {
+    return (
+      <Stack spacing={1.2}>
+        {rows.map((row) => {
+          const isIncoming = isIncomingMovement(row.quantityLabel)
+
+          return (
+            <Box
+              key={row.id}
+              sx={{
+                borderRadius: 3,
+                border: '1px solid rgba(148, 163, 184, 0.18)',
+                p: 2,
+              }}
+            >
+              <Stack spacing={1}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1.5, alignItems: 'flex-start' }}>
+                  <Box>
+                    <Typography variant="body2" fontWeight={700}>
+                      {row.resourceName}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {row.timestampLabel}
+                    </Typography>
+                  </Box>
+                  <Typography
+                    variant="body2"
+                    fontWeight={800}
+                    sx={{ color: isIncoming ? '#0f766e' : '#dc2626', whiteSpace: 'nowrap' }}
+                  >
+                    {row.quantityLabel}
+                  </Typography>
+                </Box>
+
+                <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                  <Chip
+                    label={isIncoming ? 'Giriş' : 'Çıkış'}
+                    size="small"
+                    sx={{
+                      height: 26,
+                      borderRadius: 2,
+                      backgroundColor: isIncoming ? 'rgba(32, 180, 134, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                      color: isIncoming ? '#0f766e' : '#dc2626',
+                      fontWeight: 700,
+                    }}
+                  />
+                  <Chip
+                    label={row.typeLabel}
+                    size="small"
+                    sx={{
+                      height: 26,
+                      borderRadius: 2,
+                      backgroundColor: alpha(movementTypeColors[row.type], 0.12),
+                      color: movementTypeColors[row.type],
+                      fontWeight: 700,
+                    }}
+                  />
+                </Stack>
+
+                <Typography variant="caption" color="text.secondary">
+                  {row.actor}
+                </Typography>
+                {row.notes ? (
+                  <Typography variant="caption" color="text.secondary">
+                    {row.notes}
+                  </Typography>
+                ) : null}
+              </Stack>
+            </Box>
+          )
+        })}
+      </Stack>
+    )
+  }
+
+  return (
+    <Box sx={{ overflowX: 'auto' }}>
+      <Box sx={{ minWidth: 980 }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '1.05fr 1.2fr 0.7fr 0.9fr 0.8fr 0.9fr 72px',
+            gap: 1,
+            px: 2,
+            py: 1.5,
+            borderBottom: '1px solid rgba(148, 163, 184, 0.18)',
+          }}
+        >
+          {['Tarih & Saat', 'Stok Adı', 'Tür', 'İşlem Türü', 'Miktar', 'Açıklama', 'İşlemler'].map((label) => (
+            <Typography key={label} variant="caption" fontWeight={700} color="text.secondary">
+              {label}
+            </Typography>
+          ))}
+        </Box>
+
+        {rows.map((row) => {
+          const isIncoming = isIncomingMovement(row.quantityLabel)
+
+          return (
+            <Box
+              key={row.id}
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: '1.05fr 1.2fr 0.7fr 0.9fr 0.8fr 0.9fr 72px',
+                gap: 1,
+                px: 2,
+                py: 1.4,
+                alignItems: 'center',
+                borderBottom: '1px solid rgba(148, 163, 184, 0.12)',
+              }}
+            >
+              <Typography variant="body2">{row.timestampLabel}</Typography>
+              <Typography variant="body2" fontWeight={700}>
+                {row.resourceName}
+              </Typography>
+              <Chip
+                label={isIncoming ? 'Giriş' : 'Çıkış'}
+                size="small"
+                sx={{
+                  height: 26,
+                  borderRadius: 2,
+                  backgroundColor: isIncoming ? 'rgba(32, 180, 134, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                  color: isIncoming ? '#0f766e' : '#dc2626',
+                  fontWeight: 700,
+                  justifySelf: 'start',
+                }}
+              />
+              <Chip
+                label={row.typeLabel}
+                size="small"
+                sx={{
+                  height: 26,
+                  borderRadius: 2,
+                  backgroundColor: alpha(movementTypeColors[row.type], 0.12),
+                  color: movementTypeColors[row.type],
+                  fontWeight: 700,
+                  justifySelf: 'start',
+                }}
+              />
+              <Typography
+                variant="body2"
+                fontWeight={800}
+                sx={{ color: isIncoming ? '#0f766e' : '#dc2626' }}
+              >
+                {row.quantityLabel}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" noWrap title={row.notes}>
+                {row.notes || row.actor}
+              </Typography>
+              <Stack direction="row" spacing={0.75} justifyContent="flex-end">
+                <Chip label="Gör" size="small" variant="outlined" sx={{ borderRadius: 2 }} />
+                <MoreHorizRoundedIcon sx={{ color: '#64748b', fontSize: 20 }} />
+              </Stack>
+            </Box>
+          )
+        })}
+      </Box>
+    </Box>
+  )
+}
+
 function PaginationBar({
   page,
   rowsPerPage,
@@ -863,6 +1055,8 @@ export function StockManagementViewV2() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [movementSearch, setMovementSearch] = useState('')
   const [movementTypeFilter, setMovementTypeFilter] = useState('all')
+  const [movementStartDate, setMovementStartDate] = useState('')
+  const [movementEndDate, setMovementEndDate] = useState('')
   const [countStartDate, setCountStartDate] = useState('')
   const [countEndDate, setCountEndDate] = useState('')
   const [page, setPage] = useState(0)
@@ -873,6 +1067,51 @@ export function StockManagementViewV2() {
   const stockListSectionRef = useRef<HTMLDivElement | null>(null)
 
   const resetPagination = () => setPage(0)
+
+  const clearResourceFilters = () => {
+    setResourceSearch('')
+    setCategoryFilter('all')
+    setUnitFilter('all')
+    setStatusFilter('all')
+    resetPagination()
+  }
+
+  const clearMovementFilters = () => {
+    setMovementSearch('')
+    setMovementTypeFilter('all')
+    setMovementStartDate('')
+    setMovementEndDate('')
+    resetPagination()
+  }
+
+  const clearCountFilters = () => {
+    setCountStartDate('')
+    setCountEndDate('')
+    resetPagination()
+  }
+
+  const filterFieldSx = {
+    '& .MuiOutlinedInput-root': {
+      minHeight: 56,
+      borderRadius: 3.5,
+    },
+  } as const
+
+  const filterSelectSx = {
+    minWidth: 170,
+    '& .MuiOutlinedInput-root': {
+      minHeight: 56,
+      borderRadius: 3.5,
+    },
+  } as const
+
+  const clearButtonSx = {
+    minWidth: { xs: '100%', xl: 120 },
+    height: 56,
+    borderRadius: 3.5,
+    alignSelf: { xs: 'stretch', xl: 'flex-end' },
+    whiteSpace: 'nowrap',
+  } as const
 
   const filteredResources = useMemo(() => {
     if (!data) return []
@@ -914,6 +1153,8 @@ export function StockManagementViewV2() {
     if (!data) return []
 
     const normalizedSearch = movementSearch.trim().toLocaleLowerCase('tr-TR')
+    const normalizedStartDate = normalizeDateFilterInput(movementStartDate)
+    const normalizedEndDate = normalizeDateFilterInput(movementEndDate)
 
     return data.movements.filter((row) => {
       const searchMatch =
@@ -924,10 +1165,12 @@ export function StockManagementViewV2() {
         row.notes?.toLocaleLowerCase('tr-TR').includes(normalizedSearch)
 
       const typeMatch = movementTypeFilter === 'all' || row.type === movementTypeFilter
+      const afterStart = !normalizedStartDate || row.movementDate >= normalizedStartDate
+      const beforeEnd = !normalizedEndDate || row.movementDate <= normalizedEndDate
 
-      return searchMatch && typeMatch
+      return searchMatch && typeMatch && afterStart && beforeEnd
     })
-  }, [data, movementSearch, movementTypeFilter])
+  }, [data, movementEndDate, movementSearch, movementStartDate, movementTypeFilter])
 
   const filteredCounts = useMemo(() => {
     if (!data) return []
@@ -941,6 +1184,37 @@ export function StockManagementViewV2() {
       return afterStart && beforeEnd
     })
   }, [countEndDate, countStartDate, data])
+
+  const movementSummaryMetrics = useMemo<StockDashboardMetric[]>(() => {
+    const totalEntries = filteredMovements.filter((row) => isIncomingMovement(row.quantityLabel)).length
+    const totalExits = filteredMovements.length - totalEntries
+    const netChange = totalEntries - totalExits
+
+    return [
+      { id: 'resourceKinds', label: 'Toplam Giriş', value: totalEntries, unit: 'count', helperText: 'Filtrelenen hareket', tone: 'success' },
+      { id: 'totalQuantity', label: 'Toplam Çıkış', value: totalExits, unit: 'count', helperText: 'Filtrelenen hareket', tone: 'info' },
+      { id: 'inventoryValue', label: 'Net Değişim', value: `${netChange >= 0 ? '+' : ''}${netChange}`, unit: 'text', helperText: 'Giriş - Çıkış', tone: 'warning' },
+      { id: 'pendingOrders', label: 'Toplam İşlem', value: filteredMovements.length, unit: 'count', helperText: 'Aktif filtre sonucu', tone: 'accent' },
+    ]
+  }, [filteredMovements])
+
+  const movementDistribution = useMemo(() => {
+    return movementFilterOptions
+      .filter((item) => item.value !== 'all')
+      .map((item) => {
+        const count = filteredMovements.filter((row) => row.type === item.value).length
+        const percentage = filteredMovements.length === 0 ? 0 : Number(((count / filteredMovements.length) * 100).toFixed(1))
+        return {
+          label: item.label,
+          count,
+          percentage,
+          color: movementTypeColors[item.value as StockDashboardMovementType],
+        }
+      })
+      .filter((item) => item.count > 0)
+  }, [filteredMovements])
+
+  const recentMovementRows = useMemo(() => filteredMovements.slice(0, 5), [filteredMovements])
 
   const paginatedResources = useMemo(
     () => filteredResources.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
@@ -961,11 +1235,13 @@ export function StockManagementViewV2() {
     return <DashboardSkeleton />
   }
 
+  const displayedMetrics = activeTab === 'movements' ? movementSummaryMetrics : data.metrics
   const heroBorderColor = isDarkMode ? alpha('#67e8f9', 0.2) : 'rgba(191, 219, 254, 0.5)'
   const heroBackground = isDarkMode
     ? 'radial-gradient(circle at top left, rgba(32, 180, 134, 0.18), transparent 28%), linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(17, 24, 39, 0.96) 55%, rgba(30, 41, 59, 0.92) 100%)'
     : 'radial-gradient(circle at top left, rgba(32, 180, 134, 0.14), transparent 30%), linear-gradient(135deg, #ffffff 0%, #f8fbff 52%, #f5fffb 100%)'
-  const distributionTotal = data.distribution.reduce((sum, item) => sum + item.count, 0)
+  const activeDistribution = activeTab === 'movements' ? movementDistribution : data.distribution
+  const distributionTotal = activeDistribution.reduce((sum, item) => sum + item.count, 0)
   const handleTabChange = (tab: StockDashboardTab) => {
     setActiveTab(tab)
     resetPagination()
@@ -1109,8 +1385,8 @@ export function StockManagementViewV2() {
       </Box>
 
       <Grid container spacing={2}>
-        {data.metrics.map((metric) => (
-          <Grid key={metric.id} size={{ xs: 6, sm: 6, xl: 2.4 }}>
+        {displayedMetrics.map((metric) => (
+          <Grid key={metric.id} size={{ xs: 6, sm: 6, xl: activeTab === 'movements' ? 3 : 2.4 }}>
             <MetricCard metric={metric} locale={intlLocale} />
           </Grid>
         ))}
@@ -1129,9 +1405,10 @@ export function StockManagementViewV2() {
             >
               <CardContent sx={{ p: 2.5 }}>
                 {activeTab === 'resources' ? (
-                <Stack direction={{ xs: 'column', xl: 'row' }} spacing={1.5}>
+                <Stack direction={{ xs: 'column', xl: 'row' }} spacing={1.5} alignItems={{ xl: 'flex-end' }}>
                   <TextField
                     fullWidth
+                    label="Arama"
                     placeholder={data.searchPlaceholder}
                     value={resourceSearch}
                     onChange={(event) => {
@@ -1146,9 +1423,13 @@ export function StockManagementViewV2() {
                           </InputAdornment>
                         ),
                       },
+                      inputLabel: {
+                        shrink: true,
+                      },
                     }}
+                    sx={filterFieldSx}
                   />
-                  <FormControl size="small" sx={{ minWidth: 160 }}>
+                  <FormControl size="small" sx={filterSelectSx}>
                     <InputLabel>Kategori</InputLabel>
                     <Select
                       value={categoryFilter}
@@ -1165,7 +1446,7 @@ export function StockManagementViewV2() {
                       ))}
                     </Select>
                   </FormControl>
-                  <FormControl size="small" sx={{ minWidth: 150 }}>
+                  <FormControl size="small" sx={filterSelectSx}>
                     <InputLabel>Birim Türü</InputLabel>
                     <Select
                       value={unitFilter}
@@ -1182,7 +1463,7 @@ export function StockManagementViewV2() {
                       ))}
                     </Select>
                   </FormControl>
-                  <FormControl size="small" sx={{ minWidth: 150 }}>
+                  <FormControl size="small" sx={filterSelectSx}>
                     <InputLabel>Stok Durumu</InputLabel>
                     <Select
                       value={statusFilter}
@@ -1199,17 +1480,27 @@ export function StockManagementViewV2() {
                       ))}
                     </Select>
                   </FormControl>
-                  <Chip
-                    icon={<FilterAltOutlinedIcon sx={{ fontSize: '16px !important' }} />}
-                    label="Filtrele"
+                  <Button
                     variant="outlined"
-                    sx={{ height: 40, borderRadius: 3 }}
-                  />
+                    color="inherit"
+                    startIcon={<RestartAltRoundedIcon />}
+                    onClick={clearResourceFilters}
+                    sx={clearButtonSx}
+                  >
+                    Temizle
+                  </Button>
                 </Stack>
                 ) : activeTab === 'movements' ? (
-                  <Stack direction={{ xs: 'column', xl: 'row' }} spacing={1.5}>
+                  <Stack
+                    direction={{ xs: 'column', xl: 'row' }}
+                    spacing={1.5}
+                    alignItems={{ xl: 'flex-end' }}
+                    useFlexGap
+                    flexWrap="wrap"
+                  >
                     <TextField
                       fullWidth
+                      label="Arama"
                       placeholder="Hareket ara..."
                       value={movementSearch}
                       onChange={(event) => {
@@ -1224,9 +1515,24 @@ export function StockManagementViewV2() {
                             </InputAdornment>
                           ),
                         },
+                        inputLabel: {
+                          shrink: true,
+                        },
+                      }}
+                      sx={{
+                        ...filterFieldSx,
+                        flex: { xl: '1 1 320px' },
+                        minWidth: { xs: '100%', xl: 320 },
                       }}
                     />
-                    <FormControl size="small" sx={{ minWidth: 220 }}>
+                    <FormControl
+                      size="small"
+                      sx={{
+                        ...filterSelectSx,
+                        minWidth: { xs: '100%', sm: 220 },
+                        flex: { xl: '0 0 220px' },
+                      }}
+                    >
                       <InputLabel>Düzenleme Türü</InputLabel>
                       <Select
                         value={movementTypeFilter}
@@ -1243,9 +1549,43 @@ export function StockManagementViewV2() {
                         ))}
                       </Select>
                     </FormControl>
+                    <Stack
+                      direction={{ xs: 'column', sm: 'row' }}
+                      spacing={1.5}
+                      sx={{
+                        width: { xs: '100%', xl: 'auto' },
+                        flex: { xl: '0 1 auto' },
+                      }}
+                    >
+                      <CalendarDateField
+                        label="Başlangıç Tarihi"
+                        value={movementStartDate}
+                        onChange={(nextValue) => {
+                          setMovementStartDate(nextValue)
+                          resetPagination()
+                        }}
+                      />
+                      <CalendarDateField
+                        label="Bitiş Tarihi"
+                        value={movementEndDate}
+                        onChange={(nextValue) => {
+                          setMovementEndDate(nextValue)
+                          resetPagination()
+                        }}
+                      />
+                    </Stack>
+                    <Button
+                      variant="outlined"
+                      color="inherit"
+                      startIcon={<RestartAltRoundedIcon />}
+                      onClick={clearMovementFilters}
+                      sx={{ ...clearButtonSx, flex: { xl: '0 0 120px' } }}
+                    >
+                      Temizle
+                    </Button>
                   </Stack>
                 ) : (
-                  <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5}>
+                  <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} alignItems={{ md: 'flex-end' }}>
                     <CalendarDateField
                       label="Başlangıç Tarihi"
                       value={countStartDate}
@@ -1284,16 +1624,15 @@ export function StockManagementViewV2() {
                       sx={{ display: 'none', minWidth: { xs: '100%', md: 220 } }}
                       slotProps={{ inputLabel: { shrink: true } }}
                     />
-                    <Chip
-                      label="Temizle"
+                    <Button
                       variant="outlined"
-                      onClick={() => {
-                        setCountStartDate('')
-                        setCountEndDate('')
-                        resetPagination()
-                      }}
-                      sx={{ height: 40, borderRadius: 3, alignSelf: { xs: 'stretch', md: 'center' } }}
-                    />
+                      color="inherit"
+                      startIcon={<RestartAltRoundedIcon />}
+                      onClick={clearCountFilters}
+                      sx={{ ...clearButtonSx, minWidth: { xs: '100%', md: 120 }, alignSelf: { xs: 'stretch', md: 'flex-end' } }}
+                    >
+                      Temizle
+                    </Button>
                   </Stack>
                 )}
               </CardContent>
@@ -1353,7 +1692,7 @@ export function StockManagementViewV2() {
                 </>
               ) : activeTab === 'movements' ? (
                 <>
-                  <MovementTable rows={paginatedMovements} />
+                  <MovementTableV2 rows={paginatedMovements} />
                   <PaginationBar
                     page={page}
                     rowsPerPage={rowsPerPage}
@@ -1417,12 +1756,12 @@ export function StockManagementViewV2() {
 
         <Grid size={{ xs: 12, lg: 3 }}>
           <Stack spacing={2}>
-            <SectionCard title="Stok Durum Dağılımı">
+            <SectionCard title={activeTab === 'movements' ? 'Hareket Türlerine Göre Dağılım' : 'Stok Durum Dağılımı'}>
               <Box sx={{ height: 220 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={data.distribution}
+                      data={activeDistribution}
                       dataKey="count"
                       nameKey="label"
                       cx="50%"
@@ -1432,7 +1771,7 @@ export function StockManagementViewV2() {
                       paddingAngle={2}
                       strokeWidth={0}
                     >
-                      {data.distribution.map((item) => (
+                      {activeDistribution.map((item) => (
                         <Cell key={item.label} fill={item.color} />
                       ))}
                     </Pie>
@@ -1458,7 +1797,7 @@ export function StockManagementViewV2() {
                 </Box>
               </Box>
               <Stack spacing={1.1}>
-                {data.distribution.map((item) => (
+                {activeDistribution.map((item) => (
                   <Box key={item.label} sx={{ display: 'flex', alignItems: 'center', gap: 1.1 }}>
                     <Box
                       sx={{
@@ -1480,29 +1819,59 @@ export function StockManagementViewV2() {
               </Stack>
             </SectionCard>
 
-            <SectionCard
-              title="En Değerli Stoklar"
-              action={
-                <Typography
-                  variant="body2"
-                  onClick={handleViewAllValuableResources}
-                  sx={{ color: '#0f766e', fontWeight: 700, cursor: 'pointer' }}
-                >
-                  Tümünü Gör
-                </Typography>
-              }
-            >
-              <Stack spacing={1.2}>
-                {data.valuableResources.map((item) => (
-                  <Box key={item.id} sx={{ display: 'flex', justifyContent: 'space-between', gap: 1.5 }}>
-                    <Typography variant="body2">{item.name}</Typography>
-                    <Typography variant="body2" fontWeight={700}>
-                      {formatCurrency(item.value, intlLocale)}
-                    </Typography>
-                  </Box>
-                ))}
-              </Stack>
-            </SectionCard>
+            {activeTab === 'movements' ? (
+              <SectionCard title="Son Hareketler">
+                <Stack spacing={1.2}>
+                  {recentMovementRows.map((row) => {
+                    const isIncoming = isIncomingMovement(row.quantityLabel)
+
+                    return (
+                      <Box key={row.id} sx={{ display: 'flex', justifyContent: 'space-between', gap: 1.5, alignItems: 'center' }}>
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography variant="body2" fontWeight={700} noWrap>
+                            {row.resourceName}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" noWrap>
+                            {row.typeLabel}
+                          </Typography>
+                        </Box>
+                        <Typography
+                          variant="body2"
+                          fontWeight={800}
+                          sx={{ color: isIncoming ? '#0f766e' : '#dc2626', whiteSpace: 'nowrap' }}
+                        >
+                          {row.quantityLabel}
+                        </Typography>
+                      </Box>
+                    )
+                  })}
+                </Stack>
+              </SectionCard>
+            ) : (
+              <SectionCard
+                title="En Değerli Stoklar"
+                action={
+                  <Typography
+                    variant="body2"
+                    onClick={handleViewAllValuableResources}
+                    sx={{ color: '#0f766e', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    Tümünü Gör
+                  </Typography>
+                }
+              >
+                <Stack spacing={1.2}>
+                  {data.valuableResources.map((item) => (
+                    <Box key={item.id} sx={{ display: 'flex', justifyContent: 'space-between', gap: 1.5 }}>
+                      <Typography variant="body2">{item.name}</Typography>
+                      <Typography variant="body2" fontWeight={700}>
+                        {formatCurrency(item.value, intlLocale)}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              </SectionCard>
+            )}
 
             <SectionCard title="Hızlı İşlemler">
               <Stack spacing={1}>

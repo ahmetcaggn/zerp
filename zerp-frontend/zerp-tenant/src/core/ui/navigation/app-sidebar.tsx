@@ -55,14 +55,14 @@ interface SidebarAction {
 }
 
 const GLOBAL_SIDEBAR_ACTIONS: SidebarAction[] = [
-  { id: 'dashboard', labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon />, href: '/test/dashboard' },
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon />, href: '/dashboard' },
   { id: 'employees', labelKey: 'nav.employees', icon: <PeopleAltRoundedIcon />, href: '/employees' },
   { id: 'tickets', labelKey: 'nav.tickets', icon: <SupportAgentRoundedIcon />, href: '/tickets' },
   { id: 'notifications', labelKey: 'nav.notifications', icon: <NotificationsRoundedIcon />, href: '/notifications' },
 ]
 
 const SHOP_SIDEBAR_ACTIONS: SidebarAction[] = [
-  { id: 'dashboard', labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon />, href: '/test/dashboard' },
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon />, href: '/dashboard' },
   { id: 'catalog', labelKey: 'nav.sale', icon: <MenuBookRoundedIcon />, href: '/catalog' },
   { id: 'tables', labelKey: 'nav.tables', icon: <TableRestaurantRoundedIcon />, href: '/tables' },
   { id: 'sale', labelKey: 'nav.cashier', icon: <PointOfSaleRoundedIcon />, href: '/sale' },
