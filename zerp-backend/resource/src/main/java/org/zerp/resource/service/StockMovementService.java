@@ -98,7 +98,7 @@ public class StockMovementService implements
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "StockResource not found"));
 
         BigDecimal previousQuantity = stockResource.getQuantity();
-        BigDecimal newQuantity = calculateNewQuantity(previousQuantity, data.getQuantity(), data.getType().name());
+        BigDecimal newQuantity = calculateNewQuantity(previousQuantity, data.getQuantity(), data.getType());
 
         StockMovement movement = mapper.toEntity(data);
         movement.setStockResource(stockResource);
@@ -188,7 +188,7 @@ public class StockMovementService implements
                         "StockResource not found: " + req.getStockResourceId()));
 
         BigDecimal previous = resource.getQuantity();
-        BigDecimal next = calculateNewQuantity(previous, req.getQuantity(), req.getType().name());
+        BigDecimal next = calculateNewQuantity(previous, req.getQuantity(), req.getType());
 
         StockMovement movement = new StockMovement();
         movement.setStockResource(resource);
@@ -206,10 +206,9 @@ public class StockMovementService implements
         log.info("Internal StockMovement created: resource={}, type={}, qty={}", resource.getId(), req.getType(), req.getQuantity());
     }
 
-    private BigDecimal calculateNewQuantity(BigDecimal current, BigDecimal delta, String movementType) {
+    private BigDecimal calculateNewQuantity(BigDecimal current, BigDecimal delta, StockMovementType movementType) {
         return switch (movementType) {
-            case "PURCHASE", "RETURN" -> current.add(delta);
-            case "SALE", "WASTE", "TRANSFER" -> current.subtract(delta);
+            case SALE, WASTE, TRANSFER -> current.subtract(delta);
             default -> current.add(delta);
         };
     }
