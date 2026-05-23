@@ -29,7 +29,6 @@ import org.zerp.common.entity.sale.ShopTableStatus;
 import org.zerp.common.entity.sale.TableOrderStatus;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
-import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.sale.client.ResourceServiceClient;
 import org.zerp.sale.dto.tableorder.PublicCartOrderPreviewDTO;
@@ -41,7 +40,6 @@ import org.zerp.sale.dto.tableorder.TableOrderUpdateDTO;
 import org.zerp.sale.mapper.TableOrderMapper;
 import org.zerp.sale.permission.TableOrderPermissionEvaluator;
 import org.zerp.sale.repository.MenuItemRepository;
-import org.zerp.sale.repository.ProductRecipeRepository;
 import org.zerp.sale.repository.ProductExtraOptionRepository;
 import org.zerp.sale.repository.PublicCartOrderRepository;
 import org.zerp.sale.repository.ShopTableRepository;
@@ -71,13 +69,11 @@ public class TableOrderService implements
     private final TableOrderRepository repository;
     private final ShopTableRepository shopTableRepository;
     private final MenuItemRepository menuItemRepository;
-    private final ProductRecipeRepository productRecipeRepository;
     private final ProductExtraOptionRepository productExtraOptionRepository;
     private final PublicCartOrderRepository publicCartOrderRepository;
     private final ResourceServiceClient resourceServiceClient;
     private final TableOrderMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
-    private final CurrentTenantIdResolver currentTenantIdResolver;
     private final FilterRefiner filterRefiner;
 
     @Override
@@ -123,11 +119,11 @@ public class TableOrderService implements
     @Transactional
     public TableOrderDTO create(TableOrderCreateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
-        UUID tenantId = currentTenantIdResolver.resolve();
         ShopTable shopTable = resolveShopTable(data.getTableId());
+        UUID tenantId = shopTable.getTenantId();
         Shop shop = shopTable.getShop();
 
-        if (!permissionEvaluator.canCreate(userId, shop.getId(), tenantId)) {
+        if (!permissionEvaluator.canCreate(userId, shopTable)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create TableOrder");
         }
 
@@ -157,14 +153,13 @@ public class TableOrderService implements
     @Transactional(readOnly = true)
     public PublicCartOrderPreviewDTO previewPublicCartOrder(String code, UUID tableId) {
         UUID userId = currentUserIdResolver.resolve();
-        UUID tenantId = currentTenantIdResolver.resolve();
         ShopTable shopTable = resolveShopTable(tableId);
         Shop shop = shopTable.getShop();
         if (shop == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ShopTable has no shop");
         }
 
-        if (!permissionEvaluator.canCreate(userId, shop.getId(), tenantId)) {
+        if (!permissionEvaluator.canCreate(userId, shopTable)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create TableOrder");
         }
 

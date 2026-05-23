@@ -54,4 +54,6 @@ public class CreateEmployeeRequestDto {
     private Boolean isActive = true;
 
     private List<EmployeeContactDto> contacts;
+
+    private UUID tenantId;
 }

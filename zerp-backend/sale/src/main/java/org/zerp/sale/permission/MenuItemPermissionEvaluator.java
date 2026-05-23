@@ -6,6 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.sale.MenuCategory;
 import org.zerp.common.entity.sale.MenuItem;
 import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
@@ -48,12 +49,18 @@ public class MenuItemPermissionEvaluator {
         return canRead;
     }
 
-    public boolean canCreate(UUID userId, UUID categoryId, UUID tenantId) {
-        log.trace("Checking canCreate permission - userId: {}, categoryId: {}, tenantId: {}", userId, categoryId, tenantId);
+    public boolean canCreate(UUID userId, MenuCategory parent) {
+        UUID categoryId = parent.getId();
+        UUID menuId = parent.getMenu().getId();
+        UUID shopId = parent.getMenu().getShop().getId();
+        UUID tenantId = parent.getTenantId();
+
+        log.trace("Checking canCreate permission - userId: {}, categoryId: {}, menuId: {}, tenantId: {}",
+                userId, categoryId, menuId, tenantId);
         List<Permission> result = permissionRepository.findAllByUserAndMenuItemHierarchy(
-                userId, PermissionAction.CREATE_MENU_ITEM, null, categoryId, null, null, tenantId);
+                userId, PermissionAction.CREATE_MENU_ITEM, null, categoryId, menuId, shopId, tenantId);
         boolean canCreate = !result.isEmpty();
-        log.debug("canCreate result for user {} - permitted: {}", userId, canCreate);
+        log.debug("canCreate result for user {} on category {} - permitted: {}", userId, categoryId, canCreate);
         return canCreate;
     }
 

@@ -6,12 +6,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.sale.Menu;
 import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
 import org.zerp.common.permission.service.CommonPermissionService;
+
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -43,7 +45,10 @@ public class MenuPermissionEvaluator {
         return canRead;
     }
 
-    public boolean canCreate(UUID userId, UUID shopId, UUID tenantId) {
+    public boolean canCreate(UUID userId, Shop parent) {
+        UUID shopId = parent.getId();
+        UUID tenantId = parent.getTenantId();
+
         log.trace("Checking canCreate permission - userId: {}, shopId: {}, tenantId: {}", userId, shopId, tenantId);
         List<Permission> result = permissionRepository.findAllByUserAndMenuHierarchy(
                 userId, PermissionAction.CREATE_MENU, null, shopId, tenantId);

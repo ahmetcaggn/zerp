@@ -21,12 +21,6 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class EmployeePermissionEvaluator {
-	public record EmployeeTarget(UUID employeeId, UUID tenantId) {
-	}
-
-	public record TenantParent(UUID tenantId) {
-	}
-
 	private final PermissionRepository permissionRepository;
 	private final CommonPermissionService commonPermissionService;
 
@@ -40,36 +34,36 @@ public class EmployeePermissionEvaluator {
         return !result.isEmpty();
     }
 
-	public boolean canCreate(UUID userId, TenantParent parent) {
+	public boolean canCreate(UUID userId, UUID tenantId) {
 		List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(
 				userId,
 				PermissionAction.CREATE_EMPLOYEE,
 				null,
-				parent.tenantId()
+				tenantId
 		);
 		return !result.isEmpty();
 	}
 
-	public boolean canUpdate(UUID userId, EmployeeTarget target) {
+	public boolean canUpdate(UUID userId, Employee employee) {
 		List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(
 				userId,
 				PermissionAction.UPDATE_EMPLOYEE,
-				target.employeeId(),
-				target.tenantId()
+				employee.getId(),
+				employee.getTenantId()
 		);
 		return !result.isEmpty();
 	}
 
-	public boolean canPatch(UUID userId, EmployeeTarget target) {
+	public boolean canPatch(UUID userId, Employee target) {
 		return canUpdate(userId, target);
 	}
 
-	public boolean canDelete(UUID userId, EmployeeTarget target) {
+	public boolean canDelete(UUID userId, Employee target) {
 		List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(
 				userId,
 				PermissionAction.DELETE_EMPLOYEE,
-				target.employeeId(),
-				target.tenantId()
+				target.getId(),
+				target.getTenantId()
 		);
 		return !result.isEmpty();
 	}
@@ -85,7 +79,7 @@ public class EmployeePermissionEvaluator {
 
 		return Specification.anyOf(
 				(root, _, _) -> root.get("id").in(permittedEmployeeIds),
-				(root, _, cb) -> {
+				(root, _, _) -> {
 					Join<Object, Object> tenantJoin = root.join("tenant", JoinType.INNER);
 					return tenantJoin.get("id").in(permittedTenantIds);
 				}

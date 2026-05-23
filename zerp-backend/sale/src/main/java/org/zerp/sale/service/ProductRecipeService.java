@@ -9,11 +9,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.sale.Product;
 import org.zerp.common.entity.sale.ProductRecipe;
 import org.zerp.common.entity.sale.ProductRecipeItem;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
-import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.sale.dto.productrecipe.ProductRecipeCreateDTO;
 import org.zerp.sale.dto.productrecipe.ProductRecipeDTO;
@@ -40,7 +40,6 @@ public class ProductRecipeService implements
     private final StockResourceRepository stockResourceRepository;
     private final ProductRecipeMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
-    private final CurrentTenantIdResolver currentTenantIdResolver;
     private final FilterRefiner filterRefiner;
 
     @Override
@@ -86,13 +85,16 @@ public class ProductRecipeService implements
     @Transactional
     public ProductRecipeDTO create(ProductRecipeCreateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
-        UUID tenantId = currentTenantIdResolver.resolve();
-        if (!permissionEvaluator.canCreate(userId, data.getProductId(), tenantId)) {
+        Product product = productRepository.findById(data.getProductId()).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product not found"));
+        UUID tenantId = product.getTenantId();
+
+        if (!permissionEvaluator.canCreate(userId, product)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create ProductRecipe");
         }
 
         ProductRecipe recipe = mapper.toEntity(data);
-        recipe.setProduct(productRepository.getReferenceById(data.getProductId()));
+        recipe.setProduct(product);
         recipe.setTenantId(tenantId);
 
         if (data.getItems() != null) {
@@ -130,9 +132,9 @@ public class ProductRecipeService implements
     @Transactional
     public ProductRecipeDTO update(UUID uuid, ProductRecipeUpdateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
-        UUID tenantId = currentTenantIdResolver.resolve();
         ProductRecipe recipe = repository.findById(uuid).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "ProductRecipe not found"));
+
         if (!permissionEvaluator.canUpdate(userId, recipe)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update ProductRecipe");
         }
@@ -145,7 +147,7 @@ public class ProductRecipeService implements
                 ProductRecipeItem item = mapper.toItemEntity(itemDTO);
                 item.setStockResource(stockResourceRepository.getReferenceById(itemDTO.getStockResourceId()));
                 item.setRecipe(recipe);
-                item.setTenantId(tenantId);
+                item.setTenantId(recipe.getTenantId());
                 recipe.getItems().add(item);
             });
         }

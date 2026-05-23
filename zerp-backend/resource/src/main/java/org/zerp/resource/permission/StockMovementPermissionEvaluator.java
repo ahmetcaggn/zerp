@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.resource.StockMovement;
+import org.zerp.common.entity.resource.StockResource;
 import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
@@ -45,25 +46,51 @@ public class StockMovementPermissionEvaluator {
         return canRead;
     }
 
-    public boolean canCreate(UUID userId, UUID stockResourceId, UUID tenantId) {
-        log.trace("Checking canCreate permission - userId: {}, stockResourceId: {}, tenantId: {}", userId, stockResourceId, tenantId);
+    public boolean canCreate(UUID userId, StockResource stockResource) {
+        log.trace("Checking canCreate permission - userId: {}, stockResourceId: {}, tenantId: {}",
+                userId, stockResource.getId(), stockResource.getTenantId());
         List<Permission> result = permissionRepository.findAllByUserAndStockMovementHierarchy(
-                userId, PermissionAction.CREATE_STOCK_MOVEMENT, null, stockResourceId, null, tenantId);
+                userId, PermissionAction.CREATE_STOCK_MOVEMENT,
+                null,
+                stockResource.getId(),
+                stockResource.getShop().getId(),
+                stockResource.getTenantId());
         boolean canCreate = !result.isEmpty();
         log.debug("canCreate result for user {} - permitted: {}", userId, canCreate);
         return canCreate;
     }
 
     public boolean canUpdate(UUID userId, StockMovement target) {
-        return canRead(userId, target);
+        log.trace("Checking canUpdate permission - userId: {}, stockMovementId: {}, stockResourceId: {}, tenantId: {}",
+                userId, target.getId(), target.getStockResource().getId(), target.getStockResource().getTenantId());
+        List<Permission> result = permissionRepository.findAllByUserAndStockMovementHierarchy(
+                userId, PermissionAction.UPDATE_STOCK_MOVEMENT,
+                target.getId(),
+                target.getStockResource().getId(),
+                target.getStockResource().getShop().getId(),
+                target.getStockResource().getTenantId());
+        boolean canUpdate = !result.isEmpty();
+        log.debug("canUpdate result for user {} on stockMovement {} - permitted: {}", userId, target.getId(), canUpdate);
+        return canUpdate;
     }
 
     public boolean canPatch(UUID userId, StockMovement target) {
-        return canRead(userId, target);
+        return canUpdate(userId, target);
     }
 
     public boolean canDelete(UUID userId, StockMovement target) {
-        return canRead(userId, target);
+        log.trace("Checking canDelete permission - userId: {}, stockMovementId: {}, stockResourceId: {}, tenantId: {}",
+                userId, target.getId(), target.getStockResource().getId(), target.getStockResource().getTenantId());
+        List<Permission> result = permissionRepository.findAllByUserAndStockMovementHierarchy(
+                userId, PermissionAction.DELETE_STOCK_MOVEMENT,
+                target.getId(),
+                target.getStockResource().getId(),
+                target.getStockResource().getShop().getId(),
+                target.getStockResource().getTenantId());
+        boolean canDelete = !result.isEmpty();
+        log.debug("canDelete result for user {} on stockMovement {} - permitted: {}",
+                userId, target.getId(), canDelete);
+        return canDelete;
     }
 
     public Specification<StockMovement> filterRead(UUID userId) {

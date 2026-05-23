@@ -17,7 +17,6 @@ import org.zerp.common.entity.sale.MenuItemProduct;
 import org.zerp.common.entity.sale.Product;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
-import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.sale.dto.menuitem.MenuItemCreateDTO;
 import org.zerp.sale.dto.menuitem.MenuItemDTO;
@@ -54,7 +53,6 @@ public class MenuItemService implements
     private final MenuItemProductRepository menuItemProductRepository;
     private final MenuItemMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
-    private final CurrentTenantIdResolver currentTenantIdResolver;
     private final FilterRefiner filterRefiner;
     private final S3ImageRepository s3ImageRepository;
 
@@ -104,18 +102,21 @@ public class MenuItemService implements
     @Transactional
     public MenuItemDTO create(MenuItemCreateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
-        UUID tenantId = currentTenantIdResolver.resolve();
-        if (!permissionEvaluator.canCreate(userId, data.getCategoryId(), tenantId)) {
+        MenuCategory menuCategory = categoryRepository.findById(data.getCategoryId()).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.BAD_REQUEST, "MenuCategory not found"));
+        UUID tenantId = menuCategory.getTenantId();
+
+        if (!permissionEvaluator.canCreate(userId, menuCategory)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create MenuItem");
         }
         MenuItem item = mapper.toEntity(data);
-        item.setCategory(categoryRepository.getReferenceById(data.getCategoryId()));
+        item.setCategory(menuCategory);
         item.setTenantId(tenantId);
         MenuItem saved = repository.save(item);
         log.info("Created MenuItem with id: {}", saved.getId());
-        
+
         handleProductAssignments(saved, data.getProductItems());
-        
+
         return mapper.toDTO(saved);
     }
 
@@ -138,36 +139,38 @@ public class MenuItemService implements
     @Transactional
     public MenuItemDTO update(UUID uuid, MenuItemUpdateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
-        UUID tenantId = currentTenantIdResolver.resolve();
         MenuItem item = repository.findById(uuid).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "MenuItem not found"));
         if (!permissionEvaluator.canUpdate(userId, item)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update MenuItem");
         }
+        UUID tenantId = item.getTenantId();
 
-        if (data.getCategoryId() != null && (item.getCategory() == null || !data.getCategoryId().equals(item.getCategory().getId()))) {
-            if (!permissionEvaluator.canCreate(userId, data.getCategoryId(), tenantId)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to move MenuItem to this category");
-            }
+        if (data.getCategoryId() != null && (item.getCategory() == null ||
+                !data.getCategoryId().equals(item.getCategory().getId()))) {
             MenuCategory newCategory = categoryRepository.findById(data.getCategoryId()).orElseThrow(() ->
                     new ResponseStatusException(HttpStatus.NOT_FOUND, "MenuCategory not found"));
 
-            UUID categoryTenantId = newCategory.getMenu() != null && newCategory.getMenu().getShop() != null
-                    ? newCategory.getMenu().getShop().getTenantId()
-                    : null;
+            if (!permissionEvaluator.canCreate(userId, newCategory)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "You don't have permission to move MenuItem to this category");
+            }
+
+            UUID categoryTenantId = newCategory.getTenantId();
             if (!Objects.equals(categoryTenantId, tenantId)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Category does not belong to current tenant");
             }
 
             item.setCategory(newCategory);
         }
-        
+
         mapper.updateEntityFromDTO(data, item);
         MenuItem updated = repository.save(item);
-        
+
         handleProductAssignments(updated, data.getProductItems());
-        log.info("Updated MenuItem with id: {}", uuid);
         MenuItemDTO dto = mapper.toDTO(updated);
+        log.info("Updated MenuItem with id: {}, assigned products: {}",
+                uuid, dto.getProductItems() != null ? dto.getProductItems().size() : 0);
         return dto;
     }
 
@@ -215,6 +218,7 @@ public class MenuItemService implements
         return deleted;
     }
 
+    // TODO: https://github.com/ahmetcaggn/zerp/issues/42
     @Transactional
     public MenuItemImageUploadResponseDTO uploadMenuItemImage(MultipartFile file, UUID categoryId) {
         if (categoryId == null) {
@@ -225,13 +229,12 @@ public class MenuItemService implements
         }
 
         UUID userId = currentUserIdResolver.resolve();
-        UUID tenantId = currentTenantIdResolver.resolve();
-        if (!permissionEvaluator.canCreate(userId, categoryId, tenantId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create MenuItem");
-        }
-
         MenuCategory category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "MenuCategory not found"));
+        UUID tenantId = category.getTenantId();
+        if (!permissionEvaluator.canCreate(userId, category)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create MenuItem");
+        }
 
         UUID categoryTenantId = category.getMenu() != null && category.getMenu().getShop() != null
                 ? category.getMenu().getShop().getTenantId()

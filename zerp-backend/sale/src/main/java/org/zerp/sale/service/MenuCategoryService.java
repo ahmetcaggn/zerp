@@ -9,10 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.sale.Menu;
 import org.zerp.common.entity.sale.MenuCategory;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
-import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.sale.dto.menucategory.MenuCategoryCreateDTO;
 import org.zerp.sale.dto.menucategory.MenuCategoryDTO;
@@ -37,7 +37,6 @@ public class MenuCategoryService implements
     private final MenuRepository menuRepository;
     private final MenuCategoryMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
-    private final CurrentTenantIdResolver currentTenantIdResolver;
     private final FilterRefiner filterRefiner;
 
     @Override
@@ -83,12 +82,15 @@ public class MenuCategoryService implements
     @Transactional
     public MenuCategoryDTO create(MenuCategoryCreateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
-        UUID tenantId = currentTenantIdResolver.resolve();
-        if (!permissionEvaluator.canCreate(userId, data.getMenuId(), tenantId)) {
+        Menu menu = menuRepository.findById(data.getMenuId()).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.BAD_REQUEST, "Menu not found"));
+        UUID tenantId = menu.getTenantId();
+
+        if (!permissionEvaluator.canCreate(userId, menu)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create MenuCategory");
         }
         MenuCategory category = mapper.toEntity(data);
-        category.setMenu(menuRepository.getReferenceById(data.getMenuId()));
+        category.setMenu(menu);
         category.setTenantId(tenantId);
         MenuCategory saved = repository.save(category);
         log.info("Created MenuCategory with id: {}", saved.getId());

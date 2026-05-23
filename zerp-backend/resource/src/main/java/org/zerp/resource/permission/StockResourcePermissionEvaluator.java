@@ -6,6 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.resource.StockResource;
 import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
@@ -54,20 +55,21 @@ public class StockResourcePermissionEvaluator {
         return canRead;
     }
 
-    public boolean canCreate(UUID userId, UUID shopId, UUID tenantId) {
-        log.trace("Checking canCreate permission - userId: {}, shopId: {}, tenantId: {}", userId, shopId, tenantId);
+    public boolean canCreate(UUID userId, Shop parent) {
+        log.trace("Checking canCreate permission - userId: {}, shopId: {}, tenantId: {}",
+                userId, parent.getId(), parent.getTenantId());
 
         List<Permission> result = permissionRepository.findAllByUserAndStockResourceHierarchy(
                 userId,
                 PermissionAction.CREATE_STOCK_RESOURCE,
                 null,
-                shopId,
-                tenantId
+                parent.getId(),
+                parent.getTenantId()
         );
 
         boolean canCreate = !result.isEmpty();
-        log.debug("canCreate result for user {} in tenant {} - permitted: {}",
-                userId, tenantId, canCreate);
+        log.debug("canCreate result for user {} on shop {} - permitted: {}",
+                userId, parent.getId(), canCreate);
         return canCreate;
     }
 

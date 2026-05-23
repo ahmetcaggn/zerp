@@ -14,7 +14,6 @@ import org.zerp.common.entity.sale.Menu;
 import org.zerp.common.entity.sale.MenuLanguage;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
-import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.sale.dto.menu.MenuCreateDTO;
 import org.zerp.sale.dto.menu.MenuDTO;
@@ -40,7 +39,6 @@ public class MenuService implements
     private final ShopRepository shopRepository;
     private final MenuMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
-    private final CurrentTenantIdResolver currentTenantIdResolver;
     private final FilterRefiner filterRefiner;
 
     @Override
@@ -86,9 +84,9 @@ public class MenuService implements
     @Transactional
     public MenuDTO create(MenuCreateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
-        UUID tenantId = currentTenantIdResolver.resolve();
         Shop shop = resolveShop(data.getShopId());
-        if (!permissionEvaluator.canCreate(userId, shop.getId(), tenantId)) {
+        UUID tenantId = shop.getTenantId();
+        if (!permissionEvaluator.canCreate(userId, shop)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Menu");
         }
         Menu menu = mapper.toEntity(data);

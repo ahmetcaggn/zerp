@@ -6,6 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.sale.Product;
 import org.zerp.common.entity.sale.ProductRecipe;
 import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
@@ -46,10 +47,15 @@ public class ProductRecipePermissionEvaluator {
         return canRead;
     }
 
-    public boolean canCreate(UUID userId, UUID productId, UUID tenantId) {
-        log.trace("Checking canCreate permission - userId: {}, productId: {}, tenantId: {}", userId, productId, tenantId);
+    public boolean canCreate(UUID userId, Product parent) {
+        UUID productId = parent.getId();
+        UUID shopId = parent.getShop().getId();
+        UUID tenantId = parent.getTenantId();
+
+        log.trace("Checking canCreate permission - userId: {}, productId: {}, tenantId: {}",
+                userId, productId, tenantId);
         List<Permission> result = permissionRepository.findAllByUserAndProductRecipeHierarchy(
-                userId, PermissionAction.CREATE_PRODUCT_RECIPE, null, productId, null, tenantId);
+                userId, PermissionAction.CREATE_PRODUCT_RECIPE, null, productId, shopId, tenantId);
         boolean canCreate = !result.isEmpty();
         log.debug("canCreate result for user {} - permitted: {}", userId, canCreate);
         return canCreate;

@@ -15,7 +15,6 @@ import org.zerp.common.entity.resource.StockCountItem;
 import org.zerp.common.entity.resource.StockCountStatus;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
-import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.resource.dto.stockcount.StockCountCreateDTO;
 import org.zerp.resource.dto.stockcount.StockCountDTO;
@@ -44,7 +43,6 @@ public class StockCountService implements
     private final StockResourceRepository stockResourceRepository;
     private final StockCountMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
-    private final CurrentTenantIdResolver currentTenantIdResolver;
     private final FilterRefiner filterRefiner;
 
     @Override
@@ -94,10 +92,10 @@ public class StockCountService implements
     @Transactional
     public StockCountDTO create(StockCountCreateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
-        UUID tenantId = currentTenantIdResolver.resolve();
         Shop shop = resolveShop(data.getShopId());
+        UUID tenantId = shop.getTenantId();
 
-        if (!permissionEvaluator.canCreate(userId, shop.getId(), tenantId)) {
+        if (!permissionEvaluator.canCreate(userId, shop)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create StockCount");
         }
 

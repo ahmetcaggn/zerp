@@ -17,7 +17,6 @@ import org.zerp.common.dto.ApiResponse;
 import org.zerp.common.dto.feign.user.keycloak.KeycloakCreateUserRequestDTO;
 import org.zerp.common.dto.feign.user.keycloak.KeycloakCreateUserResponseDTO;
 import org.zerp.common.dto.feign.user.keycloak.KeycloakUpdateUserRequestDTO;
-import org.zerp.common.dto.feign.user.keycloak.KeycloakUpdateUserResponseDTO;
 import org.zerp.common.dto.user.UsernameCheckResponseDTO;
 import org.zerp.common.error.filter.FilterError;
 import org.zerp.common.error.filter.FilterErrorUtils;
@@ -115,20 +114,30 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
     @Override
     @Transactional
     public EmployeeResponseDto create(CreateEmployeeRequestDto dto) {
+        UUID tenantId = dto.getTenantId();
+        if (tenantId == null) {
+            log.error("""
+                    Tenant ID is missing in the create employee request.
+                    the employee create request must include 'tenantId' field.
+                    --------
+                    MUST SEND TENANT ID IN REQUEST
+                    --------
+                    """
+            );
+            tenantId = resolveCurrentTenantId();
+        }
         UUID userId = resolveCurrentUserId();
-        UUID tenantId = resolveCurrentTenantId();
         validateUniqueConstraints(dto.getEmail(), dto.getNationalId(), null);
 
-        if (!permissionEvaluator.canCreate(userId,
-                new EmployeePermissionEvaluator.TenantParent(tenantId))) {
+        if (!permissionEvaluator.canCreate(userId, tenantId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Employee");
         }
 
         ApiResponse<UsernameCheckResponseDTO> keycloakUsernameResponse;
         //check username
-        try{
+        try {
             keycloakUsernameResponse = userServiceClient.checkUsername(dto.getUsername()).getBody();
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Failed to check username: {}. Error: {}", dto.getUsername(), e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to check username", e);
         }
@@ -146,9 +155,9 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
                 .build();
         ApiResponse<KeycloakCreateUserResponseDTO> keycloakCreateUserResponse;
 
-        try{
+        try {
             keycloakCreateUserResponse = userServiceClient.createKeycloakUser(keycloakRequest).getBody();
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Failed to create user in Keycloak for username: {}, email: {}. Error: {}", dto.getUsername(), dto.getEmail(), e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to create user in Keycloak", e);
         }
@@ -182,7 +191,11 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
             return employeeMapper.toResponseDto(employeeRepository.save(employee));
         } catch (Exception e) {
             log.error("Failed to save employee, rolling back Keycloak user and user DB entry: {}", employeeId, e);
-            try { userServiceClient.deleteKeycloakUser(employeeId); } catch (Exception ex) { log.error("Keycloak rollback failed for id: {}", employeeId, ex); }
+            try {
+                userServiceClient.deleteKeycloakUser(employeeId);
+            } catch (Exception ex) {
+                log.error("Keycloak rollback failed for id: {}", employeeId, ex);
+            }
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create employee", e);
         }
     }
@@ -194,8 +207,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
         Employee employee = employeeRepository.findByIdWithContactsAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
 
-        if (!permissionEvaluator.canUpdate(userId,
-                new EmployeePermissionEvaluator.EmployeeTarget(employee.getId(), employee.getTenant().getId()))) {
+        if (!permissionEvaluator.canUpdate(userId, employee)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update Employee");
         }
 
@@ -251,8 +263,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
         Employee employee = employeeRepository.findByIdWithContactsAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
 
-        if (!permissionEvaluator.canPatch(userId,
-                new EmployeePermissionEvaluator.EmployeeTarget(employee.getId(), employee.getTenant().getId()))) {
+        if (!permissionEvaluator.canPatch(userId, employee)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to patch Employee");
         }
 
@@ -312,8 +323,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
         Employee employee = employeeRepository.findByIdAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
 
-        if (!permissionEvaluator.canDelete(userId,
-                new EmployeePermissionEvaluator.EmployeeTarget(employee.getId(), employee.getTenant().getId()))) {
+        if (!permissionEvaluator.canDelete(userId, employee)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete Employee");
         }
         employee.deleteEmployee();

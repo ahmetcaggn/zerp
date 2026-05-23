@@ -13,7 +13,6 @@ import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.sale.ShopTable;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
-import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.sale.dto.shoptable.ShopTableCreateDTO;
 import org.zerp.sale.dto.shoptable.ShopTableDTO;
@@ -39,7 +38,6 @@ public class ShopTableService implements
     private final ShopRepository shopRepository;
     private final ShopTableMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
-    private final CurrentTenantIdResolver currentTenantIdResolver;
     private final FilterRefiner filterRefiner;
 
     @Override
@@ -85,9 +83,9 @@ public class ShopTableService implements
     @Transactional
     public ShopTableDTO create(ShopTableCreateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
-        UUID tenantId = currentTenantIdResolver.resolve();
         Shop shop = resolveShop(data.getShopId());
-        if (!permissionEvaluator.canCreate(userId, shop.getId(), tenantId)) {
+        UUID tenantId = shop.getTenantId();
+        if (!permissionEvaluator.canCreate(userId, shop)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create ShopTable");
         }
         ShopTable table = mapper.toEntity(data);

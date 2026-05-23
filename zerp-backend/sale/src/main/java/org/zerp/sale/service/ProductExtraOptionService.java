@@ -9,11 +9,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.sale.Product;
 import org.zerp.common.entity.sale.ProductExtraOption;
 import org.zerp.common.entity.sale.ProductExtraOptionItem;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
-import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.sale.dto.productextraoption.ProductExtraOptionCreateDTO;
 import org.zerp.sale.dto.productextraoption.ProductExtraOptionDTO;
@@ -41,7 +41,6 @@ public class ProductExtraOptionService implements
     private final StockResourceRepository stockResourceRepository;
     private final ProductExtraOptionMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
-    private final CurrentTenantIdResolver currentTenantIdResolver;
     private final FilterRefiner filterRefiner;
 
     @Override
@@ -87,13 +86,16 @@ public class ProductExtraOptionService implements
     @Transactional
     public ProductExtraOptionDTO create(ProductExtraOptionCreateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
-        UUID tenantId = currentTenantIdResolver.resolve();
-        if (!permissionEvaluator.canCreate(userId, data.getProductId(), tenantId)) {
+        Product product = productRepository.findById(data.getProductId()).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product not found"));
+        UUID tenantId = product.getTenantId();
+
+        if (!permissionEvaluator.canCreate(userId, product)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create ProductExtraOption");
         }
 
         ProductExtraOption option = mapper.toEntity(data);
-        option.setProduct(productRepository.getReferenceById(data.getProductId()));
+        option.setProduct(product);
         option.setTenantId(tenantId);
 
         if (data.getItems() != null) {

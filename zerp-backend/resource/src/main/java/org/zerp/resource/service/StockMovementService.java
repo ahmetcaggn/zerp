@@ -15,7 +15,6 @@ import org.zerp.common.entity.resource.StockMovementType;
 import org.zerp.common.entity.resource.StockResource;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
-import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.resource.dto.stockmovement.StockMovementCreateDTO;
 import org.zerp.resource.dto.stockmovement.StockMovementDTO;
@@ -40,7 +39,6 @@ public class StockMovementService implements
     private final StockResourceRepository stockResourceRepository;
     private final StockMovementMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
-    private final CurrentTenantIdResolver currentTenantIdResolver;
     private final FilterRefiner filterRefiner;
 
     @Override
@@ -89,13 +87,14 @@ public class StockMovementService implements
     @Transactional
     public StockMovementDTO create(StockMovementCreateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
-        UUID tenantId = currentTenantIdResolver.resolve();
-        if (!permissionEvaluator.canCreate(userId, data.getStockResourceId(), tenantId)) {
+        StockResource stockResource = stockResourceRepository.findById(data.getStockResourceId()).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.BAD_REQUEST, "StockResource not found"));
+        UUID tenantId = stockResource.getTenantId();
+
+        if (!permissionEvaluator.canCreate(userId, stockResource)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create StockMovement");
         }
 
-        StockResource stockResource = stockResourceRepository.findById(data.getStockResourceId()).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "StockResource not found"));
 
         BigDecimal previousQuantity = stockResource.getQuantity();
         BigDecimal newQuantity = calculateNewQuantity(previousQuantity, data.getQuantity(), data.getType());

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.sale.Menu;
 import org.zerp.common.entity.sale.MenuCategory;
 import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
@@ -46,12 +47,18 @@ public class MenuCategoryPermissionEvaluator {
         return canRead;
     }
 
-    public boolean canCreate(UUID userId, UUID menuId, UUID tenantId) {
-        log.trace("Checking canCreate permission - userId: {}, menuId: {}, tenantId: {}", userId, menuId, tenantId);
+    public boolean canCreate(UUID userId, Menu parent) {
+        UUID menuId = parent.getId();
+        UUID shopId = parent.getShop().getId();
+        UUID tenantId = parent.getTenantId();
+
+        log.trace("Checking canCreate permission - userId: {}, menuId: {}, tenantId: {}",
+                userId, menuId, tenantId);
         List<Permission> result = permissionRepository.findAllByUserAndMenuCategoryHierarchy(
-                userId, PermissionAction.CREATE_MENU_CATEGORY, null, menuId, null, tenantId);
+                userId, PermissionAction.CREATE_MENU_CATEGORY,
+                null, menuId, shopId, tenantId);
         boolean canCreate = !result.isEmpty();
-        log.debug("canCreate result for user {} - permitted: {}", userId, canCreate);
+        log.debug("canCreate result for user {} on menu {} - permitted: {}", userId, menuId, canCreate);
         return canCreate;
     }
 
@@ -73,7 +80,8 @@ public class MenuCategoryPermissionEvaluator {
         List<Permission> result = permissionRepository.findAllByUserAndMenuCategoryHierarchy(
                 userId, PermissionAction.UPDATE_MENU_CATEGORY, categoryId, menuId, shopId, tenantId);
         boolean canUpdate = !result.isEmpty();
-        log.debug("canUpdate result for user {} on menuCategory {} - permitted: {}", userId, categoryId, canUpdate);
+        log.debug("canUpdate result for user {} on menuCategory {} - permitted: {}",
+                userId, categoryId, canUpdate);
         return canUpdate;
     }
 

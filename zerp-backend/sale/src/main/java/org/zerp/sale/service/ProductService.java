@@ -15,7 +15,6 @@ import org.zerp.common.entity.sale.ProductMetric;
 import org.zerp.common.entity.sale.ProductType;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
-import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.sale.dto.product.ProductCreateDTO;
 import org.zerp.sale.dto.product.ProductDTO;
@@ -44,7 +43,6 @@ public class ProductService implements
     private final ProductMetricRepository productMetricRepository;
     private final ProductMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
-    private final CurrentTenantIdResolver currentTenantIdResolver;
     private final FilterRefiner filterRefiner;
 
     @Override
@@ -90,9 +88,9 @@ public class ProductService implements
     @Transactional
     public ProductDTO create(ProductCreateDTO data) {
         UUID userId = currentUserIdResolver.resolve();
-        UUID tenantId = currentTenantIdResolver.resolve();
         Shop shop = resolveShop(data.getShopId());
-        if (!permissionEvaluator.canCreate(userId, shop.getId(), tenantId)) {
+        UUID tenantId = shop.getTenantId();
+        if (!permissionEvaluator.canCreate(userId, shop)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Product");
         }
         Product product = mapper.toEntity(data);

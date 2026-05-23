@@ -6,6 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.sale.Product;
 import org.zerp.common.entity.sale.ProductExtraOption;
 import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
@@ -46,10 +47,14 @@ public class ProductExtraOptionPermissionEvaluator {
         return canRead;
     }
 
-    public boolean canCreate(UUID userId, UUID productId, UUID tenantId) {
+    public boolean canCreate(UUID userId, Product product) {
+        UUID productId = product.getId();
+        UUID shopId = product.getShop().getId();
+        UUID tenantId = product.getTenantId();
+
         log.trace("Checking canCreate permission - userId: {}, productId: {}, tenantId: {}", userId, productId, tenantId);
         List<Permission> result = permissionRepository.findAllByUserAndProductExtraOptionHierarchy(
-                userId, PermissionAction.CREATE_PRODUCT_EXTRA_OPTION, null, productId, null, tenantId);
+                userId, PermissionAction.CREATE_PRODUCT_EXTRA_OPTION, null, productId, shopId, tenantId);
         boolean canCreate = !result.isEmpty();
         log.debug("canCreate result for user {} - permitted: {}", userId, canCreate);
         return canCreate;

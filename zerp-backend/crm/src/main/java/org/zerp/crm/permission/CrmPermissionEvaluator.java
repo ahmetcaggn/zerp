@@ -185,8 +185,8 @@ public class CrmPermissionEvaluator {
         }
 
         return Specification.anyOf(
-                (root, query, cb) -> root.get("id").in(permittedTeamIds),
-                (root, query, cb) -> root.get("tenantId").in(permittedTenantIds)
+                (root, _, _) -> root.get("id").in(permittedTeamIds),
+                (root, _, _) -> root.get("tenantId").in(permittedTenantIds)
         );
     }
 
@@ -273,8 +273,8 @@ public class CrmPermissionEvaluator {
         }
 
         List<Specification<TicketEntity>> specifications = new ArrayList<>(List.of(
-                (root, query, cb) -> root.get("id").in(permittedTicketIds),
-                (root, query, cb) -> root.get("tenantId").in(permittedTenantIds)
+                (root, _, _) -> root.get("id").in(permittedTicketIds),
+                (root, _, _) -> root.get("tenantId").in(permittedTenantIds)
         ));
 
         Set<UUID> leaderPermittedTeamIds = new HashSet<>();
@@ -298,7 +298,7 @@ public class CrmPermissionEvaluator {
         }
 
         if (!leaderPermittedTeamIds.isEmpty()) {
-            specifications.add((root, query, cb) -> {
+            specifications.add((root, _, cb) -> {
                 var assignmentJoin = root.join("currentAssignment", JoinType.LEFT);
                 return cb.and(
                         cb.isTrue(assignmentJoin.get("active")),
@@ -308,7 +308,7 @@ public class CrmPermissionEvaluator {
         }
 
         if (!memberPermittedTeamIds.isEmpty()) {
-            specifications.add((root, query, cb) -> {
+            specifications.add((root, _, cb) -> {
                 var assignmentJoin = root.join("currentAssignment", JoinType.LEFT);
                 return cb.and(
                         cb.isTrue(assignmentJoin.get("active")),
@@ -319,7 +319,7 @@ public class CrmPermissionEvaluator {
         }
 
         if (!permittedUserIds.isEmpty()) {
-            specifications.add((root, query, cb) -> {
+            specifications.add((root, _, cb) -> {
                 var assignmentJoin = root.join("currentAssignment", JoinType.LEFT);
                 return cb.and(
                         cb.isTrue(assignmentJoin.get("active")),

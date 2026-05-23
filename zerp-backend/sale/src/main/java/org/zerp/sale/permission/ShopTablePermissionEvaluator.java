@@ -6,6 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.sale.ShopTable;
 import org.zerp.common.permission.entity.Permission;
 import org.zerp.common.permission.entity.PermissionAction;
@@ -45,7 +46,10 @@ public class ShopTablePermissionEvaluator {
         return canRead;
     }
 
-    public boolean canCreate(UUID userId, UUID shopId, UUID tenantId) {
+    public boolean canCreate(UUID userId, Shop parent) {
+        UUID shopId = parent.getId();
+        UUID tenantId = parent.getTenantId();
+
         log.trace("Checking canCreate permission - userId: {}, shopId: {}, tenantId: {}", userId, shopId, tenantId);
         List<Permission> result = permissionRepository.findAllByUserAndShopTableHierarchy(
                 userId, PermissionAction.CREATE_SHOP_TABLE, null, shopId, tenantId);
