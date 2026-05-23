@@ -39,6 +39,7 @@ class CreateEmployeeRequestDto extends Schema {
     this.salary,
     this.isActive,
     this.contacts = const [],
+    this.tenantId,
   });
 
   @JsonKey(name: r'username')
@@ -82,6 +83,9 @@ class CreateEmployeeRequestDto extends Schema {
 
   @JsonKey(name: r'contacts')
   final List<EmployeeContactDto> contacts;
+
+  @JsonKey(name: r'tenantId')
+  final String? tenantId;
 
   /// The factory instance for creating [CreateEmployeeRequestDto] from JSON.
   static const factory = CreateEmployeeRequestDtoFactory();

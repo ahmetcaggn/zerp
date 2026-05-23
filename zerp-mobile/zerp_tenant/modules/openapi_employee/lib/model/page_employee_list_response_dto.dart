@@ -32,8 +32,8 @@ class PageEmployeeListResponseDto extends Schema {
     this.size,
     this.content = const [],
     this.number,
-    this.pageable,
     this.sort,
+    this.pageable,
     this.numberOfElements,
     this.first,
     this.last,
@@ -55,11 +55,11 @@ class PageEmployeeListResponseDto extends Schema {
   @JsonKey(name: r'number')
   final int? number;
 
-  @JsonKey(name: r'pageable')
-  final PageableObject? pageable;
-
   @JsonKey(name: r'sort')
   final SortObject? sort;
+
+  @JsonKey(name: r'pageable')
+  final PageableObject? pageable;
 
   @JsonKey(name: r'numberOfElements')
   final int? numberOfElements;

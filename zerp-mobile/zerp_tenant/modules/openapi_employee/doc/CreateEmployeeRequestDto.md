@@ -22,6 +22,7 @@ Name | Type | Description | Notes
 **salary** | **num** |  | [optional] 
 **isActive** | **bool** |  | [optional] 
 **contacts** | [**List<EmployeeContactDto>**](EmployeeContactDto.md) |  | [optional] [default to const []]
+**tenantId** | **String** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
