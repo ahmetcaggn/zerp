@@ -77,6 +77,29 @@ public class StockCountPermissionEvaluator {
         return canUpdate(userId, target);
     }
 
+    public boolean canApprove(UUID userId, StockCount target) {
+        UUID stockCountId;
+        UUID shopId;
+        UUID tenantId;
+        try {
+            stockCountId = target.getId();
+            shopId = target.getShop().getId();
+            tenantId = target.getTenantId();
+        } catch (NullPointerException e) {
+            log.error("Null pointer while evaluating canApprove for StockCount userId={}", userId, e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid stock count structure");
+        }
+
+        List<Permission> approveResult = permissionRepository.findAllByUserAndStockCountHierarchy(
+                userId, PermissionAction.APPROVE_STOCK_COUNT, stockCountId, shopId, tenantId);
+        if (!approveResult.isEmpty()) {
+            return true;
+        }
+
+        // Backward compatibility: keep update permission as fallback until explicit approve permissions are assigned.
+        return canUpdate(userId, target);
+    }
+
     public boolean canDelete(UUID userId, StockCount target) {
         UUID stockCountId;
         UUID shopId;

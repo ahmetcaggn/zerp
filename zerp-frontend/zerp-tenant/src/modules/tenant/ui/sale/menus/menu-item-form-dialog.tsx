@@ -2,6 +2,7 @@
 import {
   Box,
   Button,
+  IconButton,
   Dialog,
   DialogActions,
   DialogContent,
@@ -11,10 +12,10 @@ import {
   MenuItem,
   Select,
   TextField,
-  Checkbox,
-  ListItemText,
 } from '@mui/material'
 import { useState } from 'react'
+import AddIcon from '@mui/icons-material/Add'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
@@ -22,7 +23,7 @@ import { getUserFriendlyError } from '@/core/utils/error-message'
 import { useCreateMenuItem, useUpdateMenuItem } from '../../../hooks/use-menu-items'
 import { useMenuCategories } from '../../../hooks/use-menu-categories'
 import { useProducts } from '../../../hooks/use-products'
-import type { MenuItemResponseDto } from '../../../types/sale'
+import type { MenuItemProductItemCreateDto, MenuItemResponseDto } from '../../../types/sale'
 
 interface Props {
   open: boolean
@@ -30,6 +31,28 @@ interface Props {
   menuItem?: MenuItemResponseDto | null
   preselectedCategoryId?: string
   onClose: () => void
+}
+
+function buildInitialProductItems(menuItem?: MenuItemResponseDto | null): MenuItemProductItemCreateDto[] {
+  if (menuItem?.productItems && menuItem.productItems.length > 0) {
+    return menuItem.productItems
+      .filter((item) => Boolean(item.productId))
+      .map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity && item.quantity > 0 ? item.quantity : 1,
+      }))
+  }
+
+  if (menuItem?.productIds && menuItem.productIds.length > 0) {
+    const counts = new Map<string, number>()
+    for (const productId of menuItem.productIds) {
+      if (!productId) continue
+      counts.set(productId, (counts.get(productId) ?? 0) + 1)
+    }
+    return Array.from(counts.entries()).map(([productId, quantity]) => ({ productId, quantity }))
+  }
+
+  return []
 }
 
 export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId, onClose }: Props) {
@@ -43,7 +66,7 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
   const [price, setPrice] = useState(String(menuItem?.price ?? ''))
   const [imageId, setImageId] = useState(menuItem?.imageId ?? '')
   const [categoryId, setCategoryId] = useState(menuItem?.categoryId ?? preselectedCategoryId ?? '')
-  const [productIds, setProductIds] = useState<string[]>(menuItem?.productIds ?? [])
+  const [productItems, setProductItems] = useState<MenuItemProductItemCreateDto[]>(() => buildInitialProductItems(menuItem))
 
   const { data: categoriesResult } = useMenuCategories({
     pagination: { page: 1, perPage: 200 },
@@ -65,6 +88,14 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
     e.preventDefault()
     if (!name.trim() || !price || !categoryId) return
 
+    const normalizedProductItems = productItems
+      .filter((item) => item.productId)
+      .map((item) => ({
+        productId: item.productId,
+        quantity: !Number.isFinite(item.quantity) || item.quantity < 1 ? 1 : Math.floor(item.quantity),
+      }))
+    const expandedProductIds = normalizedProductItems.flatMap((item) => Array.from({ length: item.quantity }, () => item.productId))
+
     if (mode === 'create') {
       createMenuItem(
         {
@@ -73,7 +104,8 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
           price: Number(price),
           ...(imageId.trim() && { imageId: imageId.trim() }),
           categoryId,
-          productIds,
+          productItems: normalizedProductItems,
+          productIds: expandedProductIds,
         },
         {
           onSuccess: () => {
@@ -92,7 +124,8 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
             ...(description.trim() && { description: description.trim() }),
             price: Number(price),
             ...(imageId.trim() && { imageId: imageId.trim() }),
-            productIds,
+            productItems: normalizedProductItems,
+            productIds: expandedProductIds,
           },
         },
         {
@@ -161,30 +194,57 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
                 ))}
               </Select>
             </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>{t('sale.menuItem.form.productIds')}</InputLabel>
-              <Select
-                multiple
-                value={productIds}
-                label={t('sale.menuItem.form.productIds')}
-                onChange={(e) => {
-                  const val = e.target.value
-                  setProductIds(typeof val === 'string' ? val.split(',') : val)
-                }}
-                renderValue={(selected) =>
-                  selected
-                    .map((id) => products.find((p) => p.id === id)?.name || id)
-                    .join(', ')
-                }
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              {productItems.map((line, index) => (
+                <Box key={`${line.productId || 'new'}-${index}`} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <FormControl sx={{ flex: 1 }}>
+                    <InputLabel>{t('sale.menuItem.form.productIds')}</InputLabel>
+                    <Select
+                      value={line.productId}
+                      label={t('sale.menuItem.form.productIds')}
+                      onChange={(e) => {
+                        const next = [...productItems]
+                        next[index] = { ...next[index], productId: e.target.value }
+                        setProductItems(next)
+                      }}
+                    >
+                      {products.map((p) => (
+                        <MenuItem key={p.id} value={p.id}>
+                          {p.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <TextField
+                    type="number"
+                    label={t('sale.menuItem.form.productQuantity')}
+                    value={line.quantity}
+                    onChange={(e) => {
+                      const quantity = Number(e.target.value)
+                      const next = [...productItems]
+                      next[index] = { ...next[index], quantity: Number.isFinite(quantity) ? quantity : 1 }
+                      setProductItems(next)
+                    }}
+                    inputProps={{ min: 1, step: 1 }}
+                    sx={{ width: 120 }}
+                  />
+                  <IconButton
+                    aria-label={t('common.delete')}
+                    onClick={() => setProductItems((prev) => prev.filter((_, lineIndex) => lineIndex !== index))}
+                  >
+                    <DeleteOutlineIcon />
+                  </IconButton>
+                </Box>
+              ))}
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<AddIcon />}
+                onClick={() => setProductItems((prev) => [...prev, { productId: '', quantity: 1 }])}
               >
-                {products.map((p) => (
-                  <MenuItem key={p.id} value={p.id}>
-                    <Checkbox checked={productIds.includes(p.id)} />
-                    <ListItemText primary={p.name} />
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                {t('sale.menuItem.form.addProductLine')}
+              </Button>
+            </Box>
           </Box>
         </DialogContent>
         <DialogActions>

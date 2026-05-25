@@ -9,6 +9,5 @@ import java.util.UUID;
 public class StockCountItemUpdateDTO {
     private UUID stockCountItemId;
     private BigDecimal actualQuantity;
-    private BigDecimal wasteQuantity;
     private String notes;
 }

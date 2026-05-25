@@ -12,6 +12,7 @@ import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -40,6 +41,12 @@ public class StockCount extends BaseEntity implements Permittable {
     private LocalDate countDate;
 
     private String notes;
+
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
+
+    @Column(name = "approved_by")
+    private UUID approvedBy;
 
     @OneToMany(mappedBy = "stockCount", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StockCountItem> items = new ArrayList<>();
