@@ -62,8 +62,12 @@ export function TenantEmployeeList({ tenantId, tenantName }: Props) {
     PermissionActions.READ_EMPLOYEE,
     PermissionActions.UPDATE_EMPLOYEE,
     PermissionActions.DELETE_EMPLOYEE,
+    PermissionActions.READ_TENANT,
+    PermissionActions.UPDATE_TENANT,
+    PermissionActions.ADMIN_TENANT,
+    PermissionActions.CREATE_EMPLOYEE_ANY_TENANT,
   ])
-  const canCreateEmployee = hasAnyPermission([PermissionActions.CREATE_EMPLOYEE])
+  const canCreateEmployeeForTenant = hasAnyPermission([PermissionActions.CREATE_EMPLOYEE_ANY_TENANT])
   const canDeleteEmployee = hasAnyPermission([PermissionActions.DELETE_EMPLOYEE])
 
   const params = {
@@ -90,7 +94,7 @@ export function TenantEmployeeList({ tenantId, tenantName }: Props) {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5">{t('employees.title')}</Typography>
-        {canCreateEmployee && (
+        {canCreateEmployeeForTenant && (
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateDialogOpen(true)}>
             {t('employees.createButton')}
           </Button>

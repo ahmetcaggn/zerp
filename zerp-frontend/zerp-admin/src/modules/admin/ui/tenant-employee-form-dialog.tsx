@@ -79,7 +79,7 @@ export function TenantEmployeeFormDialog({ open, tenantId, tenantName, onClose }
   const [draftPermissions, setDraftPermissions] = useState<PermissionDraftAssignment[]>([])
 
   const { hasAnyPermission } = useCurrentUserPermissions()
-  const canCreateEmployee = hasAnyPermission([PermissionActions.CREATE_EMPLOYEE])
+  const canCreateEmployee = hasAnyPermission([PermissionActions.CREATE_EMPLOYEE_ANY_TENANT])
 
   const { data: managersResult } = useTenantEmployees(
     tenantId,

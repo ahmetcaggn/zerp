@@ -3,6 +3,7 @@ import type { RaListParams, RaListResult } from '@/core/api/resource-types'
 import { toRaQueryString } from '@/core/api/resource-types'
 
 import type {
+  AdminCreateEmployeeRequest,
   CreateEmployeeRequest,
   EmployeeListResponse,
   EmployeeResponse,
@@ -50,6 +51,19 @@ export const employeeClient = {
 
   create: (data: CreateEmployeeRequest, tenantId: string): Promise<EmployeeResponse> =>
     httpClient.post<EmployeeResponse>(EMPLOYEE_PATH, data, getTenantRequestOptions(tenantId)),
+
+  createForTenant: (data: CreateEmployeeRequest, tenantId: string): Promise<EmployeeResponse> => {
+    const normalizedTenantId = tenantId.trim()
+    const requestData: AdminCreateEmployeeRequest = {
+      ...data,
+      tenantId: normalizedTenantId,
+    }
+    return httpClient.post<EmployeeResponse>(
+      `${EMPLOYEE_PATH}/admin`,
+      requestData,
+      getTenantRequestOptions(normalizedTenantId),
+    )
+  },
 
   update: (id: string, data: UpdateEmployeeRequest, tenantId: string): Promise<EmployeeResponse> =>
     httpClient.put<EmployeeResponse>(`${EMPLOYEE_PATH}/${id}`, data, getTenantRequestOptions(tenantId)),

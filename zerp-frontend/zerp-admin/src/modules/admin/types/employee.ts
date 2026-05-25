@@ -81,6 +81,10 @@ export interface CreateEmployeeRequest {
   contacts?: EmployeeContactDto[]
 }
 
+export interface AdminCreateEmployeeRequest extends CreateEmployeeRequest {
+  tenantId: string
+}
+
 export interface UpdateEmployeeRequest {
   username?: string
   firstName?: string

@@ -50,7 +50,7 @@ export function useCreateTenantEmployee(tenantId: string) {
   const normalizedTenantId = tenantId.trim()
 
   return useMutation({
-    mutationFn: (data: CreateEmployeeRequest) => employeeClient.create(data, normalizedTenantId),
+    mutationFn: (data: CreateEmployeeRequest) => employeeClient.createForTenant(data, normalizedTenantId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [...queryKeys.admin.employees, 'list', normalizedTenantId],
