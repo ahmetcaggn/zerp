@@ -13,6 +13,7 @@ import org.zerp.common.dto.feign.resource.StockMovementFeignRequest;
 import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.resource.StockMovementType;
 import org.zerp.common.entity.sale.MenuItem;
+import org.zerp.common.entity.sale.MenuItemProduct;
 import org.zerp.common.entity.sale.Product;
 import org.zerp.common.entity.sale.ProductRecipe;
 import org.zerp.common.entity.sale.ProductRecipeItem;
@@ -38,6 +39,7 @@ import org.zerp.sale.repository.ShopTableRepository;
 import org.zerp.sale.repository.TableOrderRepository;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -259,29 +261,64 @@ public class TableOrderService implements
         List<StockMovementFeignRequest> requests = new ArrayList<>();
         for (TableOrderItem item : order.getItems()) {
             MenuItem menuItem = item.getMenuItem();
-            List<Product> products = menuItem.getProducts();
-            if (products == null || products.isEmpty()) continue;
+            List<MenuItemProduct> compositionItems = menuItem.getProductItems();
 
-            for (Product product : products) {
-                List<ProductRecipe> defaultRecipes = product.getRecipes();
-                for (ProductRecipe recipe : defaultRecipes) {
-                    for (ProductRecipeItem recipeItem : recipe.getItems()) {
-                        BigDecimal qty = recipeItem.getQuantity()
-                                .multiply(BigDecimal.valueOf(item.getQuantity()));
-                        requests.add(StockMovementFeignRequest.builder()
-                                .stockResourceId(recipeItem.getStockResource().getId())
-                                .type(StockMovementType.SALE)
-                                .quantity(qty)
-                                .referenceType("TABLE_ORDER")
-                                .referenceId(order.getId())
-                                .notes(menuItem.getName() + " x" + item.getQuantity())
-                                .tenantId(order.getTenantId())
-                                .build());
+            if (compositionItems != null && !compositionItems.isEmpty()) {
+                for (MenuItemProduct compositionItem : compositionItems) {
+                    if (compositionItem.getProduct() == null) {
+                        continue;
                     }
+                    int menuProductQuantity = compositionItem.getQuantity() == null || compositionItem.getQuantity() < 1
+                            ? 1
+                            : compositionItem.getQuantity();
+                    appendProductRecipeStockRequests(requests, order, item, menuItem, compositionItem.getProduct(), menuProductQuantity);
                 }
+                continue;
+            }
+
+            List<Product> products = menuItem.getProducts();
+            if (products == null || products.isEmpty()) {
+                continue;
+            }
+            for (Product product : products) {
+                appendProductRecipeStockRequests(requests, order, item, menuItem, product, 1);
             }
         }
         return requests;
+    }
+
+    private void appendProductRecipeStockRequests(
+            List<StockMovementFeignRequest> requests,
+            TableOrder order,
+            TableOrderItem item,
+            MenuItem menuItem,
+            Product product,
+            int menuProductQuantity
+    ) {
+        List<ProductRecipe> defaultRecipes = product.getRecipes();
+        for (ProductRecipe recipe : defaultRecipes) {
+            for (ProductRecipeItem recipeItem : recipe.getItems()) {
+                BigDecimal recipeBaseQuantity = recipeItem.getConvertedQuantity() != null
+                        ? recipeItem.getConvertedQuantity()
+                        : recipeItem.getQuantity();
+                if (recipeBaseQuantity == null || recipeBaseQuantity.compareTo(BigDecimal.ZERO) <= 0) {
+                    continue;
+                }
+                BigDecimal qty = recipeBaseQuantity
+                        .multiply(BigDecimal.valueOf(item.getQuantity()))
+                        .multiply(BigDecimal.valueOf(menuProductQuantity))
+                        .setScale(6, RoundingMode.HALF_UP);
+                requests.add(StockMovementFeignRequest.builder()
+                        .stockResourceId(recipeItem.getStockResource().getId())
+                        .type(StockMovementType.SALE)
+                        .quantity(qty)
+                        .referenceType("TABLE_ORDER")
+                        .referenceId(order.getId())
+                        .notes(menuItem.getName() + " x" + item.getQuantity())
+                        .tenantId(order.getTenantId())
+                        .build());
+            }
+        }
     }
 
     /**

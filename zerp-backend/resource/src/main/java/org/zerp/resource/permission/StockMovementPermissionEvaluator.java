@@ -45,13 +45,30 @@ public class StockMovementPermissionEvaluator {
         return canRead;
     }
 
-    public boolean canCreate(UUID userId, UUID stockResourceId, UUID tenantId) {
-        log.trace("Checking canCreate permission - userId: {}, stockResourceId: {}, tenantId: {}", userId, stockResourceId, tenantId);
+    public boolean canCreate(UUID userId, UUID stockResourceId, UUID shopId, UUID tenantId) {
+        return canCreateWithAction(userId, stockResourceId, shopId, tenantId, PermissionAction.CREATE_STOCK_MOVEMENT);
+    }
+
+    public boolean canCreateWithAction(
+            UUID userId,
+            UUID stockResourceId,
+            UUID shopId,
+            UUID tenantId,
+            PermissionAction action
+    ) {
+        log.trace("Checking {} permission - userId: {}, stockResourceId: {}, shopId: {}, tenantId: {}",
+                action, userId, stockResourceId, shopId, tenantId);
         List<Permission> result = permissionRepository.findAllByUserAndStockMovementHierarchy(
-                userId, PermissionAction.CREATE_STOCK_MOVEMENT, null, stockResourceId, null, tenantId);
+                userId, action, null, stockResourceId, shopId, tenantId);
         boolean canCreate = !result.isEmpty();
-        log.debug("canCreate result for user {} - permitted: {}", userId, canCreate);
+        log.debug("{} result for user {} - permitted: {}", action, userId, canCreate);
         return canCreate;
+    }
+
+    public boolean canReadByShop(UUID userId, UUID shopId, UUID tenantId) {
+        List<Permission> result = permissionRepository.findAllByUserAndStockMovementHierarchy(
+                userId, PermissionAction.READ_STOCK_MOVEMENT, null, null, shopId, tenantId);
+        return !result.isEmpty();
     }
 
     public boolean canUpdate(UUID userId, StockMovement target) {

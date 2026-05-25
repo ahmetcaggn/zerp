@@ -12,6 +12,7 @@ import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 import org.zerp.common.permission.entity.Permittable;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -40,7 +41,7 @@ public class StockResource extends BaseEntity implements Permittable {
     private UnitType unitType;
 
     /**
-     * Current theoretical quantity calculated from purchases minus sales/recipe deductions.
+     * Current real quantity. This value is authoritative and must be updated only by approved stock counts.
      */
     @Column(nullable = false, precision = 15, scale = 3)
     private BigDecimal quantity = BigDecimal.ZERO;
@@ -53,6 +54,27 @@ public class StockResource extends BaseEntity implements Permittable {
 
     @Column(precision = 10, scale = 2)
     private BigDecimal costPerUnit;
+
+    @Column(name = "last_count_id")
+    private UUID lastCountId;
+
+    @Column(name = "last_counted_at")
+    private LocalDateTime lastCountedAt;
+
+    @Column(name = "last_counted_by")
+    private UUID lastCountedBy;
+
+    /**
+     * Actual quantity entered in the most recently approved stock count.
+     */
+    @Column(name = "last_count_quantity", precision = 15, scale = 3)
+    private BigDecimal lastCountQuantity;
+
+    /**
+     * Expected quantity snapshot at the moment of the most recently approved stock count.
+     */
+    @Column(name = "last_expected_quantity", precision = 15, scale = 3)
+    private BigDecimal lastExpectedQuantity;
 
     @Override
     public String getTitle() {

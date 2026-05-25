@@ -25,6 +25,10 @@ public class StockMovement extends BaseEntity {
     @Column(nullable = false)
     private StockMovementType type;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "direction")
+    private StockMovementDirection direction;
+
     @Column(nullable = false, precision = 15, scale = 3)
     private BigDecimal quantity;
 

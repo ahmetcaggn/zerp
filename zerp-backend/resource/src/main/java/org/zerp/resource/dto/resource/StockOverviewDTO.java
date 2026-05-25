@@ -8,20 +8,23 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-public class StockResourceDTO {
-    private UUID id;
-    private String name;
-    private String description;
-    private UUID shopId;
-    private String shopName;
+public class StockOverviewDTO {
+    private UUID stockResourceId;
+    private String stockResourceName;
     private UnitType unitType;
-    private BigDecimal quantity;
+    private BigDecimal realQuantity;
+    private BigDecimal expectedQuantity;
+    private BigDecimal variance;
     private BigDecimal reorderThreshold;
-    private BigDecimal costPerUnit;
     private UUID lastCountId;
     private LocalDateTime lastCountedAt;
     private UUID lastCountedBy;
     private BigDecimal lastCountQuantity;
     private BigDecimal lastExpectedQuantity;
-    private UUID tenantId;
+    private BigDecimal saleDelta;
+    private BigDecimal wasteDelta;
+    private BigDecimal purchaseDelta;
+    private BigDecimal returnDelta;
+    private BigDecimal adjustmentDelta;
+    private BigDecimal transferDelta;
 }

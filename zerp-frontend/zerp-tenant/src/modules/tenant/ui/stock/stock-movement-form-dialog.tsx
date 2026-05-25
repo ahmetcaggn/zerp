@@ -28,8 +28,21 @@ interface StockMovementFormDialogProps {
 }
 
 const MOVEMENT_TYPES: StockMovementType[] = [
-  'PURCHASE', 'SALE', 'WASTE', 'ADJUSTMENT', 'TRANSFER', 'RETURN', 'STOCK_COUNT_CORRECTION',
+  'SALE', 'WASTE', 'RETURN',
 ]
+
+function parseQuantityInput(value: string): number {
+  const normalized = value.replace(',', '.').trim()
+  if (!normalized) return Number.NaN
+  const parsed = Number(normalized)
+  return Number.isFinite(parsed) ? parsed : Number.NaN
+}
+
+function normalizeQuantityForPayload(value: string): number {
+  const parsed = parseQuantityInput(value)
+  if (!Number.isFinite(parsed) || parsed <= 0) return 0
+  return Math.round(parsed * 1_000_000) / 1_000_000
+}
 
 export function StockMovementFormDialog({ open, onClose, preselectedResourceId, preselectedType }: StockMovementFormDialogProps) {
   const { t } = useI18n()
@@ -43,21 +56,43 @@ export function StockMovementFormDialog({ open, onClose, preselectedResourceId, 
     ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
   })
 
-  const [formData, setFormData] = useState<CreateStockMovementRequestDto>({
+  const initialType = preselectedType && MOVEMENT_TYPES.includes(preselectedType)
+    ? preselectedType
+    : 'WASTE'
+
+  const [formData, setFormData] = useState<{
+    stockResourceId: string
+    type: StockMovementType
+    quantityInput: string
+    notes: string
+  }>({
     stockResourceId: preselectedResourceId || '',
-    type: preselectedType || 'ADJUSTMENT',
-    quantity: 0,
+    type: initialType,
+    quantityInput: '',
     notes: '',
   })
 
-  const handleChange = (field: keyof CreateStockMovementRequestDto, value: any) => {
+  const handleChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const quantity = normalizeQuantityForPayload(formData.quantityInput)
+    if (!formData.stockResourceId || quantity <= 0) {
+      showToast(t('stock.operation.invalidItems'), { severity: 'warning' })
+      return
+    }
+
+    const payload: CreateStockMovementRequestDto = {
+      stockResourceId: formData.stockResourceId,
+      type: formData.type,
+      quantity,
+      notes: formData.notes || undefined,
+    }
+
     try {
-      await createMutation.mutateAsync(formData)
+      await createMutation.mutateAsync(payload)
       showToast('Movement saved successfully', { severity: 'success' })
       refetchMovements()
       refetchResources()
@@ -108,9 +143,10 @@ export function StockMovementFormDialog({ open, onClose, preselectedResourceId, 
 
             <TextField
               label={t('stock.movement.quantity')}
-              type="number"
-              value={formData.quantity}
-              onChange={(e) => handleChange('quantity', Number(e.target.value))}
+              type="text"
+              value={formData.quantityInput}
+              onChange={(e) => handleChange('quantityInput', e.target.value)}
+              inputProps={{ inputMode: 'decimal' }}
               required
               fullWidth
             />

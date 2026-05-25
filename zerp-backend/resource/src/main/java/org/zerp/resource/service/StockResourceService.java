@@ -20,12 +20,17 @@ import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.resource.dto.resource.StockResourceCreateDTO;
 import org.zerp.resource.dto.resource.StockResourceDTO;
+import org.zerp.resource.dto.resource.StockOverviewDTO;
 import org.zerp.resource.dto.resource.StockResourceUpdateDTO;
 import org.zerp.resource.mapper.StockResourceMapper;
 import org.zerp.resource.permission.StockResourcePermissionEvaluator;
 import org.zerp.resource.repository.ShopRepository;
+import org.zerp.resource.repository.StockMovementRepository;
 import org.zerp.resource.repository.StockResourceRepository;
+import org.zerp.resource.repository.projection.StockMovementSummaryProjection;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +41,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class StockResourceService implements
         IResourceService<StockResourceDTO, StockResourceDTO, StockResourceCreateDTO, StockResourceUpdateDTO, UUID> {
+    private static final LocalDateTime DEFAULT_MOVEMENT_WINDOW_START = LocalDateTime.of(1970, 1, 1, 0, 0);
+
     private final StockResourcePermissionEvaluator permissionEvaluator;
     private final StockResourceRepository repository;
+    private final StockMovementRepository stockMovementRepository;
     private final ShopRepository shopRepository;
     private final StockResourceMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
@@ -241,6 +249,60 @@ public class StockResourceService implements
         return deleted;
     }
 
+    @Transactional(readOnly = true)
+    public List<StockOverviewDTO> getOverviewByShop(UUID shopId) {
+        if (shopId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "shopId is required");
+        }
+
+        UUID userId = resolveCurrentUserId();
+        LocalDateTime now = LocalDateTime.now();
+        Specification<StockResource> spec = permissionEvaluator.filterRead(userId)
+                .and((root, _, _) -> root.get("shop").get("id").in(shopId));
+
+        List<StockResource> resources = repository.findAll(spec);
+        List<StockOverviewDTO> result = new ArrayList<>(resources.size());
+
+        for (StockResource resource : resources) {
+            StockMovementSummaryProjection summary = stockMovementRepository.summarizeForResource(
+                    resource.getId(),
+                    resolveMovementWindowStart(resource.getLastCountedAt()),
+                    now
+            );
+            BigDecimal real = nullSafe(resource.getQuantity());
+            BigDecimal net = summary == null ? BigDecimal.ZERO : nullSafe(summary.getNetDelta());
+            BigDecimal expected = real.add(net);
+            BigDecimal lastCountQuantity = resource.getLastCountQuantity();
+            BigDecimal lastExpectedQuantity = resource.getLastExpectedQuantity();
+            BigDecimal variance = lastExpectedQuantity == null || lastCountQuantity == null
+                    ? BigDecimal.ZERO
+                    : lastExpectedQuantity.subtract(lastCountQuantity);
+
+            StockOverviewDTO dto = new StockOverviewDTO();
+            dto.setStockResourceId(resource.getId());
+            dto.setStockResourceName(resource.getName());
+            dto.setUnitType(resource.getUnitType());
+            dto.setRealQuantity(real);
+            dto.setExpectedQuantity(expected);
+            dto.setVariance(variance);
+            dto.setReorderThreshold(resource.getReorderThreshold());
+            dto.setLastCountId(resource.getLastCountId());
+            dto.setLastCountedAt(resource.getLastCountedAt());
+            dto.setLastCountedBy(resource.getLastCountedBy());
+            dto.setLastCountQuantity(lastCountQuantity);
+            dto.setLastExpectedQuantity(lastExpectedQuantity);
+            dto.setSaleDelta(summary == null ? BigDecimal.ZERO : nullSafe(summary.getSaleTotal()));
+            dto.setWasteDelta(summary == null ? BigDecimal.ZERO : nullSafe(summary.getWasteTotal()));
+            dto.setPurchaseDelta(summary == null ? BigDecimal.ZERO : nullSafe(summary.getPurchaseTotal()));
+            dto.setReturnDelta(summary == null ? BigDecimal.ZERO : nullSafe(summary.getReturnTotal()));
+            dto.setAdjustmentDelta(summary == null ? BigDecimal.ZERO : nullSafe(summary.getAdjustmentTotal()));
+            dto.setTransferDelta(summary == null ? BigDecimal.ZERO : nullSafe(summary.getTransferTotal()));
+            result.add(dto);
+        }
+
+        return result;
+    }
+
     // =============================================
     // Private helpers
     // =============================================
@@ -251,6 +313,13 @@ public class StockResourceService implements
      */
     private void applyFieldUpdates(StockResource stockResource, Map<String, Object> fields) {
         log.trace("Applying {} field updates to StockResource", fields.size());
+
+        if (fields.containsKey("quantity")) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "quantity cannot be updated from stock resource edit endpoints. Use stock count approval flow."
+            );
+        }
 
         if (fields.containsKey("name")) stockResource.setName((String) fields.get("name"));
         if (fields.containsKey("description")) stockResource.setDescription((String) fields.get("description"));
@@ -285,5 +354,13 @@ public class StockResourceService implements
         }
         return shopRepository.findById(shopId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shop not found"));
+    }
+
+    private BigDecimal nullSafe(BigDecimal value) {
+        return value == null ? BigDecimal.ZERO : value;
+    }
+
+    private LocalDateTime resolveMovementWindowStart(LocalDateTime lastCountedAt) {
+        return lastCountedAt == null ? DEFAULT_MOVEMENT_WINDOW_START : lastCountedAt;
     }
 }

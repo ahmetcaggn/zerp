@@ -60,7 +60,8 @@ export function StockResourceFormDialog({ open, onClose, initialData }: StockRes
 
     try {
       if (initialData) {
-        await updateMutation.mutateAsync({ id: initialData.id, data: formData })
+        const { quantity: _quantity, ...updateData } = formData
+        await updateMutation.mutateAsync({ id: initialData.id, data: updateData })
         showToast('Stock updated successfully', { severity: 'success' })
       } else {
         await createMutation.mutateAsync({ ...formData, shopId: selectedShopId })
@@ -110,14 +111,16 @@ export function StockResourceFormDialog({ open, onClose, initialData }: StockRes
                 ))}
               </Select>
             </FormControl>
-            <TextField
-              label={t('stock.resource.form.quantity')}
-              type="number"
-              value={formData.quantity}
-              onChange={(e) => handleChange('quantity', Number(e.target.value))}
-              required
-              fullWidth
-            />
+            {!initialData && (
+              <TextField
+                label={t('stock.resource.form.quantity')}
+                type="number"
+                value={formData.quantity}
+                onChange={(e) => handleChange('quantity', Number(e.target.value))}
+                required
+                fullWidth
+              />
+            )}
             <Box sx={{ display: 'flex', gap: 2 }}>
               <TextField
                 label={t('stock.resource.form.reorderThreshold')}
