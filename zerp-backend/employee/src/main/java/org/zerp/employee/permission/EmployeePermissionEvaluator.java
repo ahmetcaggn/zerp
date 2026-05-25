@@ -14,6 +14,7 @@ import org.zerp.common.permission.service.CommonPermissionService;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.HashSet;
 
 @Log4j2
 @Component
@@ -29,13 +30,23 @@ public class EmployeePermissionEvaluator {
 	private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID userId, Employee employee) {
-        List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(
-                userId,
-                PermissionAction.READ_EMPLOYEE,
-                employee.getId(),
-                employee.getParent().getId()
-        );
-        return !result.isEmpty();
+        if (employee == null || employee.getId() == null || employee.getTenantId() == null) {
+            return false;
+        }
+
+        UUID tenantId = employee.getTenantId();
+        UUID employeeId = employee.getId();
+
+        return hasRootReadScope(userId)
+                || hasTenantPermission(userId, PermissionAction.READ_EMPLOYEE, tenantId)
+                || hasTenantPermission(userId, PermissionAction.UPDATE_EMPLOYEE, tenantId)
+                || hasTenantPermission(userId, PermissionAction.DELETE_EMPLOYEE, tenantId)
+                || hasTenantPermission(userId, PermissionAction.READ_TENANT, tenantId)
+                || hasTenantPermission(userId, PermissionAction.UPDATE_TENANT, tenantId)
+                || hasTenantPermission(userId, PermissionAction.ADMIN_TENANT, tenantId)
+                || hasEmployeeHierarchyPermission(userId, PermissionAction.READ_EMPLOYEE, employeeId, tenantId)
+                || hasEmployeeHierarchyPermission(userId, PermissionAction.UPDATE_EMPLOYEE, employeeId, tenantId)
+                || hasEmployeeHierarchyPermission(userId, PermissionAction.DELETE_EMPLOYEE, employeeId, tenantId);
     }
 
 	public boolean canCreate(UUID userId, TenantParent parent) {
@@ -47,6 +58,10 @@ public class EmployeePermissionEvaluator {
 		);
 		return !result.isEmpty();
 	}
+
+    public boolean canCreateAnyTenant(UUID userId) {
+        return commonPermissionService.hasRootPermission(userId, PermissionAction.CREATE_EMPLOYEE_ANY_TENANT);
+    }
 
 	public boolean canUpdate(UUID userId, EmployeeTarget target) {
 		List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(
@@ -73,17 +88,89 @@ public class EmployeePermissionEvaluator {
 	}
 
 	public Specification<Employee> filterRead(UUID userId) {
-		Set<UUID> permittedEmployeeIds = commonPermissionService.getAllPermitted(
-				userId, PermissionTargetType.EMPLOYEE, PermissionAction.READ_EMPLOYEE);
-		Set<UUID> permittedTenantIds = commonPermissionService.getAllPermitted(
-				userId, PermissionTargetType.TENANT, PermissionAction.READ_EMPLOYEE);
+        if (hasRootReadScope(userId)) {
+            return Specification.unrestricted();
+        }
 
-		log.debug("user {} permitted: {} employees, {} tenants",
-				userId, permittedEmployeeIds.size(), permittedTenantIds.size());
+        Set<UUID> permittedEmployeeIds = collectReadableEmployeeIds(userId);
+        Set<UUID> permittedTenantIds = collectReadableTenantIds(userId);
 
-		return Specification.anyOf(
-				(root, _, _) -> root.get("id").in(permittedEmployeeIds),
-				(root, _, _) -> root.get("tenantId").in(permittedTenantIds)
-		);
+        log.debug("user {} permitted: {} employees, {} tenants",
+                userId, permittedEmployeeIds.size(), permittedTenantIds.size());
+
+        if (permittedEmployeeIds.isEmpty() && permittedTenantIds.isEmpty()) {
+            return (_, _, cb) -> cb.disjunction();
+        }
+
+        if (permittedTenantIds.isEmpty()) {
+            return (root, _, _) -> root.get("id").in(permittedEmployeeIds);
+        }
+
+        if (permittedEmployeeIds.isEmpty()) {
+            return (root, _, _) -> root.get("tenantId").in(permittedTenantIds);
+        }
+
+        return Specification.anyOf(
+                (root, _, _) -> root.get("id").in(permittedEmployeeIds),
+                (root, _, _) -> root.get("tenantId").in(permittedTenantIds)
+        );
 	}
+
+    private Set<UUID> collectReadableEmployeeIds(UUID userId) {
+        Set<UUID> readableEmployeeIds = new HashSet<>(commonPermissionService.getAllPermitted(
+                userId, PermissionTargetType.EMPLOYEE, PermissionAction.READ_EMPLOYEE
+        ));
+        readableEmployeeIds.addAll(commonPermissionService.getAllPermitted(
+                userId, PermissionTargetType.EMPLOYEE, PermissionAction.UPDATE_EMPLOYEE
+        ));
+        readableEmployeeIds.addAll(commonPermissionService.getAllPermitted(
+                userId, PermissionTargetType.EMPLOYEE, PermissionAction.DELETE_EMPLOYEE
+        ));
+        return readableEmployeeIds;
+    }
+
+    private Set<UUID> collectReadableTenantIds(UUID userId) {
+        Set<UUID> readableTenantIds = new HashSet<>(commonPermissionService.getAllPermitted(
+                userId, PermissionTargetType.TENANT, PermissionAction.READ_EMPLOYEE
+        ));
+        readableTenantIds.addAll(commonPermissionService.getAllPermitted(
+                userId, PermissionTargetType.TENANT, PermissionAction.UPDATE_EMPLOYEE
+        ));
+        readableTenantIds.addAll(commonPermissionService.getAllPermitted(
+                userId, PermissionTargetType.TENANT, PermissionAction.DELETE_EMPLOYEE
+        ));
+        readableTenantIds.addAll(commonPermissionService.getAllPermitted(
+                userId, PermissionTargetType.TENANT, PermissionAction.READ_TENANT
+        ));
+        readableTenantIds.addAll(commonPermissionService.getAllPermitted(
+                userId, PermissionTargetType.TENANT, PermissionAction.UPDATE_TENANT
+        ));
+        readableTenantIds.addAll(commonPermissionService.getAllPermitted(
+                userId, PermissionTargetType.TENANT, PermissionAction.ADMIN_TENANT
+        ));
+        return readableTenantIds;
+    }
+
+    private boolean hasEmployeeHierarchyPermission(UUID userId, PermissionAction action, UUID employeeId, UUID tenantId) {
+        List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(
+                userId, action, employeeId, tenantId
+        );
+        return !result.isEmpty();
+    }
+
+    private boolean hasTenantPermission(UUID userId, PermissionAction action, UUID tenantId) {
+        return permissionRepository.existsByUserAndTargetTypeAndActionAndTargetId(
+                userId, PermissionTargetType.TENANT, action, tenantId
+        );
+    }
+
+    private boolean hasRootReadScope(UUID userId) {
+        return commonPermissionService.hasRootPermission(userId, PermissionAction.READ_EMPLOYEE)
+                || commonPermissionService.hasRootPermission(userId, PermissionAction.UPDATE_EMPLOYEE)
+                || commonPermissionService.hasRootPermission(userId, PermissionAction.DELETE_EMPLOYEE)
+                || commonPermissionService.hasRootPermission(userId, PermissionAction.READ_TENANT)
+                || commonPermissionService.hasRootPermission(userId, PermissionAction.UPDATE_TENANT)
+                || commonPermissionService.hasRootPermission(userId, PermissionAction.ADMIN_TENANT)
+                || canCreateAnyTenant(userId);
+    }
 }

@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.server.resource.authentication.Reacti
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
 import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.zerp.gateway.service.CheckUserResult;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.zerp.common.util.header.CurrentTenantIdResolver.TENANT_ID_HEADER;
@@ -127,7 +129,8 @@ public class GatewaySecurityConfig {
                             .map(r -> r.startsWith("ROLE_") ? r.substring(5) : r)
                             .collect(Collectors.joining(","));
 
-                    String tenantId = jwt.getClaimAsString("tenant_id");
+                    String jwtTenantId = jwt.getClaimAsString("tenant_id");
+                    String tenantId = resolveTenantHeader(exchange, token, jwtTenantId);
 
                     return lazyUserCreateService.checkUser(jwt)
                             .flatMap(result -> {
@@ -139,7 +142,7 @@ public class GatewaySecurityConfig {
                                         .header(USER_ID_HEADER, String.valueOf(result.getUserId()))
                                         .header("X-User-Email", result.getEmail() != null ? result.getEmail() : (email != null ? email : ""))
                                         .header("X-User-Roles", roles)
-                                        .header(TENANT_ID_HEADER, tenantId != null ? tenantId : "")
+                                        .header(TENANT_ID_HEADER, tenantId)
                                         .build();
                                 return chain.filter(exchange.mutate().request(mutated).build()).thenReturn(Boolean.TRUE);
                             });
@@ -170,6 +173,33 @@ public class GatewaySecurityConfig {
 
     private String sanitizeJson(String value) {
         return value.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    private String resolveTenantHeader(ServerWebExchange exchange, JwtAuthenticationToken token, String jwtTenantId) {
+        String requestedTenantId = exchange.getRequest().getHeaders().getFirst(TENANT_ID_HEADER);
+        if (hasAdminRole(token) && isValidUuid(requestedTenantId)) {
+            return requestedTenantId.trim();
+        }
+        return jwtTenantId != null ? jwtTenantId : "";
+    }
+
+    private boolean hasAdminRole(JwtAuthenticationToken token) {
+        return token.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(Objects::nonNull)
+                .anyMatch(role -> "ROLE_ADMIN_SUPER".equals(role) || "ROLE_ADMIN_OPERATOR".equals(role));
+    }
+
+    private boolean isValidUuid(String value) {
+        if (!StringUtils.hasText(value)) {
+            return false;
+        }
+        try {
+            UUID.fromString(value.trim());
+            return true;
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
     }
 
     @Bean
