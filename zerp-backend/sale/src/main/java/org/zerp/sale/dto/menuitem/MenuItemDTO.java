@@ -16,5 +16,6 @@ public class MenuItemDTO {
     private UUID categoryId;
     private String categoryName;
     private List<UUID> productIds;
+    private List<MenuItemProductDTO> productItems;
     private UUID tenantId;
 }

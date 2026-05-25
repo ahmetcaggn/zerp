@@ -14,4 +14,5 @@ public class MenuItemCreateDTO {
     private String imageId;
     private UUID categoryId;
     private List<UUID> productIds;
+    private List<MenuItemProductCreateDTO> productItems;
 }

@@ -13,4 +13,5 @@ public class MenuItemUpdateDTO {
     private BigDecimal price;
     private String imageId;
     private List<UUID> productIds;
+    private List<MenuItemProductCreateDTO> productItems;
 }

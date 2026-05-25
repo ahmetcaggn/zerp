@@ -34,5 +34,12 @@ public class ProductRecipeItem extends BaseEntity {
     @Column(name = "unit_type", nullable = false)
     private UnitType unitType;
 
+    @Column(name = "converted_quantity", precision = 15, scale = 6)
+    private BigDecimal convertedQuantity;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "base_unit_type")
+    private UnitType baseUnitType;
+
     private String notes;
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.sale.MenuItem;
+import org.zerp.common.entity.sale.MenuItemProduct;
 import org.zerp.common.entity.sale.Product;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
@@ -17,6 +18,7 @@ import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.sale.dto.menuitem.MenuItemCreateDTO;
 import org.zerp.sale.dto.menuitem.MenuItemDTO;
+import org.zerp.sale.dto.menuitem.MenuItemProductCreateDTO;
 import org.zerp.sale.dto.menuitem.MenuItemUpdateDTO;
 import org.zerp.sale.mapper.MenuItemMapper;
 import org.zerp.sale.permission.MenuItemPermissionEvaluator;
@@ -25,7 +27,9 @@ import org.zerp.sale.repository.MenuCategoryRepository;
 import org.zerp.sale.repository.ProductRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -95,10 +99,13 @@ public class MenuItemService implements
         item.setCategory(categoryRepository.getReferenceById(data.getCategoryId()));
         item.setTenantId(tenantId);
         MenuItem saved = repository.save(item);
+
+        List<UUID> assignmentProductIds = upsertProductComposition(saved, data.getProductItems(), data.getProductIds());
+        if (assignmentProductIds != null) {
+            handleProductAssignments(saved, assignmentProductIds);
+        }
+
         log.info("Created MenuItem with id: {}", saved.getId());
-        
-        handleProductAssignments(saved, data.getProductIds());
-        
         return mapper.toDTO(saved);
     }
 
@@ -129,8 +136,12 @@ public class MenuItemService implements
         
         mapper.updateEntityFromDTO(data, item);
         MenuItem updated = repository.save(item);
-        
-        handleProductAssignments(updated, data.getProductIds());
+
+        List<UUID> assignmentProductIds = upsertProductComposition(updated, data.getProductItems(), data.getProductIds());
+        if (assignmentProductIds != null) {
+            handleProductAssignments(updated, assignmentProductIds);
+        }
+
         log.info("Updated MenuItem with id: {}", uuid);
         return mapper.toDTO(updated);
     }
@@ -163,8 +174,10 @@ public class MenuItemService implements
             p.setMenuItem(null);
             productRepository.save(p);
         });
-        repository.delete(item);
-        log.info("Deleted MenuItem with id: {}", uuid);
+        item.setDeleted(true);
+        item.setDeletedAt(LocalDateTime.now());
+        repository.save(item);
+        log.info("Soft deleted MenuItem with id: {}", uuid);
     }
 
     @Override
@@ -212,5 +225,52 @@ public class MenuItemService implements
                 });
             }
         }
+    }
+
+    private List<UUID> upsertProductComposition(
+            MenuItem item,
+            List<MenuItemProductCreateDTO> productItems,
+            List<UUID> legacyProductIds
+    ) {
+        if (productItems == null && legacyProductIds == null) {
+            return null;
+        }
+
+        Map<UUID, Integer> quantityByProduct = new LinkedHashMap<>();
+        if (productItems != null) {
+            for (MenuItemProductCreateDTO productItem : productItems) {
+                if (productItem == null || productItem.getProductId() == null) {
+                    continue;
+                }
+                int qty = productItem.getQuantity() == null ? 1 : productItem.getQuantity();
+                if (qty < 1) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "product item quantity must be greater than 0");
+                }
+                quantityByProduct.merge(productItem.getProductId(), qty, Integer::sum);
+            }
+        } else {
+            for (UUID productId : legacyProductIds) {
+                if (productId == null) {
+                    continue;
+                }
+                quantityByProduct.merge(productId, 1, Integer::sum);
+            }
+        }
+
+        item.getProductItems().clear();
+        for (Map.Entry<UUID, Integer> entry : quantityByProduct.entrySet()) {
+            Product product = productRepository.findById(entry.getKey()).orElseThrow(() ->
+                    new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product not found: " + entry.getKey()));
+
+            MenuItemProduct compositionItem = new MenuItemProduct();
+            compositionItem.setMenuItem(item);
+            compositionItem.setProduct(product);
+            compositionItem.setQuantity(entry.getValue());
+            compositionItem.setTenantId(item.getTenantId());
+            item.getProductItems().add(compositionItem);
+        }
+
+        repository.save(item);
+        return new ArrayList<>(quantityByProduct.keySet());
     }
 }

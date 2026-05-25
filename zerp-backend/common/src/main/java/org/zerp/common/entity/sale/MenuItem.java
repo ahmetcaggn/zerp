@@ -9,6 +9,7 @@ import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 import org.zerp.common.permission.entity.Permittable;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +33,9 @@ public class MenuItem extends BaseEntity implements Permittable {
 
     @OneToMany(mappedBy = "menuItem")
     private List<Product> products;
+
+    @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MenuItemProduct> productItems = new ArrayList<>();
 
     private BigDecimal price;
 
