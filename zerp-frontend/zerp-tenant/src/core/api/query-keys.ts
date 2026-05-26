@@ -1,6 +1,7 @@
 export const queryKeys = {
   tenant: {
     storeSummary:   ['tenant', 'store-summary'] as const,
+    shopDashboard:  ['tenant', 'shop-dashboard'] as const,
     employees:      ['tenant', 'employees'] as const,
     tickets:        ['tenant', 'tickets'] as const,
     permissions:    ['tenant', 'permissions'] as const,
