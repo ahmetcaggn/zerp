@@ -4,7 +4,7 @@ services:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
     ports:
-      - "2181:2181"
+      - "127.0.0.1:2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -15,8 +15,8 @@ services:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
     ports:
-      - "9092:9092"
-      - "29092:29092"
+      - "127.0.0.1:9092:9092"
+      - "127.0.0.1:29092:29092"
     depends_on:
       - zookeeper
     environment:
@@ -36,7 +36,7 @@ services:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
     ports:
-      - "1234:8080"
+      - "127.0.0.1:1234:8080"
     depends_on:
       - kafka
     environment:

@@ -5,8 +5,8 @@ services:
     command: server /data --console-address ":9090"
     restart: unless-stopped
     ports:
-      - "9090:9090" # admin panel
-      - "9000:9000" # api
+      - "127.0.0.1:9090:9090" # admin panel
+      - "127.0.0.1:9000:9000" # api
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
@@ -18,7 +18,7 @@ services:
     hostname: thumbor
     restart: unless-stopped
     ports:
-      - "8888:8888"
+      - "127.0.0.1:8888:8888"
     environment:
       LOG_LEVEL: "warning"
 
