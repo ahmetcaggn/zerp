@@ -627,7 +627,10 @@ export function MenuItemFormPage({
             description: menuItem.description ?? '',
             price: String(menuItem.price),
             imageId: menuItem.imageId ?? '',
-            calories: menuItem.calories === null || menuItem.calories === undefined ? '' : String(menuItem.calories),
+            calories:
+              menuItem.calories === null || menuItem.calories === undefined
+                ? ''
+                : String(menuItem.calories),
             weight: menuItem.weight ?? '',
             ingredients: menuItem.ingredients ?? [],
             allergens: menuItem.allergens ?? [],
@@ -640,8 +643,11 @@ export function MenuItemFormPage({
           showLinkedProducts={showLinkedProducts}
           isPending={isPending}
           onOpenProduct={(id) => goTo(`${ROUTES.catalog}/products/${id}`)}
-          onCancel={(categoryId) => goTo(categoryId ? `${ROUTES.catalog}/categories/${categoryId}` : ROUTES.catalog)}
+          onCancel={(categoryId) =>
+            goTo(categoryId ? `${ROUTES.catalog}/categories/${categoryId}` : ROUTES.catalog)
+          }
           onSubmit={(value) => handleUpdate(menuItem, value)}
+          lockCategory={false}
         />
       </Box>
     )

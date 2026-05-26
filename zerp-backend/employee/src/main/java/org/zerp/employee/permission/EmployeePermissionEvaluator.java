@@ -39,7 +39,7 @@ public class EmployeePermissionEvaluator {
                 || hasTenantPermission(userId, PermissionAction.DELETE_EMPLOYEE, tenantId)
                 || hasTenantPermission(userId, PermissionAction.READ_TENANT, tenantId)
                 || hasTenantPermission(userId, PermissionAction.UPDATE_TENANT, tenantId)
-                || hasTenantPermission(userId, PermissionAction.ADMIN_TENANT, tenantId)
+                || hasTenantPermission(userId, PermissionAction.ADMIN, tenantId)
                 || hasEmployeeHierarchyPermission(userId, PermissionAction.READ_EMPLOYEE, employeeId, tenantId)
                 || hasEmployeeHierarchyPermission(userId, PermissionAction.UPDATE_EMPLOYEE, employeeId, tenantId)
                 || hasEmployeeHierarchyPermission(userId, PermissionAction.DELETE_EMPLOYEE, employeeId, tenantId);
@@ -148,7 +148,7 @@ public class EmployeePermissionEvaluator {
                 userId, PermissionTargetType.TENANT, PermissionAction.UPDATE_TENANT
         ));
         readableTenantIds.addAll(commonPermissionService.getAllPermitted(
-                userId, PermissionTargetType.TENANT, PermissionAction.ADMIN_TENANT
+                userId, PermissionTargetType.TENANT, PermissionAction.ADMIN
         ));
         return readableTenantIds;
     }
@@ -172,7 +172,7 @@ public class EmployeePermissionEvaluator {
                 || commonPermissionService.hasRootPermission(userId, PermissionAction.DELETE_EMPLOYEE)
                 || commonPermissionService.hasRootPermission(userId, PermissionAction.READ_TENANT)
                 || commonPermissionService.hasRootPermission(userId, PermissionAction.UPDATE_TENANT)
-                || commonPermissionService.hasRootPermission(userId, PermissionAction.ADMIN_TENANT)
+                || commonPermissionService.hasRootPermission(userId, PermissionAction.ADMIN)
                 || canCreateAnyTenant(userId);
     }
 }

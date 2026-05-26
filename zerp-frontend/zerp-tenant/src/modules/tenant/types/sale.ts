@@ -355,6 +355,7 @@ export interface UpdateMenuItemRequestDto {
   weight?: string | null
   ingredients?: string[]
   allergens?: string[]
+  categoryId?: string
   productItems?: MenuItemProductItemDto[]
 }
 
