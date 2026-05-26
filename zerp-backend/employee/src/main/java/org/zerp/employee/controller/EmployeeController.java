@@ -5,10 +5,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.zerp.common.dto.ApiResponse;
 import org.zerp.common.resource.controller.ResourceController;
+import org.zerp.employee.dtos.request.AdminCreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.UpdateEmployeeRequestDto;
 import org.zerp.employee.dtos.response.EmployeeListResponseDto;
@@ -51,5 +53,12 @@ public class EmployeeController extends ResourceController<EmployeeResponseDto, 
             @PageableDefault(size = 20) Pageable pageable) {
         Page<EmployeeListResponseDto> employees = employeeService.getDeletedEmployeesPaginated(pageable);
         return ResponseEntity.ok(buildResponse(employees, "Deleted employees retrieved successfully"));
+    }
+
+    @PostMapping("/admin")
+    public ResponseEntity<ApiResponse<EmployeeResponseDto>> createForTenant(
+            @RequestBody AdminCreateEmployeeRequestDto data) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(buildResponse(employeeService.createForTenant(data)));
     }
 }

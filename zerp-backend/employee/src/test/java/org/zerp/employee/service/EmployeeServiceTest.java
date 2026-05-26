@@ -8,13 +8,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.mockito.ArgumentMatchers;
+import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.dto.ApiResponse;
+import org.zerp.common.dto.feign.user.keycloak.KeycloakCreateUserRequestDTO;
 import org.zerp.common.dto.feign.user.keycloak.KeycloakCreateUserResponseDTO;
 import org.zerp.common.dto.user.UsernameCheckResponseDTO;
 import org.zerp.common.entity.Tenant;
@@ -25,6 +28,7 @@ import org.zerp.common.util.header.CurrentTenantIdResolver;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.employee.Exception.DuplicateResourceException;
 import org.zerp.employee.client.UserServiceClient;
+import org.zerp.employee.dtos.request.AdminCreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.UpdateEmployeeRequestDto;
 import org.zerp.employee.dtos.response.EmployeeListResponseDto;
@@ -81,6 +85,7 @@ class EmployeeServiceTest {
         lenient().when(permissionEvaluator.filterRead(any())).thenReturn(Specification.unrestricted());
         lenient().when(permissionEvaluator.canRead(any(), any())).thenReturn(true);
         lenient().when(permissionEvaluator.canCreate(any(), any())).thenReturn(true);
+        lenient().when(permissionEvaluator.canCreateAnyTenant(any())).thenReturn(true);
         lenient().when(permissionEvaluator.canUpdate(any(), any())).thenReturn(true);
         lenient().when(permissionEvaluator.canPatch(any(), any())).thenReturn(true);
         lenient().when(permissionEvaluator.canDelete(any(), any())).thenReturn(true);
@@ -345,6 +350,57 @@ class EmployeeServiceTest {
             assertThatThrownBy(() -> employeeService.create(dto))
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessageContaining(uuidOf(999).toString());
+        }
+
+        @Test
+        void createForTenantUsesRequestedTenantId() {
+            UUID requestedTenantId = uuidOf(700);
+            AdminCreateEmployeeRequestDto adminDto = new AdminCreateEmployeeRequestDto();
+            adminDto.setTenantId(requestedTenantId);
+            adminDto.setUsername("janesmith");
+            adminDto.setTempPassword("Password123");
+            adminDto.setFirstName("Jane");
+            adminDto.setLastName("Smith");
+            adminDto.setEmail("jane@example.com");
+            adminDto.setHireDate(LocalDate.of(2023, 6, 1));
+            adminDto.setStatus(EmploymentStatus.ACTIVE);
+
+            Employee entity = buildEmployee(null, "jane@example.com");
+            Employee saved = buildEmployee(1, "jane@example.com");
+
+            when(employeeRepository.findByEmailAndNotDeleted("jane@example.com")).thenReturn(Optional.empty());
+            when(employeeMapper.toEntity(adminDto)).thenReturn(entity);
+            when(employeeRepository.save(entity)).thenReturn(saved);
+            when(employeeMapper.toResponseDto(saved)).thenReturn(buildResponseDto(1, "jane@example.com"));
+
+            employeeService.createForTenant(adminDto);
+
+            ArgumentCaptor<KeycloakCreateUserRequestDTO> keycloakRequestCaptor =
+                    ArgumentCaptor.forClass(KeycloakCreateUserRequestDTO.class);
+            verify(userServiceClient).createKeycloakUser(keycloakRequestCaptor.capture());
+            assertThat(keycloakRequestCaptor.getValue().getTenantId()).isEqualTo(requestedTenantId);
+            assertThat(entity.getTenantId()).isEqualTo(requestedTenantId);
+        }
+
+        @Test
+        void createForTenantThrowsForbiddenWithoutRootPermission() {
+            AdminCreateEmployeeRequestDto adminDto = new AdminCreateEmployeeRequestDto();
+            adminDto.setTenantId(uuidOf(700));
+            adminDto.setUsername("janesmith");
+            adminDto.setTempPassword("Password123");
+            adminDto.setFirstName("Jane");
+            adminDto.setLastName("Smith");
+            adminDto.setEmail("jane@example.com");
+            adminDto.setHireDate(LocalDate.of(2023, 6, 1));
+            adminDto.setStatus(EmploymentStatus.ACTIVE);
+
+            when(permissionEvaluator.canCreateAnyTenant(any())).thenReturn(false);
+
+            assertThatThrownBy(() -> employeeService.createForTenant(adminDto))
+                    .isInstanceOf(ResponseStatusException.class)
+                    .hasMessageContaining("create Employee for tenant");
+
+            verify(userServiceClient, never()).createKeycloakUser(any());
         }
     }
 
@@ -638,4 +694,3 @@ class EmployeeServiceTest {
         }
     }
 }
-

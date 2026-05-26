@@ -2,8 +2,12 @@ package org.zerp.resource.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.zerp.common.dto.ApiResponse;
 import org.zerp.common.resource.controller.ResourceController;
 import org.zerp.resource.dto.stockcount.StockCountCreateDTO;
 import org.zerp.resource.dto.stockcount.StockCountDTO;
@@ -23,5 +27,10 @@ public class StockCountController extends
     @Override
     protected StockCountService getService() {
         return service;
+    }
+
+    @PostMapping("/{id}/approve")
+    public ResponseEntity<ApiResponse<StockCountDTO>> approve(@PathVariable UUID id) {
+        return ResponseEntity.ok(buildResponse(service.approve(id)));
     }
 }

@@ -3,6 +3,9 @@ package org.zerp.common.permission.entity;
 import static org.zerp.common.permission.entity.PermissionTargetType.*;
 
 public enum PermissionAction {
+    // TENANT_ROOT level
+    CREATE_EMPLOYEE_ANY_TENANT(TENANT_ROOT),
+
     // TENANT level
     ADMIN(TENANT),
     UPDATE_TENANT(TENANT),
@@ -21,6 +24,13 @@ public enum PermissionAction {
     CREATE_PRODUCT(SHOP),
     CREATE_MENU(SHOP),
     CREATE_SHOP_TABLE(SHOP),
+
+
+    // todo add permittable
+    CREATE_STOCK_ENTRY(SHOP),
+    CREATE_STOCK_ADJUSTMENT(SHOP),
+    CREATE_STOCK_WASTE(SHOP),
+    CREATE_STOCK_RETURN(SHOP),
 
     // USER level
     READ_USER(USER),
@@ -97,6 +107,8 @@ public enum PermissionAction {
 
     // STOCK_COUNT level
     ADMIN_STOCK_COUNT(STOCK_COUNT),
+    // todo add permittable
+    APPROVE_STOCK_COUNT(STOCK_COUNT),
     UPDATE_STOCK_COUNT(STOCK_COUNT),
     DELETE_STOCK_COUNT(STOCK_COUNT),
     READ_STOCK_COUNT(STOCK_COUNT),

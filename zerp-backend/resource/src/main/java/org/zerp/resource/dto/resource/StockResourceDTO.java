@@ -4,6 +4,7 @@ import lombok.Data;
 import org.zerp.common.entity.resource.UnitType;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -17,5 +18,10 @@ public class StockResourceDTO {
     private BigDecimal quantity;
     private BigDecimal reorderThreshold;
     private BigDecimal costPerUnit;
+    private UUID lastCountId;
+    private LocalDateTime lastCountedAt;
+    private UUID lastCountedBy;
+    private BigDecimal lastCountQuantity;
+    private BigDecimal lastExpectedQuantity;
     private UUID tenantId;
 }

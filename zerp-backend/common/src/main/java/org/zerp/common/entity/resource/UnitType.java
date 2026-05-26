@@ -3,6 +3,7 @@ package org.zerp.common.entity.resource;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Getter
 public enum UnitType {
@@ -24,4 +25,25 @@ public enum UnitType {
         this.conversionFactor = conversionFactor;
     }
 
+    public boolean isCompatibleWith(UnitType other) {
+        return other != null && unitSystem == other.unitSystem;
+    }
+
+    public static BigDecimal convert(BigDecimal quantity, UnitType from, UnitType to) {
+        if (quantity == null) {
+            throw new IllegalArgumentException("Quantity is required");
+        }
+        if (from == null || to == null) {
+            throw new IllegalArgumentException("Both source and target units are required");
+        }
+        if (!from.isCompatibleWith(to)) {
+            throw new IllegalArgumentException("Incompatible unit conversion from " + from + " to " + to);
+        }
+        if (from == to) {
+            return quantity;
+        }
+
+        BigDecimal normalized = quantity.multiply(from.getConversionFactor());
+        return normalized.divide(to.getConversionFactor(), 6, RoundingMode.HALF_UP);
+    }
 }

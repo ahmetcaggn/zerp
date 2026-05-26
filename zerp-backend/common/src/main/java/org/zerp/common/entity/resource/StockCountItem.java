@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import org.zerp.common.entity.base.BaseEntity;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -29,6 +30,15 @@ public class StockCountItem extends BaseEntity {
     private BigDecimal theoreticalQuantity;
 
     @Column(precision = 15, scale = 3)
+    private BigDecimal previousQuantity;
+
+    @Column(precision = 15, scale = 3)
+    private BigDecimal movementDelta;
+
+    @Column(precision = 15, scale = 3)
+    private BigDecimal expectedQuantity;
+
+    @Column(precision = 15, scale = 3)
     private BigDecimal actualQuantity;
 
     /**
@@ -41,4 +51,10 @@ public class StockCountItem extends BaseEntity {
     private BigDecimal wasteQuantity;
 
     private String notes;
+
+    @Column(name = "counted_by")
+    private UUID countedBy;
+
+    @Column(name = "counted_at")
+    private LocalDateTime countedAt;
 }

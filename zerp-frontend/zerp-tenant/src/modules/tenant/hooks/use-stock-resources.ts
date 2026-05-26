@@ -1,7 +1,8 @@
 'use client'
+import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/core/api/query-keys'
 import { createResourceHooks } from '@/core/api/resource-hooks'
-import { stockResourceClient } from '../api/stock-resource-client'
+import { getStockOverview, stockResourceClient } from '../api/stock-resource-client'
 
 const {
   useList: useStockResources,
@@ -21,4 +22,13 @@ export {
   usePatchStockResource,
   useDeleteStockResource,
   useDeleteManyStockResources,
+}
+
+export function useStockOverview(shopId?: string) {
+  return useQuery({
+    queryKey: [...queryKeys.tenant.stockOverview, shopId] as const,
+    queryFn: () => getStockOverview(shopId as string),
+    enabled: Boolean(shopId),
+    staleTime: 15_000,
+  })
 }

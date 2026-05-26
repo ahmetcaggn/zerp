@@ -1,7 +1,8 @@
 'use client'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/core/api/query-keys'
 import { createResourceHooks } from '@/core/api/resource-hooks'
-import { stockCountClient } from '../api/stock-count-client'
+import { approveStockCount, stockCountClient } from '../api/stock-count-client'
 
 const {
   useList: useStockCounts,
@@ -21,4 +22,20 @@ export {
   usePatchStockCount,
   useDeleteStockCount,
   useDeleteManyStockCounts,
+}
+
+export function useApproveStockCount() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => approveStockCount(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.tenant.stockCounts })
+      queryClient.invalidateQueries({ queryKey: queryKeys.tenant.stockResources })
+      queryClient.invalidateQueries({ queryKey: queryKeys.tenant.stockOverview })
+      queryClient.invalidateQueries({ queryKey: queryKeys.tenant.stockMovements })
+      queryClient.invalidateQueries({ queryKey: queryKeys.tenant.stockMovementTimeline })
+      queryClient.invalidateQueries({ queryKey: queryKeys.tenant.stockMovementDrillDown })
+    },
+  })
 }

@@ -16,7 +16,6 @@ import org.zerp.common.entity.sale.MenuItem;
 import org.zerp.common.entity.sale.MenuItemProduct;
 import org.zerp.common.entity.sale.ProductExtraOption;
 import org.zerp.common.entity.sale.ProductExtraOptionItem;
-import org.zerp.common.entity.sale.Product;
 import org.zerp.common.entity.sale.ProductRecipe;
 import org.zerp.common.entity.sale.ProductRecipeItem;
 import org.zerp.common.entity.sale.PublicCartOrder;
@@ -46,6 +45,7 @@ import org.zerp.sale.repository.ShopTableRepository;
 import org.zerp.sale.repository.TableOrderRepository;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -413,31 +413,63 @@ public class TableOrderService implements
 
         for (TableOrderItem item : order.getItems()) {
             MenuItem menuItem = item.getMenuItem();
-            List<MenuItemProduct> productLinks = menuItem.getProductLinks();
-            if (productLinks == null || productLinks.isEmpty()) continue;
+            List<MenuItemProduct> compositionItems = menuItem.getProductLinks();
 
-            for (MenuItemProduct productLink : productLinks) {
-                Product product = productLink.getProduct();
-                List<ProductRecipe> defaultRecipes = product.getRecipes();
-                for (ProductRecipe recipe : defaultRecipes) {
-                    for (ProductRecipeItem recipeItem : recipe.getItems()) {
-                        int menuItemQuantity = productLink.getQuantity() == null || productLink.getQuantity() < 1
-                                ? 1
-                                : productLink.getQuantity();
-                        BigDecimal qty = recipeItem.getQuantity()
-                                .multiply(BigDecimal.valueOf(item.getQuantity()))
-                                .multiply(BigDecimal.valueOf(menuItemQuantity));
-                        requests.add(StockMovementFeignRequest.builder()
-                                .stockResourceId(recipeItem.getStockResource().getId())
-                                .type(StockMovementType.SALE)
-                                .quantity(qty)
-                                .referenceType("TABLE_ORDER")
-                                .referenceId(order.getId())
-                                .notes(menuItem.getName() + " x" + item.getQuantity())
-                                .tenantId(order.getTenantId())
-                                .build());
+            if (compositionItems != null && !compositionItems.isEmpty()) {
+                for (MenuItemProduct compositionItem : compositionItems) {
+                    if (compositionItem.getProduct() == null) {
+                        continue;
                     }
+                    int menuProductQuantity = compositionItem.getQuantity() == null || compositionItem.getQuantity() < 1
+                            ? 1
+                            : compositionItem.getQuantity();
+                    appendProductRecipeStockRequests(requests, order, item, menuItem, compositionItem, menuProductQuantity, extraOptionById);
                 }
+                continue;
+            }
+
+            List<MenuItemProduct> products = menuItem.getProductLinks();
+            if (products == null || products.isEmpty()) {
+                continue;
+            }
+            for (MenuItemProduct product : products) {
+                appendProductRecipeStockRequests(requests, order, item, menuItem, product, 1, extraOptionById);
+            }
+        }
+        return requests;
+    }
+
+    private void appendProductRecipeStockRequests(
+            List<StockMovementFeignRequest> requests,
+            TableOrder order,
+            TableOrderItem item,
+            MenuItem menuItem,
+            MenuItemProduct product,
+            int menuProductQuantity,
+            Map<UUID, ProductExtraOption> extraOptionById
+    ) {
+        List<ProductRecipe> defaultRecipes = product.getProduct().getRecipes();
+        for (ProductRecipe recipe : defaultRecipes) {
+            for (ProductRecipeItem recipeItem : recipe.getItems()) {
+                BigDecimal recipeBaseQuantity = recipeItem.getConvertedQuantity() != null
+                        ? recipeItem.getConvertedQuantity()
+                        : recipeItem.getQuantity();
+                if (recipeBaseQuantity == null || recipeBaseQuantity.compareTo(BigDecimal.ZERO) <= 0) {
+                    continue;
+                }
+                BigDecimal qty = recipeBaseQuantity
+                        .multiply(BigDecimal.valueOf(item.getQuantity()))
+                        .multiply(BigDecimal.valueOf(menuProductQuantity))
+                        .setScale(6, RoundingMode.HALF_UP);
+                requests.add(StockMovementFeignRequest.builder()
+                        .stockResourceId(recipeItem.getStockResource().getId())
+                        .type(StockMovementType.SALE)
+                        .quantity(qty)
+                        .referenceType("TABLE_ORDER")
+                        .referenceId(order.getId())
+                        .notes(menuItem.getName() + " x" + item.getQuantity())
+                        .tenantId(order.getTenantId())
+                        .build());
             }
 
             for (TableOrderItemSelectedExtraOption selectedExtraOption : item.getSelectedExtraOptions()) {
@@ -460,7 +492,6 @@ public class TableOrderService implements
                 }
             }
         }
-        return requests;
     }
 
     /**

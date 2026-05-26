@@ -3,6 +3,7 @@ package org.zerp.sale.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.zerp.common.entity.sale.MenuItemProduct;
 import org.zerp.common.entity.sale.MenuItem;
 import org.zerp.common.entity.sale.MenuItemProduct;
 import org.zerp.sale.dto.menuitem.MenuItemCreateDTO;

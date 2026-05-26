@@ -23,7 +23,7 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
@@ -49,6 +49,21 @@ interface Props {
 }
 
 const UNIT_TYPES: UnitType[] = ['PIECE', 'GRAM', 'KILOGRAM', 'MILLILITER', 'LITER']
+const UNIT_SYSTEM_BY_UNIT: Record<UnitType, 'COUNT' | 'WEIGHT' | 'VOLUME'> = {
+  PIECE: 'COUNT',
+  GRAM: 'WEIGHT',
+  KILOGRAM: 'WEIGHT',
+  MILLILITER: 'VOLUME',
+  LITER: 'VOLUME',
+}
+
+function getCompatibleUnitTypes(baseUnitType?: UnitType): UnitType[] {
+  if (!baseUnitType) {
+    return UNIT_TYPES
+  }
+  const baseSystem = UNIT_SYSTEM_BY_UNIT[baseUnitType]
+  return UNIT_TYPES.filter((unitType) => UNIT_SYSTEM_BY_UNIT[unitType] === baseSystem)
+}
 
 const EMPTY_ITEM = (): ProductRecipeItemCreateDto => ({
   stockResourceId: '',
@@ -87,6 +102,10 @@ export function ProductRecipeDialog({ open, product, onClose }: Props) {
     ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
   })
   const stockResources = resourcesResult?.data ?? []
+  const stockResourceById = useMemo(
+    () => new Map(stockResources.map((resource) => [resource.id, resource])),
+    [stockResources],
+  )
 
   const { mutate: createRecipe, isPending: isCreating } = useCreateProductRecipe()
   const { mutate: updateRecipe, isPending: isUpdating } = useUpdateProductRecipe()
@@ -260,7 +279,7 @@ export function ProductRecipeDialog({ open, product, onClose }: Props) {
                     {recipe.items.map((it) => (
                       <Chip
                         key={it.id}
-                        label={`${it.stockResourceName ?? it.stockResourceId} × ${it.quantity} ${it.unitType}`}
+                        label={`${it.stockResourceName ?? it.stockResourceId} × ${it.quantity} ${it.unitType}${it.convertedQuantity != null && it.baseUnitType ? ` (~${it.convertedQuantity} ${it.baseUnitType})` : ''}`}
                         size="small"
                         variant="outlined"
                       />
@@ -310,67 +329,86 @@ export function ProductRecipeDialog({ open, product, onClose }: Props) {
                 />
 
                 <Typography variant="subtitle2">{t('sale.recipe.form.addItem')}</Typography>
-                {form.items.map((item, idx) => (
-                  <Box
-                    key={idx}
-                    sx={{ display: 'flex', gap: 1, alignItems: 'flex-start', flexWrap: 'wrap' }}
-                  >
-                    <FormControl sx={{ minWidth: 180, flex: 2 }}>
-                      <InputLabel>{t('sale.recipe.form.stockResource')}</InputLabel>
-                      <Select
-                        value={item.stockResourceId}
-                        label={t('sale.recipe.form.stockResource')}
-                        onChange={(e) => updateItem(idx, 'stockResourceId', e.target.value)}
-                        size="small"
-                      >
-                        {stockResources.map((r) => (
-                          <MenuItem key={r.id} value={r.id}>
-                            {r.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    <TextField
-                      label={t('sale.recipe.form.quantity')}
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) => updateItem(idx, 'quantity', Number(e.target.value))}
-                      size="small"
-                      sx={{ width: 100 }}
-                      inputProps={{ min: 0, step: '0.001' }}
-                    />
-                    <FormControl sx={{ minWidth: 120 }}>
-                      <InputLabel>{t('sale.recipe.form.unitType')}</InputLabel>
-                      <Select
-                        value={item.unitType}
-                        label={t('sale.recipe.form.unitType')}
-                        onChange={(e) => updateItem(idx, 'unitType', e.target.value)}
-                        size="small"
-                      >
-                        {UNIT_TYPES.map((u) => (
-                          <MenuItem key={u} value={u}>
-                            {u}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    <TextField
-                      label={t('sale.recipe.form.notes')}
-                      value={item.notes}
-                      onChange={(e) => updateItem(idx, 'notes', e.target.value)}
-                      size="small"
-                      sx={{ flex: 1 }}
-                    />
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={() => removeItem(idx)}
-                      disabled={form.items.length === 1}
+                {form.items.map((item, idx) => {
+                  const selectedResource = stockResourceById.get(item.stockResourceId)
+                  const compatibleUnitTypes = getCompatibleUnitTypes(selectedResource?.unitType as UnitType | undefined)
+                  const unitOptions = compatibleUnitTypes.includes(item.unitType)
+                    ? compatibleUnitTypes
+                    : [item.unitType, ...compatibleUnitTypes]
+                  return (
+                    <Box
+                      key={idx}
+                      sx={{ display: 'flex', gap: 1, alignItems: 'flex-start', flexWrap: 'wrap' }}
                     >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                ))}
+                      <FormControl sx={{ minWidth: 180, flex: 2 }}>
+                        <InputLabel>{t('sale.recipe.form.stockResource')}</InputLabel>
+                        <Select
+                          value={item.stockResourceId}
+                          label={t('sale.recipe.form.stockResource')}
+                          onChange={(e) => {
+                            const stockResourceId = e.target.value
+                            const nextSelectedResource = stockResourceById.get(stockResourceId)
+                            const nextCompatibleUnitTypes = getCompatibleUnitTypes(nextSelectedResource?.unitType as UnitType | undefined)
+                            const nextUnitType = nextCompatibleUnitTypes.includes(item.unitType)
+                              ? item.unitType
+                              : (nextCompatibleUnitTypes[0] ?? 'PIECE')
+                            setForm((prev) => {
+                              const items = [...prev.items]
+                              items[idx] = { ...items[idx], stockResourceId, unitType: nextUnitType }
+                              return { ...prev, items }
+                            })
+                          }}
+                          size="small"
+                        >
+                          {stockResources.map((r) => (
+                            <MenuItem key={r.id} value={r.id}>
+                              {r.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      <TextField
+                        label={t('sale.recipe.form.quantity')}
+                        type="number"
+                        value={item.quantity}
+                        onChange={(e) => updateItem(idx, 'quantity', Number(e.target.value))}
+                        size="small"
+                        sx={{ width: 100 }}
+                        inputProps={{ min: 0, step: '0.001' }}
+                      />
+                      <FormControl sx={{ minWidth: 120 }}>
+                        <InputLabel>{t('sale.recipe.form.unitType')}</InputLabel>
+                        <Select
+                          value={item.unitType}
+                          label={t('sale.recipe.form.unitType')}
+                          onChange={(e) => updateItem(idx, 'unitType', e.target.value)}
+                          size="small"
+                        >
+                          {unitOptions.map((unitType) => (
+                            <MenuItem key={unitType} value={unitType}>
+                              {unitType}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      <TextField
+                        label={t('sale.recipe.form.notes')}
+                        value={item.notes}
+                        onChange={(e) => updateItem(idx, 'notes', e.target.value)}
+                        size="small"
+                        sx={{ flex: 1 }}
+                      />
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => removeItem(idx)}
+                        disabled={form.items.length === 1}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  )
+                })}
                 <Button startIcon={<AddIcon />} onClick={addItem} size="small" sx={{ alignSelf: 'flex-start' }}>
                   {t('sale.recipe.form.addItem')}
                 </Button>

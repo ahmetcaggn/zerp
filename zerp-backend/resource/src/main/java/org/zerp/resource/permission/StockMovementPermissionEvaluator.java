@@ -60,6 +60,29 @@ public class StockMovementPermissionEvaluator {
         return canCreate;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean canCreateWithAction(
+            UUID userId,
+            UUID stockResourceId,
+            UUID shopId,
+            UUID tenantId,
+            PermissionAction action
+    ) {
+        log.trace("Checking {} permission - userId: {}, stockResourceId: {}, shopId: {}, tenantId: {}",
+                action, userId, stockResourceId, shopId, tenantId);
+        List<Permission> result = permissionRepository.findAllByUserAndStockMovementHierarchy(
+                userId, action, null, stockResourceId, shopId, tenantId);
+        boolean canCreate = !result.isEmpty();
+        log.debug("{} result for user {} - permitted: {}", action, userId, canCreate);
+        return canCreate;
+    }
+//
+    public boolean canReadByShop(UUID userId, UUID shopId, UUID tenantId) {
+        List<Permission> result = permissionRepository.findAllByUserAndStockMovementHierarchy(
+                userId, PermissionAction.READ_STOCK_MOVEMENT, null, null, shopId, tenantId);
+        return !result.isEmpty();
+    }
+
     public boolean canUpdate(UUID userId, StockMovement target) {
         log.trace("Checking canUpdate permission - userId: {}, stockMovementId: {}, stockResourceId: {}, tenantId: {}",
                 userId, target.getId(), target.getStockResource().getId(), target.getStockResource().getTenantId());

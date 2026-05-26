@@ -1,4 +1,5 @@
 import { createResourceClient } from '@/core/api/resource-client'
+import { httpClient } from '@/core/api/http-client'
 import type {
   StockCountResponseDto,
   StockCountListResponseDto,
@@ -13,3 +14,7 @@ export const stockCountClient = createResourceClient<
   UpdateStockCountRequestDto,
   string
 >('/resource/stock-counts')
+
+export function approveStockCount(id: string) {
+  return httpClient.post<StockCountResponseDto>(`/resource/stock-counts/${id}/approve`, {})
+}

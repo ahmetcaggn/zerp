@@ -28,6 +28,7 @@ import java.util.UUID;
         }
 )
 public class MenuItemProduct extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

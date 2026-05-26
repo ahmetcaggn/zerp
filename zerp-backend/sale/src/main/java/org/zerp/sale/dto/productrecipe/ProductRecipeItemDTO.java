@@ -13,5 +13,7 @@ public class ProductRecipeItemDTO {
     private String stockResourceName;
     private BigDecimal quantity;
     private UnitType unitType;
+    private BigDecimal convertedQuantity;
+    private UnitType baseUnitType;
     private String notes;
 }

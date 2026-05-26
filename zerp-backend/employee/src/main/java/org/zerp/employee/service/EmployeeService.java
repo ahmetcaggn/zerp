@@ -29,6 +29,7 @@ import org.zerp.common.entity.employee.EmploymentStatus;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.employee.Exception.DuplicateResourceException;
 import org.zerp.employee.client.UserServiceClient;
+import org.zerp.employee.dtos.request.AdminCreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.EmployeeContactDto;
 import org.zerp.employee.dtos.request.UpdateEmployeeRequestDto;
@@ -114,24 +115,35 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
     @Override
     @Transactional
     public EmployeeResponseDto create(CreateEmployeeRequestDto dto) {
-        UUID tenantId = dto.getTenantId();
-        if (tenantId == null) {
-            log.error("""
-                    Tenant ID is missing in the create employee request.
-                    the employee create request must include 'tenantId' field.
-                    --------
-                    MUST SEND TENANT ID IN REQUEST
-                    --------
-                    """
-            );
-            tenantId = resolveCurrentTenantId();
-        }
         UUID userId = resolveCurrentUserId();
         validateUniqueConstraints(dto.getEmail(), dto.getNationalId(), null);
+        UUID tenantId = requireTenantId(resolveCurrentTenantId());
 
         if (!permissionEvaluator.canCreate(userId, tenantId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Employee");
         }
+
+        return createEmployeeWithTenant(dto, tenantId);
+    }
+
+    @Transactional
+    public EmployeeResponseDto createForTenant(AdminCreateEmployeeRequestDto dto) {
+        UUID userId = resolveCurrentUserId();
+        UUID tenantId = requireTenantId(dto != null ? dto.getTenantId() : null);
+
+        if (!permissionEvaluator.canCreateAnyTenant(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to create Employee for tenant");
+        }
+
+        return createEmployeeWithTenant(dto, tenantId);
+    }
+
+    private EmployeeResponseDto createEmployeeWithTenant(CreateEmployeeRequestDto dto, UUID tenantId) {
+        if (dto == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request cannot be null");
+        }
+
+        validateUniqueConstraints(dto.getEmail(), dto.getNationalId(), null);
 
         ApiResponse<UsernameCheckResponseDTO> keycloakUsernameResponse;
         //check username
@@ -440,6 +452,13 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
         Specification<Employee> spec = filterRefiner.refinedOrBadRequest(filters, Employee.class);
         log.debug("Built specification from filters: filters={}, spec={}", filters, spec);
         return spec;
+    }
+
+    private UUID requireTenantId(UUID tenantId) {
+        if (tenantId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "tenantId is required");
+        }
+        return tenantId;
     }
 
     private UUID resolveCurrentUserId() {

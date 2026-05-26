@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.resource.StockResource;
+import org.zerp.common.entity.resource.UnitType;
 import org.zerp.common.entity.sale.Product;
 import org.zerp.common.entity.sale.ProductRecipe;
 import org.zerp.common.entity.sale.ProductRecipeItem;
@@ -17,6 +19,7 @@ import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.sale.dto.productrecipe.ProductRecipeCreateDTO;
 import org.zerp.sale.dto.productrecipe.ProductRecipeDTO;
+import org.zerp.sale.dto.productrecipe.ProductRecipeItemCreateDTO;
 import org.zerp.sale.dto.productrecipe.ProductRecipeUpdateDTO;
 import org.zerp.sale.mapper.ProductRecipeMapper;
 import org.zerp.sale.permission.ProductRecipePermissionEvaluator;
@@ -24,6 +27,7 @@ import org.zerp.sale.repository.ProductRecipeRepository;
 import org.zerp.sale.repository.ProductRepository;
 import org.zerp.sale.repository.StockResourceRepository;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -99,11 +103,7 @@ public class ProductRecipeService implements
 
         if (data.getItems() != null) {
             data.getItems().forEach(itemDTO -> {
-                ProductRecipeItem item = mapper.toItemEntity(itemDTO);
-                item.setStockResource(stockResourceRepository.getReferenceById(itemDTO.getStockResourceId()));
-                item.setRecipe(recipe);
-                item.setTenantId(tenantId);
-                recipe.getItems().add(item);
+                recipe.getItems().add(buildNormalizedRecipeItem(recipe, itemDTO, tenantId));
             });
         }
 
@@ -144,11 +144,7 @@ public class ProductRecipeService implements
         if (data.getItems() != null) {
             recipe.getItems().clear();
             data.getItems().forEach(itemDTO -> {
-                ProductRecipeItem item = mapper.toItemEntity(itemDTO);
-                item.setStockResource(stockResourceRepository.getReferenceById(itemDTO.getStockResourceId()));
-                item.setRecipe(recipe);
-                item.setTenantId(recipe.getTenantId());
-                recipe.getItems().add(item);
+                recipe.getItems().add(buildNormalizedRecipeItem(recipe, itemDTO, recipe.getTenantId()));
             });
         }
 
@@ -204,5 +200,55 @@ public class ProductRecipeService implements
         ProductRecipeDTO dto = mapper.toDTO(recipe);
         dto.setItems(recipe.getItems().stream().map(mapper::toItemDTO).toList());
         return dto;
+    }
+
+    private ProductRecipeItem buildNormalizedRecipeItem(
+            ProductRecipe recipe,
+            ProductRecipeItemCreateDTO itemDTO,
+            UUID tenantId
+    ) {
+        if (itemDTO.getStockResourceId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "stockResourceId is required");
+        }
+        if (itemDTO.getUnitType() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "unitType is required");
+        }
+
+        BigDecimal quantity = normalizeInputQuantity(itemDTO.getQuantity());
+        StockResource stockResource = stockResourceRepository.findById(itemDTO.getStockResourceId()).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.BAD_REQUEST, "StockResource not found: " + itemDTO.getStockResourceId()));
+
+        if (!tenantId.equals(stockResource.getTenantId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "StockResource tenant mismatch");
+        }
+
+        UnitType baseUnitType = stockResource.getUnitType();
+        if (baseUnitType == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "StockResource base unit is not configured: " + stockResource.getName());
+        }
+
+        BigDecimal convertedQuantity;
+        try {
+            convertedQuantity = UnitType.convert(quantity, itemDTO.getUnitType(), baseUnitType);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+        }
+
+        ProductRecipeItem item = mapper.toItemEntity(itemDTO);
+        item.setQuantity(quantity);
+        item.setUnitType(itemDTO.getUnitType());
+        item.setConvertedQuantity(convertedQuantity);
+        item.setBaseUnitType(baseUnitType);
+        item.setStockResource(stockResource);
+        item.setRecipe(recipe);
+        item.setTenantId(tenantId);
+        return item;
+    }
+
+    private BigDecimal normalizeInputQuantity(BigDecimal quantity) {
+        if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "quantity must be greater than 0");
+        }
+        return quantity;
     }
 }

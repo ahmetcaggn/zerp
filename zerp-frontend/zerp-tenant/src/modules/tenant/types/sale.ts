@@ -59,6 +59,8 @@ export interface ProductRecipeItemDto {
   stockResourceName?: string
   quantity: number
   unitType: UnitType
+  convertedQuantity?: number
+  baseUnitType?: UnitType
   notes?: string
 }
 
@@ -319,6 +321,17 @@ export interface MenuItemResponseDto {
 }
 
 export type MenuItemListResponseDto = MenuItemResponseDto
+
+export interface MenuItemProductItemDto {
+  productId: string
+  productName?: string
+  quantity: number
+}
+
+export interface MenuItemProductItemCreateDto {
+  productId: string
+  quantity: number
+}
 
 export interface CreateMenuItemRequestDto {
   name: string
