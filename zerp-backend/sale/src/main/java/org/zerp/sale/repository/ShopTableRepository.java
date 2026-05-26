@@ -14,4 +14,6 @@ public interface ShopTableRepository extends JpaRepository<ShopTable, UUID>, Jpa
     long countByShopIdAndTenantId(UUID shopId, UUID tenantId);
 
     long countByShopIdAndTenantIdAndStatus(UUID shopId, UUID tenantId, ShopTableStatus status);
+
+    long countByShopIdAndTenantIdAndStatusIn(UUID shopId, UUID tenantId, Collection<ShopTableStatus> statuses);
 }
