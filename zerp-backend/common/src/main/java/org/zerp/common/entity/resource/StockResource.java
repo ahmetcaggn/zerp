@@ -43,13 +43,13 @@ public class StockResource extends BaseEntity implements Permittable {
     /**
      * Current real quantity. This value is authoritative and must be updated only by approved stock counts.
      */
-    @Column(nullable = false, precision = 15, scale = 3)
+    @Column(nullable = false, precision = 15, scale = 6)
     private BigDecimal quantity = BigDecimal.ZERO;
 
     /**
      * Minimum quantity threshold below which a reorder alert is triggered.
      */
-    @Column(precision = 15, scale = 3)
+    @Column(precision = 15, scale = 6)
     private BigDecimal reorderThreshold;
 
     @Column(precision = 10, scale = 2)
@@ -67,13 +67,13 @@ public class StockResource extends BaseEntity implements Permittable {
     /**
      * Actual quantity entered in the most recently approved stock count.
      */
-    @Column(name = "last_count_quantity", precision = 15, scale = 3)
+    @Column(name = "last_count_quantity", precision = 15, scale = 6)
     private BigDecimal lastCountQuantity;
 
     /**
      * Expected quantity snapshot at the moment of the most recently approved stock count.
      */
-    @Column(name = "last_expected_quantity", precision = 15, scale = 3)
+    @Column(name = "last_expected_quantity", precision = 15, scale = 6)
     private BigDecimal lastExpectedQuantity;
 
     @Override

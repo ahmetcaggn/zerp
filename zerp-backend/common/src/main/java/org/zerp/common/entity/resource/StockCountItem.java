@@ -26,28 +26,28 @@ public class StockCountItem extends BaseEntity {
     @JoinColumn(name = "stock_resource_id", nullable = false)
     private StockResource stockResource;
 
-    @Column(nullable = false, precision = 15, scale = 3)
+    @Column(nullable = false, precision = 15, scale = 6)
     private BigDecimal theoreticalQuantity;
 
-    @Column(precision = 15, scale = 3)
+    @Column(precision = 15, scale = 6)
     private BigDecimal previousQuantity;
 
-    @Column(precision = 15, scale = 3)
+    @Column(precision = 15, scale = 6)
     private BigDecimal movementDelta;
 
-    @Column(precision = 15, scale = 3)
+    @Column(precision = 15, scale = 6)
     private BigDecimal expectedQuantity;
 
-    @Column(precision = 15, scale = 3)
+    @Column(precision = 15, scale = 6)
     private BigDecimal actualQuantity;
 
     /**
      * Calculated as actualQuantity - theoreticalQuantity. Negative = loss/waste, positive = surplus.
      */
-    @Column(precision = 15, scale = 3)
+    @Column(precision = 15, scale = 6)
     private BigDecimal discrepancy;
 
-    @Column(precision = 15, scale = 3)
+    @Column(precision = 15, scale = 6)
     private BigDecimal wasteQuantity;
 
     private String notes;

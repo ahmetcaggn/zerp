@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.zerp.common.entity.base.BaseEntity;
+import org.zerp.common.permission.entity.Permittable;
+import org.zerp.common.permission.entity.PermissionTargetType;
+import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -12,7 +15,8 @@ import java.util.UUID;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "stock_movements")
-public class StockMovement extends BaseEntity {
+@PermissionTargetTypeAnnotation(type = PermissionTargetType.STOCK_MOVEMENT)
+public class StockMovement extends BaseEntity implements Permittable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -29,13 +33,13 @@ public class StockMovement extends BaseEntity {
     @Column(name = "direction")
     private StockMovementDirection direction;
 
-    @Column(nullable = false, precision = 15, scale = 3)
+    @Column(nullable = false, precision = 15, scale = 6)
     private BigDecimal quantity;
 
-    @Column(nullable = false, precision = 15, scale = 3)
+    @Column(nullable = false, precision = 15, scale = 6)
     private BigDecimal previousQuantity;
 
-    @Column(nullable = false, precision = 15, scale = 3)
+    @Column(nullable = false, precision = 15, scale = 6)
     private BigDecimal newQuantity;
 
     /**
@@ -46,4 +50,16 @@ public class StockMovement extends BaseEntity {
     private UUID referenceId;
 
     private String notes;
+
+    @Override
+    public String getTitle() {
+        String resourceName = stockResource == null ? "UNKNOWN_RESOURCE" : stockResource.getName();
+        String movementType = type == null ? "UNKNOWN_TYPE" : type.name();
+        return String.format("%s-%s", resourceName, movementType);
+    }
+
+    @Override
+    public Permittable getParent() {
+        return stockResource;
+    }
 }

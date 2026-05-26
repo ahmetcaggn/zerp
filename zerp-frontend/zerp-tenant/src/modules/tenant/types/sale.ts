@@ -299,11 +299,6 @@ export interface PublicCartOrderPreviewDto {
 
 // ─── Menu Item ────────────────────────────────────────────────────────────────
 
-export interface MenuItemProductItemDto {
-  productId: string
-  quantity: number
-}
-
 export interface MenuItemResponseDto {
   id: string
   name: string

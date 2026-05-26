@@ -27,7 +27,7 @@ public class ProductRecipeItem extends BaseEntity {
     @JoinColumn(name = "stock_resource_id", nullable = false)
     private StockResource stockResource;
 
-    @Column(nullable = false, precision = 15, scale = 3)
+    @Column(nullable = false, precision = 15, scale = 6)
     private BigDecimal quantity;
 
     @Enumerated(EnumType.STRING)

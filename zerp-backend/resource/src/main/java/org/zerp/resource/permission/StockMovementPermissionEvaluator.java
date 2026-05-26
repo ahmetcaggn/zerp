@@ -126,12 +126,15 @@ public class StockMovementPermissionEvaluator {
 
         Set<UUID> permittedStockResourceIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.STOCK_RESOURCE, PermissionAction.READ_STOCK_MOVEMENT);
+        Set<UUID> permittedStockMovementIds = commonPermissionService.getAllPermitted(
+                userId, PermissionTargetType.STOCK_MOVEMENT, PermissionAction.READ_STOCK_MOVEMENT);
         Set<UUID> permittedShopIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.SHOP, PermissionAction.READ_STOCK_MOVEMENT);
         Set<UUID> permittedTenantIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.TENANT, PermissionAction.READ_STOCK_MOVEMENT);
 
         return Specification.anyOf(
+                (root, _, _) -> root.get("id").in(permittedStockMovementIds),
                 (root, _, _) -> root.get("stockResource").get("id").in(permittedStockResourceIds),
                 (root, _, _) -> root.get("stockResource").get("shop").get("id").in(permittedShopIds),
                 (root, _, _) -> root.get("tenantId").in(permittedTenantIds)
