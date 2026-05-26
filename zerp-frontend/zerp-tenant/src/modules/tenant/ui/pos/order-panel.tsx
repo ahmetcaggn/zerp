@@ -22,6 +22,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import jsQR from 'jsqr'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
@@ -48,19 +49,6 @@ interface Props {
   onImportPublicCartOrder: (code: string, onSuccess?: () => void) => void
   isImportPending: boolean
   isPending: boolean
-}
-
-interface DetectedBarcode {
-  rawValue: string
-}
-
-interface BarcodeDetectorLike {
-  detect(source: HTMLVideoElement): Promise<DetectedBarcode[]>
-}
-
-interface BarcodeDetectorConstructor {
-  new(options?: { formats?: string[] }): BarcodeDetectorLike
-  getSupportedFormats?: () => Promise<string[]>
 }
 
 function QtyControl({
@@ -132,6 +120,7 @@ export function OrderPanel({
   const [isCameraActive, setIsCameraActive] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
+  const qrCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const scanLockedRef = useRef(false)
 
@@ -159,6 +148,9 @@ export function OrderPanel({
   const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach(track => track.stop())
     streamRef.current = null
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+    }
     scanLockedRef.current = false
     setIsCameraActive(false)
   }, [])
@@ -185,16 +177,7 @@ export function OrderPanel({
     setCameraError(null)
     setImportError(null)
 
-    const barcodeWindow = window as Window & { BarcodeDetector?: BarcodeDetectorConstructor }
-    if (!barcodeWindow.BarcodeDetector) {
-      setCameraError(t('pos.importQrCameraUnsupported'))
-      return
-    }
-
-    const supportedFormats: string[] | undefined = await barcodeWindow.BarcodeDetector
-      .getSupportedFormats?.()
-      .catch(() => [])
-    if (supportedFormats && supportedFormats.length > 0 && !supportedFormats.includes('qr_code')) {
+    if (!navigator.mediaDevices?.getUserMedia) {
       setCameraError(t('pos.importQrCameraUnsupported'))
       return
     }
@@ -216,29 +199,31 @@ export function OrderPanel({
   }
 
   useEffect(() => {
-    if (!isCameraActive || !videoRef.current) return undefined
+    if (!isCameraActive) return undefined
 
-    const barcodeWindow = window as Window & { BarcodeDetector?: BarcodeDetectorConstructor }
-    if (!barcodeWindow.BarcodeDetector) return undefined
-
-    const detector = new barcodeWindow.BarcodeDetector({ formats: ['qr_code'] })
     const intervalId = window.setInterval(() => {
-      if (!videoRef.current || scanLockedRef.current) return
+      const video = videoRef.current
+      const qrCanvas = qrCanvasRef.current
+      if (!video || !qrCanvas || scanLockedRef.current) return
+      if (video.readyState < video.HAVE_CURRENT_DATA || video.videoWidth <= 0 || video.videoHeight <= 0) return
+
+      if (qrCanvas.width !== video.videoWidth || qrCanvas.height !== video.videoHeight) {
+        qrCanvas.width = video.videoWidth
+        qrCanvas.height = video.videoHeight
+      }
+
+      const context = qrCanvas.getContext('2d', { willReadFrequently: true })
+      if (!context) return
+
+      context.drawImage(video, 0, 0, qrCanvas.width, qrCanvas.height)
+      const frame = context.getImageData(0, 0, qrCanvas.width, qrCanvas.height)
+      const detected = jsQR(frame.data, frame.width, frame.height, { inversionAttempts: 'attemptBoth' })
+      const rawValue = detected?.data
+      if (!rawValue || !extractPublicCartOrderCode(rawValue)) return
+
       scanLockedRef.current = true
-      detector
-        .detect(videoRef.current)
-        .then((codes) => {
-          const rawValue = codes[0]?.rawValue
-          if (!rawValue) {
-            scanLockedRef.current = false
-            return
-          }
-          setManualQrValue(rawValue)
-          submitImport(rawValue)
-        })
-        .catch(() => {
-          scanLockedRef.current = false
-        })
+      setManualQrValue(rawValue)
+      submitImport(rawValue)
     }, 650)
 
     return () => window.clearInterval(intervalId)
@@ -667,6 +652,7 @@ export function OrderPanel({
                 bgcolor: 'grey.900',
               }}
             />
+            <Box component="canvas" ref={qrCanvasRef} sx={{ display: 'none' }} />
 
             <Button
               variant={isCameraActive ? 'outlined' : 'contained'}
