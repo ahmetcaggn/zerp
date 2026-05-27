@@ -160,6 +160,46 @@ export interface MessageDictionary {
     requiredFieldsWarning: string
     employeeCreatedToast: string
     closeButtonLabel: string
+    tenantContextSubtitle: string
+  }
+  permissionGroups: {
+    title: string
+    subtitle: string
+    createButton: string
+    editButton: string
+    deleteButton: string
+    detailButton: string
+    emptyState: string
+    notFound: string
+    noDescription: string
+    nameField: string
+    descriptionField: string
+    scopeField: string
+    scopeTenant: string
+    scopeShop: string
+    actionsField: string
+    requiredWarning: string
+    createdToast: string
+    updatedToast: string
+    deletedToast: string
+    predefinedBadge: string
+    customBadge: string
+    nameColumn: string
+    sourceColumn: string
+    scopeColumn: string
+    actionsColumn: string
+    assignmentTitle: string
+    assignmentDescription: string
+    groupField: string
+    groupPlaceholder: string
+    scopeTargetField: string
+    scopeTargetRequired: string
+    snapshotInfo: string
+    applyButton: string
+    appliedToast: string
+    applyPartialToast: string
+    cancelButton: string
+    saveButton: string
   }
   shops: {
     title: string

@@ -222,7 +222,7 @@ export function EmployeeDetail({ id }: Props) {
               icon={<MonetizationOnIcon fontSize="small" />}
               label={t('employees.salaryLabel')}
               value={
-                employee.salary !== undefined
+                employee.salary != null
                   ? employee.salary.toLocaleString(salaryLocale)
                   : undefined
               }

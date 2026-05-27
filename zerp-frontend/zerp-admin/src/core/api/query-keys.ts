@@ -18,5 +18,6 @@ export const queryKeys = {
     ticketAssignmentTeams: ['admin', 'ticket-assignment-teams'] as const,
     ticketAssignmentTeamMembers: ['admin', 'ticket-assignment-team-members'] as const,
     permissions: ['admin', 'permissions'] as const,
+    permissionGroups: ['admin', 'permission-groups'] as const,
   },
 }

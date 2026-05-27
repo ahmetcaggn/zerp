@@ -23,7 +23,7 @@ import {
 } from '@mui/material'
 import type { Route } from 'next'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
@@ -34,7 +34,6 @@ import { useDeleteEmployee, useEmployees,useEmployeeSearch } from '../hooks/use-
 import type { EmployeeListResponseDto } from '../types/employee'
 import type { EmploymentStatusValue } from '../types/employee'
 import { DeletedEmployees } from './deleted-employees'
-import { EmployeeFormDialog } from './employee-form-dialog'
 import { EmployeePermissionsDialog } from './employee-permissions-dialog'
 
 const STATUS_COLOR: Record<
@@ -57,12 +56,10 @@ export function EmployeeList() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const [tab, setTab] = useState(0)
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [searchInput, setSearchInput] = useState('')
   const [debouncedKeyword, setDebouncedKeyword] = useState('')
-  const [formOpen, setFormOpen] = useState(false)
   const [permissionDialogEmployee, setPermissionDialogEmployee] =
     useState<EmployeeListResponseDto | undefined>(undefined)
 
@@ -71,14 +68,15 @@ export function EmployeeList() {
     return () => clearTimeout(id)
   }, [searchInput])
 
-  useEffect(() => {
+  const tab = useMemo(() => {
     const activeTab = searchParams.get('tab')
-    const tabIndex = EMPLOYEE_TAB_KEYS.indexOf((activeTab ?? 'active') as (typeof EMPLOYEE_TAB_KEYS)[number])
-    setTab(tabIndex >= 0 ? tabIndex : 0)
+    const tabIndex = EMPLOYEE_TAB_KEYS.indexOf(
+      (activeTab ?? 'active') as (typeof EMPLOYEE_TAB_KEYS)[number],
+    )
+    return tabIndex >= 0 ? tabIndex : 0
   }, [searchParams])
 
   function handleTabChange(nextTab: number) {
-    setTab(nextTab)
     const params = new URLSearchParams(searchParams.toString())
     params.set('tab', EMPLOYEE_TAB_KEYS[nextTab] ?? EMPLOYEE_TAB_KEYS[0])
     const queryString = params.toString()
@@ -108,7 +106,11 @@ export function EmployeeList() {
         sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
       >
         <Typography variant="h5">{t('employees.title')}</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setFormOpen(true)}>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => router.push(withLocale(locale, `${ROUTES.employees}/new`) as Route)}
+        >
           {t('employees.createButton')}
         </Button>
       </Box>
@@ -231,11 +233,6 @@ export function EmployeeList() {
         </>
       )}
 
-      <EmployeeFormDialog
-        open={formOpen}
-        mode="create"
-        onClose={() => setFormOpen(false)}
-      />
       <EmployeePermissionsDialog
         open={Boolean(permissionDialogEmployee)}
         employee={permissionDialogEmployee}

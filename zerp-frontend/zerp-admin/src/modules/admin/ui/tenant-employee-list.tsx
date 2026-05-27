@@ -3,6 +3,7 @@
 import AddIcon from '@mui/icons-material/Add'
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import DeleteIcon from '@mui/icons-material/Delete'
+import RuleFolderRoundedIcon from '@mui/icons-material/RuleFolderRounded'
 import {
   Box,
   Button,
@@ -18,8 +19,11 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import type { Route } from 'next'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
+import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
@@ -27,7 +31,6 @@ import { getUserFriendlyError } from '@/core/utils/error-message'
 
 import { useDeleteTenantEmployee, useTenantEmployees } from '../hooks/use-employees'
 import type { EmployeeListResponse, EmploymentStatusValue } from '../types/employee'
-import { TenantEmployeeFormDialog } from './tenant-employee-form-dialog'
 import { TenantEmployeePermissionsDialog } from './tenant-employee-permissions-dialog'
 
 interface Props {
@@ -49,11 +52,11 @@ const STATUS_COLOR: Record<
 }
 
 export function TenantEmployeeList({ tenantId, tenantName }: Props) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { showToast } = useToast()
+  const router = useRouter()
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
-  const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [permissionDialogEmployee, setPermissionDialogEmployee] =
     useState<EmployeeListResponse | undefined>(undefined)
 
@@ -94,11 +97,32 @@ export function TenantEmployeeList({ tenantId, tenantName }: Props) {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5">{t('employees.title')}</Typography>
-        {canCreateEmployeeForTenant && (
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateDialogOpen(true)}>
-            {t('employees.createButton')}
-          </Button>
-        )}
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          {canReadEmployees && (
+            <Button
+              variant="outlined"
+              startIcon={<RuleFolderRoundedIcon />}
+              onClick={() =>
+                router.push(
+                  withLocale(locale, `${ROUTES.tenants}/${tenantId}/permission-groups`) as Route,
+                )
+              }
+            >
+              {t('permissionGroups.title')}
+            </Button>
+          )}
+          {canCreateEmployeeForTenant && (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() =>
+                router.push(withLocale(locale, `${ROUTES.tenants}/${tenantId}/employees/new`) as Route)
+              }
+            >
+              {t('employees.createButton')}
+            </Button>
+          )}
+        </Box>
       </Box>
 
       {isLoadingPermissions ? (
@@ -201,12 +225,6 @@ export function TenantEmployeeList({ tenantId, tenantName }: Props) {
         />
       )}
 
-      <TenantEmployeeFormDialog
-        open={createDialogOpen}
-        tenantId={tenantId}
-        tenantName={tenantName}
-        onClose={() => setCreateDialogOpen(false)}
-      />
       <TenantEmployeePermissionsDialog
         open={Boolean(permissionDialogEmployee)}
         employee={permissionDialogEmployee}

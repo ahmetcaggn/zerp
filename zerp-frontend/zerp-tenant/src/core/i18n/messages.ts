@@ -118,6 +118,7 @@ export interface MessageDictionary {
     cashier: string
     stock: string
     employees: string
+    permissionGroups: string
     tickets: string
     notifications: string
   }
@@ -223,6 +224,43 @@ export interface MessageDictionary {
     requiredFieldsWarning: string
     employeeCreatedToast: string
     employeeUpdatedToast: string
+  }
+  permissionGroups: {
+    title: string
+    subtitle: string
+    createButton: string
+    editButton: string
+    deleteButton: string
+    openDetailButton: string
+    emptyState: string
+    groupField: string
+    groupPlaceholder: string
+    scopeField: string
+    scopeTargetField: string
+    scopeTargetRequired: string
+    scopeTenant: string
+    scopeShop: string
+    predefinedBadge: string
+    customBadge: string
+    snapshotInfo: string
+    assignmentTitle: string
+    assignmentDescription: string
+    actionsField: string
+    nameField: string
+    descriptionField: string
+    noDescription: string
+    sourceColumnHeader: string
+    nameColumnHeader: string
+    scopeColumnHeader: string
+    actionCountColumnHeader: string
+    requiredWarning: string
+    createdToast: string
+    updatedToast: string
+    deletedToast: string
+    notFound: string
+    applyButton: string
+    appliedToast: string
+    applyPartialToast: string
   }
     tickets: {
         title: string

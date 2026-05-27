@@ -7,6 +7,7 @@ export const ROUTES = {
   dashboard: '/dashboard',
   unauthorized: '/unauthorized',
   employees: '/employees',
+  permissionGroups: '/permission-groups',
   tickets: '/tickets',
   notifications: '/notifications',
   stock: '/stock',
@@ -28,6 +29,7 @@ export const PROTECTED_PATHS = [
   ROUTES.stock,
   ROUTES.tables,
   ROUTES.employees,
+  ROUTES.permissionGroups,
   ROUTES.tickets,
   ROUTES.notifications,
 ] as const

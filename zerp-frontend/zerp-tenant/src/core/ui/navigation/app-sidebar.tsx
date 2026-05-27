@@ -1,6 +1,17 @@
 'use client'
 
-import React, { useState } from 'react'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
+import InventoryRoundedIcon from '@mui/icons-material/InventoryRounded'
+import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
+import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded'
+import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded'
+import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded'
+import RuleFolderRoundedIcon from '@mui/icons-material/RuleFolderRounded'
+import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
+import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded'
+import TableRestaurantRoundedIcon from '@mui/icons-material/TableRestaurantRounded'
 import {
   Box,
   Drawer,
@@ -16,19 +27,10 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
-import InventoryRoundedIcon from '@mui/icons-material/InventoryRounded'
-import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
-import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded'
-import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded'
-import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded'
-import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
-import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded'
-import TableRestaurantRoundedIcon from '@mui/icons-material/TableRestaurantRounded'
 import type { Route } from 'next'
 import { usePathname, useRouter } from 'next/navigation'
+import React, { useState } from 'react'
+
 import { appConfig } from '@/core/config/app-config'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
@@ -43,6 +45,7 @@ type SidebarLabelKey =
   | 'nav.cashier'
   | 'nav.stock'
   | 'nav.employees'
+  | 'nav.permissionGroups'
   | 'nav.tickets'
   | 'nav.notifications'
 
@@ -56,6 +59,7 @@ interface SidebarAction {
 const GLOBAL_SIDEBAR_ACTIONS: SidebarAction[] = [
   { id: 'dashboard', labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon />, href: '/dashboard' },
   { id: 'employees', labelKey: 'nav.employees', icon: <PeopleAltRoundedIcon />, href: '/employees' },
+  { id: 'permission-groups', labelKey: 'nav.permissionGroups', icon: <RuleFolderRoundedIcon />, href: '/permission-groups' },
   { id: 'tickets', labelKey: 'nav.tickets', icon: <SupportAgentRoundedIcon />, href: '/tickets' },
   { id: 'notifications', labelKey: 'nav.notifications', icon: <NotificationsRoundedIcon />, href: '/notifications' },
 ]

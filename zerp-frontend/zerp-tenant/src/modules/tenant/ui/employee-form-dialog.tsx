@@ -79,7 +79,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
     employee?.manager?.id !== undefined ? String(employee.manager.id) : '',
   )
   const [salary, setSalary] = useState<string>(
-    employee?.salary !== undefined ? String(employee.salary) : '',
+    employee?.salary != null ? String(employee.salary) : '',
   )
   const [contacts, setContacts] = useState<EmployeeContactDto[]>(
     employee?.contacts?.map((c) => ({

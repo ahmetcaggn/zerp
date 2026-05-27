@@ -5,6 +5,7 @@ export const queryKeys = {
     employees:      ['tenant', 'employees'] as const,
     tickets:        ['tenant', 'tickets'] as const,
     permissions:    ['tenant', 'permissions'] as const,
+    permissionGroups: ['tenant', 'permission-groups'] as const,
     notifications:  ['tenant', 'notifications'] as const,
     stockResources:      ['tenant', 'stock-resources'] as const,
     stockOverview:       ['tenant', 'stock-overview'] as const,
