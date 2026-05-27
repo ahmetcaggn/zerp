@@ -41,14 +41,14 @@ Please follow the [installation procedure](#installation--usage) and then run th
 import 'package:openapi_resource/api.dart';
 
 
-final api_instance = StockCountCreateStockCountApi();
-final stockCountCreateDTO = StockCountCreateDTO(); // StockCountCreateDTO | 
+final api_instance = StockCountApproveApi();
+final id = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
 
 try {
-    final result = api_instance.createStockCount(stockCountCreateDTO);
+    final result = api_instance.approve(id);
     print(result);
 } catch (e) {
-    print('Exception when calling StockCountCreateStockCountApi->createStockCount: $e\n');
+    print('Exception when calling StockCountApproveApi->approve: $e\n');
 }
 
 ```
@@ -59,6 +59,7 @@ All URIs are relative to *https://api.zeerp.tech*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*StockCountApproveApi* | [**approve**](doc//StockCountApproveApi.md#) | **POST** /resource/stock-counts/{id}/approve | 
 *StockCountCreateStockCountApi* | [**createStockCount**](doc//StockCountCreateStockCountApi.md#) | **POST** /resource/stock-counts | Create: Create a new entity
 *StockCountDeleteManyStockCountApi* | [**deleteManyStockCount**](doc//StockCountDeleteManyStockCountApi.md#) | **DELETE** /resource/stock-counts | DeleteMany: Delete multiple entities
 *StockCountDeleteStockCountApi* | [**deleteStockCount**](doc//StockCountDeleteStockCountApi.md#) | **DELETE** /resource/stock-counts/{id} | Delete: Delete a single entity
@@ -71,19 +72,25 @@ Class | Method | HTTP request | Description
 *StockMovementCreateStockMovementApi* | [**createStockMovement**](doc//StockMovementCreateStockMovementApi.md#) | **POST** /resource/stock-movements | Create: Create a new entity
 *StockMovementDeleteManyStockMovementApi* | [**deleteManyStockMovement**](doc//StockMovementDeleteManyStockMovementApi.md#) | **DELETE** /resource/stock-movements | DeleteMany: Delete multiple entities
 *StockMovementDeleteStockMovementApi* | [**deleteStockMovement**](doc//StockMovementDeleteStockMovementApi.md#) | **DELETE** /resource/stock-movements/{id} | Delete: Delete a single entity
+*StockMovementDrillDownApi* | [**drillDown**](doc//StockMovementDrillDownApi.md#) | **GET** /resource/stock-movements/drill-down | 
 *StockMovementGetListStockMovementApi* | [**getListStockMovement**](doc//StockMovementGetListStockMovementApi.md#) | **GET** /resource/stock-movements | GetList: Get paginated list of entities with filtering
 *StockMovementGetManyStockMovementApi* | [**getManyStockMovement**](doc//StockMovementGetManyStockMovementApi.md#) | **GET** /resource/stock-movements/many | GetMany: Get multiple entities by IDs
 *StockMovementGetOneStockMovementApi* | [**getOneStockMovement**](doc//StockMovementGetOneStockMovementApi.md#) | **GET** /resource/stock-movements/{id} | GetOne: Get single entity by ID
 *StockMovementPatchManyStockMovementApi* | [**patchManyStockMovement**](doc//StockMovementPatchManyStockMovementApi.md#) | **PATCH** /resource/stock-movements | UpdateMany: Update multiple entities
 *StockMovementPatchStockMovementApi* | [**patchStockMovement**](doc//StockMovementPatchStockMovementApi.md#) | **PATCH** /resource/stock-movements/{id} | Update: Update an existing entity
+*StockMovementTimelineApi* | [**timeline**](doc//StockMovementTimelineApi.md#) | **GET** /resource/stock-movements/timeline | 
 *StockMovementUpdateStockMovementApi* | [**updateStockMovement**](doc//StockMovementUpdateStockMovementApi.md#) | **PUT** /resource/stock-movements/{id} | Update: Update an existing entity
 *StockMovementFeignControllerCreateBulkApi* | [**createBulk**](doc//StockMovementFeignControllerCreateBulkApi.md#) | **POST** /feign/resource/stock-movements/bulk | 
+*StockOperationCreateAdjustmentApi* | [**createAdjustment**](doc//StockOperationCreateAdjustmentApi.md#) | **POST** /resource/stock-operations/adjustments | 
+*StockOperationCreateEntryApi* | [**createEntry**](doc//StockOperationCreateEntryApi.md#) | **POST** /resource/stock-operations/entries | 
+*StockOperationHistoryApi* | [**history**](doc//StockOperationHistoryApi.md#) | **GET** /resource/stock-operations/history | 
 *StockResourceCreateStockResourceApi* | [**createStockResource**](doc//StockResourceCreateStockResourceApi.md#) | **POST** /resource/stock-resources | Create: Create a new entity
 *StockResourceDeleteManyStockResourceApi* | [**deleteManyStockResource**](doc//StockResourceDeleteManyStockResourceApi.md#) | **DELETE** /resource/stock-resources | DeleteMany: Delete multiple entities
 *StockResourceDeleteStockResourceApi* | [**deleteStockResource**](doc//StockResourceDeleteStockResourceApi.md#) | **DELETE** /resource/stock-resources/{id} | Delete: Delete a single entity
 *StockResourceGetListStockResourceApi* | [**getListStockResource**](doc//StockResourceGetListStockResourceApi.md#) | **GET** /resource/stock-resources | GetList: Get paginated list of entities with filtering
 *StockResourceGetManyStockResourceApi* | [**getManyStockResource**](doc//StockResourceGetManyStockResourceApi.md#) | **GET** /resource/stock-resources/many | GetMany: Get multiple entities by IDs
 *StockResourceGetOneStockResourceApi* | [**getOneStockResource**](doc//StockResourceGetOneStockResourceApi.md#) | **GET** /resource/stock-resources/{id} | GetOne: Get single entity by ID
+*StockResourceOverviewApi* | [**overview**](doc//StockResourceOverviewApi.md#) | **GET** /resource/stock-resources/overview | 
 *StockResourcePatchManyStockResourceApi* | [**patchManyStockResource**](doc//StockResourcePatchManyStockResourceApi.md#) | **PATCH** /resource/stock-resources | UpdateMany: Update multiple entities
 *StockResourcePatchStockResourceApi* | [**patchStockResource**](doc//StockResourcePatchStockResourceApi.md#) | **PATCH** /resource/stock-resources/{id} | Update: Update an existing entity
 *StockResourceUpdateStockResourceApi* | [**updateStockResource**](doc//StockResourceUpdateStockResourceApi.md#) | **PUT** /resource/stock-resources/{id} | Update: Update an existing entity
@@ -93,22 +100,35 @@ Class | Method | HTTP request | Description
 
  - [ApiResponseListStockCountDTO](doc//ApiResponseListStockCountDTO.md)
  - [ApiResponseListStockMovementDTO](doc//ApiResponseListStockMovementDTO.md)
+ - [ApiResponseListStockOperationDTO](doc//ApiResponseListStockOperationDTO.md)
+ - [ApiResponseListStockOverviewDTO](doc//ApiResponseListStockOverviewDTO.md)
  - [ApiResponseListStockResourceDTO](doc//ApiResponseListStockResourceDTO.md)
  - [ApiResponseListUUID](doc//ApiResponseListUUID.md)
  - [ApiResponseStockCountDTO](doc//ApiResponseStockCountDTO.md)
  - [ApiResponseStockMovementDTO](doc//ApiResponseStockMovementDTO.md)
+ - [ApiResponseStockMovementTimelineDTO](doc//ApiResponseStockMovementTimelineDTO.md)
+ - [ApiResponseStockOperationDTO](doc//ApiResponseStockOperationDTO.md)
  - [ApiResponseStockResourceDTO](doc//ApiResponseStockResourceDTO.md)
  - [ApiResponseVoid](doc//ApiResponseVoid.md)
  - [Meta](doc//Meta.md)
  - [Parameter](doc//Parameter.md)
+ - [StockAdjustmentCreateDTO](doc//StockAdjustmentCreateDTO.md)
+ - [StockAdjustmentItemDTO](doc//StockAdjustmentItemDTO.md)
  - [StockCountCreateDTO](doc//StockCountCreateDTO.md)
  - [StockCountDTO](doc//StockCountDTO.md)
  - [StockCountItemDTO](doc//StockCountItemDTO.md)
  - [StockCountItemUpdateDTO](doc//StockCountItemUpdateDTO.md)
  - [StockCountUpdateDTO](doc//StockCountUpdateDTO.md)
+ - [StockEntryCreateDTO](doc//StockEntryCreateDTO.md)
+ - [StockEntryItemDTO](doc//StockEntryItemDTO.md)
  - [StockMovementCreateDTO](doc//StockMovementCreateDTO.md)
  - [StockMovementDTO](doc//StockMovementDTO.md)
  - [StockMovementFeignRequest](doc//StockMovementFeignRequest.md)
+ - [StockMovementTimelineBucketDTO](doc//StockMovementTimelineBucketDTO.md)
+ - [StockMovementTimelineDTO](doc//StockMovementTimelineDTO.md)
+ - [StockOperationDTO](doc//StockOperationDTO.md)
+ - [StockOperationItemDTO](doc//StockOperationItemDTO.md)
+ - [StockOverviewDTO](doc//StockOverviewDTO.md)
  - [StockResourceCreateDTO](doc//StockResourceCreateDTO.md)
  - [StockResourceDTO](doc//StockResourceDTO.md)
  - [StockResourceUpdateDTO](doc//StockResourceUpdateDTO.md)

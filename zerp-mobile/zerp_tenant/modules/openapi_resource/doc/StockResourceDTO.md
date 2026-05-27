@@ -17,6 +17,11 @@ Name | Type | Description | Notes
 **quantity** | **num** |  | [optional] 
 **reorderThreshold** | **num** |  | [optional] 
 **costPerUnit** | **num** |  | [optional] 
+**lastCountId** | **String** |  | [optional] 
+**lastCountedAt** | [**DateTime**](DateTime.md) |  | [optional] 
+**lastCountedBy** | **String** |  | [optional] 
+**lastCountQuantity** | **num** |  | [optional] 
+**lastExpectedQuantity** | **num** |  | [optional] 
 **tenantId** | **String** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

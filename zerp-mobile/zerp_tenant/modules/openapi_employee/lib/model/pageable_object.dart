@@ -26,18 +26,15 @@ class PageableObject extends Schema {
   /// Returns a new [PageableObject] instance.
   PageableObject({
     this.offset,
-    this.sort,
     this.paged,
     this.pageNumber,
     this.pageSize,
+    this.sort,
     this.unpaged,
   });
 
   @JsonKey(name: r'offset')
   final int? offset;
-
-  @JsonKey(name: r'sort')
-  final SortObject? sort;
 
   @JsonKey(name: r'paged')
   final bool? paged;
@@ -47,6 +44,9 @@ class PageableObject extends Schema {
 
   @JsonKey(name: r'pageSize')
   final int? pageSize;
+
+  @JsonKey(name: r'sort')
+  final SortObject? sort;
 
   @JsonKey(name: r'unpaged')
   final bool? unpaged;

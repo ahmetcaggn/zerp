@@ -25,11 +25,6 @@ void main() {
       // TODO
     });
 
-    // num wasteQuantity
-    test('to test the property `wasteQuantity`', () async {
-      // TODO
-    });
-
     // String notes
     test('to test the property `notes`', () async {
       // TODO

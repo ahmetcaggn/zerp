@@ -60,6 +60,31 @@ void main() {
       // TODO
     });
 
+    // String lastCountId
+    test('to test the property `lastCountId`', () async {
+      // TODO
+    });
+
+    // DateTime lastCountedAt
+    test('to test the property `lastCountedAt`', () async {
+      // TODO
+    });
+
+    // String lastCountedBy
+    test('to test the property `lastCountedBy`', () async {
+      // TODO
+    });
+
+    // num lastCountQuantity
+    test('to test the property `lastCountQuantity`', () async {
+      // TODO
+    });
+
+    // num lastExpectedQuantity
+    test('to test the property `lastExpectedQuantity`', () async {
+      // TODO
+    });
+
     // String tenantId
     test('to test the property `tenantId`', () async {
       // TODO

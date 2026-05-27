@@ -45,6 +45,16 @@ void main() {
       // TODO
     });
 
+    // DateTime approvedAt
+    test('to test the property `approvedAt`', () async {
+      // TODO
+    });
+
+    // String approvedBy
+    test('to test the property `approvedBy`', () async {
+      // TODO
+    });
+
     // List<StockCountItemDTO> items (default value: const [])
     test('to test the property `items`', () async {
       // TODO

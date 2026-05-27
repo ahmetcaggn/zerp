@@ -26,7 +26,6 @@ class StockCountItemUpdateDTO extends Schema {
   StockCountItemUpdateDTO({
     this.stockCountItemId,
     this.actualQuantity,
-    this.wasteQuantity,
     this.notes,
   });
 
@@ -35,9 +34,6 @@ class StockCountItemUpdateDTO extends Schema {
 
   @JsonKey(name: r'actualQuantity')
   final num? actualQuantity;
-
-  @JsonKey(name: r'wasteQuantity')
-  final num? wasteQuantity;
 
   @JsonKey(name: r'notes')
   final String? notes;

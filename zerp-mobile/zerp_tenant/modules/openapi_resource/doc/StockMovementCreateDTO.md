@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **stockResourceId** | **String** |  | [optional] 
 **type** | **String** |  | [optional] 
+**direction** | **String** |  | [optional] 
 **quantity** | **num** |  | [optional] 
 **referenceType** | **String** |  | [optional] 
 **referenceId** | **String** |  | [optional] 

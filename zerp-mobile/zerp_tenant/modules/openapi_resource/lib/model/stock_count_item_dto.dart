@@ -29,10 +29,14 @@ class StockCountItemDTO extends Schema {
     this.stockResourceName,
     this.unitTypeAbbreviation,
     this.theoreticalQuantity,
+    this.previousQuantity,
+    this.movementDelta,
+    this.expectedQuantity,
     this.actualQuantity,
     this.discrepancy,
-    this.wasteQuantity,
     this.notes,
+    this.countedBy,
+    this.countedAt,
   });
 
   @JsonKey(name: r'id')
@@ -50,17 +54,29 @@ class StockCountItemDTO extends Schema {
   @JsonKey(name: r'theoreticalQuantity')
   final num? theoreticalQuantity;
 
+  @JsonKey(name: r'previousQuantity')
+  final num? previousQuantity;
+
+  @JsonKey(name: r'movementDelta')
+  final num? movementDelta;
+
+  @JsonKey(name: r'expectedQuantity')
+  final num? expectedQuantity;
+
   @JsonKey(name: r'actualQuantity')
   final num? actualQuantity;
 
   @JsonKey(name: r'discrepancy')
   final num? discrepancy;
 
-  @JsonKey(name: r'wasteQuantity')
-  final num? wasteQuantity;
-
   @JsonKey(name: r'notes')
   final String? notes;
+
+  @JsonKey(name: r'countedBy')
+  final String? countedBy;
+
+  @JsonKey(name: r'countedAt')
+  final DateTime? countedAt;
 
   /// The factory instance for creating [StockCountItemDTO] from JSON.
   static const factory = StockCountItemDTOFactory();

@@ -29,6 +29,8 @@ class ProductRecipeItemDTO extends Schema {
     this.stockResourceName,
     this.quantity,
     this.unitType,
+    this.convertedQuantity,
+    this.baseUnitType,
     this.notes,
   });
 
@@ -46,6 +48,12 @@ class ProductRecipeItemDTO extends Schema {
 
   @JsonKey(name: r'unitType')
   final ProductRecipeItemDTOUnitTypeEnum? unitType;
+
+  @JsonKey(name: r'convertedQuantity')
+  final num? convertedQuantity;
+
+  @JsonKey(name: r'baseUnitType')
+  final ProductRecipeItemDTOBaseUnitTypeEnum? baseUnitType;
 
   @JsonKey(name: r'notes')
   final String? notes;
@@ -107,6 +115,28 @@ MILLILITER('MILLILITER'),
 LITER('LITER');
 
 const ProductRecipeItemDTOUnitTypeEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
+
+
+enum ProductRecipeItemDTOBaseUnitTypeEnum {
+@JsonValue('PIECE')
+PIECE('PIECE'),
+@JsonValue('GRAM')
+GRAM('GRAM'),
+@JsonValue('KILOGRAM')
+KILOGRAM('KILOGRAM'),
+@JsonValue('MILLILITER')
+MILLILITER('MILLILITER'),
+@JsonValue('LITER')
+LITER('LITER');
+
+const ProductRecipeItemDTOBaseUnitTypeEnum(this.value);
 
 final String value;
 

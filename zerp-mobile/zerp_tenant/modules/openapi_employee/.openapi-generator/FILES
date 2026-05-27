@@ -2,6 +2,7 @@
 .openapi-generator-ignore
 README.md
 analysis_options.yaml
+doc/AdminCreateEmployeeRequestDto.md
 doc/ApiResponseEmployeeResponseDto.md
 doc/ApiResponseListEmployeeListResponseDto.md
 doc/ApiResponseListEmployeeResponseDto.md
@@ -14,6 +15,7 @@ doc/EmployeeContactResponseDto.md
 doc/EmployeeListResponseDto.md
 doc/EmployeeResponseDto.md
 doc/EmployeesCreateEmployeeApi.md
+doc/EmployeesCreateForTenantApi.md
 doc/EmployeesDeleteEmployeeApi.md
 doc/EmployeesDeleteManyEmployeesApi.md
 doc/EmployeesGetDeletedEmployeesApi.md
@@ -36,6 +38,7 @@ doc/UpdateEmployeeRequestDto.md
 lib/api.dart
 lib/base/api_config.dart
 lib/base/base_request.dart
+lib/model/admin_create_employee_request_dto.dart
 lib/model/api_response_employee_response_dto.dart
 lib/model/api_response_list_employee_list_response_dto.dart
 lib/model/api_response_list_employee_response_dto.dart
@@ -56,6 +59,7 @@ lib/model/parameter.dart
 lib/model/sort_object.dart
 lib/model/update_employee_request_dto.dart
 lib/requests/employees/create_employee_command.dart
+lib/requests/employees/create_for_tenant_command.dart
 lib/requests/employees/delete_employee_command.dart
 lib/requests/employees/delete_many_employees_command.dart
 lib/requests/employees/get_deleted_employees_command.dart
@@ -68,6 +72,7 @@ lib/requests/employees/patch_many_employees_command.dart
 lib/requests/employees/search_employees_command.dart
 lib/requests/employees/update_employee_command.dart
 pubspec.yaml
+test/admin_create_employee_request_dto_test.dart
 test/api_response_employee_response_dto_test.dart
 test/api_response_list_employee_list_response_dto_test.dart
 test/api_response_list_employee_response_dto_test.dart
@@ -80,6 +85,7 @@ test/employee_contact_response_dto_test.dart
 test/employee_list_response_dto_test.dart
 test/employee_response_dto_test.dart
 test/employees/create_employee_command_test.dart
+test/employees/create_for_tenant_command_test.dart
 test/employees/delete_employee_command_test.dart
 test/employees/delete_many_employees_command_test.dart
 test/employees/get_deleted_employees_command_test.dart

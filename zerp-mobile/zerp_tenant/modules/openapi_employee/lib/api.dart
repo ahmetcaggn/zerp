@@ -14,6 +14,7 @@ export 'package:dart_network_layer_core/dart_network_layer_core.dart';
 export 'base/base_request.dart';
 export 'base/api_config.dart';
 
+export 'model/admin_create_employee_request_dto.dart';
 export 'model/api_response_employee_response_dto.dart';
 export 'model/api_response_list_employee_list_response_dto.dart';
 export 'model/api_response_list_employee_response_dto.dart';
@@ -35,6 +36,7 @@ export 'model/sort_object.dart';
 export 'model/update_employee_request_dto.dart';
 
 export 'requests/employees/create_employee_command.dart';
+export 'requests/employees/create_for_tenant_command.dart';
 export 'requests/employees/delete_employee_command.dart';
 export 'requests/employees/delete_many_employees_command.dart';
 export 'requests/employees/get_deleted_employees_command.dart';

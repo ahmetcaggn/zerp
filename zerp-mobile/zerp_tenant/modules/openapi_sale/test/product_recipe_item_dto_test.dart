@@ -40,6 +40,16 @@ void main() {
       // TODO
     });
 
+    // num convertedQuantity
+    test('to test the property `convertedQuantity`', () async {
+      // TODO
+    });
+
+    // String baseUnitType
+    test('to test the property `baseUnitType`', () async {
+      // TODO
+    });
+
     // String notes
     test('to test the property `notes`', () async {
       // TODO

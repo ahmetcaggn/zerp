@@ -33,6 +33,11 @@ class StockResourceDTO extends Schema {
     this.quantity,
     this.reorderThreshold,
     this.costPerUnit,
+    this.lastCountId,
+    this.lastCountedAt,
+    this.lastCountedBy,
+    this.lastCountQuantity,
+    this.lastExpectedQuantity,
     this.tenantId,
   });
 
@@ -62,6 +67,21 @@ class StockResourceDTO extends Schema {
 
   @JsonKey(name: r'costPerUnit')
   final num? costPerUnit;
+
+  @JsonKey(name: r'lastCountId')
+  final String? lastCountId;
+
+  @JsonKey(name: r'lastCountedAt')
+  final DateTime? lastCountedAt;
+
+  @JsonKey(name: r'lastCountedBy')
+  final String? lastCountedBy;
+
+  @JsonKey(name: r'lastCountQuantity')
+  final num? lastCountQuantity;
+
+  @JsonKey(name: r'lastExpectedQuantity')
+  final num? lastExpectedQuantity;
 
   @JsonKey(name: r'tenantId')
   final String? tenantId;

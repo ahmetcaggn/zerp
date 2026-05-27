@@ -40,6 +40,21 @@ void main() {
       // TODO
     });
 
+    // num previousQuantity
+    test('to test the property `previousQuantity`', () async {
+      // TODO
+    });
+
+    // num movementDelta
+    test('to test the property `movementDelta`', () async {
+      // TODO
+    });
+
+    // num expectedQuantity
+    test('to test the property `expectedQuantity`', () async {
+      // TODO
+    });
+
     // num actualQuantity
     test('to test the property `actualQuantity`', () async {
       // TODO
@@ -50,13 +65,18 @@ void main() {
       // TODO
     });
 
-    // num wasteQuantity
-    test('to test the property `wasteQuantity`', () async {
+    // String notes
+    test('to test the property `notes`', () async {
       // TODO
     });
 
-    // String notes
-    test('to test the property `notes`', () async {
+    // String countedBy
+    test('to test the property `countedBy`', () async {
+      // TODO
+    });
+
+    // DateTime countedAt
+    test('to test the property `countedAt`', () async {
       // TODO
     });
 

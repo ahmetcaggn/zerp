@@ -35,6 +35,11 @@ void main() {
       // TODO
     });
 
+    // String direction
+    test('to test the property `direction`', () async {
+      // TODO
+    });
+
     // num quantity
     test('to test the property `quantity`', () async {
       // TODO
@@ -62,6 +67,11 @@ void main() {
 
     // String notes
     test('to test the property `notes`', () async {
+      // TODO
+    });
+
+    // DateTime createdAt
+    test('to test the property `createdAt`', () async {
       // TODO
     });
 

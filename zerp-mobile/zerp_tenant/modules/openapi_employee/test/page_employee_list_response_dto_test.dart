@@ -40,13 +40,13 @@ void main() {
       // TODO
     });
 
-    // SortObject sort
-    test('to test the property `sort`', () async {
+    // PageableObject pageable
+    test('to test the property `pageable`', () async {
       // TODO
     });
 
-    // PageableObject pageable
-    test('to test the property `pageable`', () async {
+    // SortObject sort
+    test('to test the property `sort`', () async {
       // TODO
     });
 

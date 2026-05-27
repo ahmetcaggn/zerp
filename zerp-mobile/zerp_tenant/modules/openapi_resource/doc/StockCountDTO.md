@@ -14,6 +14,8 @@ Name | Type | Description | Notes
 **status** | **String** |  | [optional] 
 **countDate** | [**DateTime**](DateTime.md) |  | [optional] 
 **notes** | **String** |  | [optional] 
+**approvedAt** | [**DateTime**](DateTime.md) |  | [optional] 
+**approvedBy** | **String** |  | [optional] 
 **items** | [**List<StockCountItemDTO>**](StockCountItemDTO.md) |  | [optional] [default to const []]
 **tenantId** | **String** |  | [optional] 
 

@@ -26,6 +26,7 @@ class StockMovementCreateDTO extends Schema {
   StockMovementCreateDTO({
     this.stockResourceId,
     this.type,
+    this.direction,
     this.quantity,
     this.referenceType,
     this.referenceId,
@@ -37,6 +38,9 @@ class StockMovementCreateDTO extends Schema {
 
   @JsonKey(name: r'type')
   final StockMovementCreateDTOTypeEnum? type;
+
+  @JsonKey(name: r'direction')
+  final StockMovementCreateDTODirectionEnum? direction;
 
   @JsonKey(name: r'quantity')
   final num? quantity;
@@ -111,6 +115,22 @@ RETURN('RETURN'),
 STOCK_COUNT_CORRECTION('STOCK_COUNT_CORRECTION');
 
 const StockMovementCreateDTOTypeEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
+
+
+enum StockMovementCreateDTODirectionEnum {
+@JsonValue('IN')
+IN('IN'),
+@JsonValue('OUT')
+OUT('OUT');
+
+const StockMovementCreateDTODirectionEnum(this.value);
 
 final String value;
 

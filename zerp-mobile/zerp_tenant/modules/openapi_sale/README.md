@@ -134,6 +134,7 @@ Class | Method | HTTP request | Description
 *ShopCreateShopApi* | [**createShop**](doc//ShopCreateShopApi.md#) | **POST** /sale/shops | Create: Create a new entity
 *ShopDeleteManyShopApi* | [**deleteManyShop**](doc//ShopDeleteManyShopApi.md#) | **DELETE** /sale/shops | DeleteMany: Delete multiple entities
 *ShopDeleteShopApi* | [**deleteShop**](doc//ShopDeleteShopApi.md#) | **DELETE** /sale/shops/{id} | Delete: Delete a single entity
+*ShopGetDashboardOverviewApi* | [**getDashboardOverview**](doc//ShopGetDashboardOverviewApi.md#) | **GET** /sale/shops/{shopId}/dashboard-overview | 
 *ShopGetListShopApi* | [**getListShop**](doc//ShopGetListShopApi.md#) | **GET** /sale/shops | GetList: Get paginated list of entities with filtering
 *ShopGetManyShopApi* | [**getManyShop**](doc//ShopGetManyShopApi.md#) | **GET** /sale/shops/many | GetMany: Get multiple entities by IDs
 *ShopGetOneShopApi* | [**getOneShop**](doc//ShopGetOneShopApi.md#) | **GET** /sale/shops/{id} | GetOne: Get single entity by ID
@@ -231,6 +232,13 @@ Class | Method | HTTP request | Description
  - [PublicShopDTO](doc//PublicShopDTO.md)
  - [PublicShopMenuResponseDTO](doc//PublicShopMenuResponseDTO.md)
  - [ShopDTO](doc//ShopDTO.md)
+ - [ShopDashboardCategorySalesDTO](doc//ShopDashboardCategorySalesDTO.md)
+ - [ShopDashboardLowStockDTO](doc//ShopDashboardLowStockDTO.md)
+ - [ShopDashboardOverviewDTO](doc//ShopDashboardOverviewDTO.md)
+ - [ShopDashboardPerformanceDTO](doc//ShopDashboardPerformanceDTO.md)
+ - [ShopDashboardSalesChannelDTO](doc//ShopDashboardSalesChannelDTO.md)
+ - [ShopDashboardTopProductDTO](doc//ShopDashboardTopProductDTO.md)
+ - [ShopDashboardTrendPointDTO](doc//ShopDashboardTrendPointDTO.md)
  - [ShopTableCreateDTO](doc//ShopTableCreateDTO.md)
  - [ShopTableDTO](doc//ShopTableDTO.md)
  - [ShopTableUpdateDTO](doc//ShopTableUpdateDTO.md)

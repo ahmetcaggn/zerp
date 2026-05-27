@@ -31,6 +31,8 @@ class StockCountDTO extends Schema {
     this.status,
     this.countDate,
     this.notes,
+    this.approvedAt,
+    this.approvedBy,
     this.items = const [],
     this.tenantId,
   });
@@ -52,6 +54,12 @@ class StockCountDTO extends Schema {
 
   @JsonKey(name: r'notes')
   final String? notes;
+
+  @JsonKey(name: r'approvedAt')
+  final DateTime? approvedAt;
+
+  @JsonKey(name: r'approvedBy')
+  final String? approvedBy;
 
   @JsonKey(name: r'items')
   final List<StockCountItemDTO> items;
@@ -108,6 +116,10 @@ enum StockCountDTOStatusEnum {
 DRAFT('DRAFT'),
 @JsonValue('IN_PROGRESS')
 IN_PROGRESS('IN_PROGRESS'),
+@JsonValue('READY_FOR_APPROVAL')
+READY_FOR_APPROVAL('READY_FOR_APPROVAL'),
+@JsonValue('CANCELLED')
+CANCELLED('CANCELLED'),
 @JsonValue('COMPLETED')
 COMPLETED('COMPLETED');
 

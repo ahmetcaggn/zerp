@@ -60,6 +60,7 @@ All URIs are relative to *https://api.zeerp.tech*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *EmployeesCreateEmployeeApi* | [**createEmployee**](doc//EmployeesCreateEmployeeApi.md#) | **POST** /employee | Create: Create a new entity
+*EmployeesCreateForTenantApi* | [**createForTenant**](doc//EmployeesCreateForTenantApi.md#) | **POST** /employee/admin | 
 *EmployeesDeleteEmployeeApi* | [**deleteEmployee**](doc//EmployeesDeleteEmployeeApi.md#) | **DELETE** /employee/{id} | Delete: Delete a single entity
 *EmployeesDeleteManyEmployeesApi* | [**deleteManyEmployees**](doc//EmployeesDeleteManyEmployeesApi.md#) | **DELETE** /employee | DeleteMany: Delete multiple entities
 *EmployeesGetDeletedEmployeesApi* | [**getDeletedEmployees**](doc//EmployeesGetDeletedEmployeesApi.md#) | **GET** /employee/deleted | 
@@ -75,6 +76,7 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AdminCreateEmployeeRequestDto](doc//AdminCreateEmployeeRequestDto.md)
  - [ApiResponseEmployeeResponseDto](doc//ApiResponseEmployeeResponseDto.md)
  - [ApiResponseListEmployeeListResponseDto](doc//ApiResponseListEmployeeListResponseDto.md)
  - [ApiResponseListEmployeeResponseDto](doc//ApiResponseListEmployeeResponseDto.md)

@@ -13,10 +13,14 @@ Name | Type | Description | Notes
 **stockResourceName** | **String** |  | [optional] 
 **unitTypeAbbreviation** | **String** |  | [optional] 
 **theoreticalQuantity** | **num** |  | [optional] 
+**previousQuantity** | **num** |  | [optional] 
+**movementDelta** | **num** |  | [optional] 
+**expectedQuantity** | **num** |  | [optional] 
 **actualQuantity** | **num** |  | [optional] 
 **discrepancy** | **num** |  | [optional] 
-**wasteQuantity** | **num** |  | [optional] 
 **notes** | **String** |  | [optional] 
+**countedBy** | **String** |  | [optional] 
+**countedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
