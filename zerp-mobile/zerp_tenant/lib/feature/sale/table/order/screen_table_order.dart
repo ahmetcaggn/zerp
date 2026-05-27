@@ -522,7 +522,7 @@ final class _CatalogSection extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '\$${(item.price ?? 0).toStringAsFixed(2)}',
+                            '₺${(item.price ?? 0).toStringAsFixed(2)}',
                             style: TextStyle(
                               color: Theme.of(
                                 context,

@@ -52,7 +52,7 @@ class OrderItemList extends StatelessWidget {
                       ),
                     const SizedBox(height: 4),
                     Text(
-                      '\$${item.unitPrice.toStringAsFixed(2)} / ${context.t.sale.order.each}',
+                      '₺${item.unitPrice.toStringAsFixed(2)} / ${context.t.sale.order.each}',
                       style: TextStyle(
                         fontSize: 13,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -62,7 +62,7 @@ class OrderItemList extends StatelessWidget {
                 ),
               ),
               Text(
-                '\$${item.totalPrice.toStringAsFixed(2)}',
+                '₺${item.totalPrice.toStringAsFixed(2)}',
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(width: 16),
