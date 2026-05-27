@@ -79,8 +79,8 @@ export function ShopFormDialog({
   const [form, setForm] = useState<ShopFormState>(EMPTY_FORM_STATE)
 
   const { hasAnyPermission } = useCurrentUserPermissions()
-  const canCreateShop = hasAnyPermission([PermissionActions.UPDATE_TENANT, PermissionActions.ADMIN_TENANT])
-  const canUpdateShop = hasAnyPermission([PermissionActions.UPDATE_TENANT, PermissionActions.ADMIN_TENANT])
+  const canCreateShop = hasAnyPermission([PermissionActions.UPDATE_TENANT, PermissionActions.ADMIN])
+  const canUpdateShop = hasAnyPermission([PermissionActions.UPDATE_TENANT, PermissionActions.ADMIN])
   const canSubmit = mode === 'create' ? canCreateShop : canUpdateShop
 
   const selectedTenantId =

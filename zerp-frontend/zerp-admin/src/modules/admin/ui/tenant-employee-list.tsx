@@ -64,7 +64,7 @@ export function TenantEmployeeList({ tenantId, tenantName }: Props) {
     PermissionActions.DELETE_EMPLOYEE,
     PermissionActions.READ_TENANT,
     PermissionActions.UPDATE_TENANT,
-    PermissionActions.ADMIN_TENANT,
+    PermissionActions.ADMIN,
     PermissionActions.CREATE_EMPLOYEE_ANY_TENANT,
   ])
   const canCreateEmployeeForTenant = hasAnyPermission([PermissionActions.CREATE_EMPLOYEE_ANY_TENANT])

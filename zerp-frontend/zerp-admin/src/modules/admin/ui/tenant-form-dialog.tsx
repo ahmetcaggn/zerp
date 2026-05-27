@@ -68,10 +68,10 @@ export function TenantFormDialog({ open, mode, tenant, onClose }: Props) {
   const { mutate: createTenant, isPending: isCreating } = useCreateTenant()
   const { mutate: updateTenant, isPending: isUpdating } = useUpdateTenant()
   const { hasPermission, hasAnyPermission } = useCurrentUserPermissions()
-  const canCreateTenant = hasPermission(PermissionActions.ADMIN_TENANT)
+  const canCreateTenant = hasPermission(PermissionActions.ADMIN)
   const canUpdateTenant = hasAnyPermission([
     PermissionActions.UPDATE_TENANT,
-    PermissionActions.ADMIN_TENANT,
+    PermissionActions.ADMIN,
   ])
   const canSubmit = mode === 'create' ? canCreateTenant : canUpdateTenant
   const isPending = isCreating || isUpdating

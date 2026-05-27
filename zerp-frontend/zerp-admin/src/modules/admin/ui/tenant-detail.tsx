@@ -30,11 +30,11 @@ export function TenantDetail({ id }: Props) {
   const canReadTenant = hasAnyPermission([
     PermissionActions.READ_TENANT,
     PermissionActions.UPDATE_TENANT,
-    PermissionActions.ADMIN_TENANT,
+    PermissionActions.ADMIN,
   ])
   const canUpdateTenant = hasAnyPermission([
     PermissionActions.UPDATE_TENANT,
-    PermissionActions.ADMIN_TENANT,
+    PermissionActions.ADMIN,
   ])
 
   const { data: tenant, isLoading, error } = useTenant(id, {

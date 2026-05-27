@@ -62,17 +62,17 @@ export function ShopList({ fixedTenantId, fixedTenantName }: ShopListProps = {})
     PermissionActions.READ_SHOP,
     PermissionActions.READ_TENANT,
     PermissionActions.UPDATE_TENANT,
-    PermissionActions.ADMIN_TENANT,
+    PermissionActions.ADMIN,
   ])
-  const canCreateShop = hasAnyPermission([PermissionActions.UPDATE_TENANT, PermissionActions.ADMIN_TENANT])
-  const canUpdateShop = hasAnyPermission([PermissionActions.UPDATE_TENANT, PermissionActions.ADMIN_TENANT])
-  const canDeleteShop = hasPermission(PermissionActions.ADMIN_TENANT)
+  const canCreateShop = hasAnyPermission([PermissionActions.UPDATE_TENANT, PermissionActions.ADMIN])
+  const canUpdateShop = hasAnyPermission([PermissionActions.UPDATE_TENANT, PermissionActions.ADMIN])
+  const canDeleteShop = hasPermission(PermissionActions.ADMIN)
   const canReadTenantsForFilter =
     !hasTenantScope &&
     hasAnyPermission([
       PermissionActions.READ_TENANT,
       PermissionActions.UPDATE_TENANT,
-      PermissionActions.ADMIN_TENANT,
+      PermissionActions.ADMIN,
     ])
 
   const effectiveTenantFilter = scopedTenantId || tenantFilter

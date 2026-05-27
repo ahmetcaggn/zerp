@@ -65,7 +65,7 @@ const TEAM_PERMISSION_ACTIONS: readonly PermissionAction[] = [
 const TENANT_PERMISSION_ACTIONS: readonly PermissionAction[] = [
   PermissionActions.READ_TENANT,
   PermissionActions.UPDATE_TENANT,
-  PermissionActions.ADMIN_TENANT,
+  PermissionActions.ADMIN,
 ]
 
 const TICKET_MANAGEMENT_ACTIONS: readonly PermissionAction[] = [

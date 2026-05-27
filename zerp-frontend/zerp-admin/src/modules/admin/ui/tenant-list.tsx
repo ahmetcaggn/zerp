@@ -46,14 +46,14 @@ export function TenantList() {
   const canReadTenant = hasAnyPermission([
     PermissionActions.READ_TENANT,
     PermissionActions.UPDATE_TENANT,
-    PermissionActions.ADMIN_TENANT,
+    PermissionActions.ADMIN,
   ])
-  const canCreateTenant = hasPermission(PermissionActions.ADMIN_TENANT)
+  const canCreateTenant = hasPermission(PermissionActions.ADMIN)
   const canUpdateTenant = hasAnyPermission([
     PermissionActions.UPDATE_TENANT,
-    PermissionActions.ADMIN_TENANT,
+    PermissionActions.ADMIN,
   ])
-  const canDeleteTenant = hasPermission(PermissionActions.ADMIN_TENANT)
+  const canDeleteTenant = hasPermission(PermissionActions.ADMIN)
 
   const params = {
     pagination: { page: page + 1, perPage: rowsPerPage },
