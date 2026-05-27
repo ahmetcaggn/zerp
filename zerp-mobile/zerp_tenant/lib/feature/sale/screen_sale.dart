@@ -156,10 +156,12 @@ final class _Loaded extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                   onPressed: selectedShop != null
                       ? () {
-                          context.router.push(
-                            RouteTables(
-                              shopId: selectedShop.id ?? '',
-                              shopName: selectedShop.name ?? '',
+                          unawaited(
+                            context.router.push(
+                              RouteTables(
+                                shopId: selectedShop.id ?? '',
+                                shopName: selectedShop.name ?? '',
+                              ),
                             ),
                           );
                         }

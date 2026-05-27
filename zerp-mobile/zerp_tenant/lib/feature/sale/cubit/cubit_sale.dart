@@ -32,13 +32,16 @@ final class StateSaleLoaded extends StateSale {
   }) {
     return StateSaleLoaded(
       shops: shops ?? this.shops,
-      selectedShop: clearSelectedShop ? null : (selectedShop ?? this.selectedShop),
+      selectedShop: clearSelectedShop
+          ? null
+          : (selectedShop ?? this.selectedShop),
     );
   }
 }
 
 final class StateSaleError extends StateSale {
   const StateSaleError({required this.message});
+
   final String message;
 }
 
@@ -53,10 +56,12 @@ class CubitSale extends Cubit<StateSale> with LoggerMixin<CubitSale> {
     try {
       final response = await _saleService.getShops();
       final shops = response.items;
-      emit(StateSaleLoaded(
-        shops: shops,
-        selectedShop: shops.isNotEmpty ? shops.first : null,
-      ));
+      emit(
+        StateSaleLoaded(
+          shops: shops,
+          selectedShop: shops.isNotEmpty ? shops.first : null,
+        ),
+      );
     } on Object catch (e) {
       emit(StateSaleError(message: 'Failed to load shops: $e'));
     }

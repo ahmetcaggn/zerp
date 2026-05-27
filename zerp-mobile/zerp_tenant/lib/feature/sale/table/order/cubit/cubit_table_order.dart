@@ -43,15 +43,16 @@ class CubitTableOrder extends Cubit<StateTableOrder>
       if ((cartItem.notes ?? '') != (originalItem.notes ?? '')) return true;
 
       // Compare selected extra option IDs
-      final originalExtraIds = originalItem.selectedExtraOptions
-          .map((opt) => opt.extraOptionId ?? '')
-          .toList()
-        ..sort();
+      final originalExtraIds =
+          originalItem.selectedExtraOptions
+              .map((opt) => opt.extraOptionId ?? '')
+              .toList()
+            ..sort();
       final currentExtraIds = List<String>.from(cartItem.selectedExtraOptionIds)
         ..sort();
 
       if (originalExtraIds.length != currentExtraIds.length) return true;
-      for (int i = 0; i < originalExtraIds.length; i++) {
+      for (var i = 0; i < originalExtraIds.length; i++) {
         if (originalExtraIds[i] != currentExtraIds[i]) return true;
       }
     }
