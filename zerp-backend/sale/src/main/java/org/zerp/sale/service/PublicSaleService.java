@@ -8,6 +8,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class PublicSaleService {
+    private static final int MAX_NEARBY_LIMIT = 50;
+    private static final double EARTH_RADIUS_KM = 6371.0d;
     private static final String PUBLIC_CART_CODE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final int PUBLIC_CART_CODE_LENGTH = 6;
     private static final int PUBLIC_CART_CODE_MAX_ATTEMPTS = 10;
@@ -70,8 +73,20 @@ public class PublicSaleService {
     @Transactional(readOnly = true)
     public List<PublicShopDTO> listShops() {
         return shopRepository.findAllByOrderByNameAsc().stream()
-                .map(this::toPublicShop)
+                .map(shop -> toPublicShop(shop, null, null))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PublicShopDTO> listNearbyShops(double latitude, double longitude, int start, int end) {
+        validateLatitude(latitude);
+        validateLongitude(longitude);
+        validatePaginationRange(start, end);
+        int pageSize = validateLimit(end - start);
+        int pageNumber = start / pageSize;
+
+        return shopRepository.findNearestShops(latitude, longitude, PageRequest.of(pageNumber, pageSize))
+                .map(shop -> toPublicShop(shop, latitude, longitude));
     }
 
     @Transactional(readOnly = true)
@@ -243,7 +258,7 @@ public class PublicSaleService {
         return menuRepository.findFirstByShopIdAndLanguageAndIsActiveTrue(shopId, defaultLanguage);
     }
 
-    private PublicShopDTO toPublicShop(Shop entity) {
+    private PublicShopDTO toPublicShop(Shop entity, Double originLatitude, Double originLongitude) {
         PublicShopDTO dto = new PublicShopDTO();
         dto.setId(entity.getId());
         dto.setTenantId(entity.getTenantId());
@@ -259,7 +274,57 @@ public class PublicSaleService {
         dto.setPhone(entity.getPhone());
         dto.setEmail(entity.getEmail());
         dto.setWebsite(entity.getWebsite());
+        dto.setLatitude(entity.getLatitude());
+        dto.setLongitude(entity.getLongitude());
+        if (originLatitude != null && originLongitude != null
+                && entity.getLatitude() != null && entity.getLongitude() != null) {
+            dto.setDistanceKm(calculateDistanceKm(originLatitude, originLongitude, entity.getLatitude(), entity.getLongitude()));
+        }
         return dto;
+    }
+
+    private int validateLimit(int limit) {
+        if (limit < 1 || limit > MAX_NEARBY_LIMIT) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "limit must be between 1 and " + MAX_NEARBY_LIMIT);
+        }
+        return limit;
+    }
+
+    private void validatePaginationRange(int start, int end) {
+        if (start < 0 || end <= start) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid pagination range");
+        }
+
+        int pageSize = end - start;
+        if (start % pageSize != 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid pagination range: _start must be divisible by page size"
+            );
+        }
+    }
+
+    private void validateLatitude(double latitude) {
+        if (Double.isNaN(latitude) || Double.isInfinite(latitude) || latitude < -90d || latitude > 90d) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "lat must be between -90 and 90");
+        }
+    }
+
+    private void validateLongitude(double longitude) {
+        if (Double.isNaN(longitude) || Double.isInfinite(longitude) || longitude < -180d || longitude > 180d) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "lng must be between -180 and 180");
+        }
+    }
+
+    private double calculateDistanceKm(double originLat, double originLng, double targetLat, double targetLng) {
+        double dLat = Math.toRadians(targetLat - originLat);
+        double dLng = Math.toRadians(targetLng - originLng);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(originLat))
+                * Math.cos(Math.toRadians(targetLat))
+                * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return EARTH_RADIUS_KM * c;
     }
 
     private PublicActiveMenuDTO toPublicActiveMenu(Menu menu) {

@@ -20,4 +20,7 @@ public class PublicShopDTO {
     private String phone;
     private String email;
     private String website;
+    private Double latitude;
+    private Double longitude;
+    private Double distanceKm;
 }

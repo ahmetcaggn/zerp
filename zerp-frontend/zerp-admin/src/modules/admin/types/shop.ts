@@ -13,6 +13,8 @@ export interface ShopResponse {
   phone?: string
   email?: string
   website?: string
+  latitude?: number
+  longitude?: number
 }
 
 export interface CreateShopRequest {
@@ -28,6 +30,8 @@ export interface CreateShopRequest {
   phone?: string
   email?: string
   website?: string
+  latitude?: number
+  longitude?: number
 }
 
 export interface UpdateShopRequest {
@@ -42,4 +46,6 @@ export interface UpdateShopRequest {
   phone?: string
   email?: string
   website?: string
+  latitude?: number
+  longitude?: number
 }

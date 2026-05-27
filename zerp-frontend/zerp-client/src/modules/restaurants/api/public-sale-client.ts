@@ -1,15 +1,33 @@
 import { httpClient } from '@/core/api/http-client'
+
 import type {
   CreatePublicCartOrderRequest,
   CreatePublicCartOrderResponse,
   PublicCategoryMenuItemsParams,
   PublicMenuItemDto,
+  PublicNearbyShopsParams,
   PublicShopDto,
   PublicShopMenuResponseDto,
 } from '../types'
 
 export async function getPublicShops(): Promise<PublicShopDto[]> {
   return httpClient.get<PublicShopDto[]>('/sale/public/shops')
+}
+
+export async function getPublicNearbyShops(
+  params: PublicNearbyShopsParams,
+): Promise<{
+  data: PublicShopDto[]
+  total: number
+}> {
+  const { latitude, longitude, start, end } = params
+  const query = new URLSearchParams({
+    lat: String(latitude),
+    lng: String(longitude),
+    _start: String(start),
+    _end: String(end),
+  })
+  return httpClient.requestList<PublicShopDto>(`/sale/public/shops/nearby?${query.toString()}`)
 }
 
 export async function getPublicShopMenu(

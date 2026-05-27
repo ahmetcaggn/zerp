@@ -15,4 +15,6 @@ public class AdminShopUpdateRequestDTO {
     private String phone;
     private String email;
     private String website;
+    private Double latitude;
+    private Double longitude;
 }

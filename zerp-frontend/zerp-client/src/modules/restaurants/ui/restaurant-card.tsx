@@ -2,8 +2,10 @@
 
 import {
   Box,
+  Button,
   Card,
   CardActionArea,
+  CardActions,
   CardContent,
   CardMedia,
   Chip,
@@ -12,18 +14,58 @@ import {
 import { useRouter } from 'next/navigation'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
+
 import type { Restaurant } from '../types'
 
 interface RestaurantCardProps {
   restaurant: Restaurant
+  userLocation?: {
+    lat: number
+    lng: number
+  } | null
 }
 
-export function RestaurantCard({ restaurant }: RestaurantCardProps) {
+export function RestaurantCard({ restaurant, userLocation }: RestaurantCardProps) {
   const router = useRouter()
   const { t, locale } = useI18n()
 
   const handleClick = () => {
     router.push(`/${locale}/restaurants/${restaurant.id}`)
+  }
+
+  const hasCoordinates = typeof restaurant.latitude === 'number' && typeof restaurant.longitude === 'number'
+
+  const handleOpenDirections = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    if (!hasCoordinates) {
+      return
+    }
+
+    const query = new URLSearchParams({
+      api: '1',
+      destination: `${restaurant.latitude},${restaurant.longitude}`,
+      travelmode: 'driving',
+    })
+    if (canBuildOriginRoute) {
+      query.set('origin', `${userLocation.lat},${userLocation.lng}`)
+    }
+    window.open(`https://www.google.com/maps/dir/?${query.toString()}`, '_blank', 'noopener,noreferrer')
+  }
+
+  const canBuildOriginRoute = hasCoordinates && typeof userLocation?.lat === 'number' && typeof userLocation?.lng === 'number'
+
+  const handleOpenGoogleLocationTestRoute = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    if (!hasCoordinates) {
+      return
+    }
+
+    const query = new URLSearchParams({
+      api: '1',
+      destination: `${restaurant.latitude},${restaurant.longitude}`,
+      travelmode: 'driving',
+    })
+    window.open(`https://www.google.com/maps/dir/?${query.toString()}`, '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -77,6 +119,19 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             {restaurant.description}
           </Typography>
+          {typeof restaurant.distanceKm === 'number' && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              {t('restaurants.crowFlyDistance', { km: restaurant.distanceKm.toFixed(2) })}
+            </Typography>
+          )}
+          {typeof restaurant.latitude === 'number' && typeof restaurant.longitude === 'number' && (
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+              {t('restaurants.shopCoordinates', {
+                lat: restaurant.latitude.toFixed(6),
+                lng: restaurant.longitude.toFixed(6),
+              })}
+            </Typography>
+          )}
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             {restaurant.categories.map((category) => (
               <Chip key={category} label={category} size="small" variant="outlined" />
@@ -84,6 +139,28 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
           </Box>
         </CardContent>
       </CardActionArea>
+      <CardActions sx={{ px: 2, pb: 2, pt: 0 }}>
+        <Box sx={{ width: '100%', display: 'flex', gap: 1 }}>
+          <Button
+            fullWidth
+            variant="outlined"
+            size="small"
+            onClick={handleOpenDirections}
+            disabled={!hasCoordinates}
+          >
+            {t('restaurants.getDirections')}
+          </Button>
+          <Button
+            fullWidth
+            variant="text"
+            size="small"
+            onClick={handleOpenGoogleLocationTestRoute}
+            disabled={!hasCoordinates}
+          >
+            {t('restaurants.debugRoute')}
+          </Button>
+        </Box>
+      </CardActions>
     </Card>
   )
 }

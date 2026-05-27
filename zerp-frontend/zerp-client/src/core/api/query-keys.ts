@@ -8,6 +8,7 @@ export const queryKeys = {
     orders: ['client', 'orders'] as const,
     restaurants: {
       shops: ['client', 'restaurants', 'shops'] as const,
+      nearbyShops: ['client', 'restaurants', 'nearby-shops'] as const,
       menu: ['client', 'restaurants', 'menu'] as const,
       products: ['client', 'restaurants', 'products'] as const,
     },

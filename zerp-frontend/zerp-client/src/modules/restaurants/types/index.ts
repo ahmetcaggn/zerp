@@ -25,6 +25,9 @@ export interface Restaurant {
   address?: string
   isOpen: boolean
   categories: string[] // e.g., 'Cafe', 'Restaurant', 'Fast Food'
+  latitude?: number
+  longitude?: number
+  distanceKm?: number
 }
 
 export interface PublicShopDto {
@@ -42,6 +45,16 @@ export interface PublicShopDto {
   phone?: string
   email?: string
   website?: string
+  latitude?: number | null
+  longitude?: number | null
+  distanceKm?: number | null
+}
+
+export interface PublicNearbyShopsParams {
+  latitude: number
+  longitude: number
+  start: number
+  end: number
 }
 
 export interface PublicActiveMenuDto {

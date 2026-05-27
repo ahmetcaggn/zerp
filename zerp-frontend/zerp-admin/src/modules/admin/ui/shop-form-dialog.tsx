@@ -48,6 +48,8 @@ interface ShopFormState {
   phone: string
   email: string
   website: string
+  latitude: string
+  longitude: string
 }
 
 const EMPTY_FORM_STATE: ShopFormState = {
@@ -63,6 +65,8 @@ const EMPTY_FORM_STATE: ShopFormState = {
   phone: '',
   email: '',
   website: '',
+  latitude: '',
+  longitude: '',
 }
 
 export function ShopFormDialog({
@@ -122,6 +126,8 @@ export function ShopFormDialog({
         phone: shop?.phone ?? '',
         email: shop?.email ?? '',
         website: shop?.website ?? '',
+        latitude: shop?.latitude != null ? String(shop.latitude) : '',
+        longitude: shop?.longitude != null ? String(shop.longitude) : '',
       })
       return
     }
@@ -142,6 +148,27 @@ export function ShopFormDialog({
     return normalized ? normalized : undefined
   }
 
+  function parseOptionalCoordinate(rawValue: string, field: 'latitude' | 'longitude'): number | undefined {
+    const normalized = rawValue.trim()
+    if (!normalized) {
+      return undefined
+    }
+
+    const parsed = Number(normalized)
+    if (Number.isNaN(parsed) || !Number.isFinite(parsed)) {
+      throw new Error(field)
+    }
+
+    if (field === 'latitude' && (parsed < -90 || parsed > 90)) {
+      throw new Error(field)
+    }
+    if (field === 'longitude' && (parsed < -180 || parsed > 180)) {
+      throw new Error(field)
+    }
+
+    return parsed
+  }
+
   function buildCreatePayload(): CreateShopRequest {
     return {
       tenantId: selectedTenantId.trim(),
@@ -156,6 +183,8 @@ export function ShopFormDialog({
       phone: normalizeOptional(form.phone),
       email: normalizeOptional(form.email),
       website: normalizeOptional(form.website),
+      latitude: parseOptionalCoordinate(form.latitude, 'latitude'),
+      longitude: parseOptionalCoordinate(form.longitude, 'longitude'),
     }
   }
 
@@ -172,6 +201,8 @@ export function ShopFormDialog({
       phone: normalizeOptional(form.phone),
       email: normalizeOptional(form.email),
       website: normalizeOptional(form.website),
+      latitude: parseOptionalCoordinate(form.latitude, 'latitude'),
+      longitude: parseOptionalCoordinate(form.longitude, 'longitude'),
     }
   }
 
@@ -193,6 +224,20 @@ export function ShopFormDialog({
 
     if (!isNameAvailable) {
       showToast(t('shops.nameUnavailable'), { severity: 'warning' })
+      return false
+    }
+
+    try {
+      parseOptionalCoordinate(form.latitude, 'latitude')
+      parseOptionalCoordinate(form.longitude, 'longitude')
+    } catch (err) {
+      if (err instanceof Error && err.message === 'latitude') {
+        showToast(t('shops.latitudeValidation'), { severity: 'warning' })
+      } else if (err instanceof Error && err.message === 'longitude') {
+        showToast(t('shops.longitudeValidation'), { severity: 'warning' })
+      } else {
+        showToast(t('shops.coordinateValidation'), { severity: 'warning' })
+      }
       return false
     }
 
@@ -375,6 +420,24 @@ export function ShopFormDialog({
             onChange={(event) => setForm((prev) => ({ ...prev, website: event.target.value }))}
             size="small"
             fullWidth
+          />
+          <TextField
+            label={t('shops.latitudeLabel')}
+            value={form.latitude}
+            onChange={(event) => setForm((prev) => ({ ...prev, latitude: event.target.value }))}
+            size="small"
+            fullWidth
+            type="number"
+            slotProps={{ htmlInput: { step: 'any' } }}
+          />
+          <TextField
+            label={t('shops.longitudeLabel')}
+            value={form.longitude}
+            onChange={(event) => setForm((prev) => ({ ...prev, longitude: event.target.value }))}
+            size="small"
+            fullWidth
+            type="number"
+            slotProps={{ htmlInput: { step: 'any' } }}
           />
           <TextField
             label={t('shops.addressLabel')}

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { LocationOn, Storefront } from '@mui/icons-material'
 import {
+  Alert,
   Box,
   Card,
   CardActionArea,
@@ -11,27 +12,43 @@ import {
   Grid,
   Typography,
 } from '@mui/material'
-import { LocationOn, Storefront } from '@mui/icons-material'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
+
+import { getBestUserPosition } from '../utils/location-utils'
 
 export function WelcomeScreen() {
   const { t, locale } = useI18n()
   const router = useRouter()
   const [isLocating, setIsLocating] = useState(false)
+  const [locationError, setLocationError] = useState<string | null>(null)
 
   const handleUseLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError(t('restaurants.locationNotSupported'))
+      return
+    }
+
     setIsLocating(true)
-    
-    // Konum bulma simülasyonu
-    // Gerçekte burada navigator.geolocation.getCurrentPosition kullanılacak
-    // ve dönen koordinata göre backend API'den en yakın mağaza id'si alınacak.
-    setTimeout(() => {
-      setIsLocating(false)
-      // Şimdilik 1 numaralı mağazayı bulmuş gibi yönlendiriyoruz
-      router.push(`/${locale}/restaurants/1`)
-    }, 1500)
+    setLocationError(null)
+
+    getBestUserPosition()
+      .then((position) => {
+        setIsLocating(false)
+        const { latitude, longitude } = position.coords
+        router.push(`/${locale}/restaurants?lat=${latitude}&lng=${longitude}`)
+      })
+      .catch((error: GeolocationPositionError | Error) => {
+        setIsLocating(false)
+        const errorCode = 'code' in error ? error.code : 0
+        setLocationError(
+          errorCode === 1
+            ? t('restaurants.locationPermissionDenied')
+            : t('restaurants.locationFailed'),
+        )
+      })
   }
 
   const handleManualSelect = () => {
@@ -48,6 +65,12 @@ export function WelcomeScreen() {
           {t('welcome.subtitle')}
         </Typography>
       </Box>
+
+      {locationError && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          {locationError}
+        </Alert>
+      )}
 
       <Grid container spacing={4} justifyContent="center">
         {/* Konumumu Kullan Kartı */}

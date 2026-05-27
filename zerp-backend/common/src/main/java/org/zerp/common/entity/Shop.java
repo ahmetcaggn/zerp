@@ -57,6 +57,8 @@ public class Shop extends BaseEntity implements Permittable {
     private String phone;
     private String email;
     private String website;
+    private Double latitude;
+    private Double longitude;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

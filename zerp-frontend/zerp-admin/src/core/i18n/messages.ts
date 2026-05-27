@@ -180,6 +180,8 @@ export interface MessageDictionary {
     addressLabel: string
     stateLabel: string
     postalCodeLabel: string
+    latitudeLabel: string
+    longitudeLabel: string
     imageIdLabel: string
     cancelButton: string
     saveButton: string
@@ -192,6 +194,9 @@ export interface MessageDictionary {
     nameUnavailable: string
     nameError: string
     nameMinLength: string
+    coordinateValidation: string
+    latitudeValidation: string
+    longitudeValidation: string
     searchPlaceholder: string
     searchButton: string
     tenantAllOption: string

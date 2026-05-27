@@ -258,6 +258,8 @@ public class AdminShopService implements IResourceService<
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "tenantId is required");
         }
         normalizeShopNameOrBadRequest(data.getName());
+        normalizeLatitude(data.getLatitude());
+        normalizeLongitude(data.getLongitude());
     }
 
     private void validateUpdateRequest(AdminShopUpdateRequestDTO data) {
@@ -265,6 +267,8 @@ public class AdminShopService implements IResourceService<
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request cannot be null");
         }
         normalizeShopNameOrBadRequest(data.getName());
+        normalizeLatitude(data.getLatitude());
+        normalizeLongitude(data.getLongitude());
     }
 
     private void ensureTenantExistsOrNotFound(UUID tenantId) {
@@ -285,6 +289,8 @@ public class AdminShopService implements IResourceService<
         shop.setPhone(normalizeNullable(data.getPhone()));
         shop.setEmail(normalizeNullable(data.getEmail()));
         shop.setWebsite(normalizeNullable(data.getWebsite()));
+        shop.setLatitude(normalizeLatitude(data.getLatitude()));
+        shop.setLongitude(normalizeLongitude(data.getLongitude()));
     }
 
     private void applyUpdateFields(Shop shop, AdminShopUpdateRequestDTO data) {
@@ -299,6 +305,8 @@ public class AdminShopService implements IResourceService<
         shop.setPhone(normalizeNullable(data.getPhone()));
         shop.setEmail(normalizeNullable(data.getEmail()));
         shop.setWebsite(normalizeNullable(data.getWebsite()));
+        shop.setLatitude(normalizeLatitude(data.getLatitude()));
+        shop.setLongitude(normalizeLongitude(data.getLongitude()));
     }
 
     private void applyPatchFields(Shop shop, Map<String, Object> fields) {
@@ -313,6 +321,8 @@ public class AdminShopService implements IResourceService<
         if (fields.containsKey("phone")) shop.setPhone(normalizeNullable(stringValueOrNull(fields.get("phone"))));
         if (fields.containsKey("email")) shop.setEmail(normalizeNullable(stringValueOrNull(fields.get("email"))));
         if (fields.containsKey("website")) shop.setWebsite(normalizeNullable(stringValueOrNull(fields.get("website"))));
+        if (fields.containsKey("latitude")) shop.setLatitude(normalizeLatitude(doubleValueOrNull(fields.get("latitude"))));
+        if (fields.containsKey("longitude")) shop.setLongitude(normalizeLongitude(doubleValueOrNull(fields.get("longitude"))));
     }
 
     private String normalizeShopNameOrBadRequest(String value) {
@@ -339,6 +349,45 @@ public class AdminShopService implements IResourceService<
 
     private String stringValueOrNull(Object value) {
         return value == null ? null : String.valueOf(value);
+    }
+
+    private Double doubleValueOrNull(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number number) {
+            return number.doubleValue();
+        }
+        String raw = String.valueOf(value).trim();
+        if (raw.isEmpty()) {
+            return null;
+        }
+        try {
+            return Double.parseDouble(raw);
+        } catch (NumberFormatException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid numeric value: " + value, ex);
+        }
+    }
+
+    private Double normalizeLatitude(Double value) {
+        return normalizeCoordinate(value, "latitude", -90d, 90d);
+    }
+
+    private Double normalizeLongitude(Double value) {
+        return normalizeCoordinate(value, "longitude", -180d, 180d);
+    }
+
+    private Double normalizeCoordinate(Double value, String fieldName, double min, double max) {
+        if (value == null) {
+            return null;
+        }
+        if (value.isNaN() || value.isInfinite() || value < min || value > max) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    fieldName + " must be between " + min + " and " + max
+            );
+        }
+        return value;
     }
 
     private void ensureShopNameUniqueOrConflict(UUID tenantId, String normalizedName) {
@@ -397,6 +446,8 @@ public class AdminShopService implements IResourceService<
         dto.setPhone(shop.getPhone());
         dto.setEmail(shop.getEmail());
         dto.setWebsite(shop.getWebsite());
+        dto.setLatitude(shop.getLatitude());
+        dto.setLongitude(shop.getLongitude());
         return dto;
     }
 }

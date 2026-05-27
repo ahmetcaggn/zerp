@@ -53,6 +53,28 @@ public class PublicSaleController {
         return ResponseEntity.ok(buildResponse(publicSaleService.listShops()));
     }
 
+    @GetMapping("/shops/nearby")
+    public ResponseEntity<ApiResponse<List<PublicShopDTO>>> getNearbyShops(
+            @RequestParam(name = "lat") double latitude,
+            @RequestParam(name = "lng") double longitude,
+            @RequestParam(name = "_start", defaultValue = "0") int start,
+            @RequestParam(name = "_end", required = false) Integer end,
+            @RequestParam(name = "limit", defaultValue = "10") int limit
+    ) {
+        int resolvedEnd = end != null ? end : start + limit;
+        if (start < 0 || resolvedEnd <= start) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid pagination range");
+        }
+
+        Page<PublicShopDTO> page = publicSaleService.listNearbyShops(latitude, longitude, start, resolvedEnd);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Total-Count", String.valueOf(page.getTotalElements()));
+        headers.add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "X-Total-Count");
+
+        return new ResponseEntity<>(buildResponse(page.getContent()), headers, HttpStatus.OK);
+    }
+
     @GetMapping("/shops/{shopId}/menu")
     public ResponseEntity<ApiResponse<PublicShopMenuResponseDTO>> getActiveMenu(
             @PathVariable UUID shopId,
