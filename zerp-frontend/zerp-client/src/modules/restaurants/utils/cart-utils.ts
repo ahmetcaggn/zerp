@@ -5,7 +5,6 @@ export interface CartItemState {
   name: string
   unitPrice: number
   quantity: number
-  notes: string
 }
 
 export function addItemToCart(items: CartItemState[], product: {
@@ -22,7 +21,6 @@ export function addItemToCart(items: CartItemState[], product: {
         name: product.name,
         unitPrice: product.price,
         quantity: 1,
-        notes: '',
       },
     ]
   }
@@ -48,16 +46,6 @@ export function updateCartItemQuantity(
   )
 }
 
-export function updateCartItemNotes(
-  items: CartItemState[],
-  menuItemId: string,
-  notes: string,
-): CartItemState[] {
-  return items.map((item) =>
-    item.menuItemId === menuItemId ? { ...item, notes } : item,
-  )
-}
-
 export function buildCartOrderPayload(
   items: CartItemState[],
   note: string,
@@ -67,7 +55,6 @@ export function buildCartOrderPayload(
     items: items.map((item) => ({
       menuItemId: item.menuItemId,
       quantity: item.quantity,
-      notes: item.notes.trim() ? item.notes.trim() : undefined,
     })),
   }
 }

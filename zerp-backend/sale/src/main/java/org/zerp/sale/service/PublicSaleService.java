@@ -167,7 +167,6 @@ public class PublicSaleService {
             item.setMenuItem(menuItem);
             item.setQuantity(itemRequest.getQuantity());
             item.setUnitPrice(menuItem.getPrice());
-            item.setNotes(itemRequest.getNotes());
             item.setCreatedAt(now);
             order.getItems().add(item);
         }

@@ -70,7 +70,6 @@ export const enMessages = {
     cartTitle: 'Order Cart',
     cartEmpty: 'Your cart is empty.',
     quantity: 'Quantity',
-    itemNote: 'Item note (optional)',
     orderNote: 'Order note (optional)',
     generateQr: 'Generate QR',
     cartSubmitFailed: 'Could not save cart. Please try again.',

@@ -70,7 +70,6 @@ export const trMessages = {
     cartTitle: 'Sipariş Sepeti',
     cartEmpty: 'Sepetiniz boş.',
     quantity: 'Adet',
-    itemNote: 'Ürün notu (opsiyonel)',
     orderNote: 'Sipariş notu (opsiyonel)',
     generateQr: 'QR Oluştur',
     cartSubmitFailed: 'Sepet kaydedilemedi. Lütfen tekrar deneyin.',

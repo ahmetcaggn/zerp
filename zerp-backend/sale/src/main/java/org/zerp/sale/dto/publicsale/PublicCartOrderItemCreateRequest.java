@@ -8,5 +8,4 @@ import java.util.UUID;
 public class PublicCartOrderItemCreateRequest {
     private UUID menuItemId;
     private int quantity;
-    private String notes;
 }

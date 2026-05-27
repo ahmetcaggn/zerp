@@ -16,7 +16,7 @@ import type { Product as MenuItem } from '../types'
 interface MenuItemCardProps {
   menuItem: MenuItem
   onClick?: () => void
-  onAddToCart?: () => void
+  onAddToCart?: (sourceRect: DOMRect) => void
 }
 
 export function MenuItemCard({ menuItem, onClick, onAddToCart }: MenuItemCardProps) {
@@ -76,7 +76,7 @@ export function MenuItemCard({ menuItem, onClick, onAddToCart }: MenuItemCardPro
               disabled={!menuItem.isAvailable}
               onClick={(e) => {
                 e.stopPropagation(); // prevent card click
-                onAddToCart?.()
+                onAddToCart?.(e.currentTarget.getBoundingClientRect())
               }}
             >
               {t('restaurants.addToCart')}

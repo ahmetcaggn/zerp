@@ -21,7 +21,7 @@ interface MenuItemDetailModalProps {
   open: boolean
   onClose: () => void
   menuItem: MenuItem | null
-  onAddToCart?: (menuItem: MenuItem) => void
+  onAddToCart?: (menuItem: MenuItem, sourceRect: DOMRect) => void
 }
 
 function buildOriginalImageUrl(imageId?: string): string | null {
@@ -141,7 +141,7 @@ export function MenuItemDetailModal({ open, onClose, menuItem, onAddToCart }: Me
         <Button
           variant="contained"
           disabled={!menuItem.isAvailable}
-          onClick={() => onAddToCart?.(menuItem)}
+          onClick={(event) => onAddToCart?.(menuItem, event.currentTarget.getBoundingClientRect())}
         >
           {t('restaurants.addToCart')}
         </Button>

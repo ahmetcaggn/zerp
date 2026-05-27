@@ -106,7 +106,6 @@ export interface PublicCategoryMenuItemsParams {
 export interface CreatePublicCartOrderItemRequest {
   menuItemId: string
   quantity: number
-  notes?: string
 }
 
 export interface CreatePublicCartOrderRequest {
