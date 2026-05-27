@@ -210,6 +210,9 @@ final class _DashboardButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final disabledColor = theme.colorScheme.onSurface.withValues(alpha: 0.38);
+
     return SizedBox(
       height: 140,
       child: Card(
@@ -218,8 +221,8 @@ final class _DashboardButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
         ),
         color: onPressed == null
-            ? Theme.of(context).colorScheme.surfaceContainerHighest
-            : Colors.white,
+            ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
+            : theme.colorScheme.surfaceContainer,
         child: InkWell(
           onTap: onPressed,
           borderRadius: BorderRadius.circular(16),
@@ -231,7 +234,7 @@ final class _DashboardButton extends StatelessWidget {
                 Icon(
                   icon,
                   size: 44,
-                  color: onPressed == null ? Colors.grey : color,
+                  color: onPressed == null ? disabledColor : color,
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -239,7 +242,9 @@ final class _DashboardButton extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: onPressed == null ? Colors.grey : Colors.black87,
+                    color: onPressed == null
+                        ? disabledColor
+                        : theme.colorScheme.onSurface,
                   ),
                 ),
               ],

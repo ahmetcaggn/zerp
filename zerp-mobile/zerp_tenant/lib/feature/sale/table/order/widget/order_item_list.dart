@@ -42,7 +42,9 @@ class OrderItemList extends StatelessWidget {
                           item.notes!,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -50,7 +52,10 @@ class OrderItemList extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       '\$${item.unitPrice.toStringAsFixed(2)} / each',
-                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
