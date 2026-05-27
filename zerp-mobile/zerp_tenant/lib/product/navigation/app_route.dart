@@ -30,6 +30,8 @@ class AppRoute extends RootStackRouter {
 
     // Sale
     AutoRoute(page: RouteSale.page),
+    AutoRoute(page: RouteTables.page),
+    AutoRoute(page: RouteTableOrder.page),
 
     // Stock
     AutoRoute(page: RouteStock.page),

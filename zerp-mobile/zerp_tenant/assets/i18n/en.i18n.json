@@ -41,7 +41,53 @@
     "title": "Menus"
   },
   "sale": {
-    "title": "Sales"
+    "title": "Sales",
+    "dashboard": {
+      "selectShop": "Select Shop",
+      "tables": "Tables",
+      "cash": "Cash",
+      "cashComingSoon": "Cash operations coming soon",
+      "empty": "No shops found."
+    },
+    "tables": {
+      "title": "Tables",
+      "loading": "Loading tables...",
+      "empty": "No tables found in this shop.",
+      "error": "Failed to load tables.",
+      "search": "Search tables...",
+      "status": {
+        "AVAILABLE": "Available",
+        "OCCUPIED": "Occupied",
+        "RESERVED": "Reserved",
+        "OUT_OF_ORDER": "Out of Order"
+      }
+    },
+    "order": {
+      "title": "Table Order",
+      "empty": "No items in order.",
+      "scanQr": "Scan QR",
+      "importCode": "Enter Code",
+      "save": "Save Order",
+      "pay": "Pay Order",
+      "qrImportSuccess": "Order imported successfully.",
+      "qrImportError": "Failed to import order.",
+      "addProducts": "Add Products",
+      "selectCategory": "Select Category",
+      "noProducts": "No products found",
+      "loadingProducts": "Loading products...",
+      "cancelDialog": {
+        "title": "Cancel Order",
+        "message": "Are you sure you want to cancel this order?",
+        "confirm": "Confirm",
+        "cancel": "Keep"
+      },
+      "discardDialog": {
+        "title": "Unsaved Changes",
+        "message": "You have unsaved changes. Are you sure you want to discard them and go back?",
+        "confirm": "Discard",
+        "cancel": "Keep Editing"
+      }
+    }
   },
   "stock": {
     "title": "Stock Status"
@@ -69,6 +115,7 @@
     "hello": "Hello $name",
     "save": "Save",
     "refresh": "Refresh",
+    "retry": "Retry",
     "required": "Required",
     "error": "Error: $message",
     "unknown": "Unknown",

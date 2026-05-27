@@ -46,6 +46,10 @@ import '../../../feature/profile/cubit/cubit_view_profile_permissions.dart'
     as _i73;
 import '../../../feature/profile/permission/cubit_profile_permissions.dart'
     as _i803;
+import '../../../feature/sale/cubit/cubit_sale.dart' as _i738;
+import '../../../feature/sale/table/cubit/cubit_tables.dart' as _i207;
+import '../../../feature/sale/table/order/cubit/cubit_table_order.dart'
+    as _i398;
 import '../../../feature/settings/sections/api_baseurl/cubit_settings_api_baseurl.dart'
     as _i1057;
 import '../../cubit/root_cubit/auth/cubit_auth.dart' as _i200;
@@ -59,6 +63,7 @@ import '../../service/api_status/api_status_service.dart' as _i371;
 import '../../service/auth/auth_service.dart' as _i238;
 import '../../service/auth/auth_storage_service.dart' as _i40;
 import '../../service/employee/employee_service.dart' as _i93;
+import '../../service/sale/sale_service.dart' as _i16;
 import '../../service/user/permission_service.dart' as _i545;
 import '../../service/user/username_service.dart' as _i868;
 import '../../storage/operator/auth_claims.operator.dart' as _i301;
@@ -154,6 +159,14 @@ extension GetItInjectableX on _i174.GetIt {
         cubitAuth: gh<_i200.CubitAuth>(),
       ),
     );
+    gh.lazySingleton<_i16.SaleService>(
+      () => _i16.SaleService(
+        invoker: gh<_i1073.ApiNetworkInvoker>(),
+        authStorageService: gh<_i40.AuthStorageService>(),
+        cubitError: gh<_i139.CubitError>(),
+        cubitAuth: gh<_i200.CubitAuth>(),
+      ),
+    );
     gh.lazySingleton<_i545.PermissionService>(
       () => _i545.PermissionService(
         invoker: gh<_i1073.ApiNetworkInvoker>(),
@@ -224,6 +237,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i93.EmployeeService>(),
         cubitSingleEmployee,
       ),
+    );
+    gh.factory<_i738.CubitSale>(() => _i738.CubitSale(gh<_i16.SaleService>()));
+    gh.factory<_i398.CubitTableOrder>(
+      () => _i398.CubitTableOrder(gh<_i16.SaleService>()),
+    );
+    gh.factoryParam<_i207.CubitTables, String, dynamic>(
+      (shopId, _) => _i207.CubitTables(gh<_i16.SaleService>(), shopId),
     );
     gh.factory<_i1057.CubitSettingsApiBaseUrl>(
       () => _i1057.CubitSettingsApiBaseUrl(
