@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zerp_tenant/feature/sale/table/order/cubit/cubit_table_order.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 class OrderItemList extends StatelessWidget {
   const OrderItemList({
@@ -42,16 +43,16 @@ class OrderItemList extends StatelessWidget {
                           item.notes!,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                             fontStyle: FontStyle.italic,
                           ),
                         ),
                       ),
                     const SizedBox(height: 4),
                     Text(
-                      '\$${item.unitPrice.toStringAsFixed(2)} / each',
+                      '\$${item.unitPrice.toStringAsFixed(2)} / ${context.t.sale.order.each}',
                       style: TextStyle(
                         fontSize: 13,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,

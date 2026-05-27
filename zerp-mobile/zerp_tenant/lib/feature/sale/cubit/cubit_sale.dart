@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:openapi_sale/api.dart';
 import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/service/sale/sale_service.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 sealed class StateSale {
   const StateSale();
@@ -63,7 +64,11 @@ class CubitSale extends Cubit<StateSale> with LoggerMixin<CubitSale> {
         ),
       );
     } on Object catch (e) {
-      emit(StateSaleError(message: 'Failed to load shops: $e'));
+      emit(
+        StateSaleError(
+          message: t.sale.errors.failedToLoadShops(error: e.toString()),
+        ),
+      );
     }
   }
 

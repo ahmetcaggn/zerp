@@ -82,9 +82,12 @@ class _ImportCodeDialogState extends State<ImportCodeDialog> {
                         color: Colors.black54,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Text(
-                        'Align QR Code within the bounds',
-                        style: TextStyle(color: Colors.white, fontSize: 13),
+                      child: Text(
+                        t.sale.order.importDialog.alignQr,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ),
@@ -98,7 +101,7 @@ class _ImportCodeDialogState extends State<ImportCodeDialog> {
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Text('Import Customer Order'),
+      title: Text(t.sale.order.importDialog.title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -106,7 +109,7 @@ class _ImportCodeDialogState extends State<ImportCodeDialog> {
           TextField(
             controller: _codeController,
             decoration: InputDecoration(
-              hintText: 'Enter Import Code',
+              hintText: t.sale.order.importDialog.hint,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -114,10 +117,13 @@ class _ImportCodeDialogState extends State<ImportCodeDialog> {
             ),
           ),
           const SizedBox(height: 16),
-          const Center(
+          Center(
             child: Text(
-              'OR',
-              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+              t.sale.order.importDialog.or,
+              style: const TextStyle(
+                color: Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -128,7 +134,7 @@ class _ImportCodeDialogState extends State<ImportCodeDialog> {
               });
             },
             icon: const Icon(Icons.camera_alt),
-            label: const Text('Scan QR Code with Camera'),
+            label: Text(t.sale.order.importDialog.scanQrButton),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
@@ -141,7 +147,7 @@ class _ImportCodeDialogState extends State<ImportCodeDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(t.common.cancel),
+          child: Text(t.sale.order.importDialog.cancel),
         ),
         ElevatedButton(
           onPressed: () {
@@ -149,7 +155,7 @@ class _ImportCodeDialogState extends State<ImportCodeDialog> {
               Navigator.of(context).pop(_codeController.text.trim());
             }
           },
-          child: Text(t.common.ok),
+          child: Text(t.sale.order.importDialog.ok),
         ),
       ],
     );

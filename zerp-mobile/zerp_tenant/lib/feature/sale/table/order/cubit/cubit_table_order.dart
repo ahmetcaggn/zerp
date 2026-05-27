@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:openapi_sale/api.dart';
 import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/service/sale/sale_service.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @injectable
 class CubitTableOrder extends Cubit<StateTableOrder>
@@ -105,7 +106,9 @@ class CubitTableOrder extends Cubit<StateTableOrder>
       );
     } on Object catch (e) {
       emit(
-        StateTableOrderError(message: 'Failed to initialize order details: $e'),
+        StateTableOrderError(
+          message: t.sale.errors.failedToInitOrder(error: e.toString()),
+        ),
       );
     }
   }

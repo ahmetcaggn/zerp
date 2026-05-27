@@ -42,6 +42,11 @@
   },
   "sale": {
     "title": "Satışlar",
+    "errors": {
+      "failedToLoadShops": "Şubeler yüklenemedi: $error",
+      "failedToLoadTables": "Masalar yüklenemedi: $error",
+      "failedToInitOrder": "Sipariş detayları başlatılamadı: $error"
+    },
     "dashboard": {
       "selectShop": "Şube Seçin",
       "tables": "Masalar",
@@ -86,6 +91,22 @@
         "message": "Kaydedilmemiş değişiklikleriniz var. Değişiklikleri geri alıp çıkmak istediğinizden emin misiniz?",
         "confirm": "Geri Al ve Çık",
         "cancel": "Düzenlemeye Devam Et"
+      },
+      "orderCancelled": "Sipariş İptal Edildi",
+      "importOrder": "Siparişi Aktar:",
+      "categoryAll": "Tümü",
+      "totalPrice": "Toplam Tutar",
+      "orderSavedSuccess": "Sipariş Başarıyla Kaydedildi",
+      "orderNotes": "Sipariş Notları",
+      "each": "adet",
+      "importDialog": {
+        "alignQr": "QR kodu çerçeveye hizalayın",
+        "title": "Müşteri Siparişini Aktar",
+        "hint": "Aktarım Kodunu Girin",
+        "or": "VEYA",
+        "scanQrButton": "Kamerayla QR Kodunu Tara",
+        "cancel": "İptal",
+        "ok": "Tamam"
       }
     }
   },

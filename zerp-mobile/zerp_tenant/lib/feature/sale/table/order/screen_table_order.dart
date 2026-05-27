@@ -113,6 +113,7 @@ class _ViewState extends State<_View> {
                     if (confirm == true) {
                       if (!context.mounted) return;
                       final messenger = ScaffoldMessenger.of(context);
+                      final cancelMsg = context.t.sale.order.orderCancelled;
                       final success = await context
                           .read<CubitTableOrder>()
                           .cancelOrder(
@@ -121,7 +122,7 @@ class _ViewState extends State<_View> {
                           );
                       if (mounted && success) {
                         messenger.showSnackBar(
-                          const SnackBar(content: Text('Order Cancelled')),
+                          SnackBar(content: Text(cancelMsg)),
                         );
                       }
                     }
@@ -332,9 +333,9 @@ class _ImportSectionState extends State<_ImportSection> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Import Order:',
-              style: TextStyle(
+            Text(
+              context.t.sale.order.importOrder,
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -387,7 +388,7 @@ final class _OrderSection extends StatelessWidget {
         TextField(
           controller: noteController,
           decoration: InputDecoration(
-            labelText: 'Order Notes',
+            labelText: context.t.sale.order.orderNotes,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 12,
@@ -444,7 +445,9 @@ final class _CatalogSection extends StatelessWidget {
                 ),
                 child: ChoiceChip(
                   label: Text(
-                    isAll ? 'All' : (category?.name ?? ''),
+                    isAll
+                        ? context.t.sale.order.categoryAll
+                        : (category?.name ?? ''),
                   ),
                   selected: isSelected,
                   onSelected: (_) {
@@ -576,9 +579,9 @@ final class _BottomSection extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Total Price',
-                    style: TextStyle(
+                  Text(
+                    context.t.sale.order.totalPrice,
+                    style: const TextStyle(
                       color: Colors.grey,
                       fontSize: 12,
                     ),
@@ -610,9 +613,9 @@ final class _BottomSection extends StatelessWidget {
                           );
                       if (context.mounted && success) {
                         messenger.showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text(
-                              'Order Saved Successfully',
+                              context.t.sale.order.orderSavedSuccess,
                             ),
                           ),
                         );

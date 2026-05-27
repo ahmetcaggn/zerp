@@ -42,6 +42,11 @@
   },
   "sale": {
     "title": "Sales",
+    "errors": {
+      "failedToLoadShops": "Failed to load shops: $error",
+      "failedToLoadTables": "Failed to load tables: $error",
+      "failedToInitOrder": "Failed to initialize order details: $error"
+    },
     "dashboard": {
       "selectShop": "Select Shop",
       "tables": "Tables",
@@ -86,6 +91,22 @@
         "message": "You have unsaved changes. Are you sure you want to discard them and go back?",
         "confirm": "Discard",
         "cancel": "Keep Editing"
+      },
+      "orderCancelled": "Order Cancelled",
+      "importOrder": "Import Order:",
+      "categoryAll": "All",
+      "totalPrice": "Total Price",
+      "orderSavedSuccess": "Order Saved Successfully",
+      "orderNotes": "Order Notes",
+      "each": "each",
+      "importDialog": {
+        "alignQr": "Align QR Code within the bounds",
+        "title": "Import Customer Order",
+        "hint": "Enter Import Code",
+        "or": "OR",
+        "scanQrButton": "Scan QR Code with Camera",
+        "cancel": "Cancel",
+        "ok": "OK"
       }
     }
   },
