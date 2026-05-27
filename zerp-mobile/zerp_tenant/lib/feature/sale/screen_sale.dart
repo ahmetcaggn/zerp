@@ -153,7 +153,7 @@ final class _Loaded extends StatelessWidget {
                 child: _DashboardButton(
                   title: context.t.sale.dashboard.tables,
                   icon: Icons.table_restaurant_outlined,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme.of(context).colorScheme.secondary,
                   onPressed: selectedShop != null
                       ? () {
                           unawaited(
@@ -173,18 +173,19 @@ final class _Loaded extends StatelessWidget {
                 child: _DashboardButton(
                   title: context.t.sale.dashboard.cash,
                   icon: Icons.point_of_sale_outlined,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.secondary,
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          context.t.sale.dashboard.cashComingSoon,
-                        ),
-                      ),
-                    );
-                  },
+                  color: Theme.of(context).colorScheme.secondary,
+                  onPressed: selectedShop != null
+                      ? () {
+                          unawaited(
+                            context.router.push(
+                              RouteCashTables(
+                                shopId: selectedShop.id ?? '',
+                                shopName: selectedShop.name ?? '',
+                              ),
+                            ),
+                          );
+                        }
+                      : null,
                 ),
               ),
             ],

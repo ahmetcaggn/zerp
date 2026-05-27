@@ -46,6 +46,9 @@ import '../../../feature/profile/cubit/cubit_view_profile_permissions.dart'
     as _i73;
 import '../../../feature/profile/permission/cubit_profile_permissions.dart'
     as _i803;
+import '../../../feature/sale/cash/cubit/cubit_cash_order.dart' as _i906;
+import '../../../feature/sale/cash/cubit/cubit_cash_payment.dart' as _i910;
+import '../../../feature/sale/cash/cubit/cubit_cash_tables.dart' as _i782;
 import '../../../feature/sale/cubit/cubit_sale.dart' as _i738;
 import '../../../feature/sale/table/cubit/cubit_tables.dart' as _i207;
 import '../../../feature/sale/table/order/cubit/cubit_table_order.dart'
@@ -238,9 +241,18 @@ extension GetItInjectableX on _i174.GetIt {
         cubitSingleEmployee,
       ),
     );
+    gh.factory<_i906.CubitCashOrder>(
+      () => _i906.CubitCashOrder(gh<_i16.SaleService>()),
+    );
+    gh.factory<_i910.CubitCashPayment>(
+      () => _i910.CubitCashPayment(gh<_i16.SaleService>()),
+    );
     gh.factory<_i738.CubitSale>(() => _i738.CubitSale(gh<_i16.SaleService>()));
     gh.factory<_i398.CubitTableOrder>(
       () => _i398.CubitTableOrder(gh<_i16.SaleService>()),
+    );
+    gh.factoryParam<_i782.CubitCashTables, String, dynamic>(
+      (shopId, _) => _i782.CubitCashTables(gh<_i16.SaleService>(), shopId),
     );
     gh.factoryParam<_i207.CubitTables, String, dynamic>(
       (shopId, _) => _i207.CubitTables(gh<_i16.SaleService>(), shopId),

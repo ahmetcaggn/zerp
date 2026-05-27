@@ -216,6 +216,28 @@ class SaleService extends ServiceBase with LoggerMixin<SaleService> {
     }
   }
 
+  Future<void> markOrderAsPaid({
+    required String orderId,
+  }) async {
+    final request = PatchTableOrderCommand(
+      id: orderId,
+      requestBody: {
+        'status': 'PAID',
+      },
+    );
+
+    final res = await invoker.send(request);
+    switch (res) {
+      case SuccessResponseResult<ApiResponseTableOrderDTO>():
+        log.info('Successfully marked order as paid: $orderId');
+        return;
+      case NetworkErrorResult<ApiResponseTableOrderDTO>():
+        throw onNetworkError(res);
+      case SpecifiedResponseResult<ApiResponseTableOrderDTO>():
+        throw onUnsuccessfulResponse(res);
+    }
+  }
+
   Future<PageResponse<MenuCategoryDTO>> getMenuCategories({
     required String shopId,
     PageRequest pageRequest = PageRequest.all,
