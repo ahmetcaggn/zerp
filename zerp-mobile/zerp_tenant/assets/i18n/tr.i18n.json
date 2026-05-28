@@ -33,7 +33,7 @@
       "employee": "Çalışanlar",
       "menu": "Menüler",
       "sale": "Satışlar",
-      "stock": "Stok Durumu",
+      "stock": "Stok",
       "store": "Mağazalar"
     }
   },
@@ -145,7 +145,7 @@
     }
   },
   "stock": {
-    "title": "Stok Durumu"
+    "title": "Stok"
   },
   "store": {
     "title": "Mağazalar"

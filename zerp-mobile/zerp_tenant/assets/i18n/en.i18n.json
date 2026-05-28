@@ -33,7 +33,7 @@
       "employee": "Employees",
       "menu": "Menus",
       "sale": "Sales",
-      "stock": "Stock Status",
+      "stock": "Stock",
       "store": "Stores"
     }
   },
@@ -145,7 +145,7 @@
     }
   },
   "stock": {
-    "title": "Stock Status"
+    "title": "Stock"
   },
   "store": {
     "title": "Stores"
