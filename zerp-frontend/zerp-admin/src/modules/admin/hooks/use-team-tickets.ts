@@ -54,17 +54,6 @@ export function useAddTeamTicketComment() {
   })
 }
 
-export function useCloseTeamTicket() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (id: string) => teamTicketClient.close(id),
-    onSuccess: (_, id) => {
-      qc.invalidateQueries({ queryKey: queryKeys.admin.teamTickets })
-      qc.invalidateQueries({ queryKey: ticketDetailKey(id) })
-    },
-  })
-}
-
 export function useChangeTeamTicketStatus() {
   const qc = useQueryClient()
   return useMutation({

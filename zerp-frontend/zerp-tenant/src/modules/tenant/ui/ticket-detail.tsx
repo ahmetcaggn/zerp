@@ -57,6 +57,7 @@ const PRIORITY_COLOR: Record<TicketPriorityString, 'error' | 'warning' | 'info' 
 }
 
 const TYPE_OPTIONS: TicketTypeString[] = ['SERVICE_LEVEL', 'QUESTION']
+const TERMINAL_STATUSES: TicketStatusString[] = ['RESOLVED', 'CLOSED', 'CANCELLED']
 
 interface Props {
   id: string
@@ -151,8 +152,8 @@ export function TicketDetail({ id }: Props) {
   const status = currentTicket.status as TicketStatusString | undefined
   const priority = currentTicket.priority as TicketPriorityString | undefined
   const tags = Array.from(currentTicket.tags ?? [])
-  const isClosed = status === 'CLOSED' || status === 'CANCELLED'
-  const isEditLocked = status === 'IN_PROGRESS'
+  const isClosed = status !== undefined && TERMINAL_STATUSES.includes(status)
+  const isEditLocked = status === 'IN_PROGRESS' || isClosed
   const attachmentUploadBlockedReason = isClosed
     ? 'Kapalı taleplere ek yüklenemez.'
     : null
@@ -164,7 +165,12 @@ export function TicketDetail({ id }: Props) {
 
   function openEditDialog() {
     if (isEditLocked) {
-      showToast('IN_PROGRESS durumundaki talepler düzenlenemez.', { severity: 'warning' })
+      showToast(
+        isClosed
+          ? 'Kapanmış talepler düzenlenemez.'
+          : 'IN_PROGRESS durumundaki talepler düzenlenemez.',
+        { severity: 'warning' },
+      )
       return
     }
     setEditTitle(currentTicket.title ?? '')
@@ -177,7 +183,12 @@ export function TicketDetail({ id }: Props) {
 
   function handleSave() {
     if (isEditLocked) {
-      showToast('IN_PROGRESS durumundaki talepler düzenlenemez.', { severity: 'warning' })
+      showToast(
+        isClosed
+          ? 'Kapanmış talepler düzenlenemez.'
+          : 'IN_PROGRESS durumundaki talepler düzenlenemez.',
+        { severity: 'warning' },
+      )
       setEditOpen(false)
       return
     }

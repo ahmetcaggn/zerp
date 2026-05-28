@@ -120,11 +120,10 @@ public class TicketEntity extends BaseEntity implements Permittable {
 
         public boolean canTransitionTo(TicketStatus newStatus) {
             return switch (this) {
-                case OPEN -> newStatus == IN_PROGRESS || newStatus == CANCELLED;
-                case IN_PROGRESS -> newStatus == WAITING_CUSTOMER || newStatus == RESOLVED || newStatus == CANCELLED || newStatus == OPEN;
-                case WAITING_CUSTOMER -> newStatus == IN_PROGRESS || newStatus == RESOLVED || newStatus == CANCELLED || newStatus == OPEN;
-                case RESOLVED -> newStatus == CLOSED || newStatus == OPEN;
-                case CLOSED, CANCELLED -> false;
+                case OPEN -> newStatus == IN_PROGRESS || newStatus == RESOLVED || newStatus == CLOSED || newStatus == CANCELLED;
+                case IN_PROGRESS -> newStatus == WAITING_CUSTOMER || newStatus == RESOLVED || newStatus == CLOSED || newStatus == CANCELLED || newStatus == OPEN;
+                case WAITING_CUSTOMER -> newStatus == IN_PROGRESS || newStatus == RESOLVED || newStatus == CLOSED || newStatus == CANCELLED || newStatus == OPEN;
+                case RESOLVED, CLOSED, CANCELLED -> false;
             };
         }
     }

@@ -42,9 +42,6 @@ export const teamTicketClient = {
   addComment: (id: string, body: AddCommentRequest): Promise<TicketResponse> =>
     httpClient.post<TicketResponse>(`/crm/tickets/${id}/comments`, body),
 
-  close: (id: string): Promise<TicketResponse> =>
-    httpClient.post<TicketResponse>(`/crm/tickets/${id}/close`, {}),
-
   changeStatus: (id: string, body: ChangeStatusRequest): Promise<TicketResponse> =>
     httpClient.patch<TicketResponse>(`/crm/tickets/${id}/status`, body),
 

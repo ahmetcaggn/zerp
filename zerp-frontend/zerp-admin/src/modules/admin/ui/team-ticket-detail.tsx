@@ -1,7 +1,6 @@
 'use client'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import DownloadIcon from '@mui/icons-material/Download'
 import SendIcon from '@mui/icons-material/Send'
@@ -39,7 +38,6 @@ import {
   useAssignTeamTicket,
   useChangeTeamTicketPriority,
   useChangeTeamTicketStatus,
-  useCloseTeamTicket,
   useTeamTicket,
   useUploadTeamTicketAttachment,
 } from '../hooks/use-team-tickets'
@@ -75,7 +73,7 @@ const STATUS_OPTIONS: TicketStatusString[] = [
 ]
 
 const PRIORITY_OPTIONS: TicketPriorityString[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
-const CLOSEABLE_STATUSES: TicketStatusString[] = ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER']
+const TERMINAL_STATUSES: TicketStatusString[] = ['RESOLVED', 'CLOSED', 'CANCELLED']
 const ASSIGNMENT_CANDIDATE_PAGE_SIZE = 10
 
 interface Props {
@@ -133,7 +131,6 @@ export function TeamTicketDetail({ id }: Props) {
   const [assignAgentPage, setAssignAgentPage] = useState(1)
 
   const { mutate: addComment, isPending: isCommenting } = useAddTeamTicketComment()
-  const { mutate: closeTicket, isPending: isClosing } = useCloseTeamTicket()
   const { mutate: changeStatus, isPending: isChangingStatus } = useChangeTeamTicketStatus()
   const { mutate: changePriority, isPending: isChangingPriority } = useChangeTeamTicketPriority()
   const { mutate: assignTicket, isPending: isAssigning } = useAssignTeamTicket()
@@ -242,8 +239,7 @@ export function TeamTicketDetail({ id }: Props) {
 
   const status = ticket.status as TicketStatusString | undefined
   const priority = ticket.priority as TicketPriorityString | undefined
-  const isCloseable = status !== undefined && CLOSEABLE_STATUSES.includes(status)
-  const isClosed = status === 'CLOSED' || status === 'CANCELLED'
+  const isClosed = status !== undefined && TERMINAL_STATUSES.includes(status)
   const activeAssignment = ticket.currentAssignment?.active
     ? ticket.currentAssignment
     : undefined
@@ -251,9 +247,6 @@ export function TeamTicketDetail({ id }: Props) {
   const canChangeAssignment = hasCurrentAssignment
     ? canUpdateTicketAssignment
     : canCreateTicketAssignment
-  const closeActionBlockedReason = !isCloseable
-    ? 'Talep mevcut durumunda kapatılamaz.'
-    : null
   const assignmentActionBlockedReason = isClosed
     ? 'Talep kapalı olduğu için atama işlemi yapılamaz.'
     : null
@@ -287,20 +280,13 @@ export function TeamTicketDetail({ id }: Props) {
     )
   }
 
-  function handleClose() {
-    if (!canUpdateTicket) {
-      showToast('Talebi kapatma yetkiniz yok.', { severity: 'warning' })
-      return
-    }
-    closeTicket(id, {
-      onSuccess: () => showToast('Talep kapatıldı.', { severity: 'success' }),
-      onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-    })
-  }
-
   function handleStatusChange(newStatus: TicketStatusString) {
     if (!canUpdateTicket) {
       showToast('Durum güncelleme yetkiniz yok.', { severity: 'warning' })
+      return
+    }
+    if (isClosed) {
+      showToast('Kapanmış taleplerde durum güncellenemez.', { severity: 'warning' })
       return
     }
     changeStatus(
@@ -471,21 +457,6 @@ export function TeamTicketDetail({ id }: Props) {
         <Button startIcon={<ArrowBackIcon />} onClick={() => router.back()} sx={{ color: 'text.secondary' }}>
           Geri
         </Button>
-        {canUpdateTicket && (
-          <Tooltip title={closeActionBlockedReason ?? ''}>
-            <span>
-              <Button
-                variant="outlined"
-                color="warning"
-                startIcon={<CheckCircleIcon />}
-                onClick={handleClose}
-                disabled={isClosing || Boolean(closeActionBlockedReason)}
-              >
-                {t('teamTickets.closeTicket')}
-              </Button>
-            </span>
-          </Tooltip>
-        )}
       </Box>
 
       <Typography variant="h5" sx={{ mb: 2 }}>

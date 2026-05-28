@@ -316,33 +316,11 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         UUID userId = resolveCurrentUserIdOrThrow();
         TicketEntity entity = findOrThrow(ticketId);
         ensureCanUpdateTicket(userId, entity);
+        if (request == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "status is required");
+        }
         TicketStatus newStatus = request.status();
-        TicketStatus oldStatus = entity.getStatus();
-
-        if (oldStatus == newStatus) {
-            return toAuthorizedResponse(userId, entity);
-        }
-
-        if (!oldStatus.canTransitionTo(newStatus)) {
-            throw new IllegalStateException(
-                    String.format("Cannot transition from %s to %s", oldStatus, newStatus));
-        }
-
-        entity.setStatus(newStatus);
-        entity.setUpdatedAt(LocalDateTime.now());
-
-        if (newStatus == TicketStatus.RESOLVED) {
-            entity.setResolvedAt(LocalDateTime.now());
-            recordSlaResolution(entity);
-        } else if (newStatus == TicketStatus.CLOSED) {
-            entity.setClosedAt(LocalDateTime.now());
-        } else if (newStatus == TicketStatus.OPEN && oldStatus == TicketStatus.RESOLVED) {
-            entity.setResolvedAt(null);
-            addHistory(entity, TicketHistoryEntity.EventType.REOPENED, null);
-        }
-
-        addHistory(entity, TicketHistoryEntity.EventType.STATUS_CHANGED,
-                String.format("Status changed from %s to %s", oldStatus, newStatus));
+        changeStatusInternal(entity, newStatus);
 
         TicketEntity saved = ticketRepository.save(entity);
         return toAuthorizedResponse(userId, saved);
@@ -358,6 +336,8 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         if (oldPriority == newPriority) {
             return toAuthorizedResponse(userId, entity);
         }
+
+        ensureTicketNotTerminal(entity, "Ticket priority cannot be changed after it is resolved, closed or cancelled");
 
         entity.setPriority(newPriority);
         entity.setUpdatedAt(LocalDateTime.now());
@@ -670,39 +650,14 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         return toPage(responses, pageable);
     }
 
-    public TicketResponse closeTicket(UUID ticketId) {
-        UUID userId = resolveCurrentUserIdOrThrow();
-        TicketEntity entity = findOrThrow(ticketId);
-        ensureCanUpdateTicket(userId, entity);
-        TicketStatus oldStatus = entity.getStatus();
-
-        if (!oldStatus.canTransitionTo(TicketStatus.CLOSED)) {
-            throw new IllegalStateException(
-                    String.format("Cannot transition from %s to %s", oldStatus, TicketStatus.CLOSED));
-        }
-
-        entity.setStatus(TicketStatus.CLOSED);
-        entity.setClosedAt(LocalDateTime.now());
-        entity.setUpdatedAt(LocalDateTime.now());
-
-        addHistory(entity, TicketHistoryEntity.EventType.STATUS_CHANGED,
-                String.format("Status changed from %s to %s", oldStatus, TicketStatus.CLOSED));
-
-        TicketEntity saved = ticketRepository.save(entity);
-        return toAuthorizedResponse(userId, saved);
-    }
-
     // -- Internal Helpers --
 
     private void changeStatusInternal(TicketEntity entity, TicketStatus newStatus) {
         TicketStatus oldStatus = entity.getStatus();
+        validateStatusTransition(oldStatus, newStatus);
+
         if (oldStatus == newStatus) {
             return;
-        }
-
-        if (!oldStatus.canTransitionTo(newStatus)) {
-            throw new IllegalStateException(
-                    String.format("Cannot transition from %s to %s", oldStatus, newStatus));
         }
 
         entity.setStatus(newStatus);
@@ -713,13 +668,37 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
             recordSlaResolution(entity);
         } else if (newStatus == TicketStatus.CLOSED) {
             entity.setClosedAt(LocalDateTime.now());
-        } else if (newStatus == TicketStatus.OPEN && oldStatus == TicketStatus.RESOLVED) {
-            entity.setResolvedAt(null);
-            addHistory(entity, TicketHistoryEntity.EventType.REOPENED, null);
         }
 
         addHistory(entity, TicketHistoryEntity.EventType.STATUS_CHANGED,
                 String.format("Status changed from %s to %s", oldStatus, newStatus));
+    }
+
+    private void validateStatusTransition(TicketStatus oldStatus, TicketStatus newStatus) {
+        if (newStatus == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "status is required");
+        }
+        if (oldStatus == null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ticket status is not set");
+        }
+
+        if (oldStatus == newStatus) {
+            return;
+        }
+
+        if (isTerminalStatus(oldStatus)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Ticket status cannot be changed after it is resolved, closed or cancelled"
+            );
+        }
+
+        if (!oldStatus.canTransitionTo(newStatus)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    String.format("Cannot transition ticket status from %s to %s", oldStatus, newStatus)
+            );
+        }
     }
 
     private TicketEntity findOrThrow(UUID ticketId) {
@@ -764,11 +743,10 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
 
         TicketAssignmentEntity assignment = ticket.getCurrentAssignment();
         boolean hasExistingAssignment = assignment != null;
+        AppUser leastLoadedAgent = resolveLeastLoadedAssignableAgent(assignmentTeam);
         if (!hasExistingAssignment) {
             assignment = new TicketAssignmentEntity();
-            ticket.setCurrentAssignment(assignment);
         }
-        AppUser leastLoadedAgent = resolveLeastLoadedAssignableAgent(assignmentTeam);
 
         assignment.setTicket(ticket);
         assignment.setTeam(assignmentTeam);
@@ -785,6 +763,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
         if (!hasExistingAssignment) {
             entityManager.persist(assignment);
         }
+        ticket.setCurrentAssignment(assignment);
 
         addHistory(ticket, TicketHistoryEntity.EventType.ASSIGNED,
                 leastLoadedAgent != null
@@ -862,14 +841,20 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     }
 
     private void validateAssignable(TicketEntity entity) {
-        if (entity.getStatus() == TicketStatus.CLOSED || entity.getStatus() == TicketStatus.CANCELLED) {
-            throw new IllegalStateException("Cannot assign a closed or cancelled ticket");
+        if (isTerminalStatus(entity.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Cannot assign a resolved, closed or cancelled ticket"
+            );
         }
     }
 
     private void validateCommentable(TicketEntity entity) {
-        if (entity.getStatus() == TicketStatus.CLOSED || entity.getStatus() == TicketStatus.CANCELLED) {
-            throw new IllegalStateException("Cannot make a comment on a closed or cancelled ticket");
+        if (isTerminalStatus(entity.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Cannot make a comment on a resolved, closed or cancelled ticket"
+            );
         }
     }
 
@@ -1078,6 +1063,17 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
                     "Ticket cannot be edited after it is in progress"
             );
         }
+        ensureTicketNotTerminal(entity, "Ticket cannot be edited after it is resolved, closed or cancelled");
+    }
+
+    private void ensureTicketNotTerminal(TicketEntity entity, String message) {
+        if (entity != null && isTerminalStatus(entity.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, message);
+        }
+    }
+
+    private boolean isTerminalStatus(TicketStatus status) {
+        return status == TicketStatus.RESOLVED || status == TicketStatus.CLOSED || status == TicketStatus.CANCELLED;
     }
 
     private String validateTitle(String title) {

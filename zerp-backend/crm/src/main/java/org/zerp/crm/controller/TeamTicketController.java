@@ -115,11 +115,6 @@ public class TeamTicketController {
         return ResponseEntity.ok(ticketService.addComment(id, request));
     }
 
-    @PostMapping("/{id}/close")
-    public ResponseEntity<TicketResponse> closeTicket(@PathVariable UUID id) {
-        return ResponseEntity.ok(ticketService.closeTicket(id));
-    }
-
     private <T> ApiResponse<List<T>> buildResponse(List<T> data) {
         return ApiResponse.<List<T>>builder()
                 .success(true)
