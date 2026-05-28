@@ -154,6 +154,7 @@ class _CreatePermissionViewState extends State<_CreatePermissionView>
                     if (selectedTargetType != null) ...[
                       const SizedBox(height: 16),
                       ViewCreatePermissionTargetSelector(
+                        key: ValueKey(selectedTargetType),
                         targetIdController: targetIdController,
                         selectedTargetType: selectedTargetType!,
                         allowedTargetTypes: availableTargetTypes,
