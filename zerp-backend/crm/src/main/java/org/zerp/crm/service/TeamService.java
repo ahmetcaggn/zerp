@@ -425,6 +425,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
                         m.getId(),
                         m.getUser() != null ? m.getUser().getId() : null,
                         resolveUserDisplayName(m.getUser()),
+                        m.getUser() != null ? m.getUser().getUsername() : null,
                         m.getUser() != null ? m.getUser().getEmail() : null,
                         m.getRole().name(),
                         m.getJoinedAt()))
@@ -499,9 +500,21 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
         String base = displayName != null && !displayName.isBlank()
                 ? displayName
                 : resolveUserDisplayName(user);
-        return user != null && user.getId() != null
-                ? base + " (" + user.getId() + ")"
-                : base;
+
+        if (user == null) {
+            return base;
+        }
+
+        String username = user.getUsername() != null ? user.getUsername().trim() : "";
+        String normalizedBase = base.trim().toLowerCase();
+        String normalizedUsername = username.toLowerCase();
+        String usernamePart = !username.isBlank() && !normalizedUsername.equals(normalizedBase)
+                ? " @" + username
+                : "";
+
+        return user.getId() != null
+                ? base + usernamePart + " (" + user.getId() + ")"
+                : base + usernamePart;
     }
 
     private <T> Page<T> toPage(List<T> items, Pageable pageable) {

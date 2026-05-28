@@ -54,10 +54,7 @@ public class CrmPermissionEvaluator {
             PermissionAction.READ_TICKET,
             PermissionAction.UPDATE_TICKET,
             PermissionAction.DELETE_TICKET,
-            PermissionAction.CREATE_TICKET_HISTORY,
             PermissionAction.READ_TICKET_HISTORY,
-            PermissionAction.UPDATE_TICKET_HISTORY,
-            PermissionAction.DELETE_TICKET_HISTORY,
             PermissionAction.CREATE_TICKET_COMMENT,
             PermissionAction.READ_TICKET_COMMENT,
             PermissionAction.UPDATE_TICKET_COMMENT,
@@ -70,10 +67,7 @@ public class CrmPermissionEvaluator {
             PermissionAction.READ_TICKET_ATTACHMENT,
             PermissionAction.UPDATE_TICKET_ATTACHMENT,
             PermissionAction.DELETE_TICKET_ATTACHMENT,
-            PermissionAction.CREATE_TICKET_SLA_TRACKING,
             PermissionAction.READ_TICKET_SLA_TRACKING,
-            PermissionAction.UPDATE_TICKET_SLA_TRACKING,
-            PermissionAction.DELETE_TICKET_SLA_TRACKING,
             PermissionAction.CREATE_TICKET_WATCHER,
             PermissionAction.READ_TICKET_WATCHER,
             PermissionAction.UPDATE_TICKET_WATCHER,
@@ -350,13 +344,13 @@ public class CrmPermissionEvaluator {
 
     public boolean canCreateTicketHistory(UUID userId, TicketParent parent) {
         return hasTicketChildHierarchyPermission(
-                userId, PermissionAction.CREATE_TICKET_HISTORY, PermissionTargetType.TICKET_HISTORY,
+                userId, PermissionAction.READ_TICKET_HISTORY, PermissionTargetType.TICKET_HISTORY,
                 null, parent.ticketId(), parent.tenantId(), parent.assignedTeamId(), parent.assignedAgentId());
     }
 
     public boolean canUpdateTicketHistory(UUID userId, TicketChildTarget target) {
         return hasTicketChildHierarchyPermission(
-                userId, PermissionAction.UPDATE_TICKET_HISTORY, PermissionTargetType.TICKET_HISTORY,
+                userId, PermissionAction.READ_TICKET_HISTORY, PermissionTargetType.TICKET_HISTORY,
                 target.childId(), target.ticketId(), target.tenantId(), target.assignedTeamId(),
                 target.assignedAgentId());
     }
@@ -367,7 +361,7 @@ public class CrmPermissionEvaluator {
 
     public boolean canDeleteTicketHistory(UUID userId, TicketChildTarget target) {
         return hasTicketChildHierarchyPermission(
-                userId, PermissionAction.DELETE_TICKET_HISTORY, PermissionTargetType.TICKET_HISTORY,
+                userId, PermissionAction.READ_TICKET_HISTORY, PermissionTargetType.TICKET_HISTORY,
                 target.childId(), target.ticketId(), target.tenantId(), target.assignedTeamId(),
                 target.assignedAgentId());
     }
@@ -516,13 +510,13 @@ public class CrmPermissionEvaluator {
 
     public boolean canCreateTicketSlaTracking(UUID userId, TicketParent parent) {
         return hasTicketChildHierarchyPermission(
-                userId, PermissionAction.CREATE_TICKET_SLA_TRACKING, PermissionTargetType.TICKET_SLA_TRACKING,
+                userId, PermissionAction.READ_TICKET_SLA_TRACKING, PermissionTargetType.TICKET_SLA_TRACKING,
                 null, parent.ticketId(), parent.tenantId(), parent.assignedTeamId(), parent.assignedAgentId());
     }
 
     public boolean canUpdateTicketSlaTracking(UUID userId, TicketChildTarget target) {
         return hasTicketChildHierarchyPermission(
-                userId, PermissionAction.UPDATE_TICKET_SLA_TRACKING, PermissionTargetType.TICKET_SLA_TRACKING,
+                userId, PermissionAction.READ_TICKET_SLA_TRACKING, PermissionTargetType.TICKET_SLA_TRACKING,
                 target.childId(), target.ticketId(), target.tenantId(), target.assignedTeamId(),
                 target.assignedAgentId());
     }
@@ -533,7 +527,7 @@ public class CrmPermissionEvaluator {
 
     public boolean canDeleteTicketSlaTracking(UUID userId, TicketChildTarget target) {
         return hasTicketChildHierarchyPermission(
-                userId, PermissionAction.DELETE_TICKET_SLA_TRACKING, PermissionTargetType.TICKET_SLA_TRACKING,
+                userId, PermissionAction.READ_TICKET_SLA_TRACKING, PermissionTargetType.TICKET_SLA_TRACKING,
                 target.childId(), target.ticketId(), target.tenantId(), target.assignedTeamId(),
                 target.assignedAgentId());
     }

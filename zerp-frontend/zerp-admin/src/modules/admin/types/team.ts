@@ -4,6 +4,7 @@ export interface TeamMemberResponse {
   id?: string
   userId?: string
   displayName?: string
+  username?: string
   email?: string
   role?: TeamMemberRoleValue
   joinedAt?: string

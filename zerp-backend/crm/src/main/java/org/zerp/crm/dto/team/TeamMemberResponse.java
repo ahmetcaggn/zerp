@@ -7,6 +7,7 @@ public record TeamMemberResponse(
         UUID id,
         UUID userId,
         String displayName,
+        String username,
         String email,
         String role,
         LocalDateTime joinedAt) {

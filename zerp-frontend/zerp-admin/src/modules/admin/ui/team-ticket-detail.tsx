@@ -28,6 +28,7 @@ import { useState } from 'react'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
+import { formatDateTime } from '@/core/utils/date-formatter'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
 import { teamTicketClient } from '../api/team-ticket-client'
@@ -117,7 +118,7 @@ function resolveCommentAuthorType(authorType?: string): CommentAuthorType {
 }
 
 export function TeamTicketDetail({ id }: Props) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { showToast } = useToast()
   const router = useRouter()
 
@@ -900,7 +901,9 @@ export function TeamTicketDetail({ id }: Props) {
               <Typography variant="caption" color="text.secondary">
                 İlk Yanıt Hedefi
               </Typography>
-              <Typography variant="body2">{ticket.slaTracking.firstResponseDueAt ?? '—'}</Typography>
+              <Typography variant="body2">
+                {formatDateTime(ticket.slaTracking.firstResponseDueAt, locale)}
+              </Typography>
               {ticket.slaTracking.isFirstResponseBreached && (
                 <Alert severity="error" sx={{ py: 0, px: 1, mt: 0.5 }}>
                   İhlal
@@ -911,7 +914,9 @@ export function TeamTicketDetail({ id }: Props) {
               <Typography variant="caption" color="text.secondary">
                 Çözüm Hedefi
               </Typography>
-              <Typography variant="body2">{ticket.slaTracking.resolutionDueAt ?? '—'}</Typography>
+              <Typography variant="body2">
+                {formatDateTime(ticket.slaTracking.resolutionDueAt, locale)}
+              </Typography>
               {ticket.slaTracking.isResolutionBreached && (
                 <Alert severity="error" sx={{ py: 0, px: 1, mt: 0.5 }}>
                   İhlal

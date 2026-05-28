@@ -419,6 +419,13 @@ export function TeamDetail({ id }: Props) {
             >
               {candidateUsers.map((candidate) => {
                 const isSelected = effectiveSelectedCandidateId === candidate.id
+                const candidateMetaSegments = [
+                  candidate.username?.trim() ? `@${candidate.username.trim()}` : null,
+                  candidate.email?.trim() || null,
+                  candidate.id,
+                ].filter((segment): segment is string => Boolean(segment))
+                const candidateMeta = candidateMetaSegments.join(' · ')
+
                 return (
                   <Box
                     key={candidate.id}
@@ -440,7 +447,7 @@ export function TeamDetail({ id }: Props) {
                   >
                     <Typography variant="body2">{candidate.displayName}</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {candidate.displayLabel}
+                      {candidateMeta}
                     </Typography>
                   </Box>
                 )
@@ -506,105 +513,115 @@ export function TeamDetail({ id }: Props) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {currentTeam.members?.map((member, index) => (
-                <TableRow key={member.id ?? `${member.userId ?? 'member'}-${index}`} hover>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {member.displayName ?? member.userId ?? '—'}
-                    </Typography>
-                    {member.userId && (
-                      <Typography variant="caption" color="text.secondary">
-                        {member.userId}
-                      </Typography>
-                    )}
-                    {member.email && (
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ display: 'block' }}
-                      >
-                        {member.email}
-                      </Typography>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={
-                        member.role === 'LEADER' ? t('teams.roleLeader') : t('teams.roleMember')
-                      }
-                      color={member.role === 'LEADER' ? 'primary' : 'default'}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>{member.joinedAt ?? '—'}</TableCell>
-                  <TableCell align="right">
-                    {canUpdateTeamMember && (
-                      <Tooltip title={t('teams.permissionsDialogTitle')}>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            if (!member.userId) return
-                            setPermissionDialogMember(member)
-                          }}
+              {currentTeam.members?.map((member, index) => {
+                const memberPrimary = member.displayName ?? member.username ?? member.userId ?? '—'
+                const normalizedPrimary = memberPrimary.trim().toLowerCase()
+                const normalizedUsername = member.username?.trim().toLowerCase()
+                const shouldShowUsername = Boolean(normalizedUsername) && normalizedUsername !== normalizedPrimary
+
+                return (
+                  <TableRow key={member.id ?? `${member.userId ?? 'member'}-${index}`} hover>
+                    <TableCell>
+                      <Typography variant="body2">{memberPrimary}</Typography>
+                      {shouldShowUsername && (
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                          @{member.username}
+                        </Typography>
+                      )}
+                      {member.userId && (
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                          {member.userId}
+                        </Typography>
+                      )}
+                      {member.email && (
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ display: 'block' }}
                         >
-                          <AdminPanelSettingsIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {canUpdateTeamMember && (
-                      <Tooltip
-                        title={
-                          member.role === 'LEADER'
-                            ? `${t('teams.roleMember')} yap`
-                            : `${t('teams.roleLeader')} yap`
+                          {member.email}
+                        </Typography>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={
+                          member.role === 'LEADER' ? t('teams.roleLeader') : t('teams.roleMember')
                         }
-                      >
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            if (!member.userId) return
-                            const nextRole =
-                              member.role === 'LEADER' ? ('MEMBER' as const) : ('LEADER' as const)
-                            changeMemberRole(
-                              { id, userId: member.userId, body: { role: nextRole } },
-                              {
-                                onSuccess: () =>
-                                  showToast('Rol güncellendi.', { severity: 'success' }),
-                                onError: (err) =>
-                                  showToast(getUserFriendlyError(err), { severity: 'error' }),
-                              },
-                            )
-                          }}
+                        color={member.role === 'LEADER' ? 'primary' : 'default'}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>{member.joinedAt ?? '—'}</TableCell>
+                    <TableCell align="right">
+                      {canUpdateTeamMember && (
+                        <Tooltip title={t('teams.permissionsDialogTitle')}>
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              if (!member.userId) return
+                              setPermissionDialogMember(member)
+                            }}
+                          >
+                            <AdminPanelSettingsIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {canUpdateTeamMember && (
+                        <Tooltip
+                          title={
+                            member.role === 'LEADER'
+                              ? `${t('teams.roleMember')} yap`
+                              : `${t('teams.roleLeader')} yap`
+                          }
                         >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {canDeleteTeamMember && (
-                      <Tooltip title={t('teams.removeMemberButton')}>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => {
-                            if (!member.userId) return
-                            removeMember(
-                              { id, userId: member.userId },
-                              {
-                                onSuccess: () =>
-                                  showToast('Üye çıkarıldı.', { severity: 'success' }),
-                                onError: (err) =>
-                                  showToast(getUserFriendlyError(err), { severity: 'error' }),
-                              },
-                            )
-                          }}
-                        >
-                          <PersonRemoveIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              if (!member.userId) return
+                              const nextRole =
+                                member.role === 'LEADER' ? ('MEMBER' as const) : ('LEADER' as const)
+                              changeMemberRole(
+                                { id, userId: member.userId, body: { role: nextRole } },
+                                {
+                                  onSuccess: () =>
+                                    showToast('Rol güncellendi.', { severity: 'success' }),
+                                  onError: (err) =>
+                                    showToast(getUserFriendlyError(err), { severity: 'error' }),
+                                },
+                              )
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {canDeleteTeamMember && (
+                        <Tooltip title={t('teams.removeMemberButton')}>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => {
+                              if (!member.userId) return
+                              removeMember(
+                                { id, userId: member.userId },
+                                {
+                                  onSuccess: () =>
+                                    showToast('Üye çıkarıldı.', { severity: 'success' }),
+                                  onError: (err) =>
+                                    showToast(getUserFriendlyError(err), { severity: 'error' }),
+                                },
+                              )
+                            }}
+                          >
+                            <PersonRemoveIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         ) : (
