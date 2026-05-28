@@ -39,6 +39,7 @@ class ScreenDashboard extends StatelessWidget {
         body: ListView(
           padding: const EdgeInsets.all(16),
           children: const [
+            _TenantInfoSection(),
             SizedBox(height: 16),
             SectionEmployee(),
             SizedBox(height: 12),
@@ -84,6 +85,47 @@ class _DashboardHeaderActions extends StatelessWidget {
                   },
           ),
         );
+      },
+    );
+  }
+}
+
+class _TenantInfoSection extends StatelessWidget {
+  const _TenantInfoSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CubitDashboard, StateDashboard>(
+      builder: (context, state) {
+        if (state is StateDashboardLoaded && state.tenant != null) {
+          final tenant = state.tenant!;
+          return Card(
+            elevation: 2,
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    tenant.name ?? context.t.dashboard.title,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  if (tenant.description?.isNotEmpty == true) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      tenant.description!,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
       },
     );
   }

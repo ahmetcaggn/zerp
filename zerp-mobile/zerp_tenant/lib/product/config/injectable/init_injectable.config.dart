@@ -67,6 +67,7 @@ import '../../service/auth/auth_service.dart' as _i238;
 import '../../service/auth/auth_storage_service.dart' as _i40;
 import '../../service/employee/employee_service.dart' as _i93;
 import '../../service/sale/sale_service.dart' as _i16;
+import '../../service/tenant/tenant_service.dart' as _i105;
 import '../../service/user/permission_service.dart' as _i545;
 import '../../service/user/username_service.dart' as _i868;
 import '../../storage/operator/auth_claims.operator.dart' as _i301;
@@ -170,6 +171,14 @@ extension GetItInjectableX on _i174.GetIt {
         cubitAuth: gh<_i200.CubitAuth>(),
       ),
     );
+    gh.lazySingleton<_i105.TenantService>(
+      () => _i105.TenantService(
+        invoker: gh<_i1073.ApiNetworkInvoker>(),
+        authStorageService: gh<_i40.AuthStorageService>(),
+        cubitError: gh<_i139.CubitError>(),
+        cubitAuth: gh<_i200.CubitAuth>(),
+      ),
+    );
     gh.lazySingleton<_i545.PermissionService>(
       () => _i545.PermissionService(
         invoker: gh<_i1073.ApiNetworkInvoker>(),
@@ -208,6 +217,17 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i129.CubitSectionEmployee>(
       () => _i129.CubitSectionEmployee(gh<_i93.EmployeeService>()),
+    );
+    gh.lazySingleton<_i268.CubitDashboard>(
+      () => _i268.CubitDashboard(
+        gh<_i129.CubitSectionEmployee>(),
+        gh<_i964.CubitSectionMenu>(),
+        gh<_i201.CubitSectionSale>(),
+        gh<_i102.CubitSectionStock>(),
+        gh<_i6.CubitSectionStore>(),
+        gh<_i40.AuthStorageService>(),
+        gh<_i105.TenantService>(),
+      ),
     );
     gh.factoryParam<
       _i713.CubitCreatePermission,
@@ -265,15 +285,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i229.CubitEmployeeUsername>(
       () => _i229.CubitEmployeeUsername(gh<_i868.UsernameService>()),
-    );
-    gh.lazySingleton<_i268.CubitDashboard>(
-      () => _i268.CubitDashboard(
-        gh<_i129.CubitSectionEmployee>(),
-        gh<_i964.CubitSectionMenu>(),
-        gh<_i201.CubitSectionSale>(),
-        gh<_i102.CubitSectionStock>(),
-        gh<_i6.CubitSectionStore>(),
-      ),
     );
     return this;
   }

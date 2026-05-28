@@ -138,6 +138,7 @@ final class AuthStorageService with LoggerMixin<AuthStorageService> {
     // mandatory claims from access token
     final sub = accessClaims['sub'];
     final preferredUsername = accessClaims['preferred_username'];
+    final tenantId = accessClaims['tenant_id'];
     if (sub == null || preferredUsername == null) {
       throw Exception(
         'Missing mandatory claims in access token. '
@@ -152,6 +153,13 @@ final class AuthStorageService with LoggerMixin<AuthStorageService> {
         'preferred_username: ${preferredUsername.runtimeType}',
       );
     }
+    if (tenantId == null || tenantId is! String) {
+      throw Exception(
+        'Missing or invalid tenant_id claim in access token. '
+        'Expected tenant_id to be a string. Got tenant_id: $tenantId, '
+        'type: ${tenantId.runtimeType}',
+      );
+    }
 
     // optional claims from access token
     final firstName = accessClaims['first_name'];
@@ -163,6 +171,7 @@ final class AuthStorageService with LoggerMixin<AuthStorageService> {
       idTokenClaims: idClaims ?? {},
       sub: sub,
       preferredUsername: preferredUsername,
+      tenantId: tenantId,
       firstName: firstName?.toString(),
       lastName: lastName?.toString(),
     );

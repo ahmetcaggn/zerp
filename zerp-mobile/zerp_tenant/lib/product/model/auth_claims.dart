@@ -11,6 +11,7 @@ abstract class AuthClaims with _$AuthClaims {
     required Map<String, dynamic> idTokenClaims,
     required String sub,
     required String preferredUsername,
+    required String tenantId,
     String? firstName,
     String? lastName,
   }) = _AuthClaims;
