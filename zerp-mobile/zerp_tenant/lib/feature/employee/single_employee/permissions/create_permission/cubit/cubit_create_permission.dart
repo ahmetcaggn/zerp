@@ -27,9 +27,19 @@ class CubitCreatePermission extends BaseCubit<StateCreatePermission>
   Future<void> _loadActions() async {
     try {
       final res = await _permissionService.getPermissionActions();
+      final filteredData = <String, List<PermissionTargetType>>{};
+      for (final entry in res.data.entries) {
+        final filteredList = entry.value
+            .where((type) => type != PermissionTargetType.TENANT_ROOT)
+            .toList();
+        if (filteredList.isNotEmpty) {
+          filteredData[entry.key] = filteredList;
+        }
+      }
+
       emit(
         StateCreatePermissionLoaded(
-          actionTargetTypes: res.data,
+          actionTargetTypes: filteredData,
         ),
       );
     } on Object catch (e, s) {

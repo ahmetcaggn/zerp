@@ -5,7 +5,6 @@ import 'package:openapi_user/api.dart';
 import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/cubit/base_cubit.dart';
 import 'package:zerp_tenant/product/service/user/permission_service.dart';
-import 'package:zerp_tenant/product/util/constants.dart';
 
 typedef PermissionTargetType =
     ApiResponseMapPermissionActionListPermissionTargetTypeDataEnum;
@@ -25,17 +24,9 @@ class CubitCreatePermissionTarget extends BaseCubit<StateCreatePermissionTarget>
     List<PermissionTargetType> hierarchy;
     final index = allowedTargetTypes.indexOf(selectedTargetType);
     if (index != -1) {
-      final fullHierarchy = allowedTargetTypes.sublist(index).reversed.toList();
-      hierarchy = fullHierarchy
-          .where((type) => type != PermissionTargetType.TENANT_ROOT)
-          .toList();
+      hierarchy = allowedTargetTypes.sublist(index).reversed.toList();
     } else {
       hierarchy = [selectedTargetType];
-    }
-
-    String? finalTargetId;
-    if (selectedTargetType == PermissionTargetType.TENANT_ROOT) {
-      finalTargetId = kTenantRootId;
     }
 
     emit(
@@ -44,14 +35,11 @@ class CubitCreatePermissionTarget extends BaseCubit<StateCreatePermissionTarget>
         hierarchy: hierarchy,
         selectedIds: {},
         selectedTitles: {},
-        finalTargetId: finalTargetId,
         loadingLevels: {},
       ),
     );
 
-    if (selectedTargetType != PermissionTargetType.TENANT_ROOT) {
-      unawaited(_checkAutoSelect(0));
-    }
+    unawaited(_checkAutoSelect(0));
   }
 
   Future<void> _checkAutoSelect(int index) async {
