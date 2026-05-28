@@ -130,6 +130,9 @@
       "orderSavedSuccess": "Order Saved Successfully",
       "orderNotes": "Order Notes",
       "each": "each",
+      "orderTab": "Order $n",
+      "newOrder": "New Order",
+      "hasUnsavedOrders": "You have unsaved changes in other orders.",
       "importDialog": {
         "alignQr": "Align QR Code within the bounds",
         "title": "Import Customer Order",

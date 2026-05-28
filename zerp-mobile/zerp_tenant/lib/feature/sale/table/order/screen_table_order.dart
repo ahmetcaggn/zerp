@@ -77,13 +77,15 @@ class _ViewState extends State<_View> {
     return BlocConsumer<CubitTableOrder, StateTableOrder>(
       listener: (context, state) {
         if (state is StateTableOrderLoaded) {
-          if (_noteController.text != state.note) {
-            _noteController.text = state.note ?? '';
+          final currentNote = state.currentOrder.note ?? '';
+          if (_noteController.text != currentNote) {
+            _noteController.text = currentNote;
           }
         }
       },
       builder: (context, state) {
-        final hasChanges = context.read<CubitTableOrder>().hasUnsavedChanges;
+        final hasChanges =
+            state is StateTableOrderLoaded && state.hasUnsavedChanges;
 
         return PopScope(
           canPop: _forcePop || !hasChanges,
@@ -99,36 +101,6 @@ class _ViewState extends State<_View> {
           },
           child: AppScaffold(
             title: '${widget.tableName} - ${context.t.sale.order.title}',
-            actions: [
-              if (state is StateTableOrderLoaded && state.existingOrder != null)
-                IconButton(
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    color: Colors.redAccent,
-                  ),
-                  onPressed: () async {
-                    final confirm = await CancelOrderConfirmDialog.show(
-                      context,
-                    );
-                    if (confirm == true) {
-                      if (!context.mounted) return;
-                      final messenger = ScaffoldMessenger.of(context);
-                      final cancelMsg = context.t.sale.order.orderCancelled;
-                      final success = await context
-                          .read<CubitTableOrder>()
-                          .cancelOrder(
-                            shopId: widget.shopId,
-                            tableId: widget.tableId,
-                          );
-                      if (mounted && success) {
-                        messenger.showSnackBar(
-                          SnackBar(content: Text(cancelMsg)),
-                        );
-                      }
-                    }
-                  },
-                ),
-            ],
             body: switch (state) {
               StateTableOrderInitial() ||
               StateTableOrderLoading() => const Center(
@@ -210,20 +182,28 @@ final class _Loaded extends StatelessWidget {
   Widget build(BuildContext context) {
     final categories = state.categories;
     final menuItems = state.menuItems;
-    final cartItems = state.cartItems;
     final selectedCategoryId = state.selectedCategoryId;
     final isSaving = state.isSaving;
     final isImporting = state.isImporting;
 
+    final currentOrder = state.currentOrder;
+    final cartItems = currentOrder.cartItems;
+
     return Stack(
       children: [
         Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _OrderTabBar(state: state, tableId: tableId),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  _ImportSection(shopId: shopId, tableId: tableId),
+                  _OrderHeader(
+                    shopId: shopId,
+                    tableId: tableId,
+                    currentOrder: currentOrder,
+                  ),
                   const SizedBox(height: 16),
                   if (cartItems.isEmpty)
                     _emptyCartIndicator(context)
@@ -275,32 +255,25 @@ final class _Loaded extends StatelessWidget {
   }
 }
 
-final class _ImportSection extends StatefulWidget {
-  const _ImportSection({
-    required this.shopId,
-    required this.tableId,
-  });
+class _OrderTabBar extends StatelessWidget {
+  const _OrderTabBar({required this.state, required this.tableId});
 
-  final String shopId;
+  final StateTableOrderLoaded state;
   final String tableId;
 
-  @override
-  State<_ImportSection> createState() => _ImportSectionState();
-}
-
-class _ImportSectionState extends State<_ImportSection> {
-  Future<void> _showScanOrImportDialog(BuildContext context) async {
+  Future<void> _scanQrForNewOrder(BuildContext context) async {
     final code = await ImportCodeDialog.show(context);
-
     if (code != null && code.isNotEmpty) {
       if (!context.mounted) return;
       final messenger = ScaffoldMessenger.of(context);
       final strings = context.t;
-      final success = await context.read<CubitTableOrder>().importFromCode(
-        code: code,
-        tableId: widget.tableId,
-      );
-      if (mounted) {
+      final success = await context
+          .read<CubitTableOrder>()
+          .importFromCodeAsNewOrder(
+            code: code,
+            tableId: tableId,
+          );
+      if (context.mounted) {
         messenger.showSnackBar(
           SnackBar(
             content: Text(
@@ -317,47 +290,150 @@ class _ImportSectionState extends State<_ImportSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: Theme.of(
-        context,
-      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+    return Container(
+      height: 56,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            offset: const Offset(0, 2),
+            blurRadius: 4,
+          ),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 8,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              context.t.sale.order.importOrder,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: state.orders.length + 2, // Orders + QR Button + Add Button
+        itemBuilder: (context, index) {
+          if (index < state.orders.length) {
+            final isSelected = index == state.selectedOrderIndex;
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ChoiceChip(
+                label: Text(context.t.sale.order.orderTab(n: index + 1)),
+                selected: isSelected,
+                onSelected: (_) =>
+                    context.read<CubitTableOrder>().selectOrder(index),
               ),
-            ),
-            ElevatedButton.icon(
-              onPressed: () => _showScanOrImportDialog(context),
-              icon: const Icon(
-                Icons.qr_code_scanner,
+            );
+          } else if (index == state.orders.length) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ActionChip(
+                avatar: const Icon(Icons.qr_code_scanner, size: 18),
+                label: Text(context.t.sale.order.newOrder),
+                onPressed: state.hasUnsavedChanges
+                    ? () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              context.t.sale.order.hasUnsavedOrders,
+                            ),
+                          ),
+                        );
+                      }
+                    : () => _scanQrForNewOrder(context),
               ),
-              label: Text(
-                context.t.sale.order.scanQr,
-              ),
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    20,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+            );
+          } else {
+            return ActionChip(
+              avatar: const Icon(Icons.add, size: 18),
+              label: Text(context.t.sale.order.newOrder),
+              onPressed: state.hasUnsavedChanges
+                  ? () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            context.t.sale.order.hasUnsavedOrders,
+                          ),
+                        ),
+                      );
+                    }
+                  : () => context.read<CubitTableOrder>().addNewOrder(),
+            );
+          }
+        },
       ),
+    );
+  }
+}
+
+class _OrderHeader extends StatelessWidget {
+  const _OrderHeader({
+    required this.shopId,
+    required this.tableId,
+    required this.currentOrder,
+  });
+
+  final String shopId;
+  final String tableId;
+  final OrderEntry currentOrder;
+
+  Future<void> _scanQrToAppend(BuildContext context) async {
+    final code = await ImportCodeDialog.show(context);
+    if (code != null && code.isNotEmpty) {
+      if (!context.mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      final strings = context.t;
+      final success = await context
+          .read<CubitTableOrder>()
+          .importFromCodeToCurrentOrder(
+            code: code,
+            tableId: tableId,
+          );
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              success
+                  ? strings.sale.order.qrImportSuccess
+                  : strings.sale.order.qrImportError,
+            ),
+            backgroundColor: success ? Colors.green : Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _cancelCurrentOrder(BuildContext context) async {
+    final confirm = await CancelOrderConfirmDialog.show(context);
+    if (confirm == true) {
+      if (!context.mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      final cancelMsg = context.t.sale.order.orderCancelled;
+      final success = await context.read<CubitTableOrder>().cancelOrder(
+        shopId: shopId,
+        tableId: tableId,
+      );
+      if (context.mounted && success) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(cancelMsg)),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        IconButton(
+          tooltip: context.t.sale.order.importOrder,
+          icon: const Icon(Icons.qr_code_scanner),
+          color: Theme.of(context).colorScheme.primary,
+          onPressed: () => _scanQrToAppend(context),
+        ),
+        IconButton(
+          tooltip: context.t.sale.order.cancelDialog.title,
+          icon: const Icon(Icons.delete_outline),
+          color: Colors.redAccent,
+          onPressed: () => _cancelCurrentOrder(context),
+        ),
+      ],
     );
   }
 }

@@ -15,50 +15,7 @@ class CubitTableOrder extends Cubit<StateTableOrder>
   bool get hasUnsavedChanges {
     final currentState = state;
     if (currentState is! StateTableOrderLoaded) return false;
-
-    final existingOrder = currentState.existingOrder;
-    final cartItems = currentState.cartItems;
-    final currentNote = currentState.note ?? '';
-
-    if (existingOrder == null) {
-      return cartItems.isNotEmpty || currentNote.isNotEmpty;
-    }
-
-    // Compare notes
-    final originalNote = existingOrder.note ?? '';
-    if (currentNote != originalNote) return true;
-
-    // Compare items length
-    final originalItems = existingOrder.items;
-    if (cartItems.length != originalItems.length) return true;
-
-    // Compare each item
-    for (final cartItem in cartItems) {
-      final originalItemIndex = originalItems.indexWhere(
-        (it) => it.menuItemId == cartItem.menuItemId,
-      );
-      if (originalItemIndex == -1) return true;
-
-      final originalItem = originalItems[originalItemIndex];
-      if (cartItem.quantity != originalItem.quantity) return true;
-      if ((cartItem.notes ?? '') != (originalItem.notes ?? '')) return true;
-
-      // Compare selected extra option IDs
-      final originalExtraIds =
-          originalItem.selectedExtraOptions
-              .map((opt) => opt.extraOptionId ?? '')
-              .toList()
-            ..sort();
-      final currentExtraIds = List<String>.from(cartItem.selectedExtraOptionIds)
-        ..sort();
-
-      if (originalExtraIds.length != currentExtraIds.length) return true;
-      for (var i = 0; i < originalExtraIds.length; i++) {
-        if (originalExtraIds[i] != currentExtraIds[i]) return true;
-      }
-    }
-
-    return false;
+    return currentState.hasUnsavedChanges;
   }
 
   Future<void> init({
@@ -73,35 +30,44 @@ class CubitTableOrder extends Cubit<StateTableOrder>
       );
       final menuItemsRes = await _saleService.getMenuItems(shopId: shopId);
 
-      final existingOrder = activeOrders.isNotEmpty ? activeOrders.first : null;
-      final cartItems = <CartItem>[];
-      String? note;
+      final orders = <OrderEntry>[];
 
-      if (existingOrder != null) {
-        note = existingOrder.note;
-        for (final item in existingOrder.items) {
-          cartItems.add(
-            CartItem(
-              menuItemId: item.menuItemId ?? '',
-              name: item.menuItemName ?? '',
-              quantity: item.quantity ?? 1,
-              unitPrice: item.unitPrice ?? 0,
-              notes: item.notes,
-              selectedExtraOptionIds: item.selectedExtraOptions
-                  .map((opt) => opt.extraOptionId ?? '')
-                  .toList(),
+      if (activeOrders.isNotEmpty) {
+        for (final existingOrder in activeOrders) {
+          final cartItems = <CartItem>[];
+          final note = existingOrder.note;
+          for (final item in existingOrder.items) {
+            cartItems.add(
+              CartItem(
+                menuItemId: item.menuItemId ?? '',
+                name: item.menuItemName ?? '',
+                quantity: item.quantity ?? 1,
+                unitPrice: item.unitPrice ?? 0,
+                notes: item.notes,
+                selectedExtraOptionIds: item.selectedExtraOptions
+                    .map((opt) => opt.extraOptionId ?? '')
+                    .toList(),
+              ),
+            );
+          }
+          orders.add(
+            OrderEntry(
+              cartItems: cartItems,
+              note: note,
+              existingOrder: existingOrder,
             ),
           );
         }
+      } else {
+        orders.add(const OrderEntry(cartItems: []));
       }
 
       emit(
         StateTableOrderLoaded(
           categories: categoriesRes.items,
           menuItems: menuItemsRes.items,
-          cartItems: cartItems,
-          existingOrder: existingOrder,
-          note: note,
+          orders: orders,
+          selectedOrderIndex: 0,
         ),
       );
     } on Object catch (e) {
@@ -124,10 +90,63 @@ class CubitTableOrder extends Cubit<StateTableOrder>
     }
   }
 
+  void selectOrder(int index) {
+    final currentState = state;
+    if (currentState is StateTableOrderLoaded) {
+      if (index >= 0 && index < currentState.orders.length) {
+        emit(currentState.copyWith(selectedOrderIndex: index));
+      }
+    }
+  }
+
+  void addNewOrder() {
+    final currentState = state;
+    if (currentState is StateTableOrderLoaded) {
+      final updatedOrders = List<OrderEntry>.from(currentState.orders)
+        ..add(const OrderEntry(cartItems: []));
+      emit(
+        currentState.copyWith(
+          orders: updatedOrders,
+          selectedOrderIndex: updatedOrders.length - 1,
+        ),
+      );
+    }
+  }
+
+  void removeNewEmptyOrder(int index) {
+    final currentState = state;
+    if (currentState is StateTableOrderLoaded) {
+      if (index >= 0 && index < currentState.orders.length) {
+        final order = currentState.orders[index];
+        if (order.existingOrder == null &&
+            order.cartItems.isEmpty &&
+            (order.note == null || order.note!.isEmpty)) {
+          final updatedOrders = List<OrderEntry>.from(currentState.orders)
+            ..removeAt(index);
+          var newIndex = currentState.selectedOrderIndex;
+          if (newIndex >= index && newIndex > 0) {
+            newIndex--;
+          }
+          if (updatedOrders.isEmpty) {
+            updatedOrders.add(const OrderEntry(cartItems: []));
+            newIndex = 0;
+          }
+          emit(
+            currentState.copyWith(
+              orders: updatedOrders,
+              selectedOrderIndex: newIndex,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   void addMenuItemToOrder(MenuItemDTO menuItem) {
     final currentState = state;
     if (currentState is StateTableOrderLoaded) {
-      final updatedCart = List<CartItem>.from(currentState.cartItems);
+      final currentOrder = currentState.currentOrder;
+      final updatedCart = List<CartItem>.from(currentOrder.cartItems);
       final index = updatedCart.indexWhere(
         (item) => item.menuItemId == menuItem.id,
       );
@@ -148,14 +167,20 @@ class CubitTableOrder extends Cubit<StateTableOrder>
         );
       }
 
-      emit(currentState.copyWith(cartItems: updatedCart));
+      final updatedOrders = List<OrderEntry>.from(currentState.orders);
+      updatedOrders[currentState.selectedOrderIndex] = currentOrder.copyWith(
+        cartItems: updatedCart,
+      );
+
+      emit(currentState.copyWith(orders: updatedOrders));
     }
   }
 
   void updateCartItemQuantity(String menuItemId, int delta) {
     final currentState = state;
     if (currentState is StateTableOrderLoaded) {
-      final updatedCart = List<CartItem>.from(currentState.cartItems);
+      final currentOrder = currentState.currentOrder;
+      final updatedCart = List<CartItem>.from(currentOrder.cartItems);
       final index = updatedCart.indexWhere(
         (item) => item.menuItemId == menuItemId,
       );
@@ -168,7 +193,11 @@ class CubitTableOrder extends Cubit<StateTableOrder>
         } else {
           updatedCart[index] = existingItem.copyWith(quantity: newQuantity);
         }
-        emit(currentState.copyWith(cartItems: updatedCart));
+        final updatedOrders = List<OrderEntry>.from(currentState.orders);
+        updatedOrders[currentState.selectedOrderIndex] = currentOrder.copyWith(
+          cartItems: updatedCart,
+        );
+        emit(currentState.copyWith(orders: updatedOrders));
       }
     }
   }
@@ -176,11 +205,14 @@ class CubitTableOrder extends Cubit<StateTableOrder>
   void updateOrderNote(String note) {
     final currentState = state;
     if (currentState is StateTableOrderLoaded) {
-      emit(currentState.copyWith(note: note));
+      final updatedOrders = List<OrderEntry>.from(currentState.orders);
+      updatedOrders[currentState.selectedOrderIndex] = currentState.currentOrder
+          .copyWith(note: note);
+      emit(currentState.copyWith(orders: updatedOrders));
     }
   }
 
-  Future<bool> importFromCode({
+  Future<bool> importFromCodeAsNewOrder({
     required String code,
     required String tableId,
   }) async {
@@ -192,7 +224,73 @@ class CubitTableOrder extends Cubit<StateTableOrder>
           code: code,
           tableId: tableId,
         );
-        final updatedCart = List<CartItem>.from(currentState.cartItems);
+        final cartItems = <CartItem>[];
+
+        for (final item in preview.items) {
+          cartItems.add(
+            CartItem(
+              menuItemId: item.menuItemId ?? '',
+              name: item.menuItemName ?? '',
+              quantity: item.quantity ?? 1,
+              unitPrice: item.unitPrice ?? 0,
+              notes: item.notes,
+            ),
+          );
+        }
+
+        final updatedOrders = List<OrderEntry>.from(currentState.orders);
+
+        // If the current order is completely empty (no items, no note,
+        // no existing order), we can just replace it.
+        // Otherwise, add a new order tab.
+        var newIndex = updatedOrders.length;
+        if (updatedOrders.length == 1 &&
+            updatedOrders[0].cartItems.isEmpty &&
+            (updatedOrders[0].note == null || updatedOrders[0].note!.isEmpty) &&
+            updatedOrders[0].existingOrder == null) {
+          updatedOrders[0] = OrderEntry(
+            cartItems: cartItems,
+            note: preview.note,
+          );
+          newIndex = 0;
+        } else {
+          updatedOrders.add(
+            OrderEntry(cartItems: cartItems, note: preview.note),
+          );
+        }
+
+        emit(
+          currentState.copyWith(
+            orders: updatedOrders,
+            selectedOrderIndex: newIndex,
+            isImporting: false,
+          ),
+        );
+        return true;
+      } on Object catch (e) {
+        log.severe('Failed to import public cart order: $e');
+        emit(currentState.copyWith(isImporting: false));
+        return false;
+      }
+    }
+    return false;
+  }
+
+  Future<bool> importFromCodeToCurrentOrder({
+    required String code,
+    required String tableId,
+  }) async {
+    final currentState = state;
+    if (currentState is StateTableOrderLoaded) {
+      emit(currentState.copyWith(isImporting: true));
+      try {
+        final preview = await _saleService.previewPublicCartOrder(
+          code: code,
+          tableId: tableId,
+        );
+
+        final currentOrder = currentState.currentOrder;
+        final updatedCart = List<CartItem>.from(currentOrder.cartItems);
 
         for (final item in preview.items) {
           final index = updatedCart.indexWhere(
@@ -216,7 +314,7 @@ class CubitTableOrder extends Cubit<StateTableOrder>
           }
         }
 
-        var newNote = currentState.note;
+        var newNote = currentOrder.note;
         if (preview.note != null && preview.note!.isNotEmpty) {
           if (newNote == null || newNote.isEmpty) {
             newNote = preview.note;
@@ -225,16 +323,21 @@ class CubitTableOrder extends Cubit<StateTableOrder>
           }
         }
 
+        final updatedOrders = List<OrderEntry>.from(currentState.orders);
+        updatedOrders[currentState.selectedOrderIndex] = currentOrder.copyWith(
+          cartItems: updatedCart,
+          note: newNote,
+        );
+
         emit(
           currentState.copyWith(
-            cartItems: updatedCart,
-            note: newNote,
+            orders: updatedOrders,
             isImporting: false,
           ),
         );
         return true;
       } on Object catch (e) {
-        log.severe('Failed to import public cart order: $e');
+        log.severe('Failed to import public cart order to current order: $e');
         emit(currentState.copyWith(isImporting: false));
         return false;
       }
@@ -250,7 +353,8 @@ class CubitTableOrder extends Cubit<StateTableOrder>
     if (currentState is StateTableOrderLoaded) {
       emit(currentState.copyWith(isSaving: true));
       try {
-        final items = currentState.cartItems.map((item) {
+        final currentOrder = currentState.currentOrder;
+        final items = currentOrder.cartItems.map((item) {
           return TableOrderItemCreateDTO(
             menuItemId: item.menuItemId,
             quantity: item.quantity,
@@ -259,20 +363,20 @@ class CubitTableOrder extends Cubit<StateTableOrder>
           );
         }).toList();
 
-        if (currentState.existingOrder != null) {
+        if (currentOrder.existingOrder != null) {
           final updateDTO = TableOrderUpdateDTO(
             status: TableOrderUpdateDTOStatusEnum.OPEN,
-            note: currentState.note,
+            note: currentOrder.note,
             items: items,
           );
           await _saleService.updateTableOrder(
-            orderId: currentState.existingOrder!.id ?? '',
+            orderId: currentOrder.existingOrder!.id ?? '',
             updateDTO: updateDTO,
           );
         } else {
           final createDTO = TableOrderCreateDTO(
             tableId: tableId,
-            note: currentState.note,
+            note: currentOrder.note,
             items: items,
           );
           await _saleService.createTableOrder(createDTO: createDTO);
@@ -295,22 +399,71 @@ class CubitTableOrder extends Cubit<StateTableOrder>
     required String tableId,
   }) async {
     final currentState = state;
-    if (currentState is StateTableOrderLoaded &&
-        currentState.existingOrder != null) {
-      emit(currentState.copyWith(isSaving: true));
-      try {
-        await _saleService.cancelTableOrder(
-          orderId: currentState.existingOrder!.id ?? '',
+    if (currentState is StateTableOrderLoaded) {
+      final currentOrder = currentState.currentOrder;
+      if (currentOrder.existingOrder != null) {
+        emit(currentState.copyWith(isSaving: true));
+        try {
+          await _saleService.cancelTableOrder(
+            orderId: currentOrder.existingOrder!.id ?? '',
+          );
+          await init(shopId: shopId, tableId: tableId);
+          return true;
+        } on Object catch (e) {
+          log.severe('Failed to cancel order: $e');
+          emit(currentState.copyWith(isSaving: false));
+          return false;
+        }
+      } else {
+        // If it's a new unsaved order, just remove it locally
+        final updatedOrders = List<OrderEntry>.from(currentState.orders)
+          ..removeAt(currentState.selectedOrderIndex);
+        var newIndex = currentState.selectedOrderIndex;
+        if (newIndex >= updatedOrders.length && newIndex > 0) {
+          newIndex--;
+        }
+        if (updatedOrders.isEmpty) {
+          updatedOrders.add(const OrderEntry(cartItems: []));
+          newIndex = 0;
+        }
+        emit(
+          currentState.copyWith(
+            orders: updatedOrders,
+            selectedOrderIndex: newIndex,
+          ),
         );
-        await init(shopId: shopId, tableId: tableId);
         return true;
-      } on Object catch (e) {
-        log.severe('Failed to cancel order: $e');
-        emit(currentState.copyWith(isSaving: false));
-        return false;
       }
     }
     return false;
+  }
+}
+
+class OrderEntry {
+  const OrderEntry({
+    required this.cartItems,
+    this.existingOrder,
+    this.note,
+  });
+
+  final List<CartItem> cartItems;
+  final TableOrderDTO? existingOrder;
+  final String? note;
+
+  OrderEntry copyWith({
+    List<CartItem>? cartItems,
+    TableOrderDTO? existingOrder,
+    bool clearExistingOrder = false,
+    String? note,
+    bool clearNote = false,
+  }) {
+    return OrderEntry(
+      cartItems: cartItems ?? this.cartItems,
+      existingOrder: clearExistingOrder
+          ? null
+          : (existingOrder ?? this.existingOrder),
+      note: clearNote ? null : (note ?? this.note),
+    );
   }
 }
 
@@ -366,34 +519,107 @@ final class StateTableOrderLoading extends StateTableOrder {
 }
 
 final class StateTableOrderLoaded extends StateTableOrder {
-  const StateTableOrderLoaded({
+  StateTableOrderLoaded({
     required this.categories,
     required this.menuItems,
-    required this.cartItems,
-    this.existingOrder,
-    this.note,
+    required this.orders,
+    required int selectedOrderIndex,
     this.isSaving = false,
     this.isImporting = false,
     this.selectedCategoryId,
-  });
+  }) : selectedOrderIndex = orders.isEmpty
+           ? 0
+           : selectedOrderIndex.clamp(0, orders.length - 1);
 
   final List<MenuCategoryDTO> categories;
   final List<MenuItemDTO> menuItems;
-  final List<CartItem> cartItems;
-  final TableOrderDTO? existingOrder;
-  final String? note;
+  final List<OrderEntry> orders;
+  final int selectedOrderIndex;
   final bool isSaving;
   final bool isImporting;
   final String? selectedCategoryId;
 
+  OrderEntry get currentOrder {
+    if (orders.isEmpty) {
+      return const OrderEntry(cartItems: []);
+    }
+    final safeIndex = selectedOrderIndex.clamp(0, orders.length - 1);
+    return orders[safeIndex];
+  }
+
+  bool get hasUnsavedChanges {
+    // If there is exactly one order and it is completely empty and new,
+    // it is not an unsaved change.
+    // This allows popping from a newly opened empty table without a discard
+    // dialog.
+    if (orders.length == 1) {
+      final order = orders[0];
+      if (order.existingOrder == null &&
+          order.cartItems.isEmpty &&
+          (order.note == null || order.note!.isEmpty)) {
+        return false;
+      }
+    }
+
+    for (final orderEntry in orders) {
+      if (_hasOrderChanged(orderEntry)) return true;
+    }
+    return false;
+  }
+
+  bool _hasOrderChanged(OrderEntry orderEntry) {
+    final existingOrder = orderEntry.existingOrder;
+    final cartItems = orderEntry.cartItems;
+    final currentNote = orderEntry.note ?? '';
+
+    if (existingOrder == null) {
+      // If it's a new order (and not caught by the single-empty-order
+      // check above), it is considered an unsaved change.
+      return true;
+    }
+
+    // Compare notes
+    final originalNote = existingOrder.note ?? '';
+    if (currentNote != originalNote) return true;
+
+    // Compare items length
+    final originalItems = existingOrder.items;
+    if (cartItems.length != originalItems.length) return true;
+
+    // Compare each item
+    for (final cartItem in cartItems) {
+      final originalItemIndex = originalItems.indexWhere(
+        (it) => it.menuItemId == cartItem.menuItemId,
+      );
+      if (originalItemIndex == -1) return true;
+
+      final originalItem = originalItems[originalItemIndex];
+      if (cartItem.quantity != originalItem.quantity) return true;
+      if ((cartItem.notes ?? '') != (originalItem.notes ?? '')) return true;
+
+      // Compare selected extra option IDs
+      final originalExtraIds =
+          originalItem.selectedExtraOptions
+              .map((opt) => opt.extraOptionId ?? '')
+              .toList()
+            ..sort();
+      final currentExtraIds = List<String>.from(cartItem.selectedExtraOptionIds)
+        ..sort();
+
+      if (originalExtraIds.length != currentExtraIds.length) return true;
+      for (var i = 0; i < originalExtraIds.length; i++) {
+        if (originalExtraIds[i] != currentExtraIds[i]) return true;
+      }
+    }
+
+    return false;
+  }
+
   StateTableOrderLoaded copyWith({
     List<MenuCategoryDTO>? categories,
     List<MenuItemDTO>? menuItems,
-    List<CartItem>? cartItems,
-    TableOrderDTO? existingOrder,
-    bool clearExistingOrder = false,
-    String? note,
-    bool clearNote = false,
+    List<OrderEntry>? orders,
+    int? selectedOrderIndex,
     bool? isSaving,
     bool? isImporting,
     String? selectedCategoryId,
@@ -402,11 +628,8 @@ final class StateTableOrderLoaded extends StateTableOrder {
     return StateTableOrderLoaded(
       categories: categories ?? this.categories,
       menuItems: menuItems ?? this.menuItems,
-      cartItems: cartItems ?? this.cartItems,
-      existingOrder: clearExistingOrder
-          ? null
-          : (existingOrder ?? this.existingOrder),
-      note: clearNote ? null : (note ?? this.note),
+      orders: orders ?? this.orders,
+      selectedOrderIndex: selectedOrderIndex ?? this.selectedOrderIndex,
       isSaving: isSaving ?? this.isSaving,
       isImporting: isImporting ?? this.isImporting,
       selectedCategoryId: clearSelectedCategoryId

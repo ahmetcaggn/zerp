@@ -130,6 +130,9 @@
       "orderSavedSuccess": "Sipariş Başarıyla Kaydedildi",
       "orderNotes": "Sipariş Notları",
       "each": "adet",
+      "orderTab": "Sipariş $n",
+      "newOrder": "Yeni Sipariş",
+      "hasUnsavedOrders": "Diğer siparişlerde kaydedilmemiş değişiklikler var.",
       "importDialog": {
         "alignQr": "QR kodu çerçeveye hizalayın",
         "title": "Müşteri Siparişini Aktar",
