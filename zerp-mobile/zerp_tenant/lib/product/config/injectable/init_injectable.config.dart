@@ -17,14 +17,8 @@ import 'package:injectable/injectable.dart' as _i526;
 import '../../../feature/dashboard/cubit/cubit_dashboard.dart' as _i268;
 import '../../../feature/dashboard/sections/employee_section/cubit_section_employee.dart'
     as _i129;
-import '../../../feature/dashboard/sections/menu_section/cubit_section_menu.dart'
-    as _i964;
-import '../../../feature/dashboard/sections/sale_section/cubit_section_sale.dart'
-    as _i201;
 import '../../../feature/dashboard/sections/stock_section/cubit_section_stock.dart'
     as _i102;
-import '../../../feature/dashboard/sections/store_section/cubit_section_store.dart'
-    as _i6;
 import '../../../feature/employee/create_employee/cubit/cubit_create_employee.dart'
     as _i657;
 import '../../../feature/employee/cubit/cubit_employee.dart' as _i828;
@@ -89,10 +83,7 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final serviceModule = _$ServiceModule();
     gh.factory<_i477.CubitProfile>(() => _i477.CubitProfile());
-    gh.lazySingleton<_i964.CubitSectionMenu>(() => _i964.CubitSectionMenu());
-    gh.lazySingleton<_i201.CubitSectionSale>(() => _i201.CubitSectionSale());
     gh.lazySingleton<_i102.CubitSectionStock>(() => _i102.CubitSectionStock());
-    gh.lazySingleton<_i6.CubitSectionStore>(() => _i6.CubitSectionStore());
     gh.lazySingleton<_i337.FlutterAppAuth>(() => serviceModule.appAuth);
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => serviceModule.secureStorage,
@@ -288,10 +279,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i268.CubitDashboard>(
       () => _i268.CubitDashboard(
         gh<_i129.CubitSectionEmployee>(),
-        gh<_i964.CubitSectionMenu>(),
-        gh<_i201.CubitSectionSale>(),
         gh<_i102.CubitSectionStock>(),
-        gh<_i6.CubitSectionStore>(),
+        gh<_i16.SaleService>(),
+        gh<_i829.CubitOrganizationScope>(),
       ),
     );
     gh.factory<_i782.CubitCashTables>(

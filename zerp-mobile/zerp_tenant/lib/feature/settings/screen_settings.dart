@@ -66,8 +66,9 @@ class ScreenSettings extends StatelessWidget {
                     child: Text(
                       currentApiHost,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color:
-                            theme.textTheme.bodyMedium?.color?.withAlpha(180),
+                        color: theme.textTheme.bodyMedium?.color?.withAlpha(
+                          180,
+                        ),
                       ),
                     ),
                   ),

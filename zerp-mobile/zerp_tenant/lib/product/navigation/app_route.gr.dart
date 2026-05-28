@@ -9,30 +9,30 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i22;
-import 'package:collection/collection.dart' as _i25;
-import 'package:flutter/material.dart' as _i23;
-import 'package:openapi_sale/api.dart' as _i24;
+import 'package:auto_route/auto_route.dart' as _i21;
+import 'package:collection/collection.dart' as _i24;
+import 'package:flutter/material.dart' as _i22;
+import 'package:openapi_sale/api.dart' as _i23;
 import 'package:zerp_tenant/feature/auth/view/screen_auth.dart' as _i1;
 import 'package:zerp_tenant/feature/dashboard/screen_dashboard.dart' as _i7;
 import 'package:zerp_tenant/feature/employee/create_employee/screen_create_employee.dart'
     as _i5;
-import 'package:zerp_tenant/feature/employee/cubit/cubit_employee.dart' as _i26;
+import 'package:zerp_tenant/feature/employee/cubit/cubit_employee.dart' as _i25;
 import 'package:zerp_tenant/feature/employee/screen_employee.dart' as _i9;
 import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_permission_viewer.dart'
-    as _i28;
+    as _i27;
 import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_single_employee.dart'
-    as _i29;
+    as _i28;
 import 'package:zerp_tenant/feature/employee/single_employee/edit_employee/screen_edit_employee.dart'
     as _i8;
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/create_permission/screen_create_permission.dart'
     as _i6;
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/cubit_permissions.dart'
-    as _i27;
+    as _i26;
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/screen_permissions.dart'
     as _i11;
 import 'package:zerp_tenant/feature/employee/single_employee/screen_single_employee.dart'
-    as _i17;
+    as _i16;
 import 'package:zerp_tenant/feature/menu/view/screen_menu.dart' as _i10;
 import 'package:zerp_tenant/feature/profile/permission/screen_profile_permissions.dart'
     as _i13;
@@ -40,25 +40,24 @@ import 'package:zerp_tenant/feature/profile/screen_profile.dart' as _i12;
 import 'package:zerp_tenant/feature/sale/cash/screen_cash_order.dart' as _i2;
 import 'package:zerp_tenant/feature/sale/cash/screen_cash_payment.dart' as _i3;
 import 'package:zerp_tenant/feature/sale/cash/screen_cash_tables.dart' as _i4;
-import 'package:zerp_tenant/feature/sale/screen_sale.dart' as _i14;
-import 'package:zerp_tenant/feature/sale/table/cubit/cubit_tables.dart' as _i30;
+import 'package:zerp_tenant/feature/sale/table/cubit/cubit_tables.dart' as _i29;
 import 'package:zerp_tenant/feature/sale/table/order/screen_table_order.dart'
-    as _i20;
-import 'package:zerp_tenant/feature/sale/table/screen_tables.dart' as _i21;
-import 'package:zerp_tenant/feature/settings/screen_settings.dart' as _i15;
+    as _i19;
+import 'package:zerp_tenant/feature/sale/table/screen_tables.dart' as _i20;
+import 'package:zerp_tenant/feature/settings/screen_settings.dart' as _i14;
 import 'package:zerp_tenant/feature/settings/sections/api_baseurl/screen_settings_api_baseurl.dart'
-    as _i16;
-import 'package:zerp_tenant/feature/stock/view/screen_stock.dart' as _i18;
-import 'package:zerp_tenant/feature/store/view/screen_store.dart' as _i19;
+    as _i15;
+import 'package:zerp_tenant/feature/stock/view/screen_stock.dart' as _i17;
+import 'package:zerp_tenant/feature/store/view/screen_store.dart' as _i18;
 
 /// generated route for
 /// [_i1.ScreenAuth]
-class RouteAuth extends _i22.PageRouteInfo<RouteAuthArgs> {
+class RouteAuth extends _i21.PageRouteInfo<RouteAuthArgs> {
   RouteAuth({
-    _i23.Key? key,
+    _i22.Key? key,
     _i1.AfterAuthCallback? afterAuthCallback,
     String? callerRoute,
-    List<_i22.PageRouteInfo>? children,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
          RouteAuth.name,
          args: RouteAuthArgs(
@@ -71,7 +70,7 @@ class RouteAuth extends _i22.PageRouteInfo<RouteAuthArgs> {
 
   static const String name = 'RouteAuth';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<RouteAuthArgs>(
@@ -89,7 +88,7 @@ class RouteAuth extends _i22.PageRouteInfo<RouteAuthArgs> {
 class RouteAuthArgs {
   const RouteAuthArgs({this.key, this.afterAuthCallback, this.callerRoute});
 
-  final _i23.Key? key;
+  final _i22.Key? key;
 
   final _i1.AfterAuthCallback? afterAuthCallback;
 
@@ -116,12 +115,12 @@ class RouteAuthArgs {
 
 /// generated route for
 /// [_i2.ScreenCashOrder]
-class RouteCashOrder extends _i22.PageRouteInfo<RouteCashOrderArgs> {
+class RouteCashOrder extends _i21.PageRouteInfo<RouteCashOrderArgs> {
   RouteCashOrder({
     required String tableId,
     required String tableName,
-    _i23.Key? key,
-    List<_i22.PageRouteInfo>? children,
+    _i22.Key? key,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
          RouteCashOrder.name,
          args: RouteCashOrderArgs(
@@ -134,7 +133,7 @@ class RouteCashOrder extends _i22.PageRouteInfo<RouteCashOrderArgs> {
 
   static const String name = 'RouteCashOrder';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<RouteCashOrderArgs>();
@@ -158,7 +157,7 @@ class RouteCashOrderArgs {
 
   final String tableName;
 
-  final _i23.Key? key;
+  final _i22.Key? key;
 
   @override
   String toString() {
@@ -180,12 +179,12 @@ class RouteCashOrderArgs {
 
 /// generated route for
 /// [_i3.ScreenCashPayment]
-class RouteCashPayment extends _i22.PageRouteInfo<RouteCashPaymentArgs> {
+class RouteCashPayment extends _i21.PageRouteInfo<RouteCashPaymentArgs> {
   RouteCashPayment({
-    required List<_i24.TableOrderDTO> orders,
+    required List<_i23.TableOrderDTO> orders,
     required Map<String, int> selectedQtys,
-    _i23.Key? key,
-    List<_i22.PageRouteInfo>? children,
+    _i22.Key? key,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
          RouteCashPayment.name,
          args: RouteCashPaymentArgs(
@@ -198,7 +197,7 @@ class RouteCashPayment extends _i22.PageRouteInfo<RouteCashPaymentArgs> {
 
   static const String name = 'RouteCashPayment';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<RouteCashPaymentArgs>();
@@ -218,11 +217,11 @@ class RouteCashPaymentArgs {
     this.key,
   });
 
-  final List<_i24.TableOrderDTO> orders;
+  final List<_i23.TableOrderDTO> orders;
 
   final Map<String, int> selectedQtys;
 
-  final _i23.Key? key;
+  final _i22.Key? key;
 
   @override
   String toString() {
@@ -233,11 +232,11 @@ class RouteCashPaymentArgs {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! RouteCashPaymentArgs) return false;
-    return const _i25.ListEquality<_i24.TableOrderDTO>().equals(
+    return const _i24.ListEquality<_i23.TableOrderDTO>().equals(
           orders,
           other.orders,
         ) &&
-        const _i25.MapEquality<String, int>().equals(
+        const _i24.MapEquality<String, int>().equals(
           selectedQtys,
           other.selectedQtys,
         ) &&
@@ -246,20 +245,20 @@ class RouteCashPaymentArgs {
 
   @override
   int get hashCode =>
-      const _i25.ListEquality<_i24.TableOrderDTO>().hash(orders) ^
-      const _i25.MapEquality<String, int>().hash(selectedQtys) ^
+      const _i24.ListEquality<_i23.TableOrderDTO>().hash(orders) ^
+      const _i24.MapEquality<String, int>().hash(selectedQtys) ^
       key.hashCode;
 }
 
 /// generated route for
 /// [_i4.ScreenCashTables]
-class RouteCashTables extends _i22.PageRouteInfo<void> {
-  const RouteCashTables({List<_i22.PageRouteInfo>? children})
+class RouteCashTables extends _i21.PageRouteInfo<void> {
+  const RouteCashTables({List<_i21.PageRouteInfo>? children})
     : super(RouteCashTables.name, initialChildren: children);
 
   static const String name = 'RouteCashTables';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i4.ScreenCashTables();
@@ -269,11 +268,11 @@ class RouteCashTables extends _i22.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i5.ScreenCreateEmployee]
-class RouteCreateEmployee extends _i22.PageRouteInfo<RouteCreateEmployeeArgs> {
+class RouteCreateEmployee extends _i21.PageRouteInfo<RouteCreateEmployeeArgs> {
   RouteCreateEmployee({
-    required _i26.CubitEmployee cubitEmployee,
-    _i23.Key? key,
-    List<_i22.PageRouteInfo>? children,
+    required _i25.CubitEmployee cubitEmployee,
+    _i22.Key? key,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
          RouteCreateEmployee.name,
          args: RouteCreateEmployeeArgs(cubitEmployee: cubitEmployee, key: key),
@@ -282,7 +281,7 @@ class RouteCreateEmployee extends _i22.PageRouteInfo<RouteCreateEmployeeArgs> {
 
   static const String name = 'RouteCreateEmployee';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<RouteCreateEmployeeArgs>();
@@ -297,9 +296,9 @@ class RouteCreateEmployee extends _i22.PageRouteInfo<RouteCreateEmployeeArgs> {
 class RouteCreateEmployeeArgs {
   const RouteCreateEmployeeArgs({required this.cubitEmployee, this.key});
 
-  final _i26.CubitEmployee cubitEmployee;
+  final _i25.CubitEmployee cubitEmployee;
 
-  final _i23.Key? key;
+  final _i22.Key? key;
 
   @override
   String toString() {
@@ -320,13 +319,13 @@ class RouteCreateEmployeeArgs {
 /// generated route for
 /// [_i6.ScreenCreatePermission]
 class RouteCreatePermission
-    extends _i22.PageRouteInfo<RouteCreatePermissionArgs> {
+    extends _i21.PageRouteInfo<RouteCreatePermissionArgs> {
   RouteCreatePermission({
     required String employeeId,
-    required _i27.CubitPermissions cubitPermission,
-    required _i28.CubitPermissionViewer cubitPermissionViewer,
-    _i23.Key? key,
-    List<_i22.PageRouteInfo>? children,
+    required _i26.CubitPermissions cubitPermission,
+    required _i27.CubitPermissionViewer cubitPermissionViewer,
+    _i22.Key? key,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
          RouteCreatePermission.name,
          args: RouteCreatePermissionArgs(
@@ -340,7 +339,7 @@ class RouteCreatePermission
 
   static const String name = 'RouteCreatePermission';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<RouteCreatePermissionArgs>();
@@ -364,11 +363,11 @@ class RouteCreatePermissionArgs {
 
   final String employeeId;
 
-  final _i27.CubitPermissions cubitPermission;
+  final _i26.CubitPermissions cubitPermission;
 
-  final _i28.CubitPermissionViewer cubitPermissionViewer;
+  final _i27.CubitPermissionViewer cubitPermissionViewer;
 
-  final _i23.Key? key;
+  final _i22.Key? key;
 
   @override
   String toString() {
@@ -395,13 +394,13 @@ class RouteCreatePermissionArgs {
 
 /// generated route for
 /// [_i7.ScreenDashboard]
-class RouteDashboard extends _i22.PageRouteInfo<void> {
-  const RouteDashboard({List<_i22.PageRouteInfo>? children})
+class RouteDashboard extends _i21.PageRouteInfo<void> {
+  const RouteDashboard({List<_i21.PageRouteInfo>? children})
     : super(RouteDashboard.name, initialChildren: children);
 
   static const String name = 'RouteDashboard';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i7.ScreenDashboard();
@@ -411,13 +410,13 @@ class RouteDashboard extends _i22.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i8.ScreenEditEmployee]
-class RouteEditEmployee extends _i22.PageRouteInfo<RouteEditEmployeeArgs> {
+class RouteEditEmployee extends _i21.PageRouteInfo<RouteEditEmployeeArgs> {
   RouteEditEmployee({
     required String employeeId,
-    required _i29.CubitSingleEmployee cubitSingleEmployee,
-    required _i26.CubitEmployee cubitEmployee,
-    _i23.Key? key,
-    List<_i22.PageRouteInfo>? children,
+    required _i28.CubitSingleEmployee cubitSingleEmployee,
+    required _i25.CubitEmployee cubitEmployee,
+    _i22.Key? key,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
          RouteEditEmployee.name,
          args: RouteEditEmployeeArgs(
@@ -431,7 +430,7 @@ class RouteEditEmployee extends _i22.PageRouteInfo<RouteEditEmployeeArgs> {
 
   static const String name = 'RouteEditEmployee';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<RouteEditEmployeeArgs>();
@@ -455,11 +454,11 @@ class RouteEditEmployeeArgs {
 
   final String employeeId;
 
-  final _i29.CubitSingleEmployee cubitSingleEmployee;
+  final _i28.CubitSingleEmployee cubitSingleEmployee;
 
-  final _i26.CubitEmployee cubitEmployee;
+  final _i25.CubitEmployee cubitEmployee;
 
-  final _i23.Key? key;
+  final _i22.Key? key;
 
   @override
   String toString() {
@@ -486,13 +485,13 @@ class RouteEditEmployeeArgs {
 
 /// generated route for
 /// [_i9.ScreenEmployee]
-class RouteEmployee extends _i22.PageRouteInfo<void> {
-  const RouteEmployee({List<_i22.PageRouteInfo>? children})
+class RouteEmployee extends _i21.PageRouteInfo<void> {
+  const RouteEmployee({List<_i21.PageRouteInfo>? children})
     : super(RouteEmployee.name, initialChildren: children);
 
   static const String name = 'RouteEmployee';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i9.ScreenEmployee();
@@ -502,13 +501,13 @@ class RouteEmployee extends _i22.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i10.ScreenMenu]
-class RouteMenu extends _i22.PageRouteInfo<void> {
-  const RouteMenu({List<_i22.PageRouteInfo>? children})
+class RouteMenu extends _i21.PageRouteInfo<void> {
+  const RouteMenu({List<_i21.PageRouteInfo>? children})
     : super(RouteMenu.name, initialChildren: children);
 
   static const String name = 'RouteMenu';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i10.ScreenMenu();
@@ -518,12 +517,12 @@ class RouteMenu extends _i22.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i11.ScreenPermissions]
-class RoutePermissions extends _i22.PageRouteInfo<RoutePermissionsArgs> {
+class RoutePermissions extends _i21.PageRouteInfo<RoutePermissionsArgs> {
   RoutePermissions({
     required String employeeId,
-    required _i28.CubitPermissionViewer cubitPermissionViewer,
-    _i23.Key? key,
-    List<_i22.PageRouteInfo>? children,
+    required _i27.CubitPermissionViewer cubitPermissionViewer,
+    _i22.Key? key,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
          RoutePermissions.name,
          args: RoutePermissionsArgs(
@@ -536,7 +535,7 @@ class RoutePermissions extends _i22.PageRouteInfo<RoutePermissionsArgs> {
 
   static const String name = 'RoutePermissions';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<RoutePermissionsArgs>();
@@ -558,9 +557,9 @@ class RoutePermissionsArgs {
 
   final String employeeId;
 
-  final _i28.CubitPermissionViewer cubitPermissionViewer;
+  final _i27.CubitPermissionViewer cubitPermissionViewer;
 
-  final _i23.Key? key;
+  final _i22.Key? key;
 
   @override
   String toString() {
@@ -583,13 +582,13 @@ class RoutePermissionsArgs {
 
 /// generated route for
 /// [_i12.ScreenProfile]
-class RouteProfile extends _i22.PageRouteInfo<void> {
-  const RouteProfile({List<_i22.PageRouteInfo>? children})
+class RouteProfile extends _i21.PageRouteInfo<void> {
+  const RouteProfile({List<_i21.PageRouteInfo>? children})
     : super(RouteProfile.name, initialChildren: children);
 
   static const String name = 'RouteProfile';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i12.ScreenProfile();
@@ -599,13 +598,13 @@ class RouteProfile extends _i22.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i13.ScreenProfilePermissions]
-class RouteProfilePermissions extends _i22.PageRouteInfo<void> {
-  const RouteProfilePermissions({List<_i22.PageRouteInfo>? children})
+class RouteProfilePermissions extends _i21.PageRouteInfo<void> {
+  const RouteProfilePermissions({List<_i21.PageRouteInfo>? children})
     : super(RouteProfilePermissions.name, initialChildren: children);
 
   static const String name = 'RouteProfilePermissions';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i13.ScreenProfilePermissions();
@@ -614,61 +613,45 @@ class RouteProfilePermissions extends _i22.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i14.ScreenSale]
-class RouteSale extends _i22.PageRouteInfo<void> {
-  const RouteSale({List<_i22.PageRouteInfo>? children})
-    : super(RouteSale.name, initialChildren: children);
-
-  static const String name = 'RouteSale';
-
-  static _i22.PageInfo page = _i22.PageInfo(
-    name,
-    builder: (data) {
-      return const _i14.ScreenSale();
-    },
-  );
-}
-
-/// generated route for
-/// [_i15.ScreenSettings]
-class RouteSettings extends _i22.PageRouteInfo<void> {
-  const RouteSettings({List<_i22.PageRouteInfo>? children})
+/// [_i14.ScreenSettings]
+class RouteSettings extends _i21.PageRouteInfo<void> {
+  const RouteSettings({List<_i21.PageRouteInfo>? children})
     : super(RouteSettings.name, initialChildren: children);
 
   static const String name = 'RouteSettings';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i15.ScreenSettings();
+      return const _i14.ScreenSettings();
     },
   );
 }
 
 /// generated route for
-/// [_i16.ScreenSettingsApiBaseUrl]
-class RouteSettingsApiBaseUrl extends _i22.PageRouteInfo<void> {
-  const RouteSettingsApiBaseUrl({List<_i22.PageRouteInfo>? children})
+/// [_i15.ScreenSettingsApiBaseUrl]
+class RouteSettingsApiBaseUrl extends _i21.PageRouteInfo<void> {
+  const RouteSettingsApiBaseUrl({List<_i21.PageRouteInfo>? children})
     : super(RouteSettingsApiBaseUrl.name, initialChildren: children);
 
   static const String name = 'RouteSettingsApiBaseUrl';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i16.ScreenSettingsApiBaseUrl();
+      return const _i15.ScreenSettingsApiBaseUrl();
     },
   );
 }
 
 /// generated route for
-/// [_i17.ScreenSingleEmployee]
-class RouteSingleEmployee extends _i22.PageRouteInfo<RouteSingleEmployeeArgs> {
+/// [_i16.ScreenSingleEmployee]
+class RouteSingleEmployee extends _i21.PageRouteInfo<RouteSingleEmployeeArgs> {
   RouteSingleEmployee({
     required String employeeId,
-    required _i26.CubitEmployee cubitEmployee,
-    _i23.Key? key,
-    List<_i22.PageRouteInfo>? children,
+    required _i25.CubitEmployee cubitEmployee,
+    _i22.Key? key,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
          RouteSingleEmployee.name,
          args: RouteSingleEmployeeArgs(
@@ -681,11 +664,11 @@ class RouteSingleEmployee extends _i22.PageRouteInfo<RouteSingleEmployeeArgs> {
 
   static const String name = 'RouteSingleEmployee';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<RouteSingleEmployeeArgs>();
-      return _i17.ScreenSingleEmployee(
+      return _i16.ScreenSingleEmployee(
         employeeId: args.employeeId,
         cubitEmployee: args.cubitEmployee,
         key: args.key,
@@ -703,9 +686,9 @@ class RouteSingleEmployeeArgs {
 
   final String employeeId;
 
-  final _i26.CubitEmployee cubitEmployee;
+  final _i25.CubitEmployee cubitEmployee;
 
-  final _i23.Key? key;
+  final _i22.Key? key;
 
   @override
   String toString() {
@@ -727,46 +710,46 @@ class RouteSingleEmployeeArgs {
 }
 
 /// generated route for
-/// [_i18.ScreenStock]
-class RouteStock extends _i22.PageRouteInfo<void> {
-  const RouteStock({List<_i22.PageRouteInfo>? children})
+/// [_i17.ScreenStock]
+class RouteStock extends _i21.PageRouteInfo<void> {
+  const RouteStock({List<_i21.PageRouteInfo>? children})
     : super(RouteStock.name, initialChildren: children);
 
   static const String name = 'RouteStock';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i18.ScreenStock();
+      return const _i17.ScreenStock();
     },
   );
 }
 
 /// generated route for
-/// [_i19.ScreenStore]
-class RouteStore extends _i22.PageRouteInfo<void> {
-  const RouteStore({List<_i22.PageRouteInfo>? children})
+/// [_i18.ScreenStore]
+class RouteStore extends _i21.PageRouteInfo<void> {
+  const RouteStore({List<_i21.PageRouteInfo>? children})
     : super(RouteStore.name, initialChildren: children);
 
   static const String name = 'RouteStore';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i19.ScreenStore();
+      return const _i18.ScreenStore();
     },
   );
 }
 
 /// generated route for
-/// [_i20.ScreenTableOrder]
-class RouteTableOrder extends _i22.PageRouteInfo<RouteTableOrderArgs> {
+/// [_i19.ScreenTableOrder]
+class RouteTableOrder extends _i21.PageRouteInfo<RouteTableOrderArgs> {
   RouteTableOrder({
     required String tableId,
     required String tableName,
-    required _i30.CubitTables cubitTables,
-    _i23.Key? key,
-    List<_i22.PageRouteInfo>? children,
+    required _i29.CubitTables cubitTables,
+    _i22.Key? key,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
          RouteTableOrder.name,
          args: RouteTableOrderArgs(
@@ -780,11 +763,11 @@ class RouteTableOrder extends _i22.PageRouteInfo<RouteTableOrderArgs> {
 
   static const String name = 'RouteTableOrder';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<RouteTableOrderArgs>();
-      return _i20.ScreenTableOrder(
+      return _i19.ScreenTableOrder(
         tableId: args.tableId,
         tableName: args.tableName,
         cubitTables: args.cubitTables,
@@ -806,9 +789,9 @@ class RouteTableOrderArgs {
 
   final String tableName;
 
-  final _i30.CubitTables cubitTables;
+  final _i29.CubitTables cubitTables;
 
-  final _i23.Key? key;
+  final _i22.Key? key;
 
   @override
   String toString() {
@@ -834,17 +817,17 @@ class RouteTableOrderArgs {
 }
 
 /// generated route for
-/// [_i21.ScreenTables]
-class RouteTables extends _i22.PageRouteInfo<void> {
-  const RouteTables({List<_i22.PageRouteInfo>? children})
+/// [_i20.ScreenTables]
+class RouteTables extends _i21.PageRouteInfo<void> {
+  const RouteTables({List<_i21.PageRouteInfo>? children})
     : super(RouteTables.name, initialChildren: children);
 
   static const String name = 'RouteTables';
 
-  static _i22.PageInfo page = _i22.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i21.ScreenTables();
+      return const _i20.ScreenTables();
     },
   );
 }

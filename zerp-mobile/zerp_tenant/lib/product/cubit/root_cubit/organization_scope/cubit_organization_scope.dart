@@ -25,9 +25,15 @@ final class CubitOrganizationScope extends BaseCubit<StateOrganizationScope>
   final CubitAuth _cubitAuth;
 
   Future<void> loadTenantIfNeeded() async {
-    if (state is! StateOrganizationScopeTenant &&
-        state is! StateOrganizationScopeLoading) {
-      await loadTenant();
+    if (state is! StateOrganizationScopeTenant) {
+      if (_loadTenantFuture != null) {
+        try {
+          await _loadTenantFuture;
+        } on Object catch (_) {}
+      }
+      if (state is! StateOrganizationScopeTenant) {
+        await loadTenant();
+      }
     }
   }
 
@@ -46,7 +52,7 @@ final class CubitOrganizationScope extends BaseCubit<StateOrganizationScope>
 
     TenantResponseDTO? tenant;
     try {
-      final claims = await _authStorageService.authClaimsIfValid;
+      final claims = await _authStorageService.authClaims;
       final tenantId = claims?.tenantId;
 
       if (tenantId == null) {
