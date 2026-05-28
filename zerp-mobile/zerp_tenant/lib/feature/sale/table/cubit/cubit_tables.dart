@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:openapi_sale/api.dart';
 import 'package:remote_logging/remote_logging.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
 import 'package:zerp_tenant/product/network/page_response.dart';
 import 'package:zerp_tenant/product/service/sale/sale_service.dart';
 
@@ -9,12 +10,28 @@ import 'package:zerp_tenant/product/service/sale/sale_service.dart';
 class CubitTables extends Cubit<StateTables> with LoggerMixin<CubitTables> {
   CubitTables(
     this._saleService,
-    @factoryParam this.shopId,
+    this._cubitOrganizationScope,
   ) : super(const StateTablesInitial());
 
-  final String shopId;
   final SaleService _saleService;
+  final CubitOrganizationScope _cubitOrganizationScope;
+
   static const int pageSize = 20;
+
+  String get shopId {
+    final currentState = _cubitOrganizationScope.state;
+    if (currentState is! StateOrganizationScopeShop) {
+      log.severe('Organization scope is not in shop scope, cannot get shop ID');
+      throw StateError('Organization scope is not in shop scope');
+    }
+
+    final shopId = currentState.shop.id;
+    if (shopId == null) {
+      log.severe('Shop ID is null in organization scope');
+      throw StateError('Shop ID is null in organization scope');
+    }
+    return shopId;
+  }
 
   Future<void> init() async {
     await fetchTables(reset: true);

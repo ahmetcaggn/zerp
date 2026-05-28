@@ -120,7 +120,6 @@ class RouteCashOrder extends _i22.PageRouteInfo<RouteCashOrderArgs> {
   RouteCashOrder({
     required String tableId,
     required String tableName,
-    required String shopId,
     _i23.Key? key,
     List<_i22.PageRouteInfo>? children,
   }) : super(
@@ -128,7 +127,6 @@ class RouteCashOrder extends _i22.PageRouteInfo<RouteCashOrderArgs> {
          args: RouteCashOrderArgs(
            tableId: tableId,
            tableName: tableName,
-           shopId: shopId,
            key: key,
          ),
          initialChildren: children,
@@ -143,7 +141,6 @@ class RouteCashOrder extends _i22.PageRouteInfo<RouteCashOrderArgs> {
       return _i2.ScreenCashOrder(
         tableId: args.tableId,
         tableName: args.tableName,
-        shopId: args.shopId,
         key: args.key,
       );
     },
@@ -154,7 +151,6 @@ class RouteCashOrderArgs {
   const RouteCashOrderArgs({
     required this.tableId,
     required this.tableName,
-    required this.shopId,
     this.key,
   });
 
@@ -162,13 +158,11 @@ class RouteCashOrderArgs {
 
   final String tableName;
 
-  final String shopId;
-
   final _i23.Key? key;
 
   @override
   String toString() {
-    return 'RouteCashOrderArgs{tableId: $tableId, tableName: $tableName, shopId: $shopId, key: $key}';
+    return 'RouteCashOrderArgs{tableId: $tableId, tableName: $tableName, key: $key}';
   }
 
   @override
@@ -177,13 +171,11 @@ class RouteCashOrderArgs {
     if (other is! RouteCashOrderArgs) return false;
     return tableId == other.tableId &&
         tableName == other.tableName &&
-        shopId == other.shopId &&
         key == other.key;
   }
 
   @override
-  int get hashCode =>
-      tableId.hashCode ^ tableName.hashCode ^ shopId.hashCode ^ key.hashCode;
+  int get hashCode => tableId.hashCode ^ tableName.hashCode ^ key.hashCode;
 }
 
 /// generated route for
@@ -261,66 +253,18 @@ class RouteCashPaymentArgs {
 
 /// generated route for
 /// [_i4.ScreenCashTables]
-class RouteCashTables extends _i22.PageRouteInfo<RouteCashTablesArgs> {
-  RouteCashTables({
-    required String shopId,
-    required String shopName,
-    _i23.Key? key,
-    List<_i22.PageRouteInfo>? children,
-  }) : super(
-         RouteCashTables.name,
-         args: RouteCashTablesArgs(
-           shopId: shopId,
-           shopName: shopName,
-           key: key,
-         ),
-         initialChildren: children,
-       );
+class RouteCashTables extends _i22.PageRouteInfo<void> {
+  const RouteCashTables({List<_i22.PageRouteInfo>? children})
+    : super(RouteCashTables.name, initialChildren: children);
 
   static const String name = 'RouteCashTables';
 
   static _i22.PageInfo page = _i22.PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<RouteCashTablesArgs>();
-      return _i4.ScreenCashTables(
-        shopId: args.shopId,
-        shopName: args.shopName,
-        key: args.key,
-      );
+      return const _i4.ScreenCashTables();
     },
   );
-}
-
-class RouteCashTablesArgs {
-  const RouteCashTablesArgs({
-    required this.shopId,
-    required this.shopName,
-    this.key,
-  });
-
-  final String shopId;
-
-  final String shopName;
-
-  final _i23.Key? key;
-
-  @override
-  String toString() {
-    return 'RouteCashTablesArgs{shopId: $shopId, shopName: $shopName, key: $key}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! RouteCashTablesArgs) return false;
-    return shopId == other.shopId &&
-        shopName == other.shopName &&
-        key == other.key;
-  }
-
-  @override
-  int get hashCode => shopId.hashCode ^ shopName.hashCode ^ key.hashCode;
 }
 
 /// generated route for
@@ -818,7 +762,6 @@ class RouteStore extends _i22.PageRouteInfo<void> {
 /// [_i20.ScreenTableOrder]
 class RouteTableOrder extends _i22.PageRouteInfo<RouteTableOrderArgs> {
   RouteTableOrder({
-    required String shopId,
     required String tableId,
     required String tableName,
     required _i30.CubitTables cubitTables,
@@ -827,7 +770,6 @@ class RouteTableOrder extends _i22.PageRouteInfo<RouteTableOrderArgs> {
   }) : super(
          RouteTableOrder.name,
          args: RouteTableOrderArgs(
-           shopId: shopId,
            tableId: tableId,
            tableName: tableName,
            cubitTables: cubitTables,
@@ -843,7 +785,6 @@ class RouteTableOrder extends _i22.PageRouteInfo<RouteTableOrderArgs> {
     builder: (data) {
       final args = data.argsAs<RouteTableOrderArgs>();
       return _i20.ScreenTableOrder(
-        shopId: args.shopId,
         tableId: args.tableId,
         tableName: args.tableName,
         cubitTables: args.cubitTables,
@@ -855,14 +796,11 @@ class RouteTableOrder extends _i22.PageRouteInfo<RouteTableOrderArgs> {
 
 class RouteTableOrderArgs {
   const RouteTableOrderArgs({
-    required this.shopId,
     required this.tableId,
     required this.tableName,
     required this.cubitTables,
     this.key,
   });
-
-  final String shopId;
 
   final String tableId;
 
@@ -874,15 +812,14 @@ class RouteTableOrderArgs {
 
   @override
   String toString() {
-    return 'RouteTableOrderArgs{shopId: $shopId, tableId: $tableId, tableName: $tableName, cubitTables: $cubitTables, key: $key}';
+    return 'RouteTableOrderArgs{tableId: $tableId, tableName: $tableName, cubitTables: $cubitTables, key: $key}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! RouteTableOrderArgs) return false;
-    return shopId == other.shopId &&
-        tableId == other.tableId &&
+    return tableId == other.tableId &&
         tableName == other.tableName &&
         cubitTables == other.cubitTables &&
         key == other.key;
@@ -890,7 +827,6 @@ class RouteTableOrderArgs {
 
   @override
   int get hashCode =>
-      shopId.hashCode ^
       tableId.hashCode ^
       tableName.hashCode ^
       cubitTables.hashCode ^
@@ -899,60 +835,16 @@ class RouteTableOrderArgs {
 
 /// generated route for
 /// [_i21.ScreenTables]
-class RouteTables extends _i22.PageRouteInfo<RouteTablesArgs> {
-  RouteTables({
-    required String shopId,
-    required String shopName,
-    _i23.Key? key,
-    List<_i22.PageRouteInfo>? children,
-  }) : super(
-         RouteTables.name,
-         args: RouteTablesArgs(shopId: shopId, shopName: shopName, key: key),
-         initialChildren: children,
-       );
+class RouteTables extends _i22.PageRouteInfo<void> {
+  const RouteTables({List<_i22.PageRouteInfo>? children})
+    : super(RouteTables.name, initialChildren: children);
 
   static const String name = 'RouteTables';
 
   static _i22.PageInfo page = _i22.PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<RouteTablesArgs>();
-      return _i21.ScreenTables(
-        shopId: args.shopId,
-        shopName: args.shopName,
-        key: args.key,
-      );
+      return const _i21.ScreenTables();
     },
   );
-}
-
-class RouteTablesArgs {
-  const RouteTablesArgs({
-    required this.shopId,
-    required this.shopName,
-    this.key,
-  });
-
-  final String shopId;
-
-  final String shopName;
-
-  final _i23.Key? key;
-
-  @override
-  String toString() {
-    return 'RouteTablesArgs{shopId: $shopId, shopName: $shopName, key: $key}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! RouteTablesArgs) return false;
-    return shopId == other.shopId &&
-        shopName == other.shopName &&
-        key == other.key;
-  }
-
-  @override
-  int get hashCode => shopId.hashCode ^ shopName.hashCode ^ key.hashCode;
 }

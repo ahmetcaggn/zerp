@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/config/device_id_generator.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/settings/cubit_settings.dart';
 import 'package:zerp_tenant/product/network/network_invoker/remote_log_network_invoker.dart';
 import 'package:zerp_tenant/product/storage/storage_initializer.dart';
@@ -20,6 +21,7 @@ abstract final class AppInitializer {
 
     // load base URL settings from storage
     await getIt<CubitSettings>().init();
+    unawaited(getIt<CubitOrganizationScope>().loadTenant());
 
     // localization
     await LocaleSettings.useDeviceLocale();

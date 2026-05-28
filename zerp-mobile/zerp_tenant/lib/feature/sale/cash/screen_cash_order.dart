@@ -15,13 +15,11 @@ class ScreenCashOrder extends StatelessWidget {
   const ScreenCashOrder({
     required this.tableId,
     required this.tableName,
-    required this.shopId,
     super.key,
   });
 
   final String tableId;
   final String tableName;
-  final String shopId;
 
   @override
   Widget build(BuildContext context) {

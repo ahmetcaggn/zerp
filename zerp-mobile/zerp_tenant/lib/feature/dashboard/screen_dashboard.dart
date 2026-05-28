@@ -10,6 +10,7 @@ import 'package:zerp_tenant/feature/dashboard/sections/sale_section/section_sale
 import 'package:zerp_tenant/feature/dashboard/sections/stock_section/section_stock.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/store_section/section_store.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
 import 'package:zerp_tenant/product/ui/layout/app_drawer.dart';
 import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
@@ -95,34 +96,27 @@ class _TenantInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CubitDashboard, StateDashboard>(
+    return BlocBuilder<CubitOrganizationScope, StateOrganizationScope>(
       builder: (context, state) {
-        if (state is StateDashboardLoaded && state.tenant != null) {
-          final tenant = state.tenant!;
-          return Card(
-            elevation: 2,
-            margin: EdgeInsets.zero,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    tenant.name ?? context.t.dashboard.title,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  if (tenant.description?.isNotEmpty == true) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      tenant.description!,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ],
+        if (state is StateOrganizationScopeTenant) {
+          final tenant = state.tenant;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                tenant.name ?? context.t.dashboard.title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
+              if (tenant.description?.isNotEmpty == true) ...[
+                const SizedBox(height: 8),
+                Text(
+                  tenant.description!,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ],
           );
         }
         return const SizedBox.shrink();

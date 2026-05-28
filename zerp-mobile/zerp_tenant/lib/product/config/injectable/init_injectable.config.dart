@@ -57,6 +57,8 @@ import '../../../feature/settings/sections/api_baseurl/cubit_settings_api_baseur
     as _i1057;
 import '../../cubit/root_cubit/auth/cubit_auth.dart' as _i200;
 import '../../cubit/root_cubit/error/cubit_error.dart' as _i139;
+import '../../cubit/root_cubit/organization_scope/cubit_organization_scope.dart'
+    as _i829;
 import '../../cubit/root_cubit/settings/cubit_settings.dart' as _i657;
 import '../../navigation/app_route.dart' as _i795;
 import '../../navigation/auth_guard.dart' as _i84;
@@ -67,6 +69,7 @@ import '../../service/auth/auth_service.dart' as _i238;
 import '../../service/auth/auth_storage_service.dart' as _i40;
 import '../../service/employee/employee_service.dart' as _i93;
 import '../../service/sale/sale_service.dart' as _i16;
+import '../../service/shop/shop_service.dart' as _i750;
 import '../../service/tenant/tenant_service.dart' as _i105;
 import '../../service/user/permission_service.dart' as _i545;
 import '../../service/user/username_service.dart' as _i868;
@@ -171,6 +174,14 @@ extension GetItInjectableX on _i174.GetIt {
         cubitAuth: gh<_i200.CubitAuth>(),
       ),
     );
+    gh.lazySingleton<_i750.ShopService>(
+      () => _i750.ShopService(
+        invoker: gh<_i1073.ApiNetworkInvoker>(),
+        authStorageService: gh<_i40.AuthStorageService>(),
+        cubitError: gh<_i139.CubitError>(),
+        cubitAuth: gh<_i200.CubitAuth>(),
+      ),
+    );
     gh.lazySingleton<_i105.TenantService>(
       () => _i105.TenantService(
         invoker: gh<_i1073.ApiNetworkInvoker>(),
@@ -218,17 +229,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i129.CubitSectionEmployee>(
       () => _i129.CubitSectionEmployee(gh<_i93.EmployeeService>()),
     );
-    gh.lazySingleton<_i268.CubitDashboard>(
-      () => _i268.CubitDashboard(
-        gh<_i129.CubitSectionEmployee>(),
-        gh<_i964.CubitSectionMenu>(),
-        gh<_i201.CubitSectionSale>(),
-        gh<_i102.CubitSectionStock>(),
-        gh<_i6.CubitSectionStore>(),
-        gh<_i40.AuthStorageService>(),
-        gh<_i105.TenantService>(),
-      ),
-    );
     gh.factoryParam<
       _i713.CubitCreatePermission,
       _i1073.CubitPermissions,
@@ -268,15 +268,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i910.CubitCashPayment(gh<_i16.SaleService>()),
     );
     gh.factory<_i738.CubitSale>(() => _i738.CubitSale(gh<_i16.SaleService>()));
-    gh.factory<_i398.CubitTableOrder>(
-      () => _i398.CubitTableOrder(gh<_i16.SaleService>()),
-    );
-    gh.factoryParam<_i782.CubitCashTables, String, dynamic>(
-      (shopId, _) => _i782.CubitCashTables(gh<_i16.SaleService>(), shopId),
-    );
-    gh.factoryParam<_i207.CubitTables, String, dynamic>(
-      (shopId, _) => _i207.CubitTables(gh<_i16.SaleService>(), shopId),
-    );
     gh.factory<_i1057.CubitSettingsApiBaseUrl>(
       () => _i1057.CubitSettingsApiBaseUrl(
         gh<_i657.CubitSettings>(),
@@ -285,6 +276,41 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i229.CubitEmployeeUsername>(
       () => _i229.CubitEmployeeUsername(gh<_i868.UsernameService>()),
+    );
+    gh.lazySingleton<_i829.CubitOrganizationScope>(
+      () => _i829.CubitOrganizationScope(
+        gh<_i40.AuthStorageService>(),
+        gh<_i105.TenantService>(),
+        gh<_i750.ShopService>(),
+        gh<_i200.CubitAuth>(),
+      ),
+    );
+    gh.lazySingleton<_i268.CubitDashboard>(
+      () => _i268.CubitDashboard(
+        gh<_i129.CubitSectionEmployee>(),
+        gh<_i964.CubitSectionMenu>(),
+        gh<_i201.CubitSectionSale>(),
+        gh<_i102.CubitSectionStock>(),
+        gh<_i6.CubitSectionStore>(),
+      ),
+    );
+    gh.factory<_i782.CubitCashTables>(
+      () => _i782.CubitCashTables(
+        gh<_i16.SaleService>(),
+        gh<_i829.CubitOrganizationScope>(),
+      ),
+    );
+    gh.factory<_i207.CubitTables>(
+      () => _i207.CubitTables(
+        gh<_i16.SaleService>(),
+        gh<_i829.CubitOrganizationScope>(),
+      ),
+    );
+    gh.factory<_i398.CubitTableOrder>(
+      () => _i398.CubitTableOrder(
+        gh<_i16.SaleService>(),
+        gh<_i829.CubitOrganizationScope>(),
+      ),
     );
     return this;
   }

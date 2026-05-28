@@ -2,15 +2,33 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:openapi_sale/api.dart';
 import 'package:remote_logging/remote_logging.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
 import 'package:zerp_tenant/product/service/sale/sale_service.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @injectable
 class CubitTableOrder extends Cubit<StateTableOrder>
     with LoggerMixin<CubitTableOrder> {
-  CubitTableOrder(this._saleService) : super(const StateTableOrderInitial());
+  CubitTableOrder(this._saleService, this._cubitOrganizationScope)
+    : super(const StateTableOrderInitial());
 
   final SaleService _saleService;
+  final CubitOrganizationScope _cubitOrganizationScope;
+
+  String get shopId {
+    final currentState = _cubitOrganizationScope.state;
+    if (currentState is! StateOrganizationScopeShop) {
+      log.severe('Organization scope is not in shop scope, cannot get shop ID');
+      throw StateError('Organization scope is not in shop scope');
+    }
+
+    final shopId = currentState.shop.id;
+    if (shopId == null) {
+      log.severe('Shop ID is null in organization scope');
+      throw StateError('Shop ID is null in organization scope');
+    }
+    return shopId;
+  }
 
   bool get hasUnsavedChanges {
     final currentState = state;
@@ -18,10 +36,7 @@ class CubitTableOrder extends Cubit<StateTableOrder>
     return currentState.hasUnsavedChanges;
   }
 
-  Future<void> init({
-    required String shopId,
-    required String tableId,
-  }) async {
+  Future<void> init({required String tableId}) async {
     emit(const StateTableOrderLoading());
     try {
       final activeOrders = await _saleService.getActiveOrders(tableId: tableId);
@@ -345,10 +360,7 @@ class CubitTableOrder extends Cubit<StateTableOrder>
     return false;
   }
 
-  Future<bool> saveOrder({
-    required String shopId,
-    required String tableId,
-  }) async {
+  Future<bool> saveOrder({required String tableId}) async {
     final currentState = state;
     if (currentState is StateTableOrderLoaded) {
       emit(currentState.copyWith(isSaving: true));
@@ -383,7 +395,7 @@ class CubitTableOrder extends Cubit<StateTableOrder>
         }
 
         // Re-initialize to fetch updated order info from API
-        await init(shopId: shopId, tableId: tableId);
+        await init(tableId: tableId);
         return true;
       } on Object catch (e) {
         log.severe('Failed to save order: $e');
@@ -394,10 +406,7 @@ class CubitTableOrder extends Cubit<StateTableOrder>
     return false;
   }
 
-  Future<bool> cancelOrder({
-    required String shopId,
-    required String tableId,
-  }) async {
+  Future<bool> cancelOrder({required String tableId}) async {
     final currentState = state;
     if (currentState is StateTableOrderLoaded) {
       final currentOrder = currentState.currentOrder;
@@ -407,7 +416,7 @@ class CubitTableOrder extends Cubit<StateTableOrder>
           await _saleService.cancelTableOrder(
             orderId: currentOrder.existingOrder!.id ?? '',
           );
-          await init(shopId: shopId, tableId: tableId);
+          await init(tableId: tableId);
           return true;
         } on Object catch (e) {
           log.severe('Failed to cancel order: $e');

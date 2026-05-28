@@ -7,6 +7,7 @@ import 'package:openapi_sale/api.dart';
 import 'package:zerp_tenant/feature/sale/cash/cubit/cubit_cash_tables.dart';
 import 'package:zerp_tenant/feature/sale/cash/widget/cash_table_card.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
@@ -14,35 +15,24 @@ import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 @RoutePage()
 class ScreenCashTables extends StatelessWidget {
   const ScreenCashTables({
-    required this.shopId,
-    required this.shopName,
     super.key,
   });
-
-  final String shopId;
-  final String shopName;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) {
-        final cubit = getIt<CubitCashTables>(param1: shopId);
+        final cubit = getIt<CubitCashTables>();
         unawaited(cubit.init());
         return cubit;
       },
-      child: _View(shopId: shopId, shopName: shopName),
+      child: const _View(),
     );
   }
 }
 
 class _View extends StatefulWidget {
-  const _View({
-    required this.shopId,
-    required this.shopName,
-  });
-
-  final String shopId;
-  final String shopName;
+  const _View();
 
   @override
   State<_View> createState() => _ViewState();
@@ -72,7 +62,16 @@ class _ViewState extends State<_View> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: '${widget.shopName} - ${context.t.sale.cash.title}',
+      title: context.t.sale.cash.title,
+      titleWidget: BlocBuilder<CubitOrganizationScope, StateOrganizationScope>(
+        builder: (context, state) {
+          if (state is! StateOrganizationScopeShop) {
+            return Text(context.t.sale.cash.title);
+          }
+          final shopName = state.shop.name ?? '';
+          return Text('$shopName - ${context.t.sale.cash.title}');
+        },
+      ),
       actions: [
         IconButton(
           tooltip: context.t.sale.cash.refresh,
@@ -137,7 +136,6 @@ class _ViewState extends State<_View> {
                     );
                   case StateCashTablesLoaded():
                     return _Loaded(
-                      shopId: widget.shopId,
                       state: state,
                       searchController: _searchController,
                     );
@@ -192,12 +190,10 @@ final class _Error extends StatelessWidget {
 
 final class _Loaded extends StatefulWidget {
   const _Loaded({
-    required this.shopId,
     required this.state,
     required this.searchController,
   });
 
-  final String shopId;
   final StateCashTablesLoaded state;
   final TextEditingController searchController;
 
@@ -285,7 +281,6 @@ class _LoadedState extends State<_Loaded> {
                         RouteCashOrder(
                           tableId: table.id ?? '',
                           tableName: table.name ?? '',
-                          shopId: widget.shopId,
                         ),
                       ),
                     );

@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:openapi_sale/api.dart';
 import 'package:zerp_tenant/feature/sale/cubit/cubit_sale.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
@@ -82,7 +83,6 @@ final class _Loaded extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final shops = state.shops;
-    final selectedShop = state.selectedShop;
 
     if (shops.isEmpty) {
       return Center(
@@ -108,9 +108,7 @@ final class _Loaded extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
               side: BorderSide(
-                color: Theme.of(
-                  context,
-                ).colorScheme.outlineVariant,
+                color: Theme.of(context).colorScheme.outlineVariant,
               ),
             ),
             child: Padding(
@@ -119,30 +117,43 @@ final class _Loaded extends StatelessWidget {
                 vertical: 4,
               ),
               child: DropdownButtonHideUnderline(
-                child: DropdownButtonFormField<ShopDTO>(
-                  initialValue: selectedShop,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                  ),
-                  items: shops.map((shop) {
-                    return DropdownMenuItem<ShopDTO>(
-                      value: shop,
-                      child: Text(
-                        shop.name ?? '',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (shop) {
-                    if (shop != null) {
-                      context.read<CubitSale>().selectShop(
-                        shop,
-                      );
-                    }
-                  },
-                ),
+                child:
+                    BlocBuilder<CubitOrganizationScope, StateOrganizationScope>(
+                      builder: (context, orgState) {
+                        ShopDTO? selectedShop;
+                        if (orgState is StateOrganizationScopeShop) {
+                          final found = shops
+                              .where((s) => s.id == orgState.shop.id)
+                              .toList();
+                          selectedShop = found.isNotEmpty ? found.first : null;
+                        }
+
+                        return DropdownButtonFormField<ShopDTO>(
+                          initialValue: selectedShop,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                          ),
+                          items: shops.map((shop) {
+                            return DropdownMenuItem<ShopDTO>(
+                              value: shop,
+                              child: Text(
+                                shop.name ?? '',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (shop) async {
+                            if (shop != null) {
+                              context.read<CubitOrganizationScope>().loadShop(
+                                shop,
+                              );
+                            }
+                          },
+                        );
+                      },
+                    ),
               ),
             ),
           ),
@@ -154,18 +165,9 @@ final class _Loaded extends StatelessWidget {
                   title: context.t.sale.dashboard.tables,
                   icon: Icons.table_restaurant_outlined,
                   color: Theme.of(context).colorScheme.secondary,
-                  onPressed: selectedShop != null
-                      ? () {
-                          unawaited(
-                            context.router.push(
-                              RouteTables(
-                                shopId: selectedShop.id ?? '',
-                                shopName: selectedShop.name ?? '',
-                              ),
-                            ),
-                          );
-                        }
-                      : null,
+                  onPressed: () {
+                    unawaited(context.router.push(const RouteTables()));
+                  },
                 ),
               ),
               const SizedBox(width: 16),
@@ -174,18 +176,9 @@ final class _Loaded extends StatelessWidget {
                   title: context.t.sale.dashboard.cash,
                   icon: Icons.point_of_sale_outlined,
                   color: Theme.of(context).colorScheme.secondary,
-                  onPressed: selectedShop != null
-                      ? () {
-                          unawaited(
-                            context.router.push(
-                              RouteCashTables(
-                                shopId: selectedShop.id ?? '',
-                                shopName: selectedShop.name ?? '',
-                              ),
-                            ),
-                          );
-                        }
-                      : null,
+                  onPressed: () {
+                    unawaited(context.router.push(const RouteCashTables()));
+                  },
                 ),
               ),
             ],
@@ -201,58 +194,65 @@ final class _DashboardButton extends StatelessWidget {
     required this.title,
     required this.icon,
     required this.color,
-    this.onPressed,
+    required this.onPressed,
   });
 
   final String title;
   final IconData icon;
   final Color color;
-  final VoidCallback? onPressed;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final disabledColor = theme.colorScheme.onSurface.withValues(alpha: 0.38);
 
-    return SizedBox(
-      height: 140,
-      child: Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        color: onPressed == null
-            ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
-            : theme.colorScheme.surfaceContainer,
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  size: 44,
-                  color: onPressed == null ? disabledColor : color,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: onPressed == null
-                        ? disabledColor
-                        : theme.colorScheme.onSurface,
+    return BlocBuilder<CubitOrganizationScope, StateOrganizationScope>(
+      builder: (context, state) {
+        final enabled = state is StateOrganizationScopeShop;
+        return SizedBox(
+          height: 140,
+          child: Card(
+            elevation: 3,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            color: enabled
+                ? theme.colorScheme.surfaceContainer
+                : theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
                   ),
+            child: InkWell(
+              onTap: enabled ? onPressed : null,
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 44,
+                      color: enabled ? color : disabledColor,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: enabled
+                            ? theme.colorScheme.onSurface
+                            : disabledColor,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

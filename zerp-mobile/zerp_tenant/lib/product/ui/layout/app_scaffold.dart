@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart' hide RouteSettings;
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
 
 /// AppScaffold is the main scaffold component used across the application.
 ///
@@ -14,6 +16,7 @@ class AppScaffold extends StatelessWidget {
   const AppScaffold({
     required this.body,
     required this.title,
+    this.titleWidget,
     this.actions = const [],
     this.drawer,
     this.floatingActionButton,
@@ -32,6 +35,9 @@ class AppScaffold extends StatelessWidget {
 
   /// The title displayed in the AppBar (dynamic)
   final String title;
+
+  /// The title widget displayed in the AppBar (dynamic)
+  final Widget? titleWidget;
 
   /// Optional list of action widgets for the AppBar, which defaults to empty.
   final List<Widget> actions;
@@ -66,12 +72,17 @@ class AppScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        actions: actions,
-        elevation: 2,
+      body: Column(
+        children: [
+          AppBar(
+            title: titleWidget ?? Text(title),
+            actions: actions,
+            elevation: 2,
+          ),
+          const _OrganizationScopeError(),
+          Expanded(child: body),
+        ],
       ),
-      body: body,
       drawer: drawer,
       endDrawer: endDrawer,
       floatingActionButton: floatingActionButton,
@@ -81,6 +92,73 @@ class AppScaffold extends StatelessWidget {
       backgroundColor: backgroundColor,
       resizeToAvoidBottomInset: resizeToAvoidBottomInset,
       primary: primary,
+    );
+  }
+}
+
+final class _OrganizationScopeError extends StatelessWidget {
+  const _OrganizationScopeError();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CubitOrganizationScope, StateOrganizationScope>(
+      builder: (context, state) {
+        if (state is StateOrganizationScopeLoading ||
+            state is StateOrganizationScopeInitial) {
+          return Container(
+            color: Colors.blueAccent,
+            padding: const EdgeInsets.all(8),
+            child: const Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'Loading organization scope...',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+          );
+        } else if (state is StateOrganizationScopeError) {
+          return Container(
+            color: Colors.redAccent,
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    state.message,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+                if (state.previousState is StateOrganizationScopeTenant)
+                  IconButton(
+                    onPressed: () {
+                      context.read<CubitOrganizationScope>().dismissError();
+                    },
+                    icon: const Icon(Icons.close, color: Colors.white),
+                  ),
+                IconButton(
+                  onPressed: () async {
+                    await context.read<CubitOrganizationScope>().retry();
+                  },
+                  icon: const Icon(Icons.refresh, color: Colors.white),
+                ),
+              ],
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      },
     );
   }
 }

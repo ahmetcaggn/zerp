@@ -6,42 +6,30 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zerp_tenant/feature/sale/table/cubit/cubit_tables.dart';
 import 'package:zerp_tenant/feature/sale/table/widget/table_card.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @RoutePage()
 class ScreenTables extends StatelessWidget {
-  const ScreenTables({
-    required this.shopId,
-    required this.shopName,
-    super.key,
-  });
-
-  final String shopId;
-  final String shopName;
+  const ScreenTables({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) {
-        final cubit = getIt<CubitTables>(param1: shopId);
+        final cubit = getIt<CubitTables>();
         unawaited(cubit.init());
         return cubit;
       },
-      child: _View(shopId: shopId, shopName: shopName),
+      child: const _View(),
     );
   }
 }
 
 class _View extends StatefulWidget {
-  const _View({
-    required this.shopId,
-    required this.shopName,
-  });
-
-  final String shopId;
-  final String shopName;
+  const _View();
 
   @override
   State<_View> createState() => _ViewState();
@@ -76,7 +64,16 @@ class _ViewState extends State<_View> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: '${widget.shopName} - ${context.t.sale.tables.title}',
+      title: context.t.sale.tables.title,
+      titleWidget: BlocBuilder<CubitOrganizationScope, StateOrganizationScope>(
+        builder: (context, state) {
+          if (state is! StateOrganizationScopeShop) {
+            return Text(context.t.sale.tables.title);
+          }
+          final shopName = state.shop.name ?? '';
+          return Text('$shopName - ${context.t.sale.tables.title}');
+        },
+      ),
       actions: [
         IconButton(
           tooltip: context.t.common.refresh,
@@ -141,7 +138,6 @@ class _ViewState extends State<_View> {
                     );
                   case StateTablesLoaded():
                     return _Loaded(
-                      shopId: widget.shopId,
                       state: state,
                       searchController: _searchController,
                     );
@@ -196,12 +192,10 @@ final class _Error extends StatelessWidget {
 
 final class _Loaded extends StatefulWidget {
   const _Loaded({
-    required this.shopId,
     required this.state,
     required this.searchController,
   });
 
-  final String shopId;
   final StateTablesLoaded state;
   final TextEditingController searchController;
 
@@ -282,7 +276,6 @@ class _LoadedState extends State<_Loaded> {
                 RouteTableOrder(
                   tableId: table.id ?? '',
                   tableName: table.name ?? '',
-                  shopId: widget.shopId,
                   cubitTables: context.read<CubitTables>(),
                 ),
               ),

@@ -17,14 +17,12 @@ import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 @RoutePage()
 class ScreenTableOrder extends StatelessWidget {
   const ScreenTableOrder({
-    required this.shopId,
     required this.tableId,
     required this.tableName,
     required this.cubitTables,
     super.key,
   });
 
-  final String shopId;
   final String tableId;
   final String tableName;
   final CubitTables cubitTables;
@@ -38,10 +36,10 @@ class ScreenTableOrder extends StatelessWidget {
       child: BlocProvider(
         create: (_) {
           final cubit = getIt<CubitTableOrder>();
-          unawaited(cubit.init(shopId: shopId, tableId: tableId));
+          unawaited(cubit.init(tableId: tableId));
           return cubit;
         },
-        child: _View(shopId: shopId, tableId: tableId, tableName: tableName),
+        child: _View(tableId: tableId, tableName: tableName),
       ),
     );
   }
@@ -49,12 +47,10 @@ class ScreenTableOrder extends StatelessWidget {
 
 class _View extends StatefulWidget {
   const _View({
-    required this.shopId,
     required this.tableId,
     required this.tableName,
   });
 
-  final String shopId;
   final String tableId;
   final String tableName;
 
@@ -107,12 +103,10 @@ class _ViewState extends State<_View> {
                 child: CircularProgressIndicator(),
               ),
               StateTableOrderError() => _Error(
-                shopId: widget.shopId,
                 tableId: widget.tableId,
                 state: state,
               ),
               StateTableOrderLoaded() => _Loaded(
-                shopId: widget.shopId,
                 tableId: widget.tableId,
                 state: state,
                 noteController: _noteController,
@@ -127,12 +121,10 @@ class _ViewState extends State<_View> {
 
 final class _Error extends StatelessWidget {
   const _Error({
-    required this.shopId,
     required this.tableId,
     required this.state,
   });
 
-  final String shopId;
   final String tableId;
   final StateTableOrderError state;
 
@@ -154,7 +146,6 @@ final class _Error extends StatelessWidget {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => context.read<CubitTableOrder>().init(
-              shopId: shopId,
               tableId: tableId,
             ),
             child: Text(context.t.common.retry),
@@ -167,13 +158,11 @@ final class _Error extends StatelessWidget {
 
 final class _Loaded extends StatelessWidget {
   const _Loaded({
-    required this.shopId,
     required this.tableId,
     required this.state,
     required this.noteController,
   });
 
-  final String shopId;
   final String tableId;
   final StateTableOrderLoaded state;
   final TextEditingController noteController;
@@ -200,7 +189,6 @@ final class _Loaded extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 children: [
                   _OrderHeader(
-                    shopId: shopId,
                     tableId: tableId,
                     currentOrder: currentOrder,
                   ),
@@ -222,7 +210,6 @@ final class _Loaded extends StatelessWidget {
               ),
             ),
             _BottomSection(
-              shopId: shopId,
               tableId: tableId,
               cartItems: cartItems,
             ),
@@ -362,12 +349,10 @@ class _OrderTabBar extends StatelessWidget {
 
 class _OrderHeader extends StatelessWidget {
   const _OrderHeader({
-    required this.shopId,
     required this.tableId,
     required this.currentOrder,
   });
 
-  final String shopId;
   final String tableId;
   final OrderEntry currentOrder;
 
@@ -405,7 +390,6 @@ class _OrderHeader extends StatelessWidget {
       final messenger = ScaffoldMessenger.of(context);
       final cancelMsg = context.t.sale.order.orderCancelled;
       final success = await context.read<CubitTableOrder>().cancelOrder(
-        shopId: shopId,
         tableId: tableId,
       );
       if (context.mounted && success) {
@@ -622,12 +606,10 @@ final class _CatalogSection extends StatelessWidget {
 
 final class _BottomSection extends StatelessWidget {
   const _BottomSection({
-    required this.shopId,
     required this.tableId,
     required this.cartItems,
   });
 
-  final String shopId;
   final String tableId;
   final List<CartItem> cartItems;
 
@@ -683,10 +665,7 @@ final class _BottomSection extends StatelessWidget {
                       final router = context.router;
                       final success = await context
                           .read<CubitTableOrder>()
-                          .saveOrder(
-                            shopId: shopId,
-                            tableId: tableId,
-                          );
+                          .saveOrder(tableId: tableId);
                       if (context.mounted && success) {
                         messenger.showSnackBar(
                           SnackBar(

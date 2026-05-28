@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:injectable/injectable.dart';
 import 'package:remote_logging/remote_logging.dart';
+import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/cubit/base_cubit.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/state_auth.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
 import 'package:zerp_tenant/product/navigation/app_route.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/service/auth/auth_service.dart';
@@ -21,7 +23,16 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
   final AppRoute _appRoute;
   final AuthService _authService;
   final AuthStorageService _authStorageService;
+
   Future<void>? _ongoingCheck;
+
+  @override
+  void emit(StateAuth state) {
+    super.emit(state);
+    if (state is StateAuthAuthenticated) {
+      unawaited(getIt<CubitOrganizationScope>().loadTenantIfNeeded());
+    }
+  }
 
   Future<void> checkAuthRemote() async {
     if (_ongoingCheck != null) {
