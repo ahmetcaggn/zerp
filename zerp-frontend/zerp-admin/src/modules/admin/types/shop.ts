@@ -49,3 +49,9 @@ export interface UpdateShopRequest {
   latitude?: number
   longitude?: number
 }
+
+export interface ShopImageUploadResponse {
+  imageId: string
+  contentType: string
+  originalFileName: string
+}

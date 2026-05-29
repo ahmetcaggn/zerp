@@ -17,6 +17,7 @@ import {
   Select,
   TextField,
 } from '@mui/material'
+import type { ChangeEvent } from 'react'
 import { useState } from 'react'
 
 import { getCountryLabel, getCountryOptions, resolveCountryCode } from '@/core/data/countries'
@@ -25,6 +26,7 @@ import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
+import { shopClient } from '../api/shop-client'
 import { useShopNameCheck } from '../hooks/use-shop-name-check'
 import { useCreateShop, useUpdateShop } from '../hooks/use-shops'
 import type { CreateShopRequest, ShopResponse, UpdateShopRequest } from '../types/shop'
@@ -86,6 +88,8 @@ export function ShopFormDialog({
   const { t, locale } = useI18n()
   const { showToast } = useToast()
   const [form, setForm] = useState<ShopFormState>(EMPTY_FORM_STATE)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
   const countryOptions = getCountryOptions(locale)
 
   const { hasAnyPermission } = useCurrentUserPermissions()
@@ -110,14 +114,15 @@ export function ShopFormDialog({
     mode === 'edit' ? shop?.id : undefined,
   )
 
-  const { mutate: createShop, isPending: isCreating } = useCreateShop()
-  const { mutate: updateShop, isPending: isUpdating } = useUpdateShop()
+  const { mutateAsync: createShop, isPending: isCreating } = useCreateShop()
+  const { mutateAsync: updateShop, isPending: isUpdating } = useUpdateShop()
 
-  const isPending = isCreating || isUpdating
+  const isPending = isCreating || isUpdating || isUploadingImage
   const isNameAvailable = shopNameStatus === 'available'
   const isNameCheckRelevant = mode === 'create' || mode === 'edit'
 
   function seedForm() {
+    setImageFile(null)
     if (mode === 'edit') {
       setForm({
         tenantId: shop?.tenantId ?? '',
@@ -146,6 +151,7 @@ export function ShopFormDialog({
 
   function handleClose() {
     setForm(EMPTY_FORM_STATE)
+    setImageFile(null)
     onClose()
   }
 
@@ -212,6 +218,26 @@ export function ShopFormDialog({
     }
   }
 
+  function handleImageSelected(event: ChangeEvent<HTMLInputElement>) {
+    const selectedFile = event.target.files?.[0] ?? null
+    event.target.value = ''
+    setImageFile(selectedFile)
+  }
+
+  async function uploadImageIfSelected(shopId: string) {
+    if (!imageFile) {
+      return
+    }
+
+    setIsUploadingImage(true)
+    try {
+      const response = await shopClient.uploadImage(shopId, imageFile)
+      setForm((prev) => ({ ...prev, imageId: response.imageId }))
+    } finally {
+      setIsUploadingImage(false)
+    }
+  }
+
   function validateCommon(): boolean {
     if (!canSubmit) {
       showToast(t('shops.unauthorized'), { severity: 'warning' })
@@ -250,39 +276,57 @@ export function ShopFormDialog({
     return true
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!validateCommon()) {
       return
     }
 
-    if (mode === 'create') {
-      createShop(buildCreatePayload(), {
-        onSuccess: () => {
-          showToast(t('shops.createdToast'), { severity: 'success' })
-          handleClose()
-        },
-        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-      })
-      return
-    }
+    try {
+      if (mode === 'create') {
+        const created = await createShop(buildCreatePayload())
+        let imageUploadError: unknown = null
+        if (created.id && imageFile) {
+          try {
+            await uploadImageIfSelected(created.id)
+          } catch (err) {
+            imageUploadError = err
+          }
+        }
 
-    if (!shop?.id) {
-      return
-    }
+        showToast(t('shops.createdToast'), { severity: 'success' })
+        if (imageUploadError) {
+          showToast(getUserFriendlyError(imageUploadError), { severity: 'error' })
+        }
+        handleClose()
+        return
+      }
 
-    updateShop(
-      {
+      if (!shop?.id) {
+        return
+      }
+
+      await updateShop({
         id: shop.id,
         data: buildUpdatePayload(),
-      },
-      {
-        onSuccess: () => {
-          showToast(t('shops.updatedToast'), { severity: 'success' })
-          handleClose()
-        },
-        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-      },
-    )
+      })
+
+      let imageUploadError: unknown = null
+      if (imageFile) {
+        try {
+          await uploadImageIfSelected(shop.id)
+        } catch (err) {
+          imageUploadError = err
+        }
+      }
+
+      showToast(t('shops.updatedToast'), { severity: 'success' })
+      if (imageUploadError) {
+        showToast(getUserFriendlyError(imageUploadError), { severity: 'error' })
+      }
+      handleClose()
+    } catch (err) {
+      showToast(getUserFriendlyError(err), { severity: 'error' })
+    }
   }
 
   const title = mode === 'create' ? t('shops.createButton') : t('shops.editButton')
@@ -372,11 +416,16 @@ export function ShopFormDialog({
           />
 
           <TextField
-            label={t('shops.imageIdLabel')}
-            value={form.imageId}
-            onChange={(event) => setForm((prev) => ({ ...prev, imageId: event.target.value }))}
+            type="file"
+            onChange={handleImageSelected}
             size="small"
             fullWidth
+            helperText={imageFile ? imageFile.name : form.imageId || undefined}
+            slotProps={{
+              htmlInput: {
+                accept: 'image/*',
+              },
+            }}
           />
           <TextField
             label={t('shops.emailLabel')}
@@ -476,7 +525,11 @@ export function ShopFormDialog({
         <Button onClick={handleClose} disabled={isPending}>
           {t('shops.cancelButton')}
         </Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={isPending || !canSubmit || !isNameAvailable}>
+        <Button
+          variant="contained"
+          onClick={() => void handleSubmit()}
+          disabled={isPending || !canSubmit || !isNameAvailable}
+        >
           {isPending ? <CircularProgress size={20} /> : t('shops.saveButton')}
         </Button>
       </DialogActions>

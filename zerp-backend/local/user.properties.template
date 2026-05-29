@@ -11,3 +11,5 @@ keycloak.admin.server-url=https://auth.femrek.dev
 keycloak.admin.realm=zerp
 keycloak.admin.client-id=zerp-admin-cli
 keycloak.admin.client-secret=
+
+app.user.tenant-images.folder=${USER_TENANT_IMAGES_FOLDER:tenant-images}
