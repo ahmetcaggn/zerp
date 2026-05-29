@@ -80,7 +80,7 @@ services:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
       OPENAPI_SERVER_URLS: ${OPENAPI_SERVER_URLS}
-      spring.jpa.hibernate.ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:-none}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO:-none}
     depends_on:
       - eureka
     volumes:
