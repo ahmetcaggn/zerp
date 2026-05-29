@@ -24,6 +24,7 @@ import {
 } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 
+import { getCountryLabel } from '@/core/data/countries'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
@@ -42,7 +43,7 @@ interface ShopListProps {
 }
 
 export function ShopList({ fixedTenantId, fixedTenantName }: ShopListProps = {}) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { showToast } = useToast()
   const scopedTenantId = fixedTenantId?.trim() ?? ''
   const hasTenantScope = Boolean(scopedTenantId)
@@ -289,7 +290,7 @@ export function ShopList({ fixedTenantId, fixedTenantName }: ShopListProps = {})
                 <TableCell>{shop.email ?? '—'}</TableCell>
                 <TableCell>{shop.phone ?? '—'}</TableCell>
                 <TableCell>{shop.city ?? '—'}</TableCell>
-                <TableCell>{shop.country ?? '—'}</TableCell>
+                <TableCell>{getCountryLabel(locale, shop.country) || '—'}</TableCell>
                 <TableCell>{shop.website ?? '—'}</TableCell>
                 <TableCell align="right">
                   {canUpdateShop && (

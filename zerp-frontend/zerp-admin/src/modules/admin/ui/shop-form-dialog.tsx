@@ -10,11 +10,16 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
   InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
   TextField,
 } from '@mui/material'
 import { useState } from 'react'
 
+import { getCountryLabel, getCountryOptions, resolveCountryCode } from '@/core/data/countries'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
@@ -78,9 +83,10 @@ export function ShopFormDialog({
   defaultTenantName,
   lockTenantOnCreate = false,
 }: Props) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { showToast } = useToast()
   const [form, setForm] = useState<ShopFormState>(EMPTY_FORM_STATE)
+  const countryOptions = getCountryOptions(locale)
 
   const { hasAnyPermission } = useCurrentUserPermissions()
   const canCreateShop = hasAnyPermission([PermissionActions.UPDATE_TENANT, PermissionActions.ADMIN])
@@ -121,7 +127,7 @@ export function ShopFormDialog({
         address: shop?.address ?? '',
         city: shop?.city ?? '',
         state: shop?.state ?? '',
-        country: shop?.country ?? '',
+        country: resolveCountryCode(locale, shop?.country),
         postalCode: shop?.postalCode ?? '',
         phone: shop?.phone ?? '',
         email: shop?.email ?? '',
@@ -400,13 +406,21 @@ export function ShopFormDialog({
             size="small"
             fullWidth
           />
-          <TextField
-            label={t('shops.countryLabel')}
-            value={form.country}
-            onChange={(event) => setForm((prev) => ({ ...prev, country: event.target.value }))}
-            size="small"
-            fullWidth
-          />
+          <FormControl size="small" fullWidth>
+            <InputLabel>{t('shops.countryLabel')}</InputLabel>
+            <Select
+              label={t('shops.countryLabel')}
+              value={form.country}
+              onChange={(event) => setForm((prev) => ({ ...prev, country: String(event.target.value) }))}
+            >
+              <MenuItem value="">—</MenuItem>
+              {countryOptions.map((country) => (
+                <MenuItem key={country.code} value={country.code}>
+                  {country.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField
             label={t('shops.postalCodeLabel')}
             value={form.postalCode}

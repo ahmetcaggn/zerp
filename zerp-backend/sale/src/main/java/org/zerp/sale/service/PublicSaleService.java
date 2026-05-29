@@ -204,6 +204,38 @@ public class PublicSaleService {
         return new PublicImageContentResponse(resource, contentType);
     }
 
+    @Transactional(readOnly = true)
+    public PublicImageContentResponse getShopImage(UUID shopId, ImageSize imageSize) {
+        Shop shop = ensureShopExists(shopId);
+        String imageId = shop.getImageId();
+        if (imageId == null || imageId.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Shop image not found");
+        }
+
+        String normalizedImageId = imageId.trim();
+        ImageSize resolvedSize = imageSize == null ? ImageSize.SMALL : imageSize;
+        ResponseEntity<byte[]> thumborResponse;
+        try {
+            thumborResponse = thumborFeignClient.getShopImage(normalizedImageId, resolvedSize);
+        } catch (FeignException.NotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found: " + normalizedImageId, e);
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to fetch image from thumbor", e);
+        }
+
+        if (!thumborResponse.getStatusCode().is2xxSuccessful() || thumborResponse.getBody() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found: " + normalizedImageId);
+        }
+
+        MediaType contentType = thumborResponse.getHeaders().getContentType();
+        if (contentType == null) {
+            contentType = MediaType.APPLICATION_OCTET_STREAM;
+        }
+
+        Resource resource = new ByteArrayResource(thumborResponse.getBody());
+        return new PublicImageContentResponse(resource, contentType);
+    }
+
     @Scheduled(cron = "${sale.public-cart.cleanup-cron:0 0 3 * * *}")
     @Transactional
     public void cleanupExpiredPublicCartOrders() {

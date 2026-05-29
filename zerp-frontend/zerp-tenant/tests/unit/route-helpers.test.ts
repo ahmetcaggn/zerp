@@ -10,6 +10,7 @@ describe('route helpers', () => {
 
   it('detects protected paths', () => {
     expect(isProtectedPath('/dashboard')).toBe(true)
+    expect(isProtectedPath('/shops')).toBe(true)
     expect(isProtectedPath('/dashboard/orders')).toBe(true)
     expect(isProtectedPath('/login')).toBe(false)
   })

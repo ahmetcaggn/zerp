@@ -110,6 +110,7 @@ export interface MessageDictionary {
     login: string
     register: string
     dashboard: string
+    shops: string
     logout: string
     language: string
     menu: string
@@ -143,6 +144,56 @@ export interface MessageDictionary {
     addEmployeeAction: string
     sendNotificationAction: string
     newTicketAction: string
+  }
+  shops: {
+    title: string
+    subtitle: string
+    selectShopLabel: string
+    searchPlaceholder: string
+    searchButton: string
+    clearButton: string
+    emptyState: string
+    detailsTitle: string
+    detailsSubtitle: string
+    imageSectionTitle: string
+    imageSectionSubtitle: string
+    imagePlaceholder: string
+    imageGuideline: string
+    uploadButton: string
+    uploading: string
+    imageReadyLabel: string
+    nameLabel: string
+    descriptionLabel: string
+    menuLanguageLabel: string
+    menuLanguageTr: string
+    menuLanguageEn: string
+    emailLabel: string
+    phoneLabel: string
+    websiteLabel: string
+    addressLabel: string
+    cityLabel: string
+    stateLabel: string
+    countryLabel: string
+    postalCodeLabel: string
+    notSelected: string
+    latitudeLabel: string
+    longitudeLabel: string
+    useCurrentLocationButton: string
+    locating: string
+    saveButton: string
+    requiredName: string
+    latitudeValidation: string
+    longitudeValidation: string
+    updatedToast: string
+    imageUploadedToast: string
+    imageUploadError: string
+    unsupportedImageType: string
+    maxImageSizeHint: string
+    selectShopWarning: string
+    locationNotSupported: string
+    locationPermissionDenied: string
+    locationFetchFailed: string
+    locationAppliedToast: string
   }
   employees: {
     title: string

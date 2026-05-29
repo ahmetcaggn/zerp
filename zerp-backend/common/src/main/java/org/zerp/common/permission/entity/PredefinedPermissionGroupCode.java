@@ -96,7 +96,6 @@ public enum PredefinedPermissionGroupCode {
                     PermissionAction.READ_TICKET_COMMENT,
                     PermissionAction.CREATE_TICKET_COMMENT,
                     PermissionAction.READ_TICKET_HISTORY,
-                    PermissionAction.CREATE_TICKET_HISTORY,
                     PermissionAction.READ_TEAM,
                     PermissionAction.CREATE_TEAM,
                     PermissionAction.UPDATE_TEAM,

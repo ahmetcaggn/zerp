@@ -40,6 +40,7 @@ const COLLAPSED_DRAWER_WIDTH = 64
 
 type SidebarLabelKey =
   | 'nav.dashboard'
+  | 'nav.shops'
   | 'nav.sale'
   | 'nav.tables'
   | 'nav.cashier'
@@ -58,6 +59,7 @@ interface SidebarAction {
 
 const GLOBAL_SIDEBAR_ACTIONS: SidebarAction[] = [
   { id: 'dashboard', labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon />, href: '/dashboard' },
+  { id: 'shops', labelKey: 'nav.shops', icon: <StorefrontRoundedIcon />, href: '/shops' },
   { id: 'employees', labelKey: 'nav.employees', icon: <PeopleAltRoundedIcon />, href: '/employees' },
   { id: 'permission-groups', labelKey: 'nav.permissionGroups', icon: <RuleFolderRoundedIcon />, href: '/permission-groups' },
   { id: 'tickets', labelKey: 'nav.tickets', icon: <SupportAgentRoundedIcon />, href: '/tickets' },

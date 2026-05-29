@@ -134,6 +134,22 @@ public class PublicSaleController {
                 .body(response.resource());
     }
 
+    @GetMapping("/shops/{shopId}/image")
+    public ResponseEntity<Resource> getShopImage(
+            @PathVariable UUID shopId,
+            @RequestParam(name = "size", required = false) String size
+    ) {
+        PublicImageContentResponse response = publicSaleService.getShopImage(shopId, resolveImageSize(size));
+        MediaType contentType = response.contentType() != null
+                ? response.contentType()
+                : MediaType.APPLICATION_OCTET_STREAM;
+
+        return ResponseEntity.ok()
+                .contentType(contentType)
+                .cacheControl(CacheControl.maxAge(7, TimeUnit.DAYS).cachePublic())
+                .body(response.resource());
+    }
+
     private ImageSize resolveImageSize(String size) {
         if (size == null || size.isBlank()) {
             return ImageSize.SMALL;
