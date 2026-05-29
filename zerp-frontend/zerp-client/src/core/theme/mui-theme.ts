@@ -48,7 +48,7 @@ export function createAppTheme(mode: ThemeMode) {
       },
     },
     shape: {
-      borderRadius: 12,
+      borderRadius: 8,
     },
     typography: {
       fontFamily: 'var(--font-dm-sans), "Segoe UI", sans-serif',

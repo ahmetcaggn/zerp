@@ -8,6 +8,8 @@ import type {
   PublicNearbyShopsParams,
   PublicShopDto,
   PublicShopMenuResponseDto,
+  PublicShopsFeedParams,
+  PublicShopsFeedResponse,
 } from '../types'
 
 export async function getPublicShops(): Promise<PublicShopDto[]> {
@@ -28,6 +30,34 @@ export async function getPublicNearbyShops(
     _end: String(end),
   })
   return httpClient.requestList<PublicShopDto>(`/sale/public/shops/nearby?${query.toString()}`)
+}
+
+export async function getPublicShopsFeed(params: PublicShopsFeedParams): Promise<PublicShopsFeedResponse> {
+  const query = new URLSearchParams()
+
+  query.set('mode', params.mode ?? 'ALL')
+  query.set('page', String(params.page ?? 1))
+  query.set('pageSize', String(params.pageSize ?? 12))
+  query.set('sortBy', params.sortBy ?? 'NAME')
+  query.set('order', params.order ?? 'ASC')
+
+  if (params.q?.trim()) {
+    query.set('q', params.q.trim())
+  }
+  if (params.city?.trim()) {
+    query.set('city', params.city.trim())
+  }
+  if (params.state?.trim()) {
+    query.set('state', params.state.trim())
+  }
+  if (typeof params.lat === 'number') {
+    query.set('lat', String(params.lat))
+  }
+  if (typeof params.lng === 'number') {
+    query.set('lng', String(params.lng))
+  }
+
+  return httpClient.get<PublicShopsFeedResponse>(`/sale/public/shops/feed?${query.toString()}`)
 }
 
 export async function getPublicShopMenu(

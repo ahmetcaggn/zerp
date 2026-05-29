@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query'
 
 import { queryKeys } from '@/core/api/query-keys'
 
@@ -10,8 +10,13 @@ import {
   getPublicNearbyShops,
   getPublicShopMenu,
   getPublicShops,
+  getPublicShopsFeed,
 } from '../api/public-sale-client'
-import type { CreatePublicCartOrderRequest, PublicCategoryMenuItemsParams } from '../types'
+import type {
+  CreatePublicCartOrderRequest,
+  PublicCategoryMenuItemsParams,
+  PublicShopsFeedParams,
+} from '../types'
 
 export function usePublicShops() {
   return useQuery({
@@ -43,6 +48,36 @@ export function usePublicShopMenu(shopId: string, language: 'TR' | 'EN') {
     queryKey: [...queryKeys.client.restaurants.menu, shopId, language],
     queryFn: () => getPublicShopMenu(shopId, language),
     enabled: !!shopId,
+  })
+}
+
+export function usePublicShopsFeedInfinite(params: Omit<PublicShopsFeedParams, 'page'>) {
+  const isNearbyMode = params.mode === 'NEARBY'
+  const enabled = isNearbyMode
+    ? typeof params.lat === 'number' && typeof params.lng === 'number'
+    : true
+
+  return useInfiniteQuery({
+    queryKey: [
+      ...queryKeys.client.restaurants.feed,
+      params.mode ?? 'ALL',
+      params.pageSize ?? 12,
+      params.q ?? '',
+      params.city ?? '',
+      params.state ?? '',
+      params.sortBy ?? 'NAME',
+      params.order ?? 'ASC',
+      params.lat ?? null,
+      params.lng ?? null,
+    ],
+    queryFn: ({ pageParam }) =>
+      getPublicShopsFeed({
+        ...params,
+        page: pageParam,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => (lastPage.hasMore ? (lastPage.nextPage ?? undefined) : undefined),
+    enabled,
   })
 }
 

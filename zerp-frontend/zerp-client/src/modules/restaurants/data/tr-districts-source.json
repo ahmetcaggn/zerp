@@ -1,0 +1,6813 @@
+[
+  {
+    "cityCode": "1",
+    "cityName": "ADANA",
+    "districtCode": "1757",
+    "districtName": "ALADAĞ",
+    "postalCode": "01720"
+  },
+  {
+    "cityCode": "1",
+    "cityName": "ADANA",
+    "districtCode": "1219",
+    "districtName": "CEYHAN",
+    "postalCode": "01920"
+  },
+  {
+    "cityCode": "1",
+    "cityName": "ADANA",
+    "districtCode": "2033",
+    "districtName": "ÇUKUROVA",
+    "postalCode": "01360"
+  },
+  {
+    "cityCode": "1",
+    "cityName": "ADANA",
+    "districtCode": "1329",
+    "districtName": "FEKE",
+    "postalCode": "01660"
+  },
+  {
+    "cityCode": "1",
+    "cityName": "ADANA",
+    "districtCode": "1806",
+    "districtName": "İMAMOĞLU",
+    "postalCode": "01700"
+  },
+  {
+    "cityCode": "1",
+    "cityName": "ADANA",
+    "districtCode": "1437",
+    "districtName": "KARAİSALI",
+    "postalCode": "01770"
+  },
+  {
+    "cityCode": "1",
+    "cityName": "ADANA",
+    "districtCode": "1443",
+    "districtName": "KARATAŞ",
+    "postalCode": "01900"
+  },
+  {
+    "cityCode": "1",
+    "cityName": "ADANA",
+    "districtCode": "1486",
+    "districtName": "KOZAN",
+    "postalCode": "01530"
+  },
+  {
+    "cityCode": "1",
+    "cityName": "ADANA",
+    "districtCode": "1580",
+    "districtName": "POZANTI",
+    "postalCode": "01490"
+  },
+  {
+    "cityCode": "1",
+    "cityName": "ADANA",
+    "districtCode": "1588",
+    "districtName": "SAİMBEYLİ",
+    "postalCode": "01740"
+  },
+  {
+    "cityCode": "1",
+    "cityName": "ADANA",
+    "districtCode": "2032",
+    "districtName": "SARIÇAM",
+    "postalCode": "01410"
+  },
+  {
+    "cityCode": "1",
+    "cityName": "ADANA",
+    "districtCode": "1104",
+    "districtName": "SEYHAN",
+    "postalCode": "01040"
+  },
+  {
+    "cityCode": "1",
+    "cityName": "ADANA",
+    "districtCode": "1687",
+    "districtName": "TUFANBEYLİ",
+    "postalCode": "01640"
+  },
+  {
+    "cityCode": "1",
+    "cityName": "ADANA",
+    "districtCode": "1734",
+    "districtName": "YUMURTALIK",
+    "postalCode": "01680"
+  },
+  {
+    "cityCode": "1",
+    "cityName": "ADANA",
+    "districtCode": "1748",
+    "districtName": "YÜREĞİR",
+    "postalCode": "01358"
+  },
+  {
+    "cityCode": "2",
+    "cityName": "ADIYAMAN",
+    "districtCode": "1182",
+    "districtName": "BESNİ",
+    "postalCode": "02300"
+  },
+  {
+    "cityCode": "2",
+    "cityName": "ADIYAMAN",
+    "districtCode": "1246",
+    "districtName": "ÇELİKHAN",
+    "postalCode": "02600"
+  },
+  {
+    "cityCode": "2",
+    "cityName": "ADIYAMAN",
+    "districtCode": "1347",
+    "districtName": "GERGER",
+    "postalCode": "02700"
+  },
+  {
+    "cityCode": "2",
+    "cityName": "ADIYAMAN",
+    "districtCode": "1354",
+    "districtName": "GÖLBAŞI",
+    "postalCode": "02530"
+  },
+  {
+    "cityCode": "2",
+    "cityName": "ADIYAMAN",
+    "districtCode": "1425",
+    "districtName": "KAHTA",
+    "postalCode": "02450"
+  },
+  {
+    "cityCode": "2",
+    "cityName": "ADIYAMAN",
+    "districtCode": "1105",
+    "districtName": "MERKEZ",
+    "postalCode": "02230"
+  },
+  {
+    "cityCode": "2",
+    "cityName": "ADIYAMAN",
+    "districtCode": "1592",
+    "districtName": "SAMSAT",
+    "postalCode": "02800"
+  },
+  {
+    "cityCode": "2",
+    "cityName": "ADIYAMAN",
+    "districtCode": "1985",
+    "districtName": "SİNCİK",
+    "postalCode": "02920"
+  },
+  {
+    "cityCode": "2",
+    "cityName": "ADIYAMAN",
+    "districtCode": "1989",
+    "districtName": "TUT",
+    "postalCode": "02350"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1771",
+    "districtName": "BAŞMAKÇI",
+    "postalCode": "03450"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1773",
+    "districtName": "BAYAT",
+    "postalCode": "03780"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1200",
+    "districtName": "BOLVADİN",
+    "postalCode": "03300"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1239",
+    "districtName": "ÇAY",
+    "postalCode": "03700"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1906",
+    "districtName": "ÇOBANLAR",
+    "postalCode": "03060"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1267",
+    "districtName": "DAZKIRI",
+    "postalCode": "03950"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1281",
+    "districtName": "DİNAR",
+    "postalCode": "03400"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1306",
+    "districtName": "EMİRDAĞ",
+    "postalCode": "03630"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1923",
+    "districtName": "EVCİLER",
+    "postalCode": "03960"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1944",
+    "districtName": "HOCALAR",
+    "postalCode": "03530"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1404",
+    "districtName": "İHSANİYE",
+    "postalCode": "03380"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1809",
+    "districtName": "İSCEHİSAR",
+    "postalCode": "03750"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1961",
+    "districtName": "KIZILÖREN",
+    "postalCode": "03560"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1108",
+    "districtName": "MERKEZ",
+    "postalCode": "03217"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1594",
+    "districtName": "SANDIKLI",
+    "postalCode": "03510"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1626",
+    "districtName": "SİNANPAŞA",
+    "postalCode": "03860"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1639",
+    "districtName": "SULTANDAĞI",
+    "postalCode": "03910"
+  },
+  {
+    "cityCode": "3",
+    "cityName": "AFYONKARAHİSAR",
+    "districtCode": "1664",
+    "districtName": "ŞUHUT",
+    "postalCode": "03830"
+  },
+  {
+    "cityCode": "4",
+    "cityName": "AĞRI",
+    "districtCode": "1283",
+    "districtName": "DİYADİN",
+    "postalCode": "04900"
+  },
+  {
+    "cityCode": "4",
+    "cityName": "AĞRI",
+    "districtCode": "1287",
+    "districtName": "DOĞUBAYAZIT",
+    "postalCode": "04400"
+  },
+  {
+    "cityCode": "4",
+    "cityName": "AĞRI",
+    "districtCode": "1301",
+    "districtName": "ELEŞKİRT",
+    "postalCode": "04600"
+  },
+  {
+    "cityCode": "4",
+    "cityName": "AĞRI",
+    "districtCode": "1379",
+    "districtName": "HAMUR",
+    "postalCode": "04850"
+  },
+  {
+    "cityCode": "4",
+    "cityName": "AĞRI",
+    "districtCode": "1111",
+    "districtName": "MERKEZ",
+    "postalCode": "04200"
+  },
+  {
+    "cityCode": "4",
+    "cityName": "AĞRI",
+    "districtCode": "1568",
+    "districtName": "PATNOS",
+    "postalCode": "04500"
+  },
+  {
+    "cityCode": "4",
+    "cityName": "AĞRI",
+    "districtCode": "1667",
+    "districtName": "TAŞLIÇAY",
+    "postalCode": "04800"
+  },
+  {
+    "cityCode": "4",
+    "cityName": "AĞRI",
+    "districtCode": "1691",
+    "districtName": "TUTAK",
+    "postalCode": "04700"
+  },
+  {
+    "cityCode": "5",
+    "cityName": "AMASYA",
+    "districtCode": "1363",
+    "districtName": "GÖYNÜCEK",
+    "postalCode": "05900"
+  },
+  {
+    "cityCode": "5",
+    "cityName": "AMASYA",
+    "districtCode": "1368",
+    "districtName": "GÜMÜŞHACIKÖY",
+    "postalCode": "05700"
+  },
+  {
+    "cityCode": "5",
+    "cityName": "AMASYA",
+    "districtCode": "1938",
+    "districtName": "HAMAMÖZÜ",
+    "postalCode": "05720"
+  },
+  {
+    "cityCode": "5",
+    "cityName": "AMASYA",
+    "districtCode": "1134",
+    "districtName": "MERKEZ",
+    "postalCode": "05200"
+  },
+  {
+    "cityCode": "5",
+    "cityName": "AMASYA",
+    "districtCode": "1524",
+    "districtName": "MERZİFON",
+    "postalCode": "05300"
+  },
+  {
+    "cityCode": "5",
+    "cityName": "AMASYA",
+    "districtCode": "1641",
+    "districtName": "SULUOVA",
+    "postalCode": "05500"
+  },
+  {
+    "cityCode": "5",
+    "cityName": "AMASYA",
+    "districtCode": "1668",
+    "districtName": "TAŞOVA",
+    "postalCode": "05845"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1872",
+    "districtName": "AKYURT",
+    "postalCode": "06750"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1130",
+    "districtName": "ALTINDAĞ",
+    "postalCode": "06080"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1157",
+    "districtName": "AYAŞ",
+    "postalCode": "06710"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1167",
+    "districtName": "BALA",
+    "postalCode": "06726"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1187",
+    "districtName": "BEYPAZARI",
+    "postalCode": "06730"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1227",
+    "districtName": "ÇAMLIDERE",
+    "postalCode": "06740"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1231",
+    "districtName": "ÇANKAYA",
+    "postalCode": "06530"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1260",
+    "districtName": "ÇUBUK",
+    "postalCode": "06760"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1302",
+    "districtName": "ELMADAĞ",
+    "postalCode": "06780"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1922",
+    "districtName": "ETİMESGUT",
+    "postalCode": "06794"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1924",
+    "districtName": "EVREN",
+    "postalCode": "06770"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1744",
+    "districtName": "GÖLBAŞI",
+    "postalCode": "06830"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1365",
+    "districtName": "GÜDÜL",
+    "postalCode": "06842"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1387",
+    "districtName": "HAYMANA",
+    "postalCode": "06860"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1815",
+    "districtName": "KAHRAMANKAZAN",
+    "postalCode": "06980"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1427",
+    "districtName": "KALECİK",
+    "postalCode": "06870"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1745",
+    "districtName": "KEÇİÖREN",
+    "postalCode": "06300"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1473",
+    "districtName": "KIZILCAHAMAM",
+    "postalCode": "06890"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1746",
+    "districtName": "MAMAK",
+    "postalCode": "06620"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1539",
+    "districtName": "NALLIHAN",
+    "postalCode": "06922"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1578",
+    "districtName": "POLATLI",
+    "postalCode": "06900"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "2034",
+    "districtName": "PURSAKLAR",
+    "postalCode": "06145"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1747",
+    "districtName": "SİNCAN",
+    "postalCode": "06935"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1658",
+    "districtName": "ŞEREFLİKOÇHİSAR",
+    "postalCode": "06950"
+  },
+  {
+    "cityCode": "6",
+    "cityName": "ANKARA",
+    "districtCode": "1723",
+    "districtName": "YENİMAHALLE",
+    "postalCode": "06560"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "1121",
+    "districtName": "AKSEKİ",
+    "postalCode": "07630"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "2035",
+    "districtName": "AKSU",
+    "postalCode": "07112"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "1126",
+    "districtName": "ALANYA",
+    "postalCode": "07400"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "1811",
+    "districtName": "DEMRE",
+    "postalCode": "07570"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "2036",
+    "districtName": "DÖŞEMEALTI",
+    "postalCode": "07121"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "1303",
+    "districtName": "ELMALI",
+    "postalCode": "07770"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "1333",
+    "districtName": "FİNİKE",
+    "postalCode": "07740"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "1337",
+    "districtName": "GAZİPAŞA",
+    "postalCode": "07900"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "1370",
+    "districtName": "GÜNDOĞMUŞ",
+    "postalCode": "07860"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "1946",
+    "districtName": "İBRADI",
+    "postalCode": "07680"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "1451",
+    "districtName": "KAŞ",
+    "postalCode": "07976"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "1959",
+    "districtName": "KEMER",
+    "postalCode": "07990"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "2037",
+    "districtName": "KEPEZ",
+    "postalCode": "07090"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "2038",
+    "districtName": "KONYAALTI",
+    "postalCode": "07070"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "1483",
+    "districtName": "KORKUTELİ",
+    "postalCode": "07810"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "1492",
+    "districtName": "KUMLUCA",
+    "postalCode": "07365"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "1512",
+    "districtName": "MANAVGAT",
+    "postalCode": "07600"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "2039",
+    "districtName": "MURATPAŞA",
+    "postalCode": "07050"
+  },
+  {
+    "cityCode": "7",
+    "cityName": "ANTALYA",
+    "districtCode": "1616",
+    "districtName": "SERİK",
+    "postalCode": "07511"
+  },
+  {
+    "cityCode": "8",
+    "cityName": "ARTVİN",
+    "districtCode": "1145",
+    "districtName": "ARDANUÇ",
+    "postalCode": "08300"
+  },
+  {
+    "cityCode": "8",
+    "cityName": "ARTVİN",
+    "districtCode": "1147",
+    "districtName": "ARHAVİ",
+    "postalCode": "08200"
+  },
+  {
+    "cityCode": "8",
+    "cityName": "ARTVİN",
+    "districtCode": "1202",
+    "districtName": "BORÇKA",
+    "postalCode": "08400"
+  },
+  {
+    "cityCode": "8",
+    "cityName": "ARTVİN",
+    "districtCode": "1395",
+    "districtName": "HOPA",
+    "postalCode": "08600"
+  },
+  {
+    "cityCode": "8",
+    "cityName": "ARTVİN",
+    "districtCode": "2105",
+    "districtName": "KEMALPAŞA",
+    "postalCode": "08610"
+  },
+  {
+    "cityCode": "8",
+    "cityName": "ARTVİN",
+    "districtCode": "1152",
+    "districtName": "MERKEZ",
+    "postalCode": "08000"
+  },
+  {
+    "cityCode": "8",
+    "cityName": "ARTVİN",
+    "districtCode": "1828",
+    "districtName": "MURGUL",
+    "postalCode": "08500"
+  },
+  {
+    "cityCode": "8",
+    "cityName": "ARTVİN",
+    "districtCode": "1653",
+    "districtName": "ŞAVŞAT",
+    "postalCode": "08790"
+  },
+  {
+    "cityCode": "8",
+    "cityName": "ARTVİN",
+    "districtCode": "1736",
+    "districtName": "YUSUFELİ",
+    "postalCode": "08890"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "1206",
+    "districtName": "BOZDOĞAN",
+    "postalCode": "09760"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "1781",
+    "districtName": "BUHARKENT",
+    "postalCode": "09670"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "1256",
+    "districtName": "ÇİNE",
+    "postalCode": "09520"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "2000",
+    "districtName": "DİDİM",
+    "postalCode": "09295"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "2076",
+    "districtName": "EFELER",
+    "postalCode": "09100"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "1348",
+    "districtName": "GERMENCİK",
+    "postalCode": "09700"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "1807",
+    "districtName": "İNCİRLİOVA",
+    "postalCode": "09610"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "1435",
+    "districtName": "KARACASU",
+    "postalCode": "09380"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "1957",
+    "districtName": "KARPUZLU",
+    "postalCode": "09540"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "1479",
+    "districtName": "KOÇARLI",
+    "postalCode": "09970"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "1968",
+    "districtName": "KÖŞK",
+    "postalCode": "09570"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "1497",
+    "districtName": "KUŞADASI",
+    "postalCode": "09430"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "1498",
+    "districtName": "KUYUCAK",
+    "postalCode": "09935"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "1542",
+    "districtName": "NAZİLLİ",
+    "postalCode": "09800"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "1637",
+    "districtName": "SÖKE",
+    "postalCode": "09220"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "1640",
+    "districtName": "SULTANHİSAR",
+    "postalCode": "09650"
+  },
+  {
+    "cityCode": "9",
+    "cityName": "AYDIN",
+    "districtCode": "1724",
+    "districtName": "YENİPAZAR",
+    "postalCode": "09350"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "2077",
+    "districtName": "ALTIEYLÜL",
+    "postalCode": "10100"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1161",
+    "districtName": "AYVALIK",
+    "postalCode": "10405"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1169",
+    "districtName": "BALYA",
+    "postalCode": "10840"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1171",
+    "districtName": "BANDIRMA",
+    "postalCode": "10245"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1191",
+    "districtName": "BİGADİÇ",
+    "postalCode": "10440"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1216",
+    "districtName": "BURHANİYE",
+    "postalCode": "10700"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1291",
+    "districtName": "DURSUNBEY",
+    "postalCode": "10800"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1294",
+    "districtName": "EDREMİT",
+    "postalCode": "10390"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1310",
+    "districtName": "ERDEK",
+    "postalCode": "10500"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1928",
+    "districtName": "GÖMEÇ",
+    "postalCode": "10715"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1360",
+    "districtName": "GÖNEN",
+    "postalCode": "10900"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1384",
+    "districtName": "HAVRAN",
+    "postalCode": "10565"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1418",
+    "districtName": "İVRİNDİ",
+    "postalCode": "10785"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "2078",
+    "districtName": "KARESİ",
+    "postalCode": "10085"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1462",
+    "districtName": "KEPSUT",
+    "postalCode": "10660"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1514",
+    "districtName": "MANYAS",
+    "postalCode": "10480"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1824",
+    "districtName": "MARMARA",
+    "postalCode": "10940"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1608",
+    "districtName": "SAVAŞTEPE",
+    "postalCode": "10580"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1619",
+    "districtName": "SINDIRGI",
+    "postalCode": "10330"
+  },
+  {
+    "cityCode": "10",
+    "cityName": "BALIKESİR",
+    "districtCode": "1644",
+    "districtName": "SUSURLUK",
+    "postalCode": "10610"
+  },
+  {
+    "cityCode": "11",
+    "cityName": "BİLECİK",
+    "districtCode": "1210",
+    "districtName": "BOZÜYÜK",
+    "postalCode": "11300"
+  },
+  {
+    "cityCode": "11",
+    "cityName": "BİLECİK",
+    "districtCode": "1359",
+    "districtName": "GÖLPAZARI",
+    "postalCode": "11700"
+  },
+  {
+    "cityCode": "11",
+    "cityName": "BİLECİK",
+    "districtCode": "1948",
+    "districtName": "İNHİSAR",
+    "postalCode": "11640"
+  },
+  {
+    "cityCode": "11",
+    "cityName": "BİLECİK",
+    "districtCode": "1192",
+    "districtName": "MERKEZ",
+    "postalCode": "11000"
+  },
+  {
+    "cityCode": "11",
+    "cityName": "BİLECİK",
+    "districtCode": "1559",
+    "districtName": "OSMANELİ",
+    "postalCode": "11500"
+  },
+  {
+    "cityCode": "11",
+    "cityName": "BİLECİK",
+    "districtCode": "1571",
+    "districtName": "PAZARYERİ",
+    "postalCode": "11800"
+  },
+  {
+    "cityCode": "11",
+    "cityName": "BİLECİK",
+    "districtCode": "1636",
+    "districtName": "SÖĞÜT",
+    "postalCode": "11600"
+  },
+  {
+    "cityCode": "11",
+    "cityName": "BİLECİK",
+    "districtCode": "1857",
+    "districtName": "YENİPAZAR",
+    "postalCode": "11780"
+  },
+  {
+    "cityCode": "12",
+    "cityName": "BİNGÖL",
+    "districtCode": "1750",
+    "districtName": "ADAKLI",
+    "postalCode": "12600"
+  },
+  {
+    "cityCode": "12",
+    "cityName": "BİNGÖL",
+    "districtCode": "1344",
+    "districtName": "GENÇ",
+    "postalCode": "12500"
+  },
+  {
+    "cityCode": "12",
+    "cityName": "BİNGÖL",
+    "districtCode": "1446",
+    "districtName": "KARLIOVA",
+    "postalCode": "12900"
+  },
+  {
+    "cityCode": "12",
+    "cityName": "BİNGÖL",
+    "districtCode": "1475",
+    "districtName": "KİĞI",
+    "postalCode": "12800"
+  },
+  {
+    "cityCode": "12",
+    "cityName": "BİNGÖL",
+    "districtCode": "1193",
+    "districtName": "MERKEZ",
+    "postalCode": "12400"
+  },
+  {
+    "cityCode": "12",
+    "cityName": "BİNGÖL",
+    "districtCode": "1633",
+    "districtName": "SOLHAN",
+    "postalCode": "12700"
+  },
+  {
+    "cityCode": "12",
+    "cityName": "BİNGÖL",
+    "districtCode": "1855",
+    "districtName": "YAYLADERE",
+    "postalCode": "12650"
+  },
+  {
+    "cityCode": "12",
+    "cityName": "BİNGÖL",
+    "districtCode": "1996",
+    "districtName": "YEDİSU",
+    "postalCode": "12830"
+  },
+  {
+    "cityCode": "13",
+    "cityName": "BİTLİS",
+    "districtCode": "1106",
+    "districtName": "ADİLCEVAZ",
+    "postalCode": "13500"
+  },
+  {
+    "cityCode": "13",
+    "cityName": "BİTLİS",
+    "districtCode": "1112",
+    "districtName": "AHLAT",
+    "postalCode": "13400"
+  },
+  {
+    "cityCode": "13",
+    "cityName": "BİTLİS",
+    "districtCode": "1798",
+    "districtName": "GÜROYMAK",
+    "postalCode": "13810"
+  },
+  {
+    "cityCode": "13",
+    "cityName": "BİTLİS",
+    "districtCode": "1394",
+    "districtName": "HİZAN",
+    "postalCode": "13600"
+  },
+  {
+    "cityCode": "13",
+    "cityName": "BİTLİS",
+    "districtCode": "1196",
+    "districtName": "MERKEZ",
+    "postalCode": "13000"
+  },
+  {
+    "cityCode": "13",
+    "cityName": "BİTLİS",
+    "districtCode": "1537",
+    "districtName": "MUTKİ",
+    "postalCode": "13700"
+  },
+  {
+    "cityCode": "13",
+    "cityName": "BİTLİS",
+    "districtCode": "1669",
+    "districtName": "TATVAN",
+    "postalCode": "13200"
+  },
+  {
+    "cityCode": "14",
+    "cityName": "BOLU",
+    "districtCode": "1916",
+    "districtName": "DÖRTDİVAN",
+    "postalCode": "14910"
+  },
+  {
+    "cityCode": "14",
+    "cityName": "BOLU",
+    "districtCode": "1346",
+    "districtName": "GEREDE",
+    "postalCode": "14900"
+  },
+  {
+    "cityCode": "14",
+    "cityName": "BOLU",
+    "districtCode": "1364",
+    "districtName": "GÖYNÜK",
+    "postalCode": "14780"
+  },
+  {
+    "cityCode": "14",
+    "cityName": "BOLU",
+    "districtCode": "1466",
+    "districtName": "KIBRISCIK",
+    "postalCode": "14610"
+  },
+  {
+    "cityCode": "14",
+    "cityName": "BOLU",
+    "districtCode": "1522",
+    "districtName": "MENGEN",
+    "postalCode": "14850"
+  },
+  {
+    "cityCode": "14",
+    "cityName": "BOLU",
+    "districtCode": "1199",
+    "districtName": "MERKEZ",
+    "postalCode": "14300"
+  },
+  {
+    "cityCode": "14",
+    "cityName": "BOLU",
+    "districtCode": "1531",
+    "districtName": "MUDURNU",
+    "postalCode": "14800"
+  },
+  {
+    "cityCode": "14",
+    "cityName": "BOLU",
+    "districtCode": "1610",
+    "districtName": "SEBEN",
+    "postalCode": "14750"
+  },
+  {
+    "cityCode": "14",
+    "cityName": "BOLU",
+    "districtCode": "1997",
+    "districtName": "YENİÇAĞA",
+    "postalCode": "14650"
+  },
+  {
+    "cityCode": "15",
+    "cityName": "BURDUR",
+    "districtCode": "1109",
+    "districtName": "AĞLASUN",
+    "postalCode": "15800"
+  },
+  {
+    "cityCode": "15",
+    "cityName": "BURDUR",
+    "districtCode": "1874",
+    "districtName": "ALTINYAYLA",
+    "postalCode": "15420"
+  },
+  {
+    "cityCode": "15",
+    "cityName": "BURDUR",
+    "districtCode": "1211",
+    "districtName": "BUCAK",
+    "postalCode": "15300"
+  },
+  {
+    "cityCode": "15",
+    "cityName": "BURDUR",
+    "districtCode": "1899",
+    "districtName": "ÇAVDIR",
+    "postalCode": "15900"
+  },
+  {
+    "cityCode": "15",
+    "cityName": "BURDUR",
+    "districtCode": "1903",
+    "districtName": "ÇELTİKÇİ",
+    "postalCode": "15070"
+  },
+  {
+    "cityCode": "15",
+    "cityName": "BURDUR",
+    "districtCode": "1357",
+    "districtName": "GÖLHİSAR",
+    "postalCode": "15400"
+  },
+  {
+    "cityCode": "15",
+    "cityName": "BURDUR",
+    "districtCode": "1813",
+    "districtName": "KARAMANLI",
+    "postalCode": "15700"
+  },
+  {
+    "cityCode": "15",
+    "cityName": "BURDUR",
+    "districtCode": "1816",
+    "districtName": "KEMER",
+    "postalCode": "15090"
+  },
+  {
+    "cityCode": "15",
+    "cityName": "BURDUR",
+    "districtCode": "1215",
+    "districtName": "MERKEZ",
+    "postalCode": "15100"
+  },
+  {
+    "cityCode": "15",
+    "cityName": "BURDUR",
+    "districtCode": "1672",
+    "districtName": "TEFENNİ",
+    "postalCode": "15600"
+  },
+  {
+    "cityCode": "15",
+    "cityName": "BURDUR",
+    "districtCode": "1728",
+    "districtName": "YEŞİLOVA",
+    "postalCode": "15500"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1783",
+    "districtName": "BÜYÜKORHAN",
+    "postalCode": "16990"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1343",
+    "districtName": "GEMLİK",
+    "postalCode": "16600"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1935",
+    "districtName": "GÜRSU",
+    "postalCode": "16580"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1799",
+    "districtName": "HARMANCIK",
+    "postalCode": "16770"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1411",
+    "districtName": "İNEGÖL",
+    "postalCode": "16415"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1420",
+    "districtName": "İZNİK",
+    "postalCode": "16870"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1434",
+    "districtName": "KARACABEY",
+    "postalCode": "16700"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1457",
+    "districtName": "KELES",
+    "postalCode": "16740"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1960",
+    "districtName": "KESTEL",
+    "postalCode": "16460"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1530",
+    "districtName": "MUDANYA",
+    "postalCode": "16950"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1535",
+    "districtName": "MUSTAFAKEMALPAŞA",
+    "postalCode": "16535"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1829",
+    "districtName": "NİLÜFER",
+    "postalCode": "16110"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1553",
+    "districtName": "ORHANELİ",
+    "postalCode": "16980"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1554",
+    "districtName": "ORHANGAZİ",
+    "postalCode": "16810"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1832",
+    "districtName": "OSMANGAZİ",
+    "postalCode": "16190"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1725",
+    "districtName": "YENİŞEHİR",
+    "postalCode": "16900"
+  },
+  {
+    "cityCode": "16",
+    "cityName": "BURSA",
+    "districtCode": "1859",
+    "districtName": "YILDIRIM",
+    "postalCode": "16290"
+  },
+  {
+    "cityCode": "17",
+    "cityName": "ÇANAKKALE",
+    "districtCode": "1160",
+    "districtName": "AYVACIK",
+    "postalCode": "17860"
+  },
+  {
+    "cityCode": "17",
+    "cityName": "ÇANAKKALE",
+    "districtCode": "1180",
+    "districtName": "BAYRAMİÇ",
+    "postalCode": "17700"
+  },
+  {
+    "cityCode": "17",
+    "cityName": "ÇANAKKALE",
+    "districtCode": "1190",
+    "districtName": "BİGA",
+    "postalCode": "17200"
+  },
+  {
+    "cityCode": "17",
+    "cityName": "ÇANAKKALE",
+    "districtCode": "1205",
+    "districtName": "BOZCAADA",
+    "postalCode": "17680"
+  },
+  {
+    "cityCode": "17",
+    "cityName": "ÇANAKKALE",
+    "districtCode": "1229",
+    "districtName": "ÇAN",
+    "postalCode": "17400"
+  },
+  {
+    "cityCode": "17",
+    "cityName": "ÇANAKKALE",
+    "districtCode": "1293",
+    "districtName": "ECEABAT",
+    "postalCode": "17900"
+  },
+  {
+    "cityCode": "17",
+    "cityName": "ÇANAKKALE",
+    "districtCode": "1326",
+    "districtName": "EZİNE",
+    "postalCode": "17600"
+  },
+  {
+    "cityCode": "17",
+    "cityName": "ÇANAKKALE",
+    "districtCode": "1340",
+    "districtName": "GELİBOLU",
+    "postalCode": "17360"
+  },
+  {
+    "cityCode": "17",
+    "cityName": "ÇANAKKALE",
+    "districtCode": "1408",
+    "districtName": "GÖKÇEADA",
+    "postalCode": "17760"
+  },
+  {
+    "cityCode": "17",
+    "cityName": "ÇANAKKALE",
+    "districtCode": "1503",
+    "districtName": "LAPSEKİ",
+    "postalCode": "17810"
+  },
+  {
+    "cityCode": "17",
+    "cityName": "ÇANAKKALE",
+    "districtCode": "1230",
+    "districtName": "MERKEZ",
+    "postalCode": "17020"
+  },
+  {
+    "cityCode": "17",
+    "cityName": "ÇANAKKALE",
+    "districtCode": "1722",
+    "districtName": "YENİCE",
+    "postalCode": "17560"
+  },
+  {
+    "cityCode": "18",
+    "cityName": "ÇANKIRI",
+    "districtCode": "1765",
+    "districtName": "ATKARACALAR",
+    "postalCode": "18310"
+  },
+  {
+    "cityCode": "18",
+    "cityName": "ÇANKIRI",
+    "districtCode": "1885",
+    "districtName": "BAYRAMÖREN",
+    "postalCode": "18320"
+  },
+  {
+    "cityCode": "18",
+    "cityName": "ÇANKIRI",
+    "districtCode": "1248",
+    "districtName": "ÇERKEŞ",
+    "postalCode": "18600"
+  },
+  {
+    "cityCode": "18",
+    "cityName": "ÇANKIRI",
+    "districtCode": "1300",
+    "districtName": "ELDİVAN",
+    "postalCode": "18700"
+  },
+  {
+    "cityCode": "18",
+    "cityName": "ÇANKIRI",
+    "districtCode": "1399",
+    "districtName": "ILGAZ",
+    "postalCode": "18400"
+  },
+  {
+    "cityCode": "18",
+    "cityName": "ÇANKIRI",
+    "districtCode": "1817",
+    "districtName": "KIZILIRMAK",
+    "postalCode": "18280"
+  },
+  {
+    "cityCode": "18",
+    "cityName": "ÇANKIRI",
+    "districtCode": "1963",
+    "districtName": "KORGUN",
+    "postalCode": "18260"
+  },
+  {
+    "cityCode": "18",
+    "cityName": "ÇANKIRI",
+    "districtCode": "1494",
+    "districtName": "KURŞUNLU",
+    "postalCode": "18300"
+  },
+  {
+    "cityCode": "18",
+    "cityName": "ÇANKIRI",
+    "districtCode": "1232",
+    "districtName": "MERKEZ",
+    "postalCode": "18100"
+  },
+  {
+    "cityCode": "18",
+    "cityName": "ÇANKIRI",
+    "districtCode": "1555",
+    "districtName": "ORTA",
+    "postalCode": "18800"
+  },
+  {
+    "cityCode": "18",
+    "cityName": "ÇANKIRI",
+    "districtCode": "1649",
+    "districtName": "ŞABANÖZÜ",
+    "postalCode": "18650"
+  },
+  {
+    "cityCode": "18",
+    "cityName": "ÇANKIRI",
+    "districtCode": "1718",
+    "districtName": "YAPRAKLI",
+    "postalCode": "18900"
+  },
+  {
+    "cityCode": "19",
+    "cityName": "ÇORUM",
+    "districtCode": "1124",
+    "districtName": "ALACA",
+    "postalCode": "19600"
+  },
+  {
+    "cityCode": "19",
+    "cityName": "ÇORUM",
+    "districtCode": "1177",
+    "districtName": "BAYAT",
+    "postalCode": "19800"
+  },
+  {
+    "cityCode": "19",
+    "cityName": "ÇORUM",
+    "districtCode": "1778",
+    "districtName": "BOĞAZKALE",
+    "postalCode": "19310"
+  },
+  {
+    "cityCode": "19",
+    "cityName": "ÇORUM",
+    "districtCode": "1911",
+    "districtName": "DODURGA",
+    "postalCode": "19060"
+  },
+  {
+    "cityCode": "19",
+    "cityName": "ÇORUM",
+    "districtCode": "1414",
+    "districtName": "İSKİLİP",
+    "postalCode": "19400"
+  },
+  {
+    "cityCode": "19",
+    "cityName": "ÇORUM",
+    "districtCode": "1445",
+    "districtName": "KARGI",
+    "postalCode": "19900"
+  },
+  {
+    "cityCode": "19",
+    "cityName": "ÇORUM",
+    "districtCode": "1972",
+    "districtName": "LAÇİN",
+    "postalCode": "19020"
+  },
+  {
+    "cityCode": "19",
+    "cityName": "ÇORUM",
+    "districtCode": "1520",
+    "districtName": "MECİTÖZÜ",
+    "postalCode": "19700"
+  },
+  {
+    "cityCode": "19",
+    "cityName": "ÇORUM",
+    "districtCode": "1259",
+    "districtName": "MERKEZ",
+    "postalCode": "19000"
+  },
+  {
+    "cityCode": "19",
+    "cityName": "ÇORUM",
+    "districtCode": "1976",
+    "districtName": "OĞUZLAR",
+    "postalCode": "19070"
+  },
+  {
+    "cityCode": "19",
+    "cityName": "ÇORUM",
+    "districtCode": "1556",
+    "districtName": "ORTAKÖY",
+    "postalCode": "19950"
+  },
+  {
+    "cityCode": "19",
+    "cityName": "ÇORUM",
+    "districtCode": "1558",
+    "districtName": "OSMANCIK",
+    "postalCode": "19500"
+  },
+  {
+    "cityCode": "19",
+    "cityName": "ÇORUM",
+    "districtCode": "1642",
+    "districtName": "SUNGURLU",
+    "postalCode": "19300"
+  },
+  {
+    "cityCode": "19",
+    "cityName": "ÇORUM",
+    "districtCode": "1850",
+    "districtName": "UĞURLUDAĞ",
+    "postalCode": "19410"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1102",
+    "districtName": "ACIPAYAM",
+    "postalCode": "20800"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1769",
+    "districtName": "BABADAĞ",
+    "postalCode": "20480"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1881",
+    "districtName": "BAKLAN",
+    "postalCode": "20770"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1774",
+    "districtName": "BEKİLLİ",
+    "postalCode": "20930"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1888",
+    "districtName": "BEYAĞAÇ",
+    "postalCode": "20590"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1889",
+    "districtName": "BOZKURT",
+    "postalCode": "20370"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1214",
+    "districtName": "BULDAN",
+    "postalCode": "20400"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1224",
+    "districtName": "ÇAL",
+    "postalCode": "20710"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1226",
+    "districtName": "ÇAMELİ",
+    "postalCode": "20980"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1233",
+    "districtName": "ÇARDAK",
+    "postalCode": "20360"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1257",
+    "districtName": "ÇİVRİL",
+    "postalCode": "20690"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1371",
+    "districtName": "GÜNEY",
+    "postalCode": "20460"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1803",
+    "districtName": "HONAZ",
+    "postalCode": "20330"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1426",
+    "districtName": "KALE",
+    "postalCode": "20570"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "2079",
+    "districtName": "MERKEZEFENDİ",
+    "postalCode": "20040"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1871",
+    "districtName": "PAMUKKALE",
+    "postalCode": "20180"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1597",
+    "districtName": "SARAYKÖY",
+    "postalCode": "20315"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1840",
+    "districtName": "SERİNHİSAR",
+    "postalCode": "20430"
+  },
+  {
+    "cityCode": "20",
+    "cityName": "DENİZLİ",
+    "districtCode": "1670",
+    "districtName": "TAVAS",
+    "postalCode": "20535"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "2040",
+    "districtName": "BAĞLAR",
+    "postalCode": "21090"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "1195",
+    "districtName": "BİSMİL",
+    "postalCode": "21500"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "1249",
+    "districtName": "ÇERMİK",
+    "postalCode": "21600"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "1253",
+    "districtName": "ÇINAR",
+    "postalCode": "21750"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "1263",
+    "districtName": "ÇÜNGÜŞ",
+    "postalCode": "21870"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "1278",
+    "districtName": "DİCLE",
+    "postalCode": "21830"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "1791",
+    "districtName": "EĞİL",
+    "postalCode": "21470"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "1315",
+    "districtName": "ERGANİ",
+    "postalCode": "21950"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "1381",
+    "districtName": "HANİ",
+    "postalCode": "21800"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "1389",
+    "districtName": "HAZRO",
+    "postalCode": "21560"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "2041",
+    "districtName": "KAYAPINAR",
+    "postalCode": "21070"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "1962",
+    "districtName": "KOCAKÖY",
+    "postalCode": "21450"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "1490",
+    "districtName": "KULP",
+    "postalCode": "21900"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "1504",
+    "districtName": "LİCE",
+    "postalCode": "21700"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "1624",
+    "districtName": "SİLVAN",
+    "postalCode": "21640"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "2042",
+    "districtName": "SUR",
+    "postalCode": "21200"
+  },
+  {
+    "cityCode": "21",
+    "cityName": "DİYARBAKIR",
+    "districtCode": "2043",
+    "districtName": "YENİŞEHİR",
+    "postalCode": "21120"
+  },
+  {
+    "cityCode": "22",
+    "cityName": "EDİRNE",
+    "districtCode": "1307",
+    "districtName": "ENEZ",
+    "postalCode": "22700"
+  },
+  {
+    "cityCode": "22",
+    "cityName": "EDİRNE",
+    "districtCode": "1385",
+    "districtName": "HAVSA",
+    "postalCode": "22500"
+  },
+  {
+    "cityCode": "22",
+    "cityName": "EDİRNE",
+    "districtCode": "1412",
+    "districtName": "İPSALA",
+    "postalCode": "22490"
+  },
+  {
+    "cityCode": "22",
+    "cityName": "EDİRNE",
+    "districtCode": "1464",
+    "districtName": "KEŞAN",
+    "postalCode": "22880"
+  },
+  {
+    "cityCode": "22",
+    "cityName": "EDİRNE",
+    "districtCode": "1502",
+    "districtName": "LALAPAŞA",
+    "postalCode": "22950"
+  },
+  {
+    "cityCode": "22",
+    "cityName": "EDİRNE",
+    "districtCode": "1523",
+    "districtName": "MERİÇ",
+    "postalCode": "22610"
+  },
+  {
+    "cityCode": "22",
+    "cityName": "EDİRNE",
+    "districtCode": "1295",
+    "districtName": "MERKEZ",
+    "postalCode": "22100"
+  },
+  {
+    "cityCode": "22",
+    "cityName": "EDİRNE",
+    "districtCode": "1988",
+    "districtName": "SÜLOĞLU",
+    "postalCode": "22580"
+  },
+  {
+    "cityCode": "22",
+    "cityName": "EDİRNE",
+    "districtCode": "1705",
+    "districtName": "UZUNKÖPRÜ",
+    "postalCode": "22300"
+  },
+  {
+    "cityCode": "23",
+    "cityName": "ELAZIĞ",
+    "districtCode": "1110",
+    "districtName": "AĞIN",
+    "postalCode": "23960"
+  },
+  {
+    "cityCode": "23",
+    "cityName": "ELAZIĞ",
+    "districtCode": "1873",
+    "districtName": "ALACAKAYA",
+    "postalCode": "23410"
+  },
+  {
+    "cityCode": "23",
+    "cityName": "ELAZIĞ",
+    "districtCode": "1762",
+    "districtName": "ARICAK",
+    "postalCode": "23510"
+  },
+  {
+    "cityCode": "23",
+    "cityName": "ELAZIĞ",
+    "districtCode": "1173",
+    "districtName": "BASKİL",
+    "postalCode": "23800"
+  },
+  {
+    "cityCode": "23",
+    "cityName": "ELAZIĞ",
+    "districtCode": "1438",
+    "districtName": "KARAKOÇAN",
+    "postalCode": "23600"
+  },
+  {
+    "cityCode": "23",
+    "cityName": "ELAZIĞ",
+    "districtCode": "1455",
+    "districtName": "KEBAN",
+    "postalCode": "23700"
+  },
+  {
+    "cityCode": "23",
+    "cityName": "ELAZIĞ",
+    "districtCode": "1820",
+    "districtName": "KOVANCILAR",
+    "postalCode": "23850"
+  },
+  {
+    "cityCode": "23",
+    "cityName": "ELAZIĞ",
+    "districtCode": "1506",
+    "districtName": "MADEN",
+    "postalCode": "23400"
+  },
+  {
+    "cityCode": "23",
+    "cityName": "ELAZIĞ",
+    "districtCode": "1298",
+    "districtName": "MERKEZ",
+    "postalCode": "23270"
+  },
+  {
+    "cityCode": "23",
+    "cityName": "ELAZIĞ",
+    "districtCode": "1566",
+    "districtName": "PALU",
+    "postalCode": "23530"
+  },
+  {
+    "cityCode": "23",
+    "cityName": "ELAZIĞ",
+    "districtCode": "1631",
+    "districtName": "SİVRİCE",
+    "postalCode": "23900"
+  },
+  {
+    "cityCode": "24",
+    "cityName": "ERZİNCAN",
+    "districtCode": "1243",
+    "districtName": "ÇAYIRLI",
+    "postalCode": "24500"
+  },
+  {
+    "cityCode": "24",
+    "cityName": "ERZİNCAN",
+    "districtCode": "1406",
+    "districtName": "İLİÇ",
+    "postalCode": "24700"
+  },
+  {
+    "cityCode": "24",
+    "cityName": "ERZİNCAN",
+    "districtCode": "1459",
+    "districtName": "KEMAH",
+    "postalCode": "24400"
+  },
+  {
+    "cityCode": "24",
+    "cityName": "ERZİNCAN",
+    "districtCode": "1460",
+    "districtName": "KEMALİYE",
+    "postalCode": "24610"
+  },
+  {
+    "cityCode": "24",
+    "cityName": "ERZİNCAN",
+    "districtCode": "1318",
+    "districtName": "MERKEZ",
+    "postalCode": "24100"
+  },
+  {
+    "cityCode": "24",
+    "cityName": "ERZİNCAN",
+    "districtCode": "1977",
+    "districtName": "OTLUKBELİ",
+    "postalCode": "24515"
+  },
+  {
+    "cityCode": "24",
+    "cityName": "ERZİNCAN",
+    "districtCode": "1583",
+    "districtName": "REFAHİYE",
+    "postalCode": "24300"
+  },
+  {
+    "cityCode": "24",
+    "cityName": "ERZİNCAN",
+    "districtCode": "1675",
+    "districtName": "TERCAN",
+    "postalCode": "24870"
+  },
+  {
+    "cityCode": "24",
+    "cityName": "ERZİNCAN",
+    "districtCode": "1853",
+    "districtName": "ÜZÜMLÜ",
+    "postalCode": "24160"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1153",
+    "districtName": "AŞKALE",
+    "postalCode": "25500"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1945",
+    "districtName": "AZİZİYE",
+    "postalCode": "25700"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1235",
+    "districtName": "ÇAT",
+    "postalCode": "25750"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1392",
+    "districtName": "HINIS",
+    "postalCode": "25600"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1396",
+    "districtName": "HORASAN",
+    "postalCode": "25800"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1416",
+    "districtName": "İSPİR",
+    "postalCode": "25900"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1812",
+    "districtName": "KARAÇOBAN",
+    "postalCode": "25610"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1444",
+    "districtName": "KARAYAZI",
+    "postalCode": "25830"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1967",
+    "districtName": "KÖPRÜKÖY",
+    "postalCode": "25320"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1540",
+    "districtName": "NARMAN",
+    "postalCode": "25530"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1550",
+    "districtName": "OLTU",
+    "postalCode": "25400"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1551",
+    "districtName": "OLUR",
+    "postalCode": "25650"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "2044",
+    "districtName": "PALANDÖKEN",
+    "postalCode": "25090"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1567",
+    "districtName": "PASİNLER",
+    "postalCode": "25300"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1865",
+    "districtName": "PAZARYOLU",
+    "postalCode": "25930"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1657",
+    "districtName": "ŞENKAYA",
+    "postalCode": "25370"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1674",
+    "districtName": "TEKMAN",
+    "postalCode": "25560"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1683",
+    "districtName": "TORTUM",
+    "postalCode": "25460"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "1851",
+    "districtName": "UZUNDERE",
+    "postalCode": "25440"
+  },
+  {
+    "cityCode": "25",
+    "cityName": "ERZURUM",
+    "districtCode": "2045",
+    "districtName": "YAKUTİYE",
+    "postalCode": "25040"
+  },
+  {
+    "cityCode": "26",
+    "cityName": "ESKİŞEHİR",
+    "districtCode": "1759",
+    "districtName": "ALPU",
+    "postalCode": "26850"
+  },
+  {
+    "cityCode": "26",
+    "cityName": "ESKİŞEHİR",
+    "districtCode": "1777",
+    "districtName": "BEYLİKOVA",
+    "postalCode": "26750"
+  },
+  {
+    "cityCode": "26",
+    "cityName": "ESKİŞEHİR",
+    "districtCode": "1255",
+    "districtName": "ÇİFTELER",
+    "postalCode": "26700"
+  },
+  {
+    "cityCode": "26",
+    "cityName": "ESKİŞEHİR",
+    "districtCode": "1934",
+    "districtName": "GÜNYÜZÜ",
+    "postalCode": "26663"
+  },
+  {
+    "cityCode": "26",
+    "cityName": "ESKİŞEHİR",
+    "districtCode": "1939",
+    "districtName": "HAN",
+    "postalCode": "26710"
+  },
+  {
+    "cityCode": "26",
+    "cityName": "ESKİŞEHİR",
+    "districtCode": "1808",
+    "districtName": "İNÖNÜ",
+    "postalCode": "26670"
+  },
+  {
+    "cityCode": "26",
+    "cityName": "ESKİŞEHİR",
+    "districtCode": "1508",
+    "districtName": "MAHMUDİYE",
+    "postalCode": "26800"
+  },
+  {
+    "cityCode": "26",
+    "cityName": "ESKİŞEHİR",
+    "districtCode": "1973",
+    "districtName": "MİHALGAZİ",
+    "postalCode": "26880"
+  },
+  {
+    "cityCode": "26",
+    "cityName": "ESKİŞEHİR",
+    "districtCode": "1527",
+    "districtName": "MİHALIÇÇIK",
+    "postalCode": "26940"
+  },
+  {
+    "cityCode": "26",
+    "cityName": "ESKİŞEHİR",
+    "districtCode": "2046",
+    "districtName": "ODUNPAZARI",
+    "postalCode": "26250"
+  },
+  {
+    "cityCode": "26",
+    "cityName": "ESKİŞEHİR",
+    "districtCode": "1599",
+    "districtName": "SARICAKAYA",
+    "postalCode": "26870"
+  },
+  {
+    "cityCode": "26",
+    "cityName": "ESKİŞEHİR",
+    "districtCode": "1618",
+    "districtName": "SEYİTGAZİ",
+    "postalCode": "26960"
+  },
+  {
+    "cityCode": "26",
+    "cityName": "ESKİŞEHİR",
+    "districtCode": "1632",
+    "districtName": "SİVRİHİSAR",
+    "postalCode": "26625"
+  },
+  {
+    "cityCode": "26",
+    "cityName": "ESKİŞEHİR",
+    "districtCode": "2047",
+    "districtName": "TEPEBAŞI",
+    "postalCode": "26170"
+  },
+  {
+    "cityCode": "27",
+    "cityName": "GAZİANTEP",
+    "districtCode": "1139",
+    "districtName": "ARABAN",
+    "postalCode": "27650"
+  },
+  {
+    "cityCode": "27",
+    "cityName": "GAZİANTEP",
+    "districtCode": "1415",
+    "districtName": "İSLAHİYE",
+    "postalCode": "27805"
+  },
+  {
+    "cityCode": "27",
+    "cityName": "GAZİANTEP",
+    "districtCode": "1956",
+    "districtName": "KARKAMIŞ",
+    "postalCode": "27880"
+  },
+  {
+    "cityCode": "27",
+    "cityName": "GAZİANTEP",
+    "districtCode": "1546",
+    "districtName": "NİZİP",
+    "postalCode": "27700"
+  },
+  {
+    "cityCode": "27",
+    "cityName": "GAZİANTEP",
+    "districtCode": "1974",
+    "districtName": "NURDAĞI",
+    "postalCode": "27840"
+  },
+  {
+    "cityCode": "27",
+    "cityName": "GAZİANTEP",
+    "districtCode": "1549",
+    "districtName": "OĞUZELİ",
+    "postalCode": "27910"
+  },
+  {
+    "cityCode": "27",
+    "cityName": "GAZİANTEP",
+    "districtCode": "1841",
+    "districtName": "ŞAHİNBEY",
+    "postalCode": "27270"
+  },
+  {
+    "cityCode": "27",
+    "cityName": "GAZİANTEP",
+    "districtCode": "1844",
+    "districtName": "ŞEHİTKAMİL",
+    "postalCode": "27620"
+  },
+  {
+    "cityCode": "27",
+    "cityName": "GAZİANTEP",
+    "districtCode": "1720",
+    "districtName": "YAVUZELİ",
+    "postalCode": "27970"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1133",
+    "districtName": "ALUCRA",
+    "postalCode": "28700"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1212",
+    "districtName": "BULANCAK",
+    "postalCode": "28310"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1893",
+    "districtName": "ÇAMOLUK",
+    "postalCode": "28710"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1894",
+    "districtName": "ÇANAKÇI",
+    "postalCode": "28810"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1272",
+    "districtName": "DERELİ",
+    "postalCode": "28950"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1912",
+    "districtName": "DOĞANKENT",
+    "postalCode": "28510"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1320",
+    "districtName": "ESPİYE",
+    "postalCode": "28600"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1324",
+    "districtName": "EYNESİL",
+    "postalCode": "28850"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1361",
+    "districtName": "GÖRELE",
+    "postalCode": "28820"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1930",
+    "districtName": "GÜCE",
+    "postalCode": "28520"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1465",
+    "districtName": "KEŞAP",
+    "postalCode": "28900"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1352",
+    "districtName": "MERKEZ",
+    "postalCode": "28100"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1837",
+    "districtName": "PİRAZİZ",
+    "postalCode": "28340"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1654",
+    "districtName": "ŞEBİNKARAHİSAR",
+    "postalCode": "28400"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1678",
+    "districtName": "TİREBOLU",
+    "postalCode": "28500"
+  },
+  {
+    "cityCode": "28",
+    "cityName": "GİRESUN",
+    "districtCode": "1854",
+    "districtName": "YAĞLIDERE",
+    "postalCode": "28610"
+  },
+  {
+    "cityCode": "29",
+    "cityName": "GÜMÜŞHANE",
+    "districtCode": "1458",
+    "districtName": "KELKİT",
+    "postalCode": "29600"
+  },
+  {
+    "cityCode": "29",
+    "cityName": "GÜMÜŞHANE",
+    "districtCode": "1822",
+    "districtName": "KÖSE",
+    "postalCode": "29650"
+  },
+  {
+    "cityCode": "29",
+    "cityName": "GÜMÜŞHANE",
+    "districtCode": "1971",
+    "districtName": "KÜRTÜN",
+    "postalCode": "29830"
+  },
+  {
+    "cityCode": "29",
+    "cityName": "GÜMÜŞHANE",
+    "districtCode": "1369",
+    "districtName": "MERKEZ",
+    "postalCode": "29200"
+  },
+  {
+    "cityCode": "29",
+    "cityName": "GÜMÜŞHANE",
+    "districtCode": "1660",
+    "districtName": "ŞİRAN",
+    "postalCode": "29700"
+  },
+  {
+    "cityCode": "29",
+    "cityName": "GÜMÜŞHANE",
+    "districtCode": "1684",
+    "districtName": "TORUL",
+    "postalCode": "29800"
+  },
+  {
+    "cityCode": "30",
+    "cityName": "HAKKARİ",
+    "districtCode": "1261",
+    "districtName": "ÇUKURCA",
+    "postalCode": "30700"
+  },
+  {
+    "cityCode": "30",
+    "cityName": "HAKKARİ",
+    "districtCode": "2107",
+    "districtName": "DERECİK",
+    "postalCode": "30802"
+  },
+  {
+    "cityCode": "30",
+    "cityName": "HAKKARİ",
+    "districtCode": "1377",
+    "districtName": "MERKEZ",
+    "postalCode": "30110"
+  },
+  {
+    "cityCode": "30",
+    "cityName": "HAKKARİ",
+    "districtCode": "1656",
+    "districtName": "ŞEMDİNLİ",
+    "postalCode": "30800"
+  },
+  {
+    "cityCode": "30",
+    "cityName": "HAKKARİ",
+    "districtCode": "1737",
+    "districtName": "YÜKSEKOVA",
+    "postalCode": "30330"
+  },
+  {
+    "cityCode": "31",
+    "cityName": "HATAY",
+    "districtCode": "1131",
+    "districtName": "ALTINÖZÜ",
+    "postalCode": "31753"
+  },
+  {
+    "cityCode": "31",
+    "cityName": "HATAY",
+    "districtCode": "2080",
+    "districtName": "ANTAKYA",
+    "postalCode": "31135"
+  },
+  {
+    "cityCode": "31",
+    "cityName": "HATAY",
+    "districtCode": "2081",
+    "districtName": "ARSUZ",
+    "postalCode": "31225"
+  },
+  {
+    "cityCode": "31",
+    "cityName": "HATAY",
+    "districtCode": "1887",
+    "districtName": "BELEN",
+    "postalCode": "31350"
+  },
+  {
+    "cityCode": "31",
+    "cityName": "HATAY",
+    "districtCode": "2082",
+    "districtName": "DEFNE",
+    "postalCode": "31141"
+  },
+  {
+    "cityCode": "31",
+    "cityName": "HATAY",
+    "districtCode": "1289",
+    "districtName": "DÖRTYOL",
+    "postalCode": "31670"
+  },
+  {
+    "cityCode": "31",
+    "cityName": "HATAY",
+    "districtCode": "1792",
+    "districtName": "ERZİN",
+    "postalCode": "31960"
+  },
+  {
+    "cityCode": "31",
+    "cityName": "HATAY",
+    "districtCode": "1382",
+    "districtName": "HASSA",
+    "postalCode": "31720"
+  },
+  {
+    "cityCode": "31",
+    "cityName": "HATAY",
+    "districtCode": "1413",
+    "districtName": "İSKENDERUN",
+    "postalCode": "31280"
+  },
+  {
+    "cityCode": "31",
+    "cityName": "HATAY",
+    "districtCode": "1468",
+    "districtName": "KIRIKHAN",
+    "postalCode": "31440"
+  },
+  {
+    "cityCode": "31",
+    "cityName": "HATAY",
+    "districtCode": "1970",
+    "districtName": "KUMLU",
+    "postalCode": "31520"
+  },
+  {
+    "cityCode": "31",
+    "cityName": "HATAY",
+    "districtCode": "2083",
+    "districtName": "PAYAS",
+    "postalCode": "31900"
+  },
+  {
+    "cityCode": "31",
+    "cityName": "HATAY",
+    "districtCode": "1585",
+    "districtName": "REYHANLI",
+    "postalCode": "31500"
+  },
+  {
+    "cityCode": "31",
+    "cityName": "HATAY",
+    "districtCode": "1591",
+    "districtName": "SAMANDAĞ",
+    "postalCode": "31785"
+  },
+  {
+    "cityCode": "31",
+    "cityName": "HATAY",
+    "districtCode": "1721",
+    "districtName": "YAYLADAĞI",
+    "postalCode": "31553"
+  },
+  {
+    "cityCode": "32",
+    "cityName": "ISPARTA",
+    "districtCode": "1755",
+    "districtName": "AKSU",
+    "postalCode": "32510"
+  },
+  {
+    "cityCode": "32",
+    "cityName": "ISPARTA",
+    "districtCode": "1154",
+    "districtName": "ATABEY",
+    "postalCode": "32670"
+  },
+  {
+    "cityCode": "32",
+    "cityName": "ISPARTA",
+    "districtCode": "1297",
+    "districtName": "EĞİRDİR",
+    "postalCode": "32500"
+  },
+  {
+    "cityCode": "32",
+    "cityName": "ISPARTA",
+    "districtCode": "1341",
+    "districtName": "GELENDOST",
+    "postalCode": "32900"
+  },
+  {
+    "cityCode": "32",
+    "cityName": "ISPARTA",
+    "districtCode": "1929",
+    "districtName": "GÖNEN",
+    "postalCode": "32090"
+  },
+  {
+    "cityCode": "32",
+    "cityName": "ISPARTA",
+    "districtCode": "1456",
+    "districtName": "KEÇİBORLU",
+    "postalCode": "32700"
+  },
+  {
+    "cityCode": "32",
+    "cityName": "ISPARTA",
+    "districtCode": "1401",
+    "districtName": "MERKEZ",
+    "postalCode": "32040"
+  },
+  {
+    "cityCode": "32",
+    "cityName": "ISPARTA",
+    "districtCode": "1615",
+    "districtName": "SENİRKENT",
+    "postalCode": "32610"
+  },
+  {
+    "cityCode": "32",
+    "cityName": "ISPARTA",
+    "districtCode": "1648",
+    "districtName": "SÜTÇÜLER",
+    "postalCode": "32950"
+  },
+  {
+    "cityCode": "32",
+    "cityName": "ISPARTA",
+    "districtCode": "1651",
+    "districtName": "ŞARKİKARAAĞAÇ",
+    "postalCode": "32810"
+  },
+  {
+    "cityCode": "32",
+    "cityName": "ISPARTA",
+    "districtCode": "1699",
+    "districtName": "ULUBORLU",
+    "postalCode": "32650"
+  },
+  {
+    "cityCode": "32",
+    "cityName": "ISPARTA",
+    "districtCode": "1717",
+    "districtName": "YALVAÇ",
+    "postalCode": "32430"
+  },
+  {
+    "cityCode": "32",
+    "cityName": "ISPARTA",
+    "districtCode": "2001",
+    "districtName": "YENİŞARBADEMLİ",
+    "postalCode": "32850"
+  },
+  {
+    "cityCode": "33",
+    "cityName": "MERSİN",
+    "districtCode": "2064",
+    "districtName": "AKDENİZ",
+    "postalCode": "33010"
+  },
+  {
+    "cityCode": "33",
+    "cityName": "MERSİN",
+    "districtCode": "1135",
+    "districtName": "ANAMUR",
+    "postalCode": "33630"
+  },
+  {
+    "cityCode": "33",
+    "cityName": "MERSİN",
+    "districtCode": "1766",
+    "districtName": "AYDINCIK",
+    "postalCode": "33840"
+  },
+  {
+    "cityCode": "33",
+    "cityName": "MERSİN",
+    "districtCode": "1779",
+    "districtName": "BOZYAZI",
+    "postalCode": "33830"
+  },
+  {
+    "cityCode": "33",
+    "cityName": "MERSİN",
+    "districtCode": "1892",
+    "districtName": "ÇAMLIYAYLA",
+    "postalCode": "33580"
+  },
+  {
+    "cityCode": "33",
+    "cityName": "MERSİN",
+    "districtCode": "1311",
+    "districtName": "ERDEMLİ",
+    "postalCode": "33730"
+  },
+  {
+    "cityCode": "33",
+    "cityName": "MERSİN",
+    "districtCode": "1366",
+    "districtName": "GÜLNAR",
+    "postalCode": "33715"
+  },
+  {
+    "cityCode": "33",
+    "cityName": "MERSİN",
+    "districtCode": "2065",
+    "districtName": "MEZİTLİ",
+    "postalCode": "33340"
+  },
+  {
+    "cityCode": "33",
+    "cityName": "MERSİN",
+    "districtCode": "1536",
+    "districtName": "MUT",
+    "postalCode": "33600"
+  },
+  {
+    "cityCode": "33",
+    "cityName": "MERSİN",
+    "districtCode": "1621",
+    "districtName": "SİLİFKE",
+    "postalCode": "33940"
+  },
+  {
+    "cityCode": "33",
+    "cityName": "MERSİN",
+    "districtCode": "1665",
+    "districtName": "TARSUS",
+    "postalCode": "33460"
+  },
+  {
+    "cityCode": "33",
+    "cityName": "MERSİN",
+    "districtCode": "2066",
+    "districtName": "TOROSLAR",
+    "postalCode": "33220"
+  },
+  {
+    "cityCode": "33",
+    "cityName": "MERSİN",
+    "districtCode": "2067",
+    "districtName": "YENİŞEHİR",
+    "postalCode": "33140"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1103",
+    "districtName": "ADALAR",
+    "postalCode": "34975"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2048",
+    "districtName": "ARNAVUTKÖY",
+    "postalCode": "34275"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2049",
+    "districtName": "ATAŞEHİR",
+    "postalCode": "34758"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2003",
+    "districtName": "AVCILAR",
+    "postalCode": "34315"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2004",
+    "districtName": "BAĞCILAR",
+    "postalCode": "34200"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2005",
+    "districtName": "BAHÇELİEVLER",
+    "postalCode": "34180"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1166",
+    "districtName": "BAKIRKÖY",
+    "postalCode": "34158"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2050",
+    "districtName": "BAŞAKŞEHİR",
+    "postalCode": "34494"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1886",
+    "districtName": "BAYRAMPAŞA",
+    "postalCode": "34035"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1183",
+    "districtName": "BEŞİKTAŞ",
+    "postalCode": "34353"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1185",
+    "districtName": "BEYKOZ",
+    "postalCode": "34810"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2051",
+    "districtName": "BEYLİKDÜZÜ",
+    "postalCode": "34520"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1186",
+    "districtName": "BEYOĞLU",
+    "postalCode": "34421"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1782",
+    "districtName": "BÜYÜKÇEKMECE",
+    "postalCode": "34500"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1237",
+    "districtName": "ÇATALCA",
+    "postalCode": "34550"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2052",
+    "districtName": "ÇEKMEKÖY",
+    "postalCode": "34794"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2016",
+    "districtName": "ESENLER",
+    "postalCode": "34230"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2053",
+    "districtName": "ESENYURT",
+    "postalCode": "34517"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1325",
+    "districtName": "EYÜPSULTAN",
+    "postalCode": "34060"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1327",
+    "districtName": "FATİH",
+    "postalCode": "34096"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1336",
+    "districtName": "GAZİOSMANPAŞA",
+    "postalCode": "34245"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2010",
+    "districtName": "GÜNGÖREN",
+    "postalCode": "34160"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1421",
+    "districtName": "KADIKÖY",
+    "postalCode": "34744"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1810",
+    "districtName": "KAĞITHANE",
+    "postalCode": "34403"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1449",
+    "districtName": "KARTAL",
+    "postalCode": "34862"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1823",
+    "districtName": "KÜÇÜKÇEKMECE",
+    "postalCode": "34307"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2012",
+    "districtName": "MALTEPE",
+    "postalCode": "34854"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1835",
+    "districtName": "PENDİK",
+    "postalCode": "34893"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2054",
+    "districtName": "SANCAKTEPE",
+    "postalCode": "34885"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1604",
+    "districtName": "SARIYER",
+    "postalCode": "34396"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1622",
+    "districtName": "SİLİVRİ",
+    "postalCode": "34582"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2014",
+    "districtName": "SULTANBEYLİ",
+    "postalCode": "34920"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2055",
+    "districtName": "SULTANGAZİ",
+    "postalCode": "34265"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1659",
+    "districtName": "ŞİLE",
+    "postalCode": "34990"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1663",
+    "districtName": "ŞİŞLİ",
+    "postalCode": "34360"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "2015",
+    "districtName": "TUZLA",
+    "postalCode": "34959"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1852",
+    "districtName": "ÜMRANİYE",
+    "postalCode": "34773"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1708",
+    "districtName": "ÜSKÜDAR",
+    "postalCode": "34660"
+  },
+  {
+    "cityCode": "34",
+    "cityName": "İSTANBUL",
+    "districtCode": "1739",
+    "districtName": "ZEYTİNBURNU",
+    "postalCode": "34025"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1128",
+    "districtName": "ALİAĞA",
+    "postalCode": "35800"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "2006",
+    "districtName": "BALÇOVA",
+    "postalCode": "35330"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1178",
+    "districtName": "BAYINDIR",
+    "postalCode": "35840"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "2056",
+    "districtName": "BAYRAKLI",
+    "postalCode": "35540"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1181",
+    "districtName": "BERGAMA",
+    "postalCode": "35715"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1776",
+    "districtName": "BEYDAĞ",
+    "postalCode": "35790"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1203",
+    "districtName": "BORNOVA",
+    "postalCode": "35080"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1780",
+    "districtName": "BUCA",
+    "postalCode": "35390"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1251",
+    "districtName": "ÇEŞME",
+    "postalCode": "35937"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "2007",
+    "districtName": "ÇİĞLİ",
+    "postalCode": "35640"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1280",
+    "districtName": "DİKİLİ",
+    "postalCode": "35985"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1334",
+    "districtName": "FOÇA",
+    "postalCode": "35683"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "2009",
+    "districtName": "GAZİEMİR",
+    "postalCode": "35410"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "2018",
+    "districtName": "GÜZELBAHÇE",
+    "postalCode": "35310"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "2057",
+    "districtName": "KARABAĞLAR",
+    "postalCode": "35140"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1432",
+    "districtName": "KARABURUN",
+    "postalCode": "35960"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1448",
+    "districtName": "KARŞIYAKA",
+    "postalCode": "35600"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1461",
+    "districtName": "KEMALPAŞA",
+    "postalCode": "35737"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1467",
+    "districtName": "KINIK",
+    "postalCode": "35990"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1477",
+    "districtName": "KİRAZ",
+    "postalCode": "35890"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1819",
+    "districtName": "KONAK",
+    "postalCode": "35220"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1826",
+    "districtName": "MENDERES",
+    "postalCode": "35479"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1521",
+    "districtName": "MENEMEN",
+    "postalCode": "35667"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "2013",
+    "districtName": "NARLIDERE",
+    "postalCode": "35320"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1563",
+    "districtName": "ÖDEMİŞ",
+    "postalCode": "35753"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1611",
+    "districtName": "SEFERİHİSAR",
+    "postalCode": "35465"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1612",
+    "districtName": "SELÇUK",
+    "postalCode": "35925"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1677",
+    "districtName": "TİRE",
+    "postalCode": "35910"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1682",
+    "districtName": "TORBALI",
+    "postalCode": "35870"
+  },
+  {
+    "cityCode": "35",
+    "cityName": "İZMİR",
+    "districtCode": "1703",
+    "districtName": "URLA",
+    "postalCode": "35430"
+  },
+  {
+    "cityCode": "36",
+    "cityName": "KARS",
+    "districtCode": "1756",
+    "districtName": "AKYAKA",
+    "postalCode": "36780"
+  },
+  {
+    "cityCode": "36",
+    "cityName": "KARS",
+    "districtCode": "1149",
+    "districtName": "ARPAÇAY",
+    "postalCode": "36730"
+  },
+  {
+    "cityCode": "36",
+    "cityName": "KARS",
+    "districtCode": "1279",
+    "districtName": "DİGOR",
+    "postalCode": "36680"
+  },
+  {
+    "cityCode": "36",
+    "cityName": "KARS",
+    "districtCode": "1424",
+    "districtName": "KAĞIZMAN",
+    "postalCode": "36700"
+  },
+  {
+    "cityCode": "36",
+    "cityName": "KARS",
+    "districtCode": "1447",
+    "districtName": "MERKEZ",
+    "postalCode": "36000"
+  },
+  {
+    "cityCode": "36",
+    "cityName": "KARS",
+    "districtCode": "1601",
+    "districtName": "SARIKAMIŞ",
+    "postalCode": "36500"
+  },
+  {
+    "cityCode": "36",
+    "cityName": "KARS",
+    "districtCode": "1614",
+    "districtName": "SELİM",
+    "postalCode": "36900"
+  },
+  {
+    "cityCode": "36",
+    "cityName": "KARS",
+    "districtCode": "1645",
+    "districtName": "SUSUZ",
+    "postalCode": "36760"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1101",
+    "districtName": "ABANA",
+    "postalCode": "37970"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1867",
+    "districtName": "AĞLI",
+    "postalCode": "37920"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1140",
+    "districtName": "ARAÇ",
+    "postalCode": "37800"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1162",
+    "districtName": "AZDAVAY",
+    "postalCode": "37750"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1208",
+    "districtName": "BOZKURT",
+    "postalCode": "37680"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1221",
+    "districtName": "CİDE",
+    "postalCode": "37600"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1238",
+    "districtName": "ÇATALZEYTİN",
+    "postalCode": "37940"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1264",
+    "districtName": "DADAY",
+    "postalCode": "37870"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1277",
+    "districtName": "DEVREKANİ",
+    "postalCode": "37700"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1915",
+    "districtName": "DOĞANYURT",
+    "postalCode": "37550"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1940",
+    "districtName": "HANÖNÜ",
+    "postalCode": "37450"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1805",
+    "districtName": "İHSANGAZİ",
+    "postalCode": "37250"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1410",
+    "districtName": "İNEBOLU",
+    "postalCode": "37500"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1499",
+    "districtName": "KÜRE",
+    "postalCode": "37900"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1450",
+    "districtName": "MERKEZ",
+    "postalCode": "37100"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1836",
+    "districtName": "PINARBAŞI",
+    "postalCode": "37770"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1984",
+    "districtName": "SEYDİLER",
+    "postalCode": "37270"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1845",
+    "districtName": "ŞENPAZAR",
+    "postalCode": "37650"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1666",
+    "districtName": "TAŞKÖPRÜ",
+    "postalCode": "37400"
+  },
+  {
+    "cityCode": "37",
+    "cityName": "KASTAMONU",
+    "districtCode": "1685",
+    "districtName": "TOSYA",
+    "postalCode": "37300"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1752",
+    "districtName": "AKKIŞLA",
+    "postalCode": "38830"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1218",
+    "districtName": "BÜNYAN",
+    "postalCode": "38600"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1275",
+    "districtName": "DEVELİ",
+    "postalCode": "38400"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1330",
+    "districtName": "FELAHİYE",
+    "postalCode": "38750"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1936",
+    "districtName": "HACILAR",
+    "postalCode": "38210"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1409",
+    "districtName": "İNCESU",
+    "postalCode": "38560"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1863",
+    "districtName": "KOCASİNAN",
+    "postalCode": "38100"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1864",
+    "districtName": "MELİKGAZİ",
+    "postalCode": "38220"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1978",
+    "districtName": "ÖZVATAN",
+    "postalCode": "38770"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1576",
+    "districtName": "PINARBAŞI",
+    "postalCode": "38700"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1603",
+    "districtName": "SARIOĞLAN",
+    "postalCode": "38850"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1605",
+    "districtName": "SARIZ",
+    "postalCode": "38660"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1846",
+    "districtName": "TALAS",
+    "postalCode": "38280"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1680",
+    "districtName": "TOMARZA",
+    "postalCode": "38900"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1715",
+    "districtName": "YAHYALI",
+    "postalCode": "38500"
+  },
+  {
+    "cityCode": "38",
+    "cityName": "KAYSERİ",
+    "districtCode": "1727",
+    "districtName": "YEŞİLHİSAR",
+    "postalCode": "38800"
+  },
+  {
+    "cityCode": "39",
+    "cityName": "KIRKLARELİ",
+    "districtCode": "1163",
+    "districtName": "BABAESKİ",
+    "postalCode": "39570"
+  },
+  {
+    "cityCode": "39",
+    "cityName": "KIRKLARELİ",
+    "districtCode": "1270",
+    "districtName": "DEMİRKÖY",
+    "postalCode": "39500"
+  },
+  {
+    "cityCode": "39",
+    "cityName": "KIRKLARELİ",
+    "districtCode": "1480",
+    "districtName": "KOFÇAZ",
+    "postalCode": "39700"
+  },
+  {
+    "cityCode": "39",
+    "cityName": "KIRKLARELİ",
+    "districtCode": "1505",
+    "districtName": "LÜLEBURGAZ",
+    "postalCode": "39770"
+  },
+  {
+    "cityCode": "39",
+    "cityName": "KIRKLARELİ",
+    "districtCode": "1471",
+    "districtName": "MERKEZ",
+    "postalCode": "39060"
+  },
+  {
+    "cityCode": "39",
+    "cityName": "KIRKLARELİ",
+    "districtCode": "1572",
+    "districtName": "PEHLİVANKÖY",
+    "postalCode": "39640"
+  },
+  {
+    "cityCode": "39",
+    "cityName": "KIRKLARELİ",
+    "districtCode": "1577",
+    "districtName": "PINARHİSAR",
+    "postalCode": "39300"
+  },
+  {
+    "cityCode": "39",
+    "cityName": "KIRKLARELİ",
+    "districtCode": "1714",
+    "districtName": "VİZE",
+    "postalCode": "39400"
+  },
+  {
+    "cityCode": "40",
+    "cityName": "KIRŞEHİR",
+    "districtCode": "1869",
+    "districtName": "AKÇAKENT",
+    "postalCode": "40720"
+  },
+  {
+    "cityCode": "40",
+    "cityName": "KIRŞEHİR",
+    "districtCode": "1754",
+    "districtName": "AKPINAR",
+    "postalCode": "40320"
+  },
+  {
+    "cityCode": "40",
+    "cityName": "KIRŞEHİR",
+    "districtCode": "1890",
+    "districtName": "BOZTEPE",
+    "postalCode": "40020"
+  },
+  {
+    "cityCode": "40",
+    "cityName": "KIRŞEHİR",
+    "districtCode": "1254",
+    "districtName": "ÇİÇEKDAĞI",
+    "postalCode": "40700"
+  },
+  {
+    "cityCode": "40",
+    "cityName": "KIRŞEHİR",
+    "districtCode": "1429",
+    "districtName": "KAMAN",
+    "postalCode": "40300"
+  },
+  {
+    "cityCode": "40",
+    "cityName": "KIRŞEHİR",
+    "districtCode": "1472",
+    "districtName": "MERKEZ",
+    "postalCode": "40100"
+  },
+  {
+    "cityCode": "40",
+    "cityName": "KIRŞEHİR",
+    "districtCode": "1529",
+    "districtName": "MUCUR",
+    "postalCode": "40500"
+  },
+  {
+    "cityCode": "41",
+    "cityName": "KOCAELİ",
+    "districtCode": "2058",
+    "districtName": "BAŞİSKELE",
+    "postalCode": "41030"
+  },
+  {
+    "cityCode": "41",
+    "cityName": "KOCAELİ",
+    "districtCode": "2059",
+    "districtName": "ÇAYIROVA",
+    "postalCode": "41420"
+  },
+  {
+    "cityCode": "41",
+    "cityName": "KOCAELİ",
+    "districtCode": "2060",
+    "districtName": "DARICA",
+    "postalCode": "41700"
+  },
+  {
+    "cityCode": "41",
+    "cityName": "KOCAELİ",
+    "districtCode": "2030",
+    "districtName": "DERİNCE",
+    "postalCode": "41900"
+  },
+  {
+    "cityCode": "41",
+    "cityName": "KOCAELİ",
+    "districtCode": "2061",
+    "districtName": "DİLOVASI",
+    "postalCode": "41455"
+  },
+  {
+    "cityCode": "41",
+    "cityName": "KOCAELİ",
+    "districtCode": "1338",
+    "districtName": "GEBZE",
+    "postalCode": "41400"
+  },
+  {
+    "cityCode": "41",
+    "cityName": "KOCAELİ",
+    "districtCode": "1355",
+    "districtName": "GÖLCÜK",
+    "postalCode": "41950"
+  },
+  {
+    "cityCode": "41",
+    "cityName": "KOCAELİ",
+    "districtCode": "2062",
+    "districtName": "İZMİT",
+    "postalCode": "41310"
+  },
+  {
+    "cityCode": "41",
+    "cityName": "KOCAELİ",
+    "districtCode": "1430",
+    "districtName": "KANDIRA",
+    "postalCode": "41600"
+  },
+  {
+    "cityCode": "41",
+    "cityName": "KOCAELİ",
+    "districtCode": "1440",
+    "districtName": "KARAMÜRSEL",
+    "postalCode": "41500"
+  },
+  {
+    "cityCode": "41",
+    "cityName": "KOCAELİ",
+    "districtCode": "2063",
+    "districtName": "KARTEPE",
+    "postalCode": "41320"
+  },
+  {
+    "cityCode": "41",
+    "cityName": "KOCAELİ",
+    "districtCode": "1821",
+    "districtName": "KÖRFEZ",
+    "postalCode": "41800"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1868",
+    "districtName": "AHIRLI",
+    "postalCode": "42390"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1753",
+    "districtName": "AKÖREN",
+    "postalCode": "42460"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1122",
+    "districtName": "AKŞEHİR",
+    "postalCode": "42580"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1760",
+    "districtName": "ALTINEKİN",
+    "postalCode": "42450"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1188",
+    "districtName": "BEYŞEHİR",
+    "postalCode": "42700"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1207",
+    "districtName": "BOZKIR",
+    "postalCode": "42630"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1222",
+    "districtName": "CİHANBEYLİ",
+    "postalCode": "42860"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1902",
+    "districtName": "ÇELTİK",
+    "postalCode": "42920"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1262",
+    "districtName": "ÇUMRA",
+    "postalCode": "42520"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1907",
+    "districtName": "DERBENT",
+    "postalCode": "42900"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1789",
+    "districtName": "DEREBUCAK",
+    "postalCode": "42485"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1285",
+    "districtName": "DOĞANHİSAR",
+    "postalCode": "42930"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1920",
+    "districtName": "EMİRGAZİ",
+    "postalCode": "42910"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1312",
+    "districtName": "EREĞLİ",
+    "postalCode": "42320"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1933",
+    "districtName": "GÜNEYSINIR",
+    "postalCode": "42490"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1375",
+    "districtName": "HADİM",
+    "postalCode": "42830"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1937",
+    "districtName": "HALKAPINAR",
+    "postalCode": "42980"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1804",
+    "districtName": "HÜYÜK",
+    "postalCode": "42690"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1400",
+    "districtName": "ILGIN",
+    "postalCode": "42610"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1422",
+    "districtName": "KADINHANI",
+    "postalCode": "42810"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1441",
+    "districtName": "KARAPINAR",
+    "postalCode": "42415"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1814",
+    "districtName": "KARATAY",
+    "postalCode": "42050"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1491",
+    "districtName": "KULU",
+    "postalCode": "42773"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1827",
+    "districtName": "MERAM",
+    "postalCode": "42040"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1598",
+    "districtName": "SARAYÖNÜ",
+    "postalCode": "42430"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1839",
+    "districtName": "SELÇUKLU",
+    "postalCode": "42100"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1617",
+    "districtName": "SEYDİŞEHİR",
+    "postalCode": "42360"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1848",
+    "districtName": "TAŞKENT",
+    "postalCode": "42960"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1990",
+    "districtName": "TUZLUKÇU",
+    "postalCode": "42970"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1994",
+    "districtName": "YALIHÜYÜK",
+    "postalCode": "42470"
+  },
+  {
+    "cityCode": "42",
+    "cityName": "KONYA",
+    "districtCode": "1735",
+    "districtName": "YUNAK",
+    "postalCode": "42536"
+  },
+  {
+    "cityCode": "43",
+    "cityName": "KÜTAHYA",
+    "districtCode": "1132",
+    "districtName": "ALTINTAŞ",
+    "postalCode": "43800"
+  },
+  {
+    "cityCode": "43",
+    "cityName": "KÜTAHYA",
+    "districtCode": "1764",
+    "districtName": "ASLANAPA",
+    "postalCode": "43210"
+  },
+  {
+    "cityCode": "43",
+    "cityName": "KÜTAHYA",
+    "districtCode": "1898",
+    "districtName": "ÇAVDARHİSAR",
+    "postalCode": "43710"
+  },
+  {
+    "cityCode": "43",
+    "cityName": "KÜTAHYA",
+    "districtCode": "1288",
+    "districtName": "DOMANİÇ",
+    "postalCode": "43860"
+  },
+  {
+    "cityCode": "43",
+    "cityName": "KÜTAHYA",
+    "districtCode": "1790",
+    "districtName": "DUMLUPINAR",
+    "postalCode": "43820"
+  },
+  {
+    "cityCode": "43",
+    "cityName": "KÜTAHYA",
+    "districtCode": "1304",
+    "districtName": "EMET",
+    "postalCode": "43700"
+  },
+  {
+    "cityCode": "43",
+    "cityName": "KÜTAHYA",
+    "districtCode": "1339",
+    "districtName": "GEDİZ",
+    "postalCode": "43640"
+  },
+  {
+    "cityCode": "43",
+    "cityName": "KÜTAHYA",
+    "districtCode": "1802",
+    "districtName": "HİSARCIK",
+    "postalCode": "43780"
+  },
+  {
+    "cityCode": "43",
+    "cityName": "KÜTAHYA",
+    "districtCode": "1500",
+    "districtName": "MERKEZ",
+    "postalCode": "43020"
+  },
+  {
+    "cityCode": "43",
+    "cityName": "KÜTAHYA",
+    "districtCode": "1979",
+    "districtName": "PAZARLAR",
+    "postalCode": "43530"
+  },
+  {
+    "cityCode": "43",
+    "cityName": "KÜTAHYA",
+    "districtCode": "1625",
+    "districtName": "SİMAV",
+    "postalCode": "43590"
+  },
+  {
+    "cityCode": "43",
+    "cityName": "KÜTAHYA",
+    "districtCode": "1843",
+    "districtName": "ŞAPHANE",
+    "postalCode": "43950"
+  },
+  {
+    "cityCode": "43",
+    "cityName": "KÜTAHYA",
+    "districtCode": "1671",
+    "districtName": "TAVŞANLI",
+    "postalCode": "43410"
+  },
+  {
+    "cityCode": "44",
+    "cityName": "MALATYA",
+    "districtCode": "1114",
+    "districtName": "AKÇADAĞ",
+    "postalCode": "44600"
+  },
+  {
+    "cityCode": "44",
+    "cityName": "MALATYA",
+    "districtCode": "1143",
+    "districtName": "ARAPGİR",
+    "postalCode": "44800"
+  },
+  {
+    "cityCode": "44",
+    "cityName": "MALATYA",
+    "districtCode": "1148",
+    "districtName": "ARGUVAN",
+    "postalCode": "44960"
+  },
+  {
+    "cityCode": "44",
+    "cityName": "MALATYA",
+    "districtCode": "1772",
+    "districtName": "BATTALGAZİ",
+    "postalCode": "44210"
+  },
+  {
+    "cityCode": "44",
+    "cityName": "MALATYA",
+    "districtCode": "1265",
+    "districtName": "DARENDE",
+    "postalCode": "44720"
+  },
+  {
+    "cityCode": "44",
+    "cityName": "MALATYA",
+    "districtCode": "1286",
+    "districtName": "DOĞANŞEHİR",
+    "postalCode": "44500"
+  },
+  {
+    "cityCode": "44",
+    "cityName": "MALATYA",
+    "districtCode": "1914",
+    "districtName": "DOĞANYOL",
+    "postalCode": "44880"
+  },
+  {
+    "cityCode": "44",
+    "cityName": "MALATYA",
+    "districtCode": "1390",
+    "districtName": "HEKİMHAN",
+    "postalCode": "44410"
+  },
+  {
+    "cityCode": "44",
+    "cityName": "MALATYA",
+    "districtCode": "1953",
+    "districtName": "KALE",
+    "postalCode": "44370"
+  },
+  {
+    "cityCode": "44",
+    "cityName": "MALATYA",
+    "districtCode": "1969",
+    "districtName": "KULUNCAK",
+    "postalCode": "44760"
+  },
+  {
+    "cityCode": "44",
+    "cityName": "MALATYA",
+    "districtCode": "1582",
+    "districtName": "PÜTÜRGE",
+    "postalCode": "44850"
+  },
+  {
+    "cityCode": "44",
+    "cityName": "MALATYA",
+    "districtCode": "1995",
+    "districtName": "YAZIHAN",
+    "postalCode": "44350"
+  },
+  {
+    "cityCode": "44",
+    "cityName": "MALATYA",
+    "districtCode": "1729",
+    "districtName": "YEŞİLYURT",
+    "postalCode": "44915"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "1751",
+    "districtName": "AHMETLİ",
+    "postalCode": "45450"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "1118",
+    "districtName": "AKHİSAR",
+    "postalCode": "45200"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "1127",
+    "districtName": "ALAŞEHİR",
+    "postalCode": "45600"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "1269",
+    "districtName": "DEMİRCİ",
+    "postalCode": "45900"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "1793",
+    "districtName": "GÖLMARMARA",
+    "postalCode": "45580"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "1362",
+    "districtName": "GÖRDES",
+    "postalCode": "45750"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "1470",
+    "districtName": "KIRKAĞAÇ",
+    "postalCode": "45730"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "1965",
+    "districtName": "KÖPRÜBAŞI",
+    "postalCode": "45940"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "1489",
+    "districtName": "KULA",
+    "postalCode": "45180"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "1590",
+    "districtName": "SALİHLİ",
+    "postalCode": "45320"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "1600",
+    "districtName": "SARIGÖL",
+    "postalCode": "45470"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "1606",
+    "districtName": "SARUHANLI",
+    "postalCode": "45880"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "1613",
+    "districtName": "SELENDİ",
+    "postalCode": "45970"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "1634",
+    "districtName": "SOMA",
+    "postalCode": "45520"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "2086",
+    "districtName": "ŞEHZADELER",
+    "postalCode": "45060"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "1689",
+    "districtName": "TURGUTLU",
+    "postalCode": "45400"
+  },
+  {
+    "cityCode": "45",
+    "cityName": "MANİSA",
+    "districtCode": "2087",
+    "districtName": "YUNUSEMRE",
+    "postalCode": "45125"
+  },
+  {
+    "cityCode": "46",
+    "cityName": "KAHRAMANMARAŞ",
+    "districtCode": "1107",
+    "districtName": "AFŞİN",
+    "postalCode": "46500"
+  },
+  {
+    "cityCode": "46",
+    "cityName": "KAHRAMANMARAŞ",
+    "districtCode": "1136",
+    "districtName": "ANDIRIN",
+    "postalCode": "46400"
+  },
+  {
+    "cityCode": "46",
+    "cityName": "KAHRAMANMARAŞ",
+    "districtCode": "1785",
+    "districtName": "ÇAĞLAYANCERİT",
+    "postalCode": "46770"
+  },
+  {
+    "cityCode": "46",
+    "cityName": "KAHRAMANMARAŞ",
+    "districtCode": "2084",
+    "districtName": "DULKADİROĞLU",
+    "postalCode": "46100"
+  },
+  {
+    "cityCode": "46",
+    "cityName": "KAHRAMANMARAŞ",
+    "districtCode": "1919",
+    "districtName": "EKİNÖZÜ",
+    "postalCode": "46360"
+  },
+  {
+    "cityCode": "46",
+    "cityName": "KAHRAMANMARAŞ",
+    "districtCode": "1299",
+    "districtName": "ELBİSTAN",
+    "postalCode": "46390"
+  },
+  {
+    "cityCode": "46",
+    "cityName": "KAHRAMANMARAŞ",
+    "districtCode": "1353",
+    "districtName": "GÖKSUN",
+    "postalCode": "46650"
+  },
+  {
+    "cityCode": "46",
+    "cityName": "KAHRAMANMARAŞ",
+    "districtCode": "1975",
+    "districtName": "NURHAK",
+    "postalCode": "46371"
+  },
+  {
+    "cityCode": "46",
+    "cityName": "KAHRAMANMARAŞ",
+    "districtCode": "2085",
+    "districtName": "ONİKİŞUBAT",
+    "postalCode": "46050"
+  },
+  {
+    "cityCode": "46",
+    "cityName": "KAHRAMANMARAŞ",
+    "districtCode": "1570",
+    "districtName": "PAZARCIK",
+    "postalCode": "46760"
+  },
+  {
+    "cityCode": "46",
+    "cityName": "KAHRAMANMARAŞ",
+    "districtCode": "1694",
+    "districtName": "TÜRKOĞLU",
+    "postalCode": "46810"
+  },
+  {
+    "cityCode": "47",
+    "cityName": "MARDİN",
+    "districtCode": "2088",
+    "districtName": "ARTUKLU",
+    "postalCode": "47420"
+  },
+  {
+    "cityCode": "47",
+    "cityName": "MARDİN",
+    "districtCode": "1787",
+    "districtName": "DARGEÇİT",
+    "postalCode": "47750"
+  },
+  {
+    "cityCode": "47",
+    "cityName": "MARDİN",
+    "districtCode": "1273",
+    "districtName": "DERİK",
+    "postalCode": "47800"
+  },
+  {
+    "cityCode": "47",
+    "cityName": "MARDİN",
+    "districtCode": "1474",
+    "districtName": "KIZILTEPE",
+    "postalCode": "47460"
+  },
+  {
+    "cityCode": "47",
+    "cityName": "MARDİN",
+    "districtCode": "1519",
+    "districtName": "MAZIDAĞI",
+    "postalCode": "47700"
+  },
+  {
+    "cityCode": "47",
+    "cityName": "MARDİN",
+    "districtCode": "1526",
+    "districtName": "MİDYAT",
+    "postalCode": "47545"
+  },
+  {
+    "cityCode": "47",
+    "cityName": "MARDİN",
+    "districtCode": "1547",
+    "districtName": "NUSAYBİN",
+    "postalCode": "47320"
+  },
+  {
+    "cityCode": "47",
+    "cityName": "MARDİN",
+    "districtCode": "1564",
+    "districtName": "ÖMERLİ",
+    "postalCode": "47570"
+  },
+  {
+    "cityCode": "47",
+    "cityName": "MARDİN",
+    "districtCode": "1609",
+    "districtName": "SAVUR",
+    "postalCode": "47860"
+  },
+  {
+    "cityCode": "47",
+    "cityName": "MARDİN",
+    "districtCode": "2002",
+    "districtName": "YEŞİLLİ",
+    "postalCode": "47650"
+  },
+  {
+    "cityCode": "48",
+    "cityName": "MUĞLA",
+    "districtCode": "1197",
+    "districtName": "BODRUM",
+    "postalCode": "48470"
+  },
+  {
+    "cityCode": "48",
+    "cityName": "MUĞLA",
+    "districtCode": "1742",
+    "districtName": "DALAMAN",
+    "postalCode": "48770"
+  },
+  {
+    "cityCode": "48",
+    "cityName": "MUĞLA",
+    "districtCode": "1266",
+    "districtName": "DATÇA",
+    "postalCode": "48900"
+  },
+  {
+    "cityCode": "48",
+    "cityName": "MUĞLA",
+    "districtCode": "1331",
+    "districtName": "FETHİYE",
+    "postalCode": "48375"
+  },
+  {
+    "cityCode": "48",
+    "cityName": "MUĞLA",
+    "districtCode": "1958",
+    "districtName": "KAVAKLIDERE",
+    "postalCode": "48585"
+  },
+  {
+    "cityCode": "48",
+    "cityName": "MUĞLA",
+    "districtCode": "1488",
+    "districtName": "KÖYCEĞİZ",
+    "postalCode": "48803"
+  },
+  {
+    "cityCode": "48",
+    "cityName": "MUĞLA",
+    "districtCode": "1517",
+    "districtName": "MARMARİS",
+    "postalCode": "48706"
+  },
+  {
+    "cityCode": "48",
+    "cityName": "MUĞLA",
+    "districtCode": "2089",
+    "districtName": "MENTEŞE",
+    "postalCode": "48040"
+  },
+  {
+    "cityCode": "48",
+    "cityName": "MUĞLA",
+    "districtCode": "1528",
+    "districtName": "MİLAS",
+    "postalCode": "48210"
+  },
+  {
+    "cityCode": "48",
+    "cityName": "MUĞLA",
+    "districtCode": "1831",
+    "districtName": "ORTACA",
+    "postalCode": "48840"
+  },
+  {
+    "cityCode": "48",
+    "cityName": "MUĞLA",
+    "districtCode": "2090",
+    "districtName": "SEYDİKEMER",
+    "postalCode": "48360"
+  },
+  {
+    "cityCode": "48",
+    "cityName": "MUĞLA",
+    "districtCode": "1695",
+    "districtName": "ULA",
+    "postalCode": "48650"
+  },
+  {
+    "cityCode": "48",
+    "cityName": "MUĞLA",
+    "districtCode": "1719",
+    "districtName": "YATAĞAN",
+    "postalCode": "48516"
+  },
+  {
+    "cityCode": "49",
+    "cityName": "MUŞ",
+    "districtCode": "1213",
+    "districtName": "BULANIK",
+    "postalCode": "49500"
+  },
+  {
+    "cityCode": "49",
+    "cityName": "MUŞ",
+    "districtCode": "1801",
+    "districtName": "HASKÖY",
+    "postalCode": "49700"
+  },
+  {
+    "cityCode": "49",
+    "cityName": "MUŞ",
+    "districtCode": "1964",
+    "districtName": "KORKUT",
+    "postalCode": "49730"
+  },
+  {
+    "cityCode": "49",
+    "cityName": "MUŞ",
+    "districtCode": "1510",
+    "districtName": "MALAZGİRT",
+    "postalCode": "49400"
+  },
+  {
+    "cityCode": "49",
+    "cityName": "MUŞ",
+    "districtCode": "1534",
+    "districtName": "MERKEZ",
+    "postalCode": "49100"
+  },
+  {
+    "cityCode": "49",
+    "cityName": "MUŞ",
+    "districtCode": "1711",
+    "districtName": "VARTO",
+    "postalCode": "49610"
+  },
+  {
+    "cityCode": "50",
+    "cityName": "NEVŞEHİR",
+    "districtCode": "1749",
+    "districtName": "ACIGÖL",
+    "postalCode": "50140"
+  },
+  {
+    "cityCode": "50",
+    "cityName": "NEVŞEHİR",
+    "districtCode": "1155",
+    "districtName": "AVANOS",
+    "postalCode": "50500"
+  },
+  {
+    "cityCode": "50",
+    "cityName": "NEVŞEHİR",
+    "districtCode": "1274",
+    "districtName": "DERİNKUYU",
+    "postalCode": "50700"
+  },
+  {
+    "cityCode": "50",
+    "cityName": "NEVŞEHİR",
+    "districtCode": "1367",
+    "districtName": "GÜLŞEHİR",
+    "postalCode": "50900"
+  },
+  {
+    "cityCode": "50",
+    "cityName": "NEVŞEHİR",
+    "districtCode": "1374",
+    "districtName": "HACIBEKTAŞ",
+    "postalCode": "50800"
+  },
+  {
+    "cityCode": "50",
+    "cityName": "NEVŞEHİR",
+    "districtCode": "1485",
+    "districtName": "KOZAKLI",
+    "postalCode": "50600"
+  },
+  {
+    "cityCode": "50",
+    "cityName": "NEVŞEHİR",
+    "districtCode": "1543",
+    "districtName": "MERKEZ",
+    "postalCode": "50300"
+  },
+  {
+    "cityCode": "50",
+    "cityName": "NEVŞEHİR",
+    "districtCode": "1707",
+    "districtName": "ÜRGÜP",
+    "postalCode": "50350"
+  },
+  {
+    "cityCode": "51",
+    "cityName": "NİĞDE",
+    "districtCode": "1876",
+    "districtName": "ALTUNHİSAR",
+    "postalCode": "51600"
+  },
+  {
+    "cityCode": "51",
+    "cityName": "NİĞDE",
+    "districtCode": "1201",
+    "districtName": "BOR",
+    "postalCode": "51710"
+  },
+  {
+    "cityCode": "51",
+    "cityName": "NİĞDE",
+    "districtCode": "1225",
+    "districtName": "ÇAMARDI",
+    "postalCode": "51660"
+  },
+  {
+    "cityCode": "51",
+    "cityName": "NİĞDE",
+    "districtCode": "1904",
+    "districtName": "ÇİFTLİK",
+    "postalCode": "51810"
+  },
+  {
+    "cityCode": "51",
+    "cityName": "NİĞDE",
+    "districtCode": "1544",
+    "districtName": "MERKEZ",
+    "postalCode": "51200"
+  },
+  {
+    "cityCode": "51",
+    "cityName": "NİĞDE",
+    "districtCode": "1700",
+    "districtName": "ULUKIŞLA",
+    "postalCode": "51900"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1119",
+    "districtName": "AKKUŞ",
+    "postalCode": "52950"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "2103",
+    "districtName": "ALTINORDU",
+    "postalCode": "52200"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1158",
+    "districtName": "AYBASTI",
+    "postalCode": "52500"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1891",
+    "districtName": "ÇAMAŞ",
+    "postalCode": "52430"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1897",
+    "districtName": "ÇATALPINAR",
+    "postalCode": "52420"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1900",
+    "districtName": "ÇAYBAŞI",
+    "postalCode": "52310"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1328",
+    "districtName": "FATSA",
+    "postalCode": "52410"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1358",
+    "districtName": "GÖLKÖY",
+    "postalCode": "52600"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1795",
+    "districtName": "GÜLYALI",
+    "postalCode": "52010"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1797",
+    "districtName": "GÜRGENTEPE",
+    "postalCode": "52610"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1947",
+    "districtName": "İKİZCE",
+    "postalCode": "52320"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1950",
+    "districtName": "KABADÜZ",
+    "postalCode": "52020"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1951",
+    "districtName": "KABATAŞ",
+    "postalCode": "52510"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1482",
+    "districtName": "KORGAN",
+    "postalCode": "52700"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1493",
+    "districtName": "KUMRU",
+    "postalCode": "52800"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1525",
+    "districtName": "MESUDİYE",
+    "postalCode": "52900"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1573",
+    "districtName": "PERŞEMBE",
+    "postalCode": "52760"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1696",
+    "districtName": "ULUBEY",
+    "postalCode": "52850"
+  },
+  {
+    "cityCode": "52",
+    "cityName": "ORDU",
+    "districtCode": "1706",
+    "districtName": "ÜNYE",
+    "postalCode": "52300"
+  },
+  {
+    "cityCode": "53",
+    "cityName": "RİZE",
+    "districtCode": "1146",
+    "districtName": "ARDEŞEN",
+    "postalCode": "53400"
+  },
+  {
+    "cityCode": "53",
+    "cityName": "RİZE",
+    "districtCode": "1228",
+    "districtName": "ÇAMLIHEMŞİN",
+    "postalCode": "53750"
+  },
+  {
+    "cityCode": "53",
+    "cityName": "RİZE",
+    "districtCode": "1241",
+    "districtName": "ÇAYELİ",
+    "postalCode": "53210"
+  },
+  {
+    "cityCode": "53",
+    "cityName": "RİZE",
+    "districtCode": "1908",
+    "districtName": "DEREPAZARI",
+    "postalCode": "53900"
+  },
+  {
+    "cityCode": "53",
+    "cityName": "RİZE",
+    "districtCode": "1332",
+    "districtName": "FINDIKLI",
+    "postalCode": "53700"
+  },
+  {
+    "cityCode": "53",
+    "cityName": "RİZE",
+    "districtCode": "1796",
+    "districtName": "GÜNEYSU",
+    "postalCode": "53350"
+  },
+  {
+    "cityCode": "53",
+    "cityName": "RİZE",
+    "districtCode": "1943",
+    "districtName": "HEMŞİN",
+    "postalCode": "53550"
+  },
+  {
+    "cityCode": "53",
+    "cityName": "RİZE",
+    "districtCode": "1405",
+    "districtName": "İKİZDERE",
+    "postalCode": "53650"
+  },
+  {
+    "cityCode": "53",
+    "cityName": "RİZE",
+    "districtCode": "1949",
+    "districtName": "İYİDERE",
+    "postalCode": "53600"
+  },
+  {
+    "cityCode": "53",
+    "cityName": "RİZE",
+    "districtCode": "1428",
+    "districtName": "KALKANDERE",
+    "postalCode": "53500"
+  },
+  {
+    "cityCode": "53",
+    "cityName": "RİZE",
+    "districtCode": "1586",
+    "districtName": "MERKEZ",
+    "postalCode": "53950"
+  },
+  {
+    "cityCode": "53",
+    "cityName": "RİZE",
+    "districtCode": "1569",
+    "districtName": "PAZAR",
+    "postalCode": "53340"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "2068",
+    "districtName": "ADAPAZARI",
+    "postalCode": "54100"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "1123",
+    "districtName": "AKYAZI",
+    "postalCode": "54400"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "2069",
+    "districtName": "ARİFİYE",
+    "postalCode": "54580"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "2070",
+    "districtName": "ERENLER",
+    "postalCode": "54200"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "1925",
+    "districtName": "FERİZLİ",
+    "postalCode": "54110"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "1351",
+    "districtName": "GEYVE",
+    "postalCode": "54950"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "1391",
+    "districtName": "HENDEK",
+    "postalCode": "54300"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "1955",
+    "districtName": "KARAPÜRÇEK",
+    "postalCode": "54430"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "1442",
+    "districtName": "KARASU",
+    "postalCode": "54500"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "1453",
+    "districtName": "KAYNARCA",
+    "postalCode": "54650"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "1818",
+    "districtName": "KOCAALİ",
+    "postalCode": "54800"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "1833",
+    "districtName": "PAMUKOVA",
+    "postalCode": "54900"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "1595",
+    "districtName": "SAPANCA",
+    "postalCode": "54600"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "2071",
+    "districtName": "SERDİVAN",
+    "postalCode": "54055"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "1986",
+    "districtName": "SÖĞÜTLÜ",
+    "postalCode": "54160"
+  },
+  {
+    "cityCode": "54",
+    "cityName": "SAKARYA",
+    "districtCode": "1847",
+    "districtName": "TARAKLI",
+    "postalCode": "54750"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "1830",
+    "districtName": "19 MAYIS",
+    "postalCode": "55421"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "1125",
+    "districtName": "ALAÇAM",
+    "postalCode": "55800"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "1763",
+    "districtName": "ASARCIK",
+    "postalCode": "55860"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "2072",
+    "districtName": "ATAKUM",
+    "postalCode": "55200"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "1879",
+    "districtName": "AYVACIK",
+    "postalCode": "55550"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "1164",
+    "districtName": "BAFRA",
+    "postalCode": "55400"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "2073",
+    "districtName": "CANİK",
+    "postalCode": "55080"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "1234",
+    "districtName": "ÇARŞAMBA",
+    "postalCode": "55515"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "1386",
+    "districtName": "HAVZA",
+    "postalCode": "55715"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "2074",
+    "districtName": "İLKADIM",
+    "postalCode": "55070"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "1452",
+    "districtName": "KAVAK",
+    "postalCode": "55850"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "1501",
+    "districtName": "LADİK",
+    "postalCode": "55760"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "1838",
+    "districtName": "SALIPAZARI",
+    "postalCode": "55530"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "1849",
+    "districtName": "TEKKEKÖY",
+    "postalCode": "55320"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "1676",
+    "districtName": "TERME",
+    "postalCode": "55600"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "1712",
+    "districtName": "VEZİRKÖPRÜ",
+    "postalCode": "55900"
+  },
+  {
+    "cityCode": "55",
+    "cityName": "SAMSUN",
+    "districtCode": "1993",
+    "districtName": "YAKAKENT",
+    "postalCode": "55810"
+  },
+  {
+    "cityCode": "56",
+    "cityName": "SİİRT",
+    "districtCode": "1179",
+    "districtName": "BAYKAN",
+    "postalCode": "56460"
+  },
+  {
+    "cityCode": "56",
+    "cityName": "SİİRT",
+    "districtCode": "1317",
+    "districtName": "ERUH",
+    "postalCode": "56800"
+  },
+  {
+    "cityCode": "56",
+    "cityName": "SİİRT",
+    "districtCode": "1495",
+    "districtName": "KURTALAN",
+    "postalCode": "56540"
+  },
+  {
+    "cityCode": "56",
+    "cityName": "SİİRT",
+    "districtCode": "1620",
+    "districtName": "MERKEZ",
+    "postalCode": "56210"
+  },
+  {
+    "cityCode": "56",
+    "cityName": "SİİRT",
+    "districtCode": "1575",
+    "districtName": "PERVARİ",
+    "postalCode": "56700"
+  },
+  {
+    "cityCode": "56",
+    "cityName": "SİİRT",
+    "districtCode": "1662",
+    "districtName": "ŞİRVAN",
+    "postalCode": "56760"
+  },
+  {
+    "cityCode": "56",
+    "cityName": "SİİRT",
+    "districtCode": "1878",
+    "districtName": "TİLLO",
+    "postalCode": "56870"
+  },
+  {
+    "cityCode": "57",
+    "cityName": "SİNOP",
+    "districtCode": "1156",
+    "districtName": "AYANCIK",
+    "postalCode": "57400"
+  },
+  {
+    "cityCode": "57",
+    "cityName": "SİNOP",
+    "districtCode": "1204",
+    "districtName": "BOYABAT",
+    "postalCode": "57200"
+  },
+  {
+    "cityCode": "57",
+    "cityName": "SİNOP",
+    "districtCode": "1910",
+    "districtName": "DİKMEN",
+    "postalCode": "57660"
+  },
+  {
+    "cityCode": "57",
+    "cityName": "SİNOP",
+    "districtCode": "1290",
+    "districtName": "DURAĞAN",
+    "postalCode": "57700"
+  },
+  {
+    "cityCode": "57",
+    "cityName": "SİNOP",
+    "districtCode": "1314",
+    "districtName": "ERFELEK",
+    "postalCode": "57800"
+  },
+  {
+    "cityCode": "57",
+    "cityName": "SİNOP",
+    "districtCode": "1349",
+    "districtName": "GERZE",
+    "postalCode": "57600"
+  },
+  {
+    "cityCode": "57",
+    "cityName": "SİNOP",
+    "districtCode": "1627",
+    "districtName": "MERKEZ",
+    "postalCode": "57000"
+  },
+  {
+    "cityCode": "57",
+    "cityName": "SİNOP",
+    "districtCode": "1981",
+    "districtName": "SARAYDÜZÜ",
+    "postalCode": "57300"
+  },
+  {
+    "cityCode": "57",
+    "cityName": "SİNOP",
+    "districtCode": "1693",
+    "districtName": "TÜRKELİ",
+    "postalCode": "57900"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1870",
+    "districtName": "AKINCILAR",
+    "postalCode": "58550"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1875",
+    "districtName": "ALTINYAYLA",
+    "postalCode": "58470"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1282",
+    "districtName": "DİVRİĞİ",
+    "postalCode": "58300"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1913",
+    "districtName": "DOĞANŞAR",
+    "postalCode": "58780"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1342",
+    "districtName": "GEMEREK",
+    "postalCode": "58840"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1927",
+    "districtName": "GÖLOVA",
+    "postalCode": "58640"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1373",
+    "districtName": "GÜRÜN",
+    "postalCode": "58800"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1376",
+    "districtName": "HAFİK",
+    "postalCode": "58760"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1407",
+    "districtName": "İMRANLI",
+    "postalCode": "58980"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1431",
+    "districtName": "KANGAL",
+    "postalCode": "58900"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1484",
+    "districtName": "KOYULHİSAR",
+    "postalCode": "58660"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1628",
+    "districtName": "MERKEZ",
+    "postalCode": "58030"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1646",
+    "districtName": "SUŞEHRİ",
+    "postalCode": "58600"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1650",
+    "districtName": "ŞARKIŞLA",
+    "postalCode": "58400"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1991",
+    "districtName": "ULAŞ",
+    "postalCode": "58380"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1731",
+    "districtName": "YILDIZELİ",
+    "postalCode": "58500"
+  },
+  {
+    "cityCode": "58",
+    "cityName": "SİVAS",
+    "districtCode": "1738",
+    "districtName": "ZARA",
+    "postalCode": "58700"
+  },
+  {
+    "cityCode": "59",
+    "cityName": "TEKİRDAĞ",
+    "districtCode": "1250",
+    "districtName": "ÇERKEZKÖY",
+    "postalCode": "59500"
+  },
+  {
+    "cityCode": "59",
+    "cityName": "TEKİRDAĞ",
+    "districtCode": "1258",
+    "districtName": "ÇORLU",
+    "postalCode": "59850"
+  },
+  {
+    "cityCode": "59",
+    "cityName": "TEKİRDAĞ",
+    "districtCode": "2094",
+    "districtName": "ERGENE",
+    "postalCode": "59930"
+  },
+  {
+    "cityCode": "59",
+    "cityName": "TEKİRDAĞ",
+    "districtCode": "1388",
+    "districtName": "HAYRABOLU",
+    "postalCode": "59410"
+  },
+  {
+    "cityCode": "59",
+    "cityName": "TEKİRDAĞ",
+    "districtCode": "2095",
+    "districtName": "KAPAKLI",
+    "postalCode": "59510"
+  },
+  {
+    "cityCode": "59",
+    "cityName": "TEKİRDAĞ",
+    "districtCode": "1511",
+    "districtName": "MALKARA",
+    "postalCode": "59320"
+  },
+  {
+    "cityCode": "59",
+    "cityName": "TEKİRDAĞ",
+    "districtCode": "1825",
+    "districtName": "MARMARAEREĞLİSİ",
+    "postalCode": "59740"
+  },
+  {
+    "cityCode": "59",
+    "cityName": "TEKİRDAĞ",
+    "districtCode": "1538",
+    "districtName": "MURATLI",
+    "postalCode": "59700"
+  },
+  {
+    "cityCode": "59",
+    "cityName": "TEKİRDAĞ",
+    "districtCode": "1596",
+    "districtName": "SARAY",
+    "postalCode": "59600"
+  },
+  {
+    "cityCode": "59",
+    "cityName": "TEKİRDAĞ",
+    "districtCode": "2096",
+    "districtName": "SÜLEYMANPAŞA",
+    "postalCode": "59100"
+  },
+  {
+    "cityCode": "59",
+    "cityName": "TEKİRDAĞ",
+    "districtCode": "1652",
+    "districtName": "ŞARKÖY",
+    "postalCode": "59570"
+  },
+  {
+    "cityCode": "60",
+    "cityName": "TOKAT",
+    "districtCode": "1129",
+    "districtName": "ALMUS",
+    "postalCode": "60900"
+  },
+  {
+    "cityCode": "60",
+    "cityName": "TOKAT",
+    "districtCode": "1151",
+    "districtName": "ARTOVA",
+    "postalCode": "60670"
+  },
+  {
+    "cityCode": "60",
+    "cityName": "TOKAT",
+    "districtCode": "1883",
+    "districtName": "BAŞÇİFTLİK",
+    "postalCode": "60620"
+  },
+  {
+    "cityCode": "60",
+    "cityName": "TOKAT",
+    "districtCode": "1308",
+    "districtName": "ERBAA",
+    "postalCode": "60500"
+  },
+  {
+    "cityCode": "60",
+    "cityName": "TOKAT",
+    "districtCode": "1679",
+    "districtName": "MERKEZ",
+    "postalCode": "60230"
+  },
+  {
+    "cityCode": "60",
+    "cityName": "TOKAT",
+    "districtCode": "1545",
+    "districtName": "NİKSAR",
+    "postalCode": "60630"
+  },
+  {
+    "cityCode": "60",
+    "cityName": "TOKAT",
+    "districtCode": "1834",
+    "districtName": "PAZAR",
+    "postalCode": "60800"
+  },
+  {
+    "cityCode": "60",
+    "cityName": "TOKAT",
+    "districtCode": "1584",
+    "districtName": "REŞADİYE",
+    "postalCode": "60730"
+  },
+  {
+    "cityCode": "60",
+    "cityName": "TOKAT",
+    "districtCode": "1987",
+    "districtName": "SULUSARAY",
+    "postalCode": "60870"
+  },
+  {
+    "cityCode": "60",
+    "cityName": "TOKAT",
+    "districtCode": "1690",
+    "districtName": "TURHAL",
+    "postalCode": "60300"
+  },
+  {
+    "cityCode": "60",
+    "cityName": "TOKAT",
+    "districtCode": "1858",
+    "districtName": "YEŞİLYURT",
+    "postalCode": "60860"
+  },
+  {
+    "cityCode": "60",
+    "cityName": "TOKAT",
+    "districtCode": "1740",
+    "districtName": "ZİLE",
+    "postalCode": "60400"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1113",
+    "districtName": "AKÇAABAT",
+    "postalCode": "61300"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1141",
+    "districtName": "ARAKLI",
+    "postalCode": "61700"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1150",
+    "districtName": "ARSİN",
+    "postalCode": "61900"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1775",
+    "districtName": "BEŞİKDÜZÜ",
+    "postalCode": "61800"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1896",
+    "districtName": "ÇARŞIBAŞI",
+    "postalCode": "61420"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1244",
+    "districtName": "ÇAYKARA",
+    "postalCode": "61940"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1909",
+    "districtName": "DERNEKPAZARI",
+    "postalCode": "61950"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1917",
+    "districtName": "DÜZKÖY",
+    "postalCode": "61390"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1942",
+    "districtName": "HAYRAT",
+    "postalCode": "61470"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1966",
+    "districtName": "KÖPRÜBAŞI",
+    "postalCode": "61630"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1507",
+    "districtName": "MAÇKA",
+    "postalCode": "61750"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1548",
+    "districtName": "OF",
+    "postalCode": "61830"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "2097",
+    "districtName": "ORTAHİSAR",
+    "postalCode": "61000"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1647",
+    "districtName": "SÜRMENE",
+    "postalCode": "61530"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1842",
+    "districtName": "ŞALPAZARI",
+    "postalCode": "61670"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1681",
+    "districtName": "TONYA",
+    "postalCode": "61510"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1709",
+    "districtName": "VAKFIKEBİR",
+    "postalCode": "61400"
+  },
+  {
+    "cityCode": "61",
+    "cityName": "TRABZON",
+    "districtCode": "1732",
+    "districtName": "YOMRA",
+    "postalCode": "61290"
+  },
+  {
+    "cityCode": "62",
+    "cityName": "TUNCELİ",
+    "districtCode": "1247",
+    "districtName": "ÇEMİŞGEZEK",
+    "postalCode": "62600"
+  },
+  {
+    "cityCode": "62",
+    "cityName": "TUNCELİ",
+    "districtCode": "1397",
+    "districtName": "HOZAT",
+    "postalCode": "62400"
+  },
+  {
+    "cityCode": "62",
+    "cityName": "TUNCELİ",
+    "districtCode": "1518",
+    "districtName": "MAZGİRT",
+    "postalCode": "62800"
+  },
+  {
+    "cityCode": "62",
+    "cityName": "TUNCELİ",
+    "districtCode": "1688",
+    "districtName": "MERKEZ",
+    "postalCode": "62000"
+  },
+  {
+    "cityCode": "62",
+    "cityName": "TUNCELİ",
+    "districtCode": "1541",
+    "districtName": "NAZIMİYE",
+    "postalCode": "62950"
+  },
+  {
+    "cityCode": "62",
+    "cityName": "TUNCELİ",
+    "districtCode": "1562",
+    "districtName": "OVACIK",
+    "postalCode": "62900"
+  },
+  {
+    "cityCode": "62",
+    "cityName": "TUNCELİ",
+    "districtCode": "1574",
+    "districtName": "PERTEK",
+    "postalCode": "62500"
+  },
+  {
+    "cityCode": "62",
+    "cityName": "TUNCELİ",
+    "districtCode": "1581",
+    "districtName": "PÜLÜMÜR",
+    "postalCode": "62710"
+  },
+  {
+    "cityCode": "63",
+    "cityName": "ŞANLIURFA",
+    "districtCode": "1115",
+    "districtName": "AKÇAKALE",
+    "postalCode": "63500"
+  },
+  {
+    "cityCode": "63",
+    "cityName": "ŞANLIURFA",
+    "districtCode": "1194",
+    "districtName": "BİRECİK",
+    "postalCode": "63420"
+  },
+  {
+    "cityCode": "63",
+    "cityName": "ŞANLIURFA",
+    "districtCode": "1209",
+    "districtName": "BOZOVA",
+    "postalCode": "63850"
+  },
+  {
+    "cityCode": "63",
+    "cityName": "ŞANLIURFA",
+    "districtCode": "1220",
+    "districtName": "CEYLANPINAR",
+    "postalCode": "63570"
+  },
+  {
+    "cityCode": "63",
+    "cityName": "ŞANLIURFA",
+    "districtCode": "2091",
+    "districtName": "EYYÜBİYE",
+    "postalCode": "63250"
+  },
+  {
+    "cityCode": "63",
+    "cityName": "ŞANLIURFA",
+    "districtCode": "1378",
+    "districtName": "HALFETİ",
+    "postalCode": "63986"
+  },
+  {
+    "cityCode": "63",
+    "cityName": "ŞANLIURFA",
+    "districtCode": "2092",
+    "districtName": "HALİLİYE",
+    "postalCode": "63050"
+  },
+  {
+    "cityCode": "63",
+    "cityName": "ŞANLIURFA",
+    "districtCode": "1800",
+    "districtName": "HARRAN",
+    "postalCode": "63510"
+  },
+  {
+    "cityCode": "63",
+    "cityName": "ŞANLIURFA",
+    "districtCode": "1393",
+    "districtName": "HİLVAN",
+    "postalCode": "63900"
+  },
+  {
+    "cityCode": "63",
+    "cityName": "ŞANLIURFA",
+    "districtCode": "2093",
+    "districtName": "KARAKÖPRÜ",
+    "postalCode": "63330"
+  },
+  {
+    "cityCode": "63",
+    "cityName": "ŞANLIURFA",
+    "districtCode": "1630",
+    "districtName": "SİVEREK",
+    "postalCode": "63614"
+  },
+  {
+    "cityCode": "63",
+    "cityName": "ŞANLIURFA",
+    "districtCode": "1643",
+    "districtName": "SURUÇ",
+    "postalCode": "63800"
+  },
+  {
+    "cityCode": "63",
+    "cityName": "ŞANLIURFA",
+    "districtCode": "1713",
+    "districtName": "VİRANŞEHİR",
+    "postalCode": "63700"
+  },
+  {
+    "cityCode": "64",
+    "cityName": "UŞAK",
+    "districtCode": "1170",
+    "districtName": "BANAZ",
+    "postalCode": "64500"
+  },
+  {
+    "cityCode": "64",
+    "cityName": "UŞAK",
+    "districtCode": "1323",
+    "districtName": "EŞME",
+    "postalCode": "64600"
+  },
+  {
+    "cityCode": "64",
+    "cityName": "UŞAK",
+    "districtCode": "1436",
+    "districtName": "KARAHALLI",
+    "postalCode": "64700"
+  },
+  {
+    "cityCode": "64",
+    "cityName": "UŞAK",
+    "districtCode": "1704",
+    "districtName": "MERKEZ",
+    "postalCode": "64300"
+  },
+  {
+    "cityCode": "64",
+    "cityName": "UŞAK",
+    "districtCode": "1629",
+    "districtName": "SİVASLI",
+    "postalCode": "64800"
+  },
+  {
+    "cityCode": "64",
+    "cityName": "UŞAK",
+    "districtCode": "1697",
+    "districtName": "ULUBEY",
+    "postalCode": "64900"
+  },
+  {
+    "cityCode": "65",
+    "cityName": "VAN",
+    "districtCode": "1770",
+    "districtName": "BAHÇESARAY",
+    "postalCode": "65710"
+  },
+  {
+    "cityCode": "65",
+    "cityName": "VAN",
+    "districtCode": "1175",
+    "districtName": "BAŞKALE",
+    "postalCode": "65600"
+  },
+  {
+    "cityCode": "65",
+    "cityName": "VAN",
+    "districtCode": "1786",
+    "districtName": "ÇALDIRAN",
+    "postalCode": "65970"
+  },
+  {
+    "cityCode": "65",
+    "cityName": "VAN",
+    "districtCode": "1236",
+    "districtName": "ÇATAK",
+    "postalCode": "65870"
+  },
+  {
+    "cityCode": "65",
+    "cityName": "VAN",
+    "districtCode": "1918",
+    "districtName": "EDREMİT",
+    "postalCode": "65170"
+  },
+  {
+    "cityCode": "65",
+    "cityName": "VAN",
+    "districtCode": "1309",
+    "districtName": "ERCİŞ",
+    "postalCode": "65440"
+  },
+  {
+    "cityCode": "65",
+    "cityName": "VAN",
+    "districtCode": "1350",
+    "districtName": "GEVAŞ",
+    "postalCode": "65700"
+  },
+  {
+    "cityCode": "65",
+    "cityName": "VAN",
+    "districtCode": "1372",
+    "districtName": "GÜRPINAR",
+    "postalCode": "65900"
+  },
+  {
+    "cityCode": "65",
+    "cityName": "VAN",
+    "districtCode": "2098",
+    "districtName": "İPEKYOLU",
+    "postalCode": "65130"
+  },
+  {
+    "cityCode": "65",
+    "cityName": "VAN",
+    "districtCode": "1533",
+    "districtName": "MURADİYE",
+    "postalCode": "65500"
+  },
+  {
+    "cityCode": "65",
+    "cityName": "VAN",
+    "districtCode": "1565",
+    "districtName": "ÖZALP",
+    "postalCode": "65570"
+  },
+  {
+    "cityCode": "65",
+    "cityName": "VAN",
+    "districtCode": "1980",
+    "districtName": "SARAY",
+    "postalCode": "65830"
+  },
+  {
+    "cityCode": "65",
+    "cityName": "VAN",
+    "districtCode": "2099",
+    "districtName": "TUŞBA",
+    "postalCode": "65040"
+  },
+  {
+    "cityCode": "66",
+    "cityName": "YOZGAT",
+    "districtCode": "1117",
+    "districtName": "AKDAĞMADENİ",
+    "postalCode": "66300"
+  },
+  {
+    "cityCode": "66",
+    "cityName": "YOZGAT",
+    "districtCode": "1877",
+    "districtName": "AYDINCIK",
+    "postalCode": "66510"
+  },
+  {
+    "cityCode": "66",
+    "cityName": "YOZGAT",
+    "districtCode": "1198",
+    "districtName": "BOĞAZLIYAN",
+    "postalCode": "66400"
+  },
+  {
+    "cityCode": "66",
+    "cityName": "YOZGAT",
+    "districtCode": "1895",
+    "districtName": "ÇANDIR",
+    "postalCode": "66620"
+  },
+  {
+    "cityCode": "66",
+    "cityName": "YOZGAT",
+    "districtCode": "1242",
+    "districtName": "ÇAYIRALAN",
+    "postalCode": "66600"
+  },
+  {
+    "cityCode": "66",
+    "cityName": "YOZGAT",
+    "districtCode": "1245",
+    "districtName": "ÇEKEREK",
+    "postalCode": "66500"
+  },
+  {
+    "cityCode": "66",
+    "cityName": "YOZGAT",
+    "districtCode": "1952",
+    "districtName": "KADIŞEHRİ",
+    "postalCode": "66540"
+  },
+  {
+    "cityCode": "66",
+    "cityName": "YOZGAT",
+    "districtCode": "1733",
+    "districtName": "MERKEZ",
+    "postalCode": "66000"
+  },
+  {
+    "cityCode": "66",
+    "cityName": "YOZGAT",
+    "districtCode": "1982",
+    "districtName": "SARAYKENT",
+    "postalCode": "66320"
+  },
+  {
+    "cityCode": "66",
+    "cityName": "YOZGAT",
+    "districtCode": "1602",
+    "districtName": "SARIKAYA",
+    "postalCode": "66650"
+  },
+  {
+    "cityCode": "66",
+    "cityName": "YOZGAT",
+    "districtCode": "1635",
+    "districtName": "SORGUN",
+    "postalCode": "66710"
+  },
+  {
+    "cityCode": "66",
+    "cityName": "YOZGAT",
+    "districtCode": "1655",
+    "districtName": "ŞEFAATLİ",
+    "postalCode": "66800"
+  },
+  {
+    "cityCode": "66",
+    "cityName": "YOZGAT",
+    "districtCode": "1998",
+    "districtName": "YENİFAKILI",
+    "postalCode": "66470"
+  },
+  {
+    "cityCode": "66",
+    "cityName": "YOZGAT",
+    "districtCode": "1726",
+    "districtName": "YERKÖY",
+    "postalCode": "66900"
+  },
+  {
+    "cityCode": "67",
+    "cityName": "ZONGULDAK",
+    "districtCode": "1758",
+    "districtName": "ALAPLI",
+    "postalCode": "67850"
+  },
+  {
+    "cityCode": "67",
+    "cityName": "ZONGULDAK",
+    "districtCode": "1240",
+    "districtName": "ÇAYCUMA",
+    "postalCode": "67900"
+  },
+  {
+    "cityCode": "67",
+    "cityName": "ZONGULDAK",
+    "districtCode": "1276",
+    "districtName": "DEVREK",
+    "postalCode": "67830"
+  },
+  {
+    "cityCode": "67",
+    "cityName": "ZONGULDAK",
+    "districtCode": "1313",
+    "districtName": "EREĞLİ",
+    "postalCode": "67300"
+  },
+  {
+    "cityCode": "67",
+    "cityName": "ZONGULDAK",
+    "districtCode": "1926",
+    "districtName": "GÖKÇEBEY",
+    "postalCode": "67680"
+  },
+  {
+    "cityCode": "67",
+    "cityName": "ZONGULDAK",
+    "districtCode": "2100",
+    "districtName": "KİLİMLİ",
+    "postalCode": "67500"
+  },
+  {
+    "cityCode": "67",
+    "cityName": "ZONGULDAK",
+    "districtCode": "2101",
+    "districtName": "KOZLU",
+    "postalCode": "67600"
+  },
+  {
+    "cityCode": "67",
+    "cityName": "ZONGULDAK",
+    "districtCode": "1741",
+    "districtName": "MERKEZ",
+    "postalCode": "67980"
+  },
+  {
+    "cityCode": "68",
+    "cityName": "AKSARAY",
+    "districtCode": "1860",
+    "districtName": "AĞAÇÖREN",
+    "postalCode": "68600"
+  },
+  {
+    "cityCode": "68",
+    "cityName": "AKSARAY",
+    "districtCode": "1921",
+    "districtName": "ESKİL",
+    "postalCode": "68800"
+  },
+  {
+    "cityCode": "68",
+    "cityName": "AKSARAY",
+    "districtCode": "1932",
+    "districtName": "GÜLAĞAÇ",
+    "postalCode": "68940"
+  },
+  {
+    "cityCode": "68",
+    "cityName": "AKSARAY",
+    "districtCode": "1861",
+    "districtName": "GÜZELYURT",
+    "postalCode": "68500"
+  },
+  {
+    "cityCode": "68",
+    "cityName": "AKSARAY",
+    "districtCode": "1120",
+    "districtName": "MERKEZ",
+    "postalCode": "68120"
+  },
+  {
+    "cityCode": "68",
+    "cityName": "AKSARAY",
+    "districtCode": "1557",
+    "districtName": "ORTAKÖY",
+    "postalCode": "68400"
+  },
+  {
+    "cityCode": "68",
+    "cityName": "AKSARAY",
+    "districtCode": "1866",
+    "districtName": "SARIYAHŞİ",
+    "postalCode": "68700"
+  },
+  {
+    "cityCode": "68",
+    "cityName": "AKSARAY",
+    "districtCode": "2106",
+    "districtName": "SULTANHANI",
+    "postalCode": "68190"
+  },
+  {
+    "cityCode": "69",
+    "cityName": "BAYBURT",
+    "districtCode": "1767",
+    "districtName": "AYDINTEPE",
+    "postalCode": "69500"
+  },
+  {
+    "cityCode": "69",
+    "cityName": "BAYBURT",
+    "districtCode": "1788",
+    "districtName": "DEMİRÖZÜ",
+    "postalCode": "69400"
+  },
+  {
+    "cityCode": "69",
+    "cityName": "BAYBURT",
+    "districtCode": "1176",
+    "districtName": "MERKEZ",
+    "postalCode": "69300"
+  },
+  {
+    "cityCode": "70",
+    "cityName": "KARAMAN",
+    "districtCode": "1768",
+    "districtName": "AYRANCI",
+    "postalCode": "70500"
+  },
+  {
+    "cityCode": "70",
+    "cityName": "KARAMAN",
+    "districtCode": "1884",
+    "districtName": "BAŞYAYLA",
+    "postalCode": "70700"
+  },
+  {
+    "cityCode": "70",
+    "cityName": "KARAMAN",
+    "districtCode": "1316",
+    "districtName": "ERMENEK",
+    "postalCode": "70400"
+  },
+  {
+    "cityCode": "70",
+    "cityName": "KARAMAN",
+    "districtCode": "1862",
+    "districtName": "KAZIMKARABEKİR",
+    "postalCode": "70600"
+  },
+  {
+    "cityCode": "70",
+    "cityName": "KARAMAN",
+    "districtCode": "1439",
+    "districtName": "MERKEZ",
+    "postalCode": "70110"
+  },
+  {
+    "cityCode": "70",
+    "cityName": "KARAMAN",
+    "districtCode": "1983",
+    "districtName": "SARIVELİLER",
+    "postalCode": "70810"
+  },
+  {
+    "cityCode": "71",
+    "cityName": "KIRIKKALE",
+    "districtCode": "1880",
+    "districtName": "BAHŞILI",
+    "postalCode": "71460"
+  },
+  {
+    "cityCode": "71",
+    "cityName": "KIRIKKALE",
+    "districtCode": "1882",
+    "districtName": "BALIŞEYH",
+    "postalCode": "71520"
+  },
+  {
+    "cityCode": "71",
+    "cityName": "KIRIKKALE",
+    "districtCode": "1901",
+    "districtName": "ÇELEBİ",
+    "postalCode": "71810"
+  },
+  {
+    "cityCode": "71",
+    "cityName": "KIRIKKALE",
+    "districtCode": "1268",
+    "districtName": "DELİCE",
+    "postalCode": "71670"
+  },
+  {
+    "cityCode": "71",
+    "cityName": "KIRIKKALE",
+    "districtCode": "1954",
+    "districtName": "KARAKEÇİLİ",
+    "postalCode": "71500"
+  },
+  {
+    "cityCode": "71",
+    "cityName": "KIRIKKALE",
+    "districtCode": "1463",
+    "districtName": "KESKİN",
+    "postalCode": "71800"
+  },
+  {
+    "cityCode": "71",
+    "cityName": "KIRIKKALE",
+    "districtCode": "1469",
+    "districtName": "MERKEZ",
+    "postalCode": "71100"
+  },
+  {
+    "cityCode": "71",
+    "cityName": "KIRIKKALE",
+    "districtCode": "1638",
+    "districtName": "SULAKYURT",
+    "postalCode": "71900"
+  },
+  {
+    "cityCode": "71",
+    "cityName": "KIRIKKALE",
+    "districtCode": "1992",
+    "districtName": "YAHŞİHAN",
+    "postalCode": "71450"
+  },
+  {
+    "cityCode": "72",
+    "cityName": "BATMAN",
+    "districtCode": "1184",
+    "districtName": "BEŞİRİ",
+    "postalCode": "72200"
+  },
+  {
+    "cityCode": "72",
+    "cityName": "BATMAN",
+    "districtCode": "1345",
+    "districtName": "GERCÜŞ",
+    "postalCode": "72300"
+  },
+  {
+    "cityCode": "72",
+    "cityName": "BATMAN",
+    "districtCode": "1941",
+    "districtName": "HASANKEYF",
+    "postalCode": "72350"
+  },
+  {
+    "cityCode": "72",
+    "cityName": "BATMAN",
+    "districtCode": "1487",
+    "districtName": "KOZLUK",
+    "postalCode": "72400"
+  },
+  {
+    "cityCode": "72",
+    "cityName": "BATMAN",
+    "districtCode": "1174",
+    "districtName": "MERKEZ",
+    "postalCode": "72000"
+  },
+  {
+    "cityCode": "72",
+    "cityName": "BATMAN",
+    "districtCode": "1607",
+    "districtName": "SASON",
+    "postalCode": "72500"
+  },
+  {
+    "cityCode": "73",
+    "cityName": "ŞIRNAK",
+    "districtCode": "1189",
+    "districtName": "BEYTÜŞŞEBAP",
+    "postalCode": "73800"
+  },
+  {
+    "cityCode": "73",
+    "cityName": "ŞIRNAK",
+    "districtCode": "1223",
+    "districtName": "CİZRE",
+    "postalCode": "73200"
+  },
+  {
+    "cityCode": "73",
+    "cityName": "ŞIRNAK",
+    "districtCode": "1931",
+    "districtName": "GÜÇLÜKONAK",
+    "postalCode": "73710"
+  },
+  {
+    "cityCode": "73",
+    "cityName": "ŞIRNAK",
+    "districtCode": "1403",
+    "districtName": "İDİL",
+    "postalCode": "73300"
+  },
+  {
+    "cityCode": "73",
+    "cityName": "ŞIRNAK",
+    "districtCode": "1661",
+    "districtName": "MERKEZ",
+    "postalCode": "73000"
+  },
+  {
+    "cityCode": "73",
+    "cityName": "ŞIRNAK",
+    "districtCode": "1623",
+    "districtName": "SİLOPİ",
+    "postalCode": "73400"
+  },
+  {
+    "cityCode": "73",
+    "cityName": "ŞIRNAK",
+    "districtCode": "1698",
+    "districtName": "ULUDERE",
+    "postalCode": "73620"
+  },
+  {
+    "cityCode": "74",
+    "cityName": "BARTIN",
+    "districtCode": "1761",
+    "districtName": "AMASRA",
+    "postalCode": "74300"
+  },
+  {
+    "cityCode": "74",
+    "cityName": "BARTIN",
+    "districtCode": "1496",
+    "districtName": "KURUCAŞİLE",
+    "postalCode": "74500"
+  },
+  {
+    "cityCode": "74",
+    "cityName": "BARTIN",
+    "districtCode": "1172",
+    "districtName": "MERKEZ",
+    "postalCode": "74100"
+  },
+  {
+    "cityCode": "74",
+    "cityName": "BARTIN",
+    "districtCode": "1701",
+    "districtName": "ULUS",
+    "postalCode": "74610"
+  },
+  {
+    "cityCode": "75",
+    "cityName": "ARDAHAN",
+    "districtCode": "1252",
+    "districtName": "ÇILDIR",
+    "postalCode": "75400"
+  },
+  {
+    "cityCode": "75",
+    "cityName": "ARDAHAN",
+    "districtCode": "2008",
+    "districtName": "DAMAL",
+    "postalCode": "75600"
+  },
+  {
+    "cityCode": "75",
+    "cityName": "ARDAHAN",
+    "districtCode": "1356",
+    "districtName": "GÖLE",
+    "postalCode": "75700"
+  },
+  {
+    "cityCode": "75",
+    "cityName": "ARDAHAN",
+    "districtCode": "1380",
+    "districtName": "HANAK",
+    "postalCode": "75900"
+  },
+  {
+    "cityCode": "75",
+    "cityName": "ARDAHAN",
+    "districtCode": "1144",
+    "districtName": "MERKEZ",
+    "postalCode": "75000"
+  },
+  {
+    "cityCode": "75",
+    "cityName": "ARDAHAN",
+    "districtCode": "1579",
+    "districtName": "POSOF",
+    "postalCode": "75800"
+  },
+  {
+    "cityCode": "76",
+    "cityName": "IĞDIR",
+    "districtCode": "1142",
+    "districtName": "ARALIK",
+    "postalCode": "76500"
+  },
+  {
+    "cityCode": "76",
+    "cityName": "IĞDIR",
+    "districtCode": "2011",
+    "districtName": "KARAKOYUNLU",
+    "postalCode": "76700"
+  },
+  {
+    "cityCode": "76",
+    "cityName": "IĞDIR",
+    "districtCode": "1398",
+    "districtName": "MERKEZ",
+    "postalCode": "76410"
+  },
+  {
+    "cityCode": "76",
+    "cityName": "IĞDIR",
+    "districtCode": "1692",
+    "districtName": "TUZLUCA",
+    "postalCode": "76900"
+  },
+  {
+    "cityCode": "77",
+    "cityName": "YALOVA",
+    "districtCode": "2019",
+    "districtName": "ALTINOVA",
+    "postalCode": "77730"
+  },
+  {
+    "cityCode": "77",
+    "cityName": "YALOVA",
+    "districtCode": "2020",
+    "districtName": "ARMUTLU",
+    "postalCode": "77500"
+  },
+  {
+    "cityCode": "77",
+    "cityName": "YALOVA",
+    "districtCode": "2021",
+    "districtName": "ÇINARCIK",
+    "postalCode": "77300"
+  },
+  {
+    "cityCode": "77",
+    "cityName": "YALOVA",
+    "districtCode": "2022",
+    "districtName": "ÇİFTLİKKÖY",
+    "postalCode": "77600"
+  },
+  {
+    "cityCode": "77",
+    "cityName": "YALOVA",
+    "districtCode": "1716",
+    "districtName": "MERKEZ",
+    "postalCode": "77200"
+  },
+  {
+    "cityCode": "77",
+    "cityName": "YALOVA",
+    "districtCode": "2026",
+    "districtName": "TERMAL",
+    "postalCode": "77400"
+  },
+  {
+    "cityCode": "78",
+    "cityName": "KARABÜK",
+    "districtCode": "1296",
+    "districtName": "EFLANİ",
+    "postalCode": "78300"
+  },
+  {
+    "cityCode": "78",
+    "cityName": "KARABÜK",
+    "districtCode": "1321",
+    "districtName": "ESKİPAZAR",
+    "postalCode": "78400"
+  },
+  {
+    "cityCode": "78",
+    "cityName": "KARABÜK",
+    "districtCode": "1433",
+    "districtName": "MERKEZ",
+    "postalCode": "78050"
+  },
+  {
+    "cityCode": "78",
+    "cityName": "KARABÜK",
+    "districtCode": "1561",
+    "districtName": "OVACIK",
+    "postalCode": "78500"
+  },
+  {
+    "cityCode": "78",
+    "cityName": "KARABÜK",
+    "districtCode": "1587",
+    "districtName": "SAFRANBOLU",
+    "postalCode": "78610"
+  },
+  {
+    "cityCode": "78",
+    "cityName": "KARABÜK",
+    "districtCode": "1856",
+    "districtName": "YENİCE",
+    "postalCode": "78700"
+  },
+  {
+    "cityCode": "79",
+    "cityName": "KİLİS",
+    "districtCode": "2023",
+    "districtName": "ELBEYLİ",
+    "postalCode": "79500"
+  },
+  {
+    "cityCode": "79",
+    "cityName": "KİLİS",
+    "districtCode": "1476",
+    "districtName": "MERKEZ",
+    "postalCode": "79000"
+  },
+  {
+    "cityCode": "79",
+    "cityName": "KİLİS",
+    "districtCode": "2024",
+    "districtName": "MUSABEYLİ",
+    "postalCode": "79600"
+  },
+  {
+    "cityCode": "79",
+    "cityName": "KİLİS",
+    "districtCode": "2025",
+    "districtName": "POLATELİ",
+    "postalCode": "79700"
+  },
+  {
+    "cityCode": "80",
+    "cityName": "OSMANİYE",
+    "districtCode": "1165",
+    "districtName": "BAHÇE",
+    "postalCode": "80500"
+  },
+  {
+    "cityCode": "80",
+    "cityName": "OSMANİYE",
+    "districtCode": "1743",
+    "districtName": "DÜZİÇİ",
+    "postalCode": "80710"
+  },
+  {
+    "cityCode": "80",
+    "cityName": "OSMANİYE",
+    "districtCode": "2027",
+    "districtName": "HASANBEYLİ",
+    "postalCode": "80850"
+  },
+  {
+    "cityCode": "80",
+    "cityName": "OSMANİYE",
+    "districtCode": "1423",
+    "districtName": "KADİRLİ",
+    "postalCode": "80760"
+  },
+  {
+    "cityCode": "80",
+    "cityName": "OSMANİYE",
+    "districtCode": "1560",
+    "districtName": "MERKEZ",
+    "postalCode": "80010"
+  },
+  {
+    "cityCode": "80",
+    "cityName": "OSMANİYE",
+    "districtCode": "2028",
+    "districtName": "SUMBAS",
+    "postalCode": "80940"
+  },
+  {
+    "cityCode": "80",
+    "cityName": "OSMANİYE",
+    "districtCode": "2029",
+    "districtName": "TOPRAKKALE",
+    "postalCode": "80950"
+  },
+  {
+    "cityCode": "81",
+    "cityName": "DÜZCE",
+    "districtCode": "1116",
+    "districtName": "AKÇAKOCA",
+    "postalCode": "81650"
+  },
+  {
+    "cityCode": "81",
+    "cityName": "DÜZCE",
+    "districtCode": "1784",
+    "districtName": "CUMAYERİ",
+    "postalCode": "81700"
+  },
+  {
+    "cityCode": "81",
+    "cityName": "DÜZCE",
+    "districtCode": "1905",
+    "districtName": "ÇİLİMLİ",
+    "postalCode": "81750"
+  },
+  {
+    "cityCode": "81",
+    "cityName": "DÜZCE",
+    "districtCode": "1794",
+    "districtName": "GÖLYAKA",
+    "postalCode": "81800"
+  },
+  {
+    "cityCode": "81",
+    "cityName": "DÜZCE",
+    "districtCode": "2017",
+    "districtName": "GÜMÜŞOVA",
+    "postalCode": "81850"
+  },
+  {
+    "cityCode": "81",
+    "cityName": "DÜZCE",
+    "districtCode": "2031",
+    "districtName": "KAYNAŞLI",
+    "postalCode": "81900"
+  },
+  {
+    "cityCode": "81",
+    "cityName": "DÜZCE",
+    "districtCode": "1292",
+    "districtName": "MERKEZ",
+    "postalCode": "81010"
+  },
+  {
+    "cityCode": "81",
+    "cityName": "DÜZCE",
+    "districtCode": "1730",
+    "districtName": "YIĞILCA",
+    "postalCode": "81950"
+  }
+]

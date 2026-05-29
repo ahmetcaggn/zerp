@@ -56,7 +56,7 @@ export function MenuItemDetailModal({ open, onClose, menuItem, onAddToCart }: Me
             width: '100%',
             height: { xs: 220, sm: 280 },
             objectFit: 'contain',
-            borderRadius: 2,
+            borderRadius: 1.5,
             mb: 2,
             bgcolor: 'background.default',
           }}

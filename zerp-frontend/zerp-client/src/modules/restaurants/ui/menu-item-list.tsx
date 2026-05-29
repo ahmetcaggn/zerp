@@ -1,6 +1,7 @@
 'use client'
 
 import AddIcon from '@mui/icons-material/Add'
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded'
@@ -470,7 +471,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
       top: `${startCenterY - size / 2}px`,
       width: `${size}px`,
       height: `${size}px`,
-      borderRadius: '14px',
+      borderRadius: '10px',
       overflow: 'hidden',
       boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
       pointerEvents: 'none',
@@ -597,10 +598,28 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
   return (
     <>
       <Stack spacing={3.5}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+          <Button
+            variant="text"
+            startIcon={<ArrowBackRoundedIcon />}
+            onClick={() => {
+              if (window.history.length > 1) {
+                router.back()
+                return
+              }
+
+              router.push(`/${locale}/restaurants`)
+            }}
+            sx={{ alignSelf: 'flex-start' }}
+          >
+            {t('restaurants.backToRestaurants')}
+          </Button>
+        </Box>
+
         <Paper
           elevation={0}
           sx={{
-            borderRadius: 3,
+            borderRadius: 2,
             border: (theme) => `1px solid ${theme.palette.divider}`,
             p: { xs: 2, md: 3 },
           }}
@@ -623,7 +642,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                 mx: { xs: 'auto', md: 0 },
                 aspectRatio: '1 / 1',
                 objectFit: 'cover',
-                borderRadius: 2.5,
+                  borderRadius: 2,
                 border: (theme) => `1px solid ${theme.palette.divider}`,
               }}
             />
@@ -760,7 +779,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                       sx={{
                         justifyContent: 'flex-start',
                         width: { xs: 'auto', md: '100%' },
-                        borderRadius: 999,
+                        borderRadius: 2,
                         fontWeight: selected ? 700 : 500,
                         flexShrink: 0,
                         '& .MuiChip-label': {
@@ -809,7 +828,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                           elevation={0}
                           sx={{
                             p: { xs: 1.75, md: 2.25 },
-                            borderRadius: 2,
+                            borderRadius: 1.5,
                             border: (theme) => `1px solid ${theme.palette.divider}`,
                           }}
                         >
@@ -950,7 +969,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                       bgcolor: 'rgba(255,255,255,0.94)',
                       px: 1.2,
                       py: 0.8,
-                      borderRadius: 1.2,
+                      borderRadius: 1,
                       maxWidth: { xs: 'calc(100% - 20px)', md: 440 },
                       border: (theme) => `1px solid ${theme.palette.divider}`,
                     }}
@@ -965,7 +984,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                   <Box ref={aboutMapContainerRef} sx={{ height: 280, width: '100%' }} />
                 </Paper>
               ) : hasCoordinates && isLeafletUnavailable && aboutMapLinks ? (
-                <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', p: 1.5 }}>
+                <Paper variant="outlined" sx={{ borderRadius: 1.5, overflow: 'hidden', p: 1.5 }}>
                   <Stack spacing={1.5}>
                     <Typography variant="body2" color="text.secondary">
                       {t('restaurants.mapFallbackInfo')}
@@ -975,7 +994,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                       src={aboutMapLinks.embed}
                       title={t('restaurants.detailAddress')}
                       loading="lazy"
-                      sx={{ width: '100%', height: 280, border: 0, borderRadius: 1.5 }}
+                      sx={{ width: '100%', height: 280, border: 0, borderRadius: 1 }}
                     />
                   </Stack>
                 </Paper>
@@ -1001,7 +1020,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
               <Grid container spacing={1.2}>
                 {detailRows.map((row) => (
                   <Grid key={row.label} size={{ xs: 12, sm: 6 }}>
-                    <Paper variant="outlined" sx={{ p: 1.25, borderRadius: 1.5, height: '100%' }}>
+                    <Paper variant="outlined" sx={{ p: 1.25, borderRadius: 1.25, height: '100%' }}>
                       <Typography variant="caption" color="text.secondary">
                         {row.label}
                       </Typography>
@@ -1089,7 +1108,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
           )}
 
           {cartItems.map((item) => (
-            <Paper key={item.menuItemId} variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
+            <Paper key={item.menuItemId} variant="outlined" sx={{ p: 1.5, borderRadius: 1.5 }}>
               <Stack spacing={1}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
                   <Typography fontWeight={700}>{item.name}</Typography>
@@ -1157,7 +1176,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
           {cartError && <Alert severity="error">{cartError}</Alert>}
 
           {qrOrderCode && (
-            <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
+            <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 1.5 }}>
               <Stack spacing={1.5} alignItems="center">
                 <Typography variant="body2" color="text.secondary">
                   {t('restaurants.orderCode')}

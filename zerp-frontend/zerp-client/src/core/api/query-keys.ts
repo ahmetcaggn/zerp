@@ -9,6 +9,7 @@ export const queryKeys = {
     restaurants: {
       shops: ['client', 'restaurants', 'shops'] as const,
       nearbyShops: ['client', 'restaurants', 'nearby-shops'] as const,
+      feed: ['client', 'restaurants', 'feed'] as const,
       menu: ['client', 'restaurants', 'menu'] as const,
       products: ['client', 'restaurants', 'products'] as const,
     },

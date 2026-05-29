@@ -29,6 +29,10 @@ import org.zerp.sale.dto.publicsale.PublicCartOrderCreateRequest;
 import org.zerp.sale.dto.publicsale.PublicCartOrderCreateResponse;
 import org.zerp.sale.dto.publicsale.PublicImageContentResponse;
 import org.zerp.sale.dto.publicsale.PublicMenuItemDTO;
+import org.zerp.sale.dto.publicsale.PublicShopFeedMode;
+import org.zerp.sale.dto.publicsale.PublicShopFeedOrder;
+import org.zerp.sale.dto.publicsale.PublicShopFeedResponseDTO;
+import org.zerp.sale.dto.publicsale.PublicShopFeedSortBy;
 import org.zerp.sale.dto.publicsale.PublicShopDTO;
 import org.zerp.sale.dto.publicsale.PublicShopMenuResponseDTO;
 import org.zerp.sale.service.PublicSaleService;
@@ -73,6 +77,35 @@ public class PublicSaleController {
         headers.add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "X-Total-Count");
 
         return new ResponseEntity<>(buildResponse(page.getContent()), headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/shops/feed")
+    public ResponseEntity<ApiResponse<PublicShopFeedResponseDTO>> getShopsFeed(
+            @RequestParam(name = "mode", defaultValue = "ALL") PublicShopFeedMode mode,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "pageSize", defaultValue = "12") int pageSize,
+            @RequestParam(name = "q", required = false) String query,
+            @RequestParam(name = "city", required = false) String city,
+            @RequestParam(name = "state", required = false) String state,
+            @RequestParam(name = "sortBy", required = false) PublicShopFeedSortBy sortBy,
+            @RequestParam(name = "order", required = false) PublicShopFeedOrder order,
+            @RequestParam(name = "lat", required = false) Double latitude,
+            @RequestParam(name = "lng", required = false) Double longitude
+    ) {
+        PublicShopFeedResponseDTO response = publicSaleService.getPublicShopFeed(
+                mode,
+                page,
+                pageSize,
+                query,
+                city,
+                state,
+                sortBy,
+                order,
+                latitude,
+                longitude
+        );
+
+        return ResponseEntity.ok(buildResponse(response));
     }
 
     @GetMapping("/shops/{shopId}/menu")

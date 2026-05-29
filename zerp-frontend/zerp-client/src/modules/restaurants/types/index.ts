@@ -19,6 +19,7 @@ export interface Restaurant {
   id: string
   name: string
   tenantName?: string
+  locationLabel?: string
   description: string
   imageUrl?: string
   rating: number
@@ -55,6 +56,33 @@ export interface PublicNearbyShopsParams {
   longitude: number
   start: number
   end: number
+}
+
+export type PublicShopFeedMode = 'ALL' | 'NEARBY'
+export type PublicShopFeedSortBy = 'NAME' | 'DISTANCE'
+export type PublicShopFeedOrder = 'ASC' | 'DESC'
+
+export interface PublicShopsFeedParams {
+  mode?: PublicShopFeedMode
+  page?: number
+  pageSize?: number
+  q?: string
+  city?: string
+  state?: string
+  sortBy?: PublicShopFeedSortBy
+  order?: PublicShopFeedOrder
+  lat?: number
+  lng?: number
+}
+
+export interface PublicShopsFeedResponse {
+  items: PublicShopDto[]
+  page: number
+  pageSize: number
+  nextPage: number | null
+  totalPages: number
+  hasMore: boolean
+  total: number
 }
 
 export interface PublicActiveMenuDto {

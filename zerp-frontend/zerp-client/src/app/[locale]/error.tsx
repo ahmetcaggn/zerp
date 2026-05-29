@@ -23,7 +23,7 @@ export default function LocaleError({
     >
       <Paper
         elevation={0}
-        sx={{ p: { xs: 4, sm: 6 }, maxWidth: 440, width: '100%', textAlign: 'center', borderRadius: 3 }}
+        sx={{ p: { xs: 4, sm: 6 }, maxWidth: 440, width: '100%', textAlign: 'center', borderRadius: 2 }}
       >
         <Typography
           sx={{

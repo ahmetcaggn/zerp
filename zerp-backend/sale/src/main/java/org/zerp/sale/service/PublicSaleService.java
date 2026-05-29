@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,10 @@ import org.zerp.sale.dto.publicsale.PublicImageContentResponse;
 import org.zerp.sale.dto.publicsale.PublicCartOrderItemCreateRequest;
 import org.zerp.sale.dto.publicsale.PublicMenuItemDTO;
 import org.zerp.sale.dto.publicsale.PublicMenuCategoryDTO;
+import org.zerp.sale.dto.publicsale.PublicShopFeedMode;
+import org.zerp.sale.dto.publicsale.PublicShopFeedOrder;
+import org.zerp.sale.dto.publicsale.PublicShopFeedResponseDTO;
+import org.zerp.sale.dto.publicsale.PublicShopFeedSortBy;
 import org.zerp.sale.dto.publicsale.PublicShopDTO;
 import org.zerp.sale.dto.publicsale.PublicShopMenuResponseDTO;
 import org.zerp.sale.feign.ThumborFeignClient;
@@ -58,6 +63,7 @@ public class PublicSaleService {
     private static final int PUBLIC_CART_CODE_LENGTH = 6;
     private static final int PUBLIC_CART_CODE_MAX_ATTEMPTS = 10;
     private static final SecureRandom RANDOM = new SecureRandom();
+    private static final int DEFAULT_FEED_LIMIT = 12;
 
     private final ShopRepository shopRepository;
     private final MenuRepository menuRepository;
@@ -87,6 +93,98 @@ public class PublicSaleService {
 
         return shopRepository.findNearestShops(latitude, longitude, PageRequest.of(pageNumber, pageSize))
                 .map(shop -> toPublicShop(shop, latitude, longitude));
+    }
+
+    @Transactional(readOnly = true)
+    public PublicShopFeedResponseDTO getPublicShopFeed(
+            PublicShopFeedMode mode,
+            Integer requestedPage,
+            Integer pageSize,
+            String query,
+            String city,
+            String state,
+            PublicShopFeedSortBy sortBy,
+            PublicShopFeedOrder order,
+            Double latitude,
+            Double longitude
+    ) {
+        PublicShopFeedMode resolvedMode = mode == null ? PublicShopFeedMode.ALL : mode;
+        int resolvedPage = validatePage(requestedPage);
+        int resolvedPageSize = validateFeedLimit(pageSize);
+        int pageIndex = resolvedPage - 1;
+        String normalizedQuery = normalizeFilterValue(query);
+        String normalizedCity = normalizeFilterValue(city);
+        String normalizedState = normalizeFilterValue(state);
+        boolean applyQuery = normalizedQuery != null;
+        boolean applyCity = normalizedCity != null;
+        boolean applyState = normalizedState != null;
+        String queryValue = applyQuery ? normalizedQuery : "";
+        String cityValue = applyCity ? normalizedCity : "";
+        String stateValue = applyState ? normalizedState : "";
+        PublicShopFeedSortBy resolvedSortBy = sortBy == null ? PublicShopFeedSortBy.NAME : sortBy;
+        PublicShopFeedOrder resolvedOrder = order == null ? PublicShopFeedOrder.ASC : order;
+
+        Page<Shop> page;
+        if (resolvedMode == PublicShopFeedMode.NEARBY) {
+            if (latitude == null || longitude == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "lat and lng are required for nearby mode");
+            }
+
+            if (normalizedCity != null || normalizedState != null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "city and state filters are not supported in nearby mode");
+            }
+
+            if (resolvedSortBy != PublicShopFeedSortBy.DISTANCE) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "nearby mode only supports DISTANCE sort");
+            }
+
+            validateLatitude(latitude);
+            validateLongitude(longitude);
+
+            Pageable pageable = PageRequest.of(pageIndex, resolvedPageSize);
+            page = resolvedOrder == PublicShopFeedOrder.DESC
+                    ? shopRepository.findPublicShopsFeedNearbyDesc(latitude, longitude, applyQuery, queryValue, pageable)
+                    : shopRepository.findPublicShopsFeedNearbyAsc(latitude, longitude, applyQuery, queryValue, pageable);
+        } else {
+            if (resolvedSortBy != PublicShopFeedSortBy.NAME) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "all mode only supports NAME sort");
+            }
+
+            Sort.Direction direction = resolvedOrder == PublicShopFeedOrder.DESC
+                    ? Sort.Direction.DESC
+                    : Sort.Direction.ASC;
+            Pageable pageable = PageRequest.of(pageIndex, resolvedPageSize, Sort.by(direction, "name"));
+            page = shopRepository.findPublicShopsFeedAll(
+                    applyQuery,
+                    queryValue,
+                    applyCity,
+                    cityValue,
+                    applyState,
+                    stateValue,
+                    pageable
+            );
+        }
+
+        List<PublicShopDTO> items = page.getContent().stream()
+                .map(shop -> toPublicShop(
+                        shop,
+                        resolvedMode == PublicShopFeedMode.NEARBY ? latitude : null,
+                        resolvedMode == PublicShopFeedMode.NEARBY ? longitude : null
+                ))
+                .toList();
+
+        boolean hasMore = (page.getNumber() + 1) < page.getTotalPages();
+        Integer nextPage = hasMore ? resolvedPage + 1 : null;
+
+        PublicShopFeedResponseDTO response = new PublicShopFeedResponseDTO();
+        response.setItems(items);
+        response.setPage(resolvedPage);
+        response.setPageSize(resolvedPageSize);
+        response.setNextPage(nextPage);
+        response.setTotalPages(page.getTotalPages());
+        response.setHasMore(hasMore);
+        response.setTotal(page.getTotalElements());
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -321,6 +419,22 @@ public class PublicSaleService {
         return limit;
     }
 
+    private int validateFeedLimit(Integer limit) {
+        int resolvedLimit = limit == null ? DEFAULT_FEED_LIMIT : limit;
+        if (resolvedLimit < 1 || resolvedLimit > MAX_NEARBY_LIMIT) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "limit must be between 1 and " + MAX_NEARBY_LIMIT);
+        }
+        return resolvedLimit;
+    }
+
+    private int validatePage(Integer page) {
+        int resolvedPage = page == null ? 1 : page;
+        if (resolvedPage < 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "page must be greater than or equal to 1");
+        }
+        return resolvedPage;
+    }
+
     private void validatePaginationRange(int start, int end) {
         if (start < 0 || end <= start) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid pagination range");
@@ -397,5 +511,14 @@ public class PublicSaleService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "imageId is required");
         }
         return imageId.trim();
+    }
+
+    private String normalizeFilterValue(String input) {
+        if (input == null) {
+            return null;
+        }
+
+        String normalized = input.trim().toLowerCase(Locale.ROOT);
+        return normalized.isEmpty() ? null : normalized;
     }
 }
