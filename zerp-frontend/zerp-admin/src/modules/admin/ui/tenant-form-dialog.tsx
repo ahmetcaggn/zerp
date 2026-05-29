@@ -13,6 +13,7 @@ import {
   InputAdornment,
   TextField,
 } from '@mui/material'
+import type { ChangeEvent } from 'react'
 import { useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
@@ -20,6 +21,7 @@ import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
+import { tenantClient } from '../api/tenant-client'
 import { useTenantNameCheck } from '../hooks/use-tenant-name-check'
 import { useCreateTenant, useUpdateTenant } from '../hooks/use-tenants'
 import type { CreateTenantRequest, TenantResponse, UpdateTenantRequest } from '../types/tenant'
@@ -63,10 +65,12 @@ export function TenantFormDialog({ open, mode, tenant, onClose }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
   const [form, setForm] = useState<TenantFormState>(EMPTY_FORM_STATE)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
   const tenantNameStatus = useTenantNameCheck(mode === 'create' ? form.name : '')
 
-  const { mutate: createTenant, isPending: isCreating } = useCreateTenant()
-  const { mutate: updateTenant, isPending: isUpdating } = useUpdateTenant()
+  const { mutateAsync: createTenant, isPending: isCreating } = useCreateTenant()
+  const { mutateAsync: updateTenant, isPending: isUpdating } = useUpdateTenant()
   const { hasPermission, hasAnyPermission } = useCurrentUserPermissions()
   const canCreateTenant = hasPermission(PermissionActions.ADMIN)
   const canUpdateTenant = hasAnyPermission([
@@ -74,10 +78,11 @@ export function TenantFormDialog({ open, mode, tenant, onClose }: Props) {
     PermissionActions.ADMIN,
   ])
   const canSubmit = mode === 'create' ? canCreateTenant : canUpdateTenant
-  const isPending = isCreating || isUpdating
+  const isPending = isCreating || isUpdating || isUploadingImage
   const isNameAvailableForCreate = mode === 'create' ? tenantNameStatus === 'available' : true
 
   function seedForm() {
+    setImageFile(null)
     if (mode === 'edit') {
       setForm({
         name: tenant?.name ?? '',
@@ -99,6 +104,7 @@ export function TenantFormDialog({ open, mode, tenant, onClose }: Props) {
 
   function handleClose() {
     setForm(EMPTY_FORM_STATE)
+    setImageFile(null)
     onClose()
   }
 
@@ -123,7 +129,27 @@ export function TenantFormDialog({ open, mode, tenant, onClose }: Props) {
     } as T
   }
 
-  function handleSubmit() {
+  function handleImageSelected(event: ChangeEvent<HTMLInputElement>) {
+    const selectedFile = event.target.files?.[0] ?? null
+    event.target.value = ''
+    setImageFile(selectedFile)
+  }
+
+  async function uploadImageIfSelected(tenantId: string) {
+    if (!imageFile) {
+      return
+    }
+
+    setIsUploadingImage(true)
+    try {
+      const response = await tenantClient.uploadImage(tenantId, imageFile)
+      setForm((prev) => ({ ...prev, imageId: response.imageId }))
+    } finally {
+      setIsUploadingImage(false)
+    }
+  }
+
+  async function handleSubmit() {
     if (!canSubmit) {
       showToast(t('tenants.unauthorized'), { severity: 'warning' })
       return
@@ -134,39 +160,57 @@ export function TenantFormDialog({ open, mode, tenant, onClose }: Props) {
       return
     }
 
-    if (mode === 'create') {
-      if (tenantNameStatus !== 'available') {
-        showToast(t('tenants.nameUnavailable'), { severity: 'warning' })
+    try {
+      if (mode === 'create') {
+        if (tenantNameStatus !== 'available') {
+          showToast(t('tenants.nameUnavailable'), { severity: 'warning' })
+          return
+        }
+
+        const created = await createTenant(buildPayload<CreateTenantRequest>())
+        let imageUploadError: unknown = null
+        if (created.id && imageFile) {
+          try {
+            await uploadImageIfSelected(created.id)
+          } catch (err) {
+            imageUploadError = err
+          }
+        }
+
+        showToast(t('tenants.createdToast'), { severity: 'success' })
+        if (imageUploadError) {
+          showToast(getUserFriendlyError(imageUploadError), { severity: 'error' })
+        }
+        handleClose()
         return
       }
 
-      createTenant(buildPayload<CreateTenantRequest>(), {
-        onSuccess: () => {
-          showToast(t('tenants.createdToast'), { severity: 'success' })
-          handleClose()
-        },
-        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-      })
-      return
-    }
+      if (!tenant?.id) {
+        return
+      }
 
-    if (!tenant?.id) {
-      return
-    }
-
-    updateTenant(
-      {
+      await updateTenant({
         id: tenant.id,
         data: buildPayload<UpdateTenantRequest>(),
-      },
-      {
-        onSuccess: () => {
-          showToast(t('tenants.updatedToast'), { severity: 'success' })
-          handleClose()
-        },
-        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-      },
-    )
+      })
+
+      let imageUploadError: unknown = null
+      if (imageFile) {
+        try {
+          await uploadImageIfSelected(tenant.id)
+        } catch (err) {
+          imageUploadError = err
+        }
+      }
+
+      showToast(t('tenants.updatedToast'), { severity: 'success' })
+      if (imageUploadError) {
+        showToast(getUserFriendlyError(imageUploadError), { severity: 'error' })
+      }
+      handleClose()
+    } catch (err) {
+      showToast(getUserFriendlyError(err), { severity: 'error' })
+    }
   }
 
   const title = mode === 'create' ? t('tenants.createButton') : t('tenants.editButton')
@@ -233,11 +277,16 @@ export function TenantFormDialog({ open, mode, tenant, onClose }: Props) {
             }}
           />
           <TextField
-            label={t('tenants.imageIdLabel')}
-            value={form.imageId}
-            onChange={(event) => setForm((prev) => ({ ...prev, imageId: event.target.value }))}
+            type="file"
+            onChange={handleImageSelected}
             size="small"
             fullWidth
+            helperText={imageFile ? imageFile.name : form.imageId || undefined}
+            slotProps={{
+              htmlInput: {
+                accept: 'image/*',
+              },
+            }}
           />
           <TextField
             label={t('tenants.emailLabel')}
@@ -313,7 +362,7 @@ export function TenantFormDialog({ open, mode, tenant, onClose }: Props) {
         </Button>
         <Button
           variant="contained"
-          onClick={handleSubmit}
+          onClick={() => void handleSubmit()}
           disabled={isPending || !canSubmit || !isNameAvailableForCreate}
         >
           {isPending ? <CircularProgress size={20} /> : t('tenants.saveButton')}

@@ -40,3 +40,9 @@ export interface UpdateTenantRequest {
   email?: string
   website?: string
 }
+
+export interface TenantImageUploadResponse {
+  imageId: string
+  contentType: string
+  originalFileName: string
+}

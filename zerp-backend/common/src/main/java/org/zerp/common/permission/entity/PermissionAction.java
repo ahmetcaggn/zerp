@@ -13,7 +13,6 @@ public enum PermissionAction {
     CREATE_EMPLOYEE(TENANT),
     CREATE_TICKET(TENANT),
     CREATE_TEAM(TENANT),
-    CREATE_STOCK_COUNT(TENANT),
 
     // SHOP level
     ADMIN_SHOP(SHOP),
@@ -24,6 +23,7 @@ public enum PermissionAction {
     CREATE_PRODUCT(SHOP),
     CREATE_MENU(SHOP),
     CREATE_SHOP_TABLE(SHOP),
+    CREATE_STOCK_COUNT(SHOP),
 
     // USER level
     READ_USER(USER),

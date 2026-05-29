@@ -247,6 +247,12 @@ services:
       KEYCLOAK_ADMIN_REALM: ${KEYCLOAK_ADMIN_REALM}
       KEYCLOAK_ADMIN_CLIENT_ID: ${KEYCLOAK_ADMIN_CLIENT_ID}
       KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET}
+      s3.repository.endpoint: http://minio:9000
+      user.thumbor.host: http://thumbor:8888
+      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-zerp-images}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-admin1234}
+      app.user.tenant-images.folder: ${USER_TENANT_IMAGES_FOLDER:-tenant-images}
       spring.config.import: optional:file:/config/user.properties
     volumes:
       - ../zerp-backend/local/docker-config/user.docker.properties:/config/user.properties:ro

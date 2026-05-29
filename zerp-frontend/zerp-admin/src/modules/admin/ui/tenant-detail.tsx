@@ -11,6 +11,7 @@ import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
+import { tenantClient } from '../api/tenant-client'
 import { useTenant } from '../hooks/use-tenants'
 import { ShopList } from './shop-list'
 import { TenantEmployeeList } from './tenant-employee-list'
@@ -82,6 +83,7 @@ export function TenantDetail({ id }: Props) {
     { label: t('tenants.websiteLabel'), value: tenant.website },
     { label: t('tenants.addressLabel'), value: tenant.address },
   ]
+  const tenantImageUrl = tenant.id && tenant.imageId ? tenantClient.getImageUrl(tenant.id) : null
 
   return (
     <Box>
@@ -96,14 +98,34 @@ export function TenantDetail({ id }: Props) {
         )}
       </Box>
 
-      <Typography variant="h5" sx={{ mb: 1 }}>
-        {tenant.name}
-      </Typography>
-      {tenant.description && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {tenant.description}
-        </Typography>
-      )}
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', mb: 2 }}>
+        {tenantImageUrl && (
+          <Box
+            component="img"
+            src={tenantImageUrl}
+            alt={tenant.name ?? 'Tenant image'}
+            sx={{
+              width: 88,
+              height: 88,
+              borderRadius: 1,
+              objectFit: 'cover',
+              border: '1px solid',
+              borderColor: 'divider',
+              flexShrink: 0,
+            }}
+          />
+        )}
+        <Box>
+          <Typography variant="h5" sx={{ mb: 1 }}>
+            {tenant.name}
+          </Typography>
+          {tenant.description && (
+            <Typography variant="body2" color="text.secondary">
+              {tenant.description}
+            </Typography>
+          )}
+        </Box>
+      </Box>
 
       <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
         <Box
