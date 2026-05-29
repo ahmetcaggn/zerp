@@ -68,6 +68,7 @@ export function MenuItemFormDialog({ open, mode, menuItem, preselectedCategoryId
 
   const { data: categoriesResult } = useMenuCategories({
     pagination: { page: 1, perPage: 200 },
+    sort: { field: 'displayOrder', order: 'ASC' },
     ...(selectedShopId ? { filter: { 'menu.shop.id': selectedShopId } } : {}),
   })
   const categories = categoriesResult?.data ?? []

@@ -2,6 +2,8 @@
 
 import AddIcon from '@mui/icons-material/Add'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import LaunchIcon from '@mui/icons-material/Launch'
@@ -11,8 +13,12 @@ import {
   Card,
   CardContent,
   CircularProgress,
-  Grid,
   IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -24,7 +30,7 @@ import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
-import { useDeleteMenuCategory, useMenuCategories } from '../../../hooks/use-menu-categories'
+import { useDeleteMenuCategory, useMenuCategories, usePatchMenuCategory } from '../../../hooks/use-menu-categories'
 import { useMenu } from '../../../hooks/use-menus'
 
 interface Props {
@@ -39,13 +45,14 @@ export function MenuCategoriesPage({ menuId }: Props) {
   const { data: menu, isLoading: isLoadingMenu } = useMenu(menuId)
   const { data: categoriesResult, isLoading: isLoadingCategories } = useMenuCategories({
     pagination: { page: 1, perPage: 200 },
-    sort: { field: 'name', order: 'ASC' },
+    sort: { field: 'displayOrder', order: 'ASC' },
     filter: { 'menu.id': menuId },
   })
 
   const categories = categoriesResult?.data ?? []
 
   const { mutate: deleteCategory } = useDeleteMenuCategory()
+  const { mutateAsync: patchCategory, isPending: isReorderPending } = usePatchMenuCategory()
 
   function goTo(path: string) {
     router.push(withLocale(locale, path) as Route)
@@ -56,6 +63,25 @@ export function MenuCategoriesPage({ menuId }: Props) {
       onSuccess: () => showToast(t('sale.category.deletedToast')),
       onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
     })
+  }
+
+  async function handleMove(index: number, direction: 'up' | 'down') {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1
+    if (targetIndex < 0 || targetIndex >= categories.length) return
+
+    const currentCategory = categories[index]
+    const targetCategory = categories[targetIndex]
+
+    const currentDisplayOrder = currentCategory.displayOrder ?? index + 1
+    const targetDisplayOrder = targetCategory.displayOrder ?? targetIndex + 1
+
+    try {
+      await patchCategory({ id: currentCategory.id, fields: { displayOrder: targetDisplayOrder } })
+      await patchCategory({ id: targetCategory.id, fields: { displayOrder: currentDisplayOrder } })
+      showToast(t('sale.category.reorderedToast'))
+    } catch (err) {
+      showToast(getUserFriendlyError(err), { severity: 'error' })
+    }
   }
 
   if (isLoadingMenu || isLoadingCategories) {
@@ -115,48 +141,76 @@ export function MenuCategoriesPage({ menuId }: Props) {
           {categories.length === 0 ? (
             <Typography color="text.secondary">{t('sale.category.emptyState')}</Typography>
           ) : (
-            <Grid container spacing={2}>
-              {categories.map((category) => (
-                <Grid key={category.id} size={{ xs: 12, sm: 6, lg: 4 }}>
-                  <Card variant="outlined" sx={{ height: '100%' }}>
-                    <CardContent sx={{ display: 'grid', gap: 1 }}>
-                      <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 700 }}>
-                        {category.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ minHeight: 42 }}>
-                        {category.description || t('sale.catalog.noDescription')}
-                      </Typography>
-
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 1 }}>
+            <Box sx={{ overflowX: 'auto' }}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{t('sale.category.form.name')}</TableCell>
+                    <TableCell>{t('sale.category.form.description')}</TableCell>
+                    <TableCell align="right">{t('common.actions')}</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {categories.map((category, index) => (
+                    <TableRow key={category.id}>
+                      <TableCell>
+                        <Typography fontWeight={600}>{category.name}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" color="text.secondary">
+                          {category.description || t('sale.catalog.noDescription')}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
                         <Button
                           size="small"
                           endIcon={<LaunchIcon fontSize="small" />}
                           onClick={() => goTo(`${ROUTES.catalog}/categories/${category.id}`)}
+                          sx={{ mr: 1 }}
                         >
                           {t('sale.catalog.openMenuItemsButton')}
                         </Button>
-
-                        <Box>
-                          <Tooltip title={t('common.edit')}>
+                        <Tooltip title={t('sale.category.moveUpButton')}>
+                          <span>
                             <IconButton
                               size="small"
-                              onClick={() => goTo(`${ROUTES.catalog}/categories/${category.id}/edit`)}
+                              onClick={() => void handleMove(index, 'up')}
+                              disabled={isReorderPending || index === 0}
                             >
-                              <EditIcon fontSize="small" />
+                              <ArrowUpwardIcon fontSize="small" />
                             </IconButton>
-                          </Tooltip>
-                          <Tooltip title={t('common.delete')}>
-                            <IconButton size="small" color="error" onClick={() => handleDelete(category.id)}>
-                              <DeleteIcon fontSize="small" />
+                          </span>
+                        </Tooltip>
+                        <Tooltip title={t('sale.category.moveDownButton')}>
+                          <span>
+                            <IconButton
+                              size="small"
+                              onClick={() => void handleMove(index, 'down')}
+                              disabled={isReorderPending || index === categories.length - 1}
+                            >
+                              <ArrowDownwardIcon fontSize="small" />
                             </IconButton>
-                          </Tooltip>
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
+                          </span>
+                        </Tooltip>
+                        <Tooltip title={t('common.edit')}>
+                          <IconButton
+                            size="small"
+                            onClick={() => goTo(`${ROUTES.catalog}/categories/${category.id}/edit`)}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t('common.delete')}>
+                          <IconButton size="small" color="error" onClick={() => handleDelete(category.id)}>
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
           )}
         </CardContent>
       </Card>

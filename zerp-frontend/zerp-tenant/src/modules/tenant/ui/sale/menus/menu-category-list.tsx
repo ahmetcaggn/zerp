@@ -52,7 +52,7 @@ export function MenuCategoryList() {
 
   const { data, isLoading } = useMenuCategories({
     pagination: { page: page + 1, perPage: rowsPerPage },
-    sort: { field: 'name', order: 'ASC' },
+    sort: { field: 'displayOrder', order: 'ASC' },
     filter: {
       ...(selectedShopId ? { 'menu.shop.id': selectedShopId } : {}),
       ...(filterMenuId ? { 'menu.id': filterMenuId } : {}),

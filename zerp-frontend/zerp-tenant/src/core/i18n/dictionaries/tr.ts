@@ -654,6 +654,9 @@ export const trMessages = {
       createdToast: 'Kategori oluşturuldu.',
       updatedToast: 'Kategori güncellendi.',
       deletedToast: 'Kategori silindi.',
+      reorderedToast: 'Kategori sırası güncellendi.',
+      moveUpButton: 'Yukarı Taşı',
+      moveDownButton: 'Aşağı Taşı',
       form: {
         name: 'Kategori Adı',
         description: 'Açıklama',

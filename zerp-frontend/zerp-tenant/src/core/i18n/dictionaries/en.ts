@@ -694,6 +694,9 @@ export const enMessages = {
       createdToast: 'Category created.',
       updatedToast: 'Category updated.',
       deletedToast: 'Category deleted.',
+      reorderedToast: 'Category order updated.',
+      moveUpButton: 'Move Up',
+      moveDownButton: 'Move Down',
       form: {
         name: 'Category Name',
         description: 'Description',

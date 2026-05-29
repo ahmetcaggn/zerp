@@ -521,7 +521,7 @@ export function MenuItemFormPage({
 
   const { data: categoriesResult, isLoading: isLoadingCategories } = useMenuCategories({
     pagination: { page: 1, perPage: 300 },
-    sort: { field: 'name', order: 'ASC' },
+    sort: { field: 'displayOrder', order: 'ASC' },
     ...(selectedShopId ? { filter: { 'menu.shop.id': selectedShopId } } : {}),
   })
 

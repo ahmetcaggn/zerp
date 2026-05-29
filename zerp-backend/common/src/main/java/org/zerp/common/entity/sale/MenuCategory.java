@@ -23,6 +23,7 @@ public class MenuCategory extends BaseEntity implements Permittable {
 
     private String name;
     private String description;
+    private Integer displayOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "menu_id", nullable = false)

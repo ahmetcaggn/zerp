@@ -203,7 +203,7 @@ public class PublicSaleService {
         }
 
         response.setActiveMenu(toPublicActiveMenu(activeMenu));
-        response.setCategories(menuCategoryRepository.findByMenuIdOrderByNameAsc(activeMenu.getId()).stream()
+        response.setCategories(menuCategoryRepository.findByMenuIdOrderByDisplayOrderAscNameAsc(activeMenu.getId()).stream()
                 .map(this::toPublicMenuCategory)
                 .toList());
         response.setMessage("Active menu found.");

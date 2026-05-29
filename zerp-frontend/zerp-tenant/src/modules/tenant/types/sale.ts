@@ -175,6 +175,7 @@ export interface MenuCategoryResponseDto {
   id: string
   name: string
   description?: string
+  displayOrder?: number
   menuId: string
   menuName?: string
   tenantId: string

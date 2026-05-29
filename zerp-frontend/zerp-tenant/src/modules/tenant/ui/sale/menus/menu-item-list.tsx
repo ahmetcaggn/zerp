@@ -46,6 +46,7 @@ export function MenuItemList() {
 
   const { data: categoriesResult } = useMenuCategories({
     pagination: { page: 1, perPage: 200 },
+    sort: { field: 'displayOrder', order: 'ASC' },
     ...(selectedShopId ? { filter: { 'menu.shop.id': selectedShopId } } : {}),
   })
   const categories = categoriesResult?.data ?? []

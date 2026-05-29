@@ -92,6 +92,7 @@ public class MenuCategoryService implements
         MenuCategory category = mapper.toEntity(data);
         category.setMenu(menu);
         category.setTenantId(tenantId);
+        category.setDisplayOrder(repository.findMaxDisplayOrderByMenuId(menu.getId()) + 1);
         MenuCategory saved = repository.save(category);
         log.info("Created MenuCategory with id: {}", saved.getId());
         return mapper.toDTO(saved);
@@ -173,5 +174,19 @@ public class MenuCategoryService implements
     private void applyFieldUpdates(MenuCategory category, Map<String, Object> fields) {
         if (fields.containsKey("name")) category.setName((String) fields.get("name"));
         if (fields.containsKey("description")) category.setDescription((String) fields.get("description"));
+        if (fields.containsKey("displayOrder")) {
+            Object rawDisplayOrder = fields.get("displayOrder");
+            if (rawDisplayOrder == null) {
+                category.setDisplayOrder(null);
+            } else if (rawDisplayOrder instanceof Number number) {
+                int displayOrder = number.intValue();
+                if (displayOrder < 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "displayOrder must be greater than or equal to 0");
+                }
+                category.setDisplayOrder(displayOrder);
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "displayOrder must be a number");
+            }
+        }
     }
 }

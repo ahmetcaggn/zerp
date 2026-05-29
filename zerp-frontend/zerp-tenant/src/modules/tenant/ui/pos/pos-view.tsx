@@ -106,7 +106,7 @@ export function PosView() {
   })
   const { data: catData, isLoading: isCatLoading } = useMenuCategories({
     pagination: { page: 1, perPage: 100 },
-    sort: { field: 'name', order: 'ASC' },
+    sort: { field: 'displayOrder', order: 'ASC' },
     ...(selectedShopId ? { filter: { 'menu.shop.id': selectedShopId } } : {}),
   })
   const { data: itemsData, isLoading: isItemsLoading } = useMenuItems({
