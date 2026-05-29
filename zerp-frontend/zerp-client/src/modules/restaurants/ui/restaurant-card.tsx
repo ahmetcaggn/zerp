@@ -63,6 +63,23 @@ export function RestaurantCard({ restaurant, userLocation }: RestaurantCardProps
     router.push(`/${locale}/restaurants/${restaurant.id}${query}`)
   }
 
+  const handleOpenDirections = () => {
+    if (!hasRestaurantLocation) {
+      return
+    }
+
+    const query = new URLSearchParams({
+      api: '1',
+      destination: `${restaurant.latitude},${restaurant.longitude}`,
+      travelmode: 'driving',
+    })
+    if (hasUserLocation) {
+      query.set('origin', `${userLocation!.lat},${userLocation!.lng}`)
+    }
+
+    window.open(`https://www.google.com/maps/dir/?${query.toString()}`, '_blank', 'noopener,noreferrer')
+  }
+
   return (
     <Card
       elevation={0}
@@ -85,7 +102,7 @@ export function RestaurantCard({ restaurant, userLocation }: RestaurantCardProps
           alignItems: 'stretch',
           display: 'flex',
           flexDirection: 'column',
-          height: '100%',
+          flexGrow: 1,
         }}
       >
         <Box sx={{ position: 'relative' }}>
@@ -159,9 +176,20 @@ export function RestaurantCard({ restaurant, userLocation }: RestaurantCardProps
       </CardActionArea>
 
       <Box sx={{ px: 2.5, pb: 2.5, pt: 0 }}>
-        <Button fullWidth variant="contained" size="small" onClick={handleOpenMenu}>
-          {t('restaurants.openMenu')}
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button fullWidth variant="contained" size="small" onClick={handleOpenMenu}>
+            {t('restaurants.openMenu')}
+          </Button>
+          <Button
+            fullWidth
+            variant="outlined"
+            size="small"
+            onClick={handleOpenDirections}
+            disabled={!hasRestaurantLocation}
+          >
+            {t('restaurants.getDirections')}
+          </Button>
+        </Stack>
       </Box>
     </Card>
   )
