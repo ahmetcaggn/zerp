@@ -5,9 +5,11 @@ import 'package:flutter/material.dart' hide RouteSettings;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:openapi_sale/api.dart';
 import 'package:zerp_tenant/feature/dashboard/cubit/cubit_dashboard.dart';
+import 'package:zerp_tenant/feature/dashboard/sections/cash_section/cubit_section_cash.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/cash_section/section_cash.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/employee_section/section_employee.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/stock_section/section_stock.dart';
+import 'package:zerp_tenant/feature/dashboard/sections/tables_section/cubit_section_tables.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/tables_section/section_tables.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
@@ -31,27 +33,56 @@ class ScreenDashboard extends StatelessWidget {
           },
         ),
       ],
-      child: AppScaffold(
-        title: context.t.dashboard.title,
-        drawer: const AppDrawer(),
-        actions: const [
-          _DashboardHeaderActions(),
-        ],
-        body: ListView(
-          padding: const EdgeInsets.all(16),
-          children: const [
-            _TenantInfoSection(),
-            SizedBox(height: 16),
-            SectionEmployee(),
-            SizedBox(height: 16),
-            _ShopSelectorSection(),
-            SizedBox(height: 12),
-            SectionTables(),
-            SizedBox(height: 12),
-            SectionCash(),
-            SizedBox(height: 12),
-            SectionStock(),
+      child: BlocListener<CubitOrganizationScope, StateOrganizationScope>(
+        listener: (context, state) {
+          if (state is StateOrganizationScopeShop) {
+            final shop = state.shop;
+            unawaited(context.read<CubitDashboard>().notifyShopChanged(shop));
+          }
+        },
+        child: AppScaffold(
+          title: context.t.dashboard.title,
+          drawer: const AppDrawer(),
+          actions: const [
+            _DashboardHeaderActions(),
           ],
+          body: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              const _TenantInfoSection(),
+              const SizedBox(height: 16),
+              const SectionEmployee(),
+              const SizedBox(height: 16),
+              const _ShopSelectorSection(),
+              const SizedBox(height: 12),
+
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth >= 600) {
+                    return const Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: SectionTables()),
+                        SizedBox(width: 12),
+                        Expanded(child: SectionCash()),
+                      ],
+                    );
+                  } else {
+                    return const Column(
+                      children: [
+                        SectionTables(),
+                        SizedBox(height: 12),
+                        SectionCash(),
+                      ],
+                    );
+                  }
+                },
+              ),
+
+              const SizedBox(height: 12),
+              const SectionStock(),
+            ],
+          ),
         ),
       ),
     );
@@ -83,6 +114,20 @@ class _DashboardHeaderActions extends StatelessWidget {
                 ? null
                 : () {
                     unawaited(context.read<CubitDashboard>().load());
+                    final orgState = context
+                        .read<CubitOrganizationScope>()
+                        .state;
+                    if (orgState is StateOrganizationScopeShop) {
+                      final shopId = orgState.shop.id;
+                      if (shopId != null) {
+                        unawaited(
+                          context.read<CubitSectionTables>().load(shopId),
+                        );
+                        unawaited(
+                          context.read<CubitSectionCash>().load(shopId),
+                        );
+                      }
+                    }
                   },
           ),
         );

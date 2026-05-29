@@ -15,10 +15,14 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
 import '../../../feature/dashboard/cubit/cubit_dashboard.dart' as _i268;
+import '../../../feature/dashboard/sections/cash_section/cubit_section_cash.dart'
+    as _i130;
 import '../../../feature/dashboard/sections/employee_section/cubit_section_employee.dart'
     as _i129;
 import '../../../feature/dashboard/sections/stock_section/cubit_section_stock.dart'
     as _i102;
+import '../../../feature/dashboard/sections/tables_section/cubit_section_tables.dart'
+    as _i285;
 import '../../../feature/employee/create_employee/cubit/cubit_create_employee.dart'
     as _i657;
 import '../../../feature/employee/cubit/cubit_employee.dart' as _i828;
@@ -49,6 +53,11 @@ import '../../../feature/sale/table/order/cubit/cubit_table_order.dart'
     as _i398;
 import '../../../feature/settings/sections/api_baseurl/cubit_settings_api_baseurl.dart'
     as _i1057;
+import '../../../feature/stock/cubit/cubit_stock.dart' as _i40;
+import '../../../feature/stock/cubit/cubit_stock_counts.dart' as _i273;
+import '../../../feature/stock/cubit/cubit_stock_movements.dart' as _i121;
+import '../../../feature/stock/cubit/cubit_stock_operations.dart' as _i946;
+import '../../../feature/stock/cubit/cubit_stock_resources.dart' as _i994;
 import '../../cubit/root_cubit/auth/cubit_auth.dart' as _i200;
 import '../../cubit/root_cubit/error/cubit_error.dart' as _i139;
 import '../../cubit/root_cubit/organization_scope/cubit_organization_scope.dart'
@@ -64,6 +73,7 @@ import '../../service/auth/auth_storage_service.dart' as _i40;
 import '../../service/employee/employee_service.dart' as _i93;
 import '../../service/sale/sale_service.dart' as _i16;
 import '../../service/shop/shop_service.dart' as _i750;
+import '../../service/stock/stock_service.dart' as _i551;
 import '../../service/tenant/tenant_service.dart' as _i105;
 import '../../service/user/permission_service.dart' as _i545;
 import '../../service/user/username_service.dart' as _i868;
@@ -83,6 +93,7 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final serviceModule = _$ServiceModule();
     gh.factory<_i477.CubitProfile>(() => _i477.CubitProfile());
+    gh.factory<_i40.CubitStock>(() => _i40.CubitStock());
     gh.lazySingleton<_i102.CubitSectionStock>(() => _i102.CubitSectionStock());
     gh.lazySingleton<_i337.FlutterAppAuth>(() => serviceModule.appAuth);
     gh.lazySingleton<_i558.FlutterSecureStorage>(
@@ -173,6 +184,14 @@ extension GetItInjectableX on _i174.GetIt {
         cubitAuth: gh<_i200.CubitAuth>(),
       ),
     );
+    gh.lazySingleton<_i551.StockService>(
+      () => _i551.StockService(
+        invoker: gh<_i1073.ApiNetworkInvoker>(),
+        authStorageService: gh<_i40.AuthStorageService>(),
+        cubitError: gh<_i139.CubitError>(),
+        cubitAuth: gh<_i200.CubitAuth>(),
+      ),
+    );
     gh.lazySingleton<_i105.TenantService>(
       () => _i105.TenantService(
         invoker: gh<_i1073.ApiNetworkInvoker>(),
@@ -252,6 +271,12 @@ extension GetItInjectableX on _i174.GetIt {
         cubitSingleEmployee,
       ),
     );
+    gh.lazySingleton<_i130.CubitSectionCash>(
+      () => _i130.CubitSectionCash(gh<_i16.SaleService>()),
+    );
+    gh.lazySingleton<_i285.CubitSectionTables>(
+      () => _i285.CubitSectionTables(gh<_i16.SaleService>()),
+    );
     gh.factory<_i906.CubitCashOrder>(
       () => _i906.CubitCashOrder(gh<_i16.SaleService>()),
     );
@@ -264,6 +289,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i657.CubitSettings>(),
         gh<_i371.ApiStatusService>(),
       ),
+    );
+    gh.factory<_i273.CubitStockCounts>(
+      () => _i273.CubitStockCounts(gh<_i551.StockService>()),
+    );
+    gh.factory<_i121.CubitStockMovements>(
+      () => _i121.CubitStockMovements(gh<_i551.StockService>()),
+    );
+    gh.factory<_i946.CubitStockOperations>(
+      () => _i946.CubitStockOperations(gh<_i551.StockService>()),
+    );
+    gh.factory<_i994.CubitStockResources>(
+      () => _i994.CubitStockResources(gh<_i551.StockService>()),
     );
     gh.factory<_i229.CubitEmployeeUsername>(
       () => _i229.CubitEmployeeUsername(gh<_i868.UsernameService>()),
@@ -280,6 +317,8 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i268.CubitDashboard(
         gh<_i129.CubitSectionEmployee>(),
         gh<_i102.CubitSectionStock>(),
+        gh<_i130.CubitSectionCash>(),
+        gh<_i285.CubitSectionTables>(),
         gh<_i16.SaleService>(),
         gh<_i829.CubitOrganizationScope>(),
       ),

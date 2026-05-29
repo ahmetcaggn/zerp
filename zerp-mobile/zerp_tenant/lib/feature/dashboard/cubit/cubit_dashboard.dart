@@ -2,8 +2,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:openapi_sale/api.dart';
 import 'package:remote_logging/remote_logging.dart';
+import 'package:zerp_tenant/feature/dashboard/sections/cash_section/cubit_section_cash.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/employee_section/cubit_section_employee.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/stock_section/cubit_section_stock.dart';
+import 'package:zerp_tenant/feature/dashboard/sections/tables_section/cubit_section_tables.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
 import 'package:zerp_tenant/product/network/page_response.dart';
 import 'package:zerp_tenant/product/service/sale/sale_service.dart';
@@ -15,12 +17,16 @@ class CubitDashboard extends Cubit<StateDashboard>
   CubitDashboard(
     this._cubitSectionEmployee,
     this._cubitSectionStock,
+    this._cubitSectionCash,
+    this._cubitSectionTables,
     this._saleService,
     this._cubitOrganizationScope,
   ) : super(const StateDashboardInitial());
 
   final CubitSectionEmployee _cubitSectionEmployee;
   final CubitSectionStock _cubitSectionStock;
+  final CubitSectionCash _cubitSectionCash;
+  final CubitSectionTables _cubitSectionTables;
   final SaleService _saleService;
   final CubitOrganizationScope _cubitOrganizationScope;
 
@@ -48,6 +54,13 @@ class CubitDashboard extends Cubit<StateDashboard>
         ),
       );
     }
+  }
+
+  Future<void> notifyShopChanged(ShopDTO shop) async {
+    await Future.wait([
+      _cubitSectionCash.load(shop.id ?? ''),
+      _cubitSectionTables.load(shop.id ?? ''),
+    ]);
   }
 }
 

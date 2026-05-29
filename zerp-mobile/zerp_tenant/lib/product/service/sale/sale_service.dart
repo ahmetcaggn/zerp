@@ -46,12 +46,16 @@ class SaleService extends ServiceBase with LoggerMixin<SaleService> {
     required String shopId,
     required PageRequest pageRequest,
     String? searchName,
+    ShopTableDTOStatusEnum? statusFilter,
   }) async {
     final queryParams = <String, String>{
       'shop.id': shopId,
     };
     if (searchName != null && searchName.isNotEmpty) {
       queryParams['name.like'] = searchName;
+    }
+    if (statusFilter != null) {
+      queryParams['status.eq'] = statusFilter.value;
     }
 
     final request = GetListShopTableCommand(
@@ -303,6 +307,38 @@ class SaleService extends ServiceBase with LoggerMixin<SaleService> {
       case NetworkErrorResult<ApiResponseListMenuItemDTO>():
         throw onNetworkError(res);
       case SpecifiedResponseResult<ApiResponseListMenuItemDTO>():
+        throw onUnsuccessfulResponse(res);
+    }
+  }
+
+  Future<PageResponse<TableOrderDTO>> getShopOrders({
+    required String shopId,
+    PageRequest pageRequest = PageRequest.all,
+  }) async {
+    final request = GetListTableOrderCommand(
+      start: pageRequest.start,
+      end: pageRequest.end,
+      allParams: {
+        'shopTable.shop.id': shopId,
+      },
+      sort: 'createdAt',
+      order: 'DESC',
+    );
+
+    final res = await invoker.send(request);
+    switch (res) {
+      case SuccessResponseResult<ApiResponseListTableOrderDTO>():
+        final orders = res.data.data;
+        final totalCount = res.totalCountHeader ?? orders.length;
+        log.info('Fetched ${orders.length} orders for shop $shopId.');
+        return PageResponse(
+          req: pageRequest,
+          items: orders,
+          totalCount: totalCount,
+        );
+      case NetworkErrorResult<ApiResponseListTableOrderDTO>():
+        throw onNetworkError(res);
+      case SpecifiedResponseResult<ApiResponseListTableOrderDTO>():
         throw onUnsuccessfulResponse(res);
     }
   }

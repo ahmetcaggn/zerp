@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:zerp_tenant/feature/dashboard/sections/tables_section/cubit_section_tables.dart';
+import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
@@ -12,20 +14,23 @@ class SectionTables extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CubitOrganizationScope, StateOrganizationScope>(
-      builder: (context, state) {
-        final enabled = state is StateOrganizationScopeShop;
-        return _SectionCard(
-          icon: Icons.table_restaurant_outlined,
-          title: context.t.sale.dashboard.tables,
-          enabled: enabled,
-          onTap: () {
-            if (enabled) {
-              unawaited(context.router.push(const RouteTables()));
-            }
-          },
-        );
-      },
+    return BlocProvider(
+      create: (_) => getIt<CubitSectionTables>(),
+      child: BlocBuilder<CubitOrganizationScope, StateOrganizationScope>(
+        builder: (context, state) {
+          final enabled = state is StateOrganizationScopeShop;
+          return _SectionCard(
+            icon: Icons.table_restaurant_outlined,
+            title: context.t.sale.dashboard.tables,
+            enabled: enabled,
+            onTap: () {
+              if (enabled) {
+                unawaited(context.router.push(const RouteTables()));
+              }
+            },
+          );
+        },
+      ),
     );
   }
 }
@@ -97,6 +102,47 @@ class _SectionCard extends StatelessWidget {
                         color: enabled ? null : disabledColor,
                       ),
                     ),
+                    if (enabled)
+                      BlocBuilder<CubitSectionTables, StateSectionTables>(
+                        builder: (context, state) {
+                          if (state is StateSectionTablesLoaded) {
+                            final total = state.totalCount;
+                            final available = state.availableCount;
+                            final occupied = state.occupiedCount;
+                            final reserved = state.reservedCount;
+                            final outOfOrder = state.outOfOrderCount;
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Wrap(
+                                runSpacing: 12,
+                                children: [
+                                  _InfoTag(label: 'Total: $total'),
+                                  const SizedBox(width: 8),
+                                  _InfoTag(label: 'Available: $available'),
+                                  const SizedBox(width: 8),
+                                  _InfoTag(label: 'Occupied: $occupied'),
+                                  const SizedBox(width: 8),
+                                  _InfoTag(label: 'Reserved: $reserved'),
+                                  const SizedBox(width: 8),
+                                  _InfoTag(label: 'Out of Order: $outOfOrder'),
+                                ],
+                              ),
+                            );
+                          } else if (state is StateSectionTablesLoading) {
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 4),
+                              child: SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
                   ],
                 ),
               ),
@@ -106,6 +152,31 @@ class _SectionCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+final class _InfoTag extends StatelessWidget {
+  const _InfoTag({
+    required this.label,
+  });
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     );
