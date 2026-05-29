@@ -1,11 +1,14 @@
 'use client'
 
+import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded'
 import {
   Box,
   Button,
   Card,
   CardContent,
   CardMedia,
+  Chip,
+  Stack,
   Typography,
 } from '@mui/material'
 
@@ -23,65 +26,83 @@ export function MenuItemCard({ menuItem, onClick, onAddToCart }: MenuItemCardPro
   const { t } = useI18n()
 
   return (
-    <Card 
-      elevation={1} 
-      sx={{ 
-        display: 'flex', 
+    <Card
+      elevation={0}
+      sx={{
+        display: 'flex',
         flexDirection: { xs: 'column', sm: 'row' },
-        height: '100%', 
-        alignItems: { xs: 'stretch', sm: 'center' }, 
+        height: '100%',
+        borderRadius: 2,
+        border: (theme) => `1px solid ${theme.palette.divider}`,
         p: 1,
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        '&:hover': onClick ? {
-          transform: 'translateY(-2px)',
-          boxShadow: 3,
-        } : {},
+        transition: 'transform 180ms ease, box-shadow 180ms ease',
+        '&:hover': onClick
+          ? {
+              transform: 'translateY(-3px)',
+              boxShadow: 4,
+            }
+          : undefined,
       }}
       onClick={onClick}
     >
       <CardMedia
         component="img"
-        sx={{ 
-          width: { xs: '100%', sm: 100 }, 
-          height: { xs: 120, sm: 100 }, 
-          borderRadius: 1, 
-          objectFit: 'contain' 
+        sx={{
+          width: { xs: '100%', sm: 118 },
+          height: { xs: 132, sm: 118 },
+          borderRadius: 1.5,
+          objectFit: 'cover',
         }}
-        image={menuItem.imageUrl || 'https://via.placeholder.com/150?text=No+Image'}
+        image={menuItem.imageUrl || 'https://placehold.co/300x300?text=No+Image'}
         alt={menuItem.name}
       />
-      <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, ml: { xs: 0, sm: 2 }, mt: { xs: 1, sm: 0 } }}>
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, ml: { xs: 0, sm: 1.5 }, mt: { xs: 1, sm: 0 } }}>
         <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5, gap: 1 }}>
-            <Typography variant="subtitle1" fontWeight="bold" sx={{ wordBreak: 'break-word' }}>
-              {menuItem.name}
-            </Typography>
-            <Typography 
-              variant="subtitle1" 
-              color="primary.main" 
-              fontWeight="bold" 
-              sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
-            >
-              {t('restaurants.price', { price: menuItem.price })}
-            </Typography>
-          </Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {menuItem.description}
-          </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button 
-              variant="contained" 
-              size="small" 
-              disabled={!menuItem.isAvailable}
-              onClick={(e) => {
-                e.stopPropagation(); // prevent card click
-                onAddToCart?.(e.currentTarget.getBoundingClientRect())
-              }}
-            >
-              {t('restaurants.addToCart')}
-            </Button>
-          </Box>
+          <Stack spacing={1}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ wordBreak: 'break-word' }}>
+                {menuItem.name}
+              </Typography>
+              <Typography
+                variant="subtitle1"
+                color="primary.main"
+                fontWeight={800}
+                sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+              >
+                {t('restaurants.price', { price: menuItem.price })}
+              </Typography>
+            </Box>
+
+            {menuItem.description ? (
+              <Typography variant="body2" color="text.secondary" sx={{ minHeight: { sm: 40 } }}>
+                {menuItem.description}
+              </Typography>
+            ) : null}
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
+              <Chip
+                size="small"
+                label={menuItem.isAvailable ? t('restaurants.open') : t('restaurants.closed')}
+                color={menuItem.isAvailable ? 'success' : 'default'}
+                variant={menuItem.isAvailable ? 'filled' : 'outlined'}
+              />
+
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<AddShoppingCartRoundedIcon />}
+                disabled={!menuItem.isAvailable}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onAddToCart?.(e.currentTarget.getBoundingClientRect())
+                }}
+              >
+                {t('restaurants.addToCart')}
+              </Button>
+            </Box>
+          </Stack>
         </CardContent>
       </Box>
     </Card>

@@ -1,5 +1,7 @@
 'use client'
 
+import LocalFireDepartmentRoundedIcon from '@mui/icons-material/LocalFireDepartmentRounded'
+import MonitorWeightRoundedIcon from '@mui/icons-material/MonitorWeightRounded'
 import {
   Box,
   Button,
@@ -42,37 +44,59 @@ export function MenuItemDetailModal({ open, onClose, menuItem, onAddToCart }: Me
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ pb: 1, fontWeight: 'bold' }}>
+      <DialogTitle sx={{ pb: 1, fontWeight: 800 }}>
         {t('productDetail.title')}
       </DialogTitle>
       <DialogContent>
-        {/* Ürün Görseli */}
-        <Box 
+        <Box
           component="img"
           src={imageSrc}
           alt={menuItem.name}
-          sx={{ width: '100%', height: 250, objectFit: 'contain', borderRadius: 2, mb: 2}}
+          sx={{
+            width: '100%',
+            height: { xs: 220, sm: 280 },
+            objectFit: 'contain',
+            borderRadius: 2,
+            mb: 2,
+            bgcolor: 'background.default',
+          }}
         />
 
         <Stack spacing={2}>
-          {/* Başlık ve Fiyat */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <Typography variant="h5" fontWeight="bold">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>
+            <Typography variant="h5" fontWeight={800}>
               {menuItem.name}
             </Typography>
-            <Typography variant="h6" color="primary.main" fontWeight="bold">
+            <Typography variant="h6" color="primary.main" fontWeight={800} sx={{ whiteSpace: 'nowrap' }}>
               {t('restaurants.price', { price: menuItem.price })}
             </Typography>
           </Box>
-          <Typography color="text.secondary">
-            {menuItem.description}
-          </Typography>
+
+          {menuItem.description ? (
+            <Typography color="text.secondary">
+              {menuItem.description}
+            </Typography>
+          ) : null}
+
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            <Chip
+              icon={<MonitorWeightRoundedIcon fontSize="small" />}
+              label={menuItem.weight || t('productDetail.notAvailable')}
+              variant="outlined"
+            />
+            <Chip
+              icon={<LocalFireDepartmentRoundedIcon fontSize="small" />}
+              label={menuItem.calories !== undefined && menuItem.calories !== null
+                ? t('productDetail.kcal', { value: menuItem.calories })
+                : t('productDetail.notAvailable')}
+              variant="outlined"
+            />
+          </Stack>
 
           <Divider />
 
-          {/* İçindekiler */}
           <Box>
-            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+            <Typography variant="subtitle2" fontWeight={700} gutterBottom>
               {t('productDetail.ingredients')}
             </Typography>
             {menuItem.ingredients && menuItem.ingredients.length > 0 ? (
@@ -88,35 +112,8 @@ export function MenuItemDetailModal({ open, onClose, menuItem, onAddToCart }: Me
             )}
           </Box>
 
-          {/* Gramaj ve Kalori */}
-          <Box sx={{ display: 'flex', gap: 4 }}>
-            <Box>
-              <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                {t('productDetail.weight')}
-              </Typography>
-              <Typography variant="body2" color={menuItem.weight ? undefined : 'text.secondary'}>
-                {menuItem.weight || t('productDetail.notAvailable')}
-              </Typography>
-            </Box>
-            <Box>
-              <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                {t('productDetail.calories')}
-              </Typography>
-              {menuItem.calories !== undefined && menuItem.calories !== null ? (
-                <Typography variant="body2">
-                  {t('productDetail.kcal', { value: menuItem.calories })}
-                </Typography>
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  {t('productDetail.notAvailable')}
-                </Typography>
-              )}
-            </Box>
-          </Box>
-
-          {/* Alerjenler */}
           <Box>
-            <Typography variant="subtitle2" fontWeight="bold" color="error.main" gutterBottom>
+            <Typography variant="subtitle2" fontWeight={700} color="error.main" gutterBottom>
               {t('productDetail.allergens')}
             </Typography>
             {menuItem.allergens && menuItem.allergens.length > 0 ? (

@@ -9,6 +9,7 @@ import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
 import {
   AppBar,
   Button,
+  Container,
   Divider,
   Drawer,
   IconButton,
@@ -114,67 +115,68 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
         elevation={0}
         sx={{ borderBottom: '1px solid', borderColor: 'divider' }}
       >
-        <Toolbar
-          disableGutters
-          sx={{
-            justifyContent: 'space-between',
-            gap: { xs: 1, sm: 2 },
-            minHeight: responsiveLayout.toolbarMinHeight,
-            px: responsiveLayout.toolbarPaddingX,
-          }}
-        >
-          <Stack alignItems="center" direction="row" gap={1.25} minWidth={0}>
-            <StorefrontRoundedIcon color="primary" />
-            <Typography
-              role="link"
-              tabIndex={0}
-              fontWeight={700}
-              noWrap
-              onClick={() => router.push(`/${locale}`)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault()
-                  router.push(`/${locale}`)
-                }
-              }}
-              sx={{ color: 'inherit', cursor: 'pointer' }}
-            >
-              {appConfig.app.name}
-            </Typography>
-          </Stack>
-
-          {isMobile ? (
-            <Stack alignItems="center" direction="row" gap={0.5}>
-              <LocaleSwitcher locale={locale} />
-              <ThemeToggle />
-              <IconButton
-                aria-label="Open menu"
-                color="inherit"
-                size="small"
-                onClick={() => setDrawerOpen(true)}
-              >
-                <MenuRoundedIcon />
-              </IconButton>
-            </Stack>
-          ) : (
-            <Stack alignItems="center" direction="row" gap={1}>
-              {visibleActions.map((action) => (
-                <Button
-                  key={action.id}
-                  onClick={() => handleActionClick(action)}
-                  size="small"
-                  variant={
-                    action.id === 'dashboard' && pathname.includes('/dashboard') ? 'contained' : 'text'
+        <Container maxWidth="lg" sx={{ px: responsiveLayout.containerPaddingX }}>
+          <Toolbar
+            disableGutters
+            sx={{
+              justifyContent: 'space-between',
+              gap: { xs: 1, sm: 2 },
+              minHeight: responsiveLayout.toolbarMinHeight,
+            }}
+          >
+            <Stack alignItems="center" direction="row" gap={1.25} minWidth={0}>
+              <StorefrontRoundedIcon color="primary" />
+              <Typography
+                role="link"
+                tabIndex={0}
+                fontWeight={700}
+                noWrap
+                onClick={() => router.push(`/${locale}`)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    router.push(`/${locale}`)
                   }
-                >
-                  {t(action.labelKey)}
-                </Button>
-              ))}
-              <LocaleSwitcher locale={locale} />
-              <ThemeToggle />
+                }}
+                sx={{ color: 'inherit', cursor: 'pointer' }}
+              >
+                {appConfig.app.name}
+              </Typography>
             </Stack>
-          )}
-        </Toolbar>
+
+            {isMobile ? (
+              <Stack alignItems="center" direction="row" gap={0.5}>
+                <LocaleSwitcher locale={locale} />
+                <ThemeToggle />
+                <IconButton
+                  aria-label="Open menu"
+                  color="inherit"
+                  size="small"
+                  onClick={() => setDrawerOpen(true)}
+                >
+                  <MenuRoundedIcon />
+                </IconButton>
+              </Stack>
+            ) : (
+              <Stack alignItems="center" direction="row" gap={1}>
+                {visibleActions.map((action) => (
+                  <Button
+                    key={action.id}
+                    onClick={() => handleActionClick(action)}
+                    size="small"
+                    variant={
+                      action.id === 'dashboard' && pathname.includes('/dashboard') ? 'contained' : 'text'
+                    }
+                  >
+                    {t(action.labelKey)}
+                  </Button>
+                ))}
+                <LocaleSwitcher locale={locale} />
+                <ThemeToggle />
+              </Stack>
+            )}
+          </Toolbar>
+        </Container>
       </AppBar>
 
       <Drawer

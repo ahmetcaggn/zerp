@@ -1,14 +1,24 @@
 'use client'
 
 import AddIcon from '@mui/icons-material/Add'
+import EmailRoundedIcon from '@mui/icons-material/EmailRounded'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded'
+import LocalOfferRoundedIcon from '@mui/icons-material/LocalOfferRounded'
+import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded'
+import PhoneRoundedIcon from '@mui/icons-material/PhoneRounded'
 import RemoveIcon from '@mui/icons-material/Remove'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
+import StarRoundedIcon from '@mui/icons-material/StarRounded'
 import {
   Alert,
   Box,
   Button,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   Divider,
   Drawer,
   Grid,
@@ -21,7 +31,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useQueries } from '@tanstack/react-query'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import QRCode from 'react-qr-code'
 
@@ -48,18 +58,58 @@ const PAGE_SIZE = 12
 const PREVIEW_LIMIT = 4
 const ALL_CATEGORY_ID = '__all__'
 const MENU_IMAGE_FALLBACK_URL = 'https://placehold.co/400'
+const SHOP_IMAGE_FALLBACK_URL = 'https://placehold.co/1400x600?text=Store'
 
-type PublicImageSize = 'SMALL' | 'ORIGINAL'
+type PublicImageSize = 'SMALL' | 'MEDIUM' | 'LARGE' | 'ORIGINAL'
 
 function buildPublicMenuItemImageUrl(imageId: string, size: PublicImageSize = 'SMALL'): string {
   const encodedImageId = encodeURIComponent(imageId)
   return `/api/sale/public/images/${encodedImageId}?size=${size}`
 }
 
+function buildPublicShopImageUrl(shopId: string, size: PublicImageSize = 'LARGE'): string {
+  return `/api/sale/public/shops/${encodeURIComponent(shopId)}/image?size=${size}`
+}
+
+function ensureWebsiteUrl(value: string): string {
+  if (value.startsWith('http://') || value.startsWith('https://')) {
+    return value
+  }
+
+  return `https://${value}`
+}
+
+function isValidCoordinatePair(lat: number | null | undefined, lng: number | null | undefined): boolean {
+  return (
+    typeof lat === 'number'
+    && typeof lng === 'number'
+    && Number.isFinite(lat)
+    && Number.isFinite(lng)
+    && lat >= -90
+    && lat <= 90
+    && lng >= -180
+    && lng <= 180
+  )
+}
+
+function calculateCrowFlyDistanceKm(originLat: number, originLng: number, targetLat: number, targetLng: number): number {
+  const earthRadiusKm = 6371
+  const dLat = ((targetLat - originLat) * Math.PI) / 180
+  const dLng = ((targetLng - originLng) * Math.PI) / 180
+  const lat1 = (originLat * Math.PI) / 180
+  const lat2 = (targetLat * Math.PI) / 180
+
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return earthRadiusKm * c
+}
+
 export function MenuItemList({ restaurantId }: MenuItemListProps) {
   const { t, locale } = useI18n()
   const requestedMenuLanguage: MenuLanguage = locale === 'tr' ? 'TR' : 'EN'
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null)
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>(ALL_CATEGORY_ID)
   const [page, setPage] = useState(1)
@@ -67,11 +117,15 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
   const [cartItems, setCartItems] = useState<CartItemState[]>([])
   const [cartOrderNote, setCartOrderNote] = useState('')
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false)
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false)
+  const [isLeafletUnavailable, setIsLeafletUnavailable] = useState(false)
   const [qrOrderCode, setQrOrderCode] = useState<string | null>(null)
   const [cartError, setCartError] = useState<string | null>(null)
   const [isCartCountPulsing, setIsCartCountPulsing] = useState(false)
   const cartButtonRef = useRef<HTMLButtonElement | null>(null)
   const cartPulseTimeoutRef = useRef<number | null>(null)
+  const aboutMapContainerRef = useRef<HTMLDivElement | null>(null)
+  const aboutMapRef = useRef<any>(null)
 
   const { data: shops = [], isLoading: isLoadingShops } = usePublicShops()
   const {
@@ -86,7 +140,39 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
     () => shops.find((shop) => shop.id === restaurantId),
     [shops, restaurantId],
   )
+  const hasCoordinates = typeof restaurant?.latitude === 'number' && typeof restaurant?.longitude === 'number'
   const tenantValue = restaurant?.tenantName ?? restaurant?.tenantId
+  const queryLocation = useMemo(() => {
+    const rawLat = searchParams.get('lat')
+    const rawLng = searchParams.get('lng')
+
+    if (!rawLat || !rawLng) {
+      return null
+    }
+
+    const latitude = Number(rawLat)
+    const longitude = Number(rawLng)
+
+    if (!isValidCoordinatePair(latitude, longitude)) {
+      return null
+    }
+
+    return { lat: latitude, lng: longitude }
+  }, [searchParams])
+  const distanceValue = useMemo(() => {
+    if (!hasCoordinates || !queryLocation) {
+      return null
+    }
+
+    const latitude = restaurant?.latitude
+    const longitude = restaurant?.longitude
+
+    if (!isValidCoordinatePair(latitude, longitude)) {
+      return null
+    }
+
+    return `${calculateCrowFlyDistanceKm(queryLocation.lat, queryLocation.lng, latitude as number, longitude as number).toFixed(1)} km`
+  }, [hasCoordinates, queryLocation, restaurant?.latitude, restaurant?.longitude])
 
   const categories = useMemo(
     () => shopMenuResponse?.categories ?? [],
@@ -109,6 +195,62 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
       }
     }
   }, [])
+
+  function cleanupAboutMap() {
+    if (aboutMapRef.current) {
+      aboutMapRef.current.remove()
+      aboutMapRef.current = null
+    }
+  }
+
+  async function initializeAboutMap() {
+    if (!hasCoordinates || !aboutMapContainerRef.current || !restaurant) {
+      return
+    }
+
+    cleanupAboutMap()
+
+    try {
+      const leaflet = await import('leaflet')
+      if (!aboutMapContainerRef.current) {
+        return
+      }
+
+      const map = leaflet.map(aboutMapContainerRef.current, {
+        zoomControl: false,
+        attributionControl: true,
+        dragging: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        boxZoom: false,
+        keyboard: false,
+        touchZoom: false,
+      }).setView([restaurant.latitude as number, restaurant.longitude as number], 15)
+
+      leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(map)
+
+      const markerIcon = leaflet.divIcon({
+        className: 'shop-location-marker',
+        html: '<div style="width:18px;height:18px;border-radius:999px;background:#e11d48;border:3px solid #ffffff;box-shadow:0 2px 10px rgba(0,0,0,0.22);"></div>',
+        iconSize: [18, 18],
+        iconAnchor: [9, 9],
+      })
+
+      leaflet.marker([restaurant.latitude as number, restaurant.longitude as number], { icon: markerIcon }).addTo(map)
+      aboutMapRef.current = map
+      setIsLeafletUnavailable(false)
+
+      window.setTimeout(() => {
+        map.invalidateSize()
+      }, 120)
+    } catch {
+      cleanupAboutMap()
+      setIsLeafletUnavailable(true)
+    }
+  }
 
   const isDiscoveryMode = selectedCategoryId === ALL_CATEGORY_ID
   const selectedCategoryName =
@@ -168,6 +310,106 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
     () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
     [cartItems],
   )
+
+  const shopHeroImage = useMemo(() => {
+    if (restaurant?.imageId) {
+      return buildPublicShopImageUrl(restaurant.id, 'LARGE')
+    }
+
+    return SHOP_IMAGE_FALLBACK_URL
+  }, [restaurant])
+
+  const shopDescription = useMemo(() => {
+    const value = restaurant?.description?.trim()
+    if (value) {
+      return value
+    }
+
+    const addressValue = [restaurant?.address, restaurant?.city, restaurant?.country]
+      .filter((item): item is string => Boolean(item && item.trim()))
+      .join(', ')
+
+    return addressValue || t('restaurants.storeInfoFallback')
+  }, [restaurant, t])
+
+  const shopAddressLine = useMemo(() => {
+    const fullAddress = [restaurant?.address, restaurant?.city, restaurant?.state, restaurant?.country, restaurant?.postalCode]
+      .filter((item): item is string => Boolean(item && item.trim()))
+      .join(', ')
+
+    return fullAddress || t('restaurants.storeInfoUnavailable')
+  }, [restaurant, t])
+
+  const ratingValue = t('restaurants.ratingUnknown')
+  const statusValue = t('restaurants.statusUnknown')
+  const restaurantLabel = tenantValue || t('restaurants.storeInfoFallback')
+
+  const aboutMapLinks = useMemo(() => {
+    if (!hasCoordinates || !restaurant) {
+      return null
+    }
+
+    const lat = restaurant.latitude as number
+    const lng = restaurant.longitude as number
+    const delta = 0.01
+    const bbox = `${lng - delta}%2C${lat - delta}%2C${lng + delta}%2C${lat + delta}`
+    return {
+      embed: `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lng}`,
+      open: `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=15/${lat}/${lng}`,
+    }
+  }, [hasCoordinates, restaurant])
+
+  const detailRows = useMemo(
+    () =>
+      [
+        { label: t('restaurants.ratingLabel'), value: ratingValue },
+        { label: t('restaurants.statusLabel'), value: statusValue },
+        { label: t('restaurants.detailTenant'), value: restaurant?.tenantName || restaurant?.tenantId || '-' },
+        { label: t('restaurants.detailDescription'), value: restaurant?.description || '-' },
+        { label: t('restaurants.detailAddress'), value: shopAddressLine || '-' },
+        { label: t('restaurants.detailPhone'), value: restaurant?.phone || '-' },
+        { label: t('restaurants.detailEmail'), value: restaurant?.email || '-' },
+        { label: t('restaurants.detailWebsite'), value: restaurant?.website || '-' },
+        { label: t('restaurants.detailMenuName'), value: activeMenu?.name || '-' },
+        { label: t('restaurants.detailMenuLanguage'), value: activeMenu?.language || '-' },
+        { label: t('restaurants.detailCategoryCount'), value: String(categories.length) },
+        {
+          label: t('restaurants.detailCoordinates'),
+          value: hasCoordinates ? `${restaurant!.latitude!.toFixed(6)}, ${restaurant!.longitude!.toFixed(6)}` : '-',
+        },
+      ] as const,
+    [
+      activeMenu?.language,
+      activeMenu?.name,
+      categories.length,
+      hasCoordinates,
+      ratingValue,
+      restaurant,
+      shopAddressLine,
+      statusValue,
+      t,
+    ],
+  )
+
+  useEffect(() => () => cleanupAboutMap(), [])
+
+  function handleOpenAboutModal() {
+    setIsLeafletUnavailable(false)
+    setIsAboutModalOpen(true)
+  }
+
+  function handleCloseAboutModal() {
+    setIsAboutModalOpen(false)
+    cleanupAboutMap()
+  }
+
+  function handleAboutDialogEntered() {
+    void initializeAboutMap()
+  }
+
+  function handleAboutDialogExit() {
+    cleanupAboutMap()
+  }
 
   function mapToMenuItem(publicMenuItem: PublicMenuItemDto, categoryName: string): MenuItem {
     const imageUrl = publicMenuItem.imageId
@@ -354,18 +596,83 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
 
   return (
     <>
-      <Stack spacing={4}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-          <Stack spacing={0.5}>
-            {tenantValue && (
-              <Typography variant="overline" color="text.secondary">
-                {tenantValue}
+      <Stack spacing={3.5}>
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: 3,
+            border: (theme) => `1px solid ${theme.palette.divider}`,
+            p: { xs: 2, md: 3 },
+          }}
+        >
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '220px minmax(0, 1fr)' },
+              alignItems: 'stretch',
+              gap: { xs: 2, md: 3 },
+            }}
+          >
+            <Box
+              component="img"
+              src={shopHeroImage}
+              alt={restaurant?.name}
+              sx={{
+                width: '100%',
+                maxWidth: { xs: 280, md: 220 },
+                mx: { xs: 'auto', md: 0 },
+                aspectRatio: '1 / 1',
+                objectFit: 'cover',
+                borderRadius: 2.5,
+                border: (theme) => `1px solid ${theme.palette.divider}`,
+              }}
+            />
+
+            <Stack spacing={1.25} sx={{ minWidth: 0, justifyContent: 'flex-start' }}>
+              <Typography variant="h2" fontWeight={800} sx={{ lineHeight: 1.15 }}>
+                {restaurant?.name}
               </Typography>
-            )}
-            <Typography variant="h4" fontWeight="bold">
-              {restaurant?.name ?? t('restaurants.title')} - {t('restaurants.productsTitle')}
-            </Typography>
-          </Stack>
+
+              <Typography color="text.secondary">{restaurantLabel}</Typography>
+
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                <Chip
+                  icon={<StarRoundedIcon />}
+                  label={`${t('restaurants.ratingLabel')}: ${ratingValue}`}
+                  variant="outlined"
+                  sx={{ fontWeight: 700 }}
+                />
+                <Chip
+                  icon={<LocalOfferRoundedIcon />}
+                  label={`${t('restaurants.statusLabel')}: ${statusValue}`}
+                  variant="outlined"
+                  sx={{ fontWeight: 700 }}
+                />
+                {distanceValue && (
+                  <Chip
+                    icon={<LocationOnRoundedIcon />}
+                    label={distanceValue}
+                    variant="outlined"
+                    sx={{ fontWeight: 700 }}
+                  />
+                )}
+                <Button
+                  variant="text"
+                  startIcon={<InfoOutlinedIcon />}
+                  onClick={handleOpenAboutModal}
+                  sx={{ px: 0.75, minWidth: 'auto' }}
+                >
+                  {t('restaurants.about')}
+                </Button>
+              </Stack>
+            </Stack>
+          </Box>
+        </Paper>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1.5 }}>
+          <Typography variant="h5" fontWeight={700}>
+            {t('restaurants.productsTitle')}
+          </Typography>
           <Stack direction="row" spacing={1.5}>
             <Button
               ref={cartButtonRef}
@@ -407,7 +714,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
           </Stack>
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 3, md: 4 } }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 2.5, md: 3 } }}>
           <Box
             sx={{
               position: 'sticky',
@@ -419,14 +726,14 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
               bgcolor: 'background.default',
             }}
           >
-            <Paper elevation={0} sx={{ borderRadius: 1.5, border: (theme) => `1px solid ${theme.palette.divider}` }}>
+            <Paper elevation={0} sx={{ borderRadius: 2, border: (theme) => `1px solid ${theme.palette.divider}` }}>
               <Box
                 component="nav"
                 sx={{
                   display: 'flex',
                   flexDirection: { xs: 'row', md: 'column' },
-                  gap: 1,
-                  p: 1.5,
+                  gap: 0.75,
+                  p: 1,
                   overflowX: { xs: 'auto', md: 'hidden' },
                   overflowY: { xs: 'hidden', md: 'auto' },
                   maxHeight: { md: '68vh' },
@@ -454,11 +761,8 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                         justifyContent: 'flex-start',
                         width: { xs: 'auto', md: '100%' },
                         borderRadius: 999,
-                        px: 0.5,
-                        py: 0.25,
                         fontWeight: selected ? 700 : 500,
                         flexShrink: 0,
-                        transition: 'all 0.2s ease',
                         '& .MuiChip-label': {
                           px: 1.2,
                           whiteSpace: 'nowrap',
@@ -476,7 +780,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
 
           <Box sx={{ flexGrow: 1, width: { xs: '100%', md: 'auto' } }}>
             {isDiscoveryMode ? (
-              <Stack spacing={3}>
+              <Stack spacing={2.5}>
                 <Box>
                   <Typography variant="h5" fontWeight={700} sx={{ mb: 0.75 }}>
                     {t('restaurants.discoveryTitle')}
@@ -492,7 +796,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                 )}
 
                 {!isLoadingDiscoveryMenuItems && !hasDiscoveryError && (
-                  <Stack spacing={2.5}>
+                  <Stack spacing={2}>
                     {categories.map((category, index) => {
                       const previewQuery = discoveryPreviewQueries[index]
                       const previewMenuItems = (previewQuery.data?.data ?? []).map((menuItem) =>
@@ -504,8 +808,8 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                           key={category.id}
                           elevation={0}
                           sx={{
-                            p: { xs: 2, md: 2.5 },
-                            borderRadius: 1.5,
+                            p: { xs: 1.75, md: 2.25 },
+                            borderRadius: 2,
                             border: (theme) => `1px solid ${theme.palette.divider}`,
                           }}
                         >
@@ -544,9 +848,9 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                           {!previewQuery.isLoading && !previewQuery.isError && (
                             <>
                               {previewMenuItems.length > 0 ? (
-                                <Grid container spacing={2}>
+                                <Grid container spacing={1.5}>
                                   {previewMenuItems.map((menuItem) => (
-                                    <Grid size={{ xs: 6, sm: 6, lg: 6 }} key={menuItem.id}>
+                                    <Grid size={{ xs: 12, sm: 6, lg: 6 }} key={menuItem.id}>
                                       <MenuItemCard
                                         menuItem={menuItem}
                                         onClick={() => setSelectedMenuItem(menuItem)}
@@ -569,7 +873,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                 )}
               </Stack>
             ) : (
-              <Stack spacing={4}>
+              <Stack spacing={3}>
                 <Box sx={{ scrollMarginTop: 80 }}>
                   <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
                     {selectedCategoryName}
@@ -579,9 +883,9 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                   {isDetailMenuItemsError && <Typography color="error">{t('restaurants.loadFailed')}</Typography>}
 
                   {!isLoadingDetailMenuItems && !isDetailMenuItemsError && (
-                    <Grid container spacing={2}>
+                    <Grid container spacing={1.5}>
                       {detailMenuItems.map((menuItem) => (
-                        <Grid size={{ xs: 6, md: 6 }} key={menuItem.id}>
+                        <Grid size={{ xs: 12, md: 6 }} key={menuItem.id}>
                           <MenuItemCard
                             menuItem={menuItem}
                             onClick={() => setSelectedMenuItem(menuItem)}
@@ -616,6 +920,140 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
           </Box>
         </Box>
 
+        <Dialog
+          open={isAboutModalOpen}
+          onClose={handleCloseAboutModal}
+          fullWidth
+          maxWidth="md"
+          slotProps={{
+            transition: {
+              onEntered: handleAboutDialogEntered,
+              onExit: handleAboutDialogExit,
+            },
+          }}
+        >
+          <DialogTitle sx={{ pb: 1, fontWeight: 800 }}>
+            {restaurant?.name} · {t('restaurants.about')}
+          </DialogTitle>
+          <DialogContent>
+            <Stack spacing={2.25}>
+              <Typography color="text.secondary">{shopDescription}</Typography>
+
+              {hasCoordinates && !isLeafletUnavailable ? (
+                <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', position: 'relative' }}>
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 10,
+                      left: 10,
+                      zIndex: 1000,
+                      bgcolor: 'rgba(255,255,255,0.94)',
+                      px: 1.2,
+                      py: 0.8,
+                      borderRadius: 1.2,
+                      maxWidth: { xs: 'calc(100% - 20px)', md: 440 },
+                      border: (theme) => `1px solid ${theme.palette.divider}`,
+                    }}
+                  >
+                    <Typography variant="caption" color="text.secondary">
+                      {t('restaurants.detailAddress')}
+                    </Typography>
+                    <Typography variant="body2" fontWeight={600}>
+                      {shopAddressLine}
+                    </Typography>
+                  </Box>
+                  <Box ref={aboutMapContainerRef} sx={{ height: 280, width: '100%' }} />
+                </Paper>
+              ) : hasCoordinates && isLeafletUnavailable && aboutMapLinks ? (
+                <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', p: 1.5 }}>
+                  <Stack spacing={1.5}>
+                    <Typography variant="body2" color="text.secondary">
+                      {t('restaurants.mapFallbackInfo')}
+                    </Typography>
+                    <Box
+                      component="iframe"
+                      src={aboutMapLinks.embed}
+                      title={t('restaurants.detailAddress')}
+                      loading="lazy"
+                      sx={{ width: '100%', height: 280, border: 0, borderRadius: 1.5 }}
+                    />
+                  </Stack>
+                </Paper>
+              ) : (
+                <Alert severity="info">{t('restaurants.coordinatesMissing')}</Alert>
+              )}
+
+              {hasCoordinates && aboutMapLinks && (
+                <Box>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    component="a"
+                    href={aboutMapLinks.open}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    {t('restaurants.openInMap')}
+                  </Button>
+                </Box>
+              )}
+
+              <Grid container spacing={1.2}>
+                {detailRows.map((row) => (
+                  <Grid key={row.label} size={{ xs: 12, sm: 6 }}>
+                    <Paper variant="outlined" sx={{ p: 1.25, borderRadius: 1.5, height: '100%' }}>
+                      <Typography variant="caption" color="text.secondary">
+                        {row.label}
+                      </Typography>
+                      <Typography sx={{ wordBreak: 'break-word', fontWeight: 600 }}>
+                        {row.value}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                {restaurant?.phone && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<PhoneRoundedIcon />}
+                    component="a"
+                    href={`tel:${restaurant.phone}`}
+                  >
+                    {t('restaurants.call')}
+                  </Button>
+                )}
+                {restaurant?.email && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<EmailRoundedIcon />}
+                    component="a"
+                    href={`mailto:${restaurant.email}`}
+                  >
+                    {t('restaurants.email')}
+                  </Button>
+                )}
+                {restaurant?.website && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<LanguageRoundedIcon />}
+                    component="a"
+                    href={ensureWebsiteUrl(restaurant.website)}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    {t('restaurants.website')}
+                  </Button>
+                )}
+              </Stack>
+            </Stack>
+          </DialogContent>
+        </Dialog>
+
         <MenuItemDetailModal
           open={!!selectedMenuItem}
           onClose={() => setSelectedMenuItem(null)}
@@ -631,22 +1069,31 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
         anchor="right"
         open={isCartDrawerOpen}
         onClose={() => setIsCartDrawerOpen(false)}
+        PaperProps={{
+          sx: {
+            borderLeft: (theme) => `1px solid ${theme.palette.divider}`,
+            backgroundImage: 'none',
+          },
+        }}
       >
-        <Stack spacing={2} sx={{ width: { xs: 320, sm: 400 }, p: 2.5 }}>
-          <Typography variant="h6" fontWeight={700}>
-            {t('restaurants.cartTitle')}
-          </Typography>
+        <Stack spacing={2} sx={{ width: { xs: 330, sm: 410 }, p: 2.5 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6" fontWeight={800}>
+              {t('restaurants.cartTitle')}
+            </Typography>
+            <Chip size="small" color="primary" label={totalCartItems} />
+          </Stack>
 
           {cartItems.length === 0 && (
             <Typography color="text.secondary">{t('restaurants.cartEmpty')}</Typography>
           )}
 
           {cartItems.map((item) => (
-            <Paper key={item.menuItemId} variant="outlined" sx={{ p: 1.5 }}>
+            <Paper key={item.menuItemId} variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
               <Stack spacing={1}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
-                  <Typography fontWeight={600}>{item.name}</Typography>
-                  <Typography color="primary.main" fontWeight={700}>
+                  <Typography fontWeight={700}>{item.name}</Typography>
+                  <Typography color="primary.main" fontWeight={800}>
                     {t('restaurants.price', { price: item.unitPrice })}
                   </Typography>
                 </Box>
@@ -663,7 +1110,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                     >
                       <RemoveIcon fontSize="small" />
                     </IconButton>
-                    <Typography sx={{ minWidth: 24, textAlign: 'center' }}>{item.quantity}</Typography>
+                    <Typography sx={{ minWidth: 24, textAlign: 'center', fontWeight: 700 }}>{item.quantity}</Typography>
                     <IconButton
                       size="small"
                       onClick={() => {
@@ -675,7 +1122,6 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                     </IconButton>
                   </Box>
                 </Box>
-
               </Stack>
             </Paper>
           ))}
@@ -711,12 +1157,12 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
           {cartError && <Alert severity="error">{cartError}</Alert>}
 
           {qrOrderCode && (
-            <Paper variant="outlined" sx={{ p: 1.5 }}>
+            <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
               <Stack spacing={1.5} alignItems="center">
                 <Typography variant="body2" color="text.secondary">
                   {t('restaurants.orderCode')}
                 </Typography>
-                <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
+                <Typography variant="body2" sx={{ wordBreak: 'break-all', fontWeight: 700 }}>
                   {qrOrderCode}
                 </Typography>
                 <Box

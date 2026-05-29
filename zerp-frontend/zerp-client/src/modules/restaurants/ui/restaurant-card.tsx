@@ -30,7 +30,10 @@ export function RestaurantCard({ restaurant, userLocation }: RestaurantCardProps
   const { t, locale } = useI18n()
 
   const handleClick = () => {
-    router.push(`/${locale}/restaurants/${restaurant.id}`)
+    const query = canBuildOriginRoute
+      ? `?lat=${userLocation.lat}&lng=${userLocation.lng}`
+      : ''
+    router.push(`/${locale}/restaurants/${restaurant.id}${query}`)
   }
 
   const hasCoordinates = typeof restaurant.latitude === 'number' && typeof restaurant.longitude === 'number'

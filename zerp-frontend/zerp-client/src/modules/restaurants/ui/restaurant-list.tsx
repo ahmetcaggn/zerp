@@ -14,6 +14,12 @@ import { RestaurantCard } from './restaurant-card'
 const NEARBY_PAGE_SIZE = 10
 const EARTH_RADIUS_KM = 6371
 
+type PublicImageSize = 'SMALL' | 'MEDIUM' | 'LARGE' | 'ORIGINAL'
+
+function buildPublicShopImageUrl(shopId: string, size: PublicImageSize = 'MEDIUM'): string {
+  return `/api/sale/public/shops/${encodeURIComponent(shopId)}/image?size=${size}`
+}
+
 function isValidCoordinatePair(lat: number | undefined, lng: number | undefined): boolean {
   return (
     typeof lat === 'number'
@@ -58,7 +64,7 @@ function mapShopToRestaurant(
     name: shop.name,
     tenantName: shop.tenantName ?? shop.tenantId,
     description: shop.description || [shop.address, shop.city, shop.country].filter(Boolean).join(', ') || '—',
-    imageUrl: `https://placehold.co/600x400?text=${encodeURIComponent(shop.name)}`,
+    imageUrl: shop.imageId ? buildPublicShopImageUrl(shop.id, 'MEDIUM') : undefined,
     isOpen: true,
     rating: 4.5,
     categories: [],

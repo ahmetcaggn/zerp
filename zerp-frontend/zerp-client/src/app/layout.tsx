@@ -1,4 +1,5 @@
 import '@/app/globals.css'
+import 'leaflet/dist/leaflet.css'
 
 import type { Metadata } from 'next'
 import { DM_Sans, Space_Grotesk } from 'next/font/google'
