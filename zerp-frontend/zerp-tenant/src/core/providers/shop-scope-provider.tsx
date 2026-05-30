@@ -72,13 +72,22 @@ export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
   const shops = useMemo(() => (isAuthenticated ? (data?.data ?? []) : []), [isAuthenticated, data?.data])
 
   const scope = useMemo<ShopScope>(() => {
-    if (!isAuthenticated || !persistedShopId || shops.length === 0) {
+    if (!isAuthenticated || !persistedShopId) {
       return { mode: 'GLOBAL' }
     }
-    const matchingShop = shops.find((shop) => shop.id === persistedShopId)
 
-    return matchingShop ? { mode: 'SHOP', shopId: matchingShop.id, shopName: matchingShop.name } : { mode: 'GLOBAL' }
-  }, [isAuthenticated, persistedShopId, shops])
+    const matchingShop = shops.find((shop) => shop.id === persistedShopId)
+    if (matchingShop) {
+      return { mode: 'SHOP', shopId: matchingShop.id, shopName: matchingShop.name }
+    }
+
+    // Prevent GLOBAL flicker on refresh while shop list is still loading.
+    if (isLoading) {
+      return { mode: 'SHOP', shopId: persistedShopId, shopName: '' }
+    }
+
+    return { mode: 'GLOBAL' }
+  }, [isAuthenticated, persistedShopId, shops, isLoading])
 
   const isScopeReady = useMemo(() => {
     if (!isAuthenticated) {

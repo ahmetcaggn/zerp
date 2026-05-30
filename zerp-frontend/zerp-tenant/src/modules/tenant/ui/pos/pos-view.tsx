@@ -102,7 +102,7 @@ export function PosView() {
 
   const { data: tablesData } = useShopTables({
     pagination: { page: 1, perPage: 100 },
-    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+    ...(selectedShopId ? { filter: { shopId: selectedShopId, 'shop.id': selectedShopId } } : {}),
   })
   const { data: catData, isLoading: isCatLoading } = useMenuCategories({
     pagination: { page: 1, perPage: 100 },
@@ -125,7 +125,11 @@ export function PosView() {
     },
   })
   const { data: ordersData } = useTableOrders({
-    filter: { 'shopTable.id': tableId ?? '__none__', status: 'OPEN' },
+    filter: {
+      ...(selectedShopId ? { shopId: selectedShopId, 'shop.id': selectedShopId } : {}),
+      'shopTable.id': tableId ?? '__none__',
+      status: 'OPEN',
+    },
     pagination: { page: 1, perPage: 20 },
   })
   const { mutate: createOrder, isPending } = useCreateTableOrder()

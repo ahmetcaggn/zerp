@@ -63,7 +63,12 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
   const [editNotes, setEditNotes] = useState('')
 
   const { data: ordersData, isLoading: isOrdersLoading } = useTableOrders({
-    filter: { 'shopTable.id': table.id, status: 'OPEN' },
+    filter: {
+      shopId: table.shopId,
+      'shop.id': table.shopId,
+      'shopTable.id': table.id,
+      status: 'OPEN',
+    },
     pagination: { page: 1, perPage: 20 },
   })
 

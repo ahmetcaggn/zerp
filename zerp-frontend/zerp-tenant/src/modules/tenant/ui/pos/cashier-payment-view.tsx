@@ -615,7 +615,12 @@ function TableOrderDetails({ table }: { table: ShopTableResponseDto }) {
 
   const { data: ordersData, isLoading } = useTableOrders(
     {
-      filter: { 'shopTable.id': table.id, status: 'OPEN' },
+      filter: {
+        shopId: table.shopId,
+        'shop.id': table.shopId,
+        'shopTable.id': table.id,
+        status: 'OPEN',
+      },
       pagination: { page: 1, perPage: 20 },
     },
     { refetchInterval: POLL_INTERVAL, refetchOnWindowFocus: true }
@@ -708,7 +713,7 @@ export function CashierPaymentView() {
     {
       pagination: { page: 1, perPage: 200 },
       sort: { field: 'name', order: 'ASC' },
-      ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+      ...(selectedShopId ? { filter: { shopId: selectedShopId, 'shop.id': selectedShopId } } : {}),
     },
     { refetchInterval: POLL_INTERVAL, refetchOnWindowFocus: true }
   )

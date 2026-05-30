@@ -29,7 +29,12 @@ function TableOrderSummary({ table }: { table: ShopTableResponseDto }) {
   const { t } = useI18n()
 
   const { data: ordersData, isLoading } = useTableOrders({
-    filter: { 'shopTable.id': table.id, status: 'OPEN' },
+    filter: {
+      shopId: table.shopId,
+      'shop.id': table.shopId,
+      'shopTable.id': table.id,
+      status: 'OPEN',
+    },
     pagination: { page: 1, perPage: 50 },
   })
 
@@ -150,7 +155,7 @@ export function CashierView() {
   const { data: tablesData, isLoading: isTablesLoading } = useShopTables({
     pagination: { page: 1, perPage: 100 },
     sort: { field: 'name', order: 'ASC' },
-    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+    ...(selectedShopId ? { filter: { shopId: selectedShopId, 'shop.id': selectedShopId } } : {}),
   })
 
   const tables = tablesData?.data ?? []

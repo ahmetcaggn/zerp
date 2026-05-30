@@ -40,7 +40,7 @@ export function FloorView() {
   const { data, isLoading } = useShopTables({
     pagination: { page: 1, perPage: 200 },
     sort: { field: 'name', order: 'ASC' },
-    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+    ...(selectedShopId ? { filter: { shopId: selectedShopId, 'shop.id': selectedShopId } } : {}),
   })
   const { mutate: deleteTable } = useDeleteShopTable()
   const { mutate: patchTable } = usePatchShopTable()

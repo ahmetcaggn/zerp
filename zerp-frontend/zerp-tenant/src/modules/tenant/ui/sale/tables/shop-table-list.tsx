@@ -49,7 +49,7 @@ export function ShopTableList() {
   const { data, isLoading } = useShopTables({
     pagination: { page: page + 1, perPage: rowsPerPage },
     sort: { field: 'name', order: 'ASC' },
-    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+    ...(selectedShopId ? { filter: { shopId: selectedShopId, 'shop.id': selectedShopId } } : {}),
   })
 
   const { mutate: deleteTable } = useDeleteShopTable()

@@ -81,7 +81,9 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
   } = useShopScope()
   const shopLabel = locale === 'tr' ? 'Mağaza' : 'Shop'
   const allShopsLabel = locale === 'tr' ? 'Tüm Mağazalar' : 'All Shops'
+  const pendingShopLabel = locale === 'tr' ? 'Seçili Mağaza' : 'Selected Shop'
   const scopeValue = scope.mode === 'SHOP' ? scope.shopId : 'GLOBAL'
+  const isScopeShopInList = scope.mode !== 'SHOP' || shops.some((shop) => shop.id === scope.shopId)
 
   const visibleActions = useMemo(
     () =>
@@ -151,6 +153,11 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
                   disabled={isLoadingShops || isScopeSwitching}
                 >
                   <MenuItem value="GLOBAL">{allShopsLabel}</MenuItem>
+                  {scope.mode === 'SHOP' && !isScopeShopInList && (
+                    <MenuItem value={scope.shopId}>
+                      {scope.shopName || pendingShopLabel}
+                    </MenuItem>
+                  )}
                   {shops.map((shop) => (
                     <MenuItem key={shop.id} value={shop.id}>
                       {shop.name}

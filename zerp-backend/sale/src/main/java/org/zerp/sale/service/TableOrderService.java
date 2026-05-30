@@ -79,9 +79,10 @@ public class TableOrderService implements
     @Override
     @Transactional(readOnly = true)
     public Page<TableOrderDTO> findWithFilters(Map<String, String> filters, Pageable pageable) {
-        log.trace("Finding TableOrders with filters: {}", filters);
+        Map<String, String> normalizedFilters = normalizeShopFilters(filters);
+        log.trace("Finding TableOrders with filters: {}", normalizedFilters);
         UUID userId = currentUserIdResolver.resolve();
-        Specification<TableOrder> spec = filterRefiner.refinedOrBadRequest(filters, TableOrder.class);
+        Specification<TableOrder> spec = filterRefiner.refinedOrBadRequest(normalizedFilters, TableOrder.class);
         spec = permissionEvaluator.filterRead(userId).and(spec);
         Page<TableOrderDTO> results = repository.findAll(spec, pageable).map(mapper::toDTO);
         log.debug("Found {} TableOrders", results.getTotalElements());
@@ -389,6 +390,15 @@ public class TableOrderService implements
         }
 
         return selected;
+    }
+
+    private Map<String, String> normalizeShopFilters(Map<String, String> filters) {
+        Map<String, String> normalized = new HashMap<>(filters);
+        String shopId = normalized.remove("shopId");
+        if (shopId != null && !shopId.isBlank()) {
+            normalized.putIfAbsent("shop.id", shopId);
+        }
+        return normalized;
     }
 
     /**

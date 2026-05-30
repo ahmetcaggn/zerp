@@ -23,6 +23,7 @@ import org.zerp.sale.repository.ShopRepository;
 import org.zerp.sale.repository.ShopTableRepository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -43,9 +44,10 @@ public class ShopTableService implements
     @Override
     @Transactional(readOnly = true)
     public Page<ShopTableDTO> findWithFilters(Map<String, String> filters, Pageable pageable) {
-        log.trace("Finding ShopTables with filters: {}", filters);
+        Map<String, String> normalizedFilters = normalizeShopFilters(filters);
+        log.trace("Finding ShopTables with filters: {}", normalizedFilters);
         UUID userId = currentUserIdResolver.resolve();
-        Specification<ShopTable> spec = filterRefiner.refinedOrBadRequest(filters, ShopTable.class);
+        Specification<ShopTable> spec = filterRefiner.refinedOrBadRequest(normalizedFilters, ShopTable.class);
         spec = permissionEvaluator.filterRead(userId).and(spec);
         Page<ShopTableDTO> results = repository.findAll(spec, pageable).map(mapper::toDTO);
         log.debug("Found {} ShopTables", results.getTotalElements());
@@ -184,5 +186,14 @@ public class ShopTableService implements
         }
         return shopRepository.findById(shopId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shop not found"));
+    }
+
+    private Map<String, String> normalizeShopFilters(Map<String, String> filters) {
+        Map<String, String> normalized = new HashMap<>(filters);
+        String shopId = normalized.remove("shopId");
+        if (shopId != null && !shopId.isBlank()) {
+            normalized.putIfAbsent("shop.id", shopId);
+        }
+        return normalized;
     }
 }
