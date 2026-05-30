@@ -29,6 +29,22 @@ final class ApiNetworkInvoker extends DioNetworkInvoker
           if (accessToken != null) {
             options.headers['Authorization'] = 'Bearer $accessToken';
           }
+
+          options.queryParameters = options.queryParameters.map((key, value) {
+            if (value is DateTime) {
+              return MapEntry(key, value.toIso8601String());
+            }
+            if (value is List) {
+              return MapEntry(
+                key,
+                value
+                    .map((e) => e is DateTime ? e.toIso8601String() : e)
+                    .toList(),
+              );
+            }
+            return MapEntry(key, value);
+          });
+
           handler.next(options);
         },
         onError: (error, handler) async {

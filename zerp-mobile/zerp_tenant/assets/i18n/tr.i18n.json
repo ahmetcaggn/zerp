@@ -71,6 +71,7 @@
       "itemCount": "$n Ürün",
       "noOpenOrders": "Açık Sipariş Yok",
       "noOpenOrdersHint": "Bu masada aktif sipariş bulunmuyor.",
+      "lastOrders": "Son Siparişler",
       "paymentReceivedToast": "Ödeme başarıyla tamamlandı",
       "partialItemsUpdatedToast": "Kısmi ödeme kaydedildi",
       "paymentMethodCash": "Nakit",
@@ -145,7 +146,166 @@
     }
   },
   "stock": {
-    "title": "Stok"
+    "title": "Stok",
+    "noShopSelected": "Stoku görüntülemek için lütfen bir şube seçin.",
+    "tabs": {
+      "resources": "Kaynaklar",
+      "movements": "Hareketler",
+      "counts": "Sayımlar"
+    },
+    "kpi": {
+      "totalVariance": "Toplam Sapma",
+      "negativeVarianceSku": "Negatif Sapmalı SKU",
+      "topRisky5": "En Riskli 5",
+      "topRisky5Empty": "Yok",
+      "lastCountVariance": "Son Sayım Sapması",
+      "lastCountDate": "Son sayım: $date",
+      "lastCountNever": "Henüz sayım yok"
+    },
+    "resource": {
+      "defineButton": "Kaynak Ekle",
+      "editButton": "Kaynağı Düzenle",
+      "createButton": "Kaynak Oluştur",
+      "varianceInfo": "Sapma = Gerçek Stok − Beklenen Stok. Negatif sapma gerçek stokun beklenenden düşük olduğunu gösterir.",
+      "emptyState": "Kaynak bulunamadı. İlk stok kaynağınızı ekleyin.",
+      "form": {
+        "name": "Ad",
+        "description": "Açıklama",
+        "unitType": "Birim Türü",
+        "quantity": "Başlangıç Miktarı",
+        "reorderThreshold": "Yeniden Sipariş Eşiği",
+        "costPerUnit": "Birim Maliyeti"
+      },
+      "table": {
+        "realStock": "Gerçek",
+        "expectedStock": "Beklenen",
+        "lastCountStock": "Son Sayım",
+        "varianceFromLastCount": "Sapma",
+        "lastExpectedStock": "Son Beklenen",
+        "lastCountDate": "Son Sayım Tarihi"
+      },
+      "unitTypes": {
+        "PIECE": "Adet",
+        "GRAM": "Gram",
+        "KILOGRAM": "Kilogram",
+        "MILLILITER": "Mililitre",
+        "LITER": "Litre"
+      }
+    },
+    "movement": {
+      "createButton": "Hareket Ekle",
+      "date": "Tarih",
+      "type": "Tür",
+      "quantity": "Miktar",
+      "expectedBefore": "Önceki",
+      "expectedAfter": "Sonraki",
+      "reference": "Referans",
+      "notes": "Notlar",
+      "emptyState": "Bu dönemde hareket bulunamadı.",
+      "filters": {
+        "period": "Dönem",
+        "periods": {
+          "DAY": "Gün",
+          "WEEK": "Hafta",
+          "MONTH": "Ay"
+        },
+        "stockType": "Kaynak",
+        "allStockTypes": "Tüm Kaynaklar",
+        "previous": "Önceki",
+        "next": "Sonraki",
+        "selectedDay": "Gün",
+        "selectedWeek": "Hafta",
+        "selectedMonth": "Ay"
+      },
+      "chart": {
+        "title": "Stok Akış Grafiği",
+        "emptyState": "Bu dönemde veri bulunamadı.",
+        "legend": {
+          "inflow": "Giriş",
+          "outflow": "Çıkış"
+        }
+      },
+      "drillDown": {
+        "title": "Hareket Detayı",
+        "clear": "Seçimi Temizle"
+      },
+      "types": {
+        "PURCHASE": "Satın Alma",
+        "SALE": "Satış",
+        "WASTE": "Fire",
+        "ADJUSTMENT": "Düzeltme",
+        "TRANSFER": "Transfer",
+        "RETURN": "İade",
+        "STOCK_COUNT_CORRECTION": "Sayım Düzeltmesi"
+      }
+    },
+    "count": {
+      "createButton": "Yeni Sayım",
+      "countDate": "Sayım Tarihi",
+      "status": "Durum",
+      "notes": "Notlar",
+      "emptyState": "Stok sayımı bulunamadı.",
+      "enterCount": "Sayım Gir",
+      "approve": "Onayla",
+      "previousActual": "Önceki",
+      "expected": "Beklenen",
+      "actual": "Gerçek",
+      "difference": "Fark",
+      "statuses": {
+        "DRAFT": "Taslak",
+        "IN_PROGRESS": "Devam Ediyor",
+        "READY_FOR_APPROVAL": "Onay Bekliyor",
+        "COMPLETED": "Tamamlandı",
+        "CANCELLED": "İptal Edildi"
+      }
+    },
+    "operation": {
+      "entryButton": "Stok Girişi",
+      "adjustmentButton": "Stok Düzeltmesi",
+      "historyTitle": "İşlem Geçmişi",
+      "referenceNoOperation": "Referans No",
+      "referenceNoOperationHelp": "Bu toplu işlem için opsiyonel referans",
+      "referenceNoGuide": "Satın alma siparişlerine izlenebilirlik için referans numaraları kullanın.",
+      "notes": "Notlar",
+      "quantity": "Miktar",
+      "direction": "Yön",
+      "reason": "Neden",
+      "addItem": "Ürün Ekle",
+      "removeItem": "Kaldır",
+      "itemCount": "Ürünler",
+      "type": "Tür",
+      "status": "Durum",
+      "referenceNo": "Ref No",
+      "shopRequired": "Lütfen önce bir şube seçin.",
+      "invalidItems": "Lütfen tüm zorunlu alanları doldurun.",
+      "entryCreated": "Stok girişi başarıyla oluşturuldu.",
+      "adjustmentCreated": "Stok düzeltmesi başarıyla oluşturuldu.",
+      "operationError": "İşlem oluşturulamadı.",
+      "emptyState": "İşlem bulunamadı.",
+      "emptyDetailItems": "Bu işlemde ürün yok.",
+      "detailTitle": "İşlem Detayı",
+      "directions": {
+        "INCREASE": "Artış",
+        "DECREASE": "Azalış"
+      },
+      "types": {
+        "ENTRY": "Giriş",
+        "ADJUSTMENT": "Düzeltme"
+      },
+      "statuses": {
+        "DRAFT": "Taslak",
+        "POSTED": "İşlendi",
+        "CANCELLED": "İptal"
+      },
+      "filters": {
+        "type": "Tür",
+        "allTypes": "Tüm Türler",
+        "referenceNo": "Referans No",
+        "from": "Başlangıç",
+        "to": "Bitiş",
+        "clear": "Temizle"
+      }
+    }
   },
   "store": {
     "title": "Mağazalar"

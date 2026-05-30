@@ -89,7 +89,6 @@ abstract class ServiceBase {
           message =
               payloadMap['message']?.toString() ??
               payloadMap['error']?.toString() ??
-              payloadMap['error']?.toString() ??
               payloadMap.toString();
         } on Object catch (e) {
           _log.warning(
@@ -104,11 +103,12 @@ abstract class ServiceBase {
         message =
             payload['message']?.toString() ??
             payload['error']?.toString() ??
-            payload['error']?.toString() ??
             payload.toString();
       } else {
         message = '${payload.runtimeType} - $payload';
       }
+    } else {
+      message = 'Unknown error data format';
     }
 
     _log.warning(

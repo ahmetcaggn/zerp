@@ -44,6 +44,16 @@ final class PageRequest {
     required this.end,
   });
 
+  factory PageRequest.fromPageAndSize({
+    required int page,
+    required int size,
+  }) {
+    return PageRequest(
+      start: (page - 1) * size,
+      end: page * size,
+    );
+  }
+
   /// The maximum number of records that can be fetched in a single request.
   /// This is used as a practical upper bound for fetching all records.
   static const int _maxRecordLimit = 1_000_000;

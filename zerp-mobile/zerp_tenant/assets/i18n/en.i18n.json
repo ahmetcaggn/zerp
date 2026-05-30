@@ -71,6 +71,7 @@
       "itemCount": "$n Items",
       "noOpenOrders": "No Open Orders",
       "noOpenOrdersHint": "This table has no active orders.",
+      "lastOrders": "Last Orders",
       "paymentReceivedToast": "Payment completed successfully",
       "partialItemsUpdatedToast": "Partial payment recorded",
       "paymentMethodCash": "Cash",
@@ -145,7 +146,166 @@
     }
   },
   "stock": {
-    "title": "Stock"
+    "title": "Stock",
+    "noShopSelected": "Please select a shop to view stock.",
+    "tabs": {
+      "resources": "Resources",
+      "movements": "Movements",
+      "counts": "Counts"
+    },
+    "kpi": {
+      "totalVariance": "Total Variance",
+      "negativeVarianceSku": "Negative Variance SKUs",
+      "topRisky5": "Top 5 Risky",
+      "topRisky5Empty": "None",
+      "lastCountVariance": "Last Count Variance",
+      "lastCountDate": "Last count: $date",
+      "lastCountNever": "No count yet"
+    },
+    "resource": {
+      "defineButton": "Add Resource",
+      "editButton": "Edit Resource",
+      "createButton": "Create Resource",
+      "varianceInfo": "Variance = Real Stock − Expected Stock. Negative means real is lower than expected.",
+      "emptyState": "No resources found. Add your first stock resource.",
+      "form": {
+        "name": "Name",
+        "description": "Description",
+        "unitType": "Unit Type",
+        "quantity": "Initial Quantity",
+        "reorderThreshold": "Reorder Threshold",
+        "costPerUnit": "Cost Per Unit"
+      },
+      "table": {
+        "realStock": "Real",
+        "expectedStock": "Expected",
+        "lastCountStock": "Last Count",
+        "varianceFromLastCount": "Variance",
+        "lastExpectedStock": "Last Expected",
+        "lastCountDate": "Last Count Date"
+      },
+      "unitTypes": {
+        "PIECE": "Piece",
+        "GRAM": "Gram",
+        "KILOGRAM": "Kilogram",
+        "MILLILITER": "Milliliter",
+        "LITER": "Liter"
+      }
+    },
+    "movement": {
+      "createButton": "Add Movement",
+      "date": "Date",
+      "type": "Type",
+      "quantity": "Quantity",
+      "expectedBefore": "Before",
+      "expectedAfter": "After",
+      "reference": "Reference",
+      "notes": "Notes",
+      "emptyState": "No movements in this period.",
+      "filters": {
+        "period": "Period",
+        "periods": {
+          "DAY": "Day",
+          "WEEK": "Week",
+          "MONTH": "Month"
+        },
+        "stockType": "Resource",
+        "allStockTypes": "All Resources",
+        "previous": "Prev",
+        "next": "Next",
+        "selectedDay": "Day",
+        "selectedWeek": "Week",
+        "selectedMonth": "Month"
+      },
+      "chart": {
+        "title": "Stock Flow Chart",
+        "emptyState": "No data for this period.",
+        "legend": {
+          "inflow": "In",
+          "outflow": "Out"
+        }
+      },
+      "drillDown": {
+        "title": "Movement Detail",
+        "clear": "Clear Selection"
+      },
+      "types": {
+        "PURCHASE": "Purchase",
+        "SALE": "Sale",
+        "WASTE": "Waste",
+        "ADJUSTMENT": "Adjustment",
+        "TRANSFER": "Transfer",
+        "RETURN": "Return",
+        "STOCK_COUNT_CORRECTION": "Count Correction"
+      }
+    },
+    "count": {
+      "createButton": "New Count",
+      "countDate": "Count Date",
+      "status": "Status",
+      "notes": "Notes",
+      "emptyState": "No stock counts found.",
+      "enterCount": "Enter Count",
+      "approve": "Approve",
+      "previousActual": "Previous",
+      "expected": "Expected",
+      "actual": "Actual",
+      "difference": "Difference",
+      "statuses": {
+        "DRAFT": "Draft",
+        "IN_PROGRESS": "In Progress",
+        "READY_FOR_APPROVAL": "Ready for Approval",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      }
+    },
+    "operation": {
+      "entryButton": "Stock Entry",
+      "adjustmentButton": "Stock Adjustment",
+      "historyTitle": "Operation History",
+      "referenceNoOperation": "Reference No",
+      "referenceNoOperationHelp": "Optional reference for this batch",
+      "referenceNoGuide": "Use reference numbers to trace operations to purchase orders.",
+      "notes": "Notes",
+      "quantity": "Quantity",
+      "direction": "Direction",
+      "reason": "Reason",
+      "addItem": "Add Item",
+      "removeItem": "Remove",
+      "itemCount": "Items",
+      "type": "Type",
+      "status": "Status",
+      "referenceNo": "Ref No",
+      "shopRequired": "Please select a shop first.",
+      "invalidItems": "Please fill all required item fields.",
+      "entryCreated": "Stock entry created successfully.",
+      "adjustmentCreated": "Stock adjustment created successfully.",
+      "operationError": "Failed to create operation.",
+      "emptyState": "No operations found.",
+      "emptyDetailItems": "No items in this operation.",
+      "detailTitle": "Operation Detail",
+      "directions": {
+        "INCREASE": "Increase",
+        "DECREASE": "Decrease"
+      },
+      "types": {
+        "ENTRY": "Entry",
+        "ADJUSTMENT": "Adjustment"
+      },
+      "statuses": {
+        "DRAFT": "Draft",
+        "POSTED": "Posted",
+        "CANCELLED": "Cancelled"
+      },
+      "filters": {
+        "type": "Type",
+        "allTypes": "All Types",
+        "referenceNo": "Reference No",
+        "from": "From",
+        "to": "To",
+        "clear": "Clear"
+      }
+    }
   },
   "store": {
     "title": "Stores"
