@@ -9,10 +9,10 @@ import org.zerp.common.dto.user.ImageSize;
 @FeignClient(name = "thumbor", url = "${user.thumbor.host}")
 public interface ThumborFeignClient {
 
-    String ORIGINAL_URL = "/unsafe/${s3.repository.bucket-name}/${app.sale.menu-item-images.folder}/{fileName}";
-    String SMALL_URL = "/unsafe/fit-in/100x100/${s3.repository.bucket-name}/${app.sale.menu-item-images.folder}/{fileName}";
-    String MEDIUM_URL = "/unsafe/fit-in/300x300/${s3.repository.bucket-name}/${app.sale.menu-item-images.folder}/{fileName}";
-    String LARGE_URL = "/unsafe/fit-in/500x500/${s3.repository.bucket-name}/${app.sale.menu-item-images.folder}/{fileName}";
+    String ORIGINAL_URL = "/unsafe/${app.sale.menu-item-images.folder}/{fileName}";
+    String SMALL_URL = "/unsafe/fit-in/100x100/${app.sale.menu-item-images.folder}/{fileName}";
+    String MEDIUM_URL = "/unsafe/fit-in/300x300/${app.sale.menu-item-images.folder}/{fileName}";
+    String LARGE_URL = "/unsafe/fit-in/500x500/${app.sale.menu-item-images.folder}/{fileName}";
     String SHOP_ORIGINAL_URL = "/unsafe/${app.sale.shop-images.folder}/{fileName}";
     String SHOP_SMALL_URL = "/unsafe/fit-in/100x100/${app.sale.shop-images.folder}/{fileName}";
     String SHOP_MEDIUM_URL = "/unsafe/fit-in/300x300/${app.sale.shop-images.folder}/{fileName}";
