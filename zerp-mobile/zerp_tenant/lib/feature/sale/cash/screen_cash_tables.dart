@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:openapi_sale/api.dart';
 import 'package:zerp_tenant/feature/sale/cash/cubit/cubit_cash_tables.dart';
 import 'package:zerp_tenant/feature/sale/cash/widget/cash_table_card.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
@@ -266,27 +265,18 @@ class _LoadedState extends State<_Loaded> {
           );
         }
         final table = items[index];
-        final isSelectable =
-            table.status == ShopTableDTOStatusEnum.OCCUPIED ||
-            table.status == ShopTableDTOStatusEnum.RESERVED;
-
-        return Opacity(
-          opacity: isSelectable ? 1.0 : 0.45,
-          child: CashTableCard(
-            table: table,
-            onTap: isSelectable
-                ? () {
-                    unawaited(
-                      context.router.push(
-                        RouteCashOrder(
-                          tableId: table.id ?? '',
-                          tableName: table.name ?? '',
-                        ),
-                      ),
-                    );
-                  }
-                : null,
-          ),
+        return CashTableCard(
+          table: table,
+          onTap: () {
+            unawaited(
+              context.router.push(
+                RouteCashOrder(
+                  tableId: table.id ?? '',
+                  tableName: table.name ?? '',
+                ),
+              ),
+            );
+          },
         );
       },
     );
