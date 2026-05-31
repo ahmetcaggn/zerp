@@ -20,7 +20,13 @@ final class ApiStatusService extends ServiceBase
   /// more context about the exact state of the server.
   Future<ActuatorStatus> checkApiStatus() async {
     try {
+      log.fine(
+        'Starting API status check by calling /actuator/health endpoint',
+      );
       final response = await invoker.send(ApiStatusCheckCommand());
+      log.fine(
+        'Received response for API status check: ${response.runtimeType}',
+      );
 
       switch (response) {
         case SuccessResponseResult<ApiStatusCheckResponseSchema>():

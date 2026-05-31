@@ -9,6 +9,19 @@ import 'package:zerp_tenant/product/network/api_url_helper.dart';
 import 'package:zerp_tenant/product/service/auth/auth_storage_service.dart';
 import 'package:zerp_tenant/product/util/query_parameter_extensions.dart';
 
+/// Key used in [RequestOptions.extra] to opt a request out of the
+/// automatic 401 auth-refresh-and-retry flow.
+///
+/// Set `extra: {kSkipAuthRetry: true}` on a [RequestCommand]'s options
+/// (e.g. via [RequestCommand.headers] side-channel or by setting the Dio
+/// options directly) to prevent the interceptor from retrying the request
+/// on a 401 response. Unauthenticated probe requests like `/actuator/health`
+/// must use this to avoid an unhandled [DioException] on retry.
+const String kSkipAuthRetry = 'skipAuthRetry';
+
+// Private alias used inside this file.
+const String _kSkipAuthRetry = kSkipAuthRetry;
+
 @lazySingleton
 final class ApiNetworkInvoker extends DioNetworkInvoker
     with LoggerMixin<ApiNetworkInvoker> {
@@ -25,6 +38,16 @@ final class ApiNetworkInvoker extends DioNetworkInvoker
     dio.interceptors.add(
       QueuedInterceptorsWrapper(
         onRequest: (options, handler) async {
+          // Paths that probe server reachability without authentication should
+          // never trigger the 401-refresh-and-retry flow.
+          final isUnauthenticatedProbe =
+              options.path.startsWith('/actuator/');
+          if (isUnauthenticatedProbe) {
+            options.extra[_kSkipAuthRetry] = true;
+            handler.next(options);
+            return;
+          }
+
           final accessToken = await _authStorageService.accessToken;
           if (accessToken != null) {
             options.headers['Authorization'] = 'Bearer $accessToken';
@@ -48,7 +71,14 @@ final class ApiNetworkInvoker extends DioNetworkInvoker
           handler.next(options);
         },
         onError: (error, handler) async {
-          if (error.response?.statusCode == 401) {
+          // Skip the auth-refresh-and-retry flow for requests that have opted
+          // out (e.g. the /actuator/health status check). Without this guard,
+          // the retry throws a second DioException that escapes the library's
+          // catch block and surfaces as an unhandled error.
+          final skipRetry =
+              error.requestOptions.extra[_kSkipAuthRetry] == true;
+
+          if (!skipRetry && error.response?.statusCode == 401) {
             await _checkSessionAfterUnauthorized();
 
             final options = error.requestOptions;

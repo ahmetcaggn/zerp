@@ -16,7 +16,13 @@ class AuthGuard extends AutoRouteGuard {
     NavigationResolver resolver,
     StackRouter router,
   ) async {
-    if (resolver.route.name == RouteAuth.name) {
+    // Routes accessible without authentication
+    const unauthenticatedRoutes = {
+      RouteAuth.name,
+      RouteSettings.name,
+      RouteSettingsApiBaseUrl.name,
+    };
+    if (unauthenticatedRoutes.contains(resolver.route.name)) {
       resolver.next();
       return;
     }
