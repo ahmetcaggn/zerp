@@ -21,11 +21,11 @@ flutter_native_splash:
   # ─── Android 12+ (adaptive splash icon) ─────────────────────────────────────
   android_12:
     color: "#FFFFFF"
-    image: assets/images/splash_logo.png
+    image: assets/images/splash_logo_android12.png
     color_dark: "#162032"
-    image_dark: assets/images/splash_logo_dark.png
+    image_dark: assets/images/splash_logo_dark_android12.png
     icon_background_color: "#FFFFFF"
-    icon_background_color_dark: "#162032"
+    icon_background_color_dark: "#FFFFFF"
 
   # ─── Options ─────────────────────────────────────────────────────────────────
   fullscreen: false
