@@ -5,6 +5,7 @@ import 'package:openapi_user/api.dart';
 import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/cubit/base_cubit.dart';
 import 'package:zerp_tenant/product/service/user/username_service.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @injectable
 final class CubitEmployeeUsername extends BaseCubit<StateEmployeeUsername>
@@ -41,8 +42,8 @@ final class CubitEmployeeUsername extends BaseCubit<StateEmployeeUsername>
   Future<void> checkUsernameAvailable(String username) async {
     if (username.contains(' ')) {
       emit(
-        const StateEmployeeUsernameError(
-          'Username cannot contain spaces.',
+        StateEmployeeUsernameError(
+          t.employee.usernameField.errorContainsSpaces,
         ),
       );
       return;

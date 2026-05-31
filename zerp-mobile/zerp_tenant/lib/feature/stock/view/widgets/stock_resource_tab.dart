@@ -308,8 +308,11 @@ class _StockResourceTabState extends State<StockResourceTab> {
                                   Padding(
                                     padding: const EdgeInsets.only(top: 4),
                                     child: Text(
-                                      'Reorder at: '
-                                      '${_fmtQty(resource.reorderThreshold)}',
+                                      t.resource.reorderAt(
+                                        threshold: _fmtQty(
+                                          resource.reorderThreshold,
+                                        ),
+                                      ),
                                       style: Theme.of(context)
                                           .textTheme
                                           .labelSmall

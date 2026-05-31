@@ -35,6 +35,18 @@
       "sale": "Satışlar",
       "stock": "Stok",
       "store": "Mağazalar"
+    },
+    "employeeSection": {
+      "total": "Toplam: $count",
+      "active": "Aktif: $count",
+      "errorLoading": "Çalışan verileri yüklenirken bir hata oluştu"
+    },
+    "tablesSection": {
+      "total": "Toplam: $count",
+      "available": "Boş: $count",
+      "occupied": "Dolu: $count",
+      "reserved": "Rezerve: $count",
+      "outOfOrder": "Kullanım Dışı: $count"
     }
   },
   "menu": {
@@ -145,6 +157,10 @@
       }
     }
   },
+  "network": {
+    "activityTooltip": "Ağ etkinliği",
+    "loadingOrgScope": "Organizasyon kapsamı yükleniyor..."
+  },
   "stock": {
     "title": "Stok",
     "noShopSelected": "Stoku görüntülemek için lütfen bir şube seçin.",
@@ -168,6 +184,7 @@
       "createButton": "Kaynak Oluştur",
       "varianceInfo": "Sapma = Gerçek Stok − Beklenen Stok. Negatif sapma gerçek stokun beklenenden düşük olduğunu gösterir.",
       "emptyState": "Kaynak bulunamadı. İlk stok kaynağınızı ekleyin.",
+      "reorderAt": "Yeniden sipariş eşiği: $threshold",
       "form": {
         "name": "Ad",
         "description": "Açıklama",
@@ -430,7 +447,8 @@
       "title": "Yetkiler",
       "total": "Toplam yetki: $count",
       "empty": "Henüz yetki yok",
-      "manage": "Yetkileri yönet"
+      "manage": "Yetkileri yönet",
+      "errorLoad": "Yetkiler yüklenemedi: $error"
     },
     "permissions": {
       "title": "Yetkiler",
@@ -443,6 +461,9 @@
       "deleteMessage": "Bu yetkiyi silmek istediğinizden emin misiniz?",
       "errorLoad": "Yetkiler yüklenemedi: $error",
       "errorDelete": "Yetki silinemedi: $error"
+    },
+    "usernameField": {
+      "errorContainsSpaces": "Kullanıcı adı boşluk içeremez."
     }
   },
   "profile": {

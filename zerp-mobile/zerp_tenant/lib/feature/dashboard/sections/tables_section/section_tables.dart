@@ -116,15 +116,30 @@ class _SectionCard extends StatelessWidget {
                               child: Wrap(
                                 runSpacing: 12,
                                 children: [
-                                  _InfoTag(label: 'Total: $total'),
+                                  _InfoTag(
+                                    label: context.t.dashboard.tablesSection
+                                        .total(count: total),
+                                  ),
                                   const SizedBox(width: 8),
-                                  _InfoTag(label: 'Available: $available'),
+                                  _InfoTag(
+                                    label: context.t.dashboard.tablesSection
+                                        .available(count: available),
+                                  ),
                                   const SizedBox(width: 8),
-                                  _InfoTag(label: 'Occupied: $occupied'),
+                                  _InfoTag(
+                                    label: context.t.dashboard.tablesSection
+                                        .occupied(count: occupied),
+                                  ),
                                   const SizedBox(width: 8),
-                                  _InfoTag(label: 'Reserved: $reserved'),
+                                  _InfoTag(
+                                    label: context.t.dashboard.tablesSection
+                                        .reserved(count: reserved),
+                                  ),
                                   const SizedBox(width: 8),
-                                  _InfoTag(label: 'Out of Order: $outOfOrder'),
+                                  _InfoTag(
+                                    label: context.t.dashboard.tablesSection
+                                        .outOfOrder(count: outOfOrder),
+                                  ),
                                 ],
                               ),
                             );

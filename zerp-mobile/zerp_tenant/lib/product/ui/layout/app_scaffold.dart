@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/network_indicator/cubit_network_indicator.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
 import 'package:zerp_tenant/product/ui/layout/widget/network_indicator_bottom_sheet.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 /// AppScaffold is the main scaffold component used across the application.
 ///
@@ -132,7 +133,7 @@ final class _NetworkIndicatorButton extends StatelessWidget {
         final count = data.inProgressCount;
 
         return IconButton(
-          tooltip: 'Network activity',
+          tooltip: context.t.network.activityTooltip,
           onPressed: () => _showNetworkBottomSheet(context),
           icon: Badge(
             isLabelVisible: count > 0,
@@ -157,9 +158,9 @@ final class _OrganizationScopeError extends StatelessWidget {
           return Container(
             color: Colors.blueAccent,
             padding: const EdgeInsets.all(8),
-            child: const Row(
+            child: Row(
               children: [
-                SizedBox(
+                const SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
@@ -167,10 +168,10 @@ final class _OrganizationScopeError extends StatelessWidget {
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Text(
-                  'Loading organization scope...',
-                  style: TextStyle(color: Colors.white),
+                  context.t.network.loadingOrgScope,
+                  style: const TextStyle(color: Colors.white),
                 ),
               ],
             ),

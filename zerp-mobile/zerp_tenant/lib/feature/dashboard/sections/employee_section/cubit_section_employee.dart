@@ -4,6 +4,7 @@ import 'package:openapi_employee/api.dart';
 import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/network/page_response.dart';
 import 'package:zerp_tenant/product/service/employee/employee_service.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @lazySingleton
 class CubitSectionEmployee extends Cubit<StateSectionEmployee>
@@ -38,8 +39,8 @@ class CubitSectionEmployee extends Cubit<StateSectionEmployee>
     } on Object catch (e, s) {
       log.severe('Error loading employee data', e, s);
       emit(
-        const StateSectionEmployeeError(
-          message: 'An error occurred while loading employee data',
+        StateSectionEmployeeError(
+          message: t.dashboard.employeeSection.errorLoading,
         ),
       );
     }

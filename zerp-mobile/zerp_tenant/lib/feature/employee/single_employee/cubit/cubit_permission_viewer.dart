@@ -6,6 +6,7 @@ import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/cubit/base_cubit.dart';
 import 'package:zerp_tenant/product/network/page_response.dart';
 import 'package:zerp_tenant/product/service/user/permission_service.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @injectable
 class CubitPermissionViewer extends BaseCubit<StatePermissionViewer>
@@ -28,7 +29,9 @@ class CubitPermissionViewer extends BaseCubit<StatePermissionViewer>
     } on Object catch (e) {
       log.severe('Error loading permissions: $e');
       emit(
-        StatePermissionViewerError('Failed to load permissions: $e'),
+        StatePermissionViewerError(
+          t.employee.permissionViewer.errorLoad(error: e.toString()),
+        ),
       );
     }
   }

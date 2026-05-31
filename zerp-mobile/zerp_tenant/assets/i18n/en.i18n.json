@@ -35,6 +35,18 @@
       "sale": "Sales",
       "stock": "Stock",
       "store": "Stores"
+    },
+    "employeeSection": {
+      "total": "Total: $count",
+      "active": "Active: $count",
+      "errorLoading": "An error occurred while loading employee data"
+    },
+    "tablesSection": {
+      "total": "Total: $count",
+      "available": "Available: $count",
+      "occupied": "Occupied: $count",
+      "reserved": "Reserved: $count",
+      "outOfOrder": "Out of Order: $count"
     }
   },
   "menu": {
@@ -145,6 +157,10 @@
       }
     }
   },
+  "network": {
+    "activityTooltip": "Network activity",
+    "loadingOrgScope": "Loading organization scope..."
+  },
   "stock": {
     "title": "Stock",
     "noShopSelected": "Please select a shop to view stock.",
@@ -168,6 +184,7 @@
       "createButton": "Create Resource",
       "varianceInfo": "Variance = Real Stock − Expected Stock. Negative means real is lower than expected.",
       "emptyState": "No resources found. Add your first stock resource.",
+      "reorderAt": "Reorder at: $threshold",
       "form": {
         "name": "Name",
         "description": "Description",
@@ -430,7 +447,8 @@
       "title": "Permissions",
       "total": "Total permissions: $count",
       "empty": "No permissions yet",
-      "manage": "Manage permissions"
+      "manage": "Manage permissions",
+      "errorLoad": "Failed to load permissions: $error"
     },
     "permissions": {
       "title": "Permissions",
@@ -443,6 +461,9 @@
       "deleteMessage": "Are you sure you want to delete this permission?",
       "errorLoad": "Failed to load permissions: $error",
       "errorDelete": "Failed to delete permission: $error"
+    },
+    "usernameField": {
+      "errorContainsSpaces": "Username cannot contain spaces."
     }
   },
   "profile": {

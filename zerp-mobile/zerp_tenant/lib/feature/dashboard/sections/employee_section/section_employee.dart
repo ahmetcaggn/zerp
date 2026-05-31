@@ -21,12 +21,16 @@ class SectionEmployee extends StatelessWidget {
             extra = Row(
               children: [
                 _MetaChip(
-                  label: 'Total: ${state.totalCount}',
+                  label: context.t.dashboard.employeeSection.total(
+                    count: state.totalCount,
+                  ),
                   icon: Icons.group_outlined,
                 ),
                 const SizedBox(width: 8),
                 _MetaChip(
-                  label: 'Active: ${state.activeCount}',
+                  label: context.t.dashboard.employeeSection.active(
+                    count: state.activeCount,
+                  ),
                   icon: Icons.check_circle_outline,
                   isPrimary: true,
                 ),
