@@ -39,12 +39,20 @@ final class CubitOrganizationScope extends BaseCubit<StateOrganizationScope>
 
   Future<void>? _loadTenantFuture;
 
-  Future<void> loadTenant() {
+  Future<void> loadTenant() async {
+    log.fine('Starting to load tenant information for organization scope');
     if (_loadTenantFuture != null) {
+      log.fine(
+        'Tenant information is already being loaded, '
+        'awaiting existing load operation',
+      );
       return _loadTenantFuture!;
     }
+    log.fine('No existing tenant load operation, starting a new one');
     _loadTenantFuture = _loadTenant();
-    return _loadTenantFuture!;
+    final result = await _loadTenantFuture;
+    _loadTenantFuture = null;
+    return result;
   }
 
   Future<void> _loadTenant() async {
