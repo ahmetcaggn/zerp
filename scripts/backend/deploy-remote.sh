@@ -62,24 +62,34 @@ if [ "$SKIP_BUILD_UPLOAD" = false ]; then
 
     # 2. Build Docker Images
     echo -e "${YELLOW}Step 2: Building Docker images locally for linux/amd64...${NC}"
-    # Build both as requested using buildx to ensure correct architecture for remote
+    # Build using buildx to ensure correct architecture for remote
     export DOCKER_DEFAULT_PLATFORM=linux/amd64
-    echo "Building standard app images..."
-    docker compose -p zerp -f docker/compose-app.yaml build
-    echo "Building aggregated app images..."
-    docker compose -p zerp -f docker/compose-app-aggregated.yaml build
+    if [ "$AGGREGATED" = true ]; then
+        echo "Aggregated mode: building only aggregated compose (skipping feature services)..."
+        docker compose -p zerp -f docker/compose-app-aggregated.yaml build
+    else
+        echo "Building standard app images..."
+        docker compose -p zerp -f docker/compose-app.yaml build
+        echo "Building aggregated app images..."
+        docker compose -p zerp -f docker/compose-app-aggregated.yaml build
+    fi
 
     # 3. Save Images
     echo -e "${YELLOW}Step 3: Saving and compressing images...${NC}"
     BUILD_DIR="$WORKSPACE_ROOT/build-deploy"
     mkdir -p "$BUILD_DIR/images"
 
-    # List of all possible services across both compose files
-    SERVICES=("eureka" "gateway" "crm" "employee" "notification" "resource" "sale" "suggestion" "user" "aggregated")
+    # In aggregated mode only eureka, gateway, and aggregated are needed
+    if [ "$AGGREGATED" = true ]; then
+        SERVICES=("eureka" "gateway" "aggregated")
+        echo "Aggregated mode: saving only eureka, gateway, and aggregated images."
+    else
+        SERVICES=("eureka" "gateway" "crm" "employee" "notification" "resource" "sale" "suggestion" "user" "aggregated")
+    fi
 
     for service in "${SERVICES[@]}"; do
         IMAGE_NAME="zerp-$service"
-        if docker image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
+        if docker image inspect "$IMAGE_NAME" > /dev/null 2>&1; then
             echo "Saving $IMAGE_NAME..."
             docker save "$IMAGE_NAME" | gzip > "$BUILD_DIR/images/$service.tar.gz"
         else
