@@ -1,50 +1,33 @@
 # Flutter Native Splash Configuration
 # https://pub.dev/packages/flutter_native_splash
 #
-# Run the following command to generate the splash screen:
-#   dart run flutter_native_splash:create
+# Run with:
+#   dart run flutter_native_splash:create --path=flutter_native_splash.yaml
 
 flutter_native_splash:
-  # ─── Android Only ───────────────────────────────────────────────────────────
-  # Disable iOS and web so only Android is generated
+  # ─── Platforms ───────────────────────────────────────────────────────────────
   android: true
-  ios: false
+  ios: true
   web: false
 
-  # ─── Background color ────────────────────────────────────────────────────────
-  # Solid background color shown behind the splash logo.
-  # Replace with your brand color once confirmed.
+  # ─── Light mode ──────────────────────────────────────────────────────────────
   color: "#FFFFFF"
+  image: assets/images/splash_logo.png
 
-  # Dark-mode background (optional – remove if you don't want a separate dark splash)
-  # color_dark: "#121212"
+  # ─── Dark mode ───────────────────────────────────────────────────────────────
+  color_dark: "#162032"
+  image_dark: assets/images/splash_logo_dark.png
 
-  # ─── Splash logo ─────────────────────────────────────────────────────────────
-  # Uncomment and set the path when the image is ready.
-  # The image should be a PNG, ideally 288 × 288 dp (1x) or use the 3x source
-  # at 864 × 864 px so Flutter can down-scale it automatically.
-  #
-  # image: assets/images/splash_logo.png
-  # image_dark: assets/images/splash_logo_dark.png
+  # ─── Android 12+ (adaptive splash icon) ─────────────────────────────────────
+  android_12:
+    color: "#FFFFFF"
+    image: assets/images/splash_logo.png
+    color_dark: "#162032"
+    image_dark: assets/images/splash_logo_dark.png
+    icon_background_color: "#FFFFFF"
+    icon_background_color_dark: "#162032"
 
-  # ─── Branding image (bottom of screen, Android 12+ only) ────────────────────
-  # Shown at the bottom of the splash. Useful for a wordmark / tagline.
-  #
-  # android_12:
-  #   image: assets/images/splash_logo.png
-  #   image_dark: assets/images/splash_logo_dark.png
-  #   color: "#FFFFFF"
-  #   color_dark: "#121212"
-  #   icon_background_color: "#FFFFFF"
-  #   icon_background_color_dark: "#121212"
-
-  # ─── Android-specific tweaks ─────────────────────────────────────────────────
-  # Keep the native splash visible until Flutter signals it is ready
-  # (avoids a white flash between the splash and first frame).
+  # ─── Options ─────────────────────────────────────────────────────────────────
   fullscreen: false
-
-  # Gravity of the splash image: center | fill | bottom | bottomRight | etc.
-  # android_gravity: center
-
-  # Disable (comment out) if you do NOT want the package to touch styles.xml
-  # android_disable_v2: false
+  android_gravity: center
+  ios_content_mode: center
