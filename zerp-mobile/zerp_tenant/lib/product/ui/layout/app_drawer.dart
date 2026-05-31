@@ -52,11 +52,6 @@ class AppDrawer extends StatelessWidget {
                   onTap: () => _navigate(context, const RouteEmployee()),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.restaurant_menu),
-                  title: Text(context.t.menu.title),
-                  onTap: () => _navigate(context, const RouteMenu()),
-                ),
-                ListTile(
                   leading: const Icon(Icons.table_restaurant),
                   title: Text(context.t.sale.dashboard.tables),
                   onTap: () => _navigate(context, const RouteTables()),
@@ -70,11 +65,6 @@ class AppDrawer extends StatelessWidget {
                   leading: const Icon(Icons.inventory),
                   title: Text(context.t.stock.title),
                   onTap: () => _navigate(context, const RouteStock()),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.store),
-                  title: Text(context.t.store.title),
-                  onTap: () => _navigate(context, const RouteStore()),
                 ),
                 const Divider(),
                 ListTile(
