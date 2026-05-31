@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart' hide RouteSettings;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:zerp_tenant/feature/auth/view/mixin/auth_mixin.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/state_auth.dart';
@@ -148,16 +149,17 @@ class _ScreenAuthState extends State<ScreenAuth> with AuthMixin {
                             ),
                             const SizedBox(height: 12),
 
-                            // Register button (outlined, secondary)
-                            OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(52),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                            const SizedBox(height: 16),
+                            GestureDetector(
+                              onTap: () => launchUrl(Uri.parse('https://tenant.zeerp.tech')),
+                              child: Text(
+                                context.t.auth.signUpDescription,
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.primary,
+                                  decoration: TextDecoration.underline,
                                 ),
                               ),
-                              onPressed: isLoading ? null : onRegisterPressed,
-                              child: Text(context.t.auth.signUp),
                             ),
                           ],
                         );

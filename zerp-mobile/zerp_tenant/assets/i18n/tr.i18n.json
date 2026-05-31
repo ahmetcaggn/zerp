@@ -6,6 +6,7 @@
   "auth": {
     "login": "Giriş Yap",
     "signUp": "Kayıt Ol",
+    "signUpDescription": "Bilgi için https://tenant.zeerp.tech adresini ziyaret edin",
     "logout": "Çıkış Yap",
     "success": "Başarıyla giriş yapıldı",
     "fail": "Giriş başarısız oldu",

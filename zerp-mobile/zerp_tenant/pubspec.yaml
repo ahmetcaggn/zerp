@@ -66,6 +66,7 @@ dependencies:
   device_info_plus: ^12.4.0
   mobile_scanner: ^7.2.0
   intl: ^0.20.2
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   auto_route_generator: ^10.5.0

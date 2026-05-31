@@ -6,6 +6,7 @@
   "auth": {
     "login": "Login",
     "signUp": "Sign Up",
+    "signUpDescription": "Visit https://tenant.zeerp.tech for information",
     "logout": "Logout",
     "success": "Logged in successfully",
     "fail": "Login failed",
