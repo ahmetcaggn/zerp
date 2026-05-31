@@ -2,7 +2,6 @@ package org.zerp.sale.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -56,8 +55,7 @@ public class MenuItemService implements
     private final FilterRefiner filterRefiner;
     private final S3ImageRepository s3ImageRepository;
 
-    @Value("${app.sale.menu-item-images.folder:saleMenuItems}")
-    private String menuItemImageFolder;
+    public static final String MENU_ITEM_IMAGE_FOLDER = "saleMenuItems";
 
     @Override
     @Transactional(readOnly = true)
@@ -252,7 +250,7 @@ public class MenuItemService implements
 
         S3FileDTO uploadedFile;
         try {
-            uploadedFile = s3ImageRepository.create(resolveMenuItemImageFolder(), fileBytes);
+            uploadedFile = s3ImageRepository.create(MENU_ITEM_IMAGE_FOLDER, fileBytes);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
@@ -357,10 +355,6 @@ public class MenuItemService implements
             }
         }
         return values;
-    }
-
-    private String resolveMenuItemImageFolder() {
-        return menuItemImageFolder == null ? "" : menuItemImageFolder.trim();
     }
 
     private String resolveContentType(MultipartFile file) {

@@ -6,17 +6,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.zerp.common.dto.user.ImageSize;
 
+import static org.zerp.sale.service.MenuItemService.MENU_ITEM_IMAGE_FOLDER;
+import static org.zerp.sale.service.ShopService.SHOP_IMAGE_FOLDER;
+
 @FeignClient(name = "thumbor", url = "${user.thumbor.host}")
 public interface ThumborFeignClient {
 
-    String ORIGINAL_URL = "/unsafe/${app.sale.menu-item-images.folder}/{fileName}";
-    String SMALL_URL = "/unsafe/fit-in/100x100/${app.sale.menu-item-images.folder}/{fileName}";
-    String MEDIUM_URL = "/unsafe/fit-in/300x300/${app.sale.menu-item-images.folder}/{fileName}";
-    String LARGE_URL = "/unsafe/fit-in/500x500/${app.sale.menu-item-images.folder}/{fileName}";
-    String SHOP_ORIGINAL_URL = "/unsafe/${app.sale.shop-images.folder}/{fileName}";
-    String SHOP_SMALL_URL = "/unsafe/fit-in/100x100/${app.sale.shop-images.folder}/{fileName}";
-    String SHOP_MEDIUM_URL = "/unsafe/fit-in/300x300/${app.sale.shop-images.folder}/{fileName}";
-    String SHOP_LARGE_URL = "/unsafe/fit-in/500x500/${app.sale.shop-images.folder}/{fileName}";
+    String ORIGINAL_URL = "/unsafe/" + MENU_ITEM_IMAGE_FOLDER + "/{fileName}";
+    String SMALL_URL = "/unsafe/fit-in/100x100/" + MENU_ITEM_IMAGE_FOLDER + "/{fileName}";
+    String MEDIUM_URL = "/unsafe/fit-in/300x300/" + MENU_ITEM_IMAGE_FOLDER + "/{fileName}";
+    String LARGE_URL = "/unsafe/fit-in/500x500/" + MENU_ITEM_IMAGE_FOLDER + "/{fileName}";
+    String SHOP_ORIGINAL_URL = "/unsafe/" + SHOP_IMAGE_FOLDER + "/{fileName}";
+    String SHOP_SMALL_URL = "/unsafe/fit-in/100x100/" + SHOP_IMAGE_FOLDER + "/{fileName}";
+    String SHOP_MEDIUM_URL = "/unsafe/fit-in/300x300/" + SHOP_IMAGE_FOLDER + "/{fileName}";
+    String SHOP_LARGE_URL = "/unsafe/fit-in/500x500/" + SHOP_IMAGE_FOLDER + "/{fileName}";
 
     @GetMapping(ORIGINAL_URL)
     ResponseEntity<byte[]> getProfileImageOriginal(@PathVariable String fileName);

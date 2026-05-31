@@ -50,8 +50,7 @@ public class ShopService implements IResourceService<ShopDTO, ShopDTO, Void, Voi
     private final S3ImageRepository s3ImageRepository;
     private final ThumborFeignClient thumborFeignClient;
 
-    @Value("${app.sale.shop-images.folder:saleShops}")
-    private String shopImageFolder;
+    public static final String SHOP_IMAGE_FOLDER = "saleShops";
 
     @Override
     @Transactional(readOnly = true)
@@ -162,7 +161,7 @@ public class ShopService implements IResourceService<ShopDTO, ShopDTO, Void, Voi
 
         S3FileDTO uploadedFile;
         try {
-            uploadedFile = s3ImageRepository.create(resolveShopImageFolder(), fileBytes);
+            uploadedFile = s3ImageRepository.create(SHOP_IMAGE_FOLDER, fileBytes);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
@@ -378,10 +377,6 @@ public class ShopService implements IResourceService<ShopDTO, ShopDTO, Void, Voi
         }
 
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported menu language: " + rawValue);
-    }
-
-    private String resolveShopImageFolder() {
-        return shopImageFolder == null ? "" : shopImageFolder.trim();
     }
 
     private String resolveContentType(MultipartFile file) {
