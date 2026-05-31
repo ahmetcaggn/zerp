@@ -101,42 +101,41 @@ class _StockResourceTabState extends State<StockResourceTab> {
             SliverAppBar(
               floating: true,
               automaticallyImplyLeading: false,
-              toolbarHeight: 48,
+              toolbarHeight: 64,
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
               shadowColor: Theme.of(
                 context,
               ).colorScheme.onSurface.withValues(alpha: 0.3),
               titleSpacing: 0,
-              title: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                child: SizedBox(
-                  height: 48,
-                  width: double.infinity,
-                  child: SingleChildScrollView(
+              title: SizedBox(
+                height: 48,
+                width: double.infinity,
+                child: Center(
+                  child: ListView(
                     scrollDirection: Axis.horizontal,
                     reverse: true,
-                    child: Row(
-                      children: [
-                        OutlinedButton.icon(
-                          onPressed: _openEntryForm,
-                          icon: const Icon(Icons.add_box_outlined, size: 18),
-                          label: Text(t.operation.entryButton),
-                        ),
-                        const SizedBox(width: 8),
-                        OutlinedButton.icon(
-                          onPressed: _openAdjustmentForm,
-                          icon: const Icon(Icons.tune_outlined, size: 18),
-                          label: Text(t.operation.adjustmentButton),
-                        ),
-                        const SizedBox(width: 8),
-                        FilledButton.icon(
-                          onPressed: _openResourceForm,
-                          icon: const Icon(Icons.add, size: 18),
-                          label: Text(t.resource.defineButton),
-                        ),
-                      ],
-                    ),
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    children: [
+                      FilledButton.icon(
+                        onPressed: _openResourceForm,
+                        icon: const Icon(Icons.add, size: 18),
+                        label: Text(t.resource.defineButton),
+                      ),
+                      const SizedBox(width: 8),
+                      OutlinedButton.icon(
+                        onPressed: _openAdjustmentForm,
+                        icon: const Icon(Icons.tune_outlined, size: 18),
+                        label: Text(t.operation.adjustmentButton),
+                      ),
+                      const SizedBox(width: 8),
+                      OutlinedButton.icon(
+                        onPressed: _openEntryForm,
+                        icon: const Icon(Icons.add_box_outlined, size: 18),
+                        label: Text(t.operation.entryButton),
+                      ),
+                    ],
                   ),
                 ),
               ),
