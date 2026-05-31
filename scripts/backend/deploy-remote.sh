@@ -104,8 +104,9 @@ if [ "$SKIP_BUILD_UPLOAD" = false ]; then
     # 5. Upload Configuration and Images
     echo -e "${YELLOW}Step 5: Uploading files via SCP...${NC}"
 
-    # Upload docker compose files (excluding .env as requested)
-    scp docker/*.yaml "$HOST_ALIAS:$REMOTE_PATH/docker/"
+    # Upload docker compose files via upload-compose.sh (uploads only explicitly listed files)
+    echo "Uploading compose files..."
+    bash "$SCRIPT_DIR/upload-compose.sh" --host-alias "$HOST_ALIAS" --path "$REMOTE_PATH"
     echo -e "${BLUE}Notice: .env file upload is skipped. Ensure it is configured manually on the remote at $REMOTE_PATH/.env${NC}"
 
     # Upload local config (required by volumes)
