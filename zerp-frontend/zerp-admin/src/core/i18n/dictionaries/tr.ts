@@ -123,6 +123,7 @@ export const trMessages = {
     usernameError: 'Kullanici adi uygunlugu kontrol edilemedi',
     usernameMinLength: 'En az 3 karakter gereklidir',
     tempPasswordField: 'Gecici Sifre *',
+    tempPasswordMinLengthWarning: 'Gecici sifre en az 8 karakter olmalidir.',
     firstNameField: 'Ad *',
     lastNameField: 'Soyad *',
     emailField: 'E-posta *',

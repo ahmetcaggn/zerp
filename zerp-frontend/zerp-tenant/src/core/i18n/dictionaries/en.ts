@@ -216,6 +216,7 @@ export const enMessages = {
     usernameError: 'Could not check username availability',
     usernameMinLength: 'At least 3 characters required',
     tempPasswordField: 'Temporary Password *',
+    tempPasswordMinLengthWarning: 'Temporary password must be at least 8 characters.',
     firstNameField: 'First Name *',
     lastNameField: 'Last Name *',
     emailField: 'Email *',

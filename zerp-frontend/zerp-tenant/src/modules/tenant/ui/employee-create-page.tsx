@@ -157,7 +157,7 @@ export function EmployeeCreatePage() {
     }
 
     if (tempPassword.length < 8) {
-      showToast(t('employees.requiredFieldsWarning'), { severity: 'warning' })
+      showToast(t('employees.tempPasswordMinLengthWarning'), { severity: 'warning' })
       return
     }
 

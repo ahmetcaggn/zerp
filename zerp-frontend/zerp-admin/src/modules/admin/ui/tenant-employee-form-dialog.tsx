@@ -131,6 +131,14 @@ export function TenantEmployeeFormDialog({ open, tenantId, tenantName, onClose }
     onClose()
   }
 
+  function handleDialogClose(_: object, reason: 'backdropClick' | 'escapeKeyDown') {
+    if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+      return
+    }
+
+    handleClose()
+  }
+
   function normalizeOptional(value: string): string | undefined {
     const normalized = value.trim()
     return normalized ? normalized : undefined
@@ -207,7 +215,7 @@ export function TenantEmployeeFormDialog({ open, tenantId, tenantName, onClose }
     }
 
     if (tempPassword.length < 8) {
-      showToast(t('employees.requiredFieldsWarning'), { severity: 'warning' })
+      showToast(t('employees.tempPasswordMinLengthWarning'), { severity: 'warning' })
       return
     }
 
@@ -244,7 +252,14 @@ export function TenantEmployeeFormDialog({ open, tenantId, tenantName, onClose }
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth onTransitionEnter={resetForm}>
+    <Dialog
+      open={open}
+      onClose={handleDialogClose}
+      disableEscapeKeyDown
+      maxWidth="md"
+      fullWidth
+      onTransitionEnter={resetForm}
+    >
       <DialogTitle>{t('employees.createButton')}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>

@@ -155,6 +155,14 @@ export function ShopFormDialog({
     onClose()
   }
 
+  function handleDialogClose(_: object, reason: 'backdropClick' | 'escapeKeyDown') {
+    if (mode === 'create' && (reason === 'backdropClick' || reason === 'escapeKeyDown')) {
+      return
+    }
+
+    handleClose()
+  }
+
   function normalizeOptional(value: string): string | undefined {
     const normalized = value.trim()
     return normalized ? normalized : undefined
@@ -332,7 +340,14 @@ export function ShopFormDialog({
   const title = mode === 'create' ? t('shops.createButton') : t('shops.editButton')
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth onTransitionEnter={seedForm}>
+    <Dialog
+      open={open}
+      onClose={handleDialogClose}
+      disableEscapeKeyDown={mode === 'create'}
+      maxWidth="md"
+      fullWidth
+      onTransitionEnter={seedForm}
+    >
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Box

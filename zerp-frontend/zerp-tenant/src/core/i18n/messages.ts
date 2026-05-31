@@ -238,6 +238,7 @@ export interface MessageDictionary {
     usernameError: string
     usernameMinLength: string
     tempPasswordField: string
+    tempPasswordMinLengthWarning: string
     firstNameField: string
     lastNameField: string
     emailField: string

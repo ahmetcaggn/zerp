@@ -113,6 +113,14 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
   const { mutate: updateEmployee, isPending: isUpdating } = useUpdateEmployee()
   const isPending = isCreating || isUpdating
 
+  function handleDialogClose(_: object, reason: 'backdropClick' | 'escapeKeyDown') {
+    if (mode === 'create' && (reason === 'backdropClick' || reason === 'escapeKeyDown')) {
+      return
+    }
+
+    onClose()
+  }
+
   function handleSubmit() {
     if (!firstName || !lastName || !email || !hireDate) {
       showToast(t('employees.requiredFieldsWarning'), { severity: 'warning' })
@@ -120,7 +128,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
     }
 
     if (mode === 'create' && tempPassword.length < 8) {
-      showToast(t('employees.requiredFieldsWarning'), { severity: 'warning' })
+      showToast(t('employees.tempPasswordMinLengthWarning'), { severity: 'warning' })
       return
     }
 
@@ -215,7 +223,13 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={handleDialogClose}
+      disableEscapeKeyDown={mode === 'create'}
+      maxWidth="sm"
+      fullWidth
+    >
       <DialogTitle>
         {mode === 'create' ? t('employees.createButton') : t('employees.editButton')}
       </DialogTitle>

@@ -216,6 +216,7 @@ export const trMessages = {
     usernameError: 'Kullanıcı adı uygunluğu kontrol edilemedi',
     usernameMinLength: 'En az 3 karakter gereklidir',
     tempPasswordField: 'Geçici Şifre *',
+    tempPasswordMinLengthWarning: 'Geçici şifre en az 8 karakter olmalıdır.',
     firstNameField: 'Ad *',
     lastNameField: 'Soyad *',
     emailField: 'E-posta *',
