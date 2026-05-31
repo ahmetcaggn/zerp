@@ -136,6 +136,80 @@ export interface MessageDictionary {
     title: string
     description: string
     cta: string
+    primaryCta: string
+    secondaryCta: string
+    heroTags: readonly string[]
+    proofPoints: ReadonlyArray<{
+      value: string
+      label: string
+    }>
+    problemStrip: ReadonlyArray<{
+      title: string
+      description: string
+    }>
+    modulesEyebrow: string
+    modulesTitle: string
+    modulesDescription: string
+    modules: ReadonlyArray<{
+      title: string
+      description: string
+    }>
+    workflowEyebrow: string
+    workflowTitle: string
+    workflowDescription: string
+    workflow: ReadonlyArray<{
+      title: string
+      description: string
+    }>
+    differenceEyebrow: string
+    differenceTitle: string
+    differenceDescription: string
+    differences: ReadonlyArray<{
+      title: string
+      description: string
+    }>
+    demoEyebrow: string
+    demoTitle: string
+    demoDescription: string
+    demoSteps: readonly string[]
+    demoRegisterCta: string
+    demoBackCta: string
+    mockup: {
+      ariaLabel: string
+      windowTitle: string
+      branch: string
+      shift: string
+      live: string
+      tablesTitle: string
+      floor: string
+      stockTitle: string
+      channelTitle: string
+      stats: ReadonlyArray<{
+        label: string
+        value: string
+        delta: string
+      }>
+      tables: ReadonlyArray<{
+        name: string
+        status: string
+        total: string
+        tone: string
+      }>
+      orders: ReadonlyArray<{
+        name: string
+        detail: string
+        status: string
+      }>
+      stock: ReadonlyArray<{
+        name: string
+        value: string
+        level: number
+      }>
+      channels: ReadonlyArray<{
+        name: string
+        value: string
+      }>
+    }
   }
   auth: {
     loginTitle: string

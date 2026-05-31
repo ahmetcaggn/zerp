@@ -45,10 +45,169 @@ export const enMessages = {
     unavailable: 'Profile details could not be fully loaded. Showing available session data.',
   },
   home: {
-    title: 'ZERP Frontend Template',
+    title: 'Run cafe and restaurant operations from one clear workspace',
     description:
-      'Scalable Next.js + MUI template infrastructure for tenant, client, and admin applications.',
-    cta: 'Open Dashboard',
+      'ZERP brings tables, menus, stock, recipes, checkout, staff, and branch performance into one modern restaurant ERP experience.',
+    cta: 'Request a Demo',
+    primaryCta: 'Request a Demo',
+    secondaryCta: 'Create Account',
+    heroTags: ['Cafe and restaurant ERP', 'Tables + stock + checkout', 'Multi-branch ready'],
+    proofPoints: [
+      { value: 'One panel', label: 'manage shops, stock, checkout, and teams in one flow' },
+      { value: 'Live', label: 'visibility across tables, channels, and stock' },
+      { value: 'Mobile', label: 'friendly for service, managers, and branch teams' },
+    ],
+    problemStrip: [
+      {
+        title: 'Service stays focused',
+        description: 'Table status, order flow, and payment steps are readable from one workspace.',
+      },
+      {
+        title: 'Stock follows recipes',
+        description: 'Coffee, milk, dough, and critical ingredients move with sales activity.',
+      },
+      {
+        title: 'Branch decisions move faster',
+        description:
+          'Revenue, channel, staff, and menu performance reach managers in a clean view.',
+      },
+    ],
+    modulesEyebrow: 'Operation Modules',
+    modulesTitle: 'Front of house and back office on the same backbone',
+    modulesDescription:
+      'More than a sales screen: an ERP structure for service speed, cost discipline, and team coordination.',
+    modules: [
+      {
+        title: 'Table and check tracking',
+        description:
+          'Occupied, open, reserved, and payment-waiting tables are tracked with clear states.',
+      },
+      {
+        title: 'Menu and recipe management',
+        description:
+          'Products, categories, extra options, and recipe relations are managed by branch.',
+      },
+      {
+        title: 'Stock and critical thresholds',
+        description:
+          'Real stock, expected stock, and count variances are visible before service is affected.',
+      },
+      {
+        title: 'Checkout and sales channels',
+        description:
+          'Table service, delivery, takeaway, and QR orders roll into one performance view.',
+      },
+      {
+        title: 'Staff and permissions',
+        description:
+          'Team members work within role, shop, and operation-specific access boundaries.',
+      },
+      {
+        title: 'QR and guest flow',
+        description:
+          'Tableside ordering and online menu flows connect back to the operations panel.',
+      },
+    ],
+    workflowEyebrow: 'Service Flow',
+    workflowTitle: 'A calm flow for rush-hour decisions',
+    workflowDescription:
+      'Baristas, waiters, cashiers, and owners work from the same operational truth instead of scattered screens.',
+    workflow: [
+      {
+        title: 'Order is placed',
+        description:
+          'Table, QR, or delivery channel routes the order into the correct service flow.',
+      },
+      {
+        title: 'Kitchen and stock react',
+        description:
+          'The product recipe keeps critical ingredients and expected stock movement current.',
+      },
+      {
+        title: 'Payment closes',
+        description: 'Checkout supports full, partial, and item-based payment scenarios.',
+      },
+      {
+        title: 'Manager sees the pulse',
+        description:
+          'Branch performance, best sellers, and low-stock alerts surface on the dashboard.',
+      },
+    ],
+    differenceEyebrow: 'What Makes It Different',
+    differenceTitle: 'POS speed without losing ERP depth',
+    differenceDescription:
+      'Common restaurant tools are fast, but stock, permissions, branches, and cost data often live apart. ZERP brings them into one decision space.',
+    differences: [
+      {
+        title: 'Built in cafe language',
+        description:
+          'Checkout, tables, recipes, extra options, and critical stock are first-class concepts.',
+      },
+      {
+        title: 'Ready for branch control',
+        description:
+          'Visibility and scope work for a single shop as well as multi-location operations.',
+      },
+      {
+        title: 'Cost-aware by design',
+        description: 'Sales are read with recipe and stock impact, not only top-line revenue.',
+      },
+      {
+        title: 'Controlled team access',
+        description: 'Employees, permission groups, and shop scope support operational security.',
+      },
+    ],
+    demoEyebrow: 'Demo Request',
+    demoTitle: 'Walk through ZERP around your own service rhythm',
+    demoDescription:
+      'This is currently a guided demo area. Until a real lead endpoint is added, the fastest path is to continue into registration and try the tenant panel.',
+    demoSteps: [
+      'Position your cafe, restaurant, or multi-branch operation.',
+      'Review table, menu, stock, and checkout screens with a sample service flow.',
+      'Move through registration to open the tenant panel for setup.',
+    ],
+    demoRegisterCta: 'Continue to Registration',
+    demoBackCta: 'Back to Top',
+    mockup: {
+      ariaLabel: 'Example ZERP restaurant ERP product interface',
+      windowTitle: 'ZERP Tenant Operations Panel',
+      branch: 'Karakoy Branch',
+      shift: 'Dinner service / live operation',
+      live: 'Live',
+      tablesTitle: 'Table Plan',
+      floor: 'Main Floor',
+      stockTitle: 'Critical Stock',
+      channelTitle: 'Sales Channels',
+      stats: [
+        { label: "Today's revenue", value: '₺42.860', delta: '+18%' },
+        { label: 'Active tables', value: '18/24', delta: '75% occupied' },
+        { label: 'Average check', value: '₺612', delta: '+₺48' },
+        { label: 'Prepared orders', value: '126', delta: '9 waiting' },
+      ],
+      tables: [
+        { name: 'Table 04', status: 'Main course', total: '₺1.240', tone: 'busy' },
+        { name: 'Table 08', status: 'Payment due', total: '₺860', tone: 'warning' },
+        { name: 'Table 11', status: 'Open', total: 'Ready', tone: 'free' },
+        { name: 'Table 14', status: 'Dessert', total: '₺690', tone: 'busy' },
+        { name: 'Bar 02', status: 'Coffee', total: '₺320', tone: 'busy' },
+        { name: 'Delivery 17', status: 'Courier pending', total: '₺480', tone: 'warning' },
+      ],
+      orders: [
+        { name: 'Flat white x3', detail: 'Bar station / 4 min', status: 'Preparing' },
+        { name: 'Salmon bowl x2', detail: 'Kitchen / recipe stocked', status: 'Queued' },
+      ],
+      stock: [
+        { name: 'Milk', value: '12 L', level: 28 },
+        { name: 'Espresso beans', value: '4.6 kg', level: 42 },
+        { name: 'Croissant dough', value: '18 pcs', level: 64 },
+      ],
+      channels: [
+        { name: 'Table service', value: '₺28.4K' },
+        { name: 'Takeaway', value: '₺7.8K' },
+        { name: 'Delivery', value: '₺4.9K' },
+        { name: 'QR order', value: '₺1.7K' },
+      ],
+    },
   },
   auth: {
     loginTitle: 'Login',
@@ -246,7 +405,8 @@ export const enMessages = {
     permissionAddButton: 'Add Permission',
     permissionNoOptions: 'No records found.',
     permissionAlreadyAdded: 'This permission is already in the list.',
-    permissionUnsupportedTargetType: 'Target selection is not supported for the selected target type.',
+    permissionUnsupportedTargetType:
+      'Target selection is not supported for the selected target type.',
     permissionAssignPartialError:
       'Employee was created but some permission records could not be added.',
     permissionsDialogTitle: 'Permission Management',
@@ -301,8 +461,7 @@ export const enMessages = {
     notFound: 'Permission group not found.',
     applyButton: 'Apply Group',
     appliedToast: 'Permission group applied.',
-    applyPartialToast:
-      'Group applied with partial skips because some permissions already existed.',
+    applyPartialToast: 'Group applied with partial skips because some permissions already existed.',
     assignedGroupsTitle: 'Assigned Groups',
     assignedGroupsEmptyState: 'No group assignments found.',
     revokeButton: 'Revoke Group',
@@ -310,7 +469,8 @@ export const enMessages = {
     revokePartialToast: 'Group assignment removed with partial warnings.',
     revokeDetailedToast: 'Group assignment removed: {details}',
     revokeMissingDetail: '{count} linked permission record(s) were already missing.',
-    revokeRetainedDetail: '{count} permission(s) were retained because they still exist via another source.',
+    revokeRetainedDetail:
+      '{count} permission(s) were retained because they still exist via another source.',
     revokeGenericWarningDetail: 'Additional consistency warnings were detected.',
     propagationSummaryToast:
       'Action changes were propagated to existing group assignments where applicable.',
@@ -474,7 +634,8 @@ export const enMessages = {
       referenceNoOperation: 'Operation Reference No',
       referenceNoItem: 'Item Reference No',
       referenceNoOperationHelp: 'Use invoice / delivery note / document number.',
-      referenceNoGuide: 'Operation Reference No applies to the whole operation. Item Reference No is only for item-specific document tracking.',
+      referenceNoGuide:
+        'Operation Reference No applies to the whole operation. Item Reference No is only for item-specific document tracking.',
       notes: 'Notes',
       quantity: 'Quantity',
       unitHint: 'Unit: {unit}',
@@ -889,13 +1050,15 @@ export const enMessages = {
     tableStatusUpdatedToast: 'Table status updated',
     importQrButton: 'Import From QR',
     importQrTitle: 'Import QR Order',
-    importQrDescription: 'Scan an order QR code created in the customer app or enter the 6-character order code inside the QR.',
+    importQrDescription:
+      'Scan an order QR code created in the customer app or enter the 6-character order code inside the QR.',
     importQrManualLabel: 'Order Code',
     importQrManualPlaceholder: 'E.g. A1B2C3',
     importQrSubmit: 'Add To Cart',
     importQrCameraStart: 'Start Camera',
     importQrCameraStop: 'Stop Camera',
-    importQrCameraUnsupported: 'This browser does not support QR scanning with the camera. You can use manual entry.',
+    importQrCameraUnsupported:
+      'This browser does not support QR scanning with the camera. You can use manual entry.',
     importQrCameraError: 'Could not open the camera. You can use manual entry.',
     importQrInvalid: 'Enter a valid 6-character order code.',
     importQrSuccess: 'QR order added to cart',

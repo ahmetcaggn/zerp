@@ -45,10 +45,160 @@ export const trMessages = {
     unavailable: 'Profil detayları tam yüklenemedi. Mevcut oturum verileri gösteriliyor.',
   },
   home: {
-    title: 'ZERP Frontend Template',
+    title: 'Kafe ve restoran operasyonunu tek ekranda yönetin',
     description:
-      'Tenant, client ve admin uygulamaları için ölçeklenebilir Next.js + MUI template altyapısı.',
-    cta: 'Panele Git',
+      'ZERP; masa, menü, stok, reçete, kasa, çalışan ve şube performansını aynı operasyon ritminde buluşturan modern bir restoran ERP deneyimi sunar.',
+    cta: 'Demo Talebi',
+    primaryCta: 'Demo Talebi',
+    secondaryCta: 'Kayıt Ol',
+    heroTags: ['Kafe ve restoran ERP', 'Masa + stok + kasa', 'Çok şubeli yönetim'],
+    proofPoints: [
+      { value: 'Tek panel', label: 'şube, stok, kasa ve ekibi aynı akışta yönetir' },
+      { value: 'Anlık', label: 'masa, kanal ve stok görünürlüğü' },
+      { value: 'Mobil', label: 'servis, yönetici ve şube ekipleri için uyumlu' },
+    ],
+    problemStrip: [
+      {
+        title: 'Servis dağılmaz',
+        description: 'Masa durumu, sipariş akışı ve ödeme adımları aynı ekranda okunur.',
+      },
+      {
+        title: 'Stok reçeteye bağlanır',
+        description: 'Kahve, süt, hamur ve kritik malzemeler satışla birlikte izlenir.',
+      },
+      {
+        title: 'Şube kararları hızlanır',
+        description: 'Ciro, kanal, personel ve menü performansı yöneticiye sade biçimde akar.',
+      },
+    ],
+    modulesEyebrow: 'Operasyon Modülleri',
+    modulesTitle: 'Restoranın ön tarafı ve arka ofisi aynı omurgada',
+    modulesDescription:
+      'Sadece satış ekranı değil; servis hızını, maliyet disiplinini ve ekip koordinasyonunu birlikte taşıyan bir ERP kurgusu.',
+    modules: [
+      {
+        title: 'Masa ve adisyon takibi',
+        description: 'Dolu, boş, rezerve ve ödeme bekleyen masalar net durumlarla takip edilir.',
+      },
+      {
+        title: 'Menü ve reçete yönetimi',
+        description: 'Ürün, kategori, ekstra seçenek ve reçete ilişkileri şube bazında düzenlenir.',
+      },
+      {
+        title: 'Stok ve kritik eşik',
+        description:
+          'Gerçek stok, beklenen stok ve sayım farkları servis öncesi görünür hale gelir.',
+      },
+      {
+        title: 'Kasa ve kanal satışları',
+        description:
+          'Masa servisi, paket, gel-al ve QR siparişleri tek performans görünümünde toplanır.',
+      },
+      {
+        title: 'Çalışan ve yetki',
+        description: 'Ekip üyeleri rol, mağaza ve operasyon kapsamına göre kontrollü çalışır.',
+      },
+      {
+        title: 'QR ve müşteri akışı',
+        description: 'Masadan sipariş ve online menü akışları operasyon paneline bağlanır.',
+      },
+    ],
+    workflowEyebrow: 'Servis Akışı',
+    workflowTitle: 'Yoğun saatlerde karar veren sade bir akış',
+    workflowDescription:
+      'Barista, garson, kasiyer ve işletme sahibi farklı ekranlara dağılmadan aynı operasyon verisine bakar.',
+    workflow: [
+      {
+        title: 'Sipariş alınır',
+        description: 'Masa, QR veya paket kanalı siparişi doğru servis akışına düşürür.',
+      },
+      {
+        title: 'Mutfak ve stok etkilenir',
+        description: 'Ürün reçetesi kritik malzemeleri ve beklenen stok hareketini güncel tutar.',
+      },
+      {
+        title: 'Ödeme kapanır',
+        description: 'Kasa ekranı tam, parçalı veya ürün bazlı ödeme senaryolarını destekler.',
+      },
+      {
+        title: 'Yönetici görür',
+        description: 'Şube performansı, en çok satanlar ve düşük stok uyarıları panelde öne çıkar.',
+      },
+    ],
+    differenceEyebrow: 'Neyi Farklı Yapar',
+    differenceTitle: 'POS hissi hızlı, ERP derinliği kaybolmaz',
+    differenceDescription:
+      'Sektördeki yaygın araçların güçlü tarafı hızdır; eksik kalan taraf ise stok, yetki, şube ve maliyet bilgisinin ayrı ayrı yaşamasıdır. ZERP bunları tek karar alanında toplar.',
+    differences: [
+      {
+        title: 'Kafe diline yakın',
+        description:
+          'Kasa, masa, reçete, ekstra seçenek ve kritik stok kavramları ürüne yerleşiktir.',
+      },
+      {
+        title: 'Şube yönetimine hazır',
+        description: 'Tek mağaza kadar çok şubeli işletmelerde de kapsam ve görünürlük korunur.',
+      },
+      {
+        title: 'Maliyet bilinci taşır',
+        description: 'Satış sadece ciro olarak değil, reçete ve stok etkisiyle birlikte okunur.',
+      },
+      {
+        title: 'Ekip erişimi kontrollü',
+        description: 'Çalışan, yetki grubu ve mağaza kapsamı operasyon güvenliğini destekler.',
+      },
+    ],
+    demoEyebrow: 'Demo Talebi',
+    demoTitle: 'İşletmenizin servis ritmine göre birlikte gezelim',
+    demoDescription:
+      'Bu bölüm şimdilik yönlendirici demo alanıdır. Gerçek lead endpointi eklenene kadar en hızlı yol kayıt akışına geçmek ve tenant panelini denemektir.',
+    demoSteps: [
+      'Kafe, restoran veya çok şubeli yapınızı birlikte konumlandırın.',
+      'Masa, menü, stok ve kasa ekranlarını örnek operasyonla inceleyin.',
+      'Uygun kurulum akışı için kayıt adımından tenant paneline ilerleyin.',
+    ],
+    demoRegisterCta: 'Kayıt Akışına Geç',
+    demoBackCta: 'Başa Dön',
+    mockup: {
+      ariaLabel: 'ZERP restoran ERP ürün arayüzü örneği',
+      windowTitle: 'ZERP Tenant Operasyon Paneli',
+      branch: 'Karaköy Şube',
+      shift: 'Akşam servisi / canlı operasyon',
+      live: 'Canlı',
+      tablesTitle: 'Masa Planı',
+      floor: 'Salon 1',
+      stockTitle: 'Kritik Stok',
+      channelTitle: 'Satış Kanalları',
+      stats: [
+        { label: 'Bugünkü ciro', value: '₺42.860', delta: '+18%' },
+        { label: 'Aktif masa', value: '18/24', delta: '%75 doluluk' },
+        { label: 'Ortalama adisyon', value: '₺612', delta: '+₺48' },
+        { label: 'Hazırlanan sipariş', value: '126', delta: '9 bekliyor' },
+      ],
+      tables: [
+        { name: 'Masa 04', status: 'Ana yemek', total: '₺1.240', tone: 'busy' },
+        { name: 'Masa 08', status: 'Ödeme bekliyor', total: '₺860', tone: 'warning' },
+        { name: 'Masa 11', status: 'Boş', total: 'Hazır', tone: 'free' },
+        { name: 'Masa 14', status: 'Tatlı servisi', total: '₺690', tone: 'busy' },
+        { name: 'Bar 02', status: 'Kahve', total: '₺320', tone: 'busy' },
+        { name: 'Paket 17', status: 'Kurye bekliyor', total: '₺480', tone: 'warning' },
+      ],
+      orders: [
+        { name: 'Flat white x3', detail: 'Bar istasyonu / 4 dk', status: 'Hazırlanıyor' },
+        { name: 'Somon bowl x2', detail: 'Mutfak / reçete stoklandı', status: 'Sırada' },
+      ],
+      stock: [
+        { name: 'Süt', value: '12 L', level: 28 },
+        { name: 'Espresso çekirdeği', value: '4.6 kg', level: 42 },
+        { name: 'Kruvasan hamuru', value: '18 adet', level: 64 },
+      ],
+      channels: [
+        { name: 'Masa servisi', value: '₺28.4K' },
+        { name: 'Gel-al', value: '₺7.8K' },
+        { name: 'Paket', value: '₺4.9K' },
+        { name: 'QR sipariş', value: '₺1.7K' },
+      ],
+    },
   },
   auth: {
     loginTitle: 'Giriş',
@@ -237,7 +387,8 @@ export const trMessages = {
     salaryField: 'Maaş',
     managerField: 'Yönetici',
     permissionsSectionTitle: 'Permission Tanımları',
-    permissionsSectionDescription: 'Önce action, sonra target type ve en sonda target seçerek permission ekleyin.',
+    permissionsSectionDescription:
+      'Önce action, sonra target type ve en sonda target seçerek permission ekleyin.',
     permissionActionField: 'Action',
     permissionTargetTypeField: 'Target Type',
     permissionTargetField: 'Target',
@@ -283,7 +434,8 @@ export const trMessages = {
     snapshotInfo:
       'Bağlantılı mod: group atamaları izlenir ve group aksiyon güncellemeleri atanmış kullanıcılara uygulanır.',
     assignmentTitle: 'Role Group Ataması',
-    assignmentDescription: 'Yetkilendirmeyi hızlandırmak için opsiyonel olarak bir permission group uygulayın.',
+    assignmentDescription:
+      'Yetkilendirmeyi hızlandırmak için opsiyonel olarak bir permission group uygulayın.',
     actionsField: 'Aksiyonlar',
     nameField: 'Ad',
     descriptionField: 'Açıklama',
@@ -299,8 +451,7 @@ export const trMessages = {
     notFound: 'Permission group bulunamadı.',
     applyButton: 'Grubu Uygula',
     appliedToast: 'Permission group uygulandı.',
-    applyPartialToast:
-      'Bazı permissionlar zaten olduğu için grup kısmi atama ile uygulandı.',
+    applyPartialToast: 'Bazı permissionlar zaten olduğu için grup kısmi atama ile uygulandı.',
     assignedGroupsTitle: 'Atanmış Gruplar',
     assignedGroupsEmptyState: 'Atanmış group kaydı bulunamadı.',
     revokeButton: 'Grubu Kaldır',
@@ -312,8 +463,7 @@ export const trMessages = {
     revokeGenericWarningDetail: 'Ek tutarlılık uyarıları tespit edildi.',
     propagationSummaryToast:
       'Aksiyon değişiklikleri uygun olan mevcut group atamalarına otomatik uygulandı.',
-    propagationScopeConflictWarning:
-      'Aktif atamalar varken scope değiştirilemez.',
+    propagationScopeConflictWarning: 'Aktif atamalar varken scope değiştirilemez.',
   },
   tickets: {
     title: 'Destek Talepleri',
@@ -347,7 +497,7 @@ export const trMessages = {
     editDialogTitle: 'Talebi Düzenle',
     deleteDialogTitle: 'Talebi Sil',
     deleteConfirmText:
-        'Bu destek talebini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+      'Bu destek talebini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
     listSearchPlaceholder: 'Başlık veya açıklamada ara…',
     searchButton: 'Ara',
     clearFiltersButton: 'Filtreleri Temizle',
@@ -434,7 +584,8 @@ export const trMessages = {
       referenceNoOperation: 'Operasyon Referans No',
       referenceNoItem: 'Kalem Referans No',
       referenceNoOperationHelp: 'Fatura / irsaliye / belge numarasi olarak kullanin.',
-      referenceNoGuide: 'Operasyon Referans No tum isleme aittir. Kalem Referans No sadece satir bazli belge takibi icindir.',
+      referenceNoGuide:
+        'Operasyon Referans No tum isleme aittir. Kalem Referans No sadece satir bazli belge takibi icindir.',
       notes: 'Notlar',
       quantity: 'Miktar',
       unitHint: 'Birim: {unit}',
@@ -545,9 +696,11 @@ export const trMessages = {
       overviewDescription:
         'Menülerinizi ve ürünlerinizi aynı ekrandan yönetin; detay akışıyla kategori ve menü öğelerine ilerleyin.',
       menusSectionTitle: 'Menüler',
-      menusSectionDescription: 'Menüleri kart görünümünde görüntüleyin ve kategori akışını yönetin.',
+      menusSectionDescription:
+        'Menüleri kart görünümünde görüntüleyin ve kategori akışını yönetin.',
       productsSectionTitle: 'Ürünler',
-      productsSectionDescription: 'Ürünleri tablo görünümünde yönetin ve detay sayfalarına ilerleyin.',
+      productsSectionDescription:
+        'Ürünleri tablo görünümünde yönetin ve detay sayfalarına ilerleyin.',
       selectShopWarning: 'Bu işlem için önce bir mağaza seçin.',
       openCategoriesButton: 'Kategorileri Aç',
       openMenuItemsButton: 'Menü Öğelerini Aç',
@@ -849,13 +1002,15 @@ export const trMessages = {
     tableStatusUpdatedToast: 'Masa durumu güncellendi',
     importQrButton: 'QR’dan İçe Aktar',
     importQrTitle: 'QR Siparişi İçe Aktar',
-    importQrDescription: 'Müşteri uygulamasında oluşturulan sipariş QR kodunu okutun veya QR içindeki 6 karakterli sipariş kodunu girin.',
+    importQrDescription:
+      'Müşteri uygulamasında oluşturulan sipariş QR kodunu okutun veya QR içindeki 6 karakterli sipariş kodunu girin.',
     importQrManualLabel: 'Sipariş Kodu',
     importQrManualPlaceholder: 'Örn. A1B2C3',
     importQrSubmit: 'Sepete Ekle',
     importQrCameraStart: 'Kamerayı Aç',
     importQrCameraStop: 'Kamerayı Durdur',
-    importQrCameraUnsupported: 'Bu tarayıcı kamera ile QR okumayı desteklemiyor. Manuel giriş kullanabilirsiniz.',
+    importQrCameraUnsupported:
+      'Bu tarayıcı kamera ile QR okumayı desteklemiyor. Manuel giriş kullanabilirsiniz.',
     importQrCameraError: 'Kamera açılamadı. Manuel giriş kullanabilirsiniz.',
     importQrInvalid: 'Geçerli bir 6 karakterli sipariş kodu girin.',
     importQrSuccess: 'QR siparişi sepete eklendi',
