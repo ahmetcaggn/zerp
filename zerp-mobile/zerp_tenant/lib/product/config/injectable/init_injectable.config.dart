@@ -60,6 +60,8 @@ import '../../../feature/stock/cubit/cubit_stock_operations.dart' as _i946;
 import '../../../feature/stock/cubit/cubit_stock_resources.dart' as _i994;
 import '../../cubit/root_cubit/auth/cubit_auth.dart' as _i200;
 import '../../cubit/root_cubit/error/cubit_error.dart' as _i139;
+import '../../cubit/root_cubit/network_indicator/cubit_network_indicator.dart'
+    as _i542;
 import '../../cubit/root_cubit/organization_scope/cubit_organization_scope.dart'
     as _i829;
 import '../../cubit/root_cubit/settings/cubit_settings.dart' as _i657;
@@ -145,6 +147,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i200.CubitAuth>(),
         gh<_i40.AuthStorageService>(),
       ),
+    );
+    gh.lazySingleton<_i542.CubitNetworkIndicator>(
+      () => _i542.CubitNetworkIndicator(gh<_i1073.ApiNetworkInvoker>()),
     );
     gh.lazySingleton<_i657.CubitSettings>(
       () => _i657.CubitSettings(

@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart' hide RouteSettings;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/network_indicator/cubit_network_indicator.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
+import 'package:zerp_tenant/product/ui/layout/widget/network_indicator_bottom_sheet.dart';
 
 /// AppScaffold is the main scaffold component used across the application.
 ///
@@ -76,7 +80,10 @@ class AppScaffold extends StatelessWidget {
         children: [
           AppBar(
             title: titleWidget ?? Text(title),
-            actions: actions,
+            actions: [
+              const _NetworkIndicatorButton(),
+              ...actions,
+            ],
             elevation: 2,
           ),
           const _OrganizationScopeError(),
@@ -92,6 +99,48 @@ class AppScaffold extends StatelessWidget {
       backgroundColor: backgroundColor,
       resizeToAvoidBottomInset: resizeToAvoidBottomInset,
       primary: primary,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Network indicator button
+// ---------------------------------------------------------------------------
+
+void _showNetworkBottomSheet(BuildContext context) {
+  unawaited(
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => BlocProvider.value(
+        value: context.read<CubitNetworkIndicator>(),
+        child: const NetworkIndicatorBottomSheet(),
+      ),
+    ),
+  );
+}
+
+final class _NetworkIndicatorButton extends StatelessWidget {
+  const _NetworkIndicatorButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CubitNetworkIndicator, StateNetworkIndicator>(
+      builder: (context, state) {
+        final data = state as StateNetworkIndicatorData;
+        final count = data.inProgressCount;
+
+        return IconButton(
+          tooltip: 'Network activity',
+          onPressed: () => _showNetworkBottomSheet(context),
+          icon: Badge(
+            isLabelVisible: count > 0,
+            label: Text('$count'),
+            child: const Icon(Icons.network_check_rounded),
+          ),
+        );
+      },
     );
   }
 }

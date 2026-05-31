@@ -5,6 +5,7 @@ import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/error/cubit_error.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/network_indicator/cubit_network_indicator.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/settings/cubit_settings.dart';
 import 'package:zerp_tenant/product/navigation/app_route.dart';
@@ -26,6 +27,7 @@ class AppRoot extends StatelessWidget with LoggerMixinConst<AppRoot> {
           BlocProvider(create: (_) => getIt<CubitError>()),
           BlocProvider(create: (_) => getIt<CubitSettings>()),
           BlocProvider(create: (_) => getIt<CubitOrganizationScope>()),
+          BlocProvider(create: (_) => getIt<CubitNetworkIndicator>()),
         ],
         child: Builder(
           builder: (context) {
