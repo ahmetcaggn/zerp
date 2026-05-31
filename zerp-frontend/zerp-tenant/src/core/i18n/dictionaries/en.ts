@@ -272,7 +272,8 @@ export const enMessages = {
     scopeShop: 'Shop',
     predefinedBadge: 'Predefined',
     customBadge: 'Custom',
-    snapshotInfo: 'Snapshot mode: changing a group later does not update already assigned users.',
+    snapshotInfo:
+      'Linked mode: group assignments are tracked and group action updates propagate to assigned users.',
     assignmentTitle: 'Role Group Assignment',
     assignmentDescription: 'Optionally apply a permission group to speed up authorization setup.',
     actionsField: 'Actions',
@@ -292,6 +293,19 @@ export const enMessages = {
     appliedToast: 'Permission group applied.',
     applyPartialToast:
       'Group applied with partial skips because some permissions already existed.',
+    assignedGroupsTitle: 'Assigned Groups',
+    assignedGroupsEmptyState: 'No group assignments found.',
+    revokeButton: 'Revoke Group',
+    revokedToast: 'Permission group assignment removed.',
+    revokePartialToast: 'Group assignment removed with partial warnings.',
+    revokeDetailedToast: 'Group assignment removed: {details}',
+    revokeMissingDetail: '{count} linked permission record(s) were already missing.',
+    revokeRetainedDetail: '{count} permission(s) were retained because they still exist via another source.',
+    revokeGenericWarningDetail: 'Additional consistency warnings were detected.',
+    propagationSummaryToast:
+      'Action changes were propagated to existing group assignments where applicable.',
+    propagationScopeConflictWarning:
+      'Scope cannot be changed while the group has active assignments.',
   },
   tickets: {
     title: 'Support Tickets',

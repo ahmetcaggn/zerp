@@ -146,13 +146,13 @@ export function PermissionGroupDetail({ groupKey }: Props) {
   const resolvedGroup = group
 
   function openEdit() {
-    if (resolvedGroup.source !== 'CUSTOM') return
+    if (!resolvedGroup.id) return
     setForm(buildForm(resolvedGroup))
     setEditOpen(true)
   }
 
   function handleSave() {
-    if (!form || resolvedGroup.source !== 'CUSTOM' || !resolvedGroup.id) return
+    if (!form || !resolvedGroup.id) return
 
     const name = form.name.trim()
     if (!name || form.actions.length === 0) {
@@ -173,9 +173,17 @@ export function PermissionGroupDetail({ groupKey }: Props) {
       {
         onSuccess: () => {
           showToast(t('permissionGroups.updatedToast'))
+          showToast(t('permissionGroups.propagationSummaryToast'), { severity: 'info' })
           setEditOpen(false)
         },
-        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+        onError: (err) => {
+          const message = getUserFriendlyError(err)
+          if (message.includes('Cannot change scopeType while group has active assignments')) {
+            showToast(t('permissionGroups.propagationScopeConflictWarning'), { severity: 'warning' })
+            return
+          }
+          showToast(message, { severity: 'error' })
+        },
       },
     )
   }
@@ -202,11 +210,11 @@ export function PermissionGroupDetail({ groupKey }: Props) {
           {t('common.back')}
         </Button>
 
-        {resolvedGroup.source === 'CUSTOM' && (
-          <Stack direction="row" spacing={1}>
-            <Button startIcon={<EditIcon />} onClick={openEdit}>
-              {t('permissionGroups.editButton')}
-            </Button>
+        <Stack direction="row" spacing={1}>
+          <Button startIcon={<EditIcon />} onClick={openEdit} disabled={!resolvedGroup.id}>
+            {t('permissionGroups.editButton')}
+          </Button>
+          {resolvedGroup.source === 'CUSTOM' && (
             <Button
               startIcon={<DeleteIcon />}
               color="error"
@@ -215,8 +223,8 @@ export function PermissionGroupDetail({ groupKey }: Props) {
             >
               {t('permissionGroups.deleteButton')}
             </Button>
-          </Stack>
-        )}
+          )}
+        </Stack>
       </Box>
 
       <Box>

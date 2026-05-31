@@ -112,6 +112,38 @@ export function useAssignPermissionGroup() {
       queryClient.invalidateQueries({
         queryKey: [...queryKeys.tenant.permissions, 'employee', variables.userId],
       })
+      queryClient.invalidateQueries({
+        queryKey: [...queryKeys.tenant.permissionGroups, 'assignments', variables.userId],
+      })
+      queryClient.invalidateQueries({ queryKey: queryKeys.tenant.permissions })
+    },
+  })
+}
+
+export function usePermissionGroupAssignments(userId: string | undefined, enabled = true) {
+  return useQuery({
+    queryKey: [...queryKeys.tenant.permissionGroups, 'assignments', userId ?? ''] as const,
+    queryFn: () => permissionGroupClient.listAssignmentsByUser(userId!),
+    enabled: enabled && Boolean(userId),
+  })
+}
+
+export function useRevokePermissionGroupAssignment() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ assignmentId }: { assignmentId: string; userId?: string }) =>
+      permissionGroupClient.revokeAssignment(assignmentId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.tenant.permissionGroups })
+      if (variables.userId) {
+        queryClient.invalidateQueries({
+          queryKey: [...queryKeys.tenant.permissionGroups, 'assignments', variables.userId],
+        })
+        queryClient.invalidateQueries({
+          queryKey: [...queryKeys.tenant.permissions, 'employee', variables.userId],
+        })
+      }
       queryClient.invalidateQueries({ queryKey: queryKeys.tenant.permissions })
     },
   })

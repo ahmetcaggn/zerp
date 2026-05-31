@@ -433,6 +433,7 @@ public class TeamService implements IResourceService<TeamResponse, TeamResponse,
 
         return new TeamResponse(
                 entity.getId(),
+                entity.getTenantId(),
                 entity.getName(),
                 entity.getDescription(),
                 entity.getType() != null ? entity.getType().name() : null,

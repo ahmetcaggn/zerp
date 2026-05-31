@@ -14,6 +14,13 @@ import java.util.UUID;
 
 @Repository
 public interface PermissionRepository extends JpaRepository<Permission, Long>, JpaSpecificationExecutor<Permission> {
+    List<Permission> findAllByUserIdAndTargetTypeAndActionAndTargetId(
+            UUID userId,
+            PermissionTargetType targetType,
+            PermissionAction action,
+            UUID targetId
+    );
+
     @Query("""
             SELECT p FROM Permission p
               WHERE p.userId = :userId

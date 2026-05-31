@@ -62,6 +62,7 @@ public class AdminTenantService implements IResourceService<
     private final FilterRefiner filterRefiner;
     private final S3ImageRepository s3ImageRepository;
     private final ThumborFeignClient thumborFeignClient;
+    private final PermissionGroupSeedService permissionGroupSeedService;
 
     @Value("${app.user.tenant-images.folder:tenant-images}")
     private String tenantImageFolder;
@@ -139,6 +140,7 @@ public class AdminTenantService implements IResourceService<
         applyCreateFields(tenant, data);
 
         Tenant saved = saveTenantOrThrow(tenant);
+        permissionGroupSeedService.ensurePredefinedGroupsForTenant(saved.getId());
         return toResponse(saved);
     }
 

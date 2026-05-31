@@ -112,6 +112,7 @@ public class PermissionService implements IResourceService<PermissionResponse, P
                 .targetType(data.getTargetType())
                 .targetId(data.getTargetId())
                 .action(data.getAction())
+                .manualGrant(true)
                 .build();
 
         if (!permissionEvaluator.canCreate(userId, toSave)) {

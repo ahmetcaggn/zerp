@@ -634,6 +634,7 @@ export function TeamDetail({ id }: Props) {
       <TeamMemberPermissionsDialog
         open={Boolean(permissionDialogMember)}
         member={permissionDialogMember}
+        tenantId={currentTeam.tenantId}
         onClose={() => setPermissionDialogMember(undefined)}
       />
 

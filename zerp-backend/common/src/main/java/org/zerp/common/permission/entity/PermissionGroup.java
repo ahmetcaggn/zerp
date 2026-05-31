@@ -28,10 +28,11 @@ import java.util.UUID;
 @Table(
         name = "permission_groups",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_permission_groups_tenant_name", columnNames = {"tenant_id", "name"})
+                @UniqueConstraint(name = "uk_permission_groups_tenant_name", columnNames = {"tenant_id", "name"}),
+                @UniqueConstraint(name = "uk_permission_groups_tenant_code", columnNames = {"tenant_id", "code"})
         }
 )
-@SQLDelete(sql = "UPDATE permission_groups SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE permission_groups SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? and version = ?")
 @SQLRestriction("deleted = false")
 public class PermissionGroup extends BaseEntity {
     @Id
@@ -43,6 +44,17 @@ public class PermissionGroup extends BaseEntity {
 
     @Column(length = 600)
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private PermissionGroupSource source = PermissionGroupSource.CUSTOM;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 64)
+    private PredefinedPermissionGroupCode code;
+
+    @Column
+    private Boolean active = true;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)

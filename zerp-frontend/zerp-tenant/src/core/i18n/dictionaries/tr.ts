@@ -270,7 +270,8 @@ export const trMessages = {
     scopeShop: 'Shop',
     predefinedBadge: 'Öntanımlı',
     customBadge: 'Özel',
-    snapshotInfo: 'Snapshot mod: grup sonradan değişse de daha önce atanan kullanıcılar otomatik güncellenmez.',
+    snapshotInfo:
+      'Bağlantılı mod: group atamaları izlenir ve group aksiyon güncellemeleri atanmış kullanıcılara uygulanır.',
     assignmentTitle: 'Role Group Ataması',
     assignmentDescription: 'Yetkilendirmeyi hızlandırmak için opsiyonel olarak bir permission group uygulayın.',
     actionsField: 'Aksiyonlar',
@@ -290,6 +291,19 @@ export const trMessages = {
     appliedToast: 'Permission group uygulandı.',
     applyPartialToast:
       'Bazı permissionlar zaten olduğu için grup kısmi atama ile uygulandı.',
+    assignedGroupsTitle: 'Atanmış Gruplar',
+    assignedGroupsEmptyState: 'Atanmış group kaydı bulunamadı.',
+    revokeButton: 'Grubu Kaldır',
+    revokedToast: 'Permission group ataması kaldırıldı.',
+    revokePartialToast: 'Group ataması uyarılarla birlikte kaldırıldı.',
+    revokeDetailedToast: 'Group ataması kaldırıldı: {details}',
+    revokeMissingDetail: '{count} bağlı permission kaydı zaten bulunamadı.',
+    revokeRetainedDetail: '{count} permission başka bir kaynaktan geldiği için korundu.',
+    revokeGenericWarningDetail: 'Ek tutarlılık uyarıları tespit edildi.',
+    propagationSummaryToast:
+      'Aksiyon değişiklikleri uygun olan mevcut group atamalarına otomatik uygulandı.',
+    propagationScopeConflictWarning:
+      'Aktif atamalar varken scope değiştirilemez.',
   },
   tickets: {
     title: 'Destek Talepleri',

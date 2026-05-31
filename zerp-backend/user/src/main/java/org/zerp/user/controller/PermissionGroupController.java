@@ -13,11 +13,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.zerp.common.dto.ApiResponse;
 import org.zerp.common.permission.entity.PredefinedPermissionGroupCode;
 import org.zerp.user.dto.permissiongroup.PermissionGroupAssignRequestDTO;
 import org.zerp.user.dto.permissiongroup.PermissionGroupAssignResponseDTO;
+import org.zerp.user.dto.permissiongroup.PermissionGroupAssignmentResponseDTO;
+import org.zerp.user.dto.permissiongroup.PermissionGroupAssignmentRevokeResponseDTO;
 import org.zerp.user.dto.permissiongroup.PermissionGroupCreateRequestDTO;
 import org.zerp.user.dto.permissiongroup.PermissionGroupPatchRequestDTO;
 import org.zerp.user.dto.permissiongroup.PermissionGroupResponseDTO;
@@ -89,5 +92,19 @@ public class PermissionGroupController {
             @RequestBody PermissionGroupAssignRequestDTO request
     ) {
         return ResponseEntity.ok(ApiResponse.success(permissionGroupService.assignGroup(request)));
+    }
+
+    @GetMapping("/assignments")
+    public ResponseEntity<ApiResponse<List<PermissionGroupAssignmentResponseDTO>>> listAssignmentsByUser(
+            @RequestParam UUID userId
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(permissionGroupService.listAssignmentsByUser(userId)));
+    }
+
+    @DeleteMapping("/assignments/{assignmentId}")
+    public ResponseEntity<ApiResponse<PermissionGroupAssignmentRevokeResponseDTO>> revokeAssignment(
+            @PathVariable UUID assignmentId
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(permissionGroupService.revokeAssignment(assignmentId)));
     }
 }

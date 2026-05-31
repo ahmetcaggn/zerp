@@ -56,3 +56,30 @@ export interface PermissionGroupAssignResponse {
   targetType: string
   targetId: string
 }
+
+export interface PermissionGroupAssignmentResponse {
+  id: string
+  groupId: string
+  groupName: string
+  groupSource: PermissionGroupSource | 'UNKNOWN'
+  groupCode?: PredefinedPermissionGroupCode
+  groupScopeType?: PermissionGroupScopeType
+  userId: string
+  targetType: string
+  targetId: string
+  assignedAt?: string
+}
+
+export interface PermissionGroupAssignmentRevokeResponse {
+  assignmentId: string
+  groupId: string
+  userId: string
+  targetType: string
+  targetId: string
+  requestedCount: number
+  removedLinkCount: number
+  deletedPermissionCount: number
+  retainedPermissionCount: number
+  missingPermissionCount: number
+  warnings: string[]
+}

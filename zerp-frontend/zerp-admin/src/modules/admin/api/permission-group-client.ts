@@ -3,6 +3,8 @@ import { httpClient } from '@/core/api/http-client'
 import type {
   PermissionGroupAssignRequest,
   PermissionGroupAssignResponse,
+  PermissionGroupAssignmentResponse,
+  PermissionGroupAssignmentRevokeResponse,
   PermissionGroupCreateRequest,
   PermissionGroupPatchRequest,
   PermissionGroupResponse,
@@ -76,6 +78,18 @@ export const permissionGroupClient = {
     httpClient.post<PermissionGroupAssignResponse>(
       '/user/permission-groups/assign',
       payload,
+      withTenantHeaders(tenantId),
+    ),
+
+  listAssignmentsByUser: (tenantId: string, userId: string): Promise<PermissionGroupAssignmentResponse[]> =>
+    httpClient.get<PermissionGroupAssignmentResponse[]>(
+      `/user/permission-groups/assignments?userId=${encodeURIComponent(userId)}`,
+      withTenantHeaders(tenantId),
+    ),
+
+  revokeAssignment: (tenantId: string, assignmentId: string): Promise<PermissionGroupAssignmentRevokeResponse> =>
+    httpClient.del<PermissionGroupAssignmentRevokeResponse>(
+      `/user/permission-groups/assignments/${assignmentId}`,
       withTenantHeaders(tenantId),
     ),
 }

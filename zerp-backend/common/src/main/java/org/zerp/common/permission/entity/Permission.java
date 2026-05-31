@@ -3,6 +3,7 @@ package org.zerp.common.permission.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.ColumnDefault;
 import org.zerp.common.entity.base.CommonBaseEntity;
 import org.zerp.common.entity.user.AppUser;
 
@@ -35,6 +36,11 @@ public class Permission extends CommonBaseEntity {
 
     @Enumerated(EnumType.STRING)
     private PermissionAction action;
+
+    @Column(name = "manual_grant")
+    @ColumnDefault("true")
+    @Builder.Default
+    private Boolean manualGrant = true;
 
     @Override
     public String toString() {

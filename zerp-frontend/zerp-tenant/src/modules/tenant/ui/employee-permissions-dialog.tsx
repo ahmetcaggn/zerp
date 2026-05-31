@@ -26,11 +26,16 @@ import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
-import { useAssignPermissionGroup } from '../hooks/use-permission-groups'
+import {
+  useAssignPermissionGroup,
+  usePermissionGroupAssignments,
+  useRevokePermissionGroupAssignment,
+} from '../hooks/use-permission-groups'
 import { useCreatePermission, useDeletePermission, useEmployeePermissions } from '../hooks/use-permissions'
 import { useShops } from '../hooks/use-shops'
 import type { EmployeeListResponseDto } from '../types/employee'
 import { prettifyPermissionEnumName, toPermissionKey } from '../types/permission'
+import { buildRevokeGroupToast } from './permission-group-revoke-toast'
 import { PermissionAssignmentBuilder } from './permission-assignment-builder'
 import {
   type PermissionGroupSelectionValue,
@@ -59,6 +64,12 @@ export function EmployeePermissionsDialog({ open, employee, onClose }: Props) {
   const { mutate: createPermission, isPending: isCreatePending } = useCreatePermission()
   const { mutate: deletePermission, isPending: isDeletePending } = useDeletePermission()
   const { mutateAsync: assignPermissionGroup, isPending: isAssignPending } = useAssignPermissionGroup()
+  const { mutateAsync: revokePermissionGroupAssignment, isPending: isRevokeAssignPending } =
+    useRevokePermissionGroupAssignment()
+  const {
+    data: groupAssignments = [],
+    isLoading: isGroupAssignmentsLoading,
+  } = usePermissionGroupAssignments(employeeUserId, open && Boolean(employeeUserId))
   const { data: shopsResult } = useShops({
     pagination: { page: 1, perPage: 100 },
     sort: { field: 'name', order: 'ASC' },
@@ -180,6 +191,21 @@ export function EmployeePermissionsDialog({ open, employee, onClose }: Props) {
     }
   }
 
+  async function handleRevokeGroupAssignment(assignmentId: string) {
+    if (!employeeUserId) return
+
+    try {
+      const response = await revokePermissionGroupAssignment({
+        assignmentId,
+        userId: employeeUserId,
+      })
+      const toast = buildRevokeGroupToast(t, response)
+      showToast(toast.message, { severity: toast.severity })
+    } catch (error) {
+      showToast(getUserFriendlyError(error), { severity: 'error' })
+    }
+  }
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>{t('employees.permissionsDialogTitle')}</DialogTitle>
@@ -222,6 +248,57 @@ export function EmployeePermissionsDialog({ open, employee, onClose }: Props) {
             >
               {isAssignPending ? <CircularProgress size={14} /> : t('permissionGroups.applyButton')}
             </Button>
+          </Box>
+
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              {t('permissionGroups.assignedGroupsTitle')}
+            </Typography>
+            {isGroupAssignmentsLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                <CircularProgress size={18} />
+              </Box>
+            ) : groupAssignments.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">
+                {t('permissionGroups.assignedGroupsEmptyState')}
+              </Typography>
+            ) : (
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{t('permissionGroups.nameField')}</TableCell>
+                    <TableCell>{t('permissionGroups.scopeField')}</TableCell>
+                    <TableCell>{t('permissionGroups.scopeTargetField')}</TableCell>
+                    <TableCell align="right">{t('common.actions')}</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {groupAssignments.map((assignment) => (
+                    <TableRow key={assignment.id}>
+                      <TableCell>{assignment.groupName}</TableCell>
+                      <TableCell>{prettifyPermissionEnumName(assignment.groupScopeType ?? '')}</TableCell>
+                      <TableCell>{assignment.targetId}</TableCell>
+                      <TableCell align="right">
+                        <Tooltip title={t('permissionGroups.revokeButton')}>
+                          <span>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              disabled={isRevokeAssignPending}
+                              onClick={() => {
+                                void handleRevokeGroupAssignment(assignment.id)
+                              }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </Box>
 
           <TextField

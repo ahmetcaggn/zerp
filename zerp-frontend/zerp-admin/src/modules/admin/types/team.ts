@@ -20,6 +20,7 @@ export interface TeamMemberCandidateResponse {
 
 export interface TeamResponse {
   id?: string
+  tenantId?: string
   name?: string
   description?: string
   type?: IssueTypeValue
