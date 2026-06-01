@@ -122,6 +122,15 @@ export interface MessageDictionary {
     permissionGroups: string
     tickets: string
     notifications: string
+    profile: string
+  }
+  profile: {
+    title: string
+    usernameLabel: string
+    emailLabel: string
+    userIdLabel: string
+    rolesLabel: string
+    unavailable: string
   }
   home: {
     title: string

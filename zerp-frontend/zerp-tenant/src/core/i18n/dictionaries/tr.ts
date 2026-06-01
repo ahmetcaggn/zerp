@@ -34,6 +34,15 @@ export const trMessages = {
     permissionGroups: 'Permission Grupları',
     tickets: 'Talepler',
     notifications: 'Bildirimler',
+    profile: 'Profil',
+  },
+  profile: {
+    title: 'Profil',
+    usernameLabel: 'Kullanıcı Adı',
+    emailLabel: 'E-posta',
+    userIdLabel: 'Kullanıcı ID',
+    rolesLabel: 'Roller',
+    unavailable: 'Profil detayları tam yüklenemedi. Mevcut oturum verileri gösteriliyor.',
   },
   home: {
     title: 'ZERP Frontend Template',

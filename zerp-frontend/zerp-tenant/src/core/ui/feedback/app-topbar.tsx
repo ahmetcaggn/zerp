@@ -1,5 +1,6 @@
 'use client'
 
+import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import LoginRoundedIcon from '@mui/icons-material/LoginRounded'
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
@@ -30,6 +31,7 @@ import { signOut, useSession } from 'next-auth/react'
 import type { ReactElement } from 'react'
 import { useMemo, useState } from 'react'
 
+import { useCurrentUserProfile } from '@/core/auth/client/use-current-user-profile'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { responsiveLayout } from '@/core/theme/layout'
@@ -64,13 +66,14 @@ const TOPBAR_ACTIONS: readonly TopbarAction[] = [
 ] as const
 
 export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
-  const { status } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { t } = useI18n()
   const [isDrawerOpen, setDrawerOpen] = useState(false)
   const isAuthenticated = status === 'authenticated'
+  const { data: currentUser } = useCurrentUserProfile()
   const {
     scope,
     shops,
@@ -84,6 +87,24 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
   const pendingShopLabel = locale === 'tr' ? 'Seçili Mağaza' : 'Selected Shop'
   const scopeValue = scope.mode === 'SHOP' ? scope.shopId : 'GLOBAL'
   const isScopeShopInList = scope.mode !== 'SHOP' || shops.some((shop) => shop.id === scope.shopId)
+  const resolvedUsername = useMemo(() => {
+    const fromApi = currentUser?.username?.trim()
+    if (fromApi) {
+      return fromApi
+    }
+
+    const fromName = session?.user?.name?.trim()
+    if (fromName) {
+      return fromName
+    }
+
+    const fromEmail = session?.user?.email?.trim()
+    if (fromEmail) {
+      return fromEmail
+    }
+
+    return '—'
+  }, [currentUser?.username, session?.user?.email, session?.user?.name])
 
   const visibleActions = useMemo(
     () =>
@@ -112,6 +133,11 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
     if (action.href) {
       router.push(`/${locale}${action.href}`)
     }
+  }
+
+  const handleProfileClick = () => {
+    setDrawerOpen(false)
+    router.push(`/${locale}/profile` as Parameters<typeof router.push>[0])
   }
 
   return (
@@ -171,6 +197,21 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
 
           {isMobile ? (
             <Stack alignItems="center" direction="row" gap={0.5}>
+              {isAuthenticated && (
+                <Typography variant="body2" noWrap sx={{ maxWidth: 120 }}>
+                  {resolvedUsername}
+                </Typography>
+              )}
+              {isAuthenticated && (
+                <IconButton
+                  aria-label={t('nav.profile')}
+                  color="inherit"
+                  size="small"
+                  onClick={handleProfileClick}
+                >
+                  <AccountCircleRoundedIcon fontSize="small" />
+                </IconButton>
+              )}
               <LocaleSwitcher locale={locale} />
               <ThemeToggle />
               <IconButton
@@ -194,6 +235,21 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
                   {t(action.labelKey)}
                 </Button>
               ))}
+              {isAuthenticated && (
+                <Stack alignItems="center" direction="row" gap={0.5} sx={{ maxWidth: 260 }}>
+                  <Typography variant="body2" noWrap>
+                    {resolvedUsername}
+                  </Typography>
+                  <IconButton
+                    aria-label={t('nav.profile')}
+                    color="inherit"
+                    size="small"
+                    onClick={handleProfileClick}
+                  >
+                    <AccountCircleRoundedIcon fontSize="small" />
+                  </IconButton>
+                </Stack>
+              )}
               <LocaleSwitcher locale={locale} />
               <ThemeToggle />
             </Stack>
@@ -223,6 +279,15 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
         <Divider />
 
         <List sx={{ py: 1 }}>
+          {isAuthenticated && (
+            <ListItemButton onClick={handleProfileClick} selected={false}>
+              <ListItemIcon sx={{ minWidth: 34 }}>
+                <AccountCircleRoundedIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary={t('nav.profile')} secondary={resolvedUsername} />
+            </ListItemButton>
+          )}
+          {isAuthenticated && visibleActions.length > 0 && <Divider />}
           {visibleActions.map((action) => (
             <ListItemButton
               key={action.id}

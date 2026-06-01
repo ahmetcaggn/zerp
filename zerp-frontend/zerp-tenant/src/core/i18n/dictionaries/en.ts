@@ -34,6 +34,15 @@ export const enMessages = {
     permissionGroups: 'Permission Groups',
     tickets: 'Tickets',
     notifications: 'Notifications',
+    profile: 'Profile',
+  },
+  profile: {
+    title: 'Profile',
+    usernameLabel: 'Username',
+    emailLabel: 'Email',
+    userIdLabel: 'User ID',
+    rolesLabel: 'Roles',
+    unavailable: 'Profile details could not be fully loaded. Showing available session data.',
   },
   home: {
     title: 'ZERP Frontend Template',

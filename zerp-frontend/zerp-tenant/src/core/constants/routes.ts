@@ -10,6 +10,7 @@ export const ROUTES = {
   permissionGroups: '/permission-groups',
   tickets: '/tickets',
   notifications: '/notifications',
+  profile: '/profile',
   shops: '/shops',
   stock: '/stock',
   catalog: '/catalog',
@@ -34,6 +35,7 @@ export const PROTECTED_PATHS = [
   ROUTES.tickets,
   ROUTES.notifications,
   ROUTES.shops,
+  ROUTES.profile,
 ] as const
 
 export function withLocale(locale: Locale, path: string): string {

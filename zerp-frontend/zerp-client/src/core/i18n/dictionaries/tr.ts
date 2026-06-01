@@ -9,9 +9,18 @@ export const trMessages = {
     login: 'Giris',
     register: 'Kayit Ol',
     dashboard: 'Panel',
+    profile: 'Profil',
     logout: 'Cikis',
     language: 'Dil',
     menu: 'Menü',
+  },
+  profile: {
+    title: 'Profil',
+    usernameLabel: 'Kullanıcı Adı',
+    emailLabel: 'E-posta',
+    userIdLabel: 'Kullanıcı ID',
+    rolesLabel: 'Roller',
+    unavailable: 'Profil detayları tam yüklenemedi. Mevcut oturum verileri gösteriliyor.',
   },
   home: {
     title: 'ZERP Frontend Template',

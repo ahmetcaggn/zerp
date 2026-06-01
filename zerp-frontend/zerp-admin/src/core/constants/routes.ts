@@ -10,6 +10,7 @@ export const ROUTES = {
   teams: '/teams',
   teamTickets: '/team-tickets',
   assignedTickets: '/assigned-tickets',
+  profile: '/profile',
   unauthorized: '/unauthorized',
 } as const
 
@@ -22,6 +23,7 @@ export const PROTECTED_PATHS = [
   ROUTES.teams,
   ROUTES.teamTickets,
   ROUTES.assignedTickets,
+  ROUTES.profile,
 ] as const
 
 export function withLocale(locale: Locale, path: string): string {

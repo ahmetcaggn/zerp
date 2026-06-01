@@ -13,9 +13,18 @@ export interface MessageDictionary {
     login: string
     register: string
     dashboard: string
+    profile: string
     logout: string
     language: string
     menu: string
+  }
+  profile: {
+    title: string
+    usernameLabel: string
+    emailLabel: string
+    userIdLabel: string
+    rolesLabel: string
+    unavailable: string
   }
   home: {
     title: string

@@ -17,9 +17,18 @@ export const enMessages = {
     teamTickets: 'Team Tickets',
     ticketManagement: 'Ticket Management',
     assignedTickets: 'Assigned Tickets',
+    profile: 'Profile',
     logout: 'Logout',
     language: 'Language',
     menu: 'Menu',
+  },
+  profile: {
+    title: 'Profile',
+    usernameLabel: 'Username',
+    emailLabel: 'Email',
+    userIdLabel: 'User ID',
+    rolesLabel: 'Roles',
+    unavailable: 'Profile details could not be fully loaded. Showing available session data.',
   },
   home: {
     title: 'ZERP Frontend Template',

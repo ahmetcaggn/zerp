@@ -21,9 +21,18 @@ export interface MessageDictionary {
     teamTickets: string
     ticketManagement: string
     assignedTickets: string
+    profile: string
     logout: string
     language: string
     menu: string
+  }
+  profile: {
+    title: string
+    usernameLabel: string
+    emailLabel: string
+    userIdLabel: string
+    rolesLabel: string
+    unavailable: string
   }
   home: {
     title: string

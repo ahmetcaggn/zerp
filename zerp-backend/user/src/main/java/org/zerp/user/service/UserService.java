@@ -82,6 +82,11 @@ public class UserService implements IResourceService<UserResponseDTO, UserRespon
         return userMapper.toUserResponseDTO(user);
     }
 
+    public UserResponseDTO findCurrentUser() {
+        UUID requesterId = userIdResolver.resolve();
+        return findById(requesterId);
+    }
+
     @Override
     public UserResponseDTO create(Void data) {
         throw new UnsupportedOperationException("Create operation is not supported for User resource");
