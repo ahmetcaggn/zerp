@@ -196,7 +196,7 @@ class _StockCountsTabState extends State<StockCountsTab> {
 
         // FAB
         Positioned(
-          bottom: 16,
+          bottom: 16 + MediaQuery.paddingOf(context).bottom,
           right: 16,
           child: FloatingActionButton.extended(
             onPressed: _openCreateForm,

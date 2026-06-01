@@ -98,44 +98,49 @@ class _StockResourceTabState extends State<StockResourceTab> {
         return CustomScrollView(
           slivers: [
             // Action buttons
-            SliverAppBar(
-              floating: true,
-              automaticallyImplyLeading: false,
-              toolbarHeight: 64,
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
-              shadowColor: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.3),
-              titleSpacing: 0,
-              title: SizedBox(
-                height: 48,
-                width: double.infinity,
-                child: Center(
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    reverse: true,
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    children: [
-                      FilledButton.icon(
-                        onPressed: _openResourceForm,
-                        icon: const Icon(Icons.add, size: 18),
-                        label: Text(t.resource.defineButton),
-                      ),
-                      const SizedBox(width: 8),
-                      OutlinedButton.icon(
-                        onPressed: _openAdjustmentForm,
-                        icon: const Icon(Icons.tune_outlined, size: 18),
-                        label: Text(t.operation.adjustmentButton),
-                      ),
-                      const SizedBox(width: 8),
-                      OutlinedButton.icon(
-                        onPressed: _openEntryForm,
-                        icon: const Icon(Icons.add_box_outlined, size: 18),
-                        label: Text(t.operation.entryButton),
-                      ),
-                    ],
+            MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              child: SliverAppBar(
+                floating: true,
+                automaticallyImplyLeading: false,
+                toolbarHeight: 64,
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
+                shadowColor: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.3),
+                titleSpacing: 0,
+                actionsPadding: EdgeInsets.zero,
+                title: SizedBox(
+                  height: 48,
+                  width: double.infinity,
+                  child: Center(
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      reverse: true,
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      children: [
+                        FilledButton.icon(
+                          onPressed: _openResourceForm,
+                          icon: const Icon(Icons.add, size: 18),
+                          label: Text(t.resource.defineButton),
+                        ),
+                        const SizedBox(width: 8),
+                        OutlinedButton.icon(
+                          onPressed: _openAdjustmentForm,
+                          icon: const Icon(Icons.tune_outlined, size: 18),
+                          label: Text(t.operation.adjustmentButton),
+                        ),
+                        const SizedBox(width: 8),
+                        OutlinedButton.icon(
+                          onPressed: _openEntryForm,
+                          icon: const Icon(Icons.add_box_outlined, size: 18),
+                          label: Text(t.operation.entryButton),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

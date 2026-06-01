@@ -73,92 +73,100 @@ class _StockMovementTabState extends State<StockMovementTab> {
         return CustomScrollView(
           slivers: [
             // ── Period selector & Date navigator ──
-            SliverAppBar(
-              floating: true,
-              automaticallyImplyLeading: false,
-              toolbarHeight: 96,
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
-              shadowColor: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.2),
-              titleSpacing: 0,
-              title: Column(
-                children: [
-                  // ── Period selector ──
-                  SizedBox(
-                    height: 48,
-                    child: SegmentedButton<StockMovementPeriod>(
-                      segments: [
-                        ButtonSegment(
-                          value: StockMovementPeriod.day,
-                          label: Text(t.movement.filters.periods.DAY),
-                        ),
-                        ButtonSegment(
-                          value: StockMovementPeriod.week,
-                          label: Text(t.movement.filters.periods.WEEK),
-                        ),
-                        ButtonSegment(
-                          value: StockMovementPeriod.month,
-                          label: Text(t.movement.filters.periods.MONTH),
-                        ),
-                      ],
-                      selected: {period},
-                      onSelectionChanged: (v) => cubit.changePeriod(v.first),
-                    ),
-                  ),
+            MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              child: SliverAppBar(
+                floating: true,
+                automaticallyImplyLeading: false,
+                toolbarHeight: 104,
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
+                shadowColor: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.2),
+                titleSpacing: 0,
+                title: Column(
+                  children: [
+                    const SizedBox(height: 8),
 
-                  // ── Date navigator ──
-                  SizedBox(
-                    height: 48,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.chevron_left),
-                            tooltip: t.movement.filters.previous,
-                            onPressed: () => cubit.shiftCursor(-1),
+                    // ── Period selector ──
+                    SizedBox(
+                      height: 48,
+                      child: SegmentedButton<StockMovementPeriod>(
+                        segments: [
+                          ButtonSegment(
+                            value: StockMovementPeriod.day,
+                            label: Text(t.movement.filters.periods.DAY),
                           ),
-                          Expanded(
-                            child: InkWell(
-                              onTap: () async {
-                                final picked = await showDatePicker(
-                                  context: context,
-                                  initialDate: cursor,
-                                  firstDate: DateTime(2020),
-                                  lastDate: DateTime.now(),
-                                );
-                                if (picked != null && context.mounted) {
-                                  await cubit.load(
-                                    shopId: widget.shopId,
-                                    cursor: picked,
+                          ButtonSegment(
+                            value: StockMovementPeriod.week,
+                            label: Text(t.movement.filters.periods.WEEK),
+                          ),
+                          ButtonSegment(
+                            value: StockMovementPeriod.month,
+                            label: Text(t.movement.filters.periods.MONTH),
+                          ),
+                        ],
+                        selected: {period},
+                        onSelectionChanged: (v) => cubit.changePeriod(v.first),
+                      ),
+                    ),
+
+                    // ── Date navigator ──
+                    SizedBox(
+                      height: 48,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.chevron_left),
+                              tooltip: t.movement.filters.previous,
+                              onPressed: () => cubit.shiftCursor(-1),
+                            ),
+                            Expanded(
+                              child: InkWell(
+                                onTap: () async {
+                                  final picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: cursor,
+                                    firstDate: DateTime(2020),
+                                    lastDate: DateTime.now(),
                                   );
-                                }
-                              },
-                              child: Center(
-                                child: Text(
-                                  _cursorLabel(period, cursor),
-                                  style: Theme.of(context).textTheme.titleSmall,
+                                  if (picked != null && context.mounted) {
+                                    await cubit.load(
+                                      shopId: widget.shopId,
+                                      cursor: picked,
+                                    );
+                                  }
+                                },
+                                child: Center(
+                                  child: Text(
+                                    _cursorLabel(period, cursor),
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleSmall,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.chevron_right),
-                            tooltip: t.movement.filters.next,
-                            onPressed: cursor.isBefore(DateTime.now())
-                                ? () => cubit.shiftCursor(1)
-                                : null,
-                          ),
-                        ],
+                            IconButton(
+                              icon: const Icon(Icons.chevron_right),
+                              tooltip: t.movement.filters.next,
+                              onPressed: cursor.isBefore(DateTime.now())
+                                  ? () => cubit.shiftCursor(1)
+                                  : null,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
 
@@ -191,120 +199,120 @@ class _StockMovementTabState extends State<StockMovementTab> {
                   children: [
                     // ── Resource filter ──
                     if (resources.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                        child: DropdownButtonFormField<String?>(
+                          initialValue: selectedResourceId,
+                          decoration: InputDecoration(
+                            labelText: t.movement.filters.stockType,
+                            isDense: true,
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                          ),
+                          items: [
+                            DropdownMenuItem<String?>(
+                              child: Text(t.movement.filters.allStockTypes),
+                            ),
+                            ...resources.map(
+                              (r) => DropdownMenuItem<String?>(
+                                value: r.id,
+                                child: Text(r.name ?? r.id ?? ''),
+                              ),
+                            ),
+                          ],
+                          onChanged: cubit.changeResource,
+                        ),
+                      ),
+
+                    // ── Chart ──
+                    if (loaded != null && period != StockMovementPeriod.day)
+                      _StockFlowChart(
+                        timeline: loaded.timeline,
+                        selectedBucket: selectedBucket,
+                        onBucketTap: cubit.selectBucket,
+                      ),
+
+                    // ── Drill-down list ──
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                      child: DropdownButtonFormField<String?>(
-                        initialValue: selectedResourceId,
-                        decoration: InputDecoration(
-                          labelText: t.movement.filters.stockType,
-                          isDense: true,
-                          border: const OutlineInputBorder(),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${t.tabs.movements} (${filteredMovements.length})',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
                           ),
-                        ),
-                        items: [
-                          DropdownMenuItem<String?>(
-                            child: Text(t.movement.filters.allStockTypes),
-                          ),
-                          ...resources.map(
-                            (r) => DropdownMenuItem<String?>(
-                              value: r.id,
-                              child: Text(r.name ?? r.id ?? ''),
+                          Visibility(
+                            visible: selectedBucket != null,
+                            maintainSize: true,
+                            maintainAnimation: true,
+                            maintainState: true,
+                            child: TextButton(
+                              onPressed: () => cubit.selectBucket(null),
+                              child: Text(t.movement.drillDown.clear),
                             ),
                           ),
                         ],
-                        onChanged: cubit.changeResource,
                       ),
                     ),
+                  ],
+                ),
+              ),
 
-                  // ── Chart ──
-                  if (loaded != null && period != StockMovementPeriod.day)
-                    _StockFlowChart(
-                      timeline: loaded.timeline,
-                      selectedBucket: selectedBucket,
-                      onBucketTap: cubit.selectBucket,
-                    ),
-
-                  // ── Drill-down list ──
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${t.tabs.movements} (${filteredMovements.length})',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ),
-                        Visibility(
-                          visible: selectedBucket != null,
-                          maintainSize: true,
-                          maintainAnimation: true,
-                          maintainState: true,
-                          child: TextButton(
-                            onPressed: () => cubit.selectBucket(null),
-                            child: Text(t.movement.drillDown.clear),
-                          ),
-                        ),
-                      ],
-                    ),
+              if (filteredMovements.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(child: Text(t.movement.emptyState)),
+                )
+              else
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    4,
+                    16,
+                    16 + MediaQuery.of(context).padding.bottom,
                   ),
-                ],
-              ),
-            ),
+                  sliver: SliverList.separated(
+                    itemCount: filteredMovements.length,
+                    separatorBuilder: (_, _) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final m = filteredMovements[index];
+                      final qty = m.quantity?.toDouble() ?? 0;
+                      final isIn = m.direction?.value == 'IN';
+                      final sign = isIn ? '+' : '-';
+                      final qtyColor = isIn ? Colors.green : Colors.red;
+                      final subtitle = [
+                        m.stockResourceName,
+                        if (m.createdAt != null)
+                          DateFormat.yMd().add_Hm().format(
+                            m.createdAt!.toLocal(),
+                          ),
+                      ].where((v) => v != null && v.isNotEmpty).join(' · ');
 
-            if (filteredMovements.isEmpty)
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(child: Text(t.movement.emptyState)),
-              )
-            else
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  4,
-                  16,
-                  16 + MediaQuery.of(context).padding.bottom,
-                ),
-                sliver: SliverList.separated(
-                  itemCount: filteredMovements.length,
-                  separatorBuilder: (_, _) => const Divider(height: 1),
-                  itemBuilder: (context, index) {
-                    final m = filteredMovements[index];
-                    final qty = m.quantity?.toDouble() ?? 0;
-                    final isIn = m.direction?.value == 'IN';
-                    final sign = isIn ? '+' : '-';
-                    final qtyColor = isIn ? Colors.green : Colors.red;
-                    final subtitle = [
-                      m.stockResourceName,
-                      if (m.createdAt != null)
-                        DateFormat.yMd().add_Hm().format(
-                          m.createdAt!.toLocal(),
+                      return ListTile(
+                        dense: true,
+                        title: Text(
+                          (context.t['stock.movement.types.${m.type?.value}']
+                                  as String?) ??
+                              m.type?.value ??
+                              '',
                         ),
-                    ].where((v) => v != null && v.isNotEmpty).join(' · ');
-
-                    return ListTile(
-                      dense: true,
-                      title: Text(
-                        (context.t['stock.movement.types.${m.type?.value}']
-                                as String?) ??
-                            m.type?.value ??
-                            '',
-                      ),
-                      subtitle: Text(subtitle),
-                      trailing: Text(
-                        '$sign${qty.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          color: qtyColor,
-                          fontWeight: FontWeight.bold,
+                        subtitle: Text(subtitle),
+                        trailing: Text(
+                          '$sign${qty.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            color: qtyColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
             ],
           ],
         );
