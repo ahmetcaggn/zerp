@@ -25,12 +25,10 @@ public interface MenuRepository extends
             set m.isActive = false
             where m.shop.id = :shopId
               and m.language = :language
-              and (:menuId is null or m.id <> :menuId)
               and m.isActive = true
             """)
-    int deactivateOtherActiveMenus(
+    int deactivateAllActiveMenus(
             @Param("shopId") UUID shopId,
-            @Param("language") MenuLanguage language,
-            @Param("menuId") UUID menuId
+            @Param("language") MenuLanguage language
     );
 }

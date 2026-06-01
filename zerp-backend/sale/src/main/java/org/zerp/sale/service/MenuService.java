@@ -92,7 +92,10 @@ public class MenuService implements
         Menu menu = mapper.toEntity(data);
         menu.setShop(shop);
         menu.setTenantId(tenantId);
-        enforceSingleActiveMenu(menu);
+//        enforceSingleActiveMenu(menu);
+        if(menu.isActive()) {
+            deactivateOtherActiveMenus(shop.getId(), menu.getLanguage());
+        }
         Menu saved = repository.save(menu);
         log.info("Created Menu with id: {}", saved.getId());
         return toMenuDTO(saved);
@@ -124,8 +127,10 @@ public class MenuService implements
         }
         mapper.updateEntityFromDTO(data, menu);
         if (data.getIsActive() != null) {
+            if(data.getIsActive()) {
+                deactivateOtherActiveMenus(menu.getShop().getId(), menu.getLanguage());
+            }
             menu.setActive(data.getIsActive());
-            enforceSingleActiveMenu(menu);
         }
         if (data.getLanguage() != null) {
             menu.setLanguage(data.getLanguage());
@@ -184,8 +189,14 @@ public class MenuService implements
         if (fields.containsKey("description")) menu.setDescription((String) fields.get("description"));
         if (fields.containsKey("isActive")) menu.setActive((Boolean) fields.get("isActive"));
         if (fields.containsKey("active")) {
-            menu.setActive((Boolean) fields.get("active"));
-            enforceSingleActiveMenu(menu);
+            if(Boolean.TRUE.equals(fields.get("active"))) {
+                deactivateOtherActiveMenus(menu.getShop().getId(), menu.getLanguage());
+                menu.setActive(true);
+            } else if(Boolean.FALSE.equals(fields.get("active"))) {
+                menu.setActive(false);
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid value for active field: " + fields.get("active"));
+            }
         }
         if (fields.containsKey("language")) {
             menu.setLanguage(resolveMenuLanguage(fields.get("language")));
@@ -194,11 +205,8 @@ public class MenuService implements
     }
 
     @Transactional
-    protected void enforceSingleActiveMenu(Menu menu) {
-        if (!menu.isActive()) {
-            return;
-        }
-        repository.deactivateOtherActiveMenus(menu.getShop().getId(), menu.getLanguage(), menu.getId());
+    protected void deactivateOtherActiveMenus(UUID shopId, MenuLanguage language) {
+        repository.deactivateAllActiveMenus(shopId, language);
     }
 
     private MenuLanguage resolveMenuLanguage(Object rawValue) {
