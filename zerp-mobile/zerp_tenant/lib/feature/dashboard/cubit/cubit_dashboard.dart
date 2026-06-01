@@ -38,14 +38,23 @@ class CubitDashboard extends Cubit<StateDashboard>
       await Future.wait<dynamic>([
         _cubitOrganizationScope.loadTenantIfNeeded(),
         _cubitSectionEmployee.load(),
-        _cubitSectionStock.load(),
         _saleService.getShops().then((value) => shopsResponse = value),
       ]);
       final shops = shopsResponse.items;
       final orgState = _cubitOrganizationScope.state;
-      if (orgState is! StateOrganizationScopeShop && shops.isNotEmpty) {
+      if (orgState is StateOrganizationScopeShop) {
+        final shopId = orgState.shop.id;
+        if (shopId != null) {
+          await Future.wait([
+            _cubitSectionCash.load(shopId),
+            _cubitSectionTables.load(shopId),
+            _cubitSectionStock.load(shopId),
+          ]);
+        }
+      } else if (shops.isNotEmpty) {
         _cubitOrganizationScope.loadShop(shops.first);
       }
+
       emit(StateDashboardLoaded(shops: shops));
     } on Object catch (e, s) {
       log.severe('Failed to load dashboard', e, s);
@@ -61,6 +70,7 @@ class CubitDashboard extends Cubit<StateDashboard>
     await Future.wait([
       _cubitSectionCash.load(shop.id ?? ''),
       _cubitSectionTables.load(shop.id ?? ''),
+      _cubitSectionStock.load(shop.id ?? ''),
     ]);
   }
 }

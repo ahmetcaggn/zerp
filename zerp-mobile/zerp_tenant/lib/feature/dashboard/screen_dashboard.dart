@@ -5,11 +5,9 @@ import 'package:flutter/material.dart' hide RouteSettings;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:openapi_sale/api.dart';
 import 'package:zerp_tenant/feature/dashboard/cubit/cubit_dashboard.dart';
-import 'package:zerp_tenant/feature/dashboard/sections/cash_section/cubit_section_cash.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/cash_section/section_cash.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/employee_section/section_employee.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/stock_section/section_stock.dart';
-import 'package:zerp_tenant/feature/dashboard/sections/tables_section/cubit_section_tables.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/tables_section/section_tables.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
@@ -105,30 +103,10 @@ class _DashboardHeaderActions extends StatelessWidget {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.refresh_rounded),
-            onPressed: isLoading
-                ? null
-                : () {
-                    unawaited(context.read<CubitDashboard>().load());
-                    final orgState = context
-                        .read<CubitOrganizationScope>()
-                        .state;
-                    if (orgState is StateOrganizationScopeShop) {
-                      final shopId = orgState.shop.id;
-                      if (shopId != null) {
-                        unawaited(
-                          context.read<CubitSectionTables>().load(shopId),
-                        );
-                        unawaited(
-                          context.read<CubitSectionCash>().load(shopId),
-                        );
-                      }
-                    }
-                  },
+            onPressed: isLoading ? null : context.read<CubitDashboard>().load,
           ),
         );
       },

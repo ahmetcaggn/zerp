@@ -5,7 +5,7 @@ import 'package:injectable/injectable.dart';
 class CubitSectionStock extends Cubit<StateSectionStock> {
   CubitSectionStock() : super(const StateSectionStockInitial());
 
-  Future<void> load() async {}
+  Future<void> load(String shopId) async {}
 }
 
 sealed class StateSectionStock {
