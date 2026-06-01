@@ -1,5 +1,12 @@
 'use client'
 
+export function ProfilePage() {
+  return null
+}
+
+/*
+Profile disabled with Auth/SSO temporarily. Restore this block when auth comes back.
+
 import { Alert, Box, CircularProgress, Paper, Stack, TextField, Typography } from '@mui/material'
 
 import { useAuth } from '@/core/auth/client/use-auth'
@@ -51,3 +58,4 @@ export function ProfilePage() {
     </Box>
   )
 }
+*/

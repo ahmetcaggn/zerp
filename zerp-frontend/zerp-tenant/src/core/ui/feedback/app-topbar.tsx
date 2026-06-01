@@ -23,8 +23,9 @@ import {
   Stack,
   Toolbar,
   Typography,
+  Menu,
 } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { alpha, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
@@ -72,6 +73,8 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { t } = useI18n()
   const [isDrawerOpen, setDrawerOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const isMenuOpen = Boolean(anchorEl)
   const isAuthenticated = status === 'authenticated'
   const { data: currentUser } = useCurrentUserProfile()
   const {
@@ -109,6 +112,10 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
   const visibleActions = useMemo(
     () =>
       TOPBAR_ACTIONS.filter((action) => {
+        if (action.id === 'logout' && !isMobile) {
+          return false
+        }
+
         if (action.visibility === 'authenticated') {
           return isAuthenticated
         }
@@ -119,7 +126,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
 
         return true
       }),
-    [isAuthenticated],
+    [isAuthenticated, isMobile],
   )
 
   const handleActionClick = (action: TopbarAction) => {
@@ -135,9 +142,22 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
     }
   }
 
+  const handleProfileMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleMenuClose = () => {
+    setAnchorEl(null)
+  }
+
   const handleProfileClick = () => {
-    setDrawerOpen(false)
+    handleMenuClose()
     router.push(`/${locale}/profile` as Parameters<typeof router.push>[0])
+  }
+
+  const handleLogoutClick = () => {
+    handleMenuClose()
+    void signOut({ callbackUrl: '/api/sso-logout' })
   }
 
   return (
@@ -206,10 +226,10 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
                 <IconButton
                   aria-label={t('nav.profile')}
                   color="inherit"
-                  size="small"
-                  onClick={handleProfileClick}
+                  size="medium"
+                  onClick={handleProfileMenuClick}
                 >
-                  <AccountCircleRoundedIcon fontSize="small" />
+                  <AccountCircleRoundedIcon fontSize="medium" />
                 </IconButton>
               )}
               <LocaleSwitcher locale={locale} />
@@ -243,10 +263,10 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
                   <IconButton
                     aria-label={t('nav.profile')}
                     color="inherit"
-                    size="small"
-                    onClick={handleProfileClick}
+                    size="medium"
+                    onClick={handleProfileMenuClick}
                   >
-                    <AccountCircleRoundedIcon fontSize="small" />
+                    <AccountCircleRoundedIcon fontSize="medium" />
                   </IconButton>
                 </Stack>
               )}
@@ -254,6 +274,55 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
               <ThemeToggle />
             </Stack>
           )}
+
+          <Menu
+            anchorEl={anchorEl}
+            open={isMenuOpen}
+            onClose={handleMenuClose}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            PaperProps={{
+              elevation: 0,
+              sx: {
+                overflow: 'visible',
+                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                mt: 1.5,
+                '&:before': {
+                  content: '""',
+                  display: 'block',
+                  position: 'absolute',
+                  top: 0,
+                  right: 14,
+                  width: 10,
+                  height: 10,
+                  bgcolor: 'background.paper',
+                  transform: 'translateY(-50%) rotate(45deg)',
+                  zIndex: 0,
+                },
+              },
+            }}
+          >
+            <MenuItem onClick={handleProfileClick}>
+              <ListItemIcon>
+                <AccountCircleRoundedIcon fontSize="small" />
+              </ListItemIcon>
+              {t('nav.profile')}
+            </MenuItem>
+            <MenuItem
+              onClick={handleLogoutClick}
+              sx={{
+                color: 'error.main',
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.error.main, 0.08),
+                },
+              }}
+            >
+              <ListItemIcon>
+                <LogoutRoundedIcon fontSize="small" sx={{ color: 'error.main' }} />
+              </ListItemIcon>
+              {t('nav.logout')}
+            </MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
 

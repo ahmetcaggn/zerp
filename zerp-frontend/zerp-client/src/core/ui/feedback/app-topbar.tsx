@@ -1,6 +1,6 @@
 'use client'
 
-import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded'
+// import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
 // import LoginRoundedIcon from '@mui/icons-material/LoginRounded'
@@ -30,7 +30,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import type { ReactElement } from 'react'
 import { useMemo, useState } from 'react'
 
-import { useCurrentUserProfile } from '@/core/auth/client/use-current-user-profile'
+// Profile disabled with Auth/SSO temporarily.
+// import { useCurrentUserProfile } from '@/core/auth/client/use-current-user-profile'
 import { appConfig } from '@/core/config/app-config'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { responsiveLayout } from '@/core/theme/layout'
@@ -101,24 +102,25 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
     [isAuthenticated],
   )
 
-  const resolvedUsername = useMemo(() => {
-    const fromApi = currentUser?.username?.trim()
-    if (fromApi) {
-      return fromApi
-    }
-
-    const fromName = session?.user?.name?.trim()
-    if (fromName) {
-      return fromName
-    }
-
-    const fromEmail = session?.user?.email?.trim()
-    if (fromEmail) {
-      return fromEmail
-    }
-
-    return '—'
-  }, [currentUser?.username, session?.user?.email, session?.user?.name])
+  // Profile disabled with Auth/SSO temporarily.
+  // const resolvedUsername = useMemo(() => {
+  //   const fromApi = currentUser?.username?.trim()
+  //   if (fromApi) {
+  //     return fromApi
+  //   }
+  //
+  //   const fromName = session?.user?.name?.trim()
+  //   if (fromName) {
+  //     return fromName
+  //   }
+  //
+  //   const fromEmail = session?.user?.email?.trim()
+  //   if (fromEmail) {
+  //     return fromEmail
+  //   }
+  //
+  //   return '—'
+  // }, [currentUser?.username, session?.user?.email, session?.user?.name])
 
   const handleActionClick = (action: TopbarAction) => {
     setDrawerOpen(false)
@@ -134,10 +136,11 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
     }
   }
 
-  const handleProfileClick = () => {
-    setDrawerOpen(false)
-    router.push(`/${locale}/profile` as Parameters<typeof router.push>[0])
-  }
+  // Profile disabled with Auth/SSO temporarily.
+  // const handleProfileClick = () => {
+  //   setDrawerOpen(false)
+  //   router.push(`/${locale}/profile` as Parameters<typeof router.push>[0])
+  // }
 
   return (
     <>
@@ -178,6 +181,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
 
             {isMobile ? (
               <Stack alignItems="center" direction="row" gap={0.5}>
+                {/* Profile disabled with Auth/SSO temporarily.
                 {isAuthenticated && (
                   <Typography variant="body2" noWrap sx={{ maxWidth: 110 }}>
                     {resolvedUsername}
@@ -192,7 +196,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
                   >
                     <AccountCircleRoundedIcon fontSize="small" />
                   </IconButton>
-                )}
+                )} */}
                 <LocaleSwitcher locale={locale} />
                 <ThemeToggle />
                 <IconButton
@@ -218,6 +222,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
                     {t(action.labelKey)}
                   </Button>
                 ))}
+                {/* Profile disabled with Auth/SSO temporarily.
                 {isAuthenticated && (
                   <Stack alignItems="center" direction="row" gap={0.5} sx={{ maxWidth: 240 }}>
                     <Typography variant="body2" noWrap>
@@ -232,7 +237,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
                       <AccountCircleRoundedIcon fontSize="small" />
                     </IconButton>
                   </Stack>
-                )}
+                )} */}
                 <LocaleSwitcher locale={locale} />
                 <ThemeToggle />
               </Stack>
@@ -263,6 +268,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
         <Divider />
 
         <List sx={{ py: 1 }}>
+          {/* Profile disabled with Auth/SSO temporarily.
           {isAuthenticated && (
             <ListItemButton onClick={handleProfileClick} selected={false}>
               <ListItemIcon sx={{ minWidth: 34 }}>
@@ -271,7 +277,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
               <ListItemText primary={t('nav.profile')} secondary={resolvedUsername} />
             </ListItemButton>
           )}
-          {isAuthenticated && visibleActions.length > 0 && <Divider />}
+          {isAuthenticated && visibleActions.length > 0 && <Divider />} */}
           {visibleActions.map((action) => (
             <ListItemButton
               key={action.id}
