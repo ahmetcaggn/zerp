@@ -41,6 +41,7 @@ import 'package:zerp_tenant/feature/sale/cash/screen_cash_order.dart' as _i2;
 import 'package:zerp_tenant/feature/sale/cash/screen_cash_payment.dart' as _i3;
 import 'package:zerp_tenant/feature/sale/cash/screen_cash_tables.dart' as _i4;
 import 'package:zerp_tenant/feature/sale/table/cubit/cubit_tables.dart' as _i29;
+import 'package:zerp_tenant/feature/sale/cash/cubit/cubit_cash_tables.dart' as _i30;
 import 'package:zerp_tenant/feature/sale/table/order/screen_table_order.dart'
     as _i19;
 import 'package:zerp_tenant/feature/sale/table/screen_tables.dart' as _i20;
@@ -119,6 +120,7 @@ class RouteCashOrder extends _i21.PageRouteInfo<RouteCashOrderArgs> {
   RouteCashOrder({
     required String tableId,
     required String tableName,
+    required _i30.CubitCashTables cubitCashTables,
     _i22.Key? key,
     List<_i21.PageRouteInfo>? children,
   }) : super(
@@ -126,6 +128,7 @@ class RouteCashOrder extends _i21.PageRouteInfo<RouteCashOrderArgs> {
          args: RouteCashOrderArgs(
            tableId: tableId,
            tableName: tableName,
+           cubitCashTables: cubitCashTables,
            key: key,
          ),
          initialChildren: children,
@@ -140,6 +143,7 @@ class RouteCashOrder extends _i21.PageRouteInfo<RouteCashOrderArgs> {
       return _i2.ScreenCashOrder(
         tableId: args.tableId,
         tableName: args.tableName,
+        cubitCashTables: args.cubitCashTables,
         key: args.key,
       );
     },
@@ -150,6 +154,7 @@ class RouteCashOrderArgs {
   const RouteCashOrderArgs({
     required this.tableId,
     required this.tableName,
+    required this.cubitCashTables,
     this.key,
   });
 
@@ -157,11 +162,13 @@ class RouteCashOrderArgs {
 
   final String tableName;
 
+  final _i30.CubitCashTables cubitCashTables;
+
   final _i22.Key? key;
 
   @override
   String toString() {
-    return 'RouteCashOrderArgs{tableId: $tableId, tableName: $tableName, key: $key}';
+    return 'RouteCashOrderArgs{tableId: $tableId, tableName: $tableName, cubitCashTables: $cubitCashTables, key: $key}';
   }
 
   @override
@@ -170,11 +177,13 @@ class RouteCashOrderArgs {
     if (other is! RouteCashOrderArgs) return false;
     return tableId == other.tableId &&
         tableName == other.tableName &&
+        cubitCashTables == other.cubitCashTables &&
         key == other.key;
   }
 
   @override
-  int get hashCode => tableId.hashCode ^ tableName.hashCode ^ key.hashCode;
+  int get hashCode =>
+      tableId.hashCode ^ tableName.hashCode ^ cubitCashTables.hashCode ^ key.hashCode;
 }
 
 /// generated route for

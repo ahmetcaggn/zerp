@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:openapi_sale/api.dart';
 import 'package:zerp_tenant/feature/sale/cash/cubit/cubit_cash_order.dart';
+import 'package:zerp_tenant/feature/sale/cash/cubit/cubit_cash_tables.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
@@ -15,11 +16,13 @@ class ScreenCashOrder extends StatelessWidget {
   const ScreenCashOrder({
     required this.tableId,
     required this.tableName,
+    required this.cubitCashTables,
     super.key,
   });
 
   final String tableId;
   final String tableName;
+  final CubitCashTables cubitCashTables;
 
   @override
   Widget build(BuildContext context) {
@@ -29,16 +32,25 @@ class ScreenCashOrder extends StatelessWidget {
         unawaited(cubit.init(tableId));
         return cubit;
       },
-      child: _View(tableName: tableName, tableId: tableId),
+      child: _View(
+        tableName: tableName,
+        tableId: tableId,
+        cubitCashTables: cubitCashTables,
+      ),
     );
   }
 }
 
 class _View extends StatelessWidget {
-  const _View({required this.tableName, required this.tableId});
+  const _View({
+    required this.tableName,
+    required this.tableId,
+    required this.cubitCashTables,
+  });
 
   final String tableName;
   final String tableId;
+  final CubitCashTables cubitCashTables;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +64,12 @@ class _View extends StatelessWidget {
             case StateCashOrderError():
               return _Error(state: state, tableId: tableId);
             case StateCashOrderLoaded():
-              return _Loaded(state: state, tableName: tableName);
+              return _Loaded(
+                state: state,
+                tableName: tableName,
+                tableId: tableId,
+                cubitCashTables: cubitCashTables,
+              );
           }
         },
       ),
@@ -87,10 +104,17 @@ class _Error extends StatelessWidget {
 }
 
 class _Loaded extends StatelessWidget {
-  const _Loaded({required this.state, required this.tableName});
+  const _Loaded({
+    required this.state,
+    required this.tableName,
+    required this.tableId,
+    required this.cubitCashTables,
+  });
 
   final StateCashOrderLoaded state;
   final String tableName;
+  final String tableId;
+  final CubitCashTables cubitCashTables;
 
   @override
   Widget build(BuildContext context) {
@@ -184,14 +208,24 @@ class _Loaded extends StatelessWidget {
                   height: 48,
                   child: FilledButton.icon(
                     onPressed: state.totalSelectedCount > 0
-                        ? () {
-                            unawaited(
-                              context.router.push(
-                                RouteCashPayment(
-                                  orders: orders,
-                                  selectedQtys: selectedQtys,
-                                ),
+                        ? () async {
+                            await context.router.push(
+                              RouteCashPayment(
+                                orders: orders,
+                                selectedQtys: selectedQtys,
                               ),
+                            );
+                            // Refresh orders for this table after returning
+                            // from payment (payment may have been completed).
+                            if (!context.mounted) return;
+                            unawaited(
+                              context
+                                  .read<CubitCashOrder>()
+                                  .init(tableId),
+                            );
+                            // Also refresh the table card in the tables list.
+                            unawaited(
+                              cubitCashTables.refreshTable(tableId),
                             );
                           }
                         : null,

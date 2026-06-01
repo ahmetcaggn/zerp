@@ -132,13 +132,9 @@ class _ViewState extends State<_View> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(context.t.sale.cash.paymentReceivedToast)),
           );
-          // Navigate back twice (to Tables view or Sale dashboard)
-          unawaited(
-            context.router.maybePopTop().then((_) async {
-              if (!context.mounted) return;
-              await context.router.maybePopTop();
-            }),
-          );
+          // Navigate back once to ScreenCashOrder (table page).
+          // ScreenCashOrder will handle refreshing orders and the tables list.
+          unawaited(context.router.maybePopTop());
         } else if (state is StateCashPaymentError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

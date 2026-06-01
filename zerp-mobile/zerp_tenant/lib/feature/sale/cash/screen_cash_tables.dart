@@ -273,6 +273,7 @@ class _LoadedState extends State<_Loaded> {
                 RouteCashOrder(
                   tableId: table.id ?? '',
                   tableName: table.name ?? '',
+                  cubitCashTables: context.read<CubitCashTables>(),
                 ),
               ),
             );
