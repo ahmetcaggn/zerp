@@ -7,6 +7,7 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded'
 import {
   AppBar,
+  Box,
   Button,
   Divider,
   Drawer,
@@ -162,11 +163,6 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
         >
           {isMobile ? (
             <Stack alignItems="center" direction="row" gap={0.5}>
-              {isAuthenticated && (
-                <Typography variant="body2" noWrap sx={{ maxWidth: 120 }}>
-                  {resolvedUsername}
-                </Typography>
-              )}
               {isAuthenticated && (
                 <IconButton
                   aria-label={t('nav.profile')}

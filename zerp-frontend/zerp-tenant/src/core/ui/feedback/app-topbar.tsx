@@ -7,6 +7,7 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded'
 import {
   AppBar,
+  Box,
   Button,
   CircularProgress,
   Divider,
@@ -218,11 +219,6 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
           {isMobile ? (
             <Stack alignItems="center" direction="row" gap={0.5}>
               {isAuthenticated && (
-                <Typography variant="body2" noWrap sx={{ maxWidth: 120 }}>
-                  {resolvedUsername}
-                </Typography>
-              )}
-              {isAuthenticated && (
                 <IconButton
                   aria-label={t('nav.profile')}
                   color="inherit"
@@ -302,6 +298,19 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
               },
             }}
           >
+            {isMobile && (
+              <Box sx={{ px: 2, py: 1.5 }}>
+                <Typography variant="subtitle2" fontWeight={700} noWrap>
+                  {resolvedUsername}
+                </Typography>
+                {session?.user?.email && (
+                  <Typography variant="caption" color="text.secondary" noWrap display="block">
+                    {session.user.email}
+                  </Typography>
+                )}
+                <Divider sx={{ mt: 1.5 }} />
+              </Box>
+            )}
             <MenuItem onClick={handleProfileClick}>
               <ListItemIcon>
                 <AccountCircleRoundedIcon fontSize="small" />

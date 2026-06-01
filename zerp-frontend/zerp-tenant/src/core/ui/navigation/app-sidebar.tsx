@@ -31,7 +31,7 @@ import {
 } from '@mui/material'
 import type { Route } from 'next'
 import { usePathname, useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { appConfig } from '@/core/config/app-config'
 import { useI18n } from '@/core/i18n/i18n-provider'
@@ -164,6 +164,10 @@ export function AppSidebar({ locale }: { locale: string }) {
   const isShopScope = scope.mode === 'SHOP'
   const sidebarSections = isShopScope ? SHOP_SIDEBAR_SECTIONS : GLOBAL_SIDEBAR_SECTIONS
 
+  useEffect(() => {
+    setIsExpanded(!isMobile)
+  }, [isMobile])
+
   const handleToggle = () => setIsExpanded((prev) => !prev)
 
   const renderAction = (action: SidebarAction, nested = false) => {
@@ -176,15 +180,15 @@ export function AppSidebar({ locale }: { locale: string }) {
         selected={isSelected}
         sx={{
           minHeight: 48,
-          justifyContent: isExpanded ? 'initial' : 'center',
-          px: isExpanded ? 2.5 : 1.5,
-          pl: isExpanded && nested ? 3.75 : undefined,
+          justifyContent: 'flex-start',
+          px: 0,
+          pl: isExpanded && nested ? 1.5 : 0,
         }}
       >
         <ListItemIcon
           sx={{
-            minWidth: 0,
-            mr: isExpanded ? 2 : 0,
+            minWidth: 64,
+            display: 'flex',
             justifyContent: 'center',
             color: isSelected ? 'primary.main' : 'inherit',
           }}
@@ -195,8 +199,14 @@ export function AppSidebar({ locale }: { locale: string }) {
           primary={t(action.labelKey)}
           sx={{
             opacity: isExpanded ? 1 : 0,
+            transition: theme.transitions.create('opacity', {
+              duration: theme.transitions.duration.shorter,
+            }),
             color: isSelected ? 'primary.main' : 'inherit',
-            '& .MuiTypography-root': { fontWeight: isSelected ? 600 : 400 },
+            '& .MuiTypography-root': {
+              fontWeight: isSelected ? 600 : 400,
+              whiteSpace: 'nowrap',
+            },
           }}
         />
       </ListItemButton>
@@ -254,32 +264,50 @@ export function AppSidebar({ locale }: { locale: string }) {
           display: 'flex',
           alignItems: 'center',
           minHeight: 64,
-          px: isExpanded ? 2 : 0,
-          justifyContent: isExpanded ? 'space-between' : 'center',
+          px: 0,
+          justifyContent: 'flex-start',
           borderBottom: '1px solid',
           borderColor: 'divider',
           overflow: 'hidden',
+          width: '100%',
         }}
       >
-        {isExpanded ? (
-          <>
-            <Stack direction="row" alignItems="center" gap={1.25}>
-              <StorefrontRoundedIcon color="primary" />
-              <Typography fontWeight={700} noWrap>
-                {appConfig.app.name}
-              </Typography>
-            </Stack>
-            <IconButton onClick={handleToggle} size="small">
-              <ChevronLeftIcon />
-            </IconButton>
-          </>
-        ) : (
-          <Tooltip title={appConfig.app.name} placement="right">
-            <IconButton onClick={handleToggle} size="small">
-              <StorefrontRoundedIcon color="primary" />
-            </IconButton>
-          </Tooltip>
-        )}
+        <Box
+          sx={{
+            minWidth: 64,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            cursor: 'pointer',
+          }}
+          onClick={!isExpanded ? handleToggle : undefined}
+        >
+          <StorefrontRoundedIcon color="primary" />
+        </Box>
+
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexGrow: 1,
+            pr: 1.5,
+            opacity: isExpanded ? 1 : 0,
+            transition: theme.transitions.create('opacity', {
+              duration: theme.transitions.duration.shorter,
+            }),
+            pointerEvents: isExpanded ? 'auto' : 'none',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <Typography fontWeight={700} noWrap>
+            {appConfig.app.name}
+          </Typography>
+          <IconButton onClick={handleToggle} size="small">
+            <ChevronLeftIcon />
+          </IconButton>
+        </Box>
       </Box>
 
       <List sx={{ pt: 1 }}>{renderAction(DASHBOARD_ACTION)}</List>
