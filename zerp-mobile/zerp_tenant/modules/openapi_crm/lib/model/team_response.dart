@@ -26,6 +26,7 @@ class TeamResponse extends Schema {
   /// Returns a new [TeamResponse] instance.
   TeamResponse({
     this.id,
+    this.tenantId,
     this.name,
     this.description,
     this.type,
@@ -35,6 +36,9 @@ class TeamResponse extends Schema {
 
   @JsonKey(name: r'id')
   final String? id;
+
+  @JsonKey(name: r'tenantId')
+  final String? tenantId;
 
   @JsonKey(name: r'name')
   final String? name;

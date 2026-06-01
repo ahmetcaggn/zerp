@@ -36,6 +36,8 @@ class AdminShopCreateRequestDTO extends Schema {
     this.phone,
     this.email,
     this.website,
+    this.latitude,
+    this.longitude,
   });
 
   @JsonKey(name: r'tenantId')
@@ -73,6 +75,12 @@ class AdminShopCreateRequestDTO extends Schema {
 
   @JsonKey(name: r'website')
   final String? website;
+
+  @JsonKey(name: r'latitude')
+  final double? latitude;
+
+  @JsonKey(name: r'longitude')
+  final double? longitude;
 
   /// The factory instance for creating [AdminShopCreateRequestDTO] from JSON.
   static const factory = AdminShopCreateRequestDTOFactory();

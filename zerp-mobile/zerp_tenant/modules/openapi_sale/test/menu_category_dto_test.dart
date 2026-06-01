@@ -30,6 +30,11 @@ void main() {
       // TODO
     });
 
+    // int displayOrder
+    test('to test the property `displayOrder`', () async {
+      // TODO
+    });
+
     // String menuId
     test('to test the property `menuId`', () async {
       // TODO

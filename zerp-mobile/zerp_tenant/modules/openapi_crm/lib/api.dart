@@ -51,7 +51,6 @@ export 'requests/team_tickets/add_ticket_comment_command.dart';
 export 'requests/team_tickets/assign_ticket_command.dart';
 export 'requests/team_tickets/change_ticket_priority_command.dart';
 export 'requests/team_tickets/change_ticket_status_command.dart';
-export 'requests/team_tickets/close_ticket_command.dart';
 export 'requests/team_tickets/list_assignment_team_candidates_command.dart';
 export 'requests/team_tickets/list_assignment_team_member_candidates_command.dart';
 export 'requests/team_tickets/unassign_ticket_command.dart';

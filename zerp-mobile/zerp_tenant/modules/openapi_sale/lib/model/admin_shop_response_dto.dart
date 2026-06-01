@@ -38,6 +38,8 @@ class AdminShopResponseDTO extends Schema {
     this.phone,
     this.email,
     this.website,
+    this.latitude,
+    this.longitude,
   });
 
   @JsonKey(name: r'id')
@@ -81,6 +83,12 @@ class AdminShopResponseDTO extends Schema {
 
   @JsonKey(name: r'website')
   final String? website;
+
+  @JsonKey(name: r'latitude')
+  final double? latitude;
+
+  @JsonKey(name: r'longitude')
+  final double? longitude;
 
   /// The factory instance for creating [AdminShopResponseDTO] from JSON.
   static const factory = AdminShopResponseDTOFactory();

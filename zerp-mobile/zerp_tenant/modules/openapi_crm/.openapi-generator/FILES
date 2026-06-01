@@ -33,7 +33,6 @@ doc/TeamTicketsAddTicketCommentApi.md
 doc/TeamTicketsAssignTicketApi.md
 doc/TeamTicketsChangeTicketPriorityApi.md
 doc/TeamTicketsChangeTicketStatusApi.md
-doc/TeamTicketsCloseTicketApi.md
 doc/TeamTicketsListAssignmentTeamCandidatesApi.md
 doc/TeamTicketsListAssignmentTeamMemberCandidatesApi.md
 doc/TeamTicketsUnassignTicketApi.md
@@ -107,7 +106,6 @@ lib/requests/team_tickets/add_ticket_comment_command.dart
 lib/requests/team_tickets/assign_ticket_command.dart
 lib/requests/team_tickets/change_ticket_priority_command.dart
 lib/requests/team_tickets/change_ticket_status_command.dart
-lib/requests/team_tickets/close_ticket_command.dart
 lib/requests/team_tickets/list_assignment_team_candidates_command.dart
 lib/requests/team_tickets/list_assignment_team_member_candidates_command.dart
 lib/requests/team_tickets/unassign_ticket_command.dart
@@ -169,7 +167,6 @@ test/team_tickets/add_ticket_comment_command_test.dart
 test/team_tickets/assign_ticket_command_test.dart
 test/team_tickets/change_ticket_priority_command_test.dart
 test/team_tickets/change_ticket_status_command_test.dart
-test/team_tickets/close_ticket_command_test.dart
 test/team_tickets/list_assignment_team_candidates_command_test.dart
 test/team_tickets/list_assignment_team_member_candidates_command_test.dart
 test/team_tickets/unassign_ticket_command_test.dart

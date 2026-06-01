@@ -38,6 +38,9 @@ class PublicShopDTO extends Schema {
     this.phone,
     this.email,
     this.website,
+    this.latitude,
+    this.longitude,
+    this.distanceKm,
   });
 
   @JsonKey(name: r'id')
@@ -81,6 +84,15 @@ class PublicShopDTO extends Schema {
 
   @JsonKey(name: r'website')
   final String? website;
+
+  @JsonKey(name: r'latitude')
+  final double? latitude;
+
+  @JsonKey(name: r'longitude')
+  final double? longitude;
+
+  @JsonKey(name: r'distanceKm')
+  final double? distanceKm;
 
   /// The factory instance for creating [PublicShopDTO] from JSON.
   static const factory = PublicShopDTOFactory();

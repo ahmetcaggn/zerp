@@ -38,6 +38,7 @@ doc/ApiResponseProductDTO.md
 doc/ApiResponseProductExtraOptionDTO.md
 doc/ApiResponseProductRecipeDTO.md
 doc/ApiResponsePublicCartOrderCreateResponse.md
+doc/ApiResponsePublicShopFeedResponseDTO.md
 doc/ApiResponsePublicShopMenuResponseDTO.md
 doc/ApiResponseShopDTO.md
 doc/ApiResponseShopTableDTO.md
@@ -136,8 +137,12 @@ doc/PublicSaleCreateCartOrderApi.md
 doc/PublicSaleGetActiveMenuApi.md
 doc/PublicSaleGetCategoryMenuItemsApi.md
 doc/PublicSaleGetMenuItemImageApi.md
+doc/PublicSaleGetNearbyShopsApi.md
+doc/PublicSaleGetShopImage1Api.md
 doc/PublicSaleGetShopsApi.md
+doc/PublicSaleGetShopsFeedApi.md
 doc/PublicShopDTO.md
+doc/PublicShopFeedResponseDTO.md
 doc/PublicShopMenuResponseDTO.md
 doc/ShopCreateShopApi.md
 doc/ShopDTO.md
@@ -154,6 +159,9 @@ doc/ShopGetDashboardOverviewApi.md
 doc/ShopGetListShopApi.md
 doc/ShopGetManyShopApi.md
 doc/ShopGetOneShopApi.md
+doc/ShopGetShopImageApi.md
+doc/ShopGetTenantDashboardOverviewApi.md
+doc/ShopImageUploadResponseDTO.md
 doc/ShopPatchManyShopApi.md
 doc/ShopPatchShopApi.md
 doc/ShopTableCreateDTO.md
@@ -169,6 +177,7 @@ doc/ShopTablePatchShopTableApi.md
 doc/ShopTableUpdateDTO.md
 doc/ShopTableUpdateShopTableApi.md
 doc/ShopUpdateShopApi.md
+doc/ShopUploadShopImageApi.md
 doc/TableOrderCreateDTO.md
 doc/TableOrderCreateTableOrderApi.md
 doc/TableOrderDTO.md
@@ -185,6 +194,12 @@ doc/TableOrderPatchTableOrderApi.md
 doc/TableOrderPreviewPublicCartOrderApi.md
 doc/TableOrderUpdateDTO.md
 doc/TableOrderUpdateTableOrderApi.md
+doc/TenantDashboardCityDistributionDTO.md
+doc/TenantDashboardMetricsDeltaDTO.md
+doc/TenantDashboardOverviewDTO.md
+doc/TenantDashboardStorePerformanceDTO.md
+doc/TenantDashboardSummaryDTO.md
+doc/TenantDashboardTrendPointDTO.md
 lib/api.dart
 lib/base/api_config.dart
 lib/base/base_request.dart
@@ -214,6 +229,7 @@ lib/model/api_response_product_dto.dart
 lib/model/api_response_product_extra_option_dto.dart
 lib/model/api_response_product_recipe_dto.dart
 lib/model/api_response_public_cart_order_create_response.dart
+lib/model/api_response_public_shop_feed_response_dto.dart
 lib/model/api_response_public_shop_menu_response_dto.dart
 lib/model/api_response_shop_dto.dart
 lib/model/api_response_shop_table_dto.dart
@@ -254,6 +270,7 @@ lib/model/public_cart_order_preview_item_dto.dart
 lib/model/public_menu_category_dto.dart
 lib/model/public_menu_item_dto.dart
 lib/model/public_shop_dto.dart
+lib/model/public_shop_feed_response_dto.dart
 lib/model/public_shop_menu_response_dto.dart
 lib/model/shop_dashboard_category_sales_dto.dart
 lib/model/shop_dashboard_low_stock_dto.dart
@@ -263,6 +280,7 @@ lib/model/shop_dashboard_sales_channel_dto.dart
 lib/model/shop_dashboard_top_product_dto.dart
 lib/model/shop_dashboard_trend_point_dto.dart
 lib/model/shop_dto.dart
+lib/model/shop_image_upload_response_dto.dart
 lib/model/shop_table_create_dto.dart
 lib/model/shop_table_dto.dart
 lib/model/shop_table_update_dto.dart
@@ -272,6 +290,12 @@ lib/model/table_order_item_create_dto.dart
 lib/model/table_order_item_dto.dart
 lib/model/table_order_item_selected_extra_option_dto.dart
 lib/model/table_order_update_dto.dart
+lib/model/tenant_dashboard_city_distribution_dto.dart
+lib/model/tenant_dashboard_metrics_delta_dto.dart
+lib/model/tenant_dashboard_overview_dto.dart
+lib/model/tenant_dashboard_store_performance_dto.dart
+lib/model/tenant_dashboard_summary_dto.dart
+lib/model/tenant_dashboard_trend_point_dto.dart
 lib/requests/admin_shops/check_shop_name_command.dart
 lib/requests/admin_shops/create_admin_shop_command.dart
 lib/requests/admin_shops/delete_admin_shop_command.dart
@@ -341,7 +365,10 @@ lib/requests/public_sale/create_cart_order_command.dart
 lib/requests/public_sale/get_active_menu_command.dart
 lib/requests/public_sale/get_category_menu_items_command.dart
 lib/requests/public_sale/get_menu_item_image_command.dart
+lib/requests/public_sale/get_nearby_shops_command.dart
+lib/requests/public_sale/get_shop_image1_command.dart
 lib/requests/public_sale/get_shops_command.dart
+lib/requests/public_sale/get_shops_feed_command.dart
 lib/requests/shop/create_shop_command.dart
 lib/requests/shop/delete_many_shop_command.dart
 lib/requests/shop/delete_shop_command.dart
@@ -349,9 +376,12 @@ lib/requests/shop/get_dashboard_overview_command.dart
 lib/requests/shop/get_list_shop_command.dart
 lib/requests/shop/get_many_shop_command.dart
 lib/requests/shop/get_one_shop_command.dart
+lib/requests/shop/get_shop_image_command.dart
+lib/requests/shop/get_tenant_dashboard_overview_command.dart
 lib/requests/shop/patch_many_shop_command.dart
 lib/requests/shop/patch_shop_command.dart
 lib/requests/shop/update_shop_command.dart
+lib/requests/shop/upload_shop_image_command.dart
 lib/requests/shop_table/create_shop_table_command.dart
 lib/requests/shop_table/delete_many_shop_table_command.dart
 lib/requests/shop_table/delete_shop_table_command.dart
@@ -408,6 +438,7 @@ test/api_response_product_dto_test.dart
 test/api_response_product_extra_option_dto_test.dart
 test/api_response_product_recipe_dto_test.dart
 test/api_response_public_cart_order_create_response_test.dart
+test/api_response_public_shop_feed_response_dto_test.dart
 test/api_response_public_shop_menu_response_dto_test.dart
 test/api_response_shop_dto_test.dart
 test/api_response_shop_table_dto_test.dart
@@ -506,8 +537,12 @@ test/public_sale/create_cart_order_command_test.dart
 test/public_sale/get_active_menu_command_test.dart
 test/public_sale/get_category_menu_items_command_test.dart
 test/public_sale/get_menu_item_image_command_test.dart
+test/public_sale/get_nearby_shops_command_test.dart
+test/public_sale/get_shop_image1_command_test.dart
 test/public_sale/get_shops_command_test.dart
+test/public_sale/get_shops_feed_command_test.dart
 test/public_shop_dto_test.dart
+test/public_shop_feed_response_dto_test.dart
 test/public_shop_menu_response_dto_test.dart
 test/shop/create_shop_command_test.dart
 test/shop/delete_many_shop_command_test.dart
@@ -516,9 +551,12 @@ test/shop/get_dashboard_overview_command_test.dart
 test/shop/get_list_shop_command_test.dart
 test/shop/get_many_shop_command_test.dart
 test/shop/get_one_shop_command_test.dart
+test/shop/get_shop_image_command_test.dart
+test/shop/get_tenant_dashboard_overview_command_test.dart
 test/shop/patch_many_shop_command_test.dart
 test/shop/patch_shop_command_test.dart
 test/shop/update_shop_command_test.dart
+test/shop/upload_shop_image_command_test.dart
 test/shop_dashboard_category_sales_dto_test.dart
 test/shop_dashboard_low_stock_dto_test.dart
 test/shop_dashboard_overview_dto_test.dart
@@ -527,6 +565,7 @@ test/shop_dashboard_sales_channel_dto_test.dart
 test/shop_dashboard_top_product_dto_test.dart
 test/shop_dashboard_trend_point_dto_test.dart
 test/shop_dto_test.dart
+test/shop_image_upload_response_dto_test.dart
 test/shop_table/create_shop_table_command_test.dart
 test/shop_table/delete_many_shop_table_command_test.dart
 test/shop_table/delete_shop_table_command_test.dart
@@ -555,3 +594,9 @@ test/table_order_item_create_dto_test.dart
 test/table_order_item_dto_test.dart
 test/table_order_item_selected_extra_option_dto_test.dart
 test/table_order_update_dto_test.dart
+test/tenant_dashboard_city_distribution_dto_test.dart
+test/tenant_dashboard_metrics_delta_dto_test.dart
+test/tenant_dashboard_overview_dto_test.dart
+test/tenant_dashboard_store_performance_dto_test.dart
+test/tenant_dashboard_summary_dto_test.dart
+test/tenant_dashboard_trend_point_dto_test.dart

@@ -11,13 +11,13 @@ import 'package:dart_network_layer_core/dart_network_layer_core.dart';
 
 import '../../base/base_request.dart';
 
-import '../../model/ticket_response.dart';
+import '../../model/api_response_void.dart';
 
 
 ///
-/// POST /crm/tickets/{id}/close
-class CloseTicketCommand extends OpenapiDefinitionBaseRequest<TicketResponse> {
-  CloseTicketCommand({
+/// DELETE /user/permission-groups/{id}
+class DeleteCustomGroupCommand extends OpenapiDefinitionBaseRequest<ApiResponseVoid> {
+  DeleteCustomGroupCommand({
     required this.id,
   });
 
@@ -25,23 +25,23 @@ class CloseTicketCommand extends OpenapiDefinitionBaseRequest<TicketResponse> {
 
   @override
   String get path {
-    var p = r'/crm/tickets/{id}/close';
+    var p = r'/user/permission-groups/{id}';
     p = p.replaceAll('{id}', id);
     return p;
   }
 
   @override
-  HttpRequestMethod get method => HttpRequestMethod.post;
+  HttpRequestMethod get method => HttpRequestMethod.delete;
 
   @override
-  SchemaFactory<TicketResponse> get defaultResponseFactory => TicketResponse.factory;
+  SchemaFactory<ApiResponseVoid> get defaultResponseFactory => ApiResponseVoid.factory;
 
   @override
   SchemaFactory get defaultErrorResponseFactory => AnyDataSchema.factory;
 
   @override
   Map<int, SchemaFactory> get responseFactories => {
-    200: TicketResponse.factory,
+    200: ApiResponseVoid.factory,
   };
 
   @override

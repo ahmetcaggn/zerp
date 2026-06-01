@@ -27,6 +27,7 @@ class TeamMemberResponse extends Schema {
     this.id,
     this.userId,
     this.displayName,
+    this.username,
     this.email,
     this.role,
     this.joinedAt,
@@ -40,6 +41,9 @@ class TeamMemberResponse extends Schema {
 
   @JsonKey(name: r'displayName')
   final String? displayName;
+
+  @JsonKey(name: r'username')
+  final String? username;
 
   @JsonKey(name: r'email')
   final String? email;

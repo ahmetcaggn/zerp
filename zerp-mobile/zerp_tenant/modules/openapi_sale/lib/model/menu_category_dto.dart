@@ -27,6 +27,7 @@ class MenuCategoryDTO extends Schema {
     this.id,
     this.name,
     this.description,
+    this.displayOrder,
     this.menuId,
     this.menuName,
     this.tenantId,
@@ -40,6 +41,9 @@ class MenuCategoryDTO extends Schema {
 
   @JsonKey(name: r'description')
   final String? description;
+
+  @JsonKey(name: r'displayOrder')
+  final int? displayOrder;
 
   @JsonKey(name: r'menuId')
   final String? menuId;

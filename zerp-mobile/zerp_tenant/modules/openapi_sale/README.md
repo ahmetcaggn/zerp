@@ -130,7 +130,10 @@ Class | Method | HTTP request | Description
 *PublicSaleGetActiveMenuApi* | [**getActiveMenu**](doc//PublicSaleGetActiveMenuApi.md#) | **GET** /sale/public/shops/{shopId}/menu | 
 *PublicSaleGetCategoryMenuItemsApi* | [**getCategoryMenuItems**](doc//PublicSaleGetCategoryMenuItemsApi.md#) | **GET** /sale/public/shops/{shopId}/categories/{categoryId}/menu-items | 
 *PublicSaleGetMenuItemImageApi* | [**getMenuItemImage**](doc//PublicSaleGetMenuItemImageApi.md#) | **GET** /sale/public/images/{imageId} | 
+*PublicSaleGetNearbyShopsApi* | [**getNearbyShops**](doc//PublicSaleGetNearbyShopsApi.md#) | **GET** /sale/public/shops/nearby | 
+*PublicSaleGetShopImage1Api* | [**getShopImage1**](doc//PublicSaleGetShopImage1Api.md#) | **GET** /sale/public/shops/{shopId}/image | 
 *PublicSaleGetShopsApi* | [**getShops**](doc//PublicSaleGetShopsApi.md#) | **GET** /sale/public/shops | 
+*PublicSaleGetShopsFeedApi* | [**getShopsFeed**](doc//PublicSaleGetShopsFeedApi.md#) | **GET** /sale/public/shops/feed | 
 *ShopCreateShopApi* | [**createShop**](doc//ShopCreateShopApi.md#) | **POST** /sale/shops | Create: Create a new entity
 *ShopDeleteManyShopApi* | [**deleteManyShop**](doc//ShopDeleteManyShopApi.md#) | **DELETE** /sale/shops | DeleteMany: Delete multiple entities
 *ShopDeleteShopApi* | [**deleteShop**](doc//ShopDeleteShopApi.md#) | **DELETE** /sale/shops/{id} | Delete: Delete a single entity
@@ -138,9 +141,12 @@ Class | Method | HTTP request | Description
 *ShopGetListShopApi* | [**getListShop**](doc//ShopGetListShopApi.md#) | **GET** /sale/shops | GetList: Get paginated list of entities with filtering
 *ShopGetManyShopApi* | [**getManyShop**](doc//ShopGetManyShopApi.md#) | **GET** /sale/shops/many | GetMany: Get multiple entities by IDs
 *ShopGetOneShopApi* | [**getOneShop**](doc//ShopGetOneShopApi.md#) | **GET** /sale/shops/{id} | GetOne: Get single entity by ID
+*ShopGetShopImageApi* | [**getShopImage**](doc//ShopGetShopImageApi.md#) | **GET** /sale/shops/{shopId}/image | 
+*ShopGetTenantDashboardOverviewApi* | [**getTenantDashboardOverview**](doc//ShopGetTenantDashboardOverviewApi.md#) | **GET** /sale/shops/dashboard-overview | 
 *ShopPatchManyShopApi* | [**patchManyShop**](doc//ShopPatchManyShopApi.md#) | **PATCH** /sale/shops | UpdateMany: Update multiple entities
 *ShopPatchShopApi* | [**patchShop**](doc//ShopPatchShopApi.md#) | **PATCH** /sale/shops/{id} | Update: Update an existing entity
 *ShopUpdateShopApi* | [**updateShop**](doc//ShopUpdateShopApi.md#) | **PUT** /sale/shops/{id} | Update: Update an existing entity
+*ShopUploadShopImageApi* | [**uploadShopImage**](doc//ShopUploadShopImageApi.md#) | **POST** /sale/shops/{shopId}/image | 
 *ShopTableCreateShopTableApi* | [**createShopTable**](doc//ShopTableCreateShopTableApi.md#) | **POST** /sale/tables | Create: Create a new entity
 *ShopTableDeleteManyShopTableApi* | [**deleteManyShopTable**](doc//ShopTableDeleteManyShopTableApi.md#) | **DELETE** /sale/tables | DeleteMany: Delete multiple entities
 *ShopTableDeleteShopTableApi* | [**deleteShopTable**](doc//ShopTableDeleteShopTableApi.md#) | **DELETE** /sale/tables/{id} | Delete: Delete a single entity
@@ -190,6 +196,7 @@ Class | Method | HTTP request | Description
  - [ApiResponseProductExtraOptionDTO](doc//ApiResponseProductExtraOptionDTO.md)
  - [ApiResponseProductRecipeDTO](doc//ApiResponseProductRecipeDTO.md)
  - [ApiResponsePublicCartOrderCreateResponse](doc//ApiResponsePublicCartOrderCreateResponse.md)
+ - [ApiResponsePublicShopFeedResponseDTO](doc//ApiResponsePublicShopFeedResponseDTO.md)
  - [ApiResponsePublicShopMenuResponseDTO](doc//ApiResponsePublicShopMenuResponseDTO.md)
  - [ApiResponseShopDTO](doc//ApiResponseShopDTO.md)
  - [ApiResponseShopTableDTO](doc//ApiResponseShopTableDTO.md)
@@ -230,6 +237,7 @@ Class | Method | HTTP request | Description
  - [PublicMenuCategoryDTO](doc//PublicMenuCategoryDTO.md)
  - [PublicMenuItemDTO](doc//PublicMenuItemDTO.md)
  - [PublicShopDTO](doc//PublicShopDTO.md)
+ - [PublicShopFeedResponseDTO](doc//PublicShopFeedResponseDTO.md)
  - [PublicShopMenuResponseDTO](doc//PublicShopMenuResponseDTO.md)
  - [ShopDTO](doc//ShopDTO.md)
  - [ShopDashboardCategorySalesDTO](doc//ShopDashboardCategorySalesDTO.md)
@@ -239,6 +247,7 @@ Class | Method | HTTP request | Description
  - [ShopDashboardSalesChannelDTO](doc//ShopDashboardSalesChannelDTO.md)
  - [ShopDashboardTopProductDTO](doc//ShopDashboardTopProductDTO.md)
  - [ShopDashboardTrendPointDTO](doc//ShopDashboardTrendPointDTO.md)
+ - [ShopImageUploadResponseDTO](doc//ShopImageUploadResponseDTO.md)
  - [ShopTableCreateDTO](doc//ShopTableCreateDTO.md)
  - [ShopTableDTO](doc//ShopTableDTO.md)
  - [ShopTableUpdateDTO](doc//ShopTableUpdateDTO.md)
@@ -248,6 +257,12 @@ Class | Method | HTTP request | Description
  - [TableOrderItemDTO](doc//TableOrderItemDTO.md)
  - [TableOrderItemSelectedExtraOptionDTO](doc//TableOrderItemSelectedExtraOptionDTO.md)
  - [TableOrderUpdateDTO](doc//TableOrderUpdateDTO.md)
+ - [TenantDashboardCityDistributionDTO](doc//TenantDashboardCityDistributionDTO.md)
+ - [TenantDashboardMetricsDeltaDTO](doc//TenantDashboardMetricsDeltaDTO.md)
+ - [TenantDashboardOverviewDTO](doc//TenantDashboardOverviewDTO.md)
+ - [TenantDashboardStorePerformanceDTO](doc//TenantDashboardStorePerformanceDTO.md)
+ - [TenantDashboardSummaryDTO](doc//TenantDashboardSummaryDTO.md)
+ - [TenantDashboardTrendPointDTO](doc//TenantDashboardTrendPointDTO.md)
 
 
 ## Documentation For Authorization

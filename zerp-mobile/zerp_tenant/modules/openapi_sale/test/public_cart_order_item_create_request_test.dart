@@ -25,11 +25,6 @@ void main() {
       // TODO
     });
 
-    // String notes
-    test('to test the property `notes`', () async {
-      // TODO
-    });
-
 
   });
 

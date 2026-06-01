@@ -1,34 +1,34 @@
-# openapi_crm.api.TeamTicketsCloseTicketApi
+# openapi_user.api.AdminTenantsGetTenantImageApi
 
 ## Load the API package
 ```dart
-import 'package:openapi_crm/api.dart';
+import 'package:openapi_user/api.dart';
 ```
 
 All URIs are relative to *https://api.zeerp.tech*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**closeTicket**](TeamTicketsCloseTicketApi.md#) | **POST** /crm/tickets/{id}/close | 
+[**getTenantImage**](AdminTenantsGetTenantImageApi.md#) | **GET** /user/tenants/{id}/image | 
 
 
-# **closeTicket**
-> TicketResponse closeTicket(id)
+# **getTenantImage**
+> MultipartFileSchema getTenantImage(id)
 
 
 
 ### Example
 ```dart
-import 'package:openapi_crm/api.dart';
+import 'package:openapi_user/api.dart';
 
-final api_instance = TeamTicketsCloseTicketApi();
+final api_instance = AdminTenantsGetTenantImageApi();
 final id = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
 
 try {
-    final result = api_instance.closeTicket(id);
+    final result = api_instance.getTenantImage(id);
     print(result);
 } catch (e) {
-    print('Exception when calling TeamTicketsCloseTicketApi->closeTicket: $e\n');
+    print('Exception when calling AdminTenantsGetTenantImageApi->getTenantImage: $e\n');
 }
 ```
 
@@ -40,7 +40,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**TicketResponse**](TicketResponse.md)
+[**MultipartFileSchema**](MultipartFileSchema.md)
 
 ### Authorization
 

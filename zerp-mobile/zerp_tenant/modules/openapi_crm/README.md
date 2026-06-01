@@ -64,7 +64,6 @@ Class | Method | HTTP request | Description
 *TeamTicketsAssignTicketApi* | [**assignTicket**](doc//TeamTicketsAssignTicketApi.md#) | **POST** /crm/tickets/{id}/assign | 
 *TeamTicketsChangeTicketPriorityApi* | [**changeTicketPriority**](doc//TeamTicketsChangeTicketPriorityApi.md#) | **PATCH** /crm/tickets/{id}/priority | 
 *TeamTicketsChangeTicketStatusApi* | [**changeTicketStatus**](doc//TeamTicketsChangeTicketStatusApi.md#) | **PATCH** /crm/tickets/{id}/status | 
-*TeamTicketsCloseTicketApi* | [**closeTicket**](doc//TeamTicketsCloseTicketApi.md#) | **POST** /crm/tickets/{id}/close | 
 *TeamTicketsListAssignmentTeamCandidatesApi* | [**listAssignmentTeamCandidates**](doc//TeamTicketsListAssignmentTeamCandidatesApi.md#) | **GET** /crm/tickets/{id}/assignment-candidates/teams | 
 *TeamTicketsListAssignmentTeamMemberCandidatesApi* | [**listAssignmentTeamMemberCandidates**](doc//TeamTicketsListAssignmentTeamMemberCandidatesApi.md#) | **GET** /crm/tickets/{id}/assignment-candidates/members | 
 *TeamTicketsUnassignTicketApi* | [**unassignTicket**](doc//TeamTicketsUnassignTicketApi.md#) | **DELETE** /crm/tickets/{id}/assign | 

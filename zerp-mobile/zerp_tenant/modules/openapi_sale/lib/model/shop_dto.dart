@@ -27,6 +27,17 @@ class ShopDTO extends Schema {
     this.id,
     this.name,
     this.description,
+    this.imageId,
+    this.address,
+    this.city,
+    this.state,
+    this.country,
+    this.postalCode,
+    this.phone,
+    this.email,
+    this.website,
+    this.latitude,
+    this.longitude,
     this.defaultMenuLanguage,
     this.tenantId,
   });
@@ -39,6 +50,39 @@ class ShopDTO extends Schema {
 
   @JsonKey(name: r'description')
   final String? description;
+
+  @JsonKey(name: r'imageId')
+  final String? imageId;
+
+  @JsonKey(name: r'address')
+  final String? address;
+
+  @JsonKey(name: r'city')
+  final String? city;
+
+  @JsonKey(name: r'state')
+  final String? state;
+
+  @JsonKey(name: r'country')
+  final String? country;
+
+  @JsonKey(name: r'postalCode')
+  final String? postalCode;
+
+  @JsonKey(name: r'phone')
+  final String? phone;
+
+  @JsonKey(name: r'email')
+  final String? email;
+
+  @JsonKey(name: r'website')
+  final String? website;
+
+  @JsonKey(name: r'latitude')
+  final double? latitude;
+
+  @JsonKey(name: r'longitude')
+  final double? longitude;
 
   @JsonKey(name: r'defaultMenuLanguage')
   final ShopDTODefaultMenuLanguageEnum? defaultMenuLanguage;

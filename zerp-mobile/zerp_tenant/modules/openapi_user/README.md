@@ -66,9 +66,22 @@ Class | Method | HTTP request | Description
 *AdminTenantsGetListAdminTenantsApi* | [**getListAdminTenants**](doc//AdminTenantsGetListAdminTenantsApi.md#) | **GET** /user/tenants | GetList: Get paginated list of entities with filtering
 *AdminTenantsGetManyAdminTenantsApi* | [**getManyAdminTenants**](doc//AdminTenantsGetManyAdminTenantsApi.md#) | **GET** /user/tenants/many | GetMany: Get multiple entities by IDs
 *AdminTenantsGetOneAdminTenantApi* | [**getOneAdminTenant**](doc//AdminTenantsGetOneAdminTenantApi.md#) | **GET** /user/tenants/{id} | GetOne: Get single entity by ID
+*AdminTenantsGetTenantImageApi* | [**getTenantImage**](doc//AdminTenantsGetTenantImageApi.md#) | **GET** /user/tenants/{id}/image | 
 *AdminTenantsPatchAdminTenantApi* | [**patchAdminTenant**](doc//AdminTenantsPatchAdminTenantApi.md#) | **PATCH** /user/tenants/{id} | Update: Update an existing entity
 *AdminTenantsPatchManyAdminTenantsApi* | [**patchManyAdminTenants**](doc//AdminTenantsPatchManyAdminTenantsApi.md#) | **PATCH** /user/tenants | UpdateMany: Update multiple entities
 *AdminTenantsUpdateAdminTenantApi* | [**updateAdminTenant**](doc//AdminTenantsUpdateAdminTenantApi.md#) | **PUT** /user/tenants/{id} | Update: Update an existing entity
+*AdminTenantsUploadTenantImageApi* | [**uploadTenantImage**](doc//AdminTenantsUploadTenantImageApi.md#) | **POST** /user/tenants/{id}/image | 
+*PermissionGroupsAssignGroupApi* | [**assignGroup**](doc//PermissionGroupsAssignGroupApi.md#) | **POST** /user/permission-groups/assign | 
+*PermissionGroupsCreateCustomGroupApi* | [**createCustomGroup**](doc//PermissionGroupsCreateCustomGroupApi.md#) | **POST** /user/permission-groups | 
+*PermissionGroupsDeleteCustomGroupApi* | [**deleteCustomGroup**](doc//PermissionGroupsDeleteCustomGroupApi.md#) | **DELETE** /user/permission-groups/{id} | 
+*PermissionGroupsGetCustomGroupApi* | [**getCustomGroup**](doc//PermissionGroupsGetCustomGroupApi.md#) | **GET** /user/permission-groups/{id} | 
+*PermissionGroupsGetCustomGroupsApi* | [**getCustomGroups**](doc//PermissionGroupsGetCustomGroupsApi.md#) | **GET** /user/permission-groups | 
+*PermissionGroupsGetPredefinedGroupApi* | [**getPredefinedGroup**](doc//PermissionGroupsGetPredefinedGroupApi.md#) | **GET** /user/permission-groups/predefined/{code} | 
+*PermissionGroupsGetPredefinedGroupsApi* | [**getPredefinedGroups**](doc//PermissionGroupsGetPredefinedGroupsApi.md#) | **GET** /user/permission-groups/predefined | 
+*PermissionGroupsListAssignmentsByUserApi* | [**listAssignmentsByUser**](doc//PermissionGroupsListAssignmentsByUserApi.md#) | **GET** /user/permission-groups/assignments | 
+*PermissionGroupsPatchCustomGroupApi* | [**patchCustomGroup**](doc//PermissionGroupsPatchCustomGroupApi.md#) | **PATCH** /user/permission-groups/{id} | 
+*PermissionGroupsRevokeAssignmentApi* | [**revokeAssignment**](doc//PermissionGroupsRevokeAssignmentApi.md#) | **DELETE** /user/permission-groups/assignments/{assignmentId} | 
+*PermissionGroupsUpdateCustomGroupApi* | [**updateCustomGroup**](doc//PermissionGroupsUpdateCustomGroupApi.md#) | **PUT** /user/permission-groups/{id} | 
 *PermissionsCreatePermissionApi* | [**createPermission**](doc//PermissionsCreatePermissionApi.md#) | **POST** /user/permissions | Create: Create a new entity
 *PermissionsDeleteManyPermissionsApi* | [**deleteManyPermissions**](doc//PermissionsDeleteManyPermissionsApi.md#) | **DELETE** /user/permissions | DeleteMany: Delete multiple entities
 *PermissionsDeletePermissionApi* | [**deletePermission**](doc//PermissionsDeletePermissionApi.md#) | **DELETE** /user/permissions/{id} | Delete: Delete a single entity
@@ -82,6 +95,7 @@ Class | Method | HTTP request | Description
 *PermissionsUpdatePermissionApi* | [**updatePermission**](doc//PermissionsUpdatePermissionApi.md#) | **PUT** /user/permissions/{id} | Update: Update an existing entity
 *PermittablesGetListPermittablesApi* | [**getListPermittables**](doc//PermittablesGetListPermittablesApi.md#) | **GET** /user/permittables | GetList: Get paginated list of entities with filtering
 *UsernamesCheckUsernameApi* | [**checkUsername**](doc//UsernamesCheckUsernameApi.md#) | **GET** /user/usernames/check | 
+*UsersGetCurrentUserApi* | [**getCurrentUser**](doc//UsersGetCurrentUserApi.md#) | **GET** /user/me | Get currently authenticated user profile
 *UsersGetListUsersApi* | [**getListUsers**](doc//UsersGetListUsersApi.md#) | **GET** /user | GetList: Get paginated list of entities with filtering
 *UsersGetManyUsersApi* | [**getManyUsers**](doc//UsersGetManyUsersApi.md#) | **GET** /user/many | GetMany: Get multiple entities by IDs
 *UsersGetOneUserApi* | [**getOneUser**](doc//UsersGetOneUserApi.md#) | **GET** /user/{id} | GetOne: Get single entity by ID
@@ -90,13 +104,19 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [ApiResponseListLong](doc//ApiResponseListLong.md)
+ - [ApiResponseListPermissionGroupAssignmentResponseDTO](doc//ApiResponseListPermissionGroupAssignmentResponseDTO.md)
+ - [ApiResponseListPermissionGroupResponseDTO](doc//ApiResponseListPermissionGroupResponseDTO.md)
  - [ApiResponseListPermissionResponse](doc//ApiResponseListPermissionResponse.md)
  - [ApiResponseListPermittableResponseDTO](doc//ApiResponseListPermittableResponseDTO.md)
  - [ApiResponseListTenantResponseDTO](doc//ApiResponseListTenantResponseDTO.md)
  - [ApiResponseListUUID](doc//ApiResponseListUUID.md)
  - [ApiResponseListUserResponseDTO](doc//ApiResponseListUserResponseDTO.md)
  - [ApiResponseMapPermissionActionListPermissionTargetType](doc//ApiResponseMapPermissionActionListPermissionTargetType.md)
+ - [ApiResponsePermissionGroupAssignResponseDTO](doc//ApiResponsePermissionGroupAssignResponseDTO.md)
+ - [ApiResponsePermissionGroupAssignmentRevokeResponseDTO](doc//ApiResponsePermissionGroupAssignmentRevokeResponseDTO.md)
+ - [ApiResponsePermissionGroupResponseDTO](doc//ApiResponsePermissionGroupResponseDTO.md)
  - [ApiResponsePermissionResponse](doc//ApiResponsePermissionResponse.md)
+ - [ApiResponseTenantImageUploadResponseDTO](doc//ApiResponseTenantImageUploadResponseDTO.md)
  - [ApiResponseTenantNameCheckResponseDTO](doc//ApiResponseTenantNameCheckResponseDTO.md)
  - [ApiResponseTenantResponseDTO](doc//ApiResponseTenantResponseDTO.md)
  - [ApiResponseUserResponseDTO](doc//ApiResponseUserResponseDTO.md)
@@ -105,10 +125,19 @@ Class | Method | HTTP request | Description
  - [Meta](doc//Meta.md)
  - [Parameter](doc//Parameter.md)
  - [PermissionCreateRequestDTO](doc//PermissionCreateRequestDTO.md)
+ - [PermissionGroupAssignRequestDTO](doc//PermissionGroupAssignRequestDTO.md)
+ - [PermissionGroupAssignResponseDTO](doc//PermissionGroupAssignResponseDTO.md)
+ - [PermissionGroupAssignmentResponseDTO](doc//PermissionGroupAssignmentResponseDTO.md)
+ - [PermissionGroupAssignmentRevokeResponseDTO](doc//PermissionGroupAssignmentRevokeResponseDTO.md)
+ - [PermissionGroupCreateRequestDTO](doc//PermissionGroupCreateRequestDTO.md)
+ - [PermissionGroupPatchRequestDTO](doc//PermissionGroupPatchRequestDTO.md)
+ - [PermissionGroupResponseDTO](doc//PermissionGroupResponseDTO.md)
+ - [PermissionGroupUpdateRequestDTO](doc//PermissionGroupUpdateRequestDTO.md)
  - [PermissionResponse](doc//PermissionResponse.md)
  - [PermissionUpdateRequest](doc//PermissionUpdateRequest.md)
  - [PermittableResponseDTO](doc//PermittableResponseDTO.md)
  - [TenantCreateRequestDTO](doc//TenantCreateRequestDTO.md)
+ - [TenantImageUploadResponseDTO](doc//TenantImageUploadResponseDTO.md)
  - [TenantNameCheckResponseDTO](doc//TenantNameCheckResponseDTO.md)
  - [TenantResponseDTO](doc//TenantResponseDTO.md)
  - [TenantUpdateRequestDTO](doc//TenantUpdateRequestDTO.md)

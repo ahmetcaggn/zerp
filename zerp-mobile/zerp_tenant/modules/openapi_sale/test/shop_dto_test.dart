@@ -30,6 +30,61 @@ void main() {
       // TODO
     });
 
+    // String imageId
+    test('to test the property `imageId`', () async {
+      // TODO
+    });
+
+    // String address
+    test('to test the property `address`', () async {
+      // TODO
+    });
+
+    // String city
+    test('to test the property `city`', () async {
+      // TODO
+    });
+
+    // String state
+    test('to test the property `state`', () async {
+      // TODO
+    });
+
+    // String country
+    test('to test the property `country`', () async {
+      // TODO
+    });
+
+    // String postalCode
+    test('to test the property `postalCode`', () async {
+      // TODO
+    });
+
+    // String phone
+    test('to test the property `phone`', () async {
+      // TODO
+    });
+
+    // String email
+    test('to test the property `email`', () async {
+      // TODO
+    });
+
+    // String website
+    test('to test the property `website`', () async {
+      // TODO
+    });
+
+    // double latitude
+    test('to test the property `latitude`', () async {
+      // TODO
+    });
+
+    // double longitude
+    test('to test the property `longitude`', () async {
+      // TODO
+    });
+
     // String defaultMenuLanguage
     test('to test the property `defaultMenuLanguage`', () async {
       // TODO

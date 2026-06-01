@@ -7,17 +7,17 @@
 // ignore_for_file: constant_identifier_names
 // ignore_for_file: lines_longer_than_80_chars
 
-import 'package:openapi_crm/api.dart';
+import 'package:openapi_user/api.dart';
 import 'package:test/test.dart';
 
 
-/// tests for TeamTicketsCloseTicketApi
+/// tests for PermissionGroupsDeleteCustomGroupApi
 void main() {
-  // final instance = TeamTicketsCloseTicketApi();
+  // final instance = PermissionGroupsDeleteCustomGroupApi();
 
-  group('tests for TeamTicketsCloseTicketApi', () {
-    //Future<TicketResponse> closeTicket(String id) async
-    test('test closeTicket', () async {
+  group('tests for PermissionGroupsDeleteCustomGroupApi', () {
+    //Future<ApiResponseVoid> deleteCustomGroup(String id) async
+    test('test deleteCustomGroup', () async {
       // TODO
     });
 

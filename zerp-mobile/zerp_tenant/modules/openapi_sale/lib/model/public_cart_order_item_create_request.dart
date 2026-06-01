@@ -26,7 +26,6 @@ class PublicCartOrderItemCreateRequest extends Schema {
   PublicCartOrderItemCreateRequest({
     this.menuItemId,
     this.quantity,
-    this.notes,
   });
 
   @JsonKey(name: r'menuItemId')
@@ -34,9 +33,6 @@ class PublicCartOrderItemCreateRequest extends Schema {
 
   @JsonKey(name: r'quantity')
   final int? quantity;
-
-  @JsonKey(name: r'notes')
-  final String? notes;
 
   /// The factory instance for creating [PublicCartOrderItemCreateRequest] from JSON.
   static const factory = PublicCartOrderItemCreateRequestFactory();
