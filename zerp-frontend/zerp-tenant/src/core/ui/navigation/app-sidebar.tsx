@@ -8,6 +8,7 @@ import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded'
 import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded'
 import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded'
+import ReceiptLongRoundedIcon from '@mui/icons-material/ReceiptLongRounded'
 import RuleFolderRoundedIcon from '@mui/icons-material/RuleFolderRounded'
 import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
 import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded'
@@ -34,6 +35,11 @@ import React, { useState } from 'react'
 
 import { appConfig } from '@/core/config/app-config'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import {
+  type PermissionAction,
+  PermissionActions,
+  useCurrentUserPermissions,
+} from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 
 const DRAWER_WIDTH = 240
@@ -45,6 +51,7 @@ type SidebarLabelKey =
   | 'nav.sale'
   | 'nav.tables'
   | 'nav.cashier'
+  | 'nav.saleHistory'
   | 'nav.stock'
   | 'nav.employees'
   | 'nav.permissionGroups'
@@ -58,6 +65,7 @@ interface SidebarAction {
   labelKey: SidebarLabelKey
   icon: React.ReactElement
   href: string
+  requiredPermission?: PermissionAction
 }
 
 interface SidebarSection {
@@ -79,16 +87,36 @@ const GLOBAL_SIDEBAR_SECTIONS: SidebarSection[] = [
     labelKey: 'nav.management',
     actions: [
       { id: 'shops', labelKey: 'nav.shops', icon: <StorefrontRoundedIcon />, href: '/shops' },
-      { id: 'employees', labelKey: 'nav.employees', icon: <PeopleAltRoundedIcon />, href: '/employees' },
-      { id: 'permission-groups', labelKey: 'nav.permissionGroups', icon: <RuleFolderRoundedIcon />, href: '/permission-groups' },
+      {
+        id: 'employees',
+        labelKey: 'nav.employees',
+        icon: <PeopleAltRoundedIcon />,
+        href: '/employees',
+      },
+      {
+        id: 'permission-groups',
+        labelKey: 'nav.permissionGroups',
+        icon: <RuleFolderRoundedIcon />,
+        href: '/permission-groups',
+      },
     ],
   },
   {
     id: 'crm',
     labelKey: 'nav.crm',
     actions: [
-      { id: 'tickets', labelKey: 'nav.tickets', icon: <SupportAgentRoundedIcon />, href: '/tickets' },
-      { id: 'notifications', labelKey: 'nav.notifications', icon: <NotificationsRoundedIcon />, href: '/notifications' },
+      {
+        id: 'tickets',
+        labelKey: 'nav.tickets',
+        icon: <SupportAgentRoundedIcon />,
+        href: '/tickets',
+      },
+      {
+        id: 'notifications',
+        labelKey: 'nav.notifications',
+        icon: <NotificationsRoundedIcon />,
+        href: '/notifications',
+      },
     ],
   },
 ]
@@ -99,8 +127,20 @@ const SHOP_SIDEBAR_SECTIONS: SidebarSection[] = [
     labelKey: 'nav.operations',
     actions: [
       { id: 'catalog', labelKey: 'nav.sale', icon: <MenuBookRoundedIcon />, href: '/catalog' },
-      { id: 'tables', labelKey: 'nav.tables', icon: <TableRestaurantRoundedIcon />, href: '/tables' },
+      {
+        id: 'tables',
+        labelKey: 'nav.tables',
+        icon: <TableRestaurantRoundedIcon />,
+        href: '/tables',
+      },
       { id: 'sale', labelKey: 'nav.cashier', icon: <PointOfSaleRoundedIcon />, href: '/sale' },
+      {
+        id: 'sale-history',
+        labelKey: 'nav.saleHistory',
+        icon: <ReceiptLongRoundedIcon />,
+        href: '/sale-history',
+        requiredPermission: PermissionActions.READ_SALE_HISTORY,
+      },
     ],
   },
   {
@@ -120,6 +160,7 @@ export function AppSidebar({ locale }: { locale: string }) {
   const pathname = usePathname()
   const { t } = useI18n()
   const { scope } = useShopScope()
+  const { hasPermission } = useCurrentUserPermissions()
   const isShopScope = scope.mode === 'SHOP'
   const sidebarSections = isShopScope ? SHOP_SIDEBAR_SECTIONS : GLOBAL_SIDEBAR_SECTIONS
 
@@ -127,7 +168,7 @@ export function AppSidebar({ locale }: { locale: string }) {
 
   const renderAction = (action: SidebarAction, nested = false) => {
     const hrefWithLocale = `/${locale}${action.href}`
-    const isSelected = pathname.startsWith(hrefWithLocale)
+    const isSelected = pathname === hrefWithLocale || pathname.startsWith(`${hrefWithLocale}/`)
 
     const listItemButton = (
       <ListItemButton
@@ -163,7 +204,13 @@ export function AppSidebar({ locale }: { locale: string }) {
 
     return (
       <ListItem key={action.id} disablePadding sx={{ display: 'block' }}>
-        {isExpanded ? listItemButton : <Tooltip title={t(action.labelKey)} placement="right">{listItemButton}</Tooltip>}
+        {isExpanded ? (
+          listItemButton
+        ) : (
+          <Tooltip title={t(action.labelKey)} placement="right">
+            {listItemButton}
+          </Tooltip>
+        )}
       </ListItem>
     )
   }
@@ -235,20 +282,26 @@ export function AppSidebar({ locale }: { locale: string }) {
         )}
       </Box>
 
-      <List sx={{ pt: 1 }}>
-        {renderAction(DASHBOARD_ACTION)}
-      </List>
+      <List sx={{ pt: 1 }}>{renderAction(DASHBOARD_ACTION)}</List>
 
       <Divider sx={{ my: 1 }} />
 
       {sidebarSections.map((section) => (
         <List key={section.id} sx={{ pt: 0 }}>
           {isExpanded && (
-            <Typography variant="caption" color="text.secondary" sx={{ px: 3, py: 1.25, display: 'block' }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ px: 3, py: 1.25, display: 'block' }}
+            >
               {t(section.labelKey)}
             </Typography>
           )}
-          {section.actions.map((action) => renderAction(action, true))}
+          {section.actions
+            .filter(
+              (action) => !action.requiredPermission || hasPermission(action.requiredPermission),
+            )
+            .map((action) => renderAction(action, true))}
         </List>
       ))}
     </Drawer>

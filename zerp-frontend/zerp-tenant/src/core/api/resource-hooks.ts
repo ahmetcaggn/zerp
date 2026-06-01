@@ -1,31 +1,27 @@
 'use client'
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  type QueryKey,
-} from '@tanstack/react-query'
+import { type QueryKey, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
 import type { ResourceClient } from './resource-client'
 import type { RaListParams } from './resource-types'
 
-export function createResourceHooks<
-  T,
-  LT,
-  C,
-  U,
-  ID extends string | number,
->(baseKey: QueryKey, client: ResourceClient<T, LT, C, U, ID>) {
+export function createResourceHooks<T, LT, C, U, ID extends string | number>(
+  baseKey: QueryKey,
+  client: ResourceClient<T, LT, C, U, ID>,
+) {
   const listKey = (params?: RaListParams) =>
     [...(baseKey as unknown[]), 'list', params ?? {}] as const
 
-  const oneKey = (id: ID) =>
-    [...(baseKey as unknown[]), 'detail', id] as const
+  const oneKey = (id: ID) => [...(baseKey as unknown[]), 'detail', id] as const
 
   return {
-    useList: (params: RaListParams = {}, options?: { refetchInterval?: number; refetchOnWindowFocus?: boolean }) =>
+    useList: (
+      params: RaListParams = {},
+      options?: { enabled?: boolean; refetchInterval?: number; refetchOnWindowFocus?: boolean },
+    ) =>
       useQuery({
         queryKey: listKey(params),
         queryFn: () => client.getList(params),
+        enabled: options?.enabled,
         refetchInterval: options?.refetchInterval,
         refetchOnWindowFocus: options?.refetchOnWindowFocus,
       }),

@@ -232,6 +232,7 @@ export interface UpdateShopTableRequestDto {
 // ─── Table Order ──────────────────────────────────────────────────────────────
 
 export type TableOrderStatus = 'OPEN' | 'PAID' | 'CANCELLED'
+export type TableOrderPaymentMethod = 'CASH'
 
 export interface TableOrderItemSelectedExtraOptionDto {
   extraOptionId: string
@@ -256,6 +257,41 @@ export interface TableOrderItemCreateDto {
   selectedExtraOptionIds?: string[]
 }
 
+export interface TableOrderPaymentItemCreateDto {
+  tableOrderItemId: string
+  quantity: number
+}
+
+export interface TableOrderPaymentCreateDto {
+  method: TableOrderPaymentMethod
+  amount: number
+  items?: TableOrderPaymentItemCreateDto[]
+}
+
+export interface TableOrderPaymentItemSelectedExtraOptionDto {
+  extraOptionId: string
+  name: string
+  price: number
+}
+
+export interface TableOrderPaymentItemDto {
+  id: string
+  menuItemId: string
+  menuItemName?: string
+  quantity: number
+  unitPrice: number
+  notes?: string
+  selectedExtraOptions?: TableOrderPaymentItemSelectedExtraOptionDto[]
+}
+
+export interface TableOrderPaymentDto {
+  id: string
+  method: TableOrderPaymentMethod
+  amount: number
+  paidAt?: string
+  items?: TableOrderPaymentItemDto[]
+}
+
 export interface TableOrderResponseDto {
   id: string
   shopTableId: string
@@ -265,6 +301,9 @@ export interface TableOrderResponseDto {
   status: TableOrderStatus
   note?: string
   items: TableOrderItemDto[]
+  payments?: TableOrderPaymentDto[]
+  createdAt?: string
+  updatedAt?: string
   tenantId: string
 }
 
@@ -280,6 +319,7 @@ export interface UpdateTableOrderRequestDto {
   status?: TableOrderStatus
   note?: string
   items?: TableOrderItemCreateDto[]
+  payments?: TableOrderPaymentCreateDto[]
 }
 
 export interface PublicCartOrderPreviewItemDto {

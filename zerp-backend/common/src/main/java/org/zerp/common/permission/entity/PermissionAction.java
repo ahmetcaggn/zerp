@@ -24,6 +24,7 @@ public enum PermissionAction {
     CREATE_MENU(SHOP),
     CREATE_SHOP_TABLE(SHOP),
     CREATE_STOCK_COUNT(SHOP),
+    READ_SALE_HISTORY(SHOP),
 
     // USER level
     READ_USER(USER),

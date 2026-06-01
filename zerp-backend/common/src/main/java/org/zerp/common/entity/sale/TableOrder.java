@@ -49,6 +49,9 @@ public class TableOrder extends BaseEntity implements Permittable {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TableOrderItem> items = new ArrayList<>();
 
+    @OneToMany(mappedBy = "tableOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TableOrderPayment> payments = new ArrayList<>();
+
     @Override
     public String getTitle() {
         return String.format("%s-%s", shop.getName(), getCreatedAt());

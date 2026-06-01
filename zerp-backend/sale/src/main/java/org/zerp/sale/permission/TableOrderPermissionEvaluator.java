@@ -43,6 +43,10 @@ public class TableOrderPermissionEvaluator {
 
         List<Permission> result = permissionRepository.findAllByUserAndTableOrderHierarchy(
                 userId, PermissionAction.READ_TABLE_ORDER, orderId, tableId, shopId, tenantId);
+        if (result.isEmpty()) {
+            result = permissionRepository.findAllByUserAndTableOrderHierarchy(
+                    userId, PermissionAction.READ_SALE_HISTORY, orderId, tableId, shopId, tenantId);
+        }
         boolean canRead = !result.isEmpty();
         log.debug("canRead result for user {} on order {} - permitted: {}", userId, orderId, canRead);
         return canRead;
@@ -111,19 +115,16 @@ public class TableOrderPermissionEvaluator {
     public Specification<TableOrder> filterRead(UUID userId) {
         log.trace("Creating filterRead specification for userId: {}", userId);
 
-        boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_TABLE_ORDER);
+        boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_TABLE_ORDER)
+                || commonPermissionService.hasRootPermission(userId, PermissionAction.READ_SALE_HISTORY);
         if (hasRootPermission) {
             return Specification.unrestricted();
         }
 
-        Set<UUID> permittedOrderIds = commonPermissionService.getAllPermitted(
-                userId, PermissionTargetType.TABLE_ORDER, PermissionAction.READ_TABLE_ORDER);
-        Set<UUID> permittedTableIds = commonPermissionService.getAllPermitted(
-                userId, PermissionTargetType.SHOP_TABLE, PermissionAction.READ_TABLE_ORDER);
-        Set<UUID> permittedShopIds = commonPermissionService.getAllPermitted(
-                userId, PermissionTargetType.SHOP, PermissionAction.READ_TABLE_ORDER);
-        Set<UUID> permittedTenantIds = commonPermissionService.getAllPermitted(
-                userId, PermissionTargetType.TENANT, PermissionAction.READ_TABLE_ORDER);
+        Set<UUID> permittedOrderIds = permittedFor(userId, PermissionTargetType.TABLE_ORDER);
+        Set<UUID> permittedTableIds = permittedFor(userId, PermissionTargetType.SHOP_TABLE);
+        Set<UUID> permittedShopIds = permittedFor(userId, PermissionTargetType.SHOP);
+        Set<UUID> permittedTenantIds = permittedFor(userId, PermissionTargetType.TENANT);
 
         return Specification.anyOf(
                 (root, _, _) -> root.get("id").in(permittedOrderIds),
@@ -131,5 +132,13 @@ public class TableOrderPermissionEvaluator {
                 (root, _, _) -> root.get("shop").get("id").in(permittedShopIds),
                 (root, _, _) -> root.get("tenantId").in(permittedTenantIds)
         );
+    }
+
+    private Set<UUID> permittedFor(UUID userId, PermissionTargetType targetType) {
+        Set<UUID> permitted = commonPermissionService.getAllPermitted(
+                userId, targetType, PermissionAction.READ_TABLE_ORDER);
+        permitted.addAll(commonPermissionService.getAllPermitted(
+                userId, targetType, PermissionAction.READ_SALE_HISTORY));
+        return permitted;
     }
 }

@@ -46,6 +46,7 @@ export const PermissionActions = {
   CREATE_TICKET_WATCHER: 'CREATE_TICKET_WATCHER',
   UPDATE_TICKET_WATCHER: 'UPDATE_TICKET_WATCHER',
   DELETE_TICKET_WATCHER: 'DELETE_TICKET_WATCHER',
+  READ_SALE_HISTORY: 'READ_SALE_HISTORY',
 } as const
 
 export type PermissionAction = (typeof PermissionActions)[keyof typeof PermissionActions]

@@ -11,6 +11,7 @@ public enum PredefinedPermissionGroupCode {
                     PermissionAction.READ_SHOP,
                     PermissionAction.READ_SHOP_TABLE,
                     PermissionAction.READ_TABLE_ORDER,
+                    PermissionAction.READ_SALE_HISTORY,
                     PermissionAction.CREATE_TABLE_ORDER,
                     PermissionAction.UPDATE_TABLE_ORDER,
                     PermissionAction.READ_MENU,

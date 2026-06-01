@@ -10,4 +10,5 @@ public class TableOrderUpdateDTO {
     private TableOrderStatus status;
     private String note;
     private List<TableOrderItemCreateDTO> items;
+    private List<TableOrderPaymentCreateDTO> payments;
 }

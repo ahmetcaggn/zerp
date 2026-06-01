@@ -19,6 +19,7 @@ export const ROUTES = {
   catalogMenuItems: '/catalog/menu-items',
   catalogProducts: '/catalog/products',
   sale: '/sale',
+  saleHistory: '/sale-history',
   tables: '/tables',
 } as const
 
@@ -28,6 +29,7 @@ export const PROTECTED_PATHS = [
   ROUTES.dashboard,
   ROUTES.catalog,
   ROUTES.sale,
+  ROUTES.saleHistory,
   ROUTES.stock,
   ROUTES.tables,
   ROUTES.employees,

@@ -24,6 +24,10 @@ import org.zerp.common.entity.sale.ShopTable;
 import org.zerp.common.entity.sale.TableOrder;
 import org.zerp.common.entity.sale.TableOrderItem;
 import org.zerp.common.entity.sale.TableOrderItemSelectedExtraOption;
+import org.zerp.common.entity.sale.TableOrderPayment;
+import org.zerp.common.entity.sale.TableOrderPaymentItem;
+import org.zerp.common.entity.sale.TableOrderPaymentItemSelectedExtraOption;
+import org.zerp.common.entity.sale.TableOrderPaymentMethod;
 import org.zerp.common.entity.sale.ShopTableStatus;
 import org.zerp.common.entity.sale.TableOrderStatus;
 import org.zerp.common.resource.service.IResourceService;
@@ -35,6 +39,8 @@ import org.zerp.sale.dto.tableorder.PublicCartOrderPreviewItemDTO;
 import org.zerp.sale.dto.tableorder.TableOrderCreateDTO;
 import org.zerp.sale.dto.tableorder.TableOrderDTO;
 import org.zerp.sale.dto.tableorder.TableOrderItemCreateDTO;
+import org.zerp.sale.dto.tableorder.TableOrderPaymentCreateDTO;
+import org.zerp.sale.dto.tableorder.TableOrderPaymentItemCreateDTO;
 import org.zerp.sale.dto.tableorder.TableOrderUpdateDTO;
 import org.zerp.sale.mapper.TableOrderMapper;
 import org.zerp.sale.permission.TableOrderPermissionEvaluator;
@@ -46,6 +52,7 @@ import org.zerp.sale.repository.TableOrderRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -193,12 +200,20 @@ public class TableOrderService implements
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to patch TableOrder");
         }
         TableOrderStatus previousStatus = order.getStatus();
+        List<TableOrderPaymentCreateDTO> paymentRequests = parsePaymentRequests(data.get("payments"));
         if (data.containsKey("status")) {
             order.setStatus(TableOrderStatus.valueOf((String) data.get("status")));
         }
         if (data.containsKey("note")) {
             order.setNote((String) data.get("note"));
         }
+
+        if (order.getStatus() == TableOrderStatus.PAID && previousStatus != TableOrderStatus.PAID) {
+            appendPayments(order, paymentRequests == null ? List.of(defaultPaymentFor(order)) : paymentRequests);
+        } else if (paymentRequests != null) {
+            appendPayments(order, paymentRequests);
+        }
+
         TableOrder updated = repository.save(order);
 
         if (isClosed(updated.getStatus())) {
@@ -223,8 +238,15 @@ public class TableOrderService implements
         if (!permissionEvaluator.canUpdate(userId, order)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to update TableOrder");
         }
+        TableOrderStatus previousStatus = order.getStatus();
         if (data.getStatus() != null) order.setStatus(data.getStatus());
         if (data.getNote() != null) order.setNote(data.getNote());
+
+        if (data.getPayments() != null) {
+            appendPayments(order, data.getPayments());
+        } else if (order.getStatus() == TableOrderStatus.PAID && previousStatus != TableOrderStatus.PAID) {
+            appendPayments(order, List.of(defaultPaymentFor(order)));
+        }
 
         if (data.getItems() != null) {
             order.getItems().clear();
@@ -306,6 +328,150 @@ public class TableOrderService implements
         selectedExtraOptions.forEach(extra -> extra.setTableOrderItem(item));
         item.getSelectedExtraOptions().addAll(selectedExtraOptions);
         return item;
+    }
+
+    private TableOrderPaymentCreateDTO defaultPaymentFor(TableOrder order) {
+        TableOrderPaymentCreateDTO payment = new TableOrderPaymentCreateDTO();
+        payment.setMethod(TableOrderPaymentMethod.CASH);
+        payment.setAmount(calculateOrderTotal(order));
+        return payment;
+    }
+
+    private BigDecimal calculateOrderTotal(TableOrder order) {
+        return order.getItems().stream()
+                .map(item -> item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private void appendPayments(TableOrder order, List<TableOrderPaymentCreateDTO> requests) {
+        if (requests == null || requests.isEmpty()) {
+            return;
+        }
+        for (TableOrderPaymentCreateDTO request : requests) {
+            if (request == null) {
+                continue;
+            }
+            TableOrderPayment payment = buildPayment(order, request);
+            order.getPayments().add(payment);
+        }
+    }
+
+    private TableOrderPayment buildPayment(TableOrder order, TableOrderPaymentCreateDTO request) {
+        TableOrderPayment payment = new TableOrderPayment();
+        payment.setTableOrder(order);
+        payment.setTenantId(order.getTenantId());
+        payment.setMethod(request.getMethod() == null ? TableOrderPaymentMethod.CASH : request.getMethod());
+        payment.setAmount(request.getAmount() == null ? BigDecimal.ZERO : request.getAmount());
+        payment.setPaidAt(LocalDateTime.now());
+
+        List<TableOrderPaymentItemCreateDTO> requestedItems = request.getItems();
+        if (requestedItems == null) {
+            for (TableOrderItem item : order.getItems()) {
+                TableOrderPaymentItem snapshot = buildPaymentItemSnapshot(payment, item, item.getQuantity());
+                payment.getItems().add(snapshot);
+            }
+            return payment;
+        }
+        if (requestedItems.isEmpty()) {
+            return payment;
+        }
+
+        Map<UUID, TableOrderItem> itemsById = new HashMap<>();
+        for (TableOrderItem item : order.getItems()) {
+            itemsById.put(item.getId(), item);
+        }
+
+        for (TableOrderPaymentItemCreateDTO requestedItem : requestedItems) {
+            if (requestedItem == null || requestedItem.getTableOrderItemId() == null) {
+                continue;
+            }
+            TableOrderItem source = itemsById.get(requestedItem.getTableOrderItemId());
+            if (source == null) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Invalid payment item: " + requestedItem.getTableOrderItemId()
+                );
+            }
+            int quantity = requestedItem.getQuantity() <= 0 ? source.getQuantity() : requestedItem.getQuantity();
+            if (quantity > source.getQuantity()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment quantity exceeds order item quantity");
+            }
+            TableOrderPaymentItem snapshot = buildPaymentItemSnapshot(payment, source, quantity);
+            payment.getItems().add(snapshot);
+        }
+        return payment;
+    }
+
+    private TableOrderPaymentItem buildPaymentItemSnapshot(
+            TableOrderPayment payment,
+            TableOrderItem source,
+            int quantity
+    ) {
+        TableOrderPaymentItem snapshot = new TableOrderPaymentItem();
+        snapshot.setPayment(payment);
+        snapshot.setTenantId(payment.getTenantId());
+        snapshot.setMenuItemId(source.getMenuItem().getId());
+        snapshot.setMenuItemName(source.getMenuItem().getName());
+        snapshot.setQuantity(quantity);
+        snapshot.setUnitPrice(source.getUnitPrice());
+        snapshot.setNotes(source.getNotes());
+
+        for (TableOrderItemSelectedExtraOption sourceOption : source.getSelectedExtraOptions()) {
+            TableOrderPaymentItemSelectedExtraOption optionSnapshot = new TableOrderPaymentItemSelectedExtraOption();
+            optionSnapshot.setPaymentItem(snapshot);
+            optionSnapshot.setTenantId(payment.getTenantId());
+            optionSnapshot.setExtraOptionId(sourceOption.getExtraOptionId());
+            optionSnapshot.setName(sourceOption.getNameSnapshot());
+            optionSnapshot.setPrice(sourceOption.getPriceSnapshot());
+            snapshot.getSelectedExtraOptions().add(optionSnapshot);
+        }
+
+        return snapshot;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<TableOrderPaymentCreateDTO> parsePaymentRequests(Object rawPayments) {
+        if (rawPayments == null) {
+            return null;
+        }
+        if (!(rawPayments instanceof List<?> rawPaymentList)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "payments must be a list");
+        }
+        List<TableOrderPaymentCreateDTO> payments = new ArrayList<>();
+        for (Object rawPayment : rawPaymentList) {
+            if (!(rawPayment instanceof Map<?, ?> rawPaymentMap)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid payment payload");
+            }
+            TableOrderPaymentCreateDTO payment = new TableOrderPaymentCreateDTO();
+            Object method = rawPaymentMap.get("method");
+            payment.setMethod(method == null ? TableOrderPaymentMethod.CASH : TableOrderPaymentMethod.valueOf(method.toString()));
+            Object amount = rawPaymentMap.get("amount");
+            if (amount != null) {
+                payment.setAmount(new BigDecimal(amount.toString()));
+            }
+            Object rawItems = rawPaymentMap.get("items");
+            if (rawItems instanceof List<?> rawItemList) {
+                List<TableOrderPaymentItemCreateDTO> items = new ArrayList<>();
+                for (Object rawItem : rawItemList) {
+                    if (!(rawItem instanceof Map<?, ?> rawItemMap)) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid payment item payload");
+                    }
+                    TableOrderPaymentItemCreateDTO item = new TableOrderPaymentItemCreateDTO();
+                    Object tableOrderItemId = rawItemMap.get("tableOrderItemId");
+                    if (tableOrderItemId != null) {
+                        item.setTableOrderItemId(UUID.fromString(tableOrderItemId.toString()));
+                    }
+                    Object quantity = rawItemMap.get("quantity");
+                    if (quantity != null) {
+                        item.setQuantity(Integer.parseInt(quantity.toString()));
+                    }
+                    items.add(item);
+                }
+                payment.setItems(items);
+            }
+            payments.add(payment);
+        }
+        return payments;
     }
 
     private String normalizePublicCartOrderCode(String code) {

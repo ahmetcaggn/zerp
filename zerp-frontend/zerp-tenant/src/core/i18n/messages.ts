@@ -121,6 +121,7 @@ export interface MessageDictionary {
     sale: string
     tables: string
     cashier: string
+    saleHistory: string
     stock: string
     employees: string
     permissionGroups: string
@@ -401,62 +402,62 @@ export interface MessageDictionary {
     appliedToast: string
     applyPartialToast: string
   }
-    tickets: {
-        title: string
-        createButton: string
-        emptyState: string
-        addComment: string
-        closeTicket: string
-        commentPlaceholder: string
-        // buttons
-        editButton: string
-        deleteButton: string
-        assignButton: string
-        reassignButton: string
-        removeAssignmentButton: string
-        // labels
-        statusLabel: string
-        priorityLabel: string
-        typeLabel: string
-        assignmentLabel: string
-        unassignedLabel: string
-        // form fields
-        teamIdField: string
-        agentIdField: string
-        titleField: string
-        descriptionField: string
-        // SLA
-        slaTrackingLabel: string
-        firstResponseTarget: string
-        resolutionTarget: string
-        breachedLabel: string
-        // comments
-        commentsLabel: string
-        unknownAuthor: string
-        // dialogs
-        editDialogTitle: string
-        deleteDialogTitle: string
-        deleteConfirmText: string
-        // list
-        listSearchPlaceholder: string
-        searchButton: string
-        clearFiltersButton: string
-        titleColumnHeader: string
-        createdAtColumnHeader: string
-        detailTooltip: string
-        rowsPerPageLabel: string
-        // toasts
-        commentAddedToast: string
-        ticketClosedToast: string
-        statusUpdatedToast: string
-        priorityUpdatedToast: string
-        assignmentCreatedToast: string
-        assignmentRemovedToast: string
-        titleRequiredWarning: string
-        ticketUpdatedToast: string
-        ticketDeletedToast: string
-        ticketCreatedToast: string
-    }
+  tickets: {
+    title: string
+    createButton: string
+    emptyState: string
+    addComment: string
+    closeTicket: string
+    commentPlaceholder: string
+    // buttons
+    editButton: string
+    deleteButton: string
+    assignButton: string
+    reassignButton: string
+    removeAssignmentButton: string
+    // labels
+    statusLabel: string
+    priorityLabel: string
+    typeLabel: string
+    assignmentLabel: string
+    unassignedLabel: string
+    // form fields
+    teamIdField: string
+    agentIdField: string
+    titleField: string
+    descriptionField: string
+    // SLA
+    slaTrackingLabel: string
+    firstResponseTarget: string
+    resolutionTarget: string
+    breachedLabel: string
+    // comments
+    commentsLabel: string
+    unknownAuthor: string
+    // dialogs
+    editDialogTitle: string
+    deleteDialogTitle: string
+    deleteConfirmText: string
+    // list
+    listSearchPlaceholder: string
+    searchButton: string
+    clearFiltersButton: string
+    titleColumnHeader: string
+    createdAtColumnHeader: string
+    detailTooltip: string
+    rowsPerPageLabel: string
+    // toasts
+    commentAddedToast: string
+    ticketClosedToast: string
+    statusUpdatedToast: string
+    priorityUpdatedToast: string
+    assignmentCreatedToast: string
+    assignmentRemovedToast: string
+    titleRequiredWarning: string
+    ticketUpdatedToast: string
+    ticketDeletedToast: string
+    ticketCreatedToast: string
+  }
   notifications: {
     title: string
     sendButton: string

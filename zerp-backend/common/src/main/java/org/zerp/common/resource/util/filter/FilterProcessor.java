@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
+
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 
@@ -197,6 +199,11 @@ public class FilterProcessor {
                     value, type.getSimpleName(), e.getMessage());
             throw new FilterError.Runtime(new FilterValueError(value, "Invalid value: "
                     + value + " for type: " + type.getSimpleName(), e));
+        } catch (DateTimeParseException e) {
+            log.warn("Failed to convert filter value to date/time: value={}, targetType={}, error={}",
+                    value, type.getSimpleName(), e.getMessage());
+            throw new FilterError.Runtime(new FilterValueError(value, "Invalid date/time format for value: "
+                    + value + " expected type: " + type.getSimpleName(), e));
         } catch (Exception e) {
             log.error("Unexpected error during value conversion: value={}, targetType={}, error={}",
                     value, type.getSimpleName(), e.getMessage(), e);
