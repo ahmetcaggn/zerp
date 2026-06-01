@@ -212,22 +212,26 @@ export function CatalogOverviewPage() {
           ) : (
             <Grid container spacing={2}>
               {menus.map((menu) => (
-                <Grid key={menu.id} size={{ xs: 12, sm: 6, lg: 4 }}>
+                <Grid key={menu.id} size={{ xs: 12, sm: 6, lg: 3 }}>
                   <Card
-                    variant="outlined"
+                    elevation={0}
                     sx={{
                       height: '100%',
-                      borderColor: menu.active ? 'primary.main' : 'divider',
-                      transition: 'all .2s ease',
-                      '&:hover': { boxShadow: 3, borderColor: 'primary.main' },
+                      border: menu.active ? '2px solid #16a34a' : '2px solid #dc2626',
+                      bgcolor: menu.active ? 'rgba(22,163,74,0.09)' : 'rgba(220,38,38,0.09)',
+                      borderRadius: 3,
+                      transition: 'transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, background-color 0.12s ease',
+                      '&:hover': { boxShadow: 6, transform: 'translateY(-2px)' },
+                      '&:active': { transform: 'scale(0.98)' },
                     }}
                   >
-                    <CardContent sx={{ display: 'grid', gap: 1.5 }}>
+                    <CardContent sx={{ display: 'grid', gap: 1, p: 2, '&:last-child': { pb: 2 } }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="h6" sx={{ fontSize: '1.05rem', fontWeight: 700 }}>
+                        <Typography variant="h6" sx={{ fontSize: '0.95rem', fontWeight: 700, lineHeight: 1.2 }}>
                           {menu.name}
                         </Typography>
                         <Switch
+                          size="small"
                           checked={menu.active}
                           disabled={isUpdatingMenu}
                           onChange={(e) => handleActiveToggle(menu, e.target.checked)}
@@ -235,35 +239,36 @@ export function CatalogOverviewPage() {
                         />
                       </Box>
 
-                      <Typography variant="body2" color="text.secondary" sx={{ minHeight: 40 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ minHeight: 32, fontSize: '0.8rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                         {menu.description || '—'}
                       </Typography>
 
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
                         {menu.language === 'EN' ? t('sale.menu.language.en') : t('sale.menu.language.tr')}
                       </Typography>
 
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, pt: 1 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, pt: 0.5 }}>
                         <Button
                           size="small"
-                          endIcon={<LaunchIcon fontSize="small" />}
+                          endIcon={<LaunchIcon sx={{ fontSize: '0.8rem !important' }} />}
                           onClick={() => goTo(`${ROUTES.catalog}/menus/${menu.id}`)}
+                          sx={{ fontSize: '0.75rem', py: 0 }}
                         >
                           {t('sale.catalog.openCategoriesButton')}
                         </Button>
 
-                        <Box>
+                        <Box sx={{ display: 'flex' }}>
                           <Tooltip title={t('common.edit')}>
                             <IconButton
                               size="small"
                               onClick={() => goTo(`${ROUTES.catalog}/menus/${menu.id}/edit`)}
                             >
-                              <EditIcon fontSize="small" />
+                              <EditIcon sx={{ fontSize: '1.1rem' }} />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title={t('common.delete')}>
                             <IconButton size="small" color="error" onClick={() => handleDeleteMenu(menu.id)}>
-                              <DeleteIcon fontSize="small" />
+                              <DeleteIcon sx={{ fontSize: '1.1rem' }} />
                             </IconButton>
                           </Tooltip>
                         </Box>
