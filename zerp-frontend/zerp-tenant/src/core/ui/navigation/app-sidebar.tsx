@@ -14,6 +14,7 @@ import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded'
 import TableRestaurantRoundedIcon from '@mui/icons-material/TableRestaurantRounded'
 import {
   Box,
+  Divider,
   Drawer,
   IconButton,
   List,
@@ -50,6 +51,8 @@ type SidebarLabelKey =
   | 'nav.tickets'
   | 'nav.notifications'
 
+type SidebarSectionLabelKey = 'nav.management' | 'nav.crm' | 'nav.operations' | 'nav.inventory'
+
 interface SidebarAction {
   id: string
   labelKey: SidebarLabelKey
@@ -57,21 +60,56 @@ interface SidebarAction {
   href: string
 }
 
-const GLOBAL_SIDEBAR_ACTIONS: SidebarAction[] = [
-  { id: 'dashboard', labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon />, href: '/dashboard' },
-  { id: 'shops', labelKey: 'nav.shops', icon: <StorefrontRoundedIcon />, href: '/shops' },
-  { id: 'employees', labelKey: 'nav.employees', icon: <PeopleAltRoundedIcon />, href: '/employees' },
-  { id: 'permission-groups', labelKey: 'nav.permissionGroups', icon: <RuleFolderRoundedIcon />, href: '/permission-groups' },
-  { id: 'tickets', labelKey: 'nav.tickets', icon: <SupportAgentRoundedIcon />, href: '/tickets' },
-  { id: 'notifications', labelKey: 'nav.notifications', icon: <NotificationsRoundedIcon />, href: '/notifications' },
+interface SidebarSection {
+  id: string
+  labelKey: SidebarSectionLabelKey
+  actions: SidebarAction[]
+}
+
+const DASHBOARD_ACTION: SidebarAction = {
+  id: 'dashboard',
+  labelKey: 'nav.dashboard',
+  icon: <DashboardRoundedIcon />,
+  href: '/dashboard',
+}
+
+const GLOBAL_SIDEBAR_SECTIONS: SidebarSection[] = [
+  {
+    id: 'management',
+    labelKey: 'nav.management',
+    actions: [
+      { id: 'shops', labelKey: 'nav.shops', icon: <StorefrontRoundedIcon />, href: '/shops' },
+      { id: 'employees', labelKey: 'nav.employees', icon: <PeopleAltRoundedIcon />, href: '/employees' },
+      { id: 'permission-groups', labelKey: 'nav.permissionGroups', icon: <RuleFolderRoundedIcon />, href: '/permission-groups' },
+    ],
+  },
+  {
+    id: 'crm',
+    labelKey: 'nav.crm',
+    actions: [
+      { id: 'tickets', labelKey: 'nav.tickets', icon: <SupportAgentRoundedIcon />, href: '/tickets' },
+      { id: 'notifications', labelKey: 'nav.notifications', icon: <NotificationsRoundedIcon />, href: '/notifications' },
+    ],
+  },
 ]
 
-const SHOP_SIDEBAR_ACTIONS: SidebarAction[] = [
-  { id: 'dashboard', labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon />, href: '/dashboard' },
-  { id: 'catalog', labelKey: 'nav.sale', icon: <MenuBookRoundedIcon />, href: '/catalog' },
-  { id: 'tables', labelKey: 'nav.tables', icon: <TableRestaurantRoundedIcon />, href: '/tables' },
-  { id: 'sale', labelKey: 'nav.cashier', icon: <PointOfSaleRoundedIcon />, href: '/sale' },
-  { id: 'stock', labelKey: 'nav.stock', icon: <InventoryRoundedIcon />, href: '/stock' },
+const SHOP_SIDEBAR_SECTIONS: SidebarSection[] = [
+  {
+    id: 'operations',
+    labelKey: 'nav.operations',
+    actions: [
+      { id: 'catalog', labelKey: 'nav.sale', icon: <MenuBookRoundedIcon />, href: '/catalog' },
+      { id: 'tables', labelKey: 'nav.tables', icon: <TableRestaurantRoundedIcon />, href: '/tables' },
+      { id: 'sale', labelKey: 'nav.cashier', icon: <PointOfSaleRoundedIcon />, href: '/sale' },
+    ],
+  },
+  {
+    id: 'inventory',
+    labelKey: 'nav.inventory',
+    actions: [
+      { id: 'stock', labelKey: 'nav.stock', icon: <InventoryRoundedIcon />, href: '/stock' },
+    ],
+  },
 ]
 
 export function AppSidebar({ locale }: { locale: string }) {
@@ -83,9 +121,52 @@ export function AppSidebar({ locale }: { locale: string }) {
   const { t } = useI18n()
   const { scope } = useShopScope()
   const isShopScope = scope.mode === 'SHOP'
-  const sidebarActions = isShopScope ? SHOP_SIDEBAR_ACTIONS : GLOBAL_SIDEBAR_ACTIONS
+  const sidebarSections = isShopScope ? SHOP_SIDEBAR_SECTIONS : GLOBAL_SIDEBAR_SECTIONS
 
   const handleToggle = () => setIsExpanded((prev) => !prev)
+
+  const renderAction = (action: SidebarAction, nested = false) => {
+    const hrefWithLocale = `/${locale}${action.href}`
+    const isSelected = pathname.startsWith(hrefWithLocale)
+
+    const listItemButton = (
+      <ListItemButton
+        onClick={() => router.push(hrefWithLocale as Route)}
+        selected={isSelected}
+        sx={{
+          minHeight: 48,
+          justifyContent: isExpanded ? 'initial' : 'center',
+          px: isExpanded ? 2.5 : 1.5,
+          pl: isExpanded && nested ? 3.75 : undefined,
+        }}
+      >
+        <ListItemIcon
+          sx={{
+            minWidth: 0,
+            mr: isExpanded ? 2 : 0,
+            justifyContent: 'center',
+            color: isSelected ? 'primary.main' : 'inherit',
+          }}
+        >
+          {action.icon}
+        </ListItemIcon>
+        <ListItemText
+          primary={t(action.labelKey)}
+          sx={{
+            opacity: isExpanded ? 1 : 0,
+            color: isSelected ? 'primary.main' : 'inherit',
+            '& .MuiTypography-root': { fontWeight: isSelected ? 600 : 400 },
+          }}
+        />
+      </ListItemButton>
+    )
+
+    return (
+      <ListItem key={action.id} disablePadding sx={{ display: 'block' }}>
+        {isExpanded ? listItemButton : <Tooltip title={t(action.labelKey)} placement="right">{listItemButton}</Tooltip>}
+      </ListItem>
+    )
+  }
 
   return (
     <Drawer
@@ -121,7 +202,6 @@ export function AppSidebar({ locale }: { locale: string }) {
         },
       }}
     >
-      {/* Logo header */}
       <Box
         sx={{
           display: 'flex',
@@ -155,56 +235,22 @@ export function AppSidebar({ locale }: { locale: string }) {
         )}
       </Box>
 
-      {/* Nav items */}
       <List sx={{ pt: 1 }}>
-        {sidebarActions.map((action) => {
-          const hrefWithLocale = `/${locale}${action.href}`
-          const isSelected = pathname.startsWith(hrefWithLocale)
-
-          const listItemButton = (
-            <ListItemButton
-              onClick={() => router.push(hrefWithLocale as Route)}
-              selected={isSelected}
-              sx={{
-                minHeight: 48,
-                justifyContent: isExpanded ? 'initial' : 'center',
-                px: 2.5,
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: isExpanded ? 2 : 'auto',
-                  justifyContent: 'center',
-                  color: isSelected ? 'primary.main' : 'inherit',
-                }}
-              >
-                {action.icon}
-              </ListItemIcon>
-              <ListItemText
-                primary={t(action.labelKey)}
-                sx={{
-                  opacity: isExpanded ? 1 : 0,
-                  color: isSelected ? 'primary.main' : 'inherit',
-                  '& .MuiTypography-root': { fontWeight: isSelected ? 600 : 400 },
-                }}
-              />
-            </ListItemButton>
-          )
-
-          return (
-            <ListItem key={action.id} disablePadding sx={{ display: 'block' }}>
-              {!isExpanded ? (
-                <Tooltip title={t(action.labelKey)} placement="right">
-                  {listItemButton}
-                </Tooltip>
-              ) : (
-                listItemButton
-              )}
-            </ListItem>
-          )
-        })}
+        {renderAction(DASHBOARD_ACTION)}
       </List>
+
+      <Divider sx={{ my: 1 }} />
+
+      {sidebarSections.map((section) => (
+        <List key={section.id} sx={{ pt: 0 }}>
+          {isExpanded && (
+            <Typography variant="caption" color="text.secondary" sx={{ px: 3, py: 1.25, display: 'block' }}>
+              {t(section.labelKey)}
+            </Typography>
+          )}
+          {section.actions.map((action) => renderAction(action, true))}
+        </List>
+      ))}
     </Drawer>
   )
 }

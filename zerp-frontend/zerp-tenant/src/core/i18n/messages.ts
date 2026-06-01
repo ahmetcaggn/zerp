@@ -114,6 +114,10 @@ export interface MessageDictionary {
     logout: string
     language: string
     menu: string
+    management: string
+    crm: string
+    operations: string
+    inventory: string
     sale: string
     tables: string
     cashier: string
