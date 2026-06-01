@@ -61,7 +61,7 @@ import '../../../feature/stock/cubit/cubit_stock_resources.dart' as _i994;
 import '../../cubit/root_cubit/auth/cubit_auth.dart' as _i200;
 import '../../cubit/root_cubit/error/cubit_error.dart' as _i139;
 import '../../cubit/root_cubit/network_indicator/cubit_network_indicator.dart'
-    as _i542;
+    as _i591;
 import '../../cubit/root_cubit/organization_scope/cubit_organization_scope.dart'
     as _i829;
 import '../../cubit/root_cubit/settings/cubit_settings.dart' as _i657;
@@ -96,7 +96,6 @@ extension GetItInjectableX on _i174.GetIt {
     final serviceModule = _$ServiceModule();
     gh.factory<_i477.CubitProfile>(() => _i477.CubitProfile());
     gh.factory<_i40.CubitStock>(() => _i40.CubitStock());
-    gh.lazySingleton<_i102.CubitSectionStock>(() => _i102.CubitSectionStock());
     gh.lazySingleton<_i337.FlutterAppAuth>(() => serviceModule.appAuth);
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => serviceModule.secureStorage,
@@ -148,14 +147,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i40.AuthStorageService>(),
       ),
     );
-    gh.lazySingleton<_i542.CubitNetworkIndicator>(
-      () => _i542.CubitNetworkIndicator(gh<_i1073.ApiNetworkInvoker>()),
-    );
     gh.lazySingleton<_i657.CubitSettings>(
       () => _i657.CubitSettings(
         gh<_i116.SettingsOperator>(),
         gh<_i1073.ApiNetworkInvoker>(),
       ),
+    );
+    gh.lazySingleton<_i591.CubitNetworkIndicator>(
+      () => _i591.CubitNetworkIndicator(gh<_i1073.ApiNetworkInvoker>()),
     );
     gh.lazySingleton<_i371.ApiStatusService>(
       () => _i371.ApiStatusService(
@@ -306,6 +305,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i994.CubitStockResources>(
       () => _i994.CubitStockResources(gh<_i551.StockService>()),
+    );
+    gh.lazySingleton<_i102.CubitSectionStock>(
+      () => _i102.CubitSectionStock(gh<_i551.StockService>()),
     );
     gh.factory<_i229.CubitEmployeeUsername>(
       () => _i229.CubitEmployeeUsername(gh<_i868.UsernameService>()),

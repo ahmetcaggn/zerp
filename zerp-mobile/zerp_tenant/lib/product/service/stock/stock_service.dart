@@ -21,11 +21,12 @@ class StockService extends ServiceBase with LoggerMixin<StockService> {
   Future<PageResponse<StockResourceDTO>> getStockResources({
     required String shopId,
     PageRequest pageRequest = PageRequest.all,
+    Map<String, String>? additionalParams,
   }) async {
     final request = GetListStockResourceCommand(
       start: pageRequest.start,
       end: pageRequest.end,
-      allParams: {'shop.id': shopId},
+      allParams: {'shop.id': shopId, ...?additionalParams},
       sort: 'name',
       order: 'ASC',
     );
@@ -184,11 +185,12 @@ class StockService extends ServiceBase with LoggerMixin<StockService> {
   Future<PageResponse<StockCountDTO>> getStockCounts({
     required String shopId,
     PageRequest pageRequest = PageRequest.all,
+    Map<String, String>? additionalParams,
   }) async {
     final request = GetListStockCountCommand(
       start: pageRequest.start,
       end: pageRequest.end,
-      allParams: {'shop.id': shopId},
+      allParams: {'shop.id': shopId, ...?additionalParams},
       sort: 'countDate',
       order: 'DESC',
     );

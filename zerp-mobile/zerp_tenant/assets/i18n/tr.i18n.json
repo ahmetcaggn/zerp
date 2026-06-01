@@ -48,6 +48,20 @@
       "occupied": "Dolu: $count",
       "reserved": "Rezerve: $count",
       "outOfOrder": "Kullanım Dışı: $count"
+    },
+    "stockSection": {
+      "lowStockAlert": "Kritik Stok: $count ürün",
+      "noLowStock": "Tüm stok seviyeleri normal",
+      "lastCounted": "Son Sayım: $date",
+      "lastCountNever": "Henüz sayım yapılmadı",
+      "errorLoading": "Stok bilgisi yüklenemedi",
+      "recentMovements": "Son Hareketler",
+      "recentCounts": "Son Sayımlar",
+      "actions": {
+        "newCount": "Yeni Sayım",
+        "entry": "Giriş",
+        "adjustment": "Düzeltme"
+      }
     }
   },
   "menu": {

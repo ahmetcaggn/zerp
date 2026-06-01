@@ -10,25 +10,25 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i21;
-import 'package:collection/collection.dart' as _i24;
+import 'package:collection/collection.dart' as _i25;
 import 'package:flutter/material.dart' as _i22;
-import 'package:openapi_sale/api.dart' as _i23;
+import 'package:openapi_sale/api.dart' as _i24;
 import 'package:zerp_tenant/feature/auth/view/screen_auth.dart' as _i1;
 import 'package:zerp_tenant/feature/dashboard/screen_dashboard.dart' as _i7;
 import 'package:zerp_tenant/feature/employee/create_employee/screen_create_employee.dart'
     as _i5;
-import 'package:zerp_tenant/feature/employee/cubit/cubit_employee.dart' as _i25;
+import 'package:zerp_tenant/feature/employee/cubit/cubit_employee.dart' as _i26;
 import 'package:zerp_tenant/feature/employee/screen_employee.dart' as _i9;
 import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_permission_viewer.dart'
-    as _i27;
-import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_single_employee.dart'
     as _i28;
+import 'package:zerp_tenant/feature/employee/single_employee/cubit/cubit_single_employee.dart'
+    as _i29;
 import 'package:zerp_tenant/feature/employee/single_employee/edit_employee/screen_edit_employee.dart'
     as _i8;
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/create_permission/screen_create_permission.dart'
     as _i6;
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/cubit_permissions.dart'
-    as _i26;
+    as _i27;
 import 'package:zerp_tenant/feature/employee/single_employee/permissions/screen_permissions.dart'
     as _i11;
 import 'package:zerp_tenant/feature/employee/single_employee/screen_single_employee.dart'
@@ -37,11 +37,12 @@ import 'package:zerp_tenant/feature/menu/view/screen_menu.dart' as _i10;
 import 'package:zerp_tenant/feature/profile/permission/screen_profile_permissions.dart'
     as _i13;
 import 'package:zerp_tenant/feature/profile/screen_profile.dart' as _i12;
+import 'package:zerp_tenant/feature/sale/cash/cubit/cubit_cash_tables.dart'
+    as _i23;
 import 'package:zerp_tenant/feature/sale/cash/screen_cash_order.dart' as _i2;
 import 'package:zerp_tenant/feature/sale/cash/screen_cash_payment.dart' as _i3;
 import 'package:zerp_tenant/feature/sale/cash/screen_cash_tables.dart' as _i4;
-import 'package:zerp_tenant/feature/sale/table/cubit/cubit_tables.dart' as _i29;
-import 'package:zerp_tenant/feature/sale/cash/cubit/cubit_cash_tables.dart' as _i30;
+import 'package:zerp_tenant/feature/sale/table/cubit/cubit_tables.dart' as _i30;
 import 'package:zerp_tenant/feature/sale/table/order/screen_table_order.dart'
     as _i19;
 import 'package:zerp_tenant/feature/sale/table/screen_tables.dart' as _i20;
@@ -120,7 +121,7 @@ class RouteCashOrder extends _i21.PageRouteInfo<RouteCashOrderArgs> {
   RouteCashOrder({
     required String tableId,
     required String tableName,
-    required _i30.CubitCashTables cubitCashTables,
+    required _i23.CubitCashTables cubitCashTables,
     _i22.Key? key,
     List<_i21.PageRouteInfo>? children,
   }) : super(
@@ -162,7 +163,7 @@ class RouteCashOrderArgs {
 
   final String tableName;
 
-  final _i30.CubitCashTables cubitCashTables;
+  final _i23.CubitCashTables cubitCashTables;
 
   final _i22.Key? key;
 
@@ -183,14 +184,17 @@ class RouteCashOrderArgs {
 
   @override
   int get hashCode =>
-      tableId.hashCode ^ tableName.hashCode ^ cubitCashTables.hashCode ^ key.hashCode;
+      tableId.hashCode ^
+      tableName.hashCode ^
+      cubitCashTables.hashCode ^
+      key.hashCode;
 }
 
 /// generated route for
 /// [_i3.ScreenCashPayment]
 class RouteCashPayment extends _i21.PageRouteInfo<RouteCashPaymentArgs> {
   RouteCashPayment({
-    required List<_i23.TableOrderDTO> orders,
+    required List<_i24.TableOrderDTO> orders,
     required Map<String, int> selectedQtys,
     _i22.Key? key,
     List<_i21.PageRouteInfo>? children,
@@ -226,7 +230,7 @@ class RouteCashPaymentArgs {
     this.key,
   });
 
-  final List<_i23.TableOrderDTO> orders;
+  final List<_i24.TableOrderDTO> orders;
 
   final Map<String, int> selectedQtys;
 
@@ -241,11 +245,11 @@ class RouteCashPaymentArgs {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! RouteCashPaymentArgs) return false;
-    return const _i24.ListEquality<_i23.TableOrderDTO>().equals(
+    return const _i25.ListEquality<_i24.TableOrderDTO>().equals(
           orders,
           other.orders,
         ) &&
-        const _i24.MapEquality<String, int>().equals(
+        const _i25.MapEquality<String, int>().equals(
           selectedQtys,
           other.selectedQtys,
         ) &&
@@ -254,8 +258,8 @@ class RouteCashPaymentArgs {
 
   @override
   int get hashCode =>
-      const _i24.ListEquality<_i23.TableOrderDTO>().hash(orders) ^
-      const _i24.MapEquality<String, int>().hash(selectedQtys) ^
+      const _i25.ListEquality<_i24.TableOrderDTO>().hash(orders) ^
+      const _i25.MapEquality<String, int>().hash(selectedQtys) ^
       key.hashCode;
 }
 
@@ -279,7 +283,7 @@ class RouteCashTables extends _i21.PageRouteInfo<void> {
 /// [_i5.ScreenCreateEmployee]
 class RouteCreateEmployee extends _i21.PageRouteInfo<RouteCreateEmployeeArgs> {
   RouteCreateEmployee({
-    required _i25.CubitEmployee cubitEmployee,
+    required _i26.CubitEmployee cubitEmployee,
     _i22.Key? key,
     List<_i21.PageRouteInfo>? children,
   }) : super(
@@ -305,7 +309,7 @@ class RouteCreateEmployee extends _i21.PageRouteInfo<RouteCreateEmployeeArgs> {
 class RouteCreateEmployeeArgs {
   const RouteCreateEmployeeArgs({required this.cubitEmployee, this.key});
 
-  final _i25.CubitEmployee cubitEmployee;
+  final _i26.CubitEmployee cubitEmployee;
 
   final _i22.Key? key;
 
@@ -331,8 +335,8 @@ class RouteCreatePermission
     extends _i21.PageRouteInfo<RouteCreatePermissionArgs> {
   RouteCreatePermission({
     required String employeeId,
-    required _i26.CubitPermissions cubitPermission,
-    required _i27.CubitPermissionViewer cubitPermissionViewer,
+    required _i27.CubitPermissions cubitPermission,
+    required _i28.CubitPermissionViewer cubitPermissionViewer,
     _i22.Key? key,
     List<_i21.PageRouteInfo>? children,
   }) : super(
@@ -372,9 +376,9 @@ class RouteCreatePermissionArgs {
 
   final String employeeId;
 
-  final _i26.CubitPermissions cubitPermission;
+  final _i27.CubitPermissions cubitPermission;
 
-  final _i27.CubitPermissionViewer cubitPermissionViewer;
+  final _i28.CubitPermissionViewer cubitPermissionViewer;
 
   final _i22.Key? key;
 
@@ -422,8 +426,8 @@ class RouteDashboard extends _i21.PageRouteInfo<void> {
 class RouteEditEmployee extends _i21.PageRouteInfo<RouteEditEmployeeArgs> {
   RouteEditEmployee({
     required String employeeId,
-    required _i28.CubitSingleEmployee cubitSingleEmployee,
-    required _i25.CubitEmployee cubitEmployee,
+    required _i29.CubitSingleEmployee cubitSingleEmployee,
+    required _i26.CubitEmployee cubitEmployee,
     _i22.Key? key,
     List<_i21.PageRouteInfo>? children,
   }) : super(
@@ -463,9 +467,9 @@ class RouteEditEmployeeArgs {
 
   final String employeeId;
 
-  final _i28.CubitSingleEmployee cubitSingleEmployee;
+  final _i29.CubitSingleEmployee cubitSingleEmployee;
 
-  final _i25.CubitEmployee cubitEmployee;
+  final _i26.CubitEmployee cubitEmployee;
 
   final _i22.Key? key;
 
@@ -529,7 +533,7 @@ class RouteMenu extends _i21.PageRouteInfo<void> {
 class RoutePermissions extends _i21.PageRouteInfo<RoutePermissionsArgs> {
   RoutePermissions({
     required String employeeId,
-    required _i27.CubitPermissionViewer cubitPermissionViewer,
+    required _i28.CubitPermissionViewer cubitPermissionViewer,
     _i22.Key? key,
     List<_i21.PageRouteInfo>? children,
   }) : super(
@@ -566,7 +570,7 @@ class RoutePermissionsArgs {
 
   final String employeeId;
 
-  final _i27.CubitPermissionViewer cubitPermissionViewer;
+  final _i28.CubitPermissionViewer cubitPermissionViewer;
 
   final _i22.Key? key;
 
@@ -658,7 +662,7 @@ class RouteSettingsApiBaseUrl extends _i21.PageRouteInfo<void> {
 class RouteSingleEmployee extends _i21.PageRouteInfo<RouteSingleEmployeeArgs> {
   RouteSingleEmployee({
     required String employeeId,
-    required _i25.CubitEmployee cubitEmployee,
+    required _i26.CubitEmployee cubitEmployee,
     _i22.Key? key,
     List<_i21.PageRouteInfo>? children,
   }) : super(
@@ -695,7 +699,7 @@ class RouteSingleEmployeeArgs {
 
   final String employeeId;
 
-  final _i25.CubitEmployee cubitEmployee;
+  final _i26.CubitEmployee cubitEmployee;
 
   final _i22.Key? key;
 
@@ -756,7 +760,7 @@ class RouteTableOrder extends _i21.PageRouteInfo<RouteTableOrderArgs> {
   RouteTableOrder({
     required String tableId,
     required String tableName,
-    required _i29.CubitTables cubitTables,
+    required _i30.CubitTables cubitTables,
     _i22.Key? key,
     List<_i21.PageRouteInfo>? children,
   }) : super(
@@ -798,7 +802,7 @@ class RouteTableOrderArgs {
 
   final String tableName;
 
-  final _i29.CubitTables cubitTables;
+  final _i30.CubitTables cubitTables;
 
   final _i22.Key? key;
 

@@ -48,6 +48,20 @@
       "occupied": "Occupied: $count",
       "reserved": "Reserved: $count",
       "outOfOrder": "Out of Order: $count"
+    },
+    "stockSection": {
+      "lowStockAlert": "Low Stock: $count items",
+      "noLowStock": "All stock levels normal",
+      "lastCounted": "Last Count: $date",
+      "lastCountNever": "No count recorded",
+      "errorLoading": "Failed to load stock info",
+      "recentMovements": "Recent Movements",
+      "recentCounts": "Recent Counts",
+      "actions": {
+        "newCount": "New Count",
+        "entry": "Entry",
+        "adjustment": "Adjustment"
+      }
     }
   },
   "menu": {
