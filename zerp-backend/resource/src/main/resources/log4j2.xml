@@ -7,7 +7,7 @@
             %d{yyyy-MM-dd HH:mm:ss.SSS} %p [%t] [correlationId=%X{correlationId}] [clientIp=%X{clientIp}] %c - %m%n
         </Property>
         <Property name="LOG_DIR">
-            logs/crm/
+            logs/resource/
         </Property>
         <Property name="FILE_SIZE_ROOT">10MB</Property>
         <Property name="MAX_FILE">5</Property>
@@ -15,8 +15,8 @@
 
     <Appenders>
         <RollingFile name="RollingFile"
-                     fileName="${LOG_DIR}crm.log"
-                     filePattern="${LOG_DIR}crm-%d{dd-MM-yyyy}-%i.log.gz"
+                     fileName="${LOG_DIR}resource.log"
+                     filePattern="${LOG_DIR}resource-%d{dd-MM-yyyy}-%i.log.gz"
                      ignoreExceptions="false">
 
             <PatternLayout>
@@ -30,7 +30,7 @@
 
             <DefaultRolloverStrategy max="${MAX_FILE}">
                 <Delete basePath="${LOG_DIR}" maxDepth="2">
-                    <IfFileName glob="*crm*.log.gz"/>
+                    <IfFileName glob="*resource*.log.gz"/>
                     <IfLastModified age="P30D"/>
                 </Delete>
             </DefaultRolloverStrategy>
