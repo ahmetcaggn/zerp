@@ -36,6 +36,7 @@ class CubitDashboard extends Cubit<StateDashboard>
     try {
       late final PageResponse<ShopDTO> shopsResponse;
       await Future.wait<dynamic>([
+        _cubitOrganizationScope.loadTenantIfNeeded(),
         _cubitSectionEmployee.load(),
         _cubitSectionStock.load(),
         _saleService.getShops().then((value) => shopsResponse = value),
