@@ -242,7 +242,8 @@ class _StockMovementTabState extends State<StockMovementTab> {
                         children: [
                           Expanded(
                             child: Text(
-                              '${t.tabs.movements} (${filteredMovements.length})',
+                              '${t.tabs.movements} '
+                              '(${filteredMovements.length})',
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                           ),
