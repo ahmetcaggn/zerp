@@ -11,6 +11,7 @@ export const enMessages = {
     dashboard: 'Dashboard',
     tenants: 'Tenants',
     shops: 'Shops',
+    management: 'Management',
     crm: 'CRM',
     teams: 'Teams',
     teamManagement: 'Team Management',

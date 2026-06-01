@@ -11,6 +11,7 @@ export const trMessages = {
     dashboard: 'Panel',
     tenants: 'Tenantlar',
     shops: 'Shoplar',
+    management: 'Yönetim',
     crm: 'CRM',
     teams: 'Takimlar',
     teamManagement: 'Takim Yonetimi',
