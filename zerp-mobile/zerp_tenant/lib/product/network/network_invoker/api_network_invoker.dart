@@ -7,7 +7,6 @@ import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
 import 'package:zerp_tenant/product/network/api_url_helper.dart';
 import 'package:zerp_tenant/product/service/auth/auth_storage_service.dart';
-import 'package:zerp_tenant/product/util/query_parameter_extensions.dart';
 
 /// Key used in [RequestOptions.extra] to opt a request out of the
 /// automatic 401 auth-refresh-and-retry flow.
@@ -40,8 +39,7 @@ final class ApiNetworkInvoker extends DioNetworkInvoker
         onRequest: (options, handler) async {
           // Paths that probe server reachability without authentication should
           // never trigger the 401-refresh-and-retry flow.
-          final isUnauthenticatedProbe =
-              options.path.startsWith('/actuator/');
+          final isUnauthenticatedProbe = options.path.startsWith('/actuator/');
           if (isUnauthenticatedProbe) {
             options.extra[_kSkipAuthRetry] = true;
             handler.next(options);
@@ -75,8 +73,7 @@ final class ApiNetworkInvoker extends DioNetworkInvoker
           // out (e.g. the /actuator/health status check). Without this guard,
           // the retry throws a second DioException that escapes the library's
           // catch block and surfaces as an unhandled error.
-          final skipRetry =
-              error.requestOptions.extra[_kSkipAuthRetry] == true;
+          final skipRetry = error.requestOptions.extra[_kSkipAuthRetry] == true;
 
           if (!skipRetry && error.response?.statusCode == 401) {
             await _checkSessionAfterUnauthorized();
@@ -112,37 +109,36 @@ final class ApiNetworkInvoker extends DioNetworkInvoker
   Future<NetworkResult<T>> send<T extends Schema>(
     RequestCommand<T> request,
   ) async {
-    log.fine(
-      'Sending request: ${request.runtimeType} '
-      '${request.path}?${request.queryParameters.toStringValue()} '
-      'with data: ${request.payload.toLogString()}',
-    );
-    final result = await super.send(request);
+    log.fine('Sending request: ${request.runtimeType}');
+    try {
+      final result = await super.send(request);
 
-    switch (result) {
-      case SuccessResponseResult<T>():
-        log.info(
-          'Request ${request.runtimeType} succeeded with status code: '
-          '${result.statusCode}',
-        );
-      case NetworkErrorResult<T>():
-        log.warning(
-          'Request ${request.runtimeType} failed with network error: '
-          '${result.error}',
-          result.error,
-          result.error.stackTrace,
-        );
-      case SpecifiedResponseResult<T>():
-        log.warning(
-          'Request ${request.runtimeType} received unsuccessful response: '
-          'Status code: ${result.statusCode}',
-        );
+      switch (result) {
+        case SuccessResponseResult<T>():
+          log.info(
+            'Request ${request.runtimeType} completed successfully: '
+            'Status code: ${result.statusCode}',
+          );
+        case NetworkErrorResult<T>():
+          log.warning(
+            'Request ${request.runtimeType} failed: '
+            'Error: ${result.error}',
+          );
+        case SpecifiedResponseResult<T>():
+          log.warning(
+            'Request ${request.runtimeType} received unsuccessful response: '
+            'Status code: ${result.statusCode}',
+          );
+      }
+      return result;
+    } catch (e, s) {
+      log.severe(
+        'UNHANDLED EXCEPTION IN SEND for ${request.runtimeType}: $e',
+        e,
+        s,
+      );
+      rethrow;
     }
-    log.fine(
-      'Received response for request: ${request.runtimeType} '
-      'with result: $result',
-    );
-    return result;
   }
 
   Future<void>? _ongoingUnauthorizedCheck;
