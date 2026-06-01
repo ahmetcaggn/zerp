@@ -1,29 +1,31 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { getToken } from 'next-auth/jwt'
 
-import { decryptTokens } from '@/core/auth/server/token-crypto'
 import { DEFAULT_LOCALE, isLocale } from '@/core/constants/locales'
-import { isAuthPath, isProtectedPath } from '@/core/utils/route-helpers'
+
+// Auth/SSO disabled temporarily. Re-enable these imports with the auth blocks below.
+// import { getToken } from 'next-auth/jwt'
+// import { decryptTokens } from '@/core/auth/server/token-crypto'
+// import { isAuthPath, isProtectedPath } from '@/core/utils/route-helpers'
 
 const INTERNAL_API_URL = process.env.INTERNAL_API_URL ?? 'http://gateway:8080'
-const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET
-const NEXTAUTH_URL = process.env.NEXTAUTH_URL ?? ''
-const SESSION_COOKIE_DOMAIN = process.env.SESSION_COOKIE_DOMAIN
+// const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET
+// const NEXTAUTH_URL = process.env.NEXTAUTH_URL ?? ''
+// const SESSION_COOKIE_DOMAIN = process.env.SESSION_COOKIE_DOMAIN
 
 // Stale default NextAuth cookie names that should be cleaned up
-const STALE_NEXTAUTH_COOKIES = [
-  '__Secure-next-auth.session-token',
-  'next-auth.session-token',
-]
+// const STALE_NEXTAUTH_COOKIES = [
+//   '__Secure-next-auth.session-token',
+//   'next-auth.session-token',
+// ]
 
-function getAuthCookieName(): string {
-  const isHttps = NEXTAUTH_URL.startsWith('https://')
-  const isProduction = process.env.NODE_ENV === 'production'
-
-  const variant = 'client'
-  return isHttps || isProduction ? `__Secure-zerp.session-token.${variant}` : `zerp.session-token.${variant}`
-}
+// function getAuthCookieName(): string {
+//   const isHttps = NEXTAUTH_URL.startsWith('https://')
+//   const isProduction = process.env.NODE_ENV === 'production'
+//
+//   const variant = 'client'
+//   return isHttps || isProduction ? `__Secure-zerp.session-token.${variant}` : `zerp.session-token.${variant}`
+// }
 
 function extractLocale(pathname: string): string | null {
   const normalizedPath = pathname.replace(/\/+/g, '/')
@@ -31,20 +33,20 @@ function extractLocale(pathname: string): string | null {
   return firstSegment && isLocale(firstSegment) ? firstSegment : null
 }
 
-function stripLocale(pathname: string, locale: string): string {
-  if (pathname === `/${locale}`) {
-    return '/'
-  }
+// function stripLocale(pathname: string, locale: string): string {
+//   if (pathname === `/${locale}`) {
+//     return '/'
+//   }
+//
+//   const prefix = `/${locale}`
+//   return pathname.startsWith(prefix) ? pathname.slice(prefix.length) || '/' : pathname
+// }
 
-  const prefix = `/${locale}`
-  return pathname.startsWith(prefix) ? pathname.slice(prefix.length) || '/' : pathname
-}
-
-function deleteStaleAuthCookies(response: NextResponse): void {
-  for (const name of STALE_NEXTAUTH_COOKIES) {
-    response.cookies.delete(name)
-  }
-}
+// function deleteStaleAuthCookies(response: NextResponse): void {
+//   for (const name of STALE_NEXTAUTH_COOKIES) {
+//     response.cookies.delete(name)
+//   }
+// }
 
 async function proxyApiRequest(req: NextRequest, accessToken?: string): Promise<NextResponse> {
   const { pathname, search } = req.nextUrl
@@ -98,63 +100,70 @@ async function proxyApiRequest(req: NextRequest, accessToken?: string): Promise<
 }
 
 export async function proxy(req: NextRequest) {
-  const { pathname, search } = req.nextUrl
+  const { pathname } = req.nextUrl
 
-  // NextAuth internal routes and SSO logout — always pass through
-  if (pathname.startsWith('/api/auth') || pathname === '/api/sso-logout') {
-    return NextResponse.next()
+  // Auth/SSO disabled temporarily.
+  if (pathname.startsWith('/api/auth')) {
+    return NextResponse.json({ error: 'Authentication is disabled' }, { status: 404 })
   }
 
-  // Global SSO logout — if another app set the logout signal, clear this app's session too
-  if (!pathname.startsWith('/api') && req.cookies.has('zerp.global-logout')) {
-    const authCookieName = getAuthCookieName()
-    const isSecure = NEXTAUTH_URL.startsWith('https://')
-    const domain = SESSION_COOKIE_DOMAIN
-    if (req.cookies.has(authCookieName)) {
-      const locale = extractLocale(pathname) ?? DEFAULT_LOCALE
-      const redirectUrl = req.nextUrl.clone()
-      redirectUrl.pathname = `/${locale}/login`
-      redirectUrl.search = ''
-      const response = NextResponse.redirect(redirectUrl)
-      // Must include domain to match original cookie and actually delete it in the browser
-      response.cookies.set(authCookieName, '', { maxAge: 0, path: '/', httpOnly: true, sameSite: 'lax', secure: isSecure, domain })
-      response.cookies.set('zerp.global-logout', '', { maxAge: 0, path: '/', httpOnly: true, sameSite: 'lax', domain })
-      return response
-    }
-    // No session but has logout signal — clear the signal
-    const response = NextResponse.next()
-    response.cookies.set('zerp.global-logout', '', { maxAge: 0, path: '/', httpOnly: true, sameSite: 'lax', domain })
-    return response
+  if (pathname === '/api/sso-logout') {
+    return new NextResponse(null, { status: 204 })
   }
 
-  // API proxy — verify session, inject Bearer token, forward to backend
+  // Global SSO logout disabled temporarily.
+  // if (!pathname.startsWith('/api') && req.cookies.has('zerp.global-logout')) {
+  //   const authCookieName = getAuthCookieName()
+  //   const isSecure = NEXTAUTH_URL.startsWith('https://')
+  //   const domain = SESSION_COOKIE_DOMAIN
+  //   if (req.cookies.has(authCookieName)) {
+  //     const locale = extractLocale(pathname) ?? DEFAULT_LOCALE
+  //     const redirectUrl = req.nextUrl.clone()
+  //     redirectUrl.pathname = `/${locale}/login`
+  //     redirectUrl.search = ''
+  //     const response = NextResponse.redirect(redirectUrl)
+  //     // Must include domain to match original cookie and actually delete it in the browser
+  //     response.cookies.set(authCookieName, '', { maxAge: 0, path: '/', httpOnly: true, sameSite: 'lax', secure: isSecure, domain })
+  //     response.cookies.set('zerp.global-logout', '', { maxAge: 0, path: '/', httpOnly: true, sameSite: 'lax', domain })
+  //     return response
+  //   }
+  //   // No session but has logout signal — clear the signal
+  //   const response = NextResponse.next()
+  //   response.cookies.set('zerp.global-logout', '', { maxAge: 0, path: '/', httpOnly: true, sameSite: 'lax', domain })
+  //   return response
+  // }
+
+  // API proxy — public while Auth/SSO is disabled.
   if (pathname.startsWith('/api')) {
-    if (pathname.startsWith('/api/sale/public')) {
-      return proxyApiRequest(req)
-    }
+    return proxyApiRequest(req)
 
-    const token = await getToken({
-      req,
-      secret: NEXTAUTH_SECRET,
-      cookieName: getAuthCookieName(),
-    }).catch(() => null)
-
-    if (!token || token.error === 'RefreshAccessTokenError') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const encryptedTokens = token.encryptedTokens
-    if (typeof encryptedTokens !== 'string') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    try {
-      const decrypted = await decryptTokens(encryptedTokens)
-      return proxyApiRequest(req, decrypted.accessToken)
-    } catch {
-      console.error('[proxy] token decryption failed', { pathname })
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Auth/SSO disabled temporarily.
+    // if (pathname.startsWith('/api/sale/public')) {
+    //   return proxyApiRequest(req)
+    // }
+    //
+    // const token = await getToken({
+    //   req,
+    //   secret: NEXTAUTH_SECRET,
+    //   cookieName: getAuthCookieName(),
+    // }).catch(() => null)
+    //
+    // if (!token || token.error === 'RefreshAccessTokenError') {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // }
+    //
+    // const encryptedTokens = token.encryptedTokens
+    // if (typeof encryptedTokens !== 'string') {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // }
+    //
+    // try {
+    //   const decrypted = await decryptTokens(encryptedTokens)
+    //   return proxyApiRequest(req, decrypted.accessToken)
+    // } catch {
+    //   console.error('[proxy] token decryption failed', { pathname })
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // }
   }
 
   // Locale redirect — prepend default locale if missing
@@ -165,37 +174,38 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  const pathWithoutLocale = stripLocale(pathname, locale)
-
-  // Public paths that are neither auth nor protected — pass through
-  if (!isAuthPath(pathWithoutLocale) && !isProtectedPath(pathWithoutLocale)) {
-    return NextResponse.next()
-  }
-
-  const token = await getToken({
-    req,
-    secret: NEXTAUTH_SECRET,
-    cookieName: getAuthCookieName(),
-  }).catch(() => null)
-
-  const isAuthenticated = !!token && token.error !== 'RefreshAccessTokenError'
-
-  // Already logged in — redirect away from auth pages and clear stale cookies
-  if (isAuthPath(pathWithoutLocale) && isAuthenticated) {
-    const redirectUrl = req.nextUrl.clone()
-    redirectUrl.pathname = `/${locale}/dashboard`
-    const response = NextResponse.redirect(redirectUrl)
-    deleteStaleAuthCookies(response)
-    return response
-  }
-
-  // Not logged in — redirect to login with callbackUrl
-  if (isProtectedPath(pathWithoutLocale) && !isAuthenticated) {
-    const redirectUrl = req.nextUrl.clone()
-    redirectUrl.pathname = `/${locale}/login`
-    redirectUrl.search = `?callbackUrl=${encodeURIComponent(`/${locale}${pathWithoutLocale}`)}${search}`
-    return NextResponse.redirect(redirectUrl)
-  }
+  // Auth/SSO disabled temporarily. All localized pages are public.
+  // const pathWithoutLocale = stripLocale(pathname, locale)
+  //
+  // // Public paths that are neither auth nor protected — pass through
+  // if (!isAuthPath(pathWithoutLocale) && !isProtectedPath(pathWithoutLocale)) {
+  //   return NextResponse.next()
+  // }
+  //
+  // const token = await getToken({
+  //   req,
+  //   secret: NEXTAUTH_SECRET,
+  //   cookieName: getAuthCookieName(),
+  // }).catch(() => null)
+  //
+  // const isAuthenticated = !!token && token.error !== 'RefreshAccessTokenError'
+  //
+  // // Already logged in — redirect away from auth pages and clear stale cookies
+  // if (isAuthPath(pathWithoutLocale) && isAuthenticated) {
+  //   const redirectUrl = req.nextUrl.clone()
+  //   redirectUrl.pathname = `/${locale}/dashboard`
+  //   const response = NextResponse.redirect(redirectUrl)
+  //   deleteStaleAuthCookies(response)
+  //   return response
+  // }
+  //
+  // // Not logged in — redirect to login with callbackUrl
+  // if (isProtectedPath(pathWithoutLocale) && !isAuthenticated) {
+  //   const redirectUrl = req.nextUrl.clone()
+  //   redirectUrl.pathname = `/${locale}/login`
+  //   redirectUrl.search = `?callbackUrl=${encodeURIComponent(`/${locale}${pathWithoutLocale}`)}${search}`
+  //   return NextResponse.redirect(redirectUrl)
+  // }
 
   return NextResponse.next()
 }

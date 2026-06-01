@@ -1,30 +1,35 @@
 'use client'
 
 import { CircularProgress, Container, Stack, Typography } from '@mui/material'
-import { useParams } from 'next/navigation'
-import { signIn, useSession } from 'next-auth/react'
+import { useParams, useRouter } from 'next/navigation'
+// Auth/SSO disabled temporarily. Re-enable these imports with the signIn effect below.
+// import { signIn, useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { responsiveLayout, responsivePageSx } from '@/core/theme/layout'
 
 export default function RegisterPage() {
-  const { status } = useSession()
+  // Auth/SSO disabled temporarily.
+  // const { status } = useSession()
   const params = useParams<{ locale: string }>()
+  const router = useRouter()
   const { t } = useI18n()
 
   useEffect(() => {
     const locale = params.locale || 'tr'
+    router.replace(`/${locale}/dashboard`)
 
-    if (status === 'authenticated') {
-      window.location.href = `/${locale}/dashboard`
-      return
-    }
-
-    if (status === 'unauthenticated') {
-      void signIn('keycloak', { callbackUrl: `/${locale}/dashboard` }, { kc_action: 'register' })
-    }
-  }, [params.locale, status])
+    // Auth/SSO disabled temporarily.
+    // if (status === 'authenticated') {
+    //   window.location.href = `/${locale}/dashboard`
+    //   return
+    // }
+    //
+    // if (status === 'unauthenticated') {
+    //   void signIn('keycloak', { callbackUrl: `/${locale}/dashboard` }, { kc_action: 'register' })
+    // }
+  }, [params.locale, router])
 
   return (
     <Container maxWidth="sm" sx={responsivePageSx.centeredContainer}>

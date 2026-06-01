@@ -1,6 +1,7 @@
 'use client'
 
-import { AuthProvider } from '@/core/auth/client/auth-provider'
+// Auth/SSO disabled temporarily. Re-enable this import with the provider wrapper below.
+// import { AuthProvider } from '@/core/auth/client/auth-provider'
 import { I18nProvider } from '@/core/i18n/i18n-provider'
 import type { MessageDictionary } from '@/core/i18n/messages'
 import { MuiEmotionCacheProvider } from '@/core/providers/mui-emotion-cache-provider'
@@ -21,13 +22,14 @@ export function AppProviders({
   return (
     <AppQueryProvider>
       <MuiEmotionCacheProvider>
-        <AuthProvider>
-          <I18nProvider locale={locale} messages={messages}>
-            <AppThemeProvider>
-              <ToastProvider>{children}</ToastProvider>
-            </AppThemeProvider>
-          </I18nProvider>
-        </AuthProvider>
+        {/* Auth/SSO disabled temporarily.
+        <AuthProvider> */}
+        <I18nProvider locale={locale} messages={messages}>
+          <AppThemeProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </AppThemeProvider>
+        </I18nProvider>
+        {/* </AuthProvider> */}
       </MuiEmotionCacheProvider>
     </AppQueryProvider>
   )

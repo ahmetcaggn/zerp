@@ -1,3 +1,18 @@
+class SessionManager {
+  get isSessionExpired(): boolean {
+    return false
+  }
+
+  reset(): void {}
+
+  forceLogout(): void {}
+}
+
+export const sessionManager = new SessionManager()
+
+/*
+Auth/SSO disabled temporarily. Restore this block when NextAuth comes back.
+
 import { signOut } from 'next-auth/react'
 
 import { getClientEnv } from '@/core/config/env.client'
@@ -31,3 +46,4 @@ class SessionManager {
 }
 
 export const sessionManager = new SessionManager()
+*/

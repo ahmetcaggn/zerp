@@ -1,3 +1,8 @@
+export const authOptions = {}
+
+/*
+Auth/SSO disabled temporarily. Restore this block when NextAuth comes back.
+
 import type { NextAuthOptions } from 'next-auth'
 import type { JWT } from 'next-auth/jwt'
 import KeycloakProvider from 'next-auth/providers/keycloak'
@@ -206,3 +211,4 @@ export const authOptions: NextAuthOptions = {
 }
 
 export { getAuthCookieName }
+*/

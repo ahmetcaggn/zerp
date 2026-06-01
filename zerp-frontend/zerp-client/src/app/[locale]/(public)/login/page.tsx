@@ -1,15 +1,18 @@
 'use client'
 
 import { CircularProgress, Container, Stack, Typography } from '@mui/material'
+import type { Route } from 'next'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { signIn, useSession } from 'next-auth/react'
+// Auth/SSO disabled temporarily. Re-enable these imports with the signIn effect below.
+// import { signIn, useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { responsiveLayout, responsivePageSx } from '@/core/theme/layout'
 
 export default function LoginPage() {
-  const { status } = useSession()
+  // Auth/SSO disabled temporarily.
+  // const { status } = useSession()
   const params = useParams<{ locale: string }>()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -17,17 +20,23 @@ export default function LoginPage() {
 
   useEffect(() => {
     const locale = params.locale || 'tr'
+    const requestedCallbackUrl = searchParams.get('callbackUrl')
+    const callbackUrl = requestedCallbackUrl?.startsWith('/')
+      ? requestedCallbackUrl
+      : `/${locale}/dashboard`
+    router.replace(callbackUrl as Route)
 
-    if (status === 'authenticated') {
-      router.replace(`/${locale}/dashboard`)
-      return
-    }
-
-    if (status === 'unauthenticated') {
-      const callbackUrl = searchParams.get('callbackUrl') || `/${locale}/dashboard`
-      void signIn('keycloak', { callbackUrl })
-    }
-  }, [params.locale, router, searchParams, status])
+    // Auth/SSO disabled temporarily.
+    // if (status === 'authenticated') {
+    //   router.replace(`/${locale}/dashboard`)
+    //   return
+    // }
+    //
+    // if (status === 'unauthenticated') {
+    //   const callbackUrl = searchParams.get('callbackUrl') || `/${locale}/dashboard`
+    //   void signIn('keycloak', { callbackUrl })
+    // }
+  }, [params.locale, router, searchParams])
 
   return (
     <Container maxWidth="sm" sx={responsivePageSx.centeredContainer}>

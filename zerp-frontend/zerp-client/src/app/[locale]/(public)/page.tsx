@@ -29,9 +29,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <Button href={`/${locale}/dashboard`} variant="contained" fullWidth>
             {messages.home.cta}
           </Button>
+          {/* Auth/SSO disabled temporarily.
           <Button href={`/${locale}/login`} variant="outlined" fullWidth>
             {messages.nav.login}
-          </Button>
+          </Button> */}
         </Stack>
       </Stack>
     </Container>

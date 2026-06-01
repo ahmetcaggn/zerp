@@ -4,11 +4,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppTopbar } from '@/core/ui/feedback/app-topbar'
 
 const push = vi.fn()
-const signOut = vi.fn()
 const mediaQueryMock = vi.fn()
 
 let pathname = '/tr'
-let sessionStatus: 'authenticated' | 'unauthenticated' | 'loading' = 'unauthenticated'
 
 vi.mock('@mui/material/useMediaQuery', () => ({
   default: (...args: unknown[]) => mediaQueryMock(...args),
@@ -17,14 +15,6 @@ vi.mock('@mui/material/useMediaQuery', () => ({
 vi.mock('next/navigation', () => ({
   usePathname: () => pathname,
   useRouter: () => ({ push }),
-}))
-
-vi.mock('next-auth/react', () => ({
-  signOut: (options: unknown) => signOut(options),
-  useSession: () => ({
-    data: null,
-    status: sessionStatus,
-  }),
 }))
 
 vi.mock('@/core/i18n/i18n-provider', () => ({
@@ -51,9 +41,7 @@ vi.mock('@/core/ui/feedback/theme-toggle', () => ({
 describe('AppTopbar', () => {
   beforeEach(() => {
     pathname = '/tr'
-    sessionStatus = 'unauthenticated'
     push.mockReset()
-    signOut.mockReset()
     mediaQueryMock.mockReset()
     mediaQueryMock.mockReturnValue(false)
   })
@@ -65,7 +53,7 @@ describe('AppTopbar', () => {
 
     expect(screen.queryByLabelText(/open menu/i)).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Dashboard' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Login' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Logout' })).not.toBeInTheDocument()
   })
 
@@ -77,7 +65,7 @@ describe('AppTopbar', () => {
     fireEvent.click(screen.getByLabelText(/open menu/i))
 
     expect(screen.getByRole('button', { name: 'Dashboard' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Login' })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByLabelText(/close menu/i))
 
@@ -86,16 +74,13 @@ describe('AppTopbar', () => {
     })
   })
 
-  it('shows logout in authenticated mobile menu and calls signOut', () => {
-    sessionStatus = 'authenticated'
+  it('does not render logout while auth is disabled', () => {
     mediaQueryMock.mockReturnValue(true)
 
     render(<AppTopbar locale="tr" />)
 
     fireEvent.click(screen.getByLabelText(/open menu/i))
-    fireEvent.click(screen.getByRole('button', { name: 'Logout' }))
 
-    expect(signOut).toHaveBeenCalledTimes(1)
-    expect(signOut).toHaveBeenCalledWith({ callbackUrl: '/tr/login' })
+    expect(screen.queryByRole('button', { name: 'Logout' })).not.toBeInTheDocument()
   })
 })

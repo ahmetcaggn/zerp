@@ -3,8 +3,8 @@
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
-import LoginRoundedIcon from '@mui/icons-material/LoginRounded'
-import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
+// import LoginRoundedIcon from '@mui/icons-material/LoginRounded'
+// import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded'
 import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
 import {
@@ -25,7 +25,8 @@ import {
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { usePathname, useRouter } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+// Auth/SSO disabled temporarily. Re-enable when login/logout comes back.
+// import { signOut, useSession } from 'next-auth/react'
 import type { ReactElement } from 'react'
 import { useMemo, useState } from 'react'
 
@@ -55,31 +56,34 @@ const TOPBAR_ACTIONS: readonly TopbarAction[] = [
     visibility: 'always',
     href: '/dashboard',
   },
-  {
-    id: 'login',
-    labelKey: 'nav.login',
-    icon: <LoginRoundedIcon fontSize="small" />,
-    visibility: 'unauthenticated',
-    href: '/login',
-  },
-  {
-    id: 'logout',
-    labelKey: 'nav.logout',
-    icon: <LogoutRoundedIcon fontSize="small" />,
-    visibility: 'authenticated',
-  },
+  // Auth/SSO disabled temporarily.
+  // {
+  //   id: 'login',
+  //   labelKey: 'nav.login',
+  //   icon: <LoginRoundedIcon fontSize="small" />,
+  //   visibility: 'unauthenticated',
+  //   href: '/login',
+  // },
+  // {
+  //   id: 'logout',
+  //   labelKey: 'nav.logout',
+  //   icon: <LogoutRoundedIcon fontSize="small" />,
+  //   visibility: 'authenticated',
+  // },
 ] as const
 
 export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
-  const { data: session, status } = useSession()
+  // Auth/SSO disabled temporarily.
+  // const { data: session, status } = useSession()
   const router = useRouter()
   const pathname = usePathname()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { t } = useI18n()
   const [isDrawerOpen, setDrawerOpen] = useState(false)
-  const isAuthenticated = status === 'authenticated'
-  const { data: currentUser } = useCurrentUserProfile()
+  const isAuthenticated = false
+  // const isAuthenticated = status === 'authenticated'
+  // const { data: currentUser } = useCurrentUserProfile()
 
   const visibleActions = useMemo(
     () =>
@@ -120,7 +124,8 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
     setDrawerOpen(false)
 
     if (action.id === 'logout') {
-      void signOut({ callbackUrl: '/api/sso-logout' })
+      // Auth/SSO disabled temporarily.
+      // void signOut({ callbackUrl: '/api/sso-logout' })
       return
     }
 

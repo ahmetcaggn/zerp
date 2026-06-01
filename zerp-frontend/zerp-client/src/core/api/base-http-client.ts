@@ -1,4 +1,5 @@
-import { sessionManager } from '@/core/auth/session-manager'
+// Auth/SSO disabled temporarily. Re-enable sessionManager with the 401 handling below.
+// import { sessionManager } from '@/core/auth/session-manager'
 import type { ApiEnvelope, ApiErrorPayload } from '@/core/types/api'
 import { ApiError } from '@/core/types/api'
 
@@ -32,9 +33,10 @@ export class BaseHttpClient {
     endpoint: string,
     options: RequestOptions = {},
   ): Promise<{ payload: unknown; response: Response }> {
-    if (sessionManager.isSessionExpired) {
-      throw new ApiError('Session expired', 401)
-    }
+    // Auth/SSO disabled temporarily.
+    // if (sessionManager.isSessionExpired) {
+    //   throw new ApiError('Session expired', 401)
+    // }
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 10_000)
@@ -58,18 +60,19 @@ export class BaseHttpClient {
       clearTimeout(timeoutId)
     }
 
-    if (response.status === 401 && !options._retry) {
-      const refreshed = await this.tryRefreshSession()
-      if (!refreshed) {
-        sessionManager.forceLogout()
-        throw new ApiError('Session expired', 401)
-      }
-
-      return this.rawFetch(endpoint, {
-        ...options,
-        _retry: true,
-      })
-    }
+    // Auth/SSO disabled temporarily.
+    // if (response.status === 401 && !options._retry) {
+    //   const refreshed = await this.tryRefreshSession()
+    //   if (!refreshed) {
+    //     sessionManager.forceLogout()
+    //     throw new ApiError('Session expired', 401)
+    //   }
+    //
+    //   return this.rawFetch(endpoint, {
+    //     ...options,
+    //     _retry: true,
+    //   })
+    // }
 
     const payload = await this.safeJson(response)
 

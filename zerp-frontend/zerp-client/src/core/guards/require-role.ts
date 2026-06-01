@@ -1,3 +1,16 @@
+import type { AppRole, Locale } from '@/core/types/common'
+
+export async function requireRole(_options: {
+  locale: Locale
+  requiredRoles: AppRole[]
+  callbackPath: string
+}) {
+  return null
+}
+
+/*
+Auth/role protection disabled temporarily. Restore this block when protected routes come back.
+
 import type { Route } from 'next'
 import { redirect } from 'next/navigation'
 
@@ -27,3 +40,4 @@ export async function requireRole(options: {
 
   return session
 }
+*/

@@ -9,14 +9,14 @@ describe('route helpers', () => {
   })
 
   it('detects protected paths', () => {
-    expect(isProtectedPath('/dashboard')).toBe(true)
-    expect(isProtectedPath('/dashboard/orders')).toBe(true)
+    expect(isProtectedPath('/dashboard')).toBe(false)
+    expect(isProtectedPath('/dashboard/orders')).toBe(false)
     expect(isProtectedPath('/login')).toBe(false)
   })
 
   it('detects auth paths', () => {
-    expect(isAuthPath('/login')).toBe(true)
-    expect(isAuthPath('/register')).toBe(true)
+    expect(isAuthPath('/login')).toBe(false)
+    expect(isAuthPath('/register')).toBe(false)
     expect(isAuthPath('/dashboard')).toBe(false)
   })
 })

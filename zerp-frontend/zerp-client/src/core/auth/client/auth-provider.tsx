@@ -1,5 +1,12 @@
 'use client'
 
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  return <>{children}</>
+}
+
+/*
+Auth/SSO disabled temporarily. Restore this block when NextAuth comes back.
+
 import { SessionProvider, useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 
@@ -31,3 +38,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     </SessionProvider>
   )
 }
+*/
