@@ -5,7 +5,12 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 import org.zerp.common.error.filter.FilterError;
 import org.zerp.common.error.filter.FilterValueError;
-
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 import java.util.List;
 import java.util.UUID;
 
@@ -127,6 +132,42 @@ public class FilterProcessor {
                 Boolean result = Boolean.valueOf(value);
                 log.trace("Successfully converted to Boolean: original={}, result={}", value, result);
                 return result;
+            } else if (LocalDateTime.class.equals(type)) {
+                LocalDateTime result;
+                try {
+                    if (!value.contains("T")) {
+                        result = LocalDate.parse(value).atStartOfDay();
+                    } else if (value.endsWith("Z") || value.contains("+") || value.matches(".*-\\d{2}:\\d{2}$")) {
+                        result = ZonedDateTime.parse(value).toLocalDateTime();
+                    } else {
+                        result = LocalDateTime.parse(value);
+                    }
+                } catch (Exception e) {
+                    result = LocalDateTime.parse(value); // fallback
+                }
+                log.trace("Successfully converted to LocalDateTime: original={}, result={}", value, result);
+                return result;
+            } else if (LocalDate.class.equals(type)) {
+                LocalDate result;
+                if (value.contains("T")) {
+                    result = LocalDate.parse(value.substring(0, value.indexOf("T")));
+                } else {
+                    result = LocalDate.parse(value);
+                }
+                log.trace("Successfully converted to LocalDate: original={}, result={}", value, result);
+                return result;
+            } else if (OffsetDateTime.class.equals(type)) {
+                OffsetDateTime result = OffsetDateTime.parse(value);
+                log.trace("Successfully converted to OffsetDateTime: original={}, result={}", value, result);
+                return result;
+            } else if (ZonedDateTime.class.equals(type)) {
+                ZonedDateTime result = ZonedDateTime.parse(value);
+                log.trace("Successfully converted to ZonedDateTime: original={}, result={}", value, result);
+                return result;
+            } else if (Instant.class.equals(type)) {
+                Instant result = Instant.parse(value);
+                log.trace("Successfully converted to Instant: original={}, result={}", value, result);
+                return result;
             } else if (Enum.class.isAssignableFrom(type)) {
                 //noinspection unchecked,rawtypes
                 Class<Enum> enumClass = (Class<Enum>) type.asSubclass(Enum.class);
@@ -181,7 +222,8 @@ public class FilterProcessor {
                 Number.class.isAssignableFrom(type) ||
                         String.class.equals(type) ||
                         UUID.class.equals(type) ||
-                        Enum.class.isAssignableFrom(type)
+                        Enum.class.isAssignableFrom(type) ||
+                        Temporal.class.isAssignableFrom(type)
         );
 
         if (!isComparable) {
