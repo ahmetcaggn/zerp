@@ -74,6 +74,7 @@ class _SectionCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 width: 52,
