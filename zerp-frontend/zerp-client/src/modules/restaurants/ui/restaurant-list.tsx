@@ -1,6 +1,11 @@
 'use client'
 
-import { LocationOnRounded, SearchRounded, StorefrontRounded } from '@mui/icons-material'
+import {
+  FilterAltRounded,
+  LocationOnRounded,
+  SearchRounded,
+  StorefrontRounded,
+} from '@mui/icons-material'
 import {
   Alert,
   alpha,
@@ -162,11 +167,14 @@ export function RestaurantList() {
   }, [searchParams])
 
   const [searchTerm, setSearchTerm] = useState('')
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
+  const [appliedSearchTerm, setAppliedSearchTerm] = useState('')
   const [mode, setMode] = useState<PublicShopFeedMode>(queryLocation ? 'NEARBY' : 'ALL')
   const [sortOrder, setSortOrder] = useState<PublicShopFeedOrder>('ASC')
+  const [appliedSortOrder, setAppliedSortOrder] = useState<PublicShopFeedOrder>('ASC')
   const [selectedCity, setSelectedCity] = useState<string>('')
+  const [appliedCity, setAppliedCity] = useState<string>('')
   const [selectedDistrict, setSelectedDistrict] = useState<string>('')
+  const [appliedDistrict, setAppliedDistrict] = useState<string>('')
   const [isRequestingLocation, setIsRequestingLocation] = useState(false)
   const [locationError, setLocationError] = useState<string | null>(null)
   const [locationAccuracyMeters, setLocationAccuracyMeters] = useState<number | null>(null)
@@ -177,20 +185,12 @@ export function RestaurantList() {
   const effectiveUserLocation = userLocation ?? queryLocation
   const isNearbyMode = mode === 'NEARBY'
 
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm.trim())
-    }, 300)
-
-    return () => window.clearTimeout(timeout)
-  }, [searchTerm])
-
   const districtOptions = useMemo(() => getDistrictOptions(selectedCity), [selectedCity])
 
-  const resolvedCity = useMemo(() => resolveCityName(selectedCity), [selectedCity])
+  const resolvedCity = useMemo(() => resolveCityName(appliedCity), [appliedCity])
   const resolvedDistrict = useMemo(
-    () => resolveDistrictName(selectedCity, selectedDistrict),
-    [selectedCity, selectedDistrict],
+    () => resolveDistrictName(appliedCity, appliedDistrict),
+    [appliedCity, appliedDistrict],
   )
 
   const {
@@ -204,11 +204,11 @@ export function RestaurantList() {
   } = usePublicShopsFeedInfinite({
     mode,
     pageSize: FEED_PAGE_SIZE,
-    q: debouncedSearchTerm || undefined,
+    q: (isNearbyMode ? searchTerm.trim() : appliedSearchTerm) || undefined,
     city: !isNearbyMode ? (resolvedCity ?? undefined) : undefined,
     state: !isNearbyMode ? (resolvedDistrict ?? undefined) : undefined,
     sortBy: isNearbyMode ? 'DISTANCE' : 'NAME',
-    order: sortOrder,
+    order: isNearbyMode ? sortOrder : appliedSortOrder,
     lat: isNearbyMode ? effectiveUserLocation?.lat : undefined,
     lng: isNearbyMode ? effectiveUserLocation?.lng : undefined,
   })
@@ -273,6 +273,7 @@ export function RestaurantList() {
         })
         setMode('NEARBY')
         setSortOrder('ASC')
+        setAppliedSortOrder('ASC')
         setIsRequestingLocation(false)
       })
       .catch((error: GeolocationPositionError | Error) => {
@@ -294,6 +295,7 @@ export function RestaurantList() {
   function handleModeChange(nextMode: PublicShopFeedMode) {
     setMode(nextMode)
     setSortOrder('ASC')
+    setAppliedSortOrder('ASC')
     if (nextMode === 'NEARBY') {
       if (!effectiveUserLocation) {
         requestUserLocation()
@@ -302,6 +304,23 @@ export function RestaurantList() {
     }
 
     setLocationError(null)
+  }
+
+  function handleApplyFilters() {
+    setAppliedSearchTerm(searchTerm.trim())
+    setAppliedSortOrder(sortOrder)
+    setAppliedCity(selectedCity)
+    setAppliedDistrict(selectedDistrict)
+  }
+
+  function getSortShortLabel(value: PublicShopFeedOrder): string {
+    if (isNearbyMode) {
+      return value === 'ASC'
+        ? t('restaurants.sortDistanceAscShort')
+        : t('restaurants.sortDistanceDescShort')
+    }
+
+    return value === 'ASC' ? t('restaurants.sortNameAscShort') : t('restaurants.sortNameDescShort')
   }
 
   const isInitialLoading = isLoading && restaurants.length === 0
@@ -345,13 +364,14 @@ export function RestaurantList() {
           <Box
             sx={{
               display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: 1.5,
+              flexDirection: 'row',
+              gap: { xs: 0.75, sm: 1.5 },
               p: 0.75,
               borderRadius: '16px',
               background: theme.palette.background.paper,
               border: `1px solid ${theme.palette.divider}`,
-              width: 'fit-content',
+              width: { xs: '100%', sm: 'fit-content' },
+              maxWidth: '100%',
               boxShadow: isDark ? 'none' : '0 2px 12px rgba(0,0,0,0.04)',
             }}
           >
@@ -359,11 +379,13 @@ export function RestaurantList() {
               onClick={() => handleModeChange('ALL')}
               startIcon={<StorefrontRounded />}
               sx={{
-                px: 3,
-                py: 1.25,
+                flex: { xs: '1 1 0', sm: '0 0 auto' },
+                minWidth: 0,
+                px: { xs: 1, sm: 3 },
+                py: { xs: 1, sm: 1.25 },
                 borderRadius: '12px',
                 fontWeight: 600,
-                fontSize: 14,
+                fontSize: { xs: 12, sm: 14 },
                 textTransform: 'none',
                 background: !isNearbyMode
                   ? `linear-gradient(145deg, ${primaryColor} 0%, ${alpha(primaryColor, 0.85)} 100%)`
@@ -375,6 +397,10 @@ export function RestaurantList() {
                     ? `linear-gradient(145deg, ${primaryColor} 0%, ${alpha(primaryColor, 0.85)} 100%)`
                     : alpha(primaryColor, 0.08),
                 },
+                '& .MuiButton-startIcon': {
+                  mr: { xs: 0.5, sm: 1 },
+                  ml: 0,
+                },
               }}
             >
               {t('restaurants.allRestaurants')}
@@ -384,11 +410,13 @@ export function RestaurantList() {
               startIcon={<LocationOnRounded />}
               disabled={isRequestingLocation}
               sx={{
-                px: 3,
-                py: 1.25,
+                flex: { xs: '1 1 0', sm: '0 0 auto' },
+                minWidth: 0,
+                px: { xs: 1, sm: 3 },
+                py: { xs: 1, sm: 1.25 },
                 borderRadius: '12px',
                 fontWeight: 600,
-                fontSize: 14,
+                fontSize: { xs: 12, sm: 14 },
                 textTransform: 'none',
                 background: isNearbyMode
                   ? `linear-gradient(145deg, ${primaryColor} 0%, ${alpha(primaryColor, 0.85)} 100%)`
@@ -399,6 +427,10 @@ export function RestaurantList() {
                   background: isNearbyMode
                     ? `linear-gradient(145deg, ${primaryColor} 0%, ${alpha(primaryColor, 0.85)} 100%)`
                     : alpha(primaryColor, 0.08),
+                },
+                '& .MuiButton-startIcon': {
+                  mr: { xs: 0.5, sm: 1 },
+                  ml: 0,
                 },
               }}
             >
@@ -415,22 +447,24 @@ export function RestaurantList() {
           {/* Search & Filters */}
           <Box
             sx={{
-              p: { xs: 2, sm: 2.5 },
+              p: { xs: 1.25, sm: 2.5 },
               borderRadius: '20px',
               background: theme.palette.background.paper,
               border: `1px solid ${theme.palette.divider}`,
               boxShadow: isDark ? 'none' : '0 4px 24px rgba(0,0,0,0.04)',
             }}
           >
-            <Stack spacing={2}>
+            <Stack spacing={{ xs: 1, sm: 2 }}>
               {/* Search Row */}
               <Stack
-                direction={{ xs: 'column', md: 'row' }}
-                spacing={2}
-                alignItems={{ xs: 'stretch', md: 'center' }}
+                direction="row"
+                spacing={{ xs: 1, sm: 2 }}
+                alignItems="center"
+                sx={{ minWidth: 0 }}
               >
                 <TextField
                   fullWidth
+                  size="small"
                   variant="outlined"
                   placeholder={t('restaurants.searchPlaceholder')}
                   value={searchTerm}
@@ -443,21 +477,30 @@ export function RestaurantList() {
                     ),
                   }}
                   sx={{
+                    flex: '1 1 auto',
+                    minWidth: 0,
                     '& .MuiOutlinedInput-root': {
-                      borderRadius: '14px',
+                      borderRadius: { xs: '12px', sm: '14px' },
                       background: alpha(theme.palette.text.primary, 0.02),
                     },
                   }}
                 />
 
-                <FormControl sx={{ minWidth: { xs: '100%', md: 200 } }}>
+                <FormControl
+                  size="small"
+                  sx={{
+                    flex: { xs: '0 0 86px', sm: '0 0 170px', md: '0 0 200px' },
+                    minWidth: 0,
+                  }}
+                >
                   <InputLabel id="restaurant-sort-label">{t('restaurants.sortLabel')}</InputLabel>
                   <Select
                     labelId="restaurant-sort-label"
                     value={sortOrder}
                     label={t('restaurants.sortLabel')}
                     onChange={(event) => setSortOrder(event.target.value as PublicShopFeedOrder)}
-                    sx={{ borderRadius: '14px' }}
+                    renderValue={(value) => getSortShortLabel(value as PublicShopFeedOrder)}
+                    sx={{ borderRadius: { xs: '12px', sm: '14px' } }}
                   >
                     {isNearbyMode
                       ? [
@@ -482,15 +525,20 @@ export function RestaurantList() {
 
               {/* City/District Filters (only in ALL mode) */}
               {!isNearbyMode && (
-                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-                  <FormControl sx={{ minWidth: { xs: '100%', md: 200 } }}>
+                <Stack
+                  direction="row"
+                  spacing={{ xs: 1, sm: 2 }}
+                  alignItems="center"
+                  sx={{ minWidth: 0 }}
+                >
+                  <FormControl size="small" sx={{ flex: '1 1 0', minWidth: 0 }}>
                     <InputLabel id="restaurant-city-label">{t('restaurants.cityLabel')}</InputLabel>
                     <Select
                       labelId="restaurant-city-label"
                       label={t('restaurants.cityLabel')}
                       value={selectedCity}
                       onChange={handleCityChange}
-                      sx={{ borderRadius: '14px' }}
+                      sx={{ borderRadius: { xs: '12px', sm: '14px' } }}
                     >
                       <MenuItem value="">
                         <em>{t('restaurants.filterAll')}</em>
@@ -503,7 +551,11 @@ export function RestaurantList() {
                     </Select>
                   </FormControl>
 
-                  <FormControl sx={{ minWidth: { xs: '100%', md: 200 } }} disabled={!selectedCity}>
+                  <FormControl
+                    size="small"
+                    sx={{ flex: '1 1 0', minWidth: 0 }}
+                    disabled={!selectedCity}
+                  >
                     <InputLabel id="restaurant-district-label">
                       {t('restaurants.districtLabel')}
                     </InputLabel>
@@ -512,7 +564,7 @@ export function RestaurantList() {
                       label={t('restaurants.districtLabel')}
                       value={selectedDistrict}
                       onChange={(event) => setSelectedDistrict(event.target.value)}
-                      sx={{ borderRadius: '14px' }}
+                      sx={{ borderRadius: { xs: '12px', sm: '14px' } }}
                     >
                       <MenuItem value="">
                         <em>{t('restaurants.filterAll')}</em>
@@ -524,6 +576,30 @@ export function RestaurantList() {
                       ))}
                     </Select>
                   </FormControl>
+
+                  <Button
+                    variant="contained"
+                    onClick={handleApplyFilters}
+                    startIcon={<FilterAltRounded />}
+                    sx={{
+                      flex: { xs: '0 0 44px', sm: '0 0 auto' },
+                      minWidth: { xs: 44, sm: 116 },
+                      width: { xs: 44, sm: 'auto' },
+                      height: 40,
+                      px: { xs: 0, sm: 2.25 },
+                      borderRadius: { xs: '12px', sm: '14px' },
+                      fontWeight: 700,
+                      textTransform: 'none',
+                      '& .MuiButton-startIcon': {
+                        m: { xs: 0, sm: '0 8px 0 -4px' },
+                      },
+                    }}
+                    aria-label={t('restaurants.applyFilters')}
+                  >
+                    <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                      {t('restaurants.applyFilters')}
+                    </Box>
+                  </Button>
                 </Stack>
               )}
             </Stack>
