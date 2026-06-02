@@ -1,6 +1,7 @@
 'use client'
 
-import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded'
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
+import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import { Box, Button, Container, Stack, Typography } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
 
@@ -25,18 +26,31 @@ export function HeroSection({ locale }: HeroSectionProps) {
         minHeight: { xs: 'calc(100vh - 60px)', sm: 'calc(100vh - 68px)' },
         display: 'flex',
         alignItems: 'center',
+        bgcolor: 'background.default',
       }}
     >
-      {/* Background decoration */}
+      {/* Modern gradient mesh background */}
       <Box
         sx={{
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: { xs: '200%', md: '120%' },
-          height: { xs: '200%', md: '120%' },
-          background: `radial-gradient(ellipse at center, ${alpha(theme.palette.primary.main, 0.08)} 0%, transparent 60%)`,
+          inset: 0,
+          background: `
+            radial-gradient(ellipse 80% 50% at 50% -20%, ${alpha(theme.palette.primary.main, 0.15)}, transparent),
+            radial-gradient(ellipse 60% 40% at 100% 50%, ${alpha(theme.palette.primary.light, 0.08)}, transparent),
+            radial-gradient(ellipse 50% 30% at 0% 80%, ${alpha(theme.palette.secondary.main, 0.06)}, transparent)
+          `,
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Subtle grid pattern */}
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: `linear-gradient(${alpha(theme.palette.divider, 0.03)} 1px, transparent 1px),
+                           linear-gradient(90deg, ${alpha(theme.palette.divider, 0.03)} 1px, transparent 1px)`,
+          backgroundSize: '64px 64px',
           pointerEvents: 'none',
         }}
       />
@@ -48,34 +62,60 @@ export function HeroSection({ locale }: HeroSectionProps) {
           gap={{ xs: 4, sm: 5 }}
           sx={{ py: { xs: 6, sm: 8, md: 10 } }}
         >
-          {/* Logo/Icon */}
+          {/* Badge */}
           <Box
             sx={{
-              width: { xs: 72, sm: 88 },
-              height: { xs: 72, sm: 88 },
-              borderRadius: '24px',
-              bgcolor: alpha(theme.palette.primary.main, 0.1),
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+              gap: 1,
+              px: 2,
+              py: 0.75,
+              borderRadius: 10,
+              bgcolor: alpha(theme.palette.primary.main, 0.08),
+              border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
+              backdropFilter: 'blur(8px)',
             }}
           >
-            <RestaurantMenuRoundedIcon
-              sx={{ fontSize: { xs: 36, sm: 44 }, color: 'primary.main' }}
+            <Box
+              sx={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                bgcolor: 'primary.main',
+                animation: 'pulse 2s infinite',
+                '@keyframes pulse': {
+                  '0%, 100%': { opacity: 1 },
+                  '50%': { opacity: 0.5 },
+                },
+              }}
             />
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 600,
+                color: 'primary.main',
+                letterSpacing: '0.02em',
+                fontSize: '0.75rem',
+              }}
+            >
+              Restoran Yonetiminde Yeni Nesil
+            </Typography>
           </Box>
 
           {/* Headlines */}
-          <Stack gap={{ xs: 2, sm: 2.5 }} maxWidth="md">
+          <Stack gap={{ xs: 2.5, sm: 3 }} maxWidth="lg">
             <Typography
               variant="h1"
               sx={{
-                fontSize: { xs: '2rem', sm: '2.75rem', md: '3.5rem' },
+                fontSize: { xs: '2.25rem', sm: '3rem', md: '3.75rem', lg: '4.25rem' },
                 fontWeight: 800,
-                lineHeight: 1.1,
-                letterSpacing: '-0.03em',
+                lineHeight: 1.05,
+                letterSpacing: '-0.04em',
                 textWrap: 'balance',
+                background: `linear-gradient(135deg, ${theme.palette.text.primary} 0%, ${alpha(theme.palette.text.primary, 0.7)} 100%)`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
               }}
             >
               {t('landing.heroTitle')}
@@ -85,8 +125,8 @@ export function HeroSection({ locale }: HeroSectionProps) {
               color="text.secondary"
               sx={{
                 fontSize: { xs: '1rem', sm: '1.125rem', md: '1.25rem' },
-                lineHeight: 1.6,
-                maxWidth: 600,
+                lineHeight: 1.7,
+                maxWidth: 640,
                 mx: 'auto',
                 textWrap: 'balance',
               }}
@@ -99,22 +139,26 @@ export function HeroSection({ locale }: HeroSectionProps) {
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             gap={{ xs: 1.5, sm: 2 }}
-            sx={{ width: { xs: '100%', sm: 'auto' } }}
+            sx={{ width: { xs: '100%', sm: 'auto' }, mt: 1 }}
           >
             <Button
               href={`/${locale}/dashboard`}
               variant="contained"
               size="large"
+              endIcon={<ArrowForwardRoundedIcon sx={{ fontSize: 18 }} />}
               sx={{
-                px: { xs: 4, sm: 5 },
+                px: { xs: 3.5, sm: 4 },
                 py: { xs: 1.5, sm: 1.75 },
                 fontSize: { xs: '0.9375rem', sm: '1rem' },
                 fontWeight: 600,
-                borderRadius: 2,
+                borderRadius: 2.5,
                 textTransform: 'none',
-                boxShadow: `0 4px 24px ${alpha(theme.palette.primary.main, 0.25)}`,
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                boxShadow: `0 8px 32px ${alpha(theme.palette.primary.main, 0.3)}`,
+                transition: 'all 0.2s ease',
                 '&:hover': {
-                  boxShadow: `0 6px 32px ${alpha(theme.palette.primary.main, 0.35)}`,
+                  transform: 'translateY(-2px)',
+                  boxShadow: `0 12px 40px ${alpha(theme.palette.primary.main, 0.4)}`,
                 },
               }}
             >
@@ -123,21 +167,54 @@ export function HeroSection({ locale }: HeroSectionProps) {
             <Button
               variant="outlined"
               size="large"
+              startIcon={<PlayArrowRoundedIcon sx={{ fontSize: 20 }} />}
               sx={{
-                px: { xs: 4, sm: 5 },
+                px: { xs: 3.5, sm: 4 },
                 py: { xs: 1.5, sm: 1.75 },
                 fontSize: { xs: '0.9375rem', sm: '1rem' },
                 fontWeight: 600,
-                borderRadius: 2,
+                borderRadius: 2.5,
                 textTransform: 'none',
-                borderWidth: 2,
+                borderColor: alpha(theme.palette.divider, 0.8),
+                color: 'text.primary',
+                backdropFilter: 'blur(8px)',
+                bgcolor: alpha(theme.palette.background.paper, 0.5),
+                transition: 'all 0.2s ease',
                 '&:hover': {
-                  borderWidth: 2,
+                  borderColor: 'primary.main',
+                  bgcolor: alpha(theme.palette.primary.main, 0.04),
+                  transform: 'translateY(-2px)',
                 },
               }}
             >
               {t('landing.heroSecondaryCta')}
             </Button>
+          </Stack>
+
+          {/* Trust indicators */}
+          <Stack
+            direction="row"
+            alignItems="center"
+            gap={{ xs: 2, sm: 4 }}
+            sx={{ mt: { xs: 2, sm: 3 }, opacity: 0.7 }}
+            flexWrap="wrap"
+            justifyContent="center"
+          >
+            {['500+ Isletme', '1M+ Siparis', '7/24 Destek'].map((item, index) => (
+              <Stack key={index} direction="row" alignItems="center" gap={0.75}>
+                <Box
+                  sx={{
+                    width: 4,
+                    height: 4,
+                    borderRadius: '50%',
+                    bgcolor: 'primary.main',
+                  }}
+                />
+                <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                  {item}
+                </Typography>
+              </Stack>
+            ))}
           </Stack>
         </Stack>
       </Container>

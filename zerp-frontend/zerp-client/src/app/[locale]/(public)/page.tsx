@@ -8,7 +8,6 @@ import {
   FeaturesSection,
   FooterSection,
   HeroSection,
-  StatsSection,
 } from '@/features/landing'
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
@@ -22,7 +21,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     <Box component="main">
       <HeroSection locale={locale as Locale} />
       <FeaturesSection />
-      <StatsSection />
       <CtaSection locale={locale as Locale} />
       <FooterSection />
     </Box>
