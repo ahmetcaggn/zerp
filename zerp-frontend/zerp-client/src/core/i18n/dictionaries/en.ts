@@ -28,6 +28,46 @@ export const enMessages = {
       'Scalable Next.js + MUI template infrastructure for tenant, client, and admin applications.',
     cta: 'Open Dashboard',
   },
+  landing: {
+    heroTitle: 'Bring Your Restaurant into the Digital Future',
+    heroSubtitle:
+      'Smart ordering, menu management, and operational efficiency solution designed for cafes and restaurants.',
+    heroCta: 'Explore Now',
+    heroSecondaryCta: 'Request Demo',
+    featuresTitle: 'Why ZERP?',
+    featuresSubtitle: 'All the tools you need for your modern business in one platform.',
+    feature1Title: 'Digital Menu',
+    feature1Desc:
+      'QR-enabled, multi-language supported, and real-time updatable smart menu system.',
+    feature2Title: 'Order Management',
+    feature2Desc:
+      'Manage table, takeaway, and delivery orders from a single panel, integrated with kitchen displays.',
+    feature3Title: 'Inventory Tracking',
+    feature3Desc:
+      'Minimize losses with real-time stock status, automatic alerts, and cost analysis.',
+    feature4Title: 'Analytics & Reports',
+    feature4Desc:
+      'Track sales trends, discover best-selling products, and make data-driven decisions.',
+    statsTitle: 'ZERP by Numbers',
+    stat1Value: '500+',
+    stat1Label: 'Active Businesses',
+    stat2Value: '1M+',
+    stat2Label: 'Monthly Orders',
+    stat3Value: '30%',
+    stat3Label: 'Efficiency Increase',
+    stat4Value: '24/7',
+    stat4Label: 'Support',
+    ctaTitle: 'Ready to Grow Your Business?',
+    ctaSubtitle:
+      'Digitize your operations, increase customer satisfaction, and reduce costs with ZERP.',
+    ctaButton: 'Start Free',
+    footerTagline: 'Modern ERP solution for cafes and restaurants.',
+    footerCopyright: '© 2024 ZERP. All rights reserved.',
+    footerLinks: 'Links',
+    footerContact: 'Contact',
+    footerPrivacy: 'Privacy Policy',
+    footerTerms: 'Terms of Service',
+  },
   auth: {
     loginTitle: 'Login',
     registerTitle: 'Register',
