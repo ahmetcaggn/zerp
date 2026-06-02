@@ -1,0 +1,4 @@
+export { CtaSection } from './components/cta-section'
+export { FeaturesSection } from './components/features-section'
+export { FooterSection } from './components/footer-section'
+export { HeroSection } from './components/hero-section'
