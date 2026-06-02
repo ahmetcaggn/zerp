@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronRightRounded,LocationOnRounded, StorefrontRounded } from '@mui/icons-material'
+import { ChevronRightRounded, LocationOnRounded, StorefrontRounded } from '@mui/icons-material'
 import {
   Alert,
   alpha,
@@ -67,7 +67,7 @@ export function WelcomeScreen() {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
+        minHeight: { xs: 'calc(100vh - 60px)', sm: 'calc(100vh - 68px)' },
         background: warmBg,
         display: 'flex',
         flexDirection: 'column',
@@ -82,37 +82,11 @@ export function WelcomeScreen() {
           flexDirection: 'column',
           justifyContent: 'center',
           px: { xs: 3, sm: 4 },
-          py: { xs: 6, sm: 8 },
+          py: { xs: 4, sm: 6 },
         }}
       >
         {/* Hero Section */}
         <Box sx={{ mb: { xs: 5, sm: 6 } }}>
-          {/* Brand Mark */}
-          <Box
-            sx={{
-              width: 56,
-              height: 56,
-              borderRadius: '16px',
-              background: `linear-gradient(145deg, ${primaryColor} 0%, ${alpha(primaryColor, 0.8)} 100%)`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              mb: 4,
-              boxShadow: `0 12px 32px ${alpha(primaryColor, 0.35)}`,
-            }}
-          >
-            <Typography
-              sx={{
-                color: 'white',
-                fontWeight: 700,
-                fontSize: 22,
-                letterSpacing: 0,
-              }}
-            >
-              Z
-            </Typography>
-          </Box>
-
           {/* Greeting */}
           <Typography
             sx={{
