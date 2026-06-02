@@ -41,7 +41,7 @@ export const enMessages = {
       'QR-enabled, multi-language supported, and real-time updatable smart menu system.',
     feature2Title: 'Order Management',
     feature2Desc:
-      'Manage table, takeaway, and delivery orders from a single panel, integrated with kitchen displays.',
+      'Manage menu and order workflows from a single panel, and keep product and category updates organized.',
     feature3Title: 'Inventory Tracking',
     feature3Desc:
       'Minimize losses with real-time stock status, automatic alerts, and cost analysis.',
@@ -53,7 +53,7 @@ export const enMessages = {
       'Digitize your operations, increase customer satisfaction, and reduce costs with ZERP.',
     ctaButton: 'Start Free',
     footerTagline: 'Modern ERP solution for cafes and restaurants.',
-    footerCopyright: '© 2024 ZERP. All rights reserved.',
+    footerCopyright: '© {year} ZERP. All rights reserved.',
     footerContact: 'Contact',
     footerPrivacy: 'Privacy Policy',
     footerTerms: 'Terms of Service',

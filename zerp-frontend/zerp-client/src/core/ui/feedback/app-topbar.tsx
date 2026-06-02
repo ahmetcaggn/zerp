@@ -8,9 +8,9 @@ import { AppBar, Container, Stack, Toolbar, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useRouter } from 'next/navigation'
+
 // Auth/SSO disabled temporarily. Re-enable when login/logout comes back.
 // import { signOut, useSession } from 'next-auth/react'
-
 // Profile disabled with Auth/SSO temporarily.
 // import { useCurrentUserProfile } from '@/core/auth/client/use-current-user-profile'
 import { appConfig } from '@/core/config/app-config'

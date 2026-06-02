@@ -41,7 +41,7 @@ export const trMessages = {
       'QR kodlu, çoklu dil destekli ve gerçek zamanlı güncellenebilen akıllı menü sistemi.',
     feature2Title: 'Sipariş Yönetimi',
     feature2Desc:
-      'Masa, paket ve kurye siparişlerini tek panelden yönetin, mutfak ekranlarıyla entegre edin.',
+      'Menü ve sipariş süreçlerini tek panelden yönetin, ürün ve kategori güncellemelerini düzenli takip edin.',
     feature3Title: 'Stok Takibi',
     feature3Desc:
       'Anlık stok durumu, otomatik uyarılar ve maliyet analizi ile kayıpları minimize edin.',
@@ -53,7 +53,7 @@ export const trMessages = {
       'ZERP ile operasyonlarınızı dijitalleştirin, müşteri memnuniyetini artırın ve maliyetleri düşürün.',
     ctaButton: 'Ücretsiz Başlayın',
     footerTagline: 'Kafe ve restoranlar için modern ERP çözümü.',
-    footerCopyright: '© 2024 ZERP. Tüm hakları saklıdır.',
+    footerCopyright: '© {year} ZERP. Tüm hakları saklıdır.',
     footerContact: 'İletişim',
     footerPrivacy: 'Gizlilik Politikası',
     footerTerms: 'Kullanım Koşulları',

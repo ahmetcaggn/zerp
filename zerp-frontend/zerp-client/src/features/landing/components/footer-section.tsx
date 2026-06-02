@@ -1,7 +1,7 @@
 'use client'
 
 import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
-import { Box, Container, Link, Stack, Typography } from '@mui/material'
+import { Box, Container, Stack, Typography } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
 
 import { appConfig } from '@/core/config/app-config'
@@ -11,6 +11,7 @@ import { responsiveLayout } from '@/core/theme/layout'
 export function FooterSection() {
   const { t } = useI18n()
   const theme = useTheme()
+  const currentYear = new Date().getFullYear()
 
   return (
     <Box
@@ -52,39 +53,12 @@ export function FooterSection() {
             </Stack>
           </Stack>
 
-          {/* Links */}
-          <Stack direction="row" gap={{ xs: 3, sm: 4 }} flexWrap="wrap" justifyContent="center">
-            {[
-              { label: t('landing.footerPrivacy'), href: '#' },
-              { label: t('landing.footerTerms'), href: '#' },
-              { label: t('landing.footerContact'), href: '#' },
-            ].map((link, index) => (
-              <Link
-                key={index}
-                href={link.href}
-                underline="none"
-                color="text.secondary"
-                sx={{
-                  fontSize: '0.8125rem',
-                  fontWeight: 500,
-                  transition: 'color 0.2s ease',
-                  '&:hover': {
-                    color: 'primary.main',
-                  },
-                }}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </Stack>
-
-          {/* Copyright */}
           <Typography
             variant="caption"
             color="text.secondary"
             sx={{ fontSize: '0.75rem', opacity: 0.8 }}
           >
-            {t('landing.footerCopyright')}
+            {t('landing.footerCopyright', { year: currentYear })}
           </Typography>
         </Stack>
       </Container>
