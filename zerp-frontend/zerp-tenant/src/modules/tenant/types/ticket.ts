@@ -26,7 +26,6 @@ export const TicketType = IssueType
 export type TicketTypeValue = IssueTypeValue
 
 export type CreateTicketRequest = Omit<GeneratedCreateTicketRequest, 'tenantId' | 'type'> & {
-  tenantId: string
   type?: IssueTypeValue
 }
 export type CommentResponse = GeneratedCommentResponse & { authorName?: string }

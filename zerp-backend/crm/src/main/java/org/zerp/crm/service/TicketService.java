@@ -283,10 +283,7 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
     public TicketResponse createTicket(CreateTicketRequest request) {
         TicketPriority priority = request.priority() != null ? request.priority() : TicketPriority.MEDIUM;
         IssueType type = request.type() != null ? request.type() : IssueType.QUESTION;
-        UUID tenantId = request.tenantId();
-        if (tenantId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "tenantId is required");
-        }
+        UUID tenantId = resolveCurrentTenantIdOrThrow();
 
         UUID userId = resolveCurrentUserIdOrThrow();
         ensureCanCreateTicket(userId, tenantId);
@@ -1496,5 +1493,13 @@ public class TicketService implements IResourceService<TicketResponse, TicketRes
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing user context");
         }
         return userId;
+    }
+
+    private UUID resolveCurrentTenantIdOrThrow() {
+        UUID tenantId = currentTenantIdResolver.resolve();
+        if (tenantId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "tenantId is required");
+        }
+        return tenantId;
     }
 }

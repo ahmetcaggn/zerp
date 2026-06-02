@@ -17,7 +17,6 @@ import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import { useAuth } from '@/core/auth/client/use-auth'
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
@@ -34,35 +33,20 @@ interface Props {
 
 const PRIORITY_OPTIONS = Object.values(TicketPriority)
 const TYPE_OPTIONS = Object.values(TicketType)
-const UUID_REGEX =
-  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/
 
 export function TicketCreateDialog({ open, onClose }: Props) {
   const { t, locale } = useI18n()
-  const { tenantId: sessionTenantId } = useAuth()
   const { showToast } = useToast()
   const router = useRouter()
 
-  const [tenantIdOverride, setTenantIdOverride] = useState<string | null>(null)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<string>(TicketPriority.Medium)
   const [type, setType] = useState<TicketTypeValue>(TicketType.Question)
-  const tenantId = tenantIdOverride ?? sessionTenantId ?? ''
 
   const { mutate: createTicket, isPending } = useCreateTicket()
 
   function handleSubmit() {
-    const normalizedTenantId = tenantId.trim()
-    if (!normalizedTenantId) {
-      showToast(t('tickets.tenantRequiredWarning'), { severity: 'warning' })
-      return
-    }
-    if (!UUID_REGEX.test(normalizedTenantId)) {
-      showToast(t('tickets.tenantFormatWarning'), { severity: 'warning' })
-      return
-    }
-
     if (!title.trim()) {
       showToast(t('tickets.titleRequiredWarning'), { severity: 'warning' })
       return
@@ -70,7 +54,6 @@ export function TicketCreateDialog({ open, onClose }: Props) {
 
     createTicket(
       {
-        tenantId: normalizedTenantId,
         title: title.trim(),
         ...(description && { description }),
         priority: priority as (typeof TicketPriority)[keyof typeof TicketPriority],
@@ -95,16 +78,6 @@ export function TicketCreateDialog({ open, onClose }: Props) {
 
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-          <TextField
-            label={t('tickets.tenantIdField')}
-            value={tenantId}
-            onChange={(e) => setTenantIdOverride(e.target.value)}
-            size="small"
-            fullWidth
-            required
-            helperText={t('tickets.tenantIdFieldHelper')}
-          />
-
           <TextField
             label={t('tickets.titleField')}
             value={title}
