@@ -2,9 +2,11 @@
 
 import {
   Alert,
+  alpha,
   Box,
   Button,
   Chip,
+  Container,
   FormControl,
   Grid,
   InputLabel,
@@ -14,8 +16,15 @@ import {
   Stack,
   TextField,
   Typography,
+  useTheme,
 } from '@mui/material'
 import type { SelectChangeEvent } from '@mui/material/Select'
+import {
+  SearchRounded,
+  TuneRounded,
+  LocationOnRounded,
+  StorefrontRounded,
+} from '@mui/icons-material'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -71,26 +80,19 @@ function RestaurantCardSkeleton() {
     <Box
       sx={{
         height: '100%',
-        borderRadius: 2.5,
-        border: (theme) => `1px solid ${theme.palette.divider}`,
+        borderRadius: '20px',
         bgcolor: (theme) => theme.palette.background.paper,
         overflow: 'hidden',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.04)',
       }}
     >
-      <Skeleton variant="rectangular" height={198} />
+      <Skeleton variant="rectangular" height={180} />
       <Box sx={{ p: 2.5 }}>
-        <Stack spacing={1.25}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1.5 }}>
-            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-              <Skeleton variant="text" width="72%" height={28} />
-              <Skeleton variant="text" width="46%" height={20} />
-            </Box>
-            <Skeleton variant="rounded" width={34} height={24} />
-          </Box>
-
+        <Stack spacing={1.5}>
+          <Skeleton variant="text" width="72%" height={28} />
+          <Skeleton variant="text" width="46%" height={20} />
           <Skeleton variant="text" width="58%" height={20} />
-          <Skeleton variant="text" width="42%" height={20} />
-          <Skeleton variant="rounded" width="100%" height={36} />
+          <Skeleton variant="rounded" width="100%" height={44} sx={{ borderRadius: '12px' }} />
         </Stack>
       </Box>
     </Box>
@@ -130,6 +132,9 @@ function mapShopToRestaurant(
 export function RestaurantList() {
   const { t } = useI18n()
   const searchParams = useSearchParams()
+  const theme = useTheme()
+  const isDark = theme.palette.mode === 'dark'
+  const primaryColor = theme.palette.primary.main
 
   const queryLocation = useMemo(() => {
     const rawLat = searchParams.get('lat')
@@ -300,181 +305,322 @@ export function RestaurantList() {
   const isInitialLoading = isLoading && restaurants.length === 0
 
   return (
-    <Stack spacing={3.5}>
-      <Stack spacing={1.2}>
-        <Typography variant="h3" fontWeight={800}>
-          {t('restaurants.title')}
-        </Typography>
-        <Typography color="text.secondary">
-          {t('restaurants.subtitle')}
-        </Typography>
-      </Stack>
-
-      <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        spacing={1.5}
-        sx={{
-          p: 1,
-          borderRadius: 2,
-          border: (theme) => `1px solid ${theme.palette.divider}`,
-          bgcolor: (theme) => theme.palette.background.paper,
-          width: 'fit-content',
-          maxWidth: '100%',
-        }}
-      >
-        <Button
-          variant={!isNearbyMode ? 'contained' : 'outlined'}
-          onClick={() => handleModeChange('ALL')}
-          sx={{ minWidth: 180 }}
-        >
-          {t('restaurants.allRestaurants')}
-        </Button>
-        <Button
-          variant={isNearbyMode ? 'contained' : 'outlined'}
-          onClick={() => handleModeChange('NEARBY')}
-          disabled={isRequestingLocation}
-          sx={{ minWidth: 180 }}
-        >
-          {isRequestingLocation ? t('restaurants.locating') : t('restaurants.showNearby')}
-        </Button>
-      </Stack>
-
-      {locationError && <Alert severity="warning">{locationError}</Alert>}
-
-      <Stack
-        direction={{ xs: 'column', md: 'row' }}
-        spacing={1.5}
-        alignItems={{ xs: 'stretch', md: 'center' }}
-        sx={{
-          p: { xs: 1.5, sm: 2 },
-          borderRadius: 2,
-          border: (theme) => `1px solid ${theme.palette.divider}`,
-          bgcolor: (theme) => theme.palette.background.paper,
-        }}
-      >
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder={t('restaurants.searchPlaceholder')}
-          value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
-        />
-
-        <FormControl sx={{ minWidth: { xs: '100%', md: 220 } }}>
-          <InputLabel id="restaurant-sort-label">{t('restaurants.sortLabel')}</InputLabel>
-          <Select
-            labelId="restaurant-sort-label"
-            value={sortOrder}
-            label={t('restaurants.sortLabel')}
-            onChange={(event) => setSortOrder(event.target.value as PublicShopFeedOrder)}
-          >
-            {isNearbyMode ? (
-              [
-                <MenuItem key="nearby-asc" value="ASC">{t('restaurants.sortDistanceAsc')}</MenuItem>,
-                <MenuItem key="nearby-desc" value="DESC">{t('restaurants.sortDistanceDesc')}</MenuItem>,
-              ]
-            ) : (
-              [
-                <MenuItem key="name-asc" value="ASC">{t('restaurants.sortNameAsc')}</MenuItem>,
-                <MenuItem key="name-desc" value="DESC">{t('restaurants.sortNameDesc')}</MenuItem>,
-              ]
-            )}
-          </Select>
-        </FormControl>
-      </Stack>
-
-      {!isNearbyMode ? (
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5}>
-          <FormControl sx={{ minWidth: { xs: '100%', md: 220 } }}>
-            <InputLabel id="restaurant-city-label">{t('restaurants.cityLabel')}</InputLabel>
-            <Select
-              labelId="restaurant-city-label"
-              label={t('restaurants.cityLabel')}
-              value={selectedCity}
-              onChange={handleCityChange}
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: theme.palette.background.default,
+        pb: 6,
+      }}
+    >
+      <Container maxWidth="lg" sx={{ pt: { xs: 3, sm: 4 } }}>
+        <Stack spacing={4}>
+          {/* Header */}
+          <Box>
+            <Typography
+              component="h1"
+              sx={{
+                fontSize: { xs: 28, sm: 36, md: 42 },
+                fontWeight: 700,
+                color: theme.palette.text.primary,
+                letterSpacing: '-0.5px',
+                mb: 1,
+              }}
             >
-              <MenuItem value="">
-                <em>{t('restaurants.filterAll')}</em>
-              </MenuItem>
-              {TURKEY_CITY_OPTIONS.map((city) => (
-                <MenuItem key={city} value={city}>{city}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl sx={{ minWidth: { xs: '100%', md: 220 } }} disabled={!selectedCity}>
-            <InputLabel id="restaurant-district-label">{t('restaurants.districtLabel')}</InputLabel>
-            <Select
-              labelId="restaurant-district-label"
-              label={t('restaurants.districtLabel')}
-              value={selectedDistrict}
-              onChange={(event) => setSelectedDistrict(event.target.value)}
-            >
-              <MenuItem value="">
-                <em>{t('restaurants.filterAll')}</em>
-              </MenuItem>
-              {districtOptions.map((district) => (
-                <MenuItem key={district} value={district}>{district}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Stack>
-      ) : (
-        <Chip
-          color="info"
-          variant="outlined"
-          label={t('restaurants.nearbyFiltersDisabled')}
-          sx={{ alignSelf: 'flex-start' }}
-        />
-      )}
-
-      {isNearbyMode && effectiveUserLocation && (
-        <Stack spacing={0.5}>
-          <Typography variant="body2" color="text.secondary">
-            {t('restaurants.userCoordinates', {
-              lat: effectiveUserLocation.lat.toFixed(6),
-              lng: effectiveUserLocation.lng.toFixed(6),
-            })}
-          </Typography>
-          {typeof locationAccuracyMeters === 'number' && (
-            <Typography variant="caption" color="text.secondary">
-              {t('restaurants.locationAccuracy', { meters: Math.round(locationAccuracyMeters) })}
+              {t('restaurants.title')}
             </Typography>
+            <Typography
+              sx={{
+                fontSize: { xs: 15, sm: 16 },
+                color: theme.palette.text.secondary,
+                maxWidth: 480,
+              }}
+            >
+              {t('restaurants.subtitle')}
+            </Typography>
+          </Box>
+
+          {/* Mode Toggle */}
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 1.5,
+              p: 0.75,
+              borderRadius: '16px',
+              background: theme.palette.background.paper,
+              border: `1px solid ${theme.palette.divider}`,
+              width: 'fit-content',
+              boxShadow: isDark ? 'none' : '0 2px 12px rgba(0,0,0,0.04)',
+            }}
+          >
+            <Button
+              onClick={() => handleModeChange('ALL')}
+              startIcon={<StorefrontRounded />}
+              sx={{
+                px: 3,
+                py: 1.25,
+                borderRadius: '12px',
+                fontWeight: 600,
+                fontSize: 14,
+                textTransform: 'none',
+                background: !isNearbyMode
+                  ? `linear-gradient(145deg, ${primaryColor} 0%, ${alpha(primaryColor, 0.85)} 100%)`
+                  : 'transparent',
+                color: !isNearbyMode ? 'white' : theme.palette.text.secondary,
+                boxShadow: !isNearbyMode ? `0 4px 16px ${alpha(primaryColor, 0.3)}` : 'none',
+                '&:hover': {
+                  background: !isNearbyMode
+                    ? `linear-gradient(145deg, ${primaryColor} 0%, ${alpha(primaryColor, 0.85)} 100%)`
+                    : alpha(primaryColor, 0.08),
+                },
+              }}
+            >
+              {t('restaurants.allRestaurants')}
+            </Button>
+            <Button
+              onClick={() => handleModeChange('NEARBY')}
+              startIcon={<LocationOnRounded />}
+              disabled={isRequestingLocation}
+              sx={{
+                px: 3,
+                py: 1.25,
+                borderRadius: '12px',
+                fontWeight: 600,
+                fontSize: 14,
+                textTransform: 'none',
+                background: isNearbyMode
+                  ? `linear-gradient(145deg, ${primaryColor} 0%, ${alpha(primaryColor, 0.85)} 100%)`
+                  : 'transparent',
+                color: isNearbyMode ? 'white' : theme.palette.text.secondary,
+                boxShadow: isNearbyMode ? `0 4px 16px ${alpha(primaryColor, 0.3)}` : 'none',
+                '&:hover': {
+                  background: isNearbyMode
+                    ? `linear-gradient(145deg, ${primaryColor} 0%, ${alpha(primaryColor, 0.85)} 100%)`
+                    : alpha(primaryColor, 0.08),
+                },
+              }}
+            >
+              {isRequestingLocation ? t('restaurants.locating') : t('restaurants.showNearby')}
+            </Button>
+          </Box>
+
+          {locationError && (
+            <Alert severity="warning" sx={{ borderRadius: '12px' }}>
+              {locationError}
+            </Alert>
           )}
-        </Stack>
-      )}
 
-      {isError && <Typography color="error">{t('restaurants.loadFailed')}</Typography>}
+          {/* Search & Filters */}
+          <Box
+            sx={{
+              p: { xs: 2, sm: 2.5 },
+              borderRadius: '20px',
+              background: theme.palette.background.paper,
+              border: `1px solid ${theme.palette.divider}`,
+              boxShadow: isDark ? 'none' : '0 4px 24px rgba(0,0,0,0.04)',
+            }}
+          >
+            <Stack spacing={2}>
+              {/* Search Row */}
+              <Stack
+                direction={{ xs: 'column', md: 'row' }}
+                spacing={2}
+                alignItems={{ xs: 'stretch', md: 'center' }}
+              >
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder={t('restaurants.searchPlaceholder')}
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <SearchRounded sx={{ mr: 1, color: theme.palette.text.secondary, fontSize: 22 }} />
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '14px',
+                      background: alpha(theme.palette.text.primary, 0.02),
+                    },
+                  }}
+                />
 
-      {isInitialLoading && (
-        <Grid container spacing={3}>
-          {Array.from({ length: 6 }).map((_, index) => (
-            <Grid key={index} size={{ xs: 12, sm: 6, lg: 4 }}>
-              <Skeleton variant="rounded" height={380} />
+                <FormControl sx={{ minWidth: { xs: '100%', md: 200 } }}>
+                  <InputLabel id="restaurant-sort-label">{t('restaurants.sortLabel')}</InputLabel>
+                  <Select
+                    labelId="restaurant-sort-label"
+                    value={sortOrder}
+                    label={t('restaurants.sortLabel')}
+                    onChange={(event) => setSortOrder(event.target.value as PublicShopFeedOrder)}
+                    sx={{ borderRadius: '14px' }}
+                  >
+                    {isNearbyMode ? (
+                      [
+                        <MenuItem key="nearby-asc" value="ASC">{t('restaurants.sortDistanceAsc')}</MenuItem>,
+                        <MenuItem key="nearby-desc" value="DESC">{t('restaurants.sortDistanceDesc')}</MenuItem>,
+                      ]
+                    ) : (
+                      [
+                        <MenuItem key="name-asc" value="ASC">{t('restaurants.sortNameAsc')}</MenuItem>,
+                        <MenuItem key="name-desc" value="DESC">{t('restaurants.sortNameDesc')}</MenuItem>,
+                      ]
+                    )}
+                  </Select>
+                </FormControl>
+              </Stack>
+
+              {/* City/District Filters (only in ALL mode) */}
+              {!isNearbyMode && (
+                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+                  <FormControl sx={{ minWidth: { xs: '100%', md: 200 } }}>
+                    <InputLabel id="restaurant-city-label">{t('restaurants.cityLabel')}</InputLabel>
+                    <Select
+                      labelId="restaurant-city-label"
+                      label={t('restaurants.cityLabel')}
+                      value={selectedCity}
+                      onChange={handleCityChange}
+                      sx={{ borderRadius: '14px' }}
+                    >
+                      <MenuItem value="">
+                        <em>{t('restaurants.filterAll')}</em>
+                      </MenuItem>
+                      {TURKEY_CITY_OPTIONS.map((city) => (
+                        <MenuItem key={city} value={city}>{city}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl sx={{ minWidth: { xs: '100%', md: 200 } }} disabled={!selectedCity}>
+                    <InputLabel id="restaurant-district-label">{t('restaurants.districtLabel')}</InputLabel>
+                    <Select
+                      labelId="restaurant-district-label"
+                      label={t('restaurants.districtLabel')}
+                      value={selectedDistrict}
+                      onChange={(event) => setSelectedDistrict(event.target.value)}
+                      sx={{ borderRadius: '14px' }}
+                    >
+                      <MenuItem value="">
+                        <em>{t('restaurants.filterAll')}</em>
+                      </MenuItem>
+                      {districtOptions.map((district) => (
+                        <MenuItem key={district} value={district}>{district}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Stack>
+              )}
+            </Stack>
+          </Box>
+
+          {/* Nearby Info Chip */}
+          {isNearbyMode && (
+            <Chip
+              icon={<LocationOnRounded sx={{ fontSize: 18 }} />}
+              label={t('restaurants.nearbyFiltersDisabled')}
+              variant="outlined"
+              sx={{
+                alignSelf: 'flex-start',
+                borderRadius: '10px',
+                borderColor: alpha(primaryColor, 0.3),
+                color: primaryColor,
+                fontWeight: 500,
+              }}
+            />
+          )}
+
+          {/* User Location Info */}
+          {isNearbyMode && effectiveUserLocation && (
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: '14px',
+                background: alpha(primaryColor, isDark ? 0.1 : 0.05),
+                border: `1px solid ${alpha(primaryColor, 0.15)}`,
+              }}
+            >
+              <Typography variant="body2" sx={{ color: primaryColor, fontWeight: 500 }}>
+                {t('restaurants.userCoordinates', {
+                  lat: effectiveUserLocation.lat.toFixed(6),
+                  lng: effectiveUserLocation.lng.toFixed(6),
+                })}
+              </Typography>
+              {typeof locationAccuracyMeters === 'number' && (
+                <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
+                  {t('restaurants.locationAccuracy', { meters: Math.round(locationAccuracyMeters) })}
+                </Typography>
+              )}
+            </Box>
+          )}
+
+          {isError && <Typography color="error">{t('restaurants.loadFailed')}</Typography>}
+
+          {/* Loading Skeletons */}
+          {isInitialLoading && (
+            <Grid container spacing={3}>
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Grid key={index} size={{ xs: 12, sm: 6, lg: 4 }}>
+                  <RestaurantCardSkeleton />
+                </Grid>
+              ))}
             </Grid>
-          ))}
-        </Grid>
-      )}
+          )}
 
-      {!isInitialLoading && restaurants.length === 0 && !isError && (
-        <Typography color="text.secondary">
-          {isNearbyMode ? t('restaurants.noNearby') : t('restaurants.noResults')}
-        </Typography>
-      )}
+          {/* Empty State */}
+          {!isInitialLoading && restaurants.length === 0 && !isError && (
+            <Box
+              sx={{
+                textAlign: 'center',
+                py: 8,
+                px: 3,
+              }}
+            >
+              <Box
+                sx={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: '20px',
+                  background: alpha(primaryColor, isDark ? 0.1 : 0.08),
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mx: 'auto',
+                  mb: 3,
+                }}
+              >
+                <StorefrontRounded sx={{ fontSize: 36, color: primaryColor }} />
+              </Box>
+              <Typography
+                sx={{
+                  fontSize: 18,
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                  mb: 1,
+                }}
+              >
+                {isNearbyMode ? t('restaurants.noNearby') : t('restaurants.noResults')}
+              </Typography>
+              <Typography sx={{ color: theme.palette.text.secondary }}>
+                {isNearbyMode
+                  ? 'Konumunuza yakın restoran bulunamadı.'
+                  : 'Arama kriterlerinize uygun restoran bulunamadı.'}
+              </Typography>
+            </Box>
+          )}
 
-      {!isInitialLoading && restaurants.length > 0 && (
-        <>
-          <Grid container spacing={3}>
-            {restaurants.map((restaurant) => (
-              <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={restaurant.id}>
-                <RestaurantCard restaurant={restaurant} userLocation={effectiveUserLocation} />
+          {/* Restaurant Grid */}
+          {!isInitialLoading && restaurants.length > 0 && (
+            <>
+              <Grid container spacing={3}>
+                {restaurants.map((restaurant) => (
+                  <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={restaurant.id}>
+                    <RestaurantCard restaurant={restaurant} userLocation={effectiveUserLocation} />
+                  </Grid>
+                ))}
               </Grid>
-            ))}
-          </Grid>
 
-          <Box ref={loadMoreRef} sx={{ py: 0.5 }} aria-hidden />
+              <Box ref={loadMoreRef} sx={{ py: 0.5 }} aria-hidden />
 
-          {isFetchingNextPage && (
+              {isFetchingNextPage && (
                 <Grid container spacing={3}>
                   {Array.from({ length: 3 }).map((_, index) => (
                     <Grid key={index} size={{ xs: 12, sm: 6, lg: 4 }}>
@@ -482,21 +628,30 @@ export function RestaurantList() {
                     </Grid>
                   ))}
                 </Grid>
+              )}
+
+              {!hasNextPage && !isFetchingNextPage && (
+                <Typography
+                  sx={{
+                    textAlign: 'center',
+                    color: theme.palette.text.secondary,
+                    fontSize: 14,
+                    py: 2,
+                  }}
+                >
+                  {t('restaurants.endOfResults')}
+                </Typography>
+              )}
+            </>
           )}
 
-          {!hasNextPage && !isFetchingNextPage && (
-            <Typography variant="body2" color="text.secondary" textAlign="center">
-              {t('restaurants.endOfResults')}
+          {isFetching && !isFetchingNextPage && restaurants.length > 0 && (
+            <Typography variant="caption" color="text.secondary" textAlign="center">
+              {t('common.loading')}
             </Typography>
           )}
-        </>
-      )}
-
-      {isFetching && !isFetchingNextPage && restaurants.length > 0 && (
-        <Typography variant="caption" color="text.secondary" textAlign="center">
-          {t('common.loading')}
-        </Typography>
-      )}
-    </Stack>
+        </Stack>
+      </Container>
+    </Box>
   )
 }

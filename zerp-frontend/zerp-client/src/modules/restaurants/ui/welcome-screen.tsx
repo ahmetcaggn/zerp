@@ -9,7 +9,6 @@ import {
   Alert,
   alpha,
   Box,
-  Button,
   Container,
   Stack,
   Typography,
@@ -60,13 +59,14 @@ export function WelcomeScreen() {
     router.push(`/${locale}/restaurants`)
   }
 
-  // Warm premium colors
-  const warmBg = '#FEFCF9'
-  const warmAccent = '#FF6B35'
-  const warmAccentLight = '#FFF0EB'
-  const warmSecondary = '#2D3436'
-  const warmMuted = '#636E72'
-  const warmBorder = 'rgba(0,0,0,0.04)'
+  // Theme-based colors using system primary (teal)
+  const isDark = theme.palette.mode === 'dark'
+  const primaryColor = theme.palette.primary.main
+  const primaryLight = isDark ? alpha(primaryColor, 0.15) : alpha(primaryColor, 0.08)
+  const warmBg = theme.palette.background.default
+  const warmSecondary = theme.palette.text.primary
+  const warmMuted = theme.palette.text.secondary
+  const warmBorder = theme.palette.divider
 
   return (
     <Box
@@ -97,12 +97,12 @@ export function WelcomeScreen() {
               width: 56,
               height: 56,
               borderRadius: '16px',
-              background: `linear-gradient(145deg, ${warmAccent} 0%, #E85A2A 100%)`,
+              background: `linear-gradient(145deg, ${primaryColor} 0%, ${alpha(primaryColor, 0.8)} 100%)`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               mb: 4,
-              boxShadow: `0 12px 32px ${alpha(warmAccent, 0.35)}`,
+              boxShadow: `0 12px 32px ${alpha(primaryColor, 0.35)}`,
             }}
           >
             <Typography
@@ -127,7 +127,7 @@ export function WelcomeScreen() {
               letterSpacing: '0.3px',
             }}
           >
-            {locale === 'tr' ? 'Merhaba' : 'Hello'} 
+            {locale === 'tr' ? 'Merhaba' : 'Hello'}
           </Typography>
 
           {/* Main Title */}
@@ -168,10 +168,6 @@ export function WelcomeScreen() {
               mb: 3,
               borderRadius: '16px',
               border: 'none',
-              background: '#FFF4E6',
-              '& .MuiAlert-icon': {
-                color: '#F59F00',
-              },
             }}
           >
             {locationError}
@@ -186,13 +182,13 @@ export function WelcomeScreen() {
             sx={{
               p: 0,
               borderRadius: '20px',
-              background: `linear-gradient(145deg, ${warmAccent} 0%, #E85A2A 100%)`,
-              boxShadow: `0 16px 48px ${alpha(warmAccent, 0.4)}`,
+              background: `linear-gradient(145deg, ${primaryColor} 0%, ${alpha(primaryColor, 0.85)} 100%)`,
+              boxShadow: `0 16px 48px ${alpha(primaryColor, 0.4)}`,
               cursor: isLocating ? 'wait' : 'pointer',
               transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
               '&:hover': {
                 transform: isLocating ? 'none' : 'translateY(-2px)',
-                boxShadow: `0 20px 56px ${alpha(warmAccent, 0.5)}`,
+                boxShadow: `0 20px 56px ${alpha(primaryColor, 0.5)}`,
               },
               '&:active': {
                 transform: isLocating ? 'none' : 'translateY(0) scale(0.99)',
@@ -277,16 +273,16 @@ export function WelcomeScreen() {
             sx={{
               p: 0,
               borderRadius: '20px',
-              background: 'white',
+              background: theme.palette.background.paper,
               border: `1px solid ${warmBorder}`,
-              boxShadow: '0 4px 24px rgba(0,0,0,0.04)',
+              boxShadow: isDark ? 'none' : '0 4px 24px rgba(0,0,0,0.04)',
               cursor: isLocating ? 'not-allowed' : 'pointer',
               opacity: isLocating ? 0.5 : 1,
               transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
               '&:hover': {
                 transform: isLocating ? 'none' : 'translateY(-2px)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-                borderColor: 'rgba(0,0,0,0.08)',
+                boxShadow: isDark ? `0 8px 32px ${alpha(primaryColor, 0.15)}` : '0 8px 32px rgba(0,0,0,0.08)',
+                borderColor: alpha(primaryColor, 0.3),
               },
               '&:active': {
                 transform: isLocating ? 'none' : 'translateY(0) scale(0.99)',
@@ -307,14 +303,14 @@ export function WelcomeScreen() {
                   width: 52,
                   height: 52,
                   borderRadius: '14px',
-                  background: warmAccentLight,
+                  background: primaryLight,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
                 }}
               >
-                <StorefrontRounded sx={{ fontSize: 26, color: warmAccent }} />
+                <StorefrontRounded sx={{ fontSize: 26, color: primaryColor }} />
               </Box>
 
               {/* Text */}
