@@ -13,7 +13,7 @@ export const themeTokens = {
     appGrid: 'rgba(15, 23, 42, 0.05)',
   },
   dark: {
-    primary: '#5eead4',
+    primary: '#4E8F89',
     secondary: '#93c5fd',
     backgroundDefault: '#0b1220',
     backgroundPaper: '#131d31',
