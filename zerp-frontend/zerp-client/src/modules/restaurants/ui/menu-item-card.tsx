@@ -1,18 +1,12 @@
 'use client'
 
 import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded'
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardMedia,
-  Typography,
-} from '@mui/material'
+import { Box, Button, Card, CardContent, Typography } from '@mui/material'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
 
 import type { Product as MenuItem } from '../types'
+import { FadeInImage } from './fade-in-image'
 
 interface MenuItemCardProps {
   menuItem: MenuItem
@@ -43,21 +37,36 @@ export function MenuItemCard({ menuItem, onClick, onAddToCart }: MenuItemCardPro
       }}
       onClick={onClick}
     >
-      <CardMedia
-        component="img"
+      <FadeInImage
+        src={menuItem.imageUrl || 'https://via.placeholder.com/150?text=No+Image'}
+        alt={menuItem.name}
+        objectFit="contain"
         sx={{
           width: { xs: '100%', sm: 100 },
           height: { xs: 120, sm: 100 },
           borderRadius: 2,
-          objectFit: 'contain',
         }}
-        image={menuItem.imageUrl || 'https://via.placeholder.com/150?text=No+Image'}
-        alt={menuItem.name}
       />
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, ml: { xs: 0, sm: 2 }, mt: { xs: 1, sm: 0 } }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+          ml: { xs: 0, sm: 2 },
+          mt: { xs: 1, sm: 0 },
+        }}
+      >
         <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5, gap: 1 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              mb: 0.5,
+              gap: 1,
+            }}
+          >
             <Typography variant="subtitle1" fontWeight="bold" sx={{ wordBreak: 'break-word' }}>
               {menuItem.name}
             </Typography>

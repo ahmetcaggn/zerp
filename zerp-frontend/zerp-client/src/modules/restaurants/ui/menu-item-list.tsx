@@ -27,6 +27,7 @@ import {
   LinearProgress,
   Pagination,
   Paper,
+  Skeleton,
   Stack,
   TextField,
   Typography,
@@ -40,7 +41,12 @@ import { queryKeys } from '@/core/api/query-keys'
 import { useI18n } from '@/core/i18n/i18n-provider'
 
 import { getPublicCategoryMenuItems } from '../api/public-sale-client'
-import { useCreatePublicCartOrder, usePublicCategoryMenuItems, usePublicShopMenu, usePublicShops } from '../hooks/use-public-sale'
+import {
+  useCreatePublicCartOrder,
+  usePublicCategoryMenuItems,
+  usePublicShopMenu,
+  usePublicShops,
+} from '../hooks/use-public-sale'
 import type { MenuLanguage, Product as MenuItem, PublicMenuItemDto } from '../types'
 import {
   addItemToCart,
@@ -48,6 +54,7 @@ import {
   type CartItemState,
   updateCartItemQuantity,
 } from '../utils/cart-utils'
+import { FadeInImage } from './fade-in-image'
 import { MenuItemCard } from './menu-item-card'
 import { MenuItemDetailModal } from './menu-item-detail-modal'
 
@@ -80,28 +87,35 @@ function ensureWebsiteUrl(value: string): string {
   return `https://${value}`
 }
 
-function isValidCoordinatePair(lat: number | null | undefined, lng: number | null | undefined): boolean {
+function isValidCoordinatePair(
+  lat: number | null | undefined,
+  lng: number | null | undefined,
+): boolean {
   return (
-    typeof lat === 'number'
-    && typeof lng === 'number'
-    && Number.isFinite(lat)
-    && Number.isFinite(lng)
-    && lat >= -90
-    && lat <= 90
-    && lng >= -180
-    && lng <= 180
+    typeof lat === 'number' &&
+    typeof lng === 'number' &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180
   )
 }
 
-function calculateCrowFlyDistanceKm(originLat: number, originLng: number, targetLat: number, targetLng: number): number {
+function calculateCrowFlyDistanceKm(
+  originLat: number,
+  originLng: number,
+  targetLat: number,
+  targetLng: number,
+): number {
   const earthRadiusKm = 6371
   const dLat = ((targetLat - originLat) * Math.PI) / 180
   const dLng = ((targetLng - originLng) * Math.PI) / 180
   const lat1 = (originLat * Math.PI) / 180
   const lat2 = (targetLat * Math.PI) / 180
 
-  const a = Math.sin(dLat / 2) ** 2
-    + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   return earthRadiusKm * c
 }
@@ -141,7 +155,8 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
     () => shops.find((shop) => shop.id === restaurantId),
     [shops, restaurantId],
   )
-  const hasCoordinates = typeof restaurant?.latitude === 'number' && typeof restaurant?.longitude === 'number'
+  const hasCoordinates =
+    typeof restaurant?.latitude === 'number' && typeof restaurant?.longitude === 'number'
   const tenantValue = restaurant?.tenantName ?? restaurant?.tenantId
   const queryLocation = useMemo(() => {
     const rawLat = searchParams.get('lat')
@@ -217,21 +232,25 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
         return
       }
 
-      const map = leaflet.map(aboutMapContainerRef.current, {
-        zoomControl: false,
-        attributionControl: true,
-        dragging: false,
-        scrollWheelZoom: false,
-        doubleClickZoom: false,
-        boxZoom: false,
-        keyboard: false,
-        touchZoom: false,
-      }).setView([restaurant.latitude as number, restaurant.longitude as number], 15)
+      const map = leaflet
+        .map(aboutMapContainerRef.current, {
+          zoomControl: false,
+          attributionControl: true,
+          dragging: false,
+          scrollWheelZoom: false,
+          doubleClickZoom: false,
+          boxZoom: false,
+          keyboard: false,
+          touchZoom: false,
+        })
+        .setView([restaurant.latitude as number, restaurant.longitude as number], 15)
 
-      leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors',
-      }).addTo(map)
+      leaflet
+        .tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap contributors',
+        })
+        .addTo(map)
 
       const markerIcon = leaflet.divIcon({
         className: 'shop-location-marker',
@@ -240,7 +259,11 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
         iconAnchor: [9, 9],
       })
 
-      leaflet.marker([restaurant.latitude as number, restaurant.longitude as number], { icon: markerIcon }).addTo(map)
+      leaflet
+        .marker([restaurant.latitude as number, restaurant.longitude as number], {
+          icon: markerIcon,
+        })
+        .addTo(map)
       aboutMapRef.current = map
       setIsLeafletUnavailable(false)
 
@@ -334,7 +357,13 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
   }, [restaurant, t])
 
   const shopAddressLine = useMemo(() => {
-    const fullAddress = [restaurant?.address, restaurant?.city, restaurant?.state, restaurant?.country, restaurant?.postalCode]
+    const fullAddress = [
+      restaurant?.address,
+      restaurant?.city,
+      restaurant?.state,
+      restaurant?.country,
+      restaurant?.postalCode,
+    ]
       .filter((item): item is string => Boolean(item && item.trim()))
       .join(', ')
 
@@ -365,7 +394,10 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
       [
         { label: t('restaurants.ratingLabel'), value: ratingValue },
         { label: t('restaurants.statusLabel'), value: statusValue },
-        { label: t('restaurants.detailTenant'), value: restaurant?.tenantName || restaurant?.tenantId || '-' },
+        {
+          label: t('restaurants.detailTenant'),
+          value: restaurant?.tenantName || restaurant?.tenantId || '-',
+        },
         { label: t('restaurants.detailDescription'), value: restaurant?.description || '-' },
         { label: t('restaurants.detailAddress'), value: shopAddressLine || '-' },
         { label: t('restaurants.detailPhone'), value: restaurant?.phone || '-' },
@@ -376,7 +408,9 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
         { label: t('restaurants.detailCategoryCount'), value: String(categories.length) },
         {
           label: t('restaurants.detailCoordinates'),
-          value: hasCoordinates ? `${restaurant!.latitude!.toFixed(6)}, ${restaurant!.longitude!.toFixed(6)}` : '-',
+          value: hasCoordinates
+            ? `${restaurant!.latitude!.toFixed(6)}, ${restaurant!.longitude!.toFixed(6)}`
+            : '-',
         },
       ] as const,
     [
@@ -458,8 +492,12 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
 
     const cartButtonRect = cartButtonRef.current?.getBoundingClientRect()
     const startCenterX = sourceRect ? sourceRect.left + sourceRect.width / 2 : window.innerWidth / 2
-    const startCenterY = sourceRect ? sourceRect.top + sourceRect.height / 2 : window.innerHeight / 2
-    const endCenterX = cartButtonRect ? cartButtonRect.left + cartButtonRect.width / 2 : window.innerWidth - 40
+    const startCenterY = sourceRect
+      ? sourceRect.top + sourceRect.height / 2
+      : window.innerHeight / 2
+    const endCenterX = cartButtonRect
+      ? cartButtonRect.left + cartButtonRect.width / 2
+      : window.innerWidth - 40
     const endCenterY = cartButtonRect ? cartButtonRect.top + cartButtonRect.height / 2 : 40
     const size = Math.max(40, Math.min(72, sourceRect?.height ?? 56))
 
@@ -516,11 +554,13 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
   }
 
   function handleAddToCart(menuItem: MenuItem, sourceRect?: DOMRect) {
-    setCartItems((prev) => addItemToCart(prev, {
-      id: menuItem.id,
-      name: menuItem.name,
-      price: menuItem.price,
-    }))
+    setCartItems((prev) =>
+      addItemToCart(prev, {
+        id: menuItem.id,
+        name: menuItem.name,
+        price: menuItem.price,
+      }),
+    )
     setQrOrderCode(null)
     setCartError(null)
     triggerCartCountPulse()
@@ -565,9 +605,71 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
 
   if (isLoadingShops || isLoadingMenu) {
     return (
-      <Box sx={{ py: 4 }}>
-        <Typography color="text.secondary">{t('common.loading')}</Typography>
-      </Box>
+      <Stack spacing={3.5}>
+        <Skeleton variant="rounded" width={160} height={36} sx={{ borderRadius: 2 }} />
+
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: 2,
+            border: (theme) => `1px solid ${theme.palette.divider}`,
+            p: { xs: 2, md: 3 },
+          }}
+        >
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '220px minmax(0, 1fr)' },
+              alignItems: 'stretch',
+              gap: { xs: 2, md: 3 },
+            }}
+          >
+            <Skeleton
+              animation="wave"
+              variant="rounded"
+              sx={{
+                width: '100%',
+                maxWidth: { xs: 280, md: 220 },
+                mx: { xs: 'auto', md: 0 },
+                aspectRatio: '1 / 1',
+                borderRadius: 2,
+                transform: 'none',
+              }}
+            />
+
+            <Stack spacing={1.25} sx={{ minWidth: 0, justifyContent: 'flex-start' }}>
+              <Skeleton animation="wave" variant="text" width="60%" height={52} />
+              <Skeleton animation="wave" variant="text" width="42%" height={28} />
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                <Skeleton animation="wave" variant="rounded" width={116} height={32} />
+                <Skeleton animation="wave" variant="rounded" width={104} height={32} />
+                <Skeleton animation="wave" variant="rounded" width={92} height={32} />
+              </Stack>
+            </Stack>
+          </Box>
+        </Paper>
+
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 1.5,
+          }}
+        >
+          <Skeleton animation="wave" variant="text" width={120} height={36} />
+          <Skeleton animation="wave" variant="rounded" width={96} height={36} />
+        </Box>
+
+        <Grid container spacing={2}>
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Grid key={index} size={{ xs: 12, md: 6 }}>
+              <Skeleton animation="wave" variant="rounded" height={138} sx={{ borderRadius: 2 }} />
+            </Grid>
+          ))}
+        </Grid>
+      </Stack>
     )
   }
 
@@ -632,17 +734,15 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
               gap: { xs: 2, md: 3 },
             }}
           >
-            <Box
-              component="img"
+            <FadeInImage
               src={shopHeroImage}
-              alt={restaurant?.name}
+              alt={restaurant?.name || t('restaurants.productsTitle')}
               sx={{
                 width: '100%',
                 maxWidth: { xs: 280, md: 220 },
                 mx: { xs: 'auto', md: 0 },
                 aspectRatio: '1 / 1',
-                objectFit: 'cover',
-                  borderRadius: 2,
+                borderRadius: 2,
                 border: (theme) => `1px solid ${theme.palette.divider}`,
               }}
             />
@@ -688,7 +788,15 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
           </Box>
         </Paper>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1.5 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 1.5,
+          }}
+        >
           <Typography variant="h5" fontWeight={700}>
             {t('restaurants.productsTitle')}
           </Typography>
@@ -727,13 +835,23 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                 </Box>
               </Box>
             </Button>
-            <Button variant="outlined" color="primary" onClick={() => router.push(`/${locale}/restaurants`)}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => router.push(`/${locale}/restaurants`)}
+            >
               {t('restaurants.changeStore')}
             </Button>
           </Stack>
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 2.5, md: 3 } }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: { xs: 2.5, md: 3 },
+          }}
+        >
           <Box
             sx={{
               position: 'sticky',
@@ -745,7 +863,10 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
               bgcolor: 'background.default',
             }}
           >
-            <Paper elevation={0} sx={{ borderRadius: 2, border: (theme) => `1px solid ${theme.palette.divider}` }}>
+            <Paper
+              elevation={0}
+              sx={{ borderRadius: 2, border: (theme) => `1px solid ${theme.palette.divider}` }}
+            >
               <Box
                 component="nav"
                 sx={{
@@ -873,7 +994,9 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                                       <MenuItemCard
                                         menuItem={menuItem}
                                         onClick={() => setSelectedMenuItem(menuItem)}
-                                        onAddToCart={(sourceRect) => handleAddToCart(menuItem, sourceRect)}
+                                        onAddToCart={(sourceRect) =>
+                                          handleAddToCart(menuItem, sourceRect)
+                                        }
                                       />
                                     </Grid>
                                   ))}
@@ -898,8 +1021,12 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                     {selectedCategoryName}
                   </Typography>
 
-                  {isLoadingDetailMenuItems && <Typography color="text.secondary">{t('common.loading')}</Typography>}
-                  {isDetailMenuItemsError && <Typography color="error">{t('restaurants.loadFailed')}</Typography>}
+                  {isLoadingDetailMenuItems && (
+                    <Typography color="text.secondary">{t('common.loading')}</Typography>
+                  )}
+                  {isDetailMenuItemsError && (
+                    <Typography color="error">{t('restaurants.loadFailed')}</Typography>
+                  )}
 
                   {!isLoadingDetailMenuItems && !isDetailMenuItemsError && (
                     <Grid container spacing={1.5}>
@@ -920,9 +1047,11 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                   <Typography color="text.secondary">{t('restaurants.noCategories')}</Typography>
                 )}
 
-                {categories.length > 0 && !isLoadingDetailMenuItems && detailMenuItems.length === 0 && (
-                  <Typography color="text.secondary">{t('restaurants.noProducts')}</Typography>
-                )}
+                {categories.length > 0 &&
+                  !isLoadingDetailMenuItems &&
+                  detailMenuItems.length === 0 && (
+                    <Typography color="text.secondary">{t('restaurants.noProducts')}</Typography>
+                  )}
 
                 {detailTotalMenuItems > PAGE_SIZE && (
                   <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1 }}>
@@ -959,7 +1088,10 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
               <Typography color="text.secondary">{shopDescription}</Typography>
 
               {hasCoordinates && !isLeafletUnavailable ? (
-                <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', position: 'relative' }}>
+                <Paper
+                  variant="outlined"
+                  sx={{ borderRadius: 2, overflow: 'hidden', position: 'relative' }}
+                >
                   <Box
                     sx={{
                       position: 'absolute',
@@ -1117,23 +1249,31 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                   </Typography>
                 </Box>
 
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box
+                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
                   <Typography variant="body2">{t('restaurants.quantity')}</Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <IconButton
                       size="small"
                       onClick={() => {
-                        setCartItems((prev) => updateCartItemQuantity(prev, item.menuItemId, item.quantity - 1))
+                        setCartItems((prev) =>
+                          updateCartItemQuantity(prev, item.menuItemId, item.quantity - 1),
+                        )
                         setQrOrderCode(null)
                       }}
                     >
                       <RemoveIcon fontSize="small" />
                     </IconButton>
-                    <Typography sx={{ minWidth: 24, textAlign: 'center', fontWeight: 700 }}>{item.quantity}</Typography>
+                    <Typography sx={{ minWidth: 24, textAlign: 'center', fontWeight: 700 }}>
+                      {item.quantity}
+                    </Typography>
                     <IconButton
                       size="small"
                       onClick={() => {
-                        setCartItems((prev) => updateCartItemQuantity(prev, item.menuItemId, item.quantity + 1))
+                        setCartItems((prev) =>
+                          updateCartItemQuantity(prev, item.menuItemId, item.quantity + 1),
+                        )
                         setQrOrderCode(null)
                       }}
                     >

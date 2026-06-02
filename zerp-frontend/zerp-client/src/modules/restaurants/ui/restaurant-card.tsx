@@ -10,7 +10,6 @@ import {
   Card,
   CardActionArea,
   CardContent,
-  CardMedia,
   Chip,
   Stack,
   Typography,
@@ -21,6 +20,7 @@ import { useRouter } from 'next/navigation'
 import { useI18n } from '@/core/i18n/i18n-provider'
 
 import type { Restaurant } from '../types'
+import { FadeInImage } from './fade-in-image'
 
 function calculateCrowFlyDistanceKm(
   originLat: number,
@@ -125,14 +125,13 @@ export function RestaurantCard({ restaurant, userLocation }: RestaurantCardProps
         }}
       >
         <Box sx={{ position: 'relative' }}>
-          <CardMedia
-            component="img"
-            image={
+          <FadeInImage
+            src={
               restaurant.imageUrl ||
               `https://placehold.co/900x540?text=${encodeURIComponent(restaurant.name)}`
             }
             alt={restaurant.name}
-            sx={{ height: 180, objectFit: 'cover' }}
+            sx={{ height: 180 }}
           />
           {/* Gradient Overlay */}
           <Box
