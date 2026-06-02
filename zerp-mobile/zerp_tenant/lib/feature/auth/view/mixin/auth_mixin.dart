@@ -7,8 +7,4 @@ mixin AuthMixin on State<ScreenAuth> {
   Future<void> onLoginPressed() async {
     await context.read<CubitAuth>().redirectLogin();
   }
-
-  Future<void> onRegisterPressed() async {
-    await context.read<CubitAuth>().redirectSignUp();
-  }
 }

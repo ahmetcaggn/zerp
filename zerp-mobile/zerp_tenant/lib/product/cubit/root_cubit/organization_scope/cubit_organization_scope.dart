@@ -25,16 +25,38 @@ final class CubitOrganizationScope extends BaseCubit<StateOrganizationScope>
   final CubitAuth _cubitAuth;
 
   Future<void> loadTenantIfNeeded() async {
+    log.fine(
+      'Checking if tenant information needs to be loaded '
+      'for organization scope',
+    );
     if (state is! StateOrganizationScopeTenant) {
       if (_loadTenantFuture != null) {
+        log.fine(
+          'Tenant information is currently being loaded, '
+          'awaiting existing load operation',
+        );
         try {
           await _loadTenantFuture;
         } on Object catch (_) {}
       }
+
       if (state is! StateOrganizationScopeTenant) {
+        log.info(
+          'Tenant information is not loaded for organization scope, '
+          'starting to load tenant information',
+        );
         await loadTenant();
+      } else {
+        log.fine(
+          'Tenant information is already loaded for organization scope, '
+          'no need to load tenant information',
+        );
       }
     }
+
+    log.fine(
+      'Current state of organization scope after loadTenantIfNeeded: $state',
+    );
   }
 
   Future<void>? _loadTenantFuture;
@@ -117,24 +139,24 @@ final class CubitOrganizationScope extends BaseCubit<StateOrganizationScope>
           message: 'Cannot load shop information without tenant information',
         ),
       );
-      return;
+    } else {
+      try {
+        final shop = await _shopService.getShop(id: shopId);
+        emit(
+          StateOrganizationScopeShop(tenant: currentState.tenant, shop: shop),
+        );
+      } on Object catch (e, s) {
+        log.severe('Failed to fetch shop info for organization scope', e, s);
+        emit(
+          StateOrganizationScopeError(
+            previousState: state,
+            message: 'Failed to load shop information',
+          ),
+        );
+      }
     }
 
-    late final ShopDTO shop;
-    try {
-      shop = await _shopService.getShop(id: shopId);
-    } on Object catch (e, s) {
-      log.severe('Failed to fetch shop info for organization scope', e, s);
-      emit(
-        StateOrganizationScopeError(
-          previousState: state,
-          message: 'Failed to load shop information',
-        ),
-      );
-      return;
-    }
-
-    emit(StateOrganizationScopeShop(tenant: currentState.tenant, shop: shop));
+    log.fine('Current state after loading shop by shop ID: $state');
   }
 
   void loadShop(ShopDTO shop) {
@@ -150,13 +172,15 @@ final class CubitOrganizationScope extends BaseCubit<StateOrganizationScope>
           message: 'Cannot load shop information without tenant information',
         ),
       );
-      return;
+    } else {
+      emit(StateOrganizationScopeShop(tenant: currentState.tenant, shop: shop));
     }
 
-    emit(StateOrganizationScopeShop(tenant: currentState.tenant, shop: shop));
+    log.fine('Current state after loading shop: $state');
   }
 
   void dismissError() {
+    log.fine('Dismissing error state in organization scope');
     final currentState = state;
     if (currentState is StateOrganizationScopeError) {
       final previousState = currentState.previousState;
@@ -169,9 +193,12 @@ final class CubitOrganizationScope extends BaseCubit<StateOrganizationScope>
         );
       }
     }
+
+    log.fine('Current state after dismissing error: $state');
   }
 
   Future<void> retry() async {
+    log.fine('Retrying loading organization scope');
     final currentState = state;
     if (currentState is StateOrganizationScopeError) {
       await loadTenant();
@@ -182,6 +209,14 @@ final class CubitOrganizationScope extends BaseCubit<StateOrganizationScope>
         'currentState: $currentState',
       );
     }
+
+    log.fine('Current state after dismissing error: $state');
+  }
+
+  void reset() {
+    log.fine('Resetting organization scope to initial state');
+    emit(const StateOrganizationScopeInitial());
+    log.fine('Current state after reset: $state');
   }
 }
 
@@ -191,10 +226,20 @@ sealed class StateOrganizationScope {
 
 final class StateOrganizationScopeInitial extends StateOrganizationScope {
   const StateOrganizationScopeInitial();
+
+  @override
+  String toString() {
+    return 'StateOrganizationScopeInitial()';
+  }
 }
 
 final class StateOrganizationScopeLoading extends StateOrganizationScope {
   const StateOrganizationScopeLoading();
+
+  @override
+  String toString() {
+    return 'StateOrganizationScopeLoading()';
+  }
 }
 
 final class StateOrganizationScopeError extends StateOrganizationScope {
@@ -205,6 +250,12 @@ final class StateOrganizationScopeError extends StateOrganizationScope {
 
   final StateOrganizationScope previousState;
   final String message;
+
+  @override
+  String toString() {
+    return 'StateOrganizationScopeError(previousState: $previousState, '
+        'message: $message)';
+  }
 }
 
 final class StateOrganizationScopeTenant extends StateOrganizationScope {
@@ -213,6 +264,11 @@ final class StateOrganizationScopeTenant extends StateOrganizationScope {
   });
 
   final TenantResponseDTO tenant;
+
+  @override
+  String toString() {
+    return 'StateOrganizationScopeTenant(tenant: ${tenant.id})';
+  }
 }
 
 final class StateOrganizationScopeShop extends StateOrganizationScopeTenant {
@@ -222,4 +278,9 @@ final class StateOrganizationScopeShop extends StateOrganizationScopeTenant {
   });
 
   final ShopDTO shop;
+
+  @override
+  String toString() {
+    return 'StateOrganizationScopeShop(tenant: ${tenant.id}, shop: ${shop.id})';
+  }
 }

@@ -94,34 +94,6 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
     }
   }
 
-  Future<void> redirectSignUp() async {
-    emit(const StateAuthLoading());
-
-    try {
-      final claims = await _authService.signUp();
-      if (claims != null) {
-        emit(StateAuthAuthenticated(username: claims.preferredUsername));
-        return;
-      }
-
-      await checkAuthRemote();
-      if (state is! StateAuthAuthenticated) {
-        emit(
-          StateAuthError(
-            message: t.auth.errors.signUpFailed,
-          ),
-        );
-      }
-    } on Object catch (e, s) {
-      log.shout('Error while redirecting to sign up', e, s);
-      emit(
-        StateAuthError(
-          message: t.auth.errors.signUpFailed,
-        ),
-      );
-    }
-  }
-
   Future<void> logout() async {
     emit(const StateAuthLoading());
     try {
@@ -135,6 +107,8 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
           message: t.auth.errors.logoutFailed,
         ),
       );
+    } finally {
+      getIt<CubitOrganizationScope>().reset();
     }
   }
 
