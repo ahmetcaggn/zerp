@@ -32,6 +32,17 @@ export interface MessageDictionary {
     emailLabel: string
     userIdLabel: string
     rolesLabel: string
+    employmentSection: string
+    personalInfoSection: string
+    managerLabel: string
+    notProvided: string
+    statusActive: string
+    statusProbation: string
+    statusOnLeave: string
+    statusSuspended: string
+    statusTerminated: string
+    statusRetired: string
+    statusDeleted: string
     unavailable: string
   }
   home: {

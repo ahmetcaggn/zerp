@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.dto.ApiResponse;
 import org.zerp.common.resource.controller.ResourceController;
 import org.zerp.common.resource.service.IResourceService;
+import org.zerp.user.dto.CurrentUserProfileDTO;
 import org.zerp.user.dto.UserResponseDTO;
 import org.zerp.user.service.UserService;
 
@@ -34,8 +35,8 @@ public class UserController extends ResourceController<UserResponseDTO, UserResp
 
     @Operation(summary = "Get currently authenticated user profile")
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> getCurrentUser() {
-        return ResponseEntity.ok(buildResponse(service.findCurrentUser()));
+    public ResponseEntity<ApiResponse<CurrentUserProfileDTO>> getCurrentUser() {
+        return ResponseEntity.ok(buildResponse(service.findCurrentUserProfile()));
     }
 
     @Override

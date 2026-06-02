@@ -8,13 +8,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.employee.Employee;
+import org.zerp.common.entity.employee.EmployeeContact;
 import org.zerp.common.entity.user.AppUser;
 import org.zerp.common.error.filter.FilterError;
 import org.zerp.common.error.filter.FilterErrorUtils;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentUserIdResolver;
+import org.zerp.user.dto.CurrentUserProfileDTO;
 import org.zerp.user.dto.UserResponseDTO;
 import org.zerp.user.mapper.UserMapper;
 import org.zerp.user.permission.UserPermissionEvaluator;
@@ -85,6 +89,68 @@ public class UserService implements IResourceService<UserResponseDTO, UserRespon
     public UserResponseDTO findCurrentUser() {
         UUID requesterId = userIdResolver.resolve();
         return findById(requesterId);
+    }
+
+    @Transactional(readOnly = true)
+    public CurrentUserProfileDTO findCurrentUserProfile() {
+        UUID requesterId = userIdResolver.resolve();
+        AppUser user = userRepository.findById(requesterId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id: " + requesterId));
+
+        if (!permissionEvaluator.canRead(requesterId, user)) {
+            log.warn("User {} does not have permission to read current profile", requesterId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id: " + requesterId);
+        }
+
+        return toCurrentUserProfile(user);
+    }
+
+    private CurrentUserProfileDTO toCurrentUserProfile(AppUser user) {
+        CurrentUserProfileDTO dto = new CurrentUserProfileDTO();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setFirstName(user.getUsername());
+        dto.setEmail(user.getEmail());
+
+        if (user instanceof Employee employee) {
+            dto.setFirstName(firstNonBlank(employee.getFirstName(), user.getUsername()));
+            dto.setLastName(employee.getLastName());
+            dto.setPhoneNumber(employee.getPhoneNumber());
+            dto.setNationalId(employee.getNationalId());
+            dto.setDateOfBirth(employee.getDateOfBirth());
+            dto.setStatus(employee.getStatus());
+            dto.setManager(toManagerDto(employee.getManager()));
+            dto.setContacts(employee.getContacts().stream().map(this::toContactDto).toList());
+        }
+
+        return dto;
+    }
+
+    private String firstNonBlank(String primary, String fallback) {
+        return primary != null && !primary.isBlank() ? primary : fallback;
+    }
+
+    private CurrentUserProfileDTO.ManagerDTO toManagerDto(Employee manager) {
+        if (manager == null) {
+            return null;
+        }
+
+        CurrentUserProfileDTO.ManagerDTO dto = new CurrentUserProfileDTO.ManagerDTO();
+        dto.setId(manager.getId());
+        dto.setFirstName(manager.getFirstName());
+        dto.setLastName(manager.getLastName());
+        dto.setEmail(manager.getEmail());
+        return dto;
+    }
+
+    private CurrentUserProfileDTO.EmployeeContactDTO toContactDto(EmployeeContact contact) {
+        CurrentUserProfileDTO.EmployeeContactDTO dto = new CurrentUserProfileDTO.EmployeeContactDTO();
+        dto.setId(contact.getId());
+        dto.setType(contact.getType());
+        dto.setValue(contact.getValue());
+        dto.setContactPersonName(contact.getContactPersonName());
+        dto.setRelationship(contact.getRelationship());
+        return dto;
     }
 
     @Override
