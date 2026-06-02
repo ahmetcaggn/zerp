@@ -8,6 +8,7 @@ import 'package:zerp_tenant/feature/sale/table/cubit/cubit_tables.dart';
 import 'package:zerp_tenant/feature/sale/table/order/cubit/cubit_table_order.dart';
 import 'package:zerp_tenant/feature/sale/table/order/widget/cancel_order_confirm_dialog.dart';
 import 'package:zerp_tenant/feature/sale/table/order/widget/discard_changes_confirm_dialog.dart';
+import 'package:zerp_tenant/feature/sale/table/order/widget/extra_option_select_dialog.dart';
 import 'package:zerp_tenant/feature/sale/table/order/widget/import_code_dialog.dart';
 import 'package:zerp_tenant/feature/sale/table/order/widget/order_item_list.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
@@ -204,6 +205,7 @@ final class _Loaded extends StatelessWidget {
                   _CatalogSection(
                     categories: categories,
                     menuItems: menuItems,
+                    extraOptions: state.extraOptions,
                     selectedCategoryId: selectedCategoryId,
                   ),
                 ],
@@ -437,9 +439,9 @@ final class _OrderSection extends StatelessWidget {
       children: [
         OrderItemList(
           items: cartItems,
-          onQuantityChanged: (menuItemId, delta) {
+          onQuantityChanged: (item, delta) {
             context.read<CubitTableOrder>().updateCartItemQuantity(
-              menuItemId,
+              item,
               delta,
             );
           },
@@ -469,11 +471,13 @@ final class _CatalogSection extends StatelessWidget {
   const _CatalogSection({
     required this.categories,
     required this.menuItems,
+    required this.extraOptions,
     required this.selectedCategoryId,
   });
 
   final List<MenuCategoryDTO> categories;
   final List<MenuItemDTO> menuItems;
+  final List<ProductExtraOptionDTO> extraOptions;
   final String? selectedCategoryId;
 
   @override
@@ -561,8 +565,32 @@ final class _CatalogSection extends StatelessWidget {
                     ),
                   ),
                   child: InkWell(
-                    onTap: () {
-                      context.read<CubitTableOrder>().addMenuItemToOrder(item);
+                    onTap: () async {
+                      final productIds = item.productItems
+                          .map((p) => p.productId)
+                          .toSet();
+                      final itemOptions = extraOptions
+                          .where((opt) => productIds.contains(opt.productId))
+                          .toList();
+
+                      if (itemOptions.isEmpty) {
+                        context.read<CubitTableOrder>().addMenuItemToOrder(
+                          item,
+                        );
+                      } else {
+                        final selectedOptions =
+                            await ExtraOptionSelectDialog.show(
+                              context,
+                              menuItem: item,
+                              options: itemOptions,
+                            );
+                        if (selectedOptions != null && context.mounted) {
+                          context.read<CubitTableOrder>().addMenuItemToOrder(
+                            item,
+                            selectedExtraOptions: selectedOptions,
+                          );
+                        }
+                      }
                     },
                     borderRadius: BorderRadius.circular(12),
                     child: Padding(

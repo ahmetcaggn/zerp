@@ -10,7 +10,7 @@ class OrderItemList extends StatelessWidget {
   });
 
   final List<CartItem> items;
-  final void Function(String menuItemId, int delta) onQuantityChanged;
+  final void Function(CartItem item, int delta) onQuantityChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +36,29 @@ class OrderItemList extends StatelessWidget {
                         fontSize: 16,
                       ),
                     ),
+                    if (item.selectedExtraOptions.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4, left: 4),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: List.generate(
+                            item.selectedExtraOptions.length,
+                            (i) {
+                              final opt = item.selectedExtraOptions[i];
+                              return Text(
+                                '+ ${opt.name} '
+                                '(₺${opt.price.toStringAsFixed(2)})',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
                     if (item.notes != null && item.notes!.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 2),
@@ -73,7 +96,7 @@ class OrderItemList extends StatelessWidget {
                       Icons.remove_circle_outline,
                       color: Colors.redAccent,
                     ),
-                    onPressed: () => onQuantityChanged(item.menuItemId, -1),
+                    onPressed: () => onQuantityChanged(item, -1),
                   ),
                   Text(
                     '${item.quantity}',
@@ -87,7 +110,7 @@ class OrderItemList extends StatelessWidget {
                       Icons.add_circle_outline,
                       color: Colors.green,
                     ),
-                    onPressed: () => onQuantityChanged(item.menuItemId, 1),
+                    onPressed: () => onQuantityChanged(item, 1),
                   ),
                 ],
               ),

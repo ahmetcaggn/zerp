@@ -146,6 +146,7 @@
       "selectCategory": "Select Category",
       "noProducts": "No products found",
       "loadingProducts": "Loading products...",
+      "extraOptionsTitle": "Extra Options",
       "cancelDialog": {
         "title": "Cancel Order",
         "message": "Are you sure you want to cancel this order?",

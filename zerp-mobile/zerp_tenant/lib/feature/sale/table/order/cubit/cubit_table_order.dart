@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:openapi_sale/api.dart';
 import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
+import 'package:zerp_tenant/product/network/page_response.dart';
 import 'package:zerp_tenant/product/service/sale/sale_service.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
@@ -39,11 +40,18 @@ class CubitTableOrder extends Cubit<StateTableOrder>
   Future<void> init({required String tableId}) async {
     emit(const StateTableOrderLoading());
     try {
-      final activeOrders = await _saleService.getActiveOrders(tableId: tableId);
-      final categoriesRes = await _saleService.getMenuCategories(
-        shopId: shopId,
-      );
-      final menuItemsRes = await _saleService.getMenuItems(shopId: shopId);
+      final responses = await Future.wait([
+        _saleService.getActiveOrders(tableId: tableId),
+        _saleService.getMenuCategories(shopId: shopId),
+        _saleService.getMenuItems(shopId: shopId),
+        _saleService.getProductExtraOptions(shopId: shopId),
+      ]);
+
+      final activeOrders = responses[0] as List<TableOrderDTO>;
+      final categoriesRes = responses[1] as PageResponse<MenuCategoryDTO>;
+      final menuItemsRes = responses[2] as PageResponse<MenuItemDTO>;
+      final extraOptionsRes =
+          responses[3] as PageResponse<ProductExtraOptionDTO>;
 
       final orders = <OrderEntry>[];
 
@@ -59,8 +67,14 @@ class CubitTableOrder extends Cubit<StateTableOrder>
                 quantity: item.quantity ?? 1,
                 unitPrice: item.unitPrice ?? 0,
                 notes: item.notes,
-                selectedExtraOptionIds: item.selectedExtraOptions
-                    .map((opt) => opt.extraOptionId ?? '')
+                selectedExtraOptions: item.selectedExtraOptions
+                    .map(
+                      (opt) => SelectedExtraOption(
+                        id: opt.extraOptionId ?? '',
+                        name: opt.name ?? '',
+                        price: opt.price ?? 0,
+                      ),
+                    )
                     .toList(),
               ),
             );
@@ -81,6 +95,7 @@ class CubitTableOrder extends Cubit<StateTableOrder>
         StateTableOrderLoaded(
           categories: categoriesRes.items,
           menuItems: menuItemsRes.items,
+          extraOptions: extraOptionsRes.items,
           orders: orders,
           selectedOrderIndex: 0,
         ),
@@ -157,14 +172,29 @@ class CubitTableOrder extends Cubit<StateTableOrder>
     }
   }
 
-  void addMenuItemToOrder(MenuItemDTO menuItem) {
+  void addMenuItemToOrder(
+    MenuItemDTO menuItem, {
+    List<ProductExtraOptionDTO> selectedExtraOptions = const [],
+  }) {
     final currentState = state;
     if (currentState is StateTableOrderLoaded) {
       final currentOrder = currentState.currentOrder;
       final updatedCart = List<CartItem>.from(currentOrder.cartItems);
-      final index = updatedCart.indexWhere(
-        (item) => item.menuItemId == menuItem.id,
-      );
+
+      final sortedExtraIds =
+          selectedExtraOptions.map((e) => e.id ?? '').toList()..sort();
+
+      final index = updatedCart.indexWhere((item) {
+        if (item.menuItemId != menuItem.id) return false;
+        final itemSortedExtraIds = List<String>.from(
+          item.selectedExtraOptions.map((e) => e.id),
+        )..sort();
+        if (itemSortedExtraIds.length != sortedExtraIds.length) return false;
+        for (var i = 0; i < sortedExtraIds.length; i++) {
+          if (itemSortedExtraIds[i] != sortedExtraIds[i]) return false;
+        }
+        return true;
+      });
 
       if (index != -1) {
         final existingItem = updatedCart[index];
@@ -172,12 +202,25 @@ class CubitTableOrder extends Cubit<StateTableOrder>
           quantity: existingItem.quantity + 1,
         );
       } else {
+        num extraOptionsPrice = 0;
+        for (final opt in selectedExtraOptions) {
+          extraOptionsPrice += opt.price ?? 0;
+        }
         updatedCart.add(
           CartItem(
             menuItemId: menuItem.id ?? '',
             name: menuItem.name ?? '',
             quantity: 1,
-            unitPrice: menuItem.price ?? 0,
+            unitPrice: (menuItem.price ?? 0) + extraOptionsPrice,
+            selectedExtraOptions: selectedExtraOptions
+                .map(
+                  (opt) => SelectedExtraOption(
+                    id: opt.id ?? '',
+                    name: opt.name ?? '',
+                    price: opt.price ?? 0,
+                  ),
+                )
+                .toList(),
           ),
         );
       }
@@ -191,14 +234,27 @@ class CubitTableOrder extends Cubit<StateTableOrder>
     }
   }
 
-  void updateCartItemQuantity(String menuItemId, int delta) {
+  void updateCartItemQuantity(CartItem cartItem, int delta) {
     final currentState = state;
     if (currentState is StateTableOrderLoaded) {
       final currentOrder = currentState.currentOrder;
       final updatedCart = List<CartItem>.from(currentOrder.cartItems);
-      final index = updatedCart.indexWhere(
-        (item) => item.menuItemId == menuItemId,
-      );
+
+      final sortedExtraIds = List<String>.from(
+        cartItem.selectedExtraOptions.map((e) => e.id),
+      )..sort();
+
+      final index = updatedCart.indexWhere((item) {
+        if (item.menuItemId != cartItem.menuItemId) return false;
+        final itemSortedExtraIds = List<String>.from(
+          item.selectedExtraOptions.map((e) => e.id),
+        )..sort();
+        if (itemSortedExtraIds.length != sortedExtraIds.length) return false;
+        for (var i = 0; i < sortedExtraIds.length; i++) {
+          if (itemSortedExtraIds[i] != sortedExtraIds[i]) return false;
+        }
+        return true;
+      });
 
       if (index != -1) {
         final existingItem = updatedCart[index];
@@ -371,7 +427,9 @@ class CubitTableOrder extends Cubit<StateTableOrder>
             menuItemId: item.menuItemId,
             quantity: item.quantity,
             notes: item.notes,
-            selectedExtraOptionIds: item.selectedExtraOptionIds,
+            selectedExtraOptionIds: item.selectedExtraOptions
+                .map((e) => e.id)
+                .toList(),
           );
         }).toList();
 
@@ -476,6 +534,18 @@ class OrderEntry {
   }
 }
 
+class SelectedExtraOption {
+  const SelectedExtraOption({
+    required this.id,
+    required this.name,
+    required this.price,
+  });
+
+  final String id;
+  final String name;
+  final num price;
+}
+
 class CartItem {
   CartItem({
     required this.menuItemId,
@@ -483,7 +553,7 @@ class CartItem {
     required this.quantity,
     required this.unitPrice,
     this.notes,
-    this.selectedExtraOptionIds = const [],
+    this.selectedExtraOptions = const [],
   });
 
   final String menuItemId;
@@ -491,7 +561,7 @@ class CartItem {
   final num unitPrice;
   final int quantity;
   final String? notes;
-  final List<String> selectedExtraOptionIds;
+  final List<SelectedExtraOption> selectedExtraOptions;
 
   num get totalPrice => unitPrice * quantity;
 
@@ -501,7 +571,7 @@ class CartItem {
     num? unitPrice,
     int? quantity,
     String? notes,
-    List<String>? selectedExtraOptionIds,
+    List<SelectedExtraOption>? selectedExtraOptions,
   }) {
     return CartItem(
       menuItemId: menuItemId ?? this.menuItemId,
@@ -509,8 +579,7 @@ class CartItem {
       unitPrice: unitPrice ?? this.unitPrice,
       quantity: quantity ?? this.quantity,
       notes: notes ?? this.notes,
-      selectedExtraOptionIds:
-          selectedExtraOptionIds ?? this.selectedExtraOptionIds,
+      selectedExtraOptions: selectedExtraOptions ?? this.selectedExtraOptions,
     );
   }
 }
@@ -531,6 +600,7 @@ final class StateTableOrderLoaded extends StateTableOrder {
   StateTableOrderLoaded({
     required this.categories,
     required this.menuItems,
+    required this.extraOptions,
     required this.orders,
     required int selectedOrderIndex,
     this.isSaving = false,
@@ -542,6 +612,7 @@ final class StateTableOrderLoaded extends StateTableOrder {
 
   final List<MenuCategoryDTO> categories;
   final List<MenuItemDTO> menuItems;
+  final List<ProductExtraOptionDTO> extraOptions;
   final List<OrderEntry> orders;
   final int selectedOrderIndex;
   final bool isSaving;
@@ -597,28 +668,30 @@ final class StateTableOrderLoaded extends StateTableOrder {
 
     // Compare each item
     for (final cartItem in cartItems) {
-      final originalItemIndex = originalItems.indexWhere(
-        (it) => it.menuItemId == cartItem.menuItemId,
-      );
+      final currentExtraIds = List<String>.from(
+        cartItem.selectedExtraOptions.map((e) => e.id),
+      )..sort();
+
+      final originalItemIndex = originalItems.indexWhere((it) {
+        if (it.menuItemId != cartItem.menuItemId) return false;
+        final originalExtraIds =
+            it.selectedExtraOptions
+                .map((opt) => opt.extraOptionId ?? '')
+                .toList()
+              ..sort();
+
+        if (originalExtraIds.length != currentExtraIds.length) return false;
+        for (var i = 0; i < originalExtraIds.length; i++) {
+          if (originalExtraIds[i] != currentExtraIds[i]) return false;
+        }
+        return true;
+      });
+
       if (originalItemIndex == -1) return true;
 
       final originalItem = originalItems[originalItemIndex];
       if (cartItem.quantity != originalItem.quantity) return true;
       if ((cartItem.notes ?? '') != (originalItem.notes ?? '')) return true;
-
-      // Compare selected extra option IDs
-      final originalExtraIds =
-          originalItem.selectedExtraOptions
-              .map((opt) => opt.extraOptionId ?? '')
-              .toList()
-            ..sort();
-      final currentExtraIds = List<String>.from(cartItem.selectedExtraOptionIds)
-        ..sort();
-
-      if (originalExtraIds.length != currentExtraIds.length) return true;
-      for (var i = 0; i < originalExtraIds.length; i++) {
-        if (originalExtraIds[i] != currentExtraIds[i]) return true;
-      }
     }
 
     return false;
@@ -627,6 +700,7 @@ final class StateTableOrderLoaded extends StateTableOrder {
   StateTableOrderLoaded copyWith({
     List<MenuCategoryDTO>? categories,
     List<MenuItemDTO>? menuItems,
+    List<ProductExtraOptionDTO>? extraOptions,
     List<OrderEntry>? orders,
     int? selectedOrderIndex,
     bool? isSaving,
@@ -637,6 +711,7 @@ final class StateTableOrderLoaded extends StateTableOrder {
     return StateTableOrderLoaded(
       categories: categories ?? this.categories,
       menuItems: menuItems ?? this.menuItems,
+      extraOptions: extraOptions ?? this.extraOptions,
       orders: orders ?? this.orders,
       selectedOrderIndex: selectedOrderIndex ?? this.selectedOrderIndex,
       isSaving: isSaving ?? this.isSaving,

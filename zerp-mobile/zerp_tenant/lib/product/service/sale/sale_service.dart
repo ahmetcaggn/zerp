@@ -342,4 +342,37 @@ class SaleService extends ServiceBase with LoggerMixin<SaleService> {
         throw onUnsuccessfulResponse(res);
     }
   }
+
+  Future<PageResponse<ProductExtraOptionDTO>> getProductExtraOptions({
+    required String shopId,
+    PageRequest pageRequest = PageRequest.all,
+  }) async {
+    final params = <String, String>{
+      'product.shop.id': shopId,
+      'isActive': 'true',
+    };
+
+    final request = GetListProductExtraOptionCommand(
+      start: pageRequest.start,
+      end: pageRequest.end,
+      allParams: params,
+    );
+
+    final res = await invoker.send(request);
+    switch (res) {
+      case SuccessResponseResult<ApiResponseListProductExtraOptionDTO>():
+        final options = res.data.data;
+        final totalCount = res.totalCountHeader ?? options.length;
+        log.info('Fetched ${options.length} extra options for shop $shopId.');
+        return PageResponse(
+          req: pageRequest,
+          items: options,
+          totalCount: totalCount,
+        );
+      case NetworkErrorResult<ApiResponseListProductExtraOptionDTO>():
+        throw onNetworkError(res);
+      case SpecifiedResponseResult<ApiResponseListProductExtraOptionDTO>():
+        throw onUnsuccessfulResponse(res);
+    }
+  }
 }

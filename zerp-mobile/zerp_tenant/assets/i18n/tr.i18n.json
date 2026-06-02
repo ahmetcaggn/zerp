@@ -146,6 +146,7 @@
       "selectCategory": "Kategori Seçin",
       "noProducts": "Ürün bulunamadı",
       "loadingProducts": "Ürünler yükleniyor...",
+      "extraOptionsTitle": "Ekstra Seçenekler",
       "cancelDialog": {
         "title": "Siparişi İptal Et",
         "message": "Bu siparişi iptal etmek istediğinizden emin misiniz?",
