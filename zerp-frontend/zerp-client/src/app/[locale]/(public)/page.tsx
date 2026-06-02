@@ -1,9 +1,7 @@
-import { Box } from '@mui/material'
 import { notFound } from 'next/navigation'
 
 import { isLocale } from '@/core/constants/locales'
-import type { Locale } from '@/core/types/common'
-import { CtaSection, FeaturesSection, FooterSection, HeroSection } from '@/features/landing'
+import { WelcomeScreen } from '@/modules/restaurants/ui/welcome-screen'
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -12,12 +10,5 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     notFound()
   }
 
-  return (
-    <Box component="main">
-      <HeroSection locale={locale as Locale} />
-      <FeaturesSection />
-      <CtaSection locale={locale as Locale} />
-      <FooterSection />
-    </Box>
-  )
+  return <WelcomeScreen />
 }

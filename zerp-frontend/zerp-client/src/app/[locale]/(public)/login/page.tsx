@@ -21,19 +21,17 @@ export default function LoginPage() {
   useEffect(() => {
     const locale = params.locale || 'tr'
     const requestedCallbackUrl = searchParams.get('callbackUrl')
-    const callbackUrl = requestedCallbackUrl?.startsWith('/')
-      ? requestedCallbackUrl
-      : `/${locale}/dashboard`
+    const callbackUrl = requestedCallbackUrl?.startsWith('/') ? requestedCallbackUrl : `/${locale}`
     router.replace(callbackUrl as Route)
 
     // Auth/SSO disabled temporarily.
     // if (status === 'authenticated') {
-    //   router.replace(`/${locale}/dashboard`)
+    //   router.replace(`/${locale}`)
     //   return
     // }
     //
     // if (status === 'unauthenticated') {
-    //   const callbackUrl = searchParams.get('callbackUrl') || `/${locale}/dashboard`
+    //   const callbackUrl = searchParams.get('callbackUrl') || `/${locale}`
     //   void signIn('keycloak', { callbackUrl })
     // }
   }, [params.locale, router, searchParams])

@@ -18,16 +18,16 @@ export default function RegisterPage() {
 
   useEffect(() => {
     const locale = params.locale || 'tr'
-    router.replace(`/${locale}/dashboard`)
+    router.replace(`/${locale}`)
 
     // Auth/SSO disabled temporarily.
     // if (status === 'authenticated') {
-    //   window.location.href = `/${locale}/dashboard`
+    //   window.location.href = `/${locale}`
     //   return
     // }
     //
     // if (status === 'unauthenticated') {
-    //   void signIn('keycloak', { callbackUrl: `/${locale}/dashboard` }, { kc_action: 'register' })
+    //   void signIn('keycloak', { callbackUrl: `/${locale}` }, { kc_action: 'register' })
     // }
   }, [params.locale, router])
 
