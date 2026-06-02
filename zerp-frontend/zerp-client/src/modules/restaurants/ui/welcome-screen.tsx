@@ -1,26 +1,20 @@
 'use client'
 
 import {
-  ArrowForward,
-  ExploreOutlined,
-  LocationOnOutlined,
-  MyLocation,
-  RestaurantOutlined,
-  Storefront,
+  LocationOnRounded,
+  StorefrontRounded,
+  ChevronRightRounded,
 } from '@mui/icons-material'
 import {
   Alert,
   alpha,
   Box,
   Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
   Container,
   Stack,
   Typography,
   useTheme,
+  CircularProgress,
 } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -66,106 +60,103 @@ export function WelcomeScreen() {
     router.push(`/${locale}/restaurants`)
   }
 
-  const isDark = theme.palette.mode === 'dark'
+  // Warm premium colors
+  const warmBg = '#FEFCF9'
+  const warmAccent = '#FF6B35'
+  const warmAccentLight = '#FFF0EB'
+  const warmSecondary = '#2D3436'
+  const warmMuted = '#636E72'
+  const warmBorder = 'rgba(0,0,0,0.04)'
 
   return (
     <Box
       sx={{
         minHeight: '100vh',
-        position: 'relative',
-        overflow: 'hidden',
+        background: warmBg,
         display: 'flex',
-        alignItems: 'center',
-        background: isDark
-          ? `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.08)} 0%, ${theme.palette.background.default} 50%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`
-          : `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.04)} 0%, ${theme.palette.background.default} 50%, ${alpha(theme.palette.secondary.main, 0.03)} 100%)`,
+        flexDirection: 'column',
       }}
     >
-      {/* Subtle pattern overlay */}
-      <Box
+      {/* Main Content */}
+      <Container
+        maxWidth="sm"
         sx={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: `radial-gradient(${alpha(theme.palette.primary.main, isDark ? 0.15 : 0.08)} 1px, transparent 1px)`,
-          backgroundSize: '32px 32px',
-          pointerEvents: 'none',
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          px: { xs: 3, sm: 4 },
+          py: { xs: 6, sm: 8 },
         }}
-      />
-
-      {/* Floating decoration elements */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '10%',
-          right: '5%',
-          width: 300,
-          height: 300,
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${alpha(theme.palette.primary.main, 0.12)} 0%, transparent 70%)`,
-          filter: 'blur(60px)',
-          pointerEvents: 'none',
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: '15%',
-          left: '10%',
-          width: 250,
-          height: 250,
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${alpha(theme.palette.secondary.main, 0.1)} 0%, transparent 70%)`,
-          filter: 'blur(50px)',
-          pointerEvents: 'none',
-        }}
-      />
-
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, py: 6 }}>
-        {/* Header Section */}
-        <Box sx={{ textAlign: 'center', mb: 8 }}>
-          <Chip
-            icon={<RestaurantOutlined sx={{ fontSize: 16 }} />}
-            label="ZERP Client"
-            size="small"
+      >
+        {/* Hero Section */}
+        <Box sx={{ mb: { xs: 5, sm: 6 } }}>
+          {/* Brand Mark */}
+          <Box
             sx={{
-              mb: 3,
-              px: 1,
-              background: alpha(theme.palette.primary.main, 0.1),
-              color: theme.palette.primary.main,
-              fontWeight: 600,
-              letterSpacing: 0.5,
-              border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-            }}
-          />
-
-          <Typography
-            variant="h2"
-            sx={{
-              fontWeight: 800,
-              mb: 2,
-              fontSize: { xs: '2rem', sm: '2.75rem', md: '3.5rem' },
-              background: `linear-gradient(135deg, ${theme.palette.text.primary} 0%, ${theme.palette.primary.main} 100%)`,
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              lineHeight: 1.2,
+              width: 56,
+              height: 56,
+              borderRadius: '16px',
+              background: `linear-gradient(145deg, ${warmAccent} 0%, #E85A2A 100%)`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mb: 4,
+              boxShadow: `0 12px 32px ${alpha(warmAccent, 0.35)}`,
             }}
           >
-            {t('welcome.title')}
+            <Typography
+              sx={{
+                color: 'white',
+                fontWeight: 700,
+                fontSize: 22,
+                letterSpacing: '-0.5px',
+              }}
+            >
+              Z
+            </Typography>
+          </Box>
+
+          {/* Greeting */}
+          <Typography
+            sx={{
+              fontSize: { xs: 15, sm: 16 },
+              fontWeight: 500,
+              color: warmMuted,
+              mb: 1.5,
+              letterSpacing: '0.3px',
+            }}
+          >
+            {locale === 'tr' ? 'Merhaba' : 'Hello'} 
           </Typography>
 
+          {/* Main Title */}
           <Typography
-            variant="h6"
+            component="h1"
             sx={{
-              color: theme.palette.text.secondary,
-              maxWidth: 500,
-              mx: 'auto',
-              fontWeight: 400,
-              fontSize: { xs: '1rem', sm: '1.125rem' },
-              lineHeight: 1.6,
+              fontSize: { xs: 32, sm: 40, md: 48 },
+              fontWeight: 700,
+              color: warmSecondary,
+              lineHeight: 1.15,
+              letterSpacing: '-1px',
+              mb: 2,
             }}
           >
-            {t('welcome.subtitle')}
+            {locale === 'tr' ? 'Ne yemek\nistersin?' : 'What would you\nlike to eat?'}
+          </Typography>
+
+          {/* Subtitle */}
+          <Typography
+            sx={{
+              fontSize: { xs: 16, sm: 17 },
+              color: warmMuted,
+              lineHeight: 1.6,
+              maxWidth: 340,
+            }}
+          >
+            {locale === 'tr'
+              ? 'Yakınındaki restoranları keşfet ve siparişini hızlıca ver.'
+              : 'Discover nearby restaurants and place your order quickly.'}
           </Typography>
         </Box>
 
@@ -174,220 +165,223 @@ export function WelcomeScreen() {
           <Alert
             severity="warning"
             sx={{
-              mb: 4,
-              maxWidth: 600,
-              mx: 'auto',
-              borderRadius: 3,
-              border: `1px solid ${alpha(theme.palette.warning.main, 0.3)}`,
+              mb: 3,
+              borderRadius: '16px',
+              border: 'none',
+              background: '#FFF4E6',
+              '& .MuiAlert-icon': {
+                color: '#F59F00',
+              },
             }}
           >
             {locationError}
           </Alert>
         )}
 
-        {/* Cards Section */}
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={3}
-          justifyContent="center"
-          alignItems="stretch"
-          sx={{ maxWidth: 900, mx: 'auto' }}
-        >
-          {/* Location Card */}
-          <Card
+        {/* Action Cards */}
+        <Stack spacing={2}>
+          {/* Primary: Location Button */}
+          <Box
+            onClick={!isLocating ? handleUseLocation : undefined}
             sx={{
-              flex: 1,
-              borderRadius: 4,
-              overflow: 'hidden',
-              border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-              background: isDark
-                ? alpha(theme.palette.background.paper, 0.6)
-                : alpha(theme.palette.background.paper, 0.8),
-              backdropFilter: 'blur(20px)',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              p: 0,
+              borderRadius: '20px',
+              background: `linear-gradient(145deg, ${warmAccent} 0%, #E85A2A 100%)`,
+              boxShadow: `0 16px 48px ${alpha(warmAccent, 0.4)}`,
               cursor: isLocating ? 'wait' : 'pointer',
+              transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
               '&:hover': {
-                transform: 'translateY(-8px)',
-                boxShadow: `0 20px 40px ${alpha(theme.palette.primary.main, 0.15)}`,
-                borderColor: alpha(theme.palette.primary.main, 0.3),
+                transform: isLocating ? 'none' : 'translateY(-2px)',
+                boxShadow: `0 20px 56px ${alpha(warmAccent, 0.5)}`,
+              },
+              '&:active': {
+                transform: isLocating ? 'none' : 'translateY(0) scale(0.99)',
               },
             }}
-            onClick={!isLocating ? handleUseLocation : undefined}
           >
-            <CardContent sx={{ p: 4 }}>
-              {/* Icon Container */}
+            <Box
+              sx={{
+                p: { xs: 2.5, sm: 3 },
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2.5,
+              }}
+            >
+              {/* Icon */}
               <Box
                 sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: 3,
+                  width: 52,
+                  height: 52,
+                  borderRadius: '14px',
+                  background: 'rgba(255,255,255,0.2)',
+                  backdropFilter: 'blur(10px)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  mb: 3,
-                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.dark, 0.8)} 100%)`,
-                  boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.3)}`,
+                  flexShrink: 0,
                 }}
               >
                 {isLocating ? (
-                  <CircularProgress size={36} sx={{ color: 'white' }} />
+                  <CircularProgress size={24} sx={{ color: 'white' }} />
                 ) : (
-                  <MyLocation sx={{ fontSize: 36, color: 'white' }} />
+                  <LocationOnRounded sx={{ fontSize: 26, color: 'white' }} />
                 )}
               </Box>
 
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: 700,
-                  mb: 1.5,
-                  color: theme.palette.text.primary,
-                }}
-              >
-                {isLocating ? t('welcome.findingLocation') : t('welcome.useLocation')}
-              </Typography>
+              {/* Text */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  sx={{
+                    fontSize: { xs: 17, sm: 18 },
+                    fontWeight: 600,
+                    color: 'white',
+                    mb: 0.25,
+                  }}
+                >
+                  {isLocating
+                    ? locale === 'tr'
+                      ? 'Konum alınıyor...'
+                      : 'Getting location...'
+                    : locale === 'tr'
+                      ? 'Konumumu Kullan'
+                      : 'Use My Location'}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: { xs: 13, sm: 14 },
+                    color: 'rgba(255,255,255,0.8)',
+                  }}
+                >
+                  {locale === 'tr'
+                    ? 'En yakın restoranları bul'
+                    : 'Find the nearest restaurants'}
+                </Typography>
+              </Box>
 
-              <Typography
-                sx={{
-                  color: theme.palette.text.secondary,
-                  mb: 3,
-                  lineHeight: 1.6,
-                }}
-              >
-                {t('welcome.useLocationDesc')}
-              </Typography>
+              {/* Arrow */}
+              {!isLocating && (
+                <ChevronRightRounded
+                  sx={{
+                    fontSize: 28,
+                    color: 'rgba(255,255,255,0.8)',
+                    flexShrink: 0,
+                  }}
+                />
+              )}
+            </Box>
+          </Box>
 
-              <Button
-                variant="contained"
-                size="large"
-                disabled={isLocating}
-                endIcon={isLocating ? null : <LocationOnOutlined />}
-                sx={{
-                  borderRadius: 2,
-                  px: 3,
-                  py: 1.25,
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                  boxShadow: `0 4px 14px ${alpha(theme.palette.primary.main, 0.4)}`,
-                  '&:hover': {
-                    boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.5)}`,
-                  },
-                }}
-              >
-                {isLocating ? t('welcome.findingLocation') : t('welcome.useLocation')}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Manual Select Card */}
-          <Card
+          {/* Secondary: Browse All */}
+          <Box
+            onClick={!isLocating ? handleManualSelect : undefined}
             sx={{
-              flex: 1,
-              borderRadius: 4,
-              overflow: 'hidden',
-              border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-              background: isDark
-                ? alpha(theme.palette.background.paper, 0.6)
-                : alpha(theme.palette.background.paper, 0.8),
-              backdropFilter: 'blur(20px)',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              p: 0,
+              borderRadius: '20px',
+              background: 'white',
+              border: `1px solid ${warmBorder}`,
+              boxShadow: '0 4px 24px rgba(0,0,0,0.04)',
               cursor: isLocating ? 'not-allowed' : 'pointer',
-              opacity: isLocating ? 0.6 : 1,
+              opacity: isLocating ? 0.5 : 1,
+              transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
               '&:hover': {
-                transform: isLocating ? 'none' : 'translateY(-8px)',
-                boxShadow: isLocating
-                  ? 'none'
-                  : `0 20px 40px ${alpha(theme.palette.secondary.main, 0.15)}`,
-                borderColor: isLocating ? 'transparent' : alpha(theme.palette.secondary.main, 0.3),
+                transform: isLocating ? 'none' : 'translateY(-2px)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+                borderColor: 'rgba(0,0,0,0.08)',
+              },
+              '&:active': {
+                transform: isLocating ? 'none' : 'translateY(0) scale(0.99)',
               },
             }}
-            onClick={!isLocating ? handleManualSelect : undefined}
           >
-            <CardContent sx={{ p: 4 }}>
-              {/* Icon Container */}
+            <Box
+              sx={{
+                p: { xs: 2.5, sm: 3 },
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2.5,
+              }}
+            >
+              {/* Icon */}
               <Box
                 sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: 3,
+                  width: 52,
+                  height: 52,
+                  borderRadius: '14px',
+                  background: warmAccentLight,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  mb: 3,
-                  background: `linear-gradient(135deg, ${theme.palette.secondary.main} 0%, ${alpha(theme.palette.secondary.dark, 0.8)} 100%)`,
-                  boxShadow: `0 8px 24px ${alpha(theme.palette.secondary.main, 0.3)}`,
+                  flexShrink: 0,
                 }}
               >
-                <Storefront sx={{ fontSize: 36, color: 'white' }} />
+                <StorefrontRounded sx={{ fontSize: 26, color: warmAccent }} />
               </Box>
 
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: 700,
-                  mb: 1.5,
-                  color: theme.palette.text.primary,
-                }}
-              >
-                {t('welcome.manualSelect')}
-              </Typography>
+              {/* Text */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  sx={{
+                    fontSize: { xs: 17, sm: 18 },
+                    fontWeight: 600,
+                    color: warmSecondary,
+                    mb: 0.25,
+                  }}
+                >
+                  {locale === 'tr' ? 'Tüm Restoranlar' : 'Browse All'}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: { xs: 13, sm: 14 },
+                    color: warmMuted,
+                  }}
+                >
+                  {locale === 'tr'
+                    ? 'Listeden seçim yap'
+                    : 'Choose from the list'}
+                </Typography>
+              </Box>
 
-              <Typography
+              {/* Arrow */}
+              <ChevronRightRounded
                 sx={{
-                  color: theme.palette.text.secondary,
-                  mb: 3,
-                  lineHeight: 1.6,
+                  fontSize: 28,
+                  color: warmMuted,
+                  opacity: 0.5,
+                  flexShrink: 0,
                 }}
-              >
-                {t('welcome.manualSelectDesc')}
-              </Typography>
-
-              <Button
-                variant="outlined"
-                size="large"
-                disabled={isLocating}
-                endIcon={<ExploreOutlined />}
-                sx={{
-                  borderRadius: 2,
-                  px: 3,
-                  py: 1.25,
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  borderColor: theme.palette.secondary.main,
-                  color: theme.palette.secondary.main,
-                  borderWidth: 2,
-                  '&:hover': {
-                    borderWidth: 2,
-                    background: alpha(theme.palette.secondary.main, 0.08),
-                    borderColor: theme.palette.secondary.main,
-                  },
-                }}
-              >
-                {t('welcome.manualSelect')}
-              </Button>
-            </CardContent>
-          </Card>
+              />
+            </Box>
+          </Box>
         </Stack>
 
-        {/* Footer hint */}
-        <Box sx={{ textAlign: 'center', mt: 8 }}>
-          <Stack
-            direction="row"
-            spacing={1}
-            alignItems="center"
-            justifyContent="center"
-            sx={{ color: theme.palette.text.secondary }}
+        {/* Bottom Hint */}
+        <Box
+          sx={{
+            mt: { xs: 5, sm: 6 },
+            textAlign: 'center',
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: 13,
+              color: alpha(warmMuted, 0.6),
+              letterSpacing: '0.2px',
+            }}
           >
-            <ArrowForward sx={{ fontSize: 18, opacity: 0.6 }} />
-            <Typography variant="body2" sx={{ opacity: 0.8 }}>
-              {locale === 'tr'
-                ? 'Hızlı ve kolay sipariş deneyimi'
-                : 'Quick and easy ordering experience'}
-            </Typography>
-          </Stack>
+            {locale === 'tr'
+              ? 'Hızlı, kolay ve lezzetli sipariş deneyimi'
+              : 'Fast, easy and delicious ordering experience'}
+          </Typography>
         </Box>
       </Container>
+
+      {/* Safe Area Bottom Spacer (for mobile) */}
+      <Box
+        sx={{
+          height: 'env(safe-area-inset-bottom, 0px)',
+          background: warmBg,
+        }}
+      />
     </Box>
   )
 }
