@@ -8,6 +8,13 @@
     "signUp": "Sign Up",
     "signUpDescription": "Visit https://tenant.zeerp.tech for information",
     "logout": "Logout",
+    "logoutDialog": {
+      "title": "Logout",
+      "message": "Are you sure you want to log out?",
+      "confirm": "Logout",
+      "cancel": "Cancel",
+      "loading": "Logging out..."
+    },
     "success": "Logged in successfully",
     "fail": "Login failed",
     "errors": {
@@ -174,7 +181,9 @@
   },
   "network": {
     "activityTooltip": "Network activity",
-    "loadingOrgScope": "Loading organization scope..."
+    "loadingOrgScope": "Loading organization scope...",
+    "orgScopeNotInitialized": "Organization scope not initialized",
+    "initOrgScope": "Initialize organization scope"
   },
   "stock": {
     "title": "Stock",

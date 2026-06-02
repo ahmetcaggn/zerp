@@ -153,8 +153,33 @@ final class _OrganizationScopeError extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CubitOrganizationScope, StateOrganizationScope>(
       builder: (context, state) {
-        if (state is StateOrganizationScopeLoading ||
-            state is StateOrganizationScopeInitial) {
+        if (state is StateOrganizationScopeInitial) {
+          return Container(
+            color: Colors.orangeAccent,
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              children: [
+                const Icon(Icons.warning_amber_rounded, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.t.network.orgScopeNotInitialized,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+                IconButton(
+                  tooltip: context.t.network.initOrgScope,
+                  onPressed: () async {
+                    await context.read<CubitOrganizationScope>().loadTenant();
+                  },
+                  icon: const Icon(Icons.play_arrow, color: Colors.white),
+                ),
+              ],
+            ),
+          );
+        }
+
+        if (state is StateOrganizationScopeLoading) {
           return Container(
             color: Colors.blueAccent,
             padding: const EdgeInsets.all(8),

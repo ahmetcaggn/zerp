@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart' hide RouteSettings;
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
+import 'package:zerp_tenant/feature/auth/view/widget/logging_out_dialog.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
@@ -96,7 +95,7 @@ class AppDrawer extends StatelessWidget {
               ),
               onTap: () async {
                 Navigator.pop(context);
-                await context.read<CubitAuth>().logout();
+                await LoggingOutDialog.show(context);
               },
             ),
           ),

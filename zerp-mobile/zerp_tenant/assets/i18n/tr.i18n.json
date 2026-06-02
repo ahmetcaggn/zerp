@@ -8,6 +8,13 @@
     "signUp": "Kayıt Ol",
     "signUpDescription": "Bilgi için https://tenant.zeerp.tech adresini ziyaret edin",
     "logout": "Çıkış Yap",
+    "logoutDialog": {
+      "title": "Çıkış Yap",
+      "message": "Çıkış yapmak istediğinizden emin misiniz?",
+      "confirm": "Çıkış Yap",
+      "cancel": "İptal",
+      "loading": "Çıkış yapılıyor..."
+    },
     "success": "Başarıyla giriş yapıldı",
     "fail": "Giriş başarısız oldu",
     "errors": {
@@ -174,7 +181,9 @@
   },
   "network": {
     "activityTooltip": "Ağ etkinliği",
-    "loadingOrgScope": "Organizasyon kapsamı yükleniyor..."
+    "loadingOrgScope": "Organizasyon kapsamı yükleniyor...",
+    "orgScopeNotInitialized": "Organizasyon kapsamı başlatılmadı",
+    "initOrgScope": "Organizasyon kapsamını başlat"
   },
   "stock": {
     "title": "Stok",
