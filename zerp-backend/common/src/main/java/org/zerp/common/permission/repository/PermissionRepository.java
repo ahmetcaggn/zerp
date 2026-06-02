@@ -22,6 +22,31 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
     );
 
     @Query("""
+            SELECT CASE WHEN COUNT(p) > 0 THEN TRUE ELSE FALSE END FROM Permission p
+                  WHERE p.userId = :userId
+                    AND p.action = 'ADMIN'
+                    AND :targetUserId IS NOT NULL
+                    AND p.targetType = 'TENANT'
+                    AND p.targetId = :tenantId
+            """)
+    Boolean existsAdminByUserIdAndTenantId(
+            @Param("userId") UUID userId,
+            @Param("tenantId") UUID tenantId
+    );
+
+    @Query("""
+            SELECT CASE WHEN COUNT(p) > 0 THEN TRUE ELSE FALSE END FROM Permission p
+                  WHERE p.userId = :userId
+                    AND p.action = 'ADMIN'
+                    AND :targetUserId IS NOT NULL
+                    AND p.targetType = 'TENANT_ROOT'
+                    AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID}
+            """)
+    Boolean existsAdminByUserIdOnTenantRoot(
+            @Param("userId") UUID userId
+    );
+
+    @Query("""
             SELECT p FROM Permission p
               WHERE p.userId = :userId
                 AND p.action = :action
@@ -206,9 +231,9 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
                 AND p.targetId = :targetId
             """)
     boolean existsByUserAndTargetTypeAndActionAndTargetId(@Param("userId") UUID userId,
-                                                         @Param("type") PermissionTargetType type,
-                                                         @Param("action") PermissionAction action,
-                                                         @Param("targetId") UUID targetId);
+                                                          @Param("type") PermissionTargetType type,
+                                                          @Param("action") PermissionAction action,
+                                                          @Param("targetId") UUID targetId);
 
     @Query("""
             SELECT p FROM Permission p

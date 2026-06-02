@@ -41,6 +41,11 @@ public class MenuItemPermissionEvaluator {
             log.error("Null pointer while evaluating canRead for MenuItem userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid menu item structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting read access to menuItem {}",
+                    userId, tenantId, itemId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndMenuItemHierarchy(
                 userId, PermissionAction.READ_MENU_ITEM, itemId, categoryId, menuId, shopId, tenantId);
@@ -50,10 +55,24 @@ public class MenuItemPermissionEvaluator {
     }
 
     public boolean canCreate(UUID userId, MenuCategory parent) {
-        UUID categoryId = parent.getId();
-        UUID menuId = parent.getMenu().getId();
-        UUID shopId = parent.getMenu().getShop().getId();
-        UUID tenantId = parent.getTenantId();
+        UUID categoryId;
+        UUID menuId;
+        UUID shopId;
+        UUID tenantId;
+        try {
+            categoryId = parent.getId();
+            menuId = parent.getMenu().getId();
+            shopId = parent.getMenu().getShop().getId();
+            tenantId = parent.getTenantId();
+        } catch (NullPointerException e) {
+            log.error("Null pointer while evaluating canCreate for MenuCategory userId={}", userId, e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid menu category structure");
+        }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting create access to category {}",
+                    userId, tenantId, categoryId);
+            return true;
+        }
 
         log.trace("Checking canCreate permission - userId: {}, categoryId: {}, menuId: {}, tenantId: {}",
                 userId, categoryId, menuId, tenantId);
@@ -79,6 +98,11 @@ public class MenuItemPermissionEvaluator {
         } catch (NullPointerException e) {
             log.error("Null pointer while evaluating canUpdate for MenuItem userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid menu item structure");
+        }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting update access to menuItem {}",
+                    userId, tenantId, itemId);
+            return true;
         }
 
         List<Permission> result = permissionRepository.findAllByUserAndMenuItemHierarchy(
@@ -108,6 +132,11 @@ public class MenuItemPermissionEvaluator {
             log.error("Null pointer while evaluating canDelete for MenuItem userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid menu item structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting delete access to menuItem {}",
+                    userId, tenantId, itemId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndMenuItemHierarchy(
                 userId, PermissionAction.DELETE_MENU_ITEM, itemId, categoryId, menuId, shopId, tenantId);
@@ -124,6 +153,17 @@ public class MenuItemPermissionEvaluator {
             return Specification.unrestricted();
         }
 
+
+        boolean isAdminOnTenantRoot = commonPermissionService.isAdminOnTenantRoot(userId);
+        if (isAdminOnTenantRoot) {
+            return Specification.unrestricted();
+        }
+
+        UUID managingTenantId = commonPermissionService.getTenantIdIfTheUserIsAdminOnIt(userId);
+        if (managingTenantId != null) {
+            return (root, _, _) -> root.get("tenantId").equalTo(managingTenantId);
+        }
+
         Set<UUID> permittedItemIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.MENU_ITEM, PermissionAction.READ_MENU_ITEM);
         Set<UUID> permittedCategoryIds = commonPermissionService.getAllPermitted(
@@ -137,10 +177,11 @@ public class MenuItemPermissionEvaluator {
 
         return Specification.anyOf(
                 (root, _, _) -> root.get("id").in(permittedItemIds),
+                (root, _, _) -> root.get("tenantId").in(permittedTenantIds),
                 (root, _, _) -> root.get("category").get("id").in(permittedCategoryIds),
                 (root, _, _) -> root.get("category").get("menu").get("id").in(permittedMenuIds),
-                (root, _, _) -> root.get("category").get("menu").get("shop").get("id").in(permittedShopIds),
-                (root, _, _) -> root.get("tenantId").in(permittedTenantIds)
+                (root, _, _) -> root.get("category").get("menu").get("shop").get("id").in(permittedShopIds)
         );
     }
+
 }

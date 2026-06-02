@@ -21,8 +21,7 @@ import java.util.UUID;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class ProductRecipePermissionEvaluator {
-    private final PermissionRepository permissionRepository;
+public class ProductRecipePermissionEvaluator {    private final PermissionRepository permissionRepository;
     private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID userId, ProductRecipe target) {
@@ -39,6 +38,10 @@ public class ProductRecipePermissionEvaluator {
             log.error("Null pointer while evaluating canRead for ProductRecipe userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid product recipe structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting read access to recipe", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndProductRecipeHierarchy(
                 userId, PermissionAction.READ_PRODUCT_RECIPE, recipeId, productId, shopId, tenantId);
@@ -54,6 +57,11 @@ public class ProductRecipePermissionEvaluator {
 
         log.trace("Checking canCreate permission - userId: {}, productId: {}, tenantId: {}",
                 userId, productId, tenantId);
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting create access to recipe", userId, tenantId);
+            return true;
+        }
+
         List<Permission> result = permissionRepository.findAllByUserAndProductRecipeHierarchy(
                 userId, PermissionAction.CREATE_PRODUCT_RECIPE, null, productId, shopId, tenantId);
         boolean canCreate = !result.isEmpty();
@@ -74,6 +82,10 @@ public class ProductRecipePermissionEvaluator {
         } catch (NullPointerException e) {
             log.error("Null pointer while evaluating canUpdate for ProductRecipe userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid product recipe structure");
+        }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting update access to recipe", userId, tenantId);
+            return true;
         }
 
         List<Permission> result = permissionRepository.findAllByUserAndProductRecipeHierarchy(
@@ -99,6 +111,10 @@ public class ProductRecipePermissionEvaluator {
             log.error("Null pointer while evaluating canDelete for ProductRecipe userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid product recipe structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting delete access to recipe", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndProductRecipeHierarchy(
                 userId, PermissionAction.DELETE_PRODUCT_RECIPE, recipeId, productId, shopId, tenantId);
@@ -109,6 +125,16 @@ public class ProductRecipePermissionEvaluator {
         boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_PRODUCT_RECIPE);
         if (hasRootPermission) {
             return Specification.unrestricted();
+        }
+
+        boolean isAdminOnTenantRoot = commonPermissionService.isAdminOnTenantRoot(userId);
+        if (isAdminOnTenantRoot) {
+            return Specification.unrestricted();
+        }
+
+        UUID managingTenantId = commonPermissionService.getTenantIdIfTheUserIsAdminOnIt(userId);
+        if (managingTenantId != null) {
+            return (root, _, _) -> root.get("tenantId").equalTo(managingTenantId);
         }
 
         Set<UUID> permittedRecipeIds = commonPermissionService.getAllPermitted(

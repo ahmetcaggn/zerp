@@ -20,8 +20,7 @@ import java.util.UUID;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class ProductPermissionEvaluator {
-    private final PermissionRepository permissionRepository;
+public class ProductPermissionEvaluator {    private final PermissionRepository permissionRepository;
     private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID userId, Product target) {
@@ -36,6 +35,10 @@ public class ProductPermissionEvaluator {
             log.error("Null pointer while evaluating canRead for Product userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid product structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting read access to product", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndProductHierarchy(
                 userId, PermissionAction.READ_PRODUCT, productId, shopId, tenantId);
@@ -49,6 +52,11 @@ public class ProductPermissionEvaluator {
         UUID tenantId = parent.getTenantId();
 
         log.trace("Checking canCreate permission - userId: {}, shopId: {}, tenantId: {}", userId, shopId, tenantId);
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting create access to product", userId, tenantId);
+            return true;
+        }
+
         List<Permission> result = permissionRepository.findAllByUserAndProductHierarchy(
                 userId, PermissionAction.CREATE_PRODUCT, null, shopId, tenantId);
         boolean canCreate = !result.isEmpty();
@@ -67,6 +75,10 @@ public class ProductPermissionEvaluator {
         } catch (NullPointerException e) {
             log.error("Null pointer while evaluating canUpdate for Product userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid product structure");
+        }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting update access to product", userId, tenantId);
+            return true;
         }
 
         List<Permission> result = permissionRepository.findAllByUserAndProductHierarchy(
@@ -92,6 +104,10 @@ public class ProductPermissionEvaluator {
             log.error("Null pointer while evaluating canDelete for Product userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid product structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting delete access to product", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndProductHierarchy(
                 userId, PermissionAction.DELETE_PRODUCT, productId, shopId, tenantId);
@@ -101,12 +117,22 @@ public class ProductPermissionEvaluator {
     }
 
     public Specification<Product> filterRead(UUID userId) {
-        log.trace("Creating filterRead specification for userId: {}", userId);
 
         boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_PRODUCT);
         if (hasRootPermission) {
             return Specification.unrestricted();
         }
+
+        boolean isAdminOnTenantRoot = commonPermissionService.isAdminOnTenantRoot(userId);
+        if (isAdminOnTenantRoot) {
+            return Specification.unrestricted();
+        }
+
+        UUID managingTenantId = commonPermissionService.getTenantIdIfTheUserIsAdminOnIt(userId);
+        if (managingTenantId != null) {
+            return (root, _, _) -> root.get("tenantId").equalTo(managingTenantId);
+        }
+        log.trace("Creating filterRead specification for userId: {}", userId);
 
         Set<UUID> permittedProductIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.PRODUCT, PermissionAction.READ_PRODUCT);

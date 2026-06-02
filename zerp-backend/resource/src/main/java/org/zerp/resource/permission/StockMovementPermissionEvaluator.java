@@ -38,6 +38,10 @@ public class StockMovementPermissionEvaluator {
             log.error("Null pointer while evaluating canRead for StockMovement userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid stock movement structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting read access to stock movement", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndStockMovementHierarchy(
                 userId, PermissionAction.READ_STOCK_MOVEMENT, stockMovementId, stockResourceId, shopId, tenantId);
@@ -47,6 +51,10 @@ public class StockMovementPermissionEvaluator {
     }
 
     public boolean canCreate(UUID userId, StockResource stockResource) {
+        if (commonPermissionService.isAdminAny(userId, stockResource.getTenantId())) {
+            log.debug("User {} is admin for tenant {}, granting create access to stock movement", userId, stockResource.getTenantId());
+            return true;
+        }
         log.trace("Checking canCreate permission - userId: {}, stockResourceId: {}, tenantId: {}",
                 userId, stockResource.getId(), stockResource.getTenantId());
         List<Permission> result = permissionRepository.findAllByUserAndStockMovementHierarchy(
@@ -68,6 +76,11 @@ public class StockMovementPermissionEvaluator {
             UUID tenantId,
             PermissionAction action
     ) {
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting create access to {}", userId, tenantId, action);
+            return true;
+        }
+
         log.trace("Checking {} permission - userId: {}, stockResourceId: {}, shopId: {}, tenantId: {}",
                 action, userId, stockResourceId, shopId, tenantId);
         List<Permission> result = permissionRepository.findAllByUserAndStockMovementHierarchy(
@@ -78,12 +91,21 @@ public class StockMovementPermissionEvaluator {
     }
 //
     public boolean canReadByShop(UUID userId, UUID shopId, UUID tenantId) {
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting read access to stock movement by shop", userId, tenantId);
+            return true;
+        }
+
         List<Permission> result = permissionRepository.findAllByUserAndStockMovementHierarchy(
                 userId, PermissionAction.READ_STOCK_MOVEMENT, null, null, shopId, tenantId);
         return !result.isEmpty();
     }
 
     public boolean canUpdate(UUID userId, StockMovement target) {
+        if (commonPermissionService.isAdminAny(userId, target.getStockResource().getTenantId())) {
+            log.debug("User {} is admin for tenant {}, granting update access to stock movement", userId, target.getStockResource().getTenantId());
+            return true;
+        }
         log.trace("Checking canUpdate permission - userId: {}, stockMovementId: {}, stockResourceId: {}, tenantId: {}",
                 userId, target.getId(), target.getStockResource().getId(), target.getStockResource().getTenantId());
         List<Permission> result = permissionRepository.findAllByUserAndStockMovementHierarchy(
@@ -102,6 +124,10 @@ public class StockMovementPermissionEvaluator {
     }
 
     public boolean canDelete(UUID userId, StockMovement target) {
+        if (commonPermissionService.isAdminAny(userId, target.getStockResource().getTenantId())) {
+            log.debug("User {} is admin for tenant {}, granting delete access to stock movement", userId, target.getStockResource().getTenantId());
+            return true;
+        }
         log.trace("Checking canDelete permission - userId: {}, stockMovementId: {}, stockResourceId: {}, tenantId: {}",
                 userId, target.getId(), target.getStockResource().getId(), target.getStockResource().getTenantId());
         List<Permission> result = permissionRepository.findAllByUserAndStockMovementHierarchy(
@@ -117,12 +143,22 @@ public class StockMovementPermissionEvaluator {
     }
 
     public Specification<StockMovement> filterRead(UUID userId) {
-        log.trace("Creating filterRead specification for userId: {}", userId);
 
         boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_STOCK_MOVEMENT);
         if (hasRootPermission) {
             return Specification.unrestricted();
         }
+
+        boolean isAdminOnTenantRoot = commonPermissionService.isAdminOnTenantRoot(userId);
+        if (isAdminOnTenantRoot) {
+            return Specification.unrestricted();
+        }
+
+        UUID managingTenantId = commonPermissionService.getTenantIdIfTheUserIsAdminOnIt(userId);
+        if (managingTenantId != null) {
+            return (root, _, _) -> root.get("tenantId").equalTo(managingTenantId);
+        }
+        log.trace("Creating filterRead specification for userId: {}", userId);
 
         Set<UUID> permittedStockResourceIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.STOCK_RESOURCE, PermissionAction.READ_STOCK_MOVEMENT);

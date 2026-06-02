@@ -21,9 +21,7 @@ import java.util.UUID;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class ShopTablePermissionEvaluator {
-
-    private final PermissionRepository permissionRepository;
+public class ShopTablePermissionEvaluator {    private final PermissionRepository permissionRepository;
     private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID userId, ShopTable target) {
@@ -38,6 +36,10 @@ public class ShopTablePermissionEvaluator {
             log.error("Null pointer while evaluating canRead for ShopTable userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid table structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting read access to table", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndShopTableHierarchy(
                 userId, PermissionAction.READ_SHOP_TABLE, tableId, shopId, tenantId);
@@ -51,6 +53,11 @@ public class ShopTablePermissionEvaluator {
         UUID tenantId = parent.getTenantId();
 
         log.trace("Checking canCreate permission - userId: {}, shopId: {}, tenantId: {}", userId, shopId, tenantId);
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting create access to table", userId, tenantId);
+            return true;
+        }
+
         List<Permission> result = permissionRepository.findAllByUserAndShopTableHierarchy(
                 userId, PermissionAction.CREATE_SHOP_TABLE, null, shopId, tenantId);
         boolean canCreate = !result.isEmpty();
@@ -69,6 +76,10 @@ public class ShopTablePermissionEvaluator {
         } catch (NullPointerException e) {
             log.error("Null pointer while evaluating canUpdate for ShopTable userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid table structure");
+        }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting update access to table", userId, tenantId);
+            return true;
         }
 
         List<Permission> result = permissionRepository.findAllByUserAndShopTableHierarchy(
@@ -94,6 +105,10 @@ public class ShopTablePermissionEvaluator {
             log.error("Null pointer while evaluating canDelete for ShopTable userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid table structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting delete access to table", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndShopTableHierarchy(
                 userId, PermissionAction.DELETE_SHOP_TABLE, tableId, shopId, tenantId);
@@ -103,12 +118,22 @@ public class ShopTablePermissionEvaluator {
     }
 
     public Specification<ShopTable> filterRead(UUID userId) {
-        log.trace("Creating filterRead specification for userId: {}", userId);
 
         boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_SHOP_TABLE);
         if (hasRootPermission) {
             return Specification.unrestricted();
         }
+
+        boolean isAdminOnTenantRoot = commonPermissionService.isAdminOnTenantRoot(userId);
+        if (isAdminOnTenantRoot) {
+            return Specification.unrestricted();
+        }
+
+        UUID managingTenantId = commonPermissionService.getTenantIdIfTheUserIsAdminOnIt(userId);
+        if (managingTenantId != null) {
+            return (root, _, _) -> root.get("tenantId").equalTo(managingTenantId);
+        }
+        log.trace("Creating filterRead specification for userId: {}", userId);
 
         Set<UUID> permittedTableIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.SHOP_TABLE, PermissionAction.READ_SHOP_TABLE);

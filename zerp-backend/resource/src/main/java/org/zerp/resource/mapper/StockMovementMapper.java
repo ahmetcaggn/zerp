@@ -6,7 +6,7 @@ import org.zerp.common.entity.resource.StockMovement;
 import org.zerp.resource.dto.stockmovement.StockMovementCreateDTO;
 import org.zerp.resource.dto.stockmovement.StockMovementDTO;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
 public interface StockMovementMapper {
     @Mapping(target = "stockResource", ignore = true)
     StockMovement toEntity(StockMovementCreateDTO dto);

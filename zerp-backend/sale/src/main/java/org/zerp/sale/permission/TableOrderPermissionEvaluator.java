@@ -21,9 +21,7 @@ import java.util.UUID;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class TableOrderPermissionEvaluator {
-
-    private final PermissionRepository permissionRepository;
+public class TableOrderPermissionEvaluator {    private final PermissionRepository permissionRepository;
     private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID userId, TableOrder target) {
@@ -39,6 +37,10 @@ public class TableOrderPermissionEvaluator {
         } catch (NullPointerException e) {
             log.error("Null pointer while evaluating canRead for TableOrder userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid order structure");
+        }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting read access to order", userId, tenantId);
+            return true;
         }
 
         List<Permission> result = permissionRepository.findAllByUserAndTableOrderHierarchy(
@@ -56,6 +58,10 @@ public class TableOrderPermissionEvaluator {
         UUID tableId = parent.getId();
         UUID shopId = parent.getShop().getId();
         UUID tenantId = parent.getTenantId();
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting create access to order", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndTableOrderHierarchy(
                 userId, PermissionAction.CREATE_TABLE_ORDER, null, tableId, shopId, tenantId);
@@ -77,6 +83,10 @@ public class TableOrderPermissionEvaluator {
         } catch (NullPointerException e) {
             log.error("Null pointer while evaluating canUpdate for TableOrder userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid order structure");
+        }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting update access to order", userId, tenantId);
+            return true;
         }
 
         List<Permission> result = permissionRepository.findAllByUserAndTableOrderHierarchy(
@@ -104,6 +114,10 @@ public class TableOrderPermissionEvaluator {
             log.error("Null pointer while evaluating canDelete for TableOrder userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid order structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting delete access to order", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndTableOrderHierarchy(
                 userId, PermissionAction.DELETE_TABLE_ORDER, orderId, tableId, shopId, tenantId);
@@ -113,13 +127,23 @@ public class TableOrderPermissionEvaluator {
     }
 
     public Specification<TableOrder> filterRead(UUID userId) {
-        log.trace("Creating filterRead specification for userId: {}", userId);
 
         boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_TABLE_ORDER)
                 || commonPermissionService.hasRootPermission(userId, PermissionAction.READ_SALE_HISTORY);
         if (hasRootPermission) {
             return Specification.unrestricted();
         }
+
+        boolean isAdminOnTenantRoot = commonPermissionService.isAdminOnTenantRoot(userId);
+        if (isAdminOnTenantRoot) {
+            return Specification.unrestricted();
+        }
+
+        UUID managingTenantId = commonPermissionService.getTenantIdIfTheUserIsAdminOnIt(userId);
+        if (managingTenantId != null) {
+            return (root, _, _) -> root.get("tenantId").equalTo(managingTenantId);
+        }
+        log.trace("Creating filterRead specification for userId: {}", userId);
 
         Set<UUID> permittedOrderIds = permittedFor(userId, PermissionTargetType.TABLE_ORDER);
         Set<UUID> permittedTableIds = permittedFor(userId, PermissionTargetType.SHOP_TABLE);

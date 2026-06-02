@@ -14,7 +14,7 @@ import org.zerp.sale.dto.menuitem.MenuItemUpdateDTO;
 import java.util.Comparator;
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
 public interface MenuItemMapper {
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "productLinks", ignore = true)

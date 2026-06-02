@@ -8,6 +8,7 @@ import org.zerp.common.entity.TenantRoot;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
+import org.zerp.common.permission.service.CommonPermissionService;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,14 +17,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PermittablePermissionEvaluator {
     private final PermissionRepository permissionRepository;
+    private final CommonPermissionService commonPermissionService;
 
     public <T> Specification<T> filterRead(UUID userId) {
-        // Check for TENANT_ROOT access
-        boolean hasRootAccess = permissionRepository.existsByUserAndTargetTypeAndActionAndTargetId(
-                userId, PermissionTargetType.TENANT_ROOT, PermissionAction.ADMIN, TenantRoot.ID);
-
-        if (hasRootAccess) {
+        boolean isAdminOnTenantRoot = commonPermissionService.isAdminOnTenantRoot(userId);
+        if (isAdminOnTenantRoot) {
             return Specification.unrestricted();
+        }
+
+        UUID managingTenantId = commonPermissionService.getTenantIdIfTheUserIsAdminOnIt(userId);
+        if (managingTenantId != null) {
+            return (root, _, _) -> {
+                if (root.getJavaType().equals(Tenant.class)) {
+                    return root.get("id").equalTo(managingTenantId);
+                }
+                return root.get("tenantId").equalTo(managingTenantId);
+            };
         }
 
         // Check for specific TENANT access

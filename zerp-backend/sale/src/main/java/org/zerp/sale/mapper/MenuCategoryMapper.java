@@ -8,7 +8,7 @@ import org.zerp.sale.dto.menucategory.MenuCategoryCreateDTO;
 import org.zerp.sale.dto.menucategory.MenuCategoryDTO;
 import org.zerp.sale.dto.menucategory.MenuCategoryUpdateDTO;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
 public interface MenuCategoryMapper {
     @Mapping(target = "menu", ignore = true)
     MenuCategory toEntity(MenuCategoryCreateDTO dto);

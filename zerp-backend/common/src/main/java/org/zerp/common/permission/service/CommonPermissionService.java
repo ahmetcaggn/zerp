@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.zerp.common.permission.entity.PermissionAction;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.repository.PermissionRepository;
+import org.zerp.common.util.header.CurrentTenantIdResolver;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +17,42 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CommonPermissionService {
     private final PermissionRepository permissionRepository;
+    private final CurrentTenantIdResolver currentTenantIdResolver;
+
+    public UUID getTenantIdIfTheUserIsAdminOnIt(UUID userId) {
+        log.trace("Checking if user {} is admin on any tenant", userId);
+        UUID tenantId = currentTenantIdResolver.resolve();
+        boolean isAdmin = permissionRepository.existsAdminByUserIdAndTenantId(userId, tenantId);
+        if (isAdmin) {
+            log.trace("User {} is admin on tenant {}, returning tenantId", userId, tenantId);
+            return tenantId;
+        }
+        log.trace("User {} is not admin on tenant {}, returning null", userId, tenantId);
+        return null;
+    }
+
+    public boolean isAdminOnTenant(UUID userId, UUID tenantId) {
+        log.trace("Checking if user {} is admin on tenant {}", userId, tenantId);
+        boolean isAdmin = permissionRepository.existsAdminByUserIdAndTenantId(userId, tenantId);
+        log.trace("isAdmin check for user {} on tenant {}: {}", userId, tenantId, isAdmin);
+        return isAdmin;
+    }
+
+    public boolean isAdminOnTenantRoot(UUID userId) {
+        log.trace("Checking if user {} is system admin on tenant root", userId);
+        boolean isSystemAdmin = permissionRepository.existsAdminByUserIdOnTenantRoot(userId);
+        log.trace("isAdmin check for user {} on tenant root: {}", userId, isSystemAdmin);
+        return isSystemAdmin;
+    }
+
+    public boolean isAdminAny(UUID userId, UUID tenantId) {
+        log.trace("Checking if tenant {} is admin", tenantId);
+        boolean isSystemAdmin = permissionRepository.existsAdminByUserIdOnTenantRoot(userId);
+        boolean isAdmin = permissionRepository.existsAdminByUserIdAndTenantId(userId, tenantId);
+        log.trace("isAdmin check for user {} on tenant {}: isSystemAdmin={}, isAdmin={}",
+                userId, tenantId, isSystemAdmin, isAdmin);
+        return isSystemAdmin || isAdmin;
+    }
 
     public boolean hasRootPermission(UUID userId, PermissionAction action) {
         log.trace("Checking root permission for userId: {}, action: {}", userId, action);

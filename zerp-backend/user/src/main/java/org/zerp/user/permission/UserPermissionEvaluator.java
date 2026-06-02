@@ -23,6 +23,11 @@ public class UserPermissionEvaluator {
     private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID requesterId, AppUser target) {
+        if (commonPermissionService.isAdminAny(requesterId, target.getTenantId())) {
+            log.debug("User {} is admin for tenant {}, granting read access to user {}",
+                    requesterId, target.getTenantId(), target.getId());
+            return true;
+        }
         List<Permission> permissions = permissionRepository.findAllByUserAndUserHierarchy(
                 requesterId,
                 PermissionAction.READ_USER,
@@ -37,6 +42,15 @@ public class UserPermissionEvaluator {
     }
 
     public Specification<AppUser> filterRead(UUID requesterId) {
+        boolean isAdminOnTenantRoot = commonPermissionService.isAdminOnTenantRoot(requesterId);
+        if (isAdminOnTenantRoot) {
+            return Specification.unrestricted();
+        }
+
+        UUID managingTenantId = commonPermissionService.getTenantIdIfTheUserIsAdminOnIt(requesterId);
+        if (managingTenantId != null) {
+            return (root, _, _) -> root.get("tenantId").equalTo(managingTenantId);
+        }
         Set<UUID> permittedUserIds = commonPermissionService.getAllPermitted(
                 requesterId, PermissionTargetType.USER, PermissionAction.READ_USER);
         Set<UUID> permittedTenantIds = commonPermissionService.getAllPermitted(

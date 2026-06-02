@@ -39,6 +39,10 @@ public class MenuCategoryPermissionEvaluator {
             log.error("Null pointer while evaluating canRead for MenuCategory userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid menu category structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting read access to category {}", userId, tenantId, categoryId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndMenuCategoryHierarchy(
                 userId, PermissionAction.READ_MENU_CATEGORY, categoryId, menuId, shopId, tenantId);
@@ -54,6 +58,11 @@ public class MenuCategoryPermissionEvaluator {
 
         log.trace("Checking canCreate permission - userId: {}, menuId: {}, tenantId: {}",
                 userId, menuId, tenantId);
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting create access to category for menu {}", userId, tenantId, menuId);
+            return true;
+        }
+
         List<Permission> result = permissionRepository.findAllByUserAndMenuCategoryHierarchy(
                 userId, PermissionAction.CREATE_MENU_CATEGORY,
                 null, menuId, shopId, tenantId);
@@ -75,6 +84,10 @@ public class MenuCategoryPermissionEvaluator {
         } catch (NullPointerException e) {
             log.error("Null pointer while evaluating canUpdate for MenuCategory userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid menu category structure");
+        }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting update access to category {}", userId, tenantId, categoryId);
+            return true;
         }
 
         List<Permission> result = permissionRepository.findAllByUserAndMenuCategoryHierarchy(
@@ -103,6 +116,10 @@ public class MenuCategoryPermissionEvaluator {
             log.error("Null pointer while evaluating canDelete for MenuCategory userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid menu category structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting delete access to category {}", userId, tenantId, categoryId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndMenuCategoryHierarchy(
                 userId, PermissionAction.DELETE_MENU_CATEGORY, categoryId, menuId, shopId, tenantId);
@@ -112,12 +129,22 @@ public class MenuCategoryPermissionEvaluator {
     }
 
     public Specification<MenuCategory> filterRead(UUID userId) {
-        log.trace("Creating filterRead specification for userId: {}", userId);
 
         boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_MENU_CATEGORY);
         if (hasRootPermission) {
             return Specification.unrestricted();
         }
+
+        boolean isAdminOnTenantRoot = commonPermissionService.isAdminOnTenantRoot(userId);
+        if (isAdminOnTenantRoot) {
+            return Specification.unrestricted();
+        }
+
+        UUID managingTenantId = commonPermissionService.getTenantIdIfTheUserIsAdminOnIt(userId);
+        if (managingTenantId != null) {
+            return (root, _, _) -> root.get("tenantId").equalTo(managingTenantId);
+        }
+        log.trace("Creating filterRead specification for userId: {}", userId);
 
         Set<UUID> permittedCategoryIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.MENU_CATEGORY, PermissionAction.READ_MENU_CATEGORY);

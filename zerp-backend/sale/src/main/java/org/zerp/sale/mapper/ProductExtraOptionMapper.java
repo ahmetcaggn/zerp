@@ -11,7 +11,7 @@ import org.zerp.sale.dto.productextraoption.ProductExtraOptionItemCreateDTO;
 import org.zerp.sale.dto.productextraoption.ProductExtraOptionItemDTO;
 import org.zerp.sale.dto.productextraoption.ProductExtraOptionUpdateDTO;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
 public interface ProductExtraOptionMapper {
     @Mapping(target = "product", ignore = true)
     @Mapping(target = "items", ignore = true)

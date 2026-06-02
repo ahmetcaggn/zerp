@@ -21,8 +21,7 @@ import java.util.UUID;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class StockResourcePermissionEvaluator {
-    private final PermissionRepository permissionRepository;
+public class StockResourcePermissionEvaluator {    private final PermissionRepository permissionRepository;
     private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID userId, StockResource target) {
@@ -40,6 +39,10 @@ public class StockResourcePermissionEvaluator {
 
         log.trace("Checking canRead permission - userId: {}, stockResourceId: {}, tenantId: {}",
                 userId, stockResourceId, tenantId);
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting read access to stock resource", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndStockResourceHierarchy(
                 userId,
@@ -58,7 +61,10 @@ public class StockResourcePermissionEvaluator {
     public boolean canCreate(UUID userId, Shop parent) {
         log.trace("Checking canCreate permission - userId: {}, shopId: {}, tenantId: {}",
                 userId, parent.getId(), parent.getTenantId());
-
+        if (commonPermissionService.isAdminAny(userId, parent.getTenantId())) {
+            log.debug("User {} is admin for tenant {}, granting create access to stock resource", userId, parent.getTenantId());
+            return true;
+        }
         List<Permission> result = permissionRepository.findAllByUserAndStockResourceHierarchy(
                 userId,
                 PermissionAction.CREATE_STOCK_RESOURCE,
@@ -88,6 +94,10 @@ public class StockResourcePermissionEvaluator {
 
         log.trace("Checking canUpdate permission - userId: {}, stockResourceId: {}, shopId: {}, tenantId: {}",
                 userId, stockResourceId, shopId, tenantId);
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting update access to stock resource", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndStockResourceHierarchy(
                 userId,
@@ -118,6 +128,10 @@ public class StockResourcePermissionEvaluator {
 
         log.trace("Checking canPatch permission - userId: {}, stockResourceId: {}, shopId: {}, tenantId: {}",
                 userId, stockResourceId, shopId, tenantId);
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting patch access to stock resource", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndStockResourceHierarchy(
                 userId,
@@ -148,6 +162,10 @@ public class StockResourcePermissionEvaluator {
 
         log.trace("Checking canDelete permission - userId: {}, stockResourceId: {}, shopId: {}, tenantId: {}",
                 userId, stockResourceId, shopId, tenantId);
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting delete access to stock resource", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndStockResourceHierarchy(
                 userId,
@@ -164,13 +182,23 @@ public class StockResourcePermissionEvaluator {
     }
 
     public Specification<StockResource> filterRead(UUID userId) {
-        log.trace("Creating filterRead specification for userId: {}", userId);
 
         boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_STOCK_RESOURCE);
         if (hasRootPermission) {
             log.debug("User {} has root permission for READ_STOCK_RESOURCE, returning unrestricted specification", userId);
             return Specification.unrestricted();
         }
+
+        boolean isAdminOnTenantRoot = commonPermissionService.isAdminOnTenantRoot(userId);
+        if (isAdminOnTenantRoot) {
+            return Specification.unrestricted();
+        }
+
+        UUID managingTenantId = commonPermissionService.getTenantIdIfTheUserIsAdminOnIt(userId);
+        if (managingTenantId != null) {
+            return (root, _, _) -> root.get("tenantId").equalTo(managingTenantId);
+        }
+        log.trace("Creating filterRead specification for userId: {}", userId);
 
         Set<UUID> permittedStockResourceIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.STOCK_RESOURCE, PermissionAction.READ_STOCK_RESOURCE);

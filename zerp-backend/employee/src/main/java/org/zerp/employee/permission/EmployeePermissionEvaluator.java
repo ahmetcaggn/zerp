@@ -32,6 +32,10 @@ public class EmployeePermissionEvaluator {
 
         UUID tenantId = employee.getTenantId();
         UUID employeeId = employee.getId();
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting read access to employee", userId, tenantId);
+            return true;
+        }
 
         return hasRootReadScope(userId)
                 || hasTenantPermission(userId, PermissionAction.READ_EMPLOYEE, tenantId)
@@ -46,6 +50,11 @@ public class EmployeePermissionEvaluator {
     }
 
 	public boolean canCreate(UUID userId, UUID tenantId) {
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting create access to employee", userId, tenantId);
+            return true;
+        }
+
 		List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(
 				userId,
 				PermissionAction.CREATE_EMPLOYEE,
@@ -60,6 +69,10 @@ public class EmployeePermissionEvaluator {
     }
 
     public boolean canUpdate(UUID userId, Employee employee) {
+        if (commonPermissionService.isAdminAny(userId, employee.getTenantId())) {
+            log.debug("User {} is admin for tenant {}, granting update access to employee", userId, employee.getTenantId());
+            return true;
+        }
 		List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(
 				userId,
 				PermissionAction.UPDATE_EMPLOYEE,
@@ -74,6 +87,10 @@ public class EmployeePermissionEvaluator {
 	}
 
 	public boolean canDelete(UUID userId, Employee target) {
+        if (commonPermissionService.isAdminAny(userId, target.getTenantId())) {
+            log.debug("User {} is admin for tenant {}, granting delete access to employee", userId, target.getTenantId());
+            return true;
+        }
 		List<Permission> result = permissionRepository.findAllByUserAndEmployeeHierarchy(
 				userId,
 				PermissionAction.DELETE_EMPLOYEE,
@@ -86,6 +103,16 @@ public class EmployeePermissionEvaluator {
 	public Specification<Employee> filterRead(UUID userId) {
         if (hasRootReadScope(userId)) {
             return Specification.unrestricted();
+        }
+
+        boolean isAdminOnTenantRoot = commonPermissionService.isAdminOnTenantRoot(userId);
+        if (isAdminOnTenantRoot) {
+            return Specification.unrestricted();
+        }
+
+        UUID managingTenantId = commonPermissionService.getTenantIdIfTheUserIsAdminOnIt(userId);
+        if (managingTenantId != null) {
+            return (root, _, _) -> root.get("tenantId").equalTo(managingTenantId);
         }
 
         Set<UUID> permittedEmployeeIds = collectReadableEmployeeIds(userId);

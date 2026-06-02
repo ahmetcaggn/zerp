@@ -11,7 +11,7 @@ import org.zerp.sale.dto.productrecipe.ProductRecipeItemCreateDTO;
 import org.zerp.sale.dto.productrecipe.ProductRecipeItemDTO;
 import org.zerp.sale.dto.productrecipe.ProductRecipeUpdateDTO;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
 public interface ProductRecipeMapper {
     @Mapping(target = "product", ignore = true)
     @Mapping(target = "items", ignore = true)

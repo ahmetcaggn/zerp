@@ -8,7 +8,7 @@ import org.zerp.sale.dto.product.ProductCreateDTO;
 import org.zerp.sale.dto.product.ProductDTO;
 import org.zerp.sale.dto.product.ProductUpdateDTO;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
 public interface ProductMapper {
     @Mapping(target = "shop", ignore = true)
     @Mapping(target = "type", ignore = true)

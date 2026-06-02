@@ -21,8 +21,7 @@ import java.util.UUID;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class ProductExtraOptionPermissionEvaluator {
-    private final PermissionRepository permissionRepository;
+public class ProductExtraOptionPermissionEvaluator {    private final PermissionRepository permissionRepository;
     private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID userId, ProductExtraOption target) {
@@ -39,6 +38,10 @@ public class ProductExtraOptionPermissionEvaluator {
             log.error("Null pointer while evaluating canRead for ProductExtraOption userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid product extra option structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting read access to extra option", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndProductExtraOptionHierarchy(
                 userId, PermissionAction.READ_PRODUCT_EXTRA_OPTION, extraOptionId, productId, shopId, tenantId);
@@ -53,6 +56,11 @@ public class ProductExtraOptionPermissionEvaluator {
         UUID tenantId = product.getTenantId();
 
         log.trace("Checking canCreate permission - userId: {}, productId: {}, tenantId: {}", userId, productId, tenantId);
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting create access to extra option", userId, tenantId);
+            return true;
+        }
+
         List<Permission> result = permissionRepository.findAllByUserAndProductExtraOptionHierarchy(
                 userId, PermissionAction.CREATE_PRODUCT_EXTRA_OPTION, null, productId, shopId, tenantId);
         boolean canCreate = !result.isEmpty();
@@ -73,6 +81,10 @@ public class ProductExtraOptionPermissionEvaluator {
         } catch (NullPointerException e) {
             log.error("Null pointer while evaluating canUpdate for ProductExtraOption userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid product extra option structure");
+        }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting update access to extra option", userId, tenantId);
+            return true;
         }
 
         List<Permission> result = permissionRepository.findAllByUserAndProductExtraOptionHierarchy(
@@ -98,6 +110,10 @@ public class ProductExtraOptionPermissionEvaluator {
             log.error("Null pointer while evaluating canDelete for ProductExtraOption userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid product extra option structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting delete access to extra option", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndProductExtraOptionHierarchy(
                 userId, PermissionAction.DELETE_PRODUCT_EXTRA_OPTION, extraOptionId, productId, shopId, tenantId);
@@ -108,6 +124,16 @@ public class ProductExtraOptionPermissionEvaluator {
         boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_PRODUCT_EXTRA_OPTION);
         if (hasRootPermission) {
             return Specification.unrestricted();
+        }
+
+        boolean isAdminOnTenantRoot = commonPermissionService.isAdminOnTenantRoot(userId);
+        if (isAdminOnTenantRoot) {
+            return Specification.unrestricted();
+        }
+
+        UUID managingTenantId = commonPermissionService.getTenantIdIfTheUserIsAdminOnIt(userId);
+        if (managingTenantId != null) {
+            return (root, _, _) -> root.get("tenantId").equalTo(managingTenantId);
         }
 
         Set<UUID> permittedExtraOptionIds = commonPermissionService.getAllPermitted(

@@ -21,8 +21,7 @@ import java.util.UUID;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class StockCountPermissionEvaluator {
-    private final PermissionRepository permissionRepository;
+public class StockCountPermissionEvaluator {    private final PermissionRepository permissionRepository;
     private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID userId, StockCount target) {
@@ -37,6 +36,10 @@ public class StockCountPermissionEvaluator {
             log.error("Null pointer while evaluating canRead for StockCount userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid stock count structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting read access to stock count", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndStockCountHierarchy(
                 userId, PermissionAction.READ_STOCK_COUNT, stockCountId, shopId, tenantId);
@@ -50,6 +53,11 @@ public class StockCountPermissionEvaluator {
         UUID tenantId = parent.getTenantId();
 
         log.trace("Checking canCreate permission - userId: {}, shopId: {}, tenantId: {}", userId, shopId, tenantId);
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting create access to stock count", userId, tenantId);
+            return true;
+        }
+
         List<Permission> result = permissionRepository.findAllByUserAndStockCountHierarchy(
                 userId, PermissionAction.CREATE_STOCK_COUNT, null, shopId, tenantId);
         boolean canCreate = !result.isEmpty();
@@ -68,6 +76,10 @@ public class StockCountPermissionEvaluator {
         } catch (NullPointerException e) {
             log.error("Null pointer while evaluating canUpdate for StockCount userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid stock count structure");
+        }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting update access to stock count", userId, tenantId);
+            return true;
         }
 
         List<Permission> result = permissionRepository.findAllByUserAndStockCountHierarchy(
@@ -93,6 +105,10 @@ public class StockCountPermissionEvaluator {
             log.error("Null pointer while evaluating canApprove for StockCount userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid stock count structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting approve access to stock count", userId, tenantId);
+            return true;
+        }
 
         List<Permission> approveResult = permissionRepository.findAllByUserAndStockCountHierarchy(
                 userId, PermissionAction.APPROVE_STOCK_COUNT, stockCountId, shopId, tenantId);
@@ -116,6 +132,10 @@ public class StockCountPermissionEvaluator {
             log.error("Null pointer while evaluating canDelete for StockCount userId={}", userId, e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid stock count structure");
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting delete access to stock count", userId, tenantId);
+            return true;
+        }
 
         List<Permission> result = permissionRepository.findAllByUserAndStockCountHierarchy(
                 userId, PermissionAction.DELETE_STOCK_COUNT, stockCountId, shopId, tenantId);
@@ -125,12 +145,22 @@ public class StockCountPermissionEvaluator {
     }
 
     public Specification<StockCount> filterRead(UUID userId) {
-        log.trace("Creating filterRead specification for userId: {}", userId);
 
         boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_STOCK_COUNT);
         if (hasRootPermission) {
             return Specification.unrestricted();
         }
+
+        boolean isAdminOnTenantRoot = commonPermissionService.isAdminOnTenantRoot(userId);
+        if (isAdminOnTenantRoot) {
+            return Specification.unrestricted();
+        }
+
+        UUID managingTenantId = commonPermissionService.getTenantIdIfTheUserIsAdminOnIt(userId);
+        if (managingTenantId != null) {
+            return (root, _, _) -> root.get("tenantId").equalTo(managingTenantId);
+        }
+        log.trace("Creating filterRead specification for userId: {}", userId);
 
         Set<UUID> permittedStockCountIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.STOCK_COUNT, PermissionAction.READ_STOCK_COUNT);

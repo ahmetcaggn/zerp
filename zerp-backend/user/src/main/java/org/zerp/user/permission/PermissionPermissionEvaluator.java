@@ -44,6 +44,7 @@ public class PermissionPermissionEvaluator {
                 hasReadPermissionOnUser(userId, target.getUserId());
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean canCreate(UUID userId, Permission target) {
         log.debug("Checking if user {} can create permission for user {}",
                 userId, target.getUserId());
@@ -107,6 +108,7 @@ public class PermissionPermissionEvaluator {
         return Specification.anyOf(ownPermissions, grantedPermissions, grantedTenantPermissions);
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean canReadPermissionActions(UUID userId) {
         return isAdminTenant(userId, tenantIdResolver.resolve()) || isAdminTenantOnRoot(userId);
     }
@@ -170,12 +172,7 @@ public class PermissionPermissionEvaluator {
     }
 
     private boolean isAdminTenant(UUID userId, UUID tenantId) {
-        return permissionRepository.existsByUserAndTargetTypeAndActionAndTargetId(
-                userId,
-                PermissionTargetType.TENANT,
-                PermissionAction.ADMIN,
-                tenantId
-        );
+        return commonPermissionService.isAdminAny(userId, tenantId);
     }
 
     private boolean hasReadPermissionOnUser(UUID requesterId, UUID permissionUserId) {

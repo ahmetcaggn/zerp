@@ -13,7 +13,7 @@ import org.zerp.employee.dtos.response.ManagerDto;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
 public interface EmployeeMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "manager", ignore = true)

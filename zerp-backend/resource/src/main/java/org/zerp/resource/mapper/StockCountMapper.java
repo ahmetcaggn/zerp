@@ -8,7 +8,7 @@ import org.zerp.resource.dto.stockcount.StockCountCreateDTO;
 import org.zerp.resource.dto.stockcount.StockCountDTO;
 import org.zerp.resource.dto.stockcount.StockCountItemDTO;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
 public interface StockCountMapper {
     @Mapping(target = "shop", ignore = true)
     StockCount toEntity(StockCountCreateDTO dto);

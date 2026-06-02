@@ -8,7 +8,7 @@ import org.zerp.resource.dto.resource.StockResourceCreateDTO;
 import org.zerp.resource.dto.resource.StockResourceDTO;
 import org.zerp.resource.dto.resource.StockResourceUpdateDTO;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
 public interface StockResourceMapper {
     @Mapping(target = "shop", ignore = true)
     StockResource toEntity(StockResourceCreateDTO dto);

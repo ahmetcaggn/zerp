@@ -13,6 +13,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 @Component
 @RequiredArgsConstructor
 public class AdminShopPermissionEvaluator {
@@ -22,6 +25,16 @@ public class AdminShopPermissionEvaluator {
     public Specification<Shop> filterRead(UUID userId) {
         if (hasRootReadScope(userId)) {
             return Specification.unrestricted();
+        }
+
+        boolean isAdminOnTenantRoot = commonPermissionService.isAdminOnTenantRoot(userId);
+        if (isAdminOnTenantRoot) {
+            return Specification.unrestricted();
+        }
+
+        UUID managingTenantId = commonPermissionService.getTenantIdIfTheUserIsAdminOnIt(userId);
+        if (managingTenantId != null) {
+            return (root, _, _) -> root.get("tenantId").equalTo(managingTenantId);
         }
 
         Set<UUID> permittedShopIds = new HashSet<>(commonPermissionService.getAllPermitted(
@@ -55,6 +68,10 @@ public class AdminShopPermissionEvaluator {
 
         UUID tenantId = shop.getTenantId();
         UUID shopId = shop.getId();
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting read access to shop {}", userId, tenantId, shopId);
+            return true;
+        }
 
         return hasRootReadScope(userId)
                 || hasTenantPermission(userId, PermissionAction.READ_TENANT, tenantId)
@@ -67,16 +84,31 @@ public class AdminShopPermissionEvaluator {
         if (tenantId == null) {
             return false;
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting create access", userId, tenantId);
+            return true;
+        }
+
         return hasRootWriteScope(userId)
                 || hasTenantPermission(userId, PermissionAction.UPDATE_TENANT, tenantId)
                 || hasTenantPermission(userId, PermissionAction.ADMIN, tenantId);
     }
 
     public boolean canUpdate(UUID userId, UUID tenantId) {
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting update access", userId, tenantId);
+            return true;
+        }
+
         return canCreate(userId, tenantId);
     }
 
     public boolean canPatch(UUID userId, UUID tenantId) {
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting patch access", userId, tenantId);
+            return true;
+        }
+
         return canUpdate(userId, tenantId);
     }
 
@@ -84,6 +116,11 @@ public class AdminShopPermissionEvaluator {
         if (tenantId == null) {
             return false;
         }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting delete access", userId, tenantId);
+            return true;
+        }
+
         return hasRootAdmin(userId)
                 || hasTenantPermission(userId, PermissionAction.ADMIN, tenantId);
     }

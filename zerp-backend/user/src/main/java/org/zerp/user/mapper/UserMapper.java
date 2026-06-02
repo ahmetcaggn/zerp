@@ -9,7 +9,7 @@ import org.zerp.user.dto.UserResponseDTO;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
 public interface UserMapper {
     /**
      * Convert AppUser entity to UserCheckResponseDTO
