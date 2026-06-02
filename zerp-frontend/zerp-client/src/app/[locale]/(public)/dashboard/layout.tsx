@@ -1,7 +1,15 @@
-import { Container } from '@mui/material'
-
-import { responsivePageSx } from '@/core/theme/layout'
+import { Box } from '@mui/material'
 
 export default function PublicDashboardLayout({ children }: { children: React.ReactNode }) {
-  return <Container sx={responsivePageSx.protectedContainer}>{children}</Container>
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      {children}
+    </Box>
+  )
 }
