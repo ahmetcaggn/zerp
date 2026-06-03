@@ -19,6 +19,7 @@ import org.zerp.common.dto.user.ImageSize;
 import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.sale.MenuLanguage;
 import org.zerp.common.entity.sale.ShopCuisineCategory;
+import org.zerp.common.entity.sale.ShopWorkingHour;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentUserIdResolver;
@@ -27,12 +28,18 @@ import org.zerp.s3repository.repository.S3ImageRepository;
 import org.zerp.sale.dto.shop.ShopImageContentResponseDTO;
 import org.zerp.sale.dto.shop.ShopDTO;
 import org.zerp.sale.dto.shop.ShopImageUploadResponseDTO;
+import org.zerp.sale.dto.shop.ShopWorkingHourDTO;
 import org.zerp.sale.feign.ThumborFeignClient;
 import org.zerp.sale.permission.ShopPermissionEvaluator;
 import org.zerp.sale.repository.ShopRepository;
 
 import java.io.IOException;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -264,6 +271,9 @@ public class ShopService implements IResourceService<ShopDTO, ShopDTO, Void, Voi
         if (fields.containsKey("cuisineCategories")) {
             shop.setCuisineCategories(resolveCuisineCategories(fields.get("cuisineCategories")));
         }
+        if (fields.containsKey("workingHours")) {
+            shop.setWorkingHours(resolveWorkingHours(fields.get("workingHours")));
+        }
         if (fields.containsKey("defaultMenuLanguage")) {
             shop.setDefaultMenuLanguage(resolveMenuLanguage(fields.get("defaultMenuLanguage")));
         }
@@ -286,6 +296,7 @@ public class ShopService implements IResourceService<ShopDTO, ShopDTO, Void, Voi
         dto.setLatitude(shop.getLatitude());
         dto.setLongitude(shop.getLongitude());
         dto.setCuisineCategories(shop.getCuisineCategories() == null ? Set.of() : Set.copyOf(shop.getCuisineCategories()));
+        dto.setWorkingHours(toWorkingHourDTOs(shop.getWorkingHours()));
         dto.setDefaultMenuLanguage(shop.getDefaultMenuLanguage());
         dto.setTenantId(shop.getTenantId());
         return dto;
@@ -440,6 +451,113 @@ public class ShopService implements IResourceService<ShopDTO, ShopDTO, Void, Voi
         } catch (IllegalArgumentException ignored) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported cuisine category: " + rawValue);
         }
+    }
+
+    private Set<ShopWorkingHour> resolveWorkingHours(Object rawValue) {
+        if (rawValue == null) {
+            return new LinkedHashSet<>();
+        }
+        if (!(rawValue instanceof Collection<?> values)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "workingHours must be an array");
+        }
+
+        Set<DayOfWeek> seenDays = EnumSet.noneOf(DayOfWeek.class);
+        Set<ShopWorkingHour> resolved = new LinkedHashSet<>();
+        for (Object value : values) {
+            if (!(value instanceof Map<?, ?> item)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "workingHours items must be objects");
+            }
+
+            DayOfWeek dayOfWeek = resolveDayOfWeek(item.get("dayOfWeek"));
+            if (!seenDays.add(dayOfWeek)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate workingHours day: " + dayOfWeek);
+            }
+
+            LocalTime opensAt = resolveLocalTime(item.get("opensAt"), "opensAt");
+            LocalTime closesAt = resolveLocalTime(item.get("closesAt"), "closesAt");
+            boolean openAllDay = booleanValueOrFalse(item.get("openAllDay"));
+            if (!openAllDay && !opensAt.isBefore(closesAt)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "opensAt must be before closesAt");
+            }
+
+            ShopWorkingHour workingHour = new ShopWorkingHour();
+            workingHour.setDayOfWeek(dayOfWeek);
+            workingHour.setOpensAt(opensAt);
+            workingHour.setClosesAt(closesAt);
+            workingHour.setOpenAllDay(openAllDay);
+            resolved.add(workingHour);
+        }
+
+        if (seenDays.size() != DayOfWeek.values().length) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "workingHours must include all 7 days");
+        }
+
+        return resolved;
+    }
+
+    private DayOfWeek resolveDayOfWeek(Object rawValue) {
+        if (rawValue instanceof DayOfWeek dayOfWeek) {
+            return dayOfWeek;
+        }
+
+        String normalized = normalizeNullable(stringValueOrNull(rawValue));
+        if (normalized == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "dayOfWeek is required");
+        }
+
+        try {
+            return DayOfWeek.valueOf(normalized.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ignored) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported dayOfWeek: " + rawValue);
+        }
+    }
+
+    private LocalTime resolveLocalTime(Object rawValue, String fieldName) {
+        if (rawValue instanceof LocalTime localTime) {
+            return localTime;
+        }
+
+        String normalized = normalizeNullable(stringValueOrNull(rawValue));
+        if (normalized == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, fieldName + " is required");
+        }
+
+        try {
+            return LocalTime.parse(normalized);
+        } catch (DateTimeParseException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, fieldName + " must be HH:mm", ex);
+        }
+    }
+
+    private List<ShopWorkingHourDTO> toWorkingHourDTOs(Set<ShopWorkingHour> workingHours) {
+        if (workingHours == null || workingHours.isEmpty()) {
+            return List.of();
+        }
+
+        return workingHours.stream()
+                .sorted(Comparator.comparing(ShopWorkingHour::getDayOfWeek))
+                .map(this::toWorkingHourDTO)
+                .toList();
+    }
+
+    private ShopWorkingHourDTO toWorkingHourDTO(ShopWorkingHour workingHour) {
+        ShopWorkingHourDTO dto = new ShopWorkingHourDTO();
+        dto.setDayOfWeek(workingHour.getDayOfWeek());
+        dto.setOpensAt(workingHour.getOpensAt());
+        dto.setClosesAt(workingHour.getClosesAt());
+        dto.setOpenAllDay(workingHour.isOpenAllDay());
+        return dto;
+    }
+
+    private boolean booleanValueOrFalse(Object value) {
+        if (value instanceof Boolean bool) {
+            return bool;
+        }
+        if (value == null) {
+            return false;
+        }
+
+        return Boolean.parseBoolean(String.valueOf(value));
     }
 
     private String resolveContentType(MultipartFile file) {

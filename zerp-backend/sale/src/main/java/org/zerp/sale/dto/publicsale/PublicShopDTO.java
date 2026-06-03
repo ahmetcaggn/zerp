@@ -2,7 +2,9 @@ package org.zerp.sale.dto.publicsale;
 
 import lombok.Data;
 import org.zerp.common.entity.sale.ShopCuisineCategory;
+import org.zerp.sale.dto.shop.ShopWorkingHourDTO;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,5 +27,6 @@ public class PublicShopDTO {
     private Double latitude;
     private Double longitude;
     private Set<ShopCuisineCategory> cuisineCategories;
+    private List<ShopWorkingHourDTO> workingHours;
     private Double distanceKm;
 }

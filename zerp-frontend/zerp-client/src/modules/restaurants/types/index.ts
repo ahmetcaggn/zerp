@@ -1,6 +1,21 @@
 import type { CuisineCategory } from '../data/cuisine-categories'
 
 export type MenuLanguage = 'TR' | 'EN'
+export type ShopDayOfWeek =
+  | 'MONDAY'
+  | 'TUESDAY'
+  | 'WEDNESDAY'
+  | 'THURSDAY'
+  | 'FRIDAY'
+  | 'SATURDAY'
+  | 'SUNDAY'
+
+export interface ShopWorkingHourDto {
+  dayOfWeek: ShopDayOfWeek
+  opensAt: string
+  closesAt: string
+  openAllDay?: boolean
+}
 
 export interface Product {
   id: string
@@ -53,6 +68,7 @@ export interface PublicShopDto {
   longitude?: number | null
   distanceKm?: number | null
   cuisineCategories?: CuisineCategory[]
+  workingHours?: ShopWorkingHourDto[]
 }
 
 export interface PublicNearbyShopsParams {
@@ -74,6 +90,7 @@ export interface PublicShopsFeedParams {
   city?: string
   state?: string
   cuisineCategory?: CuisineCategory
+  cuisineCategories?: CuisineCategory[]
   sortBy?: PublicShopFeedSortBy
   order?: PublicShopFeedOrder
   lat?: number

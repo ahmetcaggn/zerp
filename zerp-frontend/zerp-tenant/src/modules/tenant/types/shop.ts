@@ -1,6 +1,21 @@
 import type { CuisineCategory } from '../data/cuisine-categories'
 
 export type MenuLanguage = 'TR' | 'EN'
+export type ShopDayOfWeek =
+  | 'MONDAY'
+  | 'TUESDAY'
+  | 'WEDNESDAY'
+  | 'THURSDAY'
+  | 'FRIDAY'
+  | 'SATURDAY'
+  | 'SUNDAY'
+
+export interface ShopWorkingHourDto {
+  dayOfWeek: ShopDayOfWeek
+  opensAt: string
+  closesAt: string
+  openAllDay: boolean
+}
 
 export interface ShopResponseDto {
   id: string
@@ -18,6 +33,7 @@ export interface ShopResponseDto {
   latitude?: number
   longitude?: number
   cuisineCategories?: CuisineCategory[]
+  workingHours?: ShopWorkingHourDto[]
   defaultMenuLanguage: MenuLanguage
   tenantId: string
 }
@@ -43,6 +59,7 @@ export interface PatchShopRequestDto {
   latitude?: number | null
   longitude?: number | null
   cuisineCategories?: CuisineCategory[]
+  workingHours?: ShopWorkingHourDto[]
   defaultMenuLanguage?: MenuLanguage
 }
 

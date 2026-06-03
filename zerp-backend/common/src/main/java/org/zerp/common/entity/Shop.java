@@ -24,6 +24,7 @@ import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.entity.sale.MenuLanguage;
 import org.zerp.common.entity.sale.ShopCuisineCategory;
 import org.zerp.common.entity.sale.ShopTable;
+import org.zerp.common.entity.sale.ShopWorkingHour;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 import org.zerp.common.permission.entity.Permittable;
@@ -70,6 +71,10 @@ public class Shop extends BaseEntity implements Permittable {
     @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)
     private Set<ShopCuisineCategory> cuisineCategories = new LinkedHashSet<>();
+
+    @ElementCollection
+    @CollectionTable(name = "shop_working_hours", joinColumns = @JoinColumn(name = "shop_id"))
+    private Set<ShopWorkingHour> workingHours = new LinkedHashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -4,6 +4,7 @@ import lombok.Data;
 import org.zerp.common.entity.sale.MenuLanguage;
 import org.zerp.common.entity.sale.ShopCuisineCategory;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -24,6 +25,7 @@ public class ShopDTO {
     private Double latitude;
     private Double longitude;
     private Set<ShopCuisineCategory> cuisineCategories;
+    private List<ShopWorkingHourDTO> workingHours;
     private MenuLanguage defaultMenuLanguage;
     private UUID tenantId;
 }

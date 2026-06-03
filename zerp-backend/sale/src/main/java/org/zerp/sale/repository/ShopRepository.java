@@ -59,16 +59,28 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
             Pageable pageable
     );
 
-    @Query("""
-            SELECT s
+    @Query(value = """
+            SELECT DISTINCT s
             FROM Shop s
+            LEFT JOIN s.cuisineCategories cuisineCategory
             WHERE (:applyQuery = FALSE
                 OR LOWER(s.name) LIKE CONCAT('%', :q, '%')
                 OR LOWER(COALESCE(s.description, '')) LIKE CONCAT('%', :q, '%'))
               AND (:applyCity = FALSE OR LOWER(COALESCE(s.city, '')) = :city)
               AND (:applyState = FALSE OR LOWER(COALESCE(s.state, '')) = :state)
-              AND (:applyCuisineCategory = FALSE OR :cuisineCategory MEMBER OF s.cuisineCategories)
-            """)
+              AND (:applyCuisineCategories = FALSE OR cuisineCategory IN (:cuisineCategories))
+            """,
+            countQuery = """
+                    SELECT COUNT(DISTINCT s)
+                    FROM Shop s
+                    LEFT JOIN s.cuisineCategories cuisineCategory
+                    WHERE (:applyQuery = FALSE
+                        OR LOWER(s.name) LIKE CONCAT('%', :q, '%')
+                        OR LOWER(COALESCE(s.description, '')) LIKE CONCAT('%', :q, '%'))
+                      AND (:applyCity = FALSE OR LOWER(COALESCE(s.city, '')) = :city)
+                      AND (:applyState = FALSE OR LOWER(COALESCE(s.state, '')) = :state)
+                      AND (:applyCuisineCategories = FALSE OR cuisineCategory IN (:cuisineCategories))
+                    """)
     Page<Shop> findPublicShopsFeedAll(
             @Param("applyQuery") boolean applyQuery,
             @Param("q") String q,
@@ -76,8 +88,8 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
             @Param("city") String city,
             @Param("applyState") boolean applyState,
             @Param("state") String state,
-            @Param("applyCuisineCategory") boolean applyCuisineCategory,
-            @Param("cuisineCategory") ShopCuisineCategory cuisineCategory,
+            @Param("applyCuisineCategories") boolean applyCuisineCategories,
+            @Param("cuisineCategories") List<ShopCuisineCategory> cuisineCategories,
             Pageable pageable
     );
 
@@ -90,11 +102,11 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
               AND (:applyQuery = false
                 OR LOWER(s.name) LIKE CONCAT('%', :q, '%')
                 OR LOWER(COALESCE(s.description, '')) LIKE CONCAT('%', :q, '%'))
-              AND (:applyCuisineCategory = false OR EXISTS (
+              AND (:applyCuisineCategories = false OR EXISTS (
                 SELECT 1
                 FROM shop_cuisine_categories scc
                 WHERE scc.shop_id = s.id
-                  AND scc.category = :cuisineCategory
+                  AND scc.category IN (:cuisineCategories)
               ))
             ORDER BY (
                 6371 * acos(
@@ -113,11 +125,11 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
                       AND (:applyQuery = false
                         OR LOWER(s.name) LIKE CONCAT('%', :q, '%')
                         OR LOWER(COALESCE(s.description, '')) LIKE CONCAT('%', :q, '%'))
-                      AND (:applyCuisineCategory = false OR EXISTS (
+                      AND (:applyCuisineCategories = false OR EXISTS (
                         SELECT 1
                         FROM shop_cuisine_categories scc
                         WHERE scc.shop_id = s.id
-                          AND scc.category = :cuisineCategory
+                          AND scc.category IN (:cuisineCategories)
                       ))
                     """,
             nativeQuery = true)
@@ -126,8 +138,8 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
             @Param("longitude") double longitude,
             @Param("applyQuery") boolean applyQuery,
             @Param("q") String q,
-            @Param("applyCuisineCategory") boolean applyCuisineCategory,
-            @Param("cuisineCategory") String cuisineCategory,
+            @Param("applyCuisineCategories") boolean applyCuisineCategories,
+            @Param("cuisineCategories") List<String> cuisineCategories,
             Pageable pageable
     );
 
@@ -140,11 +152,11 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
               AND (:applyQuery = false
                 OR LOWER(s.name) LIKE CONCAT('%', :q, '%')
                 OR LOWER(COALESCE(s.description, '')) LIKE CONCAT('%', :q, '%'))
-              AND (:applyCuisineCategory = false OR EXISTS (
+              AND (:applyCuisineCategories = false OR EXISTS (
                 SELECT 1
                 FROM shop_cuisine_categories scc
                 WHERE scc.shop_id = s.id
-                  AND scc.category = :cuisineCategory
+                  AND scc.category IN (:cuisineCategories)
               ))
             ORDER BY (
                 6371 * acos(
@@ -163,11 +175,11 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
                       AND (:applyQuery = false
                         OR LOWER(s.name) LIKE CONCAT('%', :q, '%')
                         OR LOWER(COALESCE(s.description, '')) LIKE CONCAT('%', :q, '%'))
-                      AND (:applyCuisineCategory = false OR EXISTS (
+                      AND (:applyCuisineCategories = false OR EXISTS (
                         SELECT 1
                         FROM shop_cuisine_categories scc
                         WHERE scc.shop_id = s.id
-                          AND scc.category = :cuisineCategory
+                          AND scc.category IN (:cuisineCategories)
                       ))
                     """,
             nativeQuery = true)
@@ -176,8 +188,8 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
             @Param("longitude") double longitude,
             @Param("applyQuery") boolean applyQuery,
             @Param("q") String q,
-            @Param("applyCuisineCategory") boolean applyCuisineCategory,
-            @Param("cuisineCategory") String cuisineCategory,
+            @Param("applyCuisineCategories") boolean applyCuisineCategories,
+            @Param("cuisineCategories") List<String> cuisineCategories,
             Pageable pageable
     );
 }
