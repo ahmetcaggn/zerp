@@ -6,6 +6,7 @@ services:
       dockerfile: zerp-backend/docker/jre25.dockerfile
       args:
         SERVICE: eureka
+        EXPOSE_PORT: 8761
     container_name: zerp-eureka
     hostname: eureka
     environment:
