@@ -142,7 +142,6 @@
       "pay": "Pay Order",
       "qrImportSuccess": "Order imported successfully.",
       "qrImportError": "Failed to import order.",
-      "addProducts": "Add Products",
       "selectCategory": "Select Category",
       "noProducts": "No products found",
       "loadingProducts": "Loading products...",

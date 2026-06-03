@@ -3,14 +3,13 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:openapi_sale/api.dart';
 import 'package:zerp_tenant/feature/sale/table/cubit/cubit_tables.dart';
 import 'package:zerp_tenant/feature/sale/table/order/cubit/cubit_table_order.dart';
-import 'package:zerp_tenant/feature/sale/table/order/widget/cancel_order_confirm_dialog.dart';
+import 'package:zerp_tenant/feature/sale/table/order/widget/catalog_section.dart';
 import 'package:zerp_tenant/feature/sale/table/order/widget/discard_changes_confirm_dialog.dart';
-import 'package:zerp_tenant/feature/sale/table/order/widget/extra_option_select_dialog.dart';
-import 'package:zerp_tenant/feature/sale/table/order/widget/import_code_dialog.dart';
-import 'package:zerp_tenant/feature/sale/table/order/widget/order_item_list.dart';
+import 'package:zerp_tenant/feature/sale/table/order/widget/order_header.dart';
+import 'package:zerp_tenant/feature/sale/table/order/widget/order_section.dart';
+import 'package:zerp_tenant/feature/sale/table/order/widget/order_tab_bar.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
@@ -170,9 +169,6 @@ final class _Loaded extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categories = state.categories;
-    final menuItems = state.menuItems;
-    final selectedCategoryId = state.selectedCategoryId;
     final isSaving = state.isSaving;
     final isImporting = state.isImporting;
 
@@ -184,31 +180,12 @@ final class _Loaded extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _OrderTabBar(state: state, tableId: tableId),
+            OrderTabBar(state: state, tableId: tableId),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _OrderHeader(
-                    tableId: tableId,
-                    currentOrder: currentOrder,
-                  ),
-                  const SizedBox(height: 16),
-                  if (cartItems.isEmpty)
-                    _emptyCartIndicator(context)
-                  else
-                    _OrderSection(
-                      cartItems: cartItems,
-                      noteController: noteController,
-                    ),
-                  const Divider(height: 32),
-                  _CatalogSection(
-                    categories: categories,
-                    menuItems: menuItems,
-                    extraOptions: state.extraOptions,
-                    selectedCategoryId: selectedCategoryId,
-                  ),
-                ],
+              child: _Content(
+                tableId: tableId,
+                state: state,
+                noteController: noteController,
               ),
             ),
             _BottomSection(
@@ -227,6 +204,105 @@ final class _Loaded extends StatelessWidget {
       ],
     );
   }
+}
+
+final class _Content extends StatelessWidget {
+  const _Content({
+    required this.tableId,
+    required this.state,
+    required this.noteController,
+  });
+
+  final String tableId;
+  final StateTableOrderLoaded state;
+  final TextEditingController noteController;
+
+  @override
+  Widget build(BuildContext context) {
+    final categories = state.categories;
+    final menuItems = state.menuItems;
+    final selectedCategoryId = state.selectedCategoryId;
+
+    final currentOrder = state.currentOrder;
+    final cartItems = currentOrder.cartItems;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // two column
+        if (constraints.maxWidth > 720) {
+          return Row(
+            children: [
+              Expanded(
+                child: CatalogSection(
+                  categories: categories,
+                  menuItems: menuItems,
+                  extraOptions: state.extraOptions,
+                  selectedCategoryId: selectedCategoryId,
+                  scrollable: true,
+                ),
+              ),
+              Container(
+                width: 1,
+                color: Colors.grey.withValues(alpha: 0.2),
+              ),
+              SizedBox(
+                width: 360,
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeTop: true,
+                  child: ListView(
+                    children: [
+                      const SizedBox(height: 8),
+                      OrderHeader(
+                        tableId: tableId,
+                        currentOrder: currentOrder,
+                      ),
+                      if (cartItems.isEmpty)
+                        _emptyCartIndicator(context)
+                      else
+                        OrderSection(
+                          cartItems: cartItems,
+                          noteController: noteController,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+
+        // single column
+        return MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          child: ListView(
+            children: [
+              const SizedBox(height: 8),
+              CatalogSection(
+                categories: categories,
+                menuItems: menuItems,
+                extraOptions: state.extraOptions,
+                selectedCategoryId: selectedCategoryId,
+                scrollable: false,
+              ),
+              const Divider(height: 16),
+              OrderHeader(
+                tableId: tableId,
+                currentOrder: currentOrder,
+              ),
+              if (cartItems.isEmpty)
+                _emptyCartIndicator(context)
+              else
+                OrderSection(
+                  cartItems: cartItems,
+                  noteController: noteController,
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   Widget _emptyCartIndicator(BuildContext context) {
     return Padding(
@@ -240,394 +316,6 @@ final class _Loaded extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _OrderTabBar extends StatelessWidget {
-  const _OrderTabBar({required this.state, required this.tableId});
-
-  final StateTableOrderLoaded state;
-  final String tableId;
-
-  Future<void> _scanQrForNewOrder(BuildContext context) async {
-    final code = await ImportCodeDialog.show(context);
-    if (code != null && code.isNotEmpty) {
-      if (!context.mounted) return;
-      final messenger = ScaffoldMessenger.of(context);
-      final strings = context.t;
-      final success = await context
-          .read<CubitTableOrder>()
-          .importFromCodeAsNewOrder(
-            code: code,
-            tableId: tableId,
-          );
-      if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              success
-                  ? strings.sale.order.qrImportSuccess
-                  : strings.sale.order.qrImportError,
-            ),
-            backgroundColor: success ? Colors.green : Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 56,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            offset: const Offset(0, 2),
-            blurRadius: 4,
-          ),
-        ],
-      ),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        itemCount: state.orders.length + 2, // Orders + QR Button + Add Button
-        itemBuilder: (context, index) {
-          if (index < state.orders.length) {
-            final isSelected = index == state.selectedOrderIndex;
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: ChoiceChip(
-                label: Text(context.t.sale.order.orderTab(n: index + 1)),
-                selected: isSelected,
-                onSelected: (_) =>
-                    context.read<CubitTableOrder>().selectOrder(index),
-              ),
-            );
-          } else if (index == state.orders.length) {
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: ActionChip(
-                avatar: const Icon(Icons.qr_code_scanner, size: 18),
-                label: Text(context.t.sale.order.newOrder),
-                onPressed: state.hasUnsavedChanges
-                    ? () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              context.t.sale.order.hasUnsavedOrders,
-                            ),
-                          ),
-                        );
-                      }
-                    : () => _scanQrForNewOrder(context),
-              ),
-            );
-          } else {
-            return ActionChip(
-              avatar: const Icon(Icons.add, size: 18),
-              label: Text(context.t.sale.order.newOrder),
-              onPressed: state.hasUnsavedChanges
-                  ? () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            context.t.sale.order.hasUnsavedOrders,
-                          ),
-                        ),
-                      );
-                    }
-                  : () => context.read<CubitTableOrder>().addNewOrder(),
-            );
-          }
-        },
-      ),
-    );
-  }
-}
-
-class _OrderHeader extends StatelessWidget {
-  const _OrderHeader({
-    required this.tableId,
-    required this.currentOrder,
-  });
-
-  final String tableId;
-  final OrderEntry currentOrder;
-
-  Future<void> _scanQrToAppend(BuildContext context) async {
-    final code = await ImportCodeDialog.show(context);
-    if (code != null && code.isNotEmpty) {
-      if (!context.mounted) return;
-      final messenger = ScaffoldMessenger.of(context);
-      final strings = context.t;
-      final success = await context
-          .read<CubitTableOrder>()
-          .importFromCodeToCurrentOrder(
-            code: code,
-            tableId: tableId,
-          );
-      if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              success
-                  ? strings.sale.order.qrImportSuccess
-                  : strings.sale.order.qrImportError,
-            ),
-            backgroundColor: success ? Colors.green : Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _cancelCurrentOrder(BuildContext context) async {
-    final confirm = await CancelOrderConfirmDialog.show(context);
-    if (confirm == true) {
-      if (!context.mounted) return;
-      final messenger = ScaffoldMessenger.of(context);
-      final cancelMsg = context.t.sale.order.orderCancelled;
-      final success = await context.read<CubitTableOrder>().cancelOrder(
-        tableId: tableId,
-      );
-      if (context.mounted && success) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(cancelMsg)),
-        );
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        IconButton(
-          tooltip: context.t.sale.order.importOrder,
-          icon: const Icon(Icons.qr_code_scanner),
-          color: Theme.of(context).colorScheme.primary,
-          onPressed: () => _scanQrToAppend(context),
-        ),
-        IconButton(
-          tooltip: context.t.sale.order.cancelDialog.title,
-          icon: const Icon(Icons.delete_outline),
-          color: Colors.redAccent,
-          onPressed: () => _cancelCurrentOrder(context),
-        ),
-      ],
-    );
-  }
-}
-
-final class _OrderSection extends StatelessWidget {
-  const _OrderSection({
-    required this.cartItems,
-    required this.noteController,
-  });
-
-  final List<CartItem> cartItems;
-  final TextEditingController noteController;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        OrderItemList(
-          items: cartItems,
-          onQuantityChanged: (item, delta) {
-            context.read<CubitTableOrder>().updateCartItemQuantity(
-              item,
-              delta,
-            );
-          },
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: noteController,
-          decoration: InputDecoration(
-            labelText: context.t.sale.order.orderNotes,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                12,
-              ),
-            ),
-          ),
-          maxLines: 2,
-          onChanged: (note) {
-            context.read<CubitTableOrder>().updateOrderNote(note);
-          },
-        ),
-      ],
-    );
-  }
-}
-
-final class _CatalogSection extends StatelessWidget {
-  const _CatalogSection({
-    required this.categories,
-    required this.menuItems,
-    required this.extraOptions,
-    required this.selectedCategoryId,
-  });
-
-  final List<MenuCategoryDTO> categories;
-  final List<MenuItemDTO> menuItems;
-  final List<ProductExtraOptionDTO> extraOptions;
-  final String? selectedCategoryId;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          context.t.sale.order.addProducts,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 40,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: categories.length + 1,
-            itemBuilder: (context, index) {
-              final isAll = index == 0;
-              final category = isAll ? null : categories[index - 1];
-              final isSelected = isAll
-                  ? selectedCategoryId == null
-                  : selectedCategoryId == category?.id;
-
-              return Padding(
-                padding: const EdgeInsets.only(
-                  right: 8,
-                ),
-                child: ChoiceChip(
-                  label: Text(
-                    isAll
-                        ? context.t.sale.order.categoryAll
-                        : (category?.name ?? ''),
-                  ),
-                  selected: isSelected,
-                  onSelected: (_) {
-                    context.read<CubitTableOrder>().selectCategory(
-                      isAll ? null : category?.id,
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 12),
-        Builder(
-          builder: (context) {
-            final filteredItems = menuItems.where((item) {
-              if (selectedCategoryId == null) return true;
-              return item.categoryId == selectedCategoryId;
-            }).toList();
-
-            if (filteredItems.isEmpty) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 24,
-                ),
-                child: Center(
-                  child: Text(
-                    context.t.sale.order.noProducts,
-                  ),
-                ),
-              );
-            }
-
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 192,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-              ),
-              itemCount: filteredItems.length,
-              itemBuilder: (context, index) {
-                final item = filteredItems[index];
-                return Card(
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.outlineVariant,
-                    ),
-                  ),
-                  child: InkWell(
-                    onTap: () async {
-                      final productIds = item.productItems
-                          .map((p) => p.productId)
-                          .toSet();
-                      final itemOptions = extraOptions
-                          .where((opt) => productIds.contains(opt.productId))
-                          .toList();
-
-                      if (itemOptions.isEmpty) {
-                        context.read<CubitTableOrder>().addMenuItemToOrder(
-                          item,
-                        );
-                      } else {
-                        final selectedOptions =
-                            await ExtraOptionSelectDialog.show(
-                              context,
-                              menuItem: item,
-                              options: itemOptions,
-                            );
-                        if (selectedOptions != null && context.mounted) {
-                          context.read<CubitTableOrder>().addMenuItemToOrder(
-                            item,
-                            selectedExtraOptions: selectedOptions,
-                          );
-                        }
-                      }
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            item.name ?? '',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '₺${(item.price ?? 0).toStringAsFixed(2)}',
-                            style: TextStyle(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        ),
-      ],
     );
   }
 }
@@ -658,6 +346,7 @@ final class _BottomSection extends StatelessWidget {
         ],
       ),
       child: SafeArea(
+        top: false,
         child: Row(
           children: [
             Expanded(
