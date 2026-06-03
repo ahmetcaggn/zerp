@@ -109,6 +109,37 @@ class CubitTableOrder extends Cubit<StateTableOrder>
     }
   }
 
+  Future<void> refreshCatalog() async {
+    final currentState = state;
+    if (currentState is! StateTableOrderLoaded) return;
+
+    emit(currentState.copyWith(isCatalogLoading: true));
+    try {
+      final responses = await Future.wait([
+        _saleService.getMenuCategories(shopId: shopId),
+        _saleService.getMenuItems(shopId: shopId),
+        _saleService.getProductExtraOptions(shopId: shopId),
+      ]);
+
+      final categoriesRes = responses[0] as PageResponse<MenuCategoryDTO>;
+      final menuItemsRes = responses[1] as PageResponse<MenuItemDTO>;
+      final extraOptionsRes =
+          responses[2] as PageResponse<ProductExtraOptionDTO>;
+
+      emit(
+        currentState.copyWith(
+          categories: categoriesRes.items,
+          menuItems: menuItemsRes.items,
+          extraOptions: extraOptionsRes.items,
+          isCatalogLoading: false,
+        ),
+      );
+    } on Object catch (e) {
+      log.severe('Failed to refresh catalog: $e');
+      emit(currentState.copyWith(isCatalogLoading: false));
+    }
+  }
+
   void selectCategory(String? categoryId) {
     final currentState = state;
     if (currentState is StateTableOrderLoaded) {
@@ -605,6 +636,7 @@ final class StateTableOrderLoaded extends StateTableOrder {
     required int selectedOrderIndex,
     this.isSaving = false,
     this.isImporting = false,
+    this.isCatalogLoading = false,
     this.selectedCategoryId,
   }) : selectedOrderIndex = orders.isEmpty
            ? 0
@@ -617,6 +649,7 @@ final class StateTableOrderLoaded extends StateTableOrder {
   final int selectedOrderIndex;
   final bool isSaving;
   final bool isImporting;
+  final bool isCatalogLoading;
   final String? selectedCategoryId;
 
   OrderEntry get currentOrder {
@@ -705,6 +738,7 @@ final class StateTableOrderLoaded extends StateTableOrder {
     int? selectedOrderIndex,
     bool? isSaving,
     bool? isImporting,
+    bool? isCatalogLoading,
     String? selectedCategoryId,
     bool clearSelectedCategoryId = false,
   }) {
@@ -716,6 +750,7 @@ final class StateTableOrderLoaded extends StateTableOrder {
       selectedOrderIndex: selectedOrderIndex ?? this.selectedOrderIndex,
       isSaving: isSaving ?? this.isSaving,
       isImporting: isImporting ?? this.isImporting,
+      isCatalogLoading: isCatalogLoading ?? this.isCatalogLoading,
       selectedCategoryId: clearSelectedCategoryId
           ? null
           : (selectedCategoryId ?? this.selectedCategoryId),

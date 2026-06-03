@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:openapi_sale/model/menu_category_dto.dart';
@@ -14,6 +16,7 @@ final class CatalogSection extends StatelessWidget {
     required this.extraOptions,
     required this.selectedCategoryId,
     required this.scrollable,
+    required this.isCatalogLoading,
     super.key,
   });
 
@@ -22,6 +25,7 @@ final class CatalogSection extends StatelessWidget {
   final List<ProductExtraOptionDTO> extraOptions;
   final String? selectedCategoryId;
   final bool scrollable;
+  final bool isCatalogLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -30,36 +34,59 @@ final class CatalogSection extends StatelessWidget {
         const SizedBox(height: 8),
         SizedBox(
           height: 40,
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            scrollDirection: Axis.horizontal,
-            itemCount: categories.length + 1,
-            itemBuilder: (context, index) {
-              final isAll = index == 0;
-              final category = isAll ? null : categories[index - 1];
-              final isSelected = isAll
-                  ? selectedCategoryId == null
-                  : selectedCategoryId == category?.id;
+          child: Row(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: categories.length + 1,
+                  itemBuilder: (context, index) {
+                    final isAll = index == 0;
+                    final category = isAll ? null : categories[index - 1];
+                    final isSelected = isAll
+                        ? selectedCategoryId == null
+                        : selectedCategoryId == category?.id;
 
-              return Padding(
-                padding: const EdgeInsets.only(
-                  right: 8,
-                ),
-                child: ChoiceChip(
-                  label: Text(
-                    isAll
-                        ? context.t.sale.order.categoryAll
-                        : (category?.name ?? ''),
-                  ),
-                  selected: isSelected,
-                  onSelected: (_) {
-                    context.read<CubitTableOrder>().selectCategory(
-                      isAll ? null : category?.id,
+                    return Padding(
+                      padding: const EdgeInsets.only(
+                        right: 8,
+                      ),
+                      child: ChoiceChip(
+                        label: Text(
+                          isAll
+                              ? context.t.sale.order.categoryAll
+                              : (category?.name ?? ''),
+                        ),
+                        selected: isSelected,
+                        onSelected: (_) {
+                          context.read<CubitTableOrder>().selectCategory(
+                            isAll ? null : category?.id,
+                          );
+                        },
+                      ),
                     );
                   },
                 ),
-              );
-            },
+              ),
+              if (isCatalogLoading)
+                const AspectRatio(
+                  aspectRatio: 1,
+                  child: SizedBox(
+                    child: Padding(
+                      padding: EdgeInsets.all(12),
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                )
+              else
+                IconButton(
+                  icon: const Icon(Icons.refresh_rounded),
+                  onPressed: () {
+                    unawaited(context.read<CubitTableOrder>().refreshCatalog());
+                  },
+                ),
+            ],
           ),
         ),
         const SizedBox(height: 12),

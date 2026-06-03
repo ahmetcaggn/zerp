@@ -238,6 +238,7 @@ final class _Content extends StatelessWidget {
                   extraOptions: state.extraOptions,
                   selectedCategoryId: selectedCategoryId,
                   scrollable: true,
+                  isCatalogLoading: state.isCatalogLoading,
                 ),
               ),
               Container(
@@ -284,6 +285,7 @@ final class _Content extends StatelessWidget {
                 extraOptions: state.extraOptions,
                 selectedCategoryId: selectedCategoryId,
                 scrollable: false,
+                isCatalogLoading: state.isCatalogLoading,
               ),
               const Divider(height: 16),
               OrderHeader(
