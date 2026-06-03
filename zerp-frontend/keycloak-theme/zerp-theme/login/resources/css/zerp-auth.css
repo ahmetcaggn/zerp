@@ -1,0 +1,390 @@
+:root {
+  --zerp-background: #f3f6fb;
+  --zerp-foreground: #0f172a;
+  --zerp-card: #ffffff;
+  --zerp-border: rgba(15, 23, 42, 0.12);
+  --zerp-border-strong: rgba(15, 23, 42, 0.2);
+  --zerp-muted: #475569;
+  --zerp-primary: #0f766e;
+  --zerp-primary-hover: #115e59;
+  --zerp-secondary: #2563eb;
+  --zerp-primary-contrast: #f8fafc;
+  --zerp-danger: #dc2626;
+  --zerp-info-bg: #eff6ff;
+  --zerp-info-fg: #1d4ed8;
+  --zerp-success-bg: #ecfdf5;
+  --zerp-success-fg: #047857;
+  --zerp-warning-bg: #fffbeb;
+  --zerp-warning-fg: #b45309;
+  --zerp-error-bg: #fef2f2;
+  --zerp-error-fg: #b91c1c;
+  --zerp-radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  color: var(--zerp-foreground);
+  font-family: "Geist", "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  background: var(--zerp-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+}
+
+.zerp-auth-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background:
+    linear-gradient(145deg, rgba(248, 250, 252, 0.96), rgba(234, 242, 255, 0.92)),
+    repeating-linear-gradient(90deg, transparent, transparent 44px, rgba(15, 23, 42, 0.05) 44px, rgba(15, 23, 42, 0.05) 45px);
+}
+
+.zerp-header {
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.zerp-header__container {
+  width: 100%;
+  max-width: 1120px;
+  min-height: 56px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.zerp-language {
+  position: relative;
+}
+
+.zerp-language__trigger {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--zerp-border);
+  border-radius: var(--zerp-radius);
+  color: var(--zerp-muted);
+  background: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.zerp-language__trigger::-webkit-details-marker {
+  display: none;
+}
+
+.zerp-language__trigger:hover,
+.zerp-language[open] .zerp-language__trigger {
+  border-color: var(--zerp-border-strong);
+  color: var(--zerp-foreground);
+  background: #ffffff;
+}
+
+.zerp-language__trigger svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  fill: currentColor;
+}
+
+.zerp-language__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  min-width: 112px;
+  padding: 6px;
+  border: 1px solid var(--zerp-border);
+  border-radius: var(--zerp-radius);
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+}
+
+.zerp-language__item {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: var(--zerp-muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.zerp-language__item:hover,
+.zerp-language__item:focus,
+.zerp-language__item--active {
+  color: var(--zerp-foreground);
+  background: rgba(15, 118, 110, 0.09);
+}
+
+.zerp-auth-main {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 0 72px;
+}
+
+.zerp-auth-container {
+  width: 100%;
+  max-width: 448px;
+}
+
+.zerp-brand-block {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.zerp-brand {
+  margin: 0 0 8px;
+  color: var(--zerp-foreground);
+  font-size: 2.2rem;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.zerp-brand-subtitle {
+  margin: 0;
+  color: var(--zerp-muted);
+  font-size: 0.9rem;
+}
+
+.zerp-card {
+  padding: 24px;
+  border: 1px solid var(--zerp-border);
+  border-radius: var(--zerp-radius);
+  background: var(--zerp-card);
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.07);
+}
+
+.zerp-card-header {
+  margin-bottom: 20px;
+}
+
+.zerp-card-title {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.zerp-card-description {
+  margin: 0;
+  color: var(--zerp-muted);
+  font-size: 0.94rem;
+}
+
+.zerp-alert {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: var(--zerp-radius);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.zerp-alert-info {
+  color: var(--zerp-info-fg);
+  background: var(--zerp-info-bg);
+}
+
+.zerp-alert-success {
+  color: var(--zerp-success-fg);
+  background: var(--zerp-success-bg);
+}
+
+.zerp-alert-warning {
+  color: var(--zerp-warning-fg);
+  background: var(--zerp-warning-bg);
+}
+
+.zerp-alert-error {
+  color: var(--zerp-error-fg);
+  background: var(--zerp-error-bg);
+}
+
+.zerp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.zerp-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zerp-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.zerp-input {
+  width: 100%;
+  height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--zerp-border);
+  border-radius: var(--zerp-radius);
+  color: var(--zerp-foreground);
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.zerp-input::placeholder {
+  color: #94a3b8;
+}
+
+.zerp-input:focus {
+  border-color: rgba(15, 118, 110, 0.72);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.13);
+}
+
+.zerp-input[aria-invalid="true"] {
+  border-color: rgba(220, 38, 38, 0.75);
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+}
+
+.zerp-password {
+  position: relative;
+}
+
+.zerp-password .zerp-input {
+  padding-right: 46px;
+}
+
+.zerp-password__toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--zerp-muted);
+  background: transparent;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.zerp-password__toggle:hover,
+.zerp-password__toggle:focus {
+  color: var(--zerp-foreground);
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.zerp-password__toggle svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  fill: currentColor;
+}
+
+.zerp-field-error {
+  color: var(--zerp-danger);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.zerp-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--zerp-muted);
+  font-size: 0.86rem;
+}
+
+.zerp-checkbox-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--zerp-primary);
+}
+
+.zerp-primary-button {
+  width: 100%;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--zerp-radius);
+  color: var(--zerp-primary-contrast);
+  background: var(--zerp-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.18s ease, transform 0.12s ease, box-shadow 0.2s ease;
+}
+
+.zerp-primary-button:hover,
+.zerp-primary-button:focus {
+  background: var(--zerp-primary-hover);
+  box-shadow: 0 10px 20px rgba(15, 118, 110, 0.18);
+}
+
+.zerp-primary-button:active {
+  transform: translateY(1px);
+}
+
+.zerp-try-another {
+  margin-top: 8px;
+  border: none;
+  color: var(--zerp-secondary);
+  background: transparent;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .zerp-auth-page {
+    padding: 12px;
+  }
+
+  .zerp-header__container {
+    min-height: 48px;
+    padding: 0 4px;
+  }
+
+  .zerp-auth-main {
+    padding: 24px 0 44px;
+  }
+
+  .zerp-card {
+    padding: 18px;
+  }
+}
