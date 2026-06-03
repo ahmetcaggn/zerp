@@ -17,6 +17,7 @@ services:
       spring.config.import: optional:file:/config/eureka.properties
     volumes:
       - ../zerp-backend/local/docker-config/eureka.docker.properties:/config/eureka.properties:ro
+      - ./logs:/app/logs
     networks:
       - vpn-network
       - cloudflare_tunnel_network
@@ -60,6 +61,7 @@ services:
       spring.config.import: optional:file:/config/crm.properties
     volumes:
       - ../zerp-backend/local/docker-config/crm.docker.properties:/config/crm.properties:ro
+      - ./logs:/app/logs
     depends_on:
       - eureka
     networks:
@@ -97,6 +99,7 @@ services:
       spring.config.import: optional:file:/config/employee.properties
     volumes:
       - ../zerp-backend/local/docker-config/employee.docker.properties:/config/employee.properties:ro
+      - ./logs:/app/logs
     depends_on:
       - eureka
     networks:
@@ -140,6 +143,7 @@ services:
       spring.config.import: optional:file:/config/notification.properties
     volumes:
       - ../zerp-backend/local/docker-config/notification.docker.properties:/config/notification.properties:ro
+      - ./logs:/app/logs
     depends_on:
       - eureka
     networks:
@@ -177,6 +181,7 @@ services:
       spring.config.import: optional:file:/config/resource.properties
     volumes:
       - ../zerp-backend/local/docker-config/resource.docker.properties:/config/resource.properties:ro
+      - ./logs:/app/logs
     depends_on:
       - eureka
     networks:
@@ -217,10 +222,13 @@ services:
       spring.config.import: optional:file:/config/sale.properties
     volumes:
       - ../zerp-backend/local/docker-config/sale.docker.properties:/config/sale.properties:ro
+      - ./logs:/app/logs
     depends_on:
       - eureka
     networks:
       - zerp-net
+
+  # suggestion service is not on use yet.
 
   user:
     image: zerp-user:latest
@@ -264,6 +272,7 @@ services:
       spring.config.import: optional:file:/config/user.properties
     volumes:
       - ../zerp-backend/local/docker-config/user.docker.properties:/config/user.properties:ro
+      - ./logs:/app/logs
     depends_on:
       - eureka
     networks:
@@ -290,6 +299,7 @@ services:
       spring.config.import: optional:file:/config/gateway.properties
     volumes:
       - ../zerp-backend/local/docker-config/gateway.docker.properties:/config/gateway.properties:ro
+      - ./logs:/app/logs
     depends_on:
       - eureka
       - crm
