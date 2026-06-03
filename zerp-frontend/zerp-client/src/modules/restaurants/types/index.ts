@@ -1,3 +1,5 @@
+import type { CuisineCategory } from '../data/cuisine-categories'
+
 export type MenuLanguage = 'TR' | 'EN'
 
 export interface Product {
@@ -26,6 +28,7 @@ export interface Restaurant {
   address?: string
   isOpen: boolean
   categories: string[] // e.g., 'Cafe', 'Restaurant', 'Fast Food'
+  cuisineCategories?: CuisineCategory[]
   latitude?: number
   longitude?: number
   distanceKm?: number
@@ -49,6 +52,7 @@ export interface PublicShopDto {
   latitude?: number | null
   longitude?: number | null
   distanceKm?: number | null
+  cuisineCategories?: CuisineCategory[]
 }
 
 export interface PublicNearbyShopsParams {
@@ -69,6 +73,7 @@ export interface PublicShopsFeedParams {
   q?: string
   city?: string
   state?: string
+  cuisineCategory?: CuisineCategory
   sortBy?: PublicShopFeedSortBy
   order?: PublicShopFeedOrder
   lat?: number

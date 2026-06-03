@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.dto.user.ImageSize;
 import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.sale.MenuLanguage;
+import org.zerp.common.entity.sale.ShopCuisineCategory;
 import org.zerp.common.resource.service.IResourceService;
 import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentUserIdResolver;
@@ -31,9 +32,12 @@ import org.zerp.sale.permission.ShopPermissionEvaluator;
 import org.zerp.sale.repository.ShopRepository;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Log4j2
@@ -257,6 +261,9 @@ public class ShopService implements IResourceService<ShopDTO, ShopDTO, Void, Voi
         if (fields.containsKey("longitude")) {
             shop.setLongitude(normalizeLongitude(doubleValueOrNull(fields.get("longitude"))));
         }
+        if (fields.containsKey("cuisineCategories")) {
+            shop.setCuisineCategories(resolveCuisineCategories(fields.get("cuisineCategories")));
+        }
         if (fields.containsKey("defaultMenuLanguage")) {
             shop.setDefaultMenuLanguage(resolveMenuLanguage(fields.get("defaultMenuLanguage")));
         }
@@ -278,6 +285,7 @@ public class ShopService implements IResourceService<ShopDTO, ShopDTO, Void, Voi
         dto.setWebsite(shop.getWebsite());
         dto.setLatitude(shop.getLatitude());
         dto.setLongitude(shop.getLongitude());
+        dto.setCuisineCategories(shop.getCuisineCategories() == null ? Set.of() : Set.copyOf(shop.getCuisineCategories()));
         dto.setDefaultMenuLanguage(shop.getDefaultMenuLanguage());
         dto.setTenantId(shop.getTenantId());
         return dto;
@@ -377,6 +385,61 @@ public class ShopService implements IResourceService<ShopDTO, ShopDTO, Void, Voi
         }
 
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported menu language: " + rawValue);
+    }
+
+    private Set<ShopCuisineCategory> resolveCuisineCategories(Object rawValue) {
+        if (rawValue == null) {
+            return new LinkedHashSet<>();
+        }
+
+        if (rawValue instanceof Collection<?> values) {
+            Set<ShopCuisineCategory> resolved = new LinkedHashSet<>();
+            for (Object value : values) {
+                ShopCuisineCategory category = resolveCuisineCategory(value);
+                if (category != null) {
+                    resolved.add(category);
+                }
+            }
+            return resolved;
+        }
+
+        if (rawValue instanceof String rawString) {
+            String normalized = rawString.trim();
+            if (normalized.isEmpty()) {
+                return new LinkedHashSet<>();
+            }
+
+            Set<ShopCuisineCategory> resolved = new LinkedHashSet<>();
+            for (String part : normalized.split(",")) {
+                ShopCuisineCategory category = resolveCuisineCategory(part);
+                if (category != null) {
+                    resolved.add(category);
+                }
+            }
+            return resolved;
+        }
+
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cuisineCategories must be an array");
+    }
+
+    private ShopCuisineCategory resolveCuisineCategory(Object rawValue) {
+        if (rawValue == null) {
+            return null;
+        }
+        if (rawValue instanceof ShopCuisineCategory category) {
+            return category;
+        }
+
+        String normalized = String.valueOf(rawValue).trim();
+        if (normalized.isEmpty()) {
+            return null;
+        }
+
+        try {
+            return ShopCuisineCategory.valueOf(normalized.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ignored) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported cuisine category: " + rawValue);
+        }
     }
 
     private String resolveContentType(MultipartFile file) {

@@ -2,6 +2,8 @@ package org.zerp.common.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Column;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -20,12 +22,15 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.entity.sale.MenuLanguage;
+import org.zerp.common.entity.sale.ShopCuisineCategory;
 import org.zerp.common.entity.sale.ShopTable;
 import org.zerp.common.permission.entity.PermissionTargetType;
 import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 import org.zerp.common.permission.entity.Permittable;
 
 import java.util.List;
+import java.util.Set;
+import java.util.LinkedHashSet;
 import java.util.UUID;
 
 @Data
@@ -59,6 +64,12 @@ public class Shop extends BaseEntity implements Permittable {
     private String website;
     private Double latitude;
     private Double longitude;
+
+    @ElementCollection(targetClass = ShopCuisineCategory.class)
+    @CollectionTable(name = "shop_cuisine_categories", joinColumns = @JoinColumn(name = "shop_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", nullable = false)
+    private Set<ShopCuisineCategory> cuisineCategories = new LinkedHashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -9,6 +9,7 @@ import {
 import {
   Alert,
   alpha,
+  Autocomplete,
   Box,
   Button,
   Chip,
@@ -30,6 +31,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
 
+import {
+  CUISINE_CATEGORIES,
+  type CuisineCategory,
+  cuisineCategoryLabelKey,
+} from '../data/cuisine-categories'
 import {
   getDistrictOptions,
   resolveCityName,
@@ -128,6 +134,7 @@ function mapShopToRestaurant(
     isOpen: true,
     rating: 0,
     categories: [],
+    cuisineCategories: shop.cuisineCategories ?? [],
     latitude: shopLat,
     longitude: shopLng,
     distanceKm: typeof shop.distanceKm === 'number' ? shop.distanceKm : computedDistanceKm,
@@ -175,6 +182,8 @@ export function RestaurantList() {
   const [appliedCity, setAppliedCity] = useState<string>('')
   const [selectedDistrict, setSelectedDistrict] = useState<string>('')
   const [appliedDistrict, setAppliedDistrict] = useState<string>('')
+  const [selectedCuisineCategory, setSelectedCuisineCategory] = useState<CuisineCategory | ''>('')
+  const [appliedCuisineCategory, setAppliedCuisineCategory] = useState<CuisineCategory | ''>('')
   const [isRequestingLocation, setIsRequestingLocation] = useState(false)
   const [locationError, setLocationError] = useState<string | null>(null)
   const [locationAccuracyMeters, setLocationAccuracyMeters] = useState<number | null>(null)
@@ -207,6 +216,7 @@ export function RestaurantList() {
     q: (isNearbyMode ? searchTerm.trim() : appliedSearchTerm) || undefined,
     city: !isNearbyMode ? (resolvedCity ?? undefined) : undefined,
     state: !isNearbyMode ? (resolvedDistrict ?? undefined) : undefined,
+    cuisineCategory: (isNearbyMode ? selectedCuisineCategory : appliedCuisineCategory) || undefined,
     sortBy: isNearbyMode ? 'DISTANCE' : 'NAME',
     order: isNearbyMode ? sortOrder : appliedSortOrder,
     lat: isNearbyMode ? effectiveUserLocation?.lat : undefined,
@@ -311,6 +321,7 @@ export function RestaurantList() {
     setAppliedSortOrder(sortOrder)
     setAppliedCity(selectedCity)
     setAppliedDistrict(selectedDistrict)
+    setAppliedCuisineCategory(selectedCuisineCategory)
   }
 
   function getSortShortLabel(value: PublicShopFeedOrder): string {
@@ -521,6 +532,29 @@ export function RestaurantList() {
                         ]}
                   </Select>
                 </FormControl>
+
+                <Autocomplete
+                  options={CUISINE_CATEGORIES}
+                  value={selectedCuisineCategory || null}
+                  getOptionLabel={(category) => t(cuisineCategoryLabelKey(category))}
+                  isOptionEqualToValue={(option, value) => option === value}
+                  onChange={(_, value) => setSelectedCuisineCategory(value ?? '')}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label={t('restaurants.cuisineCategoryLabel')}
+                      placeholder={t('restaurants.filterAll')}
+                      size="small"
+                    />
+                  )}
+                  sx={{
+                    flex: { xs: '0 0 118px', sm: '0 0 190px', md: '0 0 220px' },
+                    minWidth: 0,
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: { xs: '12px', sm: '14px' },
+                    },
+                  }}
+                />
               </Stack>
 
               {/* City/District Filters (only in ALL mode) */}

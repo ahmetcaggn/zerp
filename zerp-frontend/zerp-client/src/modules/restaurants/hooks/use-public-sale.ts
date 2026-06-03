@@ -65,6 +65,7 @@ export function usePublicShopsFeedInfinite(params: Omit<PublicShopsFeedParams, '
       params.q ?? '',
       params.city ?? '',
       params.state ?? '',
+      params.cuisineCategory ?? '',
       params.sortBy ?? 'NAME',
       params.order ?? 'ASC',
       params.lat ?? null,

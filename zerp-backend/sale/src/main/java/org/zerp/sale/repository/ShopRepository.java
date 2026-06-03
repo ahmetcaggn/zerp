@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
 import org.zerp.common.entity.Shop;
+import org.zerp.common.entity.sale.ShopCuisineCategory;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -66,6 +67,7 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
                 OR LOWER(COALESCE(s.description, '')) LIKE CONCAT('%', :q, '%'))
               AND (:applyCity = FALSE OR LOWER(COALESCE(s.city, '')) = :city)
               AND (:applyState = FALSE OR LOWER(COALESCE(s.state, '')) = :state)
+              AND (:applyCuisineCategory = FALSE OR :cuisineCategory MEMBER OF s.cuisineCategories)
             """)
     Page<Shop> findPublicShopsFeedAll(
             @Param("applyQuery") boolean applyQuery,
@@ -74,6 +76,8 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
             @Param("city") String city,
             @Param("applyState") boolean applyState,
             @Param("state") String state,
+            @Param("applyCuisineCategory") boolean applyCuisineCategory,
+            @Param("cuisineCategory") ShopCuisineCategory cuisineCategory,
             Pageable pageable
     );
 
@@ -86,6 +90,12 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
               AND (:applyQuery = false
                 OR LOWER(s.name) LIKE CONCAT('%', :q, '%')
                 OR LOWER(COALESCE(s.description, '')) LIKE CONCAT('%', :q, '%'))
+              AND (:applyCuisineCategory = false OR EXISTS (
+                SELECT 1
+                FROM shop_cuisine_categories scc
+                WHERE scc.shop_id = s.id
+                  AND scc.category = :cuisineCategory
+              ))
             ORDER BY (
                 6371 * acos(
                     cos(radians(:latitude)) * cos(radians(s.latitude))
@@ -103,6 +113,12 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
                       AND (:applyQuery = false
                         OR LOWER(s.name) LIKE CONCAT('%', :q, '%')
                         OR LOWER(COALESCE(s.description, '')) LIKE CONCAT('%', :q, '%'))
+                      AND (:applyCuisineCategory = false OR EXISTS (
+                        SELECT 1
+                        FROM shop_cuisine_categories scc
+                        WHERE scc.shop_id = s.id
+                          AND scc.category = :cuisineCategory
+                      ))
                     """,
             nativeQuery = true)
     Page<Shop> findPublicShopsFeedNearbyAsc(
@@ -110,6 +126,8 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
             @Param("longitude") double longitude,
             @Param("applyQuery") boolean applyQuery,
             @Param("q") String q,
+            @Param("applyCuisineCategory") boolean applyCuisineCategory,
+            @Param("cuisineCategory") String cuisineCategory,
             Pageable pageable
     );
 
@@ -122,6 +140,12 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
               AND (:applyQuery = false
                 OR LOWER(s.name) LIKE CONCAT('%', :q, '%')
                 OR LOWER(COALESCE(s.description, '')) LIKE CONCAT('%', :q, '%'))
+              AND (:applyCuisineCategory = false OR EXISTS (
+                SELECT 1
+                FROM shop_cuisine_categories scc
+                WHERE scc.shop_id = s.id
+                  AND scc.category = :cuisineCategory
+              ))
             ORDER BY (
                 6371 * acos(
                     cos(radians(:latitude)) * cos(radians(s.latitude))
@@ -139,6 +163,12 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
                       AND (:applyQuery = false
                         OR LOWER(s.name) LIKE CONCAT('%', :q, '%')
                         OR LOWER(COALESCE(s.description, '')) LIKE CONCAT('%', :q, '%'))
+                      AND (:applyCuisineCategory = false OR EXISTS (
+                        SELECT 1
+                        FROM shop_cuisine_categories scc
+                        WHERE scc.shop_id = s.id
+                          AND scc.category = :cuisineCategory
+                      ))
                     """,
             nativeQuery = true)
     Page<Shop> findPublicShopsFeedNearbyDesc(
@@ -146,6 +176,8 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
             @Param("longitude") double longitude,
             @Param("applyQuery") boolean applyQuery,
             @Param("q") String q,
+            @Param("applyCuisineCategory") boolean applyCuisineCategory,
+            @Param("cuisineCategory") String cuisineCategory,
             Pageable pageable
     );
 }

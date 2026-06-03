@@ -1,3 +1,5 @@
+import type { CuisineCategory } from '../data/cuisine-categories'
+
 export type MenuLanguage = 'TR' | 'EN'
 
 export interface ShopResponseDto {
@@ -15,6 +17,7 @@ export interface ShopResponseDto {
   website?: string
   latitude?: number
   longitude?: number
+  cuisineCategories?: CuisineCategory[]
   defaultMenuLanguage: MenuLanguage
   tenantId: string
 }
@@ -39,6 +42,7 @@ export interface PatchShopRequestDto {
   website?: string | null
   latitude?: number | null
   longitude?: number | null
+  cuisineCategories?: CuisineCategory[]
   defaultMenuLanguage?: MenuLanguage
 }
 

@@ -25,6 +25,7 @@ import org.zerp.common.entity.sale.MenuCategory;
 import org.zerp.common.entity.sale.MenuItem;
 import org.zerp.common.entity.sale.PublicCartOrder;
 import org.zerp.common.entity.sale.PublicCartOrderItem;
+import org.zerp.common.entity.sale.ShopCuisineCategory;
 import org.zerp.sale.dto.publicsale.PublicActiveMenuDTO;
 import org.zerp.sale.dto.publicsale.PublicCartOrderCreateRequest;
 import org.zerp.sale.dto.publicsale.PublicCartOrderCreateResponse;
@@ -103,6 +104,7 @@ public class PublicSaleService {
             String query,
             String city,
             String state,
+            String cuisineCategory,
             PublicShopFeedSortBy sortBy,
             PublicShopFeedOrder order,
             Double latitude,
@@ -115,9 +117,11 @@ public class PublicSaleService {
         String normalizedQuery = normalizeFilterValue(query);
         String normalizedCity = normalizeFilterValue(city);
         String normalizedState = normalizeFilterValue(state);
+        ShopCuisineCategory resolvedCuisineCategory = resolveCuisineCategory(cuisineCategory);
         boolean applyQuery = normalizedQuery != null;
         boolean applyCity = normalizedCity != null;
         boolean applyState = normalizedState != null;
+        boolean applyCuisineCategory = resolvedCuisineCategory != null;
         String queryValue = applyQuery ? normalizedQuery : "";
         String cityValue = applyCity ? normalizedCity : "";
         String stateValue = applyState ? normalizedState : "";
@@ -143,8 +147,24 @@ public class PublicSaleService {
 
             Pageable pageable = PageRequest.of(pageIndex, resolvedPageSize);
             page = resolvedOrder == PublicShopFeedOrder.DESC
-                    ? shopRepository.findPublicShopsFeedNearbyDesc(latitude, longitude, applyQuery, queryValue, pageable)
-                    : shopRepository.findPublicShopsFeedNearbyAsc(latitude, longitude, applyQuery, queryValue, pageable);
+                    ? shopRepository.findPublicShopsFeedNearbyDesc(
+                            latitude,
+                            longitude,
+                            applyQuery,
+                            queryValue,
+                            applyCuisineCategory,
+                            resolvedCuisineCategory == null ? "" : resolvedCuisineCategory.name(),
+                            pageable
+                    )
+                    : shopRepository.findPublicShopsFeedNearbyAsc(
+                            latitude,
+                            longitude,
+                            applyQuery,
+                            queryValue,
+                            applyCuisineCategory,
+                            resolvedCuisineCategory == null ? "" : resolvedCuisineCategory.name(),
+                            pageable
+                    );
         } else {
             if (resolvedSortBy != PublicShopFeedSortBy.NAME) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "all mode only supports NAME sort");
@@ -161,6 +181,8 @@ public class PublicSaleService {
                     cityValue,
                     applyState,
                     stateValue,
+                    applyCuisineCategory,
+                    resolvedCuisineCategory == null ? ShopCuisineCategory.BURGER : resolvedCuisineCategory,
                     pageable
             );
         }
@@ -405,6 +427,7 @@ public class PublicSaleService {
         dto.setWebsite(entity.getWebsite());
         dto.setLatitude(entity.getLatitude());
         dto.setLongitude(entity.getLongitude());
+        dto.setCuisineCategories(entity.getCuisineCategories());
         if (originLatitude != null && originLongitude != null
                 && entity.getLatitude() != null && entity.getLongitude() != null) {
             dto.setDistanceKm(calculateDistanceKm(originLatitude, originLongitude, entity.getLatitude(), entity.getLongitude()));
@@ -520,5 +543,18 @@ public class PublicSaleService {
 
         String normalized = input.trim().toLowerCase(Locale.ROOT);
         return normalized.isEmpty() ? null : normalized;
+    }
+
+    private ShopCuisineCategory resolveCuisineCategory(String input) {
+        String normalized = normalizeFilterValue(input);
+        if (normalized == null) {
+            return null;
+        }
+
+        try {
+            return ShopCuisineCategory.valueOf(normalized.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ignored) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported cuisine category: " + input);
+        }
     }
 }

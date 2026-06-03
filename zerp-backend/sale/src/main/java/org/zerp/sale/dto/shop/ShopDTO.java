@@ -2,7 +2,9 @@ package org.zerp.sale.dto.shop;
 
 import lombok.Data;
 import org.zerp.common.entity.sale.MenuLanguage;
+import org.zerp.common.entity.sale.ShopCuisineCategory;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -21,6 +23,7 @@ public class ShopDTO {
     private String website;
     private Double latitude;
     private Double longitude;
+    private Set<ShopCuisineCategory> cuisineCategories;
     private MenuLanguage defaultMenuLanguage;
     private UUID tenantId;
 }

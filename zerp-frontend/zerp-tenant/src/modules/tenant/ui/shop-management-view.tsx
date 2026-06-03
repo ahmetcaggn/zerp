@@ -6,10 +6,12 @@ import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
 import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Card,
   CardContent,
+  Chip,
   CircularProgress,
   FormControl,
   Grid,
@@ -33,6 +35,11 @@ import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
 import { buildShopImageUrl } from '../api/shop-client'
+import {
+  CUISINE_CATEGORIES,
+  type CuisineCategory,
+  cuisineCategoryLabelKey,
+} from '../data/cuisine-categories'
 import { getDistrictOptions, resolveCityName, resolveDistrictName, TURKEY_CITY_OPTIONS } from '../data/tr-city-district-data'
 import { useShop, useShops, useUpdateShop, useUploadShopImage } from '../hooks/use-shops'
 import type { MenuLanguage, PatchShopRequestDto, ShopResponseDto } from '../types/shop'
@@ -44,6 +51,7 @@ interface ShopFormState {
   name: string
   description: string
   defaultMenuLanguage: MenuLanguage
+  cuisineCategories: CuisineCategory[]
   imageId: string
   email: string
   phone: string
@@ -65,6 +73,7 @@ function toFormState(shop: ShopResponseDto): ShopFormState {
     name: shop.name ?? '',
     description: shop.description ?? '',
     defaultMenuLanguage: shop.defaultMenuLanguage ?? 'TR',
+    cuisineCategories: shop.cuisineCategories ?? [],
     imageId: shop.imageId ?? '',
     email: shop.email ?? '',
     phone: shop.phone ?? '',
@@ -305,6 +314,7 @@ export function ShopManagementView() {
       postalCode: normalizeOptional(form.postalCode),
       latitude,
       longitude,
+      cuisineCategories: form.cuisineCategories,
     }
 
     try {
@@ -647,6 +657,44 @@ export function ShopManagementView() {
                           <MenuItem value="EN">{t('shops.menuLanguageEn')}</MenuItem>
                         </Select>
                       </FormControl>
+                    </Grid>
+
+                    <Grid size={{ xs: 12 }}>
+                      <Autocomplete
+                        multiple
+                        disableCloseOnSelect
+                        options={CUISINE_CATEGORIES}
+                        value={form.cuisineCategories}
+                        getOptionLabel={(category) => t(cuisineCategoryLabelKey(category))}
+                        isOptionEqualToValue={(option, value) => option === value}
+                        onChange={(_, value) =>
+                          updateCurrentForm((current) => ({
+                            ...current,
+                            cuisineCategories: value as CuisineCategory[],
+                          }))
+                        }
+                        renderTags={(value, getTagProps) =>
+                          value.map((category, index) => {
+                            const { key, ...tagProps } = getTagProps({ index })
+                            return (
+                              <Chip
+                                key={key}
+                                {...tagProps}
+                                label={t(cuisineCategoryLabelKey(category))}
+                                size="small"
+                              />
+                            )
+                          })
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label={t('shops.cuisineCategoriesLabel')}
+                            placeholder={form.cuisineCategories.length === 0 ? t('shops.noCuisineCategories') : ''}
+                            size="small"
+                          />
+                        )}
+                      />
                     </Grid>
 
                     <Grid size={{ xs: 12 }}>
