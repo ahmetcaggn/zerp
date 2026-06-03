@@ -6,29 +6,43 @@ scrape_configs:
   - job_name: 'eureka'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['eureka:8761']
+      - targets: ['zerp-eureka:8761', 'eureka:8761']
 
   - job_name: 'gateway'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['gateway:8080']
+      - targets: ['zerp-gateway:8080', 'gateway:8080']
 
   - job_name: 'microservices'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets:
+          - 'zerp-crm:8081'
+          - 'zerp-employee:8082'
+          - 'zerp-notification:8083'
+          - 'zerp-resource:8084'
+          - 'zerp-sale:8085'
+          - 'zerp-suggestion:8086'
+          - 'zerp-user:8087'
           - 'crm:8081'
           - 'employee:8082'
           - 'notification:8083'
           - 'resource:8084'
           - 'sale:8085'
-          # - 'suggestion:8086'
+          - 'suggestion:8086'
           - 'user:8087'
 
   # - job_name: 'aggregated-services'
   #   metrics_path: '/actuator/prometheus'
   #   static_configs:
   #     - targets:
+  #         - 'zerp-aggregated:8081'
+  #         - 'zerp-aggregated:8082'
+  #         - 'zerp-aggregated:8083'
+  #         - 'zerp-aggregated:8084'
+  #         - 'zerp-aggregated:8085'
+  #         - 'zerp-aggregated:8086'
+  #         - 'zerp-aggregated:8087'
   #         - 'aggregated:8081'
   #         - 'aggregated:8082'
   #         - 'aggregated:8083'

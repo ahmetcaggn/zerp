@@ -30,6 +30,10 @@ FILES_TO_UPLOAD=(
     "compose-postgres.yaml"
     "compose-redis.yaml"
     "compose-storage.yaml"
+    "compose-apm.yaml"
+    "prometheus.yml"
+    "logstash.conf"
+    "compose-opensearch.yaml"
 )
 
 show_help() {
