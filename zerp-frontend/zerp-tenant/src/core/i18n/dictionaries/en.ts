@@ -1008,6 +1008,7 @@ export const enMessages = {
       paySelected: 'Pay Selected',
       paidSoFar: 'Paid',
       remaining: 'Remaining',
+      fillRemainingAmount: 'Fill Remaining',
       recordPayment: 'Record',
       completePayment: 'Complete Payment',
       partialItemsUpdatedToast: 'Selected items paid',

@@ -3,7 +3,6 @@ import AddIcon from '@mui/icons-material/Add'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CreditCardIcon from '@mui/icons-material/CreditCard'
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import LocalAtmIcon from '@mui/icons-material/LocalAtm'
 import PaymentIcon from '@mui/icons-material/Payment'
@@ -55,13 +54,8 @@ const POLL_INTERVAL = 8000
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type PaymentMethod = 'CASH' | 'CARD'
+type PaymentMethod = TableOrderPaymentCreateDto['method']
 type Stage = 'SELECT' | 'PAYMENT'
-
-interface SplitEntry {
-  id: string
-  amount: number
-}
 
 // itemId → how many units selected for payment
 type SelectedQtys = Map<string, number>
@@ -404,7 +398,6 @@ function PaymentStage({
   const isPending = isPatchPending || isUpdatePending
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH')
-  const [splitPayments, setSplitPayments] = useState<SplitEntry[]>([])
   const [splitInput, setSplitInput] = useState('')
   const [splitMode, setSplitMode] = useState(false)
 
@@ -447,8 +440,18 @@ function PaymentStage({
   )
 
   const grandTotal = paymentPlan.reduce((s, p) => s + p.paidTotal, 0)
-  const paidSoFar = splitPayments.reduce((s, p) => s + p.amount, 0)
+  const paidSoFar = paymentPlan.reduce(
+    (sum, { order, paidTotal }) => sum + Math.min(paidTotal, amountOnlyPaidForOrder(order)),
+    0,
+  )
   const remaining = Math.max(0, grandTotal - paidSoFar)
+  const splitInputAmount = Number.parseFloat(splitInput)
+  const payableSplitAmount =
+    Number.isFinite(splitInputAmount) && splitInputAmount > 0
+      ? Math.min(splitInputAmount, remaining)
+      : 0
+  const hasOpenAmountSplit = paidSoFar > 0.001 && remaining > 0.001
+  const effectiveSplitMode = splitMode || hasOpenAmountSplit
 
   function selectedPaymentItems(selectedItems: { item: TableOrderItemDto; selectedQty: number }[]) {
     return selectedItems.map(({ item, selectedQty }) => ({
@@ -457,65 +460,75 @@ function PaymentStage({
     }))
   }
 
-  function buildPaymentsByOrder(splitEntries = splitPayments) {
+  function amountOnlyPaidForOrder(order: TableOrderResponseDto) {
+    const payments = [...(order.payments ?? [])].sort((a, b) => {
+      const aTime = a.paidAt ? Date.parse(a.paidAt) : 0
+      const bTime = b.paidAt ? Date.parse(b.paidAt) : 0
+      return aTime - bTime
+    })
+
+    return payments.reduce((sum, payment) => {
+      const paymentItems = payment.items ?? []
+      if (paymentItems.length > 0) return 0
+      return sum + payment.amount
+    }, 0)
+  }
+
+  function buildFullPaymentsByOrder() {
     const paymentsByOrder = new Map<string, TableOrderPaymentCreateDto[]>()
 
-    if (!splitMode) {
-      paymentPlan.forEach(({ order, selectedItems, paidTotal }) => {
-        paymentsByOrder.set(order.id, [
-          {
-            method: 'CASH',
-            amount: paidTotal,
-            items: selectedPaymentItems(selectedItems),
-          },
-        ])
-      })
-      return paymentsByOrder
-    }
-
-    let splitIndex = 0
-    let splitRemainder = splitEntries[0]?.amount ?? 0
-
     paymentPlan.forEach(({ order, selectedItems, paidTotal }) => {
-      const payments: TableOrderPaymentCreateDto[] = []
-      let orderRemainder = paidTotal
-      let shouldAttachItems = true
-
-      while (orderRemainder > 0.001 && splitIndex < splitEntries.length) {
-        const amount = Math.min(orderRemainder, splitRemainder)
-        payments.push({
-          method: 'CASH',
-          amount,
-          items: shouldAttachItems ? selectedPaymentItems(selectedItems) : [],
-        })
-        shouldAttachItems = false
-        orderRemainder -= amount
-        splitRemainder -= amount
-
-        if (splitRemainder <= 0.001) {
-          splitIndex += 1
-          splitRemainder = splitEntries[splitIndex]?.amount ?? 0
-        }
-      }
-
-      if (orderRemainder > 0.001) {
-        payments.push({
-          method: 'CASH',
-          amount: orderRemainder,
-          items: shouldAttachItems ? selectedPaymentItems(selectedItems) : [],
-        })
-      }
-
-      paymentsByOrder.set(order.id, payments)
+      paymentsByOrder.set(order.id, [
+        {
+          method: paymentMethod,
+          amount: paidTotal,
+          items: selectedPaymentItems(selectedItems),
+        },
+      ])
     })
 
     return paymentsByOrder
   }
 
-  function executePayment(splitEntries = splitPayments) {
+  function buildSplitPaymentsByOrder(amount: number, attachItems: boolean) {
+    const paymentsByOrder = new Map<string, TableOrderPaymentCreateDto[]>()
+
+    const outstandingPlans = paymentPlan
+      .map((plan) => ({
+        ...plan,
+        orderRemaining: Math.max(0, plan.paidTotal - amountOnlyPaidForOrder(plan.order)),
+      }))
+      .filter(({ orderRemaining }) => orderRemaining > 0.001)
+    const totalOutstanding = outstandingPlans.reduce((sum, plan) => sum + plan.orderRemaining, 0)
+    let amountRemainder = Math.min(amount, totalOutstanding)
+
+    outstandingPlans.forEach(({ order, selectedItems, orderRemaining }, index) => {
+      if (amountRemainder <= 0.001) return
+
+      const isLastPlan = index === outstandingPlans.length - 1
+      const proportionalAmount =
+        totalOutstanding > 0 ? (amount * orderRemaining) / totalOutstanding : 0
+      const amountForOrder = attachItems
+        ? orderRemaining
+        : Math.min(orderRemaining, isLastPlan ? amountRemainder : proportionalAmount)
+      if (amountForOrder <= 0.001) return
+
+      paymentsByOrder.set(order.id, [
+        {
+          method: paymentMethod,
+          amount: amountForOrder,
+          items: attachItems ? selectedPaymentItems(selectedItems) : [],
+        },
+      ])
+      amountRemainder -= amountForOrder
+    })
+
+    return paymentsByOrder
+  }
+
+  function executeClosingPayment(paymentsByOrder: Map<string, TableOrderPaymentCreateDto[]>) {
     let completed = 0
     const total = paymentPlan.length
-    const paymentsByOrder = buildPaymentsByOrder(splitEntries)
 
     paymentPlan.forEach(({ order, isFullOrder, remainingItems }) => {
       const payments = paymentsByOrder.get(order.id) ?? []
@@ -551,15 +564,49 @@ function PaymentStage({
     })
   }
 
-  function handleRecordSplit() {
-    const amount = parseFloat(splitInput)
-    if (isNaN(amount) || amount <= 0) return
-    const newPayments = [...splitPayments, { id: Math.random().toString(36).slice(2), amount }]
-    setSplitPayments(newPayments)
-    setSplitInput('')
-    if (newPayments.reduce((s, p) => s + p.amount, 0) >= grandTotal - 0.001) {
-      executePayment(newPayments)
+  function executeOpenSplitPayment(paymentsByOrder: Map<string, TableOrderPaymentCreateDto[]>) {
+    const entries = Array.from(paymentsByOrder.entries())
+    let completed = 0
+
+    entries.forEach(([orderId, payments]) => {
+      patchOrder(
+        { id: orderId, fields: { payments } },
+        {
+          onSuccess: () => {
+            completed++
+            if (completed === entries.length) {
+              setSplitInput('')
+              showToast(t('sale.cashier.paymentReceivedToast'))
+            }
+          },
+          onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+        },
+      )
+    })
+  }
+
+  function executePayment() {
+    executeClosingPayment(buildFullPaymentsByOrder())
+  }
+
+  function handlePaySplitAmount() {
+    if (payableSplitAmount <= 0.001 || remaining <= 0.001) return
+
+    const isFinalSplitPayment = payableSplitAmount >= remaining - 0.001
+    const paymentsByOrder = buildSplitPaymentsByOrder(payableSplitAmount, isFinalSplitPayment)
+    if (paymentsByOrder.size === 0) return
+
+    if (isFinalSplitPayment) {
+      executeClosingPayment(paymentsByOrder)
+      return
     }
+
+    executeOpenSplitPayment(paymentsByOrder)
+  }
+
+  function handleFillRemainingAmount() {
+    if (remaining <= 0.001) return
+    setSplitInput(remaining.toFixed(2))
   }
 
   return (
@@ -693,7 +740,7 @@ function PaymentStage({
             startIcon={<LocalAtmIcon />}
             onClick={() => {
               setPaymentMethod('CASH')
-              setSplitMode(false)
+              if (!hasOpenAmountSplit) setSplitMode(false)
             }}
             sx={{ flex: 1, fontWeight: 700, py: 1 }}
           >
@@ -716,11 +763,14 @@ function PaymentStage({
 
         {/* Split amount toggle */}
         <Button
-          variant={splitMode ? 'contained' : 'outlined'}
+          variant={effectiveSplitMode ? 'contained' : 'outlined'}
           size="small"
           onClick={() => {
+            if (hasOpenAmountSplit) {
+              setSplitMode(true)
+              return
+            }
             setSplitMode((p) => !p)
-            setSplitPayments([])
             setSplitInput('')
           }}
           sx={{ mb: 1.5, fontWeight: 600 }}
@@ -729,37 +779,8 @@ function PaymentStage({
         </Button>
 
         {/* Split mode panel */}
-        {splitMode && (
+        {effectiveSplitMode && (
           <Box sx={{ mb: 2 }}>
-            {splitPayments.length > 0 && (
-              <Box sx={{ mb: 1 }}>
-                {splitPayments.map((entry) => (
-                  <Box
-                    key={entry.id}
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      py: 0.25,
-                    }}
-                  >
-                    <Typography variant="body2" color="success.main" fontWeight={600}>
-                      + {entry.amount.toFixed(2)} ₺
-                    </Typography>
-                    <IconButton
-                      size="small"
-                      onClick={() =>
-                        setSplitPayments((prev) => prev.filter((p) => p.id !== entry.id))
-                      }
-                      sx={{ p: 0.25 }}
-                    >
-                      <DeleteOutlineIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                ))}
-                <Divider sx={{ my: 0.75 }} />
-              </Box>
-            )}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2" color="text.secondary">
                 {t('sale.cashier.paidSoFar')}: <strong>{paidSoFar.toFixed(2)} ₺</strong>
@@ -772,27 +793,38 @@ function PaymentStage({
                 {t('sale.cashier.remaining')}: {remaining.toFixed(2)} ₺
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
               <TextField
                 size="small"
                 type="number"
                 value={splitInput}
                 onChange={(e) => setSplitInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleRecordSplit()
+                  if (e.key === 'Enter') handlePaySplitAmount()
                 }}
                 placeholder="0.00"
                 inputProps={{ min: 0, step: 0.01 }}
                 InputProps={{ endAdornment: <InputAdornment position="end">₺</InputAdornment> }}
-                sx={{ flex: 1 }}
+                sx={{ flex: '1 1 160px' }}
               />
               <Button
                 variant="outlined"
-                onClick={handleRecordSplit}
-                disabled={!splitInput || isPending}
-                sx={{ fontWeight: 700, minWidth: 80 }}
+                onClick={handleFillRemainingAmount}
+                disabled={remaining <= 0.001 || isPending}
+                sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}
               >
-                {t('sale.cashier.recordPayment')}
+                {t('sale.cashier.fillRemainingAmount')}
+              </Button>
+              <Button
+                variant="contained"
+                color="success"
+                onClick={handlePaySplitAmount}
+                disabled={payableSplitAmount <= 0.001 || isPending}
+                sx={{ fontWeight: 700, minWidth: 120 }}
+              >
+                {payableSplitAmount > 0.001
+                  ? `${t('sale.cashier.payBtn')} ${payableSplitAmount.toFixed(2)} ₺`
+                  : t('sale.cashier.payBtn')}
               </Button>
             </Box>
           </Box>
@@ -804,7 +836,7 @@ function PaymentStage({
         elevation={4}
         sx={{ mt: 2, p: 2, borderRadius: 3, bgcolor: 'background.paper', flexShrink: 0 }}
       >
-        {(!splitMode || remaining <= 0.001) && (
+        {!effectiveSplitMode && (
           <Button
             variant="contained"
             color="success"
@@ -812,13 +844,11 @@ function PaymentStage({
             size="large"
             startIcon={isPending ? undefined : <PaymentIcon />}
             onClick={() => executePayment()}
-            disabled={isPending || (splitMode && remaining > 0.001)}
+            disabled={isPending}
             sx={{ fontWeight: 700, py: 1.5, borderRadius: 2, fontSize: '1rem' }}
           >
             {isPending ? (
               <CircularProgress size={22} color="inherit" />
-            ) : splitMode ? (
-              t('sale.cashier.completePayment')
             ) : (
               `${t('sale.cashier.payBtn')} ${grandTotal.toFixed(2)} ₺`
             )}

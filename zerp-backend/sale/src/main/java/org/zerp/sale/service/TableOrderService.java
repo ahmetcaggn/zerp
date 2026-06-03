@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.Comparator;
 
 @Log4j2
 @Service
@@ -258,6 +259,16 @@ public class TableOrderService implements
 
         TableOrder updated = repository.save(order);
         log.info("Updated TableOrder with id: {}", uuid);
+
+        if (isClosed(updated.getStatus())) {
+            releaseTableIfNoOpenOrders(updated.getShopTable());
+        }
+
+        if (updated.getStatus() == TableOrderStatus.PAID && previousStatus != TableOrderStatus.PAID) {
+            List<StockMovementFeignRequest> requests = buildStockMovementRequests(updated);
+            dispatchStockDeduction(updated.getId(), requests);
+        }
+
         return mapper.toDTO(updated);
     }
 
@@ -347,13 +358,48 @@ public class TableOrderService implements
         if (requests == null || requests.isEmpty()) {
             return;
         }
+        List<TableOrderPayment> payments = new ArrayList<>();
         for (TableOrderPaymentCreateDTO request : requests) {
             if (request == null) {
                 continue;
             }
             TableOrderPayment payment = buildPayment(order, request);
-            order.getPayments().add(payment);
+            payments.add(payment);
         }
+        validatePaymentTotal(order, payments);
+        order.getPayments().addAll(payments);
+    }
+
+    private void validatePaymentTotal(TableOrder order, List<TableOrderPayment> incomingPayments) {
+        if (incomingPayments.isEmpty()) {
+            return;
+        }
+        BigDecimal orderTotal = calculateOrderTotal(order);
+        BigDecimal alreadyPaidForOpenItems = calculateAmountOnlyPaidForOpenItems(order);
+        BigDecimal incomingTotal = incomingPayments.stream()
+                .map(TableOrderPayment::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (alreadyPaidForOpenItems.add(incomingTotal).compareTo(orderTotal) > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment amount exceeds remaining order amount");
+        }
+    }
+
+    private BigDecimal calculateAmountOnlyPaidForOpenItems(TableOrder order) {
+        List<TableOrderPayment> payments = new ArrayList<>(order.getPayments());
+        payments.sort(Comparator.comparing(payment ->
+                payment.getPaidAt() == null ? LocalDateTime.MIN : payment.getPaidAt()
+        ));
+
+        BigDecimal paid = BigDecimal.ZERO;
+        for (TableOrderPayment payment : payments) {
+            if (payment.getItems() != null && !payment.getItems().isEmpty()) {
+                paid = BigDecimal.ZERO;
+                continue;
+            }
+            paid = paid.add(payment.getAmount() == null ? BigDecimal.ZERO : payment.getAmount());
+        }
+        return paid;
     }
 
     private TableOrderPayment buildPayment(TableOrder order, TableOrderPaymentCreateDTO request) {
@@ -361,7 +407,11 @@ public class TableOrderService implements
         payment.setTableOrder(order);
         payment.setTenantId(order.getTenantId());
         payment.setMethod(request.getMethod() == null ? TableOrderPaymentMethod.CASH : request.getMethod());
-        payment.setAmount(request.getAmount() == null ? BigDecimal.ZERO : request.getAmount());
+        BigDecimal amount = request.getAmount();
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment amount must be greater than zero");
+        }
+        payment.setAmount(amount);
         payment.setPaidAt(LocalDateTime.now());
 
         List<TableOrderPaymentItemCreateDTO> requestedItems = request.getItems();
@@ -568,11 +618,59 @@ public class TableOrderService implements
     }
 
     /**
-     * Builds stock movement requests inside the active transaction so all lazy
-     * collections (MenuItem.productLinks, ProductRecipe.items, etc.) are still accessible.
-     * The resulting list contains only plain POJOs and is safe to hand off to an async thread.
+     * Builds stock movement requests from paid item snapshots, not current open items.
+     * This keeps partial-payment stock deduction delayed until the order is fully paid.
      */
     private List<StockMovementFeignRequest> buildStockMovementRequests(TableOrder order) {
+        List<StockMovementFeignRequest> requests = new ArrayList<>();
+        Set<UUID> selectedExtraOptionIds = new HashSet<>();
+        Set<UUID> menuItemIds = new HashSet<>();
+        boolean hasPaymentItemSnapshots = false;
+
+        for (TableOrderPayment payment : order.getPayments()) {
+            for (TableOrderPaymentItem paymentItem : payment.getItems()) {
+                hasPaymentItemSnapshots = true;
+                if (paymentItem.getMenuItemId() != null) {
+                    menuItemIds.add(paymentItem.getMenuItemId());
+                }
+                for (TableOrderPaymentItemSelectedExtraOption selectedExtraOption : paymentItem.getSelectedExtraOptions()) {
+                    selectedExtraOptionIds.add(selectedExtraOption.getExtraOptionId());
+                }
+            }
+        }
+
+        if (!hasPaymentItemSnapshots) {
+            return buildStockMovementRequestsFromOpenItems(order);
+        }
+
+        Map<UUID, MenuItem> menuItemById = new HashMap<>();
+        if (!menuItemIds.isEmpty()) {
+            for (MenuItem menuItem : menuItemRepository.findAllById(menuItemIds)) {
+                menuItemById.put(menuItem.getId(), menuItem);
+            }
+        }
+
+        Map<UUID, ProductExtraOption> extraOptionById = resolveExtraOptionsById(selectedExtraOptionIds);
+
+        for (TableOrderPayment payment : order.getPayments()) {
+            for (TableOrderPaymentItem paymentItem : payment.getItems()) {
+                if (paymentItem.getMenuItemId() == null) {
+                    continue;
+                }
+                MenuItem menuItem = menuItemById.get(paymentItem.getMenuItemId());
+                if (menuItem == null) {
+                    log.warn("Skipping stock deduction for missing menu item {} on order {}",
+                            paymentItem.getMenuItemId(), order.getId());
+                    continue;
+                }
+                appendMenuItemStockRequests(requests, order, menuItem, paymentItem.getQuantity(),
+                        paymentItem.getSelectedExtraOptions(), extraOptionById);
+            }
+        }
+        return requests;
+    }
+
+    private List<StockMovementFeignRequest> buildStockMovementRequestsFromOpenItems(TableOrder order) {
         List<StockMovementFeignRequest> requests = new ArrayList<>();
         Set<UUID> selectedExtraOptionIds = new HashSet<>();
         for (TableOrderItem item : order.getItems()) {
@@ -580,50 +678,63 @@ public class TableOrderService implements
                 selectedExtraOptionIds.add(selectedExtraOption.getExtraOptionId());
             }
         }
+        Map<UUID, ProductExtraOption> extraOptionById = resolveExtraOptionsById(selectedExtraOptionIds);
+
+        for (TableOrderItem item : order.getItems()) {
+            appendMenuItemStockRequests(requests, order, item.getMenuItem(), item.getQuantity(),
+                    item.getSelectedExtraOptions(), extraOptionById);
+        }
+        return requests;
+    }
+
+    private Map<UUID, ProductExtraOption> resolveExtraOptionsById(Set<UUID> selectedExtraOptionIds) {
         Map<UUID, ProductExtraOption> extraOptionById = new HashMap<>();
         if (!selectedExtraOptionIds.isEmpty()) {
             for (ProductExtraOption option : productExtraOptionRepository.findAllByIdIn(selectedExtraOptionIds)) {
                 extraOptionById.put(option.getId(), option);
             }
         }
+        return extraOptionById;
+    }
 
-        for (TableOrderItem item : order.getItems()) {
-            MenuItem menuItem = item.getMenuItem();
-            List<MenuItemProduct> compositionItems = menuItem.getProductLinks();
-
-            if (compositionItems != null && !compositionItems.isEmpty()) {
-                for (MenuItemProduct compositionItem : compositionItems) {
-                    if (compositionItem.getProduct() == null) {
-                        continue;
-                    }
-                    int menuProductQuantity = compositionItem.getQuantity() == null || compositionItem.getQuantity() < 1
-                            ? 1
-                            : compositionItem.getQuantity();
-                    appendProductRecipeStockRequests(requests, order, item, menuItem, compositionItem, menuProductQuantity, extraOptionById);
-                }
-                continue;
-            }
-
-            List<MenuItemProduct> products = menuItem.getProductLinks();
-            if (products == null || products.isEmpty()) {
-                continue;
-            }
-            for (MenuItemProduct product : products) {
-                appendProductRecipeStockRequests(requests, order, item, menuItem, product, 1, extraOptionById);
-            }
+    private void appendMenuItemStockRequests(
+            List<StockMovementFeignRequest> requests,
+            TableOrder order,
+            MenuItem menuItem,
+            int quantity,
+            List<?> selectedExtraOptions,
+            Map<UUID, ProductExtraOption> extraOptionById
+    ) {
+        if (menuItem == null || quantity <= 0) {
+            return;
         }
-        return requests;
+        List<MenuItemProduct> compositionItems = menuItem.getProductLinks();
+        if (compositionItems == null || compositionItems.isEmpty()) {
+            return;
+        }
+        for (MenuItemProduct compositionItem : compositionItems) {
+            if (compositionItem.getProduct() == null) {
+                continue;
+            }
+            int menuProductQuantity = compositionItem.getQuantity() == null || compositionItem.getQuantity() < 1
+                    ? 1
+                    : compositionItem.getQuantity();
+            appendProductRecipeStockRequests(requests, order, quantity, selectedExtraOptions, menuItem,
+                    compositionItem, menuProductQuantity, extraOptionById);
+        }
     }
 
     private void appendProductRecipeStockRequests(
             List<StockMovementFeignRequest> requests,
             TableOrder order,
-            TableOrderItem item,
+            int quantity,
+            List<?> selectedExtraOptions,
             MenuItem menuItem,
             MenuItemProduct product,
             int menuProductQuantity,
             Map<UUID, ProductExtraOption> extraOptionById
     ) {
+        List<?> extraOptions = selectedExtraOptions == null ? List.of() : selectedExtraOptions;
         List<ProductRecipe> defaultRecipes = product.getProduct().getRecipes();
         for (ProductRecipe recipe : defaultRecipes) {
             for (ProductRecipeItem recipeItem : recipe.getItems()) {
@@ -634,7 +745,7 @@ public class TableOrderService implements
                     continue;
                 }
                 BigDecimal qty = recipeBaseQuantity
-                        .multiply(BigDecimal.valueOf(item.getQuantity()))
+                        .multiply(BigDecimal.valueOf(quantity))
                         .multiply(BigDecimal.valueOf(menuProductQuantity))
                         .setScale(6, RoundingMode.HALF_UP);
                 requests.add(StockMovementFeignRequest.builder()
@@ -643,31 +754,42 @@ public class TableOrderService implements
                         .quantity(qty)
                         .referenceType("TABLE_ORDER")
                         .referenceId(order.getId())
-                        .notes(menuItem.getName() + " x" + item.getQuantity())
+                        .notes(menuItem.getName() + " x" + quantity)
                         .tenantId(order.getTenantId())
                         .build());
             }
 
-            for (TableOrderItemSelectedExtraOption selectedExtraOption : item.getSelectedExtraOptions()) {
-                ProductExtraOption option = extraOptionById.get(selectedExtraOption.getExtraOptionId());
+            for (Object selectedExtraOption : extraOptions) {
+                UUID extraOptionId = resolveSelectedExtraOptionId(selectedExtraOption);
+                ProductExtraOption option = extraOptionById.get(extraOptionId);
                 if (option == null || option.getItems() == null) {
                     continue;
                 }
                 for (ProductExtraOptionItem optionItem : option.getItems()) {
                     BigDecimal qty = optionItem.getQuantity()
-                            .multiply(BigDecimal.valueOf(item.getQuantity()));
+                            .multiply(BigDecimal.valueOf(quantity));
                     requests.add(StockMovementFeignRequest.builder()
                             .stockResourceId(optionItem.getStockResource().getId())
                             .type(StockMovementType.SALE)
                             .quantity(qty)
                             .referenceType("TABLE_ORDER")
                             .referenceId(order.getId())
-                            .notes(option.getName() + " x" + item.getQuantity())
+                            .notes(option.getName() + " x" + quantity)
                             .tenantId(order.getTenantId())
                             .build());
                 }
             }
         }
+    }
+
+    private UUID resolveSelectedExtraOptionId(Object selectedExtraOption) {
+        if (selectedExtraOption instanceof TableOrderItemSelectedExtraOption itemOption) {
+            return itemOption.getExtraOptionId();
+        }
+        if (selectedExtraOption instanceof TableOrderPaymentItemSelectedExtraOption paymentOption) {
+            return paymentOption.getExtraOptionId();
+        }
+        return null;
     }
 
     /**

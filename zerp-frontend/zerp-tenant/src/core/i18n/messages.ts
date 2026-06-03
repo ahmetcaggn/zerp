@@ -83,6 +83,7 @@ export interface MessageDictionary {
       paySelected: string
       paidSoFar: string
       remaining: string
+      fillRemainingAmount: string
       recordPayment: string
       completePayment: string
       partialItemsUpdatedToast: string

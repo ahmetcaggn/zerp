@@ -960,6 +960,7 @@ export const trMessages = {
       paySelected: 'Seçilileri Öde',
       paidSoFar: 'Ödenen',
       remaining: 'Kalan',
+      fillRemainingAmount: 'Kalan Tutarı Gir',
       recordPayment: 'Kaydet',
       completePayment: 'Ödemeyi Tamamla',
       partialItemsUpdatedToast: 'Seçili ürünler ödendi',
