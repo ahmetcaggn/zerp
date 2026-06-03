@@ -1,4 +1,4 @@
-package org.zerp.employee.Exception;
+package org.zerp.employee.exception;
 
 public class DuplicateResourceException extends RuntimeException {
     

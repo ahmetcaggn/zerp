@@ -27,7 +27,7 @@ import org.zerp.common.entity.employee.Employee;
 import org.zerp.common.entity.employee.EmployeeContact;
 import org.zerp.common.entity.employee.EmploymentStatus;
 import org.zerp.common.resource.service.IResourceService;
-import org.zerp.employee.Exception.DuplicateResourceException;
+import org.zerp.employee.exception.DuplicateResourceException;
 import org.zerp.employee.client.UserServiceClient;
 import org.zerp.employee.dtos.request.AdminCreateEmployeeRequestDto;
 import org.zerp.employee.dtos.request.CreateEmployeeRequestDto;

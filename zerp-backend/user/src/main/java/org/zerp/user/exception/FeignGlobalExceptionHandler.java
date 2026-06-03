@@ -1,6 +1,7 @@
 package org.zerp.user.exception;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +13,9 @@ import org.zerp.common.dto.ApiResponse;
 import org.zerp.common.dto.ErrorDetails;
 
 @Log4j2
-@RestControllerAdvice
-public class GlobalExceptionHandler {
+@Order(1)
+@RestControllerAdvice(basePackages = "org.zerp.user.controller.feign")
+public class FeignGlobalExceptionHandler {
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiResponse<ErrorDetails>> handleResponseStatusException(ResponseStatusException exception) {
         log.warn("Handling ResponseStatusException with status {} and reason '{}'",
