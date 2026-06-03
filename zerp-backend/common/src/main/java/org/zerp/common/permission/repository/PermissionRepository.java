@@ -25,7 +25,6 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
             SELECT CASE WHEN COUNT(p) > 0 THEN TRUE ELSE FALSE END FROM Permission p
                   WHERE p.userId = :userId
                     AND p.action = 'ADMIN'
-                    AND :targetUserId IS NOT NULL
                     AND p.targetType = 'TENANT'
                     AND p.targetId = :tenantId
             """)
@@ -38,7 +37,6 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
             SELECT CASE WHEN COUNT(p) > 0 THEN TRUE ELSE FALSE END FROM Permission p
                   WHERE p.userId = :userId
                     AND p.action = 'ADMIN'
-                    AND :targetUserId IS NOT NULL
                     AND p.targetType = 'TENANT_ROOT'
                     AND p.targetId = :#{T(org.zerp.common.entity.TenantRoot).ID}
             """)
