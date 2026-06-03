@@ -1,0 +1,38 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'eureka'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['eureka:8761']
+
+  - job_name: 'gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['gateway:8080']
+
+  - job_name: 'microservices'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets:
+          - 'crm:8081'
+          - 'employee:8082'
+          - 'notification:8083'
+          - 'resource:8084'
+          - 'sale:8085'
+          # - 'suggestion:8086'
+          - 'user:8087'
+
+  # - job_name: 'aggregated-services'
+  #   metrics_path: '/actuator/prometheus'
+  #   static_configs:
+  #     - targets:
+  #         - 'aggregated:8081'
+  #         - 'aggregated:8082'
+  #         - 'aggregated:8083'
+  #         - 'aggregated:8084'
+  #         - 'aggregated:8085'
+  #         - 'aggregated:8086'
+  #         - 'aggregated:8087'
