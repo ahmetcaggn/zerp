@@ -53,6 +53,9 @@ export async function getPublicShopsFeed(params: PublicShopsFeedParams): Promise
   if (params.cuisineCategory) {
     query.set('cuisineCategory', params.cuisineCategory)
   }
+  params.cuisineCategories?.forEach((cuisineCategory) => {
+    query.append('cuisineCategories', cuisineCategory)
+  })
   if (typeof params.lat === 'number') {
     query.set('lat', String(params.lat))
   }

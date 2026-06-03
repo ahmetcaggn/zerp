@@ -16,9 +16,12 @@ import {
   useTheme,
 } from '@mui/material'
 import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
 
+import type { CuisineCategory } from '../data/cuisine-categories'
+import { cuisineCategoryLabelKey } from '../data/cuisine-categories'
 import type { Restaurant } from '../types'
 import { FadeInImage } from './fade-in-image'
 
@@ -45,6 +48,171 @@ interface RestaurantCardProps {
     lat: number
     lng: number
   } | null
+}
+
+function CuisineCategoryTags({ categories }: { categories: CuisineCategory[] }) {
+  const { t } = useI18n()
+  const theme = useTheme()
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const measureRef = useRef<HTMLDivElement | null>(null)
+  const [visibleCount, setVisibleCount] = useState(categories.length)
+  const [hiddenCount, setHiddenCount] = useState(0)
+
+  const labels = useMemo(
+    () => categories.map((category) => t(cuisineCategoryLabelKey(category))),
+    [categories, t],
+  )
+
+  useEffect(() => {
+    const container = containerRef.current
+    const measure = measureRef.current
+    if (!container || !measure) {
+      return
+    }
+
+    const currentContainer = container
+    const currentMeasure = measure
+
+    function updateVisibleCount() {
+      const availableWidth = currentContainer.clientWidth
+      const gap = 6
+      const categoryChipWidths = Array.from(
+        currentMeasure.querySelectorAll('[data-measure-kind="category"]'),
+      ).map((child) => Math.ceil(child.getBoundingClientRect().width))
+      const overflowChipWidths = new Map(
+        Array.from(currentMeasure.querySelectorAll('[data-measure-kind="overflow"]')).map(
+          (child) => [
+            Number((child as HTMLElement).dataset.remainingCount),
+            Math.ceil(child.getBoundingClientRect().width),
+          ],
+        ),
+      )
+      const totalCount = categoryChipWidths.length
+      const totalWidth = categoryChipWidths.reduce(
+        (width, chipWidth, index) => width + chipWidth + (index > 0 ? gap : 0),
+        0,
+      )
+
+      if (totalWidth <= availableWidth) {
+        setVisibleCount(totalCount)
+        setHiddenCount(0)
+        return
+      }
+
+      const prefixWidths = categoryChipWidths.reduce<number[]>((widths, chipWidth, index) => {
+        const previousWidth = widths[index - 1] ?? 0
+        widths.push(previousWidth + chipWidth + (index > 0 ? gap : 0))
+        return widths
+      }, [])
+
+      for (let nextVisibleCount = totalCount - 1; nextVisibleCount >= 0; nextVisibleCount -= 1) {
+        const nextHiddenCount = totalCount - nextVisibleCount
+        const overflowWidth = overflowChipWidths.get(nextHiddenCount)
+        if (!overflowWidth) {
+          continue
+        }
+
+        const visibleWidth = nextVisibleCount > 0 ? (prefixWidths[nextVisibleCount - 1] ?? 0) : 0
+        const combinedWidth =
+          visibleWidth + overflowWidth + (nextVisibleCount > 0 ? gap : 0)
+
+        if (combinedWidth <= availableWidth) {
+          setVisibleCount(nextVisibleCount)
+          setHiddenCount(nextHiddenCount)
+          return
+        }
+      }
+
+      setVisibleCount(0)
+      setHiddenCount(0)
+    }
+
+    updateVisibleCount()
+
+    const resizeObserver = new ResizeObserver(updateVisibleCount)
+    resizeObserver.observe(currentContainer)
+    window.addEventListener('resize', updateVisibleCount)
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', updateVisibleCount)
+    }
+  }, [labels])
+
+  if (categories.length === 0) {
+    return null
+  }
+
+  const chipSx = {
+    maxWidth: '100%',
+    height: 24,
+    borderRadius: '8px',
+    backgroundColor: theme.palette.action.hover,
+    color: theme.palette.text.secondary,
+    flexShrink: 0,
+    fontSize: 12,
+    fontWeight: 700,
+    '& .MuiChip-label': {
+      overflow: 'hidden',
+      px: 1,
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    },
+  } as const
+
+  return (
+    <Box sx={{ position: 'relative', minWidth: 0 }}>
+      <Box
+        ref={containerRef}
+        sx={{
+          display: 'flex',
+          gap: 0.75,
+          minHeight: 24,
+          minWidth: 0,
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {labels.slice(0, visibleCount).map((label) => (
+          <Chip key={label} label={label} size="small" sx={chipSx} />
+        ))}
+        {hiddenCount > 0 && <Chip label={`+${hiddenCount}`} size="small" sx={chipSx} />}
+      </Box>
+      <Box
+        ref={measureRef}
+        aria-hidden="true"
+        sx={{
+          display: 'flex',
+          gap: 0.75,
+          height: 0,
+          left: 0,
+          overflow: 'hidden',
+          pointerEvents: 'none',
+          position: 'absolute',
+          top: 0,
+          visibility: 'hidden',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {labels.map((label) => (
+          <Chip key={label} data-measure-kind="category" label={label} size="small" sx={chipSx} />
+        ))}
+        {labels.map((_, index) => {
+          const remainingCount = index + 1
+          return (
+            <Chip
+              key={`overflow-${remainingCount}`}
+              data-measure-kind="overflow"
+              data-remaining-count={remainingCount}
+              label={`+${remainingCount}`}
+              size="small"
+              sx={chipSx}
+            />
+          )
+        })}
+      </Box>
+    </Box>
+  )
 }
 
 export function RestaurantCard({ restaurant, userLocation }: RestaurantCardProps) {
@@ -218,32 +386,20 @@ export function RestaurantCard({ restaurant, userLocation }: RestaurantCardProps
             </Typography>
           )}
 
-          <Stack
-            direction="row"
-            alignItems="flex-start"
-            justifyContent="space-between"
-            spacing={1.5}
+          <Typography
+            component="h3"
+            sx={{
+              fontSize: { xs: 18, sm: 20 },
+              fontWeight: 700,
+              color: theme.palette.text.primary,
+              lineHeight: 1.25,
+              minWidth: 0,
+            }}
           >
-            <Typography
-              component="h3"
-              sx={{
-                fontSize: { xs: 18, sm: 20 },
-                fontWeight: 700,
-                color: theme.palette.text.primary,
-                lineHeight: 1.25,
-                minWidth: 0,
-              }}
-            >
-              {restaurant.name}
-            </Typography>
-            <Chip
-              label="-"
-              size="small"
-              variant="outlined"
-              color="primary"
-              sx={{ fontWeight: 700, flexShrink: 0 }}
-            />
-          </Stack>
+            {restaurant.name}
+          </Typography>
+
+          <CuisineCategoryTags categories={restaurant.cuisineCategories ?? []} />
 
           {/* Location */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>

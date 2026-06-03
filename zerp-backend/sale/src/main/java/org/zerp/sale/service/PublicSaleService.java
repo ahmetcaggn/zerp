@@ -26,6 +26,7 @@ import org.zerp.common.entity.sale.MenuItem;
 import org.zerp.common.entity.sale.PublicCartOrder;
 import org.zerp.common.entity.sale.PublicCartOrderItem;
 import org.zerp.common.entity.sale.ShopCuisineCategory;
+import org.zerp.common.entity.sale.ShopWorkingHour;
 import org.zerp.sale.dto.publicsale.PublicActiveMenuDTO;
 import org.zerp.sale.dto.publicsale.PublicCartOrderCreateRequest;
 import org.zerp.sale.dto.publicsale.PublicCartOrderCreateResponse;
@@ -39,6 +40,7 @@ import org.zerp.sale.dto.publicsale.PublicShopFeedResponseDTO;
 import org.zerp.sale.dto.publicsale.PublicShopFeedSortBy;
 import org.zerp.sale.dto.publicsale.PublicShopDTO;
 import org.zerp.sale.dto.publicsale.PublicShopMenuResponseDTO;
+import org.zerp.sale.dto.shop.ShopWorkingHourDTO;
 import org.zerp.sale.feign.ThumborFeignClient;
 import org.zerp.sale.repository.MenuCategoryRepository;
 import org.zerp.sale.repository.MenuItemRepository;
@@ -48,10 +50,13 @@ import org.zerp.sale.repository.PublicCartOrderRepository;
 import org.zerp.sale.repository.ShopRepository;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.security.SecureRandom;
+import java.util.Set;
 import java.util.UUID;
 
 @Log4j2
@@ -105,6 +110,7 @@ public class PublicSaleService {
             String city,
             String state,
             String cuisineCategory,
+            List<String> cuisineCategories,
             PublicShopFeedSortBy sortBy,
             PublicShopFeedOrder order,
             Double latitude,
@@ -117,14 +123,23 @@ public class PublicSaleService {
         String normalizedQuery = normalizeFilterValue(query);
         String normalizedCity = normalizeFilterValue(city);
         String normalizedState = normalizeFilterValue(state);
-        ShopCuisineCategory resolvedCuisineCategory = resolveCuisineCategory(cuisineCategory);
+        Set<ShopCuisineCategory> resolvedCuisineCategories = resolveCuisineCategories(
+                cuisineCategory,
+                cuisineCategories
+        );
         boolean applyQuery = normalizedQuery != null;
         boolean applyCity = normalizedCity != null;
         boolean applyState = normalizedState != null;
-        boolean applyCuisineCategory = resolvedCuisineCategory != null;
+        boolean applyCuisineCategories = !resolvedCuisineCategories.isEmpty();
         String queryValue = applyQuery ? normalizedQuery : "";
         String cityValue = applyCity ? normalizedCity : "";
         String stateValue = applyState ? normalizedState : "";
+        List<ShopCuisineCategory> cuisineCategoryValues = applyCuisineCategories
+                ? List.copyOf(resolvedCuisineCategories)
+                : List.of(ShopCuisineCategory.BURGER);
+        List<String> cuisineCategoryNames = cuisineCategoryValues.stream()
+                .map(ShopCuisineCategory::name)
+                .toList();
         PublicShopFeedSortBy resolvedSortBy = sortBy == null ? PublicShopFeedSortBy.NAME : sortBy;
         PublicShopFeedOrder resolvedOrder = order == null ? PublicShopFeedOrder.ASC : order;
 
@@ -152,8 +167,8 @@ public class PublicSaleService {
                             longitude,
                             applyQuery,
                             queryValue,
-                            applyCuisineCategory,
-                            resolvedCuisineCategory == null ? "" : resolvedCuisineCategory.name(),
+                            applyCuisineCategories,
+                            cuisineCategoryNames,
                             pageable
                     )
                     : shopRepository.findPublicShopsFeedNearbyAsc(
@@ -161,8 +176,8 @@ public class PublicSaleService {
                             longitude,
                             applyQuery,
                             queryValue,
-                            applyCuisineCategory,
-                            resolvedCuisineCategory == null ? "" : resolvedCuisineCategory.name(),
+                            applyCuisineCategories,
+                            cuisineCategoryNames,
                             pageable
                     );
         } else {
@@ -181,8 +196,8 @@ public class PublicSaleService {
                     cityValue,
                     applyState,
                     stateValue,
-                    applyCuisineCategory,
-                    resolvedCuisineCategory == null ? ShopCuisineCategory.BURGER : resolvedCuisineCategory,
+                    applyCuisineCategories,
+                    cuisineCategoryValues,
                     pageable
             );
         }
@@ -428,6 +443,7 @@ public class PublicSaleService {
         dto.setLatitude(entity.getLatitude());
         dto.setLongitude(entity.getLongitude());
         dto.setCuisineCategories(entity.getCuisineCategories());
+        dto.setWorkingHours(toWorkingHourDTOs(entity.getWorkingHours()));
         if (originLatitude != null && originLongitude != null
                 && entity.getLatitude() != null && entity.getLongitude() != null) {
             dto.setDistanceKm(calculateDistanceKm(originLatitude, originLongitude, entity.getLatitude(), entity.getLongitude()));
@@ -495,6 +511,26 @@ public class PublicSaleService {
         return EARTH_RADIUS_KM * c;
     }
 
+    private List<ShopWorkingHourDTO> toWorkingHourDTOs(Set<ShopWorkingHour> workingHours) {
+        if (workingHours == null || workingHours.isEmpty()) {
+            return List.of();
+        }
+
+        return workingHours.stream()
+                .sorted(Comparator.comparing(ShopWorkingHour::getDayOfWeek))
+                .map(this::toWorkingHourDTO)
+                .toList();
+    }
+
+    private ShopWorkingHourDTO toWorkingHourDTO(ShopWorkingHour workingHour) {
+        ShopWorkingHourDTO dto = new ShopWorkingHourDTO();
+        dto.setDayOfWeek(workingHour.getDayOfWeek());
+        dto.setOpensAt(workingHour.getOpensAt());
+        dto.setClosesAt(workingHour.getClosesAt());
+        dto.setOpenAllDay(workingHour.isOpenAllDay());
+        return dto;
+    }
+
     private PublicActiveMenuDTO toPublicActiveMenu(Menu menu) {
         PublicActiveMenuDTO dto = new PublicActiveMenuDTO();
         dto.setId(menu.getId());
@@ -556,5 +592,29 @@ public class PublicSaleService {
         } catch (IllegalArgumentException ignored) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported cuisine category: " + input);
         }
+    }
+
+    private Set<ShopCuisineCategory> resolveCuisineCategories(
+            String cuisineCategory,
+            List<String> cuisineCategories
+    ) {
+        Set<ShopCuisineCategory> resolved = new LinkedHashSet<>();
+        ShopCuisineCategory singleCategory = resolveCuisineCategory(cuisineCategory);
+        if (singleCategory != null) {
+            resolved.add(singleCategory);
+        }
+
+        if (cuisineCategories == null) {
+            return resolved;
+        }
+
+        for (String category : cuisineCategories) {
+            ShopCuisineCategory resolvedCategory = resolveCuisineCategory(category);
+            if (resolvedCategory != null) {
+                resolved.add(resolvedCategory);
+            }
+        }
+
+        return resolved;
     }
 }

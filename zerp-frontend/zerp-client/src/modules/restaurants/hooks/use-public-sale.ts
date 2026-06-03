@@ -56,6 +56,7 @@ export function usePublicShopsFeedInfinite(params: Omit<PublicShopsFeedParams, '
   const enabled = isNearbyMode
     ? typeof params.lat === 'number' && typeof params.lng === 'number'
     : true
+  const cuisineCategoriesKey = params.cuisineCategories?.join(',') ?? ''
 
   return useInfiniteQuery({
     queryKey: [
@@ -66,6 +67,7 @@ export function usePublicShopsFeedInfinite(params: Omit<PublicShopsFeedParams, '
       params.city ?? '',
       params.state ?? '',
       params.cuisineCategory ?? '',
+      cuisineCategoriesKey,
       params.sortBy ?? 'NAME',
       params.order ?? 'ASC',
       params.lat ?? null,

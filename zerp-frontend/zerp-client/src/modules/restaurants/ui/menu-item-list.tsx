@@ -1,5 +1,6 @@
 'use client'
 
+import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded'
 import AddIcon from '@mui/icons-material/Add'
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded'
@@ -41,13 +42,20 @@ import { queryKeys } from '@/core/api/query-keys'
 import { useI18n } from '@/core/i18n/i18n-provider'
 
 import { getPublicCategoryMenuItems } from '../api/public-sale-client'
+import { cuisineCategoryLabelKey } from '../data/cuisine-categories'
 import {
   useCreatePublicCartOrder,
   usePublicCategoryMenuItems,
   usePublicShopMenu,
   usePublicShops,
 } from '../hooks/use-public-sale'
-import type { MenuLanguage, Product as MenuItem, PublicMenuItemDto } from '../types'
+import type {
+  MenuLanguage,
+  Product as MenuItem,
+  PublicMenuItemDto,
+  ShopDayOfWeek,
+  ShopWorkingHourDto,
+} from '../types'
 import {
   addItemToCart,
   buildCartOrderPayload,
@@ -67,6 +75,24 @@ const PREVIEW_LIMIT = 4
 const ALL_CATEGORY_ID = '__all__'
 const MENU_IMAGE_FALLBACK_URL = 'https://placehold.co/400'
 const SHOP_IMAGE_FALLBACK_URL = 'https://placehold.co/1400x600?text=Store'
+const SHOP_DAYS: ShopDayOfWeek[] = [
+  'MONDAY',
+  'TUESDAY',
+  'WEDNESDAY',
+  'THURSDAY',
+  'FRIDAY',
+  'SATURDAY',
+  'SUNDAY',
+]
+const JS_DAY_TO_SHOP_DAY: ShopDayOfWeek[] = [
+  'SUNDAY',
+  'MONDAY',
+  'TUESDAY',
+  'WEDNESDAY',
+  'THURSDAY',
+  'FRIDAY',
+  'SATURDAY',
+]
 
 type PublicImageSize = 'SMALL' | 'MEDIUM' | 'LARGE' | 'ORIGINAL'
 
@@ -85,6 +111,18 @@ function ensureWebsiteUrl(value: string): string {
   }
 
   return `https://${value}`
+}
+
+function formatWorkingHour(workingHour: ShopWorkingHourDto | undefined, openAllDayLabel: string): string {
+  if (workingHour?.openAllDay) {
+    return openAllDayLabel
+  }
+
+  if (!workingHour?.opensAt || !workingHour.closesAt) {
+    return ''
+  }
+
+  return `${workingHour.opensAt.slice(0, 5)} - ${workingHour.closesAt.slice(0, 5)}`
 }
 
 function isValidCoordinatePair(
@@ -133,6 +171,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
   const [cartOrderNote, setCartOrderNote] = useState('')
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false)
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false)
+  const [isWorkingHoursModalOpen, setIsWorkingHoursModalOpen] = useState(false)
   const [isLeafletUnavailable, setIsLeafletUnavailable] = useState(false)
   const [qrOrderCode, setQrOrderCode] = useState<string | null>(null)
   const [cartError, setCartError] = useState<string | null>(null)
@@ -155,6 +194,26 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
     () => shops.find((shop) => shop.id === restaurantId),
     [shops, restaurantId],
   )
+  const cuisineCategoryLabels = useMemo(
+    () =>
+      (restaurant?.cuisineCategories ?? []).map((category) =>
+        t(cuisineCategoryLabelKey(category)),
+      ),
+    [restaurant?.cuisineCategories, t],
+  )
+  const orderedWorkingHours = useMemo(() => {
+    const byDay = new Map((restaurant?.workingHours ?? []).map((item) => [item.dayOfWeek, item]))
+    return SHOP_DAYS.flatMap((dayOfWeek) => {
+      const workingHour = byDay.get(dayOfWeek)
+      return workingHour ? [workingHour] : []
+    })
+  }, [restaurant?.workingHours])
+  const todayWorkingHour = useMemo(() => {
+    const today = JS_DAY_TO_SHOP_DAY[new Date().getDay()]
+    return orderedWorkingHours.find((workingHour) => workingHour.dayOfWeek === today)
+  }, [orderedWorkingHours])
+  const todayWorkingHourLabel =
+    formatWorkingHour(todayWorkingHour, t('restaurants.openAllDay')) || t('restaurants.notProvided')
   const hasCoordinates =
     typeof restaurant?.latitude === 'number' && typeof restaurant?.longitude === 'number'
   const tenantValue = restaurant?.tenantName ?? restaurant?.tenantId
@@ -754,36 +813,68 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
 
               <Typography color="text.secondary">{restaurantLabel}</Typography>
 
-              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                <Chip
-                  icon={<StarRoundedIcon />}
-                  label={`${t('restaurants.ratingLabel')}: ${ratingValue}`}
-                  variant="outlined"
-                  sx={{ fontWeight: 700 }}
-                />
-                <Chip
-                  icon={<LocalOfferRoundedIcon />}
-                  label={`${t('restaurants.statusLabel')}: ${statusValue}`}
-                  variant="outlined"
-                  sx={{ fontWeight: 700 }}
-                />
-                {distanceValue && (
+              <Box sx={{ display: 'grid', gap: 1 }}>
+                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                   <Chip
-                    icon={<LocationOnRoundedIcon />}
-                    label={distanceValue}
+                    icon={<StarRoundedIcon />}
+                    label={`${t('restaurants.ratingLabel')}: ${ratingValue}`}
                     variant="outlined"
                     sx={{ fontWeight: 700 }}
                   />
+                  <Chip
+                    icon={<LocalOfferRoundedIcon />}
+                    label={`${t('restaurants.statusLabel')}: ${statusValue}`}
+                    variant="outlined"
+                    sx={{ fontWeight: 700 }}
+                  />
+                  {distanceValue && (
+                    <Chip
+                      icon={<LocationOnRoundedIcon />}
+                      label={distanceValue}
+                      variant="outlined"
+                      sx={{ fontWeight: 700 }}
+                    />
+                  )}
+                  <Chip
+                    icon={<AccessTimeRoundedIcon />}
+                    label={`${t('restaurants.todayWorkingHours')}: ${todayWorkingHourLabel}`}
+                    variant="outlined"
+                    sx={{ fontWeight: 700 }}
+                  />
+                  <Button
+                    variant="text"
+                    startIcon={<AccessTimeRoundedIcon />}
+                    onClick={() => setIsWorkingHoursModalOpen(true)}
+                    sx={{ px: 0.75, minWidth: 'auto' }}
+                  >
+                    {t('restaurants.allWorkingHours')}
+                  </Button>
+                  <Button
+                    variant="text"
+                    startIcon={<InfoOutlinedIcon />}
+                    onClick={handleOpenAboutModal}
+                    sx={{ px: 0.75, minWidth: 'auto' }}
+                  >
+                    {t('restaurants.about')}
+                  </Button>
+                </Stack>
+
+                {cuisineCategoryLabels.length > 0 && (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {cuisineCategoryLabels.map((label) => (
+                      <Chip
+                        key={label}
+                        label={label}
+                        sx={{
+                          bgcolor: 'action.hover',
+                          color: 'text.secondary',
+                          fontWeight: 700,
+                        }}
+                      />
+                    ))}
+                  </Box>
                 )}
-                <Button
-                  variant="text"
-                  startIcon={<InfoOutlinedIcon />}
-                  onClick={handleOpenAboutModal}
-                  sx={{ px: 0.75, minWidth: 'auto' }}
-                >
-                  {t('restaurants.about')}
-                </Button>
-              </Stack>
+              </Box>
             </Stack>
           </Box>
         </Paper>
@@ -1067,6 +1158,46 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
             )}
           </Box>
         </Box>
+
+        <Dialog
+          open={isWorkingHoursModalOpen}
+          onClose={() => setIsWorkingHoursModalOpen(false)}
+          fullWidth
+          maxWidth="xs"
+        >
+          <DialogTitle sx={{ pb: 1, fontWeight: 800 }}>
+            {t('restaurants.workHours')}
+          </DialogTitle>
+          <DialogContent>
+            {orderedWorkingHours.length > 0 ? (
+              <Stack spacing={1}>
+                {orderedWorkingHours.map((workingHour) => (
+                  <Paper
+                    key={workingHour.dayOfWeek}
+                    variant="outlined"
+                    sx={{
+                      p: 1.25,
+                      borderRadius: 1.25,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 1.5,
+                    }}
+                  >
+                    <Typography fontWeight={700}>
+                      {t(`restaurants.days.${workingHour.dayOfWeek}`)}
+                    </Typography>
+                    <Typography color="text.secondary" fontWeight={700}>
+                      {formatWorkingHour(workingHour, t('restaurants.openAllDay'))}
+                    </Typography>
+                  </Paper>
+                ))}
+              </Stack>
+            ) : (
+              <Alert severity="info">{t('restaurants.workingHoursUnavailable')}</Alert>
+            )}
+          </DialogContent>
+        </Dialog>
 
         <Dialog
           open={isAboutModalOpen}

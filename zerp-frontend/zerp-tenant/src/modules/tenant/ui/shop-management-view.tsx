@@ -11,9 +11,11 @@ import {
   Button,
   Card,
   CardContent,
+  Checkbox,
   Chip,
   CircularProgress,
   FormControl,
+  FormControlLabel,
   Grid,
   InputAdornment,
   InputLabel,
@@ -42,10 +44,32 @@ import {
 } from '../data/cuisine-categories'
 import { getDistrictOptions, resolveCityName, resolveDistrictName, TURKEY_CITY_OPTIONS } from '../data/tr-city-district-data'
 import { useShop, useShops, useUpdateShop, useUploadShopImage } from '../hooks/use-shops'
-import type { MenuLanguage, PatchShopRequestDto, ShopResponseDto } from '../types/shop'
+import type {
+  MenuLanguage,
+  PatchShopRequestDto,
+  ShopDayOfWeek,
+  ShopResponseDto,
+  ShopWorkingHourDto,
+} from '../types/shop'
 
 const ACCEPTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024
+const SHOP_DAYS: ShopDayOfWeek[] = [
+  'MONDAY',
+  'TUESDAY',
+  'WEDNESDAY',
+  'THURSDAY',
+  'FRIDAY',
+  'SATURDAY',
+  'SUNDAY',
+]
+const DEFAULT_WORKING_HOURS: ShopWorkingHourDto[] = SHOP_DAYS.map((dayOfWeek) => ({
+  dayOfWeek,
+  opensAt: '09:00',
+  closesAt: '22:00',
+  openAllDay: false,
+}))
+const TIME_VALUE_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/
 
 interface ShopFormState {
   name: string
@@ -63,6 +87,7 @@ interface ShopFormState {
   postalCode: string
   latitude: string
   longitude: string
+  workingHours: ShopWorkingHourDto[]
 }
 
 function toFormState(shop: ShopResponseDto): ShopFormState {
@@ -85,7 +110,32 @@ function toFormState(shop: ShopResponseDto): ShopFormState {
     postalCode: shop.postalCode ?? '',
     latitude: shop.latitude != null ? String(shop.latitude) : '',
     longitude: shop.longitude != null ? String(shop.longitude) : '',
+    workingHours: normalizeWorkingHours(shop.workingHours),
   }
+}
+
+function normalizeWorkingHours(workingHours?: ShopWorkingHourDto[]): ShopWorkingHourDto[] {
+  const byDay = new Map((workingHours ?? []).map((item) => [item.dayOfWeek, item]))
+
+  return DEFAULT_WORKING_HOURS.map((defaultWorkingHour) => {
+    const dayOfWeek = defaultWorkingHour.dayOfWeek
+    const item = byDay.get(dayOfWeek)
+    return {
+      dayOfWeek,
+      opensAt: normalizeTimeValue(item?.opensAt) ?? defaultWorkingHour.opensAt,
+      closesAt: normalizeTimeValue(item?.closesAt) ?? defaultWorkingHour.closesAt,
+      openAllDay: item?.openAllDay ?? defaultWorkingHour.openAllDay,
+    }
+  })
+}
+
+function normalizeTimeValue(value?: string): string | null {
+  if (!value) {
+    return null
+  }
+
+  const normalized = value.trim().slice(0, 5)
+  return TIME_VALUE_PATTERN.test(normalized) ? normalized : null
 }
 
 function normalizeOptional(value: string): string | null {
@@ -112,6 +162,18 @@ function parseOptionalCoordinate(value: string, field: 'latitude' | 'longitude')
   }
 
   return parsed
+}
+
+function isValidWorkingHour(workingHour: ShopWorkingHourDto): boolean {
+  if (workingHour.openAllDay) {
+    return true
+  }
+
+  return (
+    TIME_VALUE_PATTERN.test(workingHour.opensAt) &&
+    TIME_VALUE_PATTERN.test(workingHour.closesAt) &&
+    workingHour.opensAt < workingHour.closesAt
+  )
 }
 
 export function ShopManagementView() {
@@ -299,6 +361,11 @@ export function ShopManagementView() {
       return
     }
 
+    if (form.workingHours.some((workingHour) => !isValidWorkingHour(workingHour))) {
+      showToast(t('shops.workingHoursValidation'), { severity: 'warning' })
+      return
+    }
+
     const payload: PatchShopRequestDto = {
       name: form.name.trim(),
       description: normalizeOptional(form.description),
@@ -315,6 +382,7 @@ export function ShopManagementView() {
       latitude,
       longitude,
       cuisineCategories: form.cuisineCategories,
+      workingHours: form.workingHours,
     }
 
     try {
@@ -709,6 +777,122 @@ export function ShopManagementView() {
                           updateCurrentForm((current) => ({ ...current, description: event.target.value }))
                         }
                       />
+                    </Grid>
+
+                    <Grid size={{ xs: 12 }}>
+                      <Box
+                        sx={{
+                          p: 2,
+                          borderRadius: 2,
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          display: 'grid',
+                          gap: 1.5,
+                        }}
+                      >
+                        <Box>
+                          <Typography fontWeight={700}>{t('shops.workingHoursTitle')}</Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+                            {t('shops.workingHoursSubtitle')}
+                          </Typography>
+                        </Box>
+
+                        <Grid container spacing={1.25}>
+                          {form.workingHours.map((workingHour) => (
+                            <Grid key={workingHour.dayOfWeek} size={{ xs: 12, sm: 6 }}>
+                              <Box
+                                sx={{
+                                  display: 'grid',
+                                  gridTemplateColumns: {
+                                    xs: 'repeat(2, minmax(0, 1fr))',
+                                    md: 'minmax(88px, 1fr) minmax(0, 124px) minmax(0, 104px) minmax(0, 104px)',
+                                  },
+                                  gap: 1,
+                                  alignItems: 'center',
+                                  p: 1,
+                                  borderRadius: 1.5,
+                                  bgcolor: 'action.hover',
+                                }}
+                              >
+                                <Typography
+                                  variant="body2"
+                                  fontWeight={700}
+                                  sx={{ gridColumn: { xs: '1 / -1', md: 'auto' } }}
+                                >
+                                  {t(`shops.days.${workingHour.dayOfWeek}`)}
+                                </Typography>
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      size="small"
+                                      checked={workingHour.openAllDay}
+                                      onChange={(event) =>
+                                        updateCurrentForm((current) => ({
+                                          ...current,
+                                          workingHours: current.workingHours.map((item) =>
+                                            item.dayOfWeek === workingHour.dayOfWeek
+                                              ? {
+                                                  ...item,
+                                                  openAllDay: event.target.checked,
+                                                  opensAt: event.target.checked ? '00:00' : item.opensAt,
+                                                  closesAt: event.target.checked ? '23:59' : item.closesAt,
+                                                }
+                                              : item,
+                                          ),
+                                        }))
+                                      }
+                                    />
+                                  }
+                                  label={t('shops.openAllDayLabel')}
+                                  sx={{
+                                    m: 0,
+                                    '& .MuiFormControlLabel-label': {
+                                      fontSize: '0.8125rem',
+                                      fontWeight: 700,
+                                    },
+                                  }}
+                                />
+                                <TextField
+                                  label={t('shops.opensAtLabel')}
+                                  type="time"
+                                  size="small"
+                                  value={workingHour.opensAt}
+                                  disabled={workingHour.openAllDay}
+                                  onChange={(event) =>
+                                    updateCurrentForm((current) => ({
+                                      ...current,
+                                      workingHours: current.workingHours.map((item) =>
+                                        item.dayOfWeek === workingHour.dayOfWeek
+                                          ? { ...item, opensAt: event.target.value }
+                                          : item,
+                                      ),
+                                    }))
+                                  }
+                                  slotProps={{ htmlInput: { step: 300 } }}
+                                />
+                                <TextField
+                                  label={t('shops.closesAtLabel')}
+                                  type="time"
+                                  size="small"
+                                  value={workingHour.closesAt}
+                                  disabled={workingHour.openAllDay}
+                                  onChange={(event) =>
+                                    updateCurrentForm((current) => ({
+                                      ...current,
+                                      workingHours: current.workingHours.map((item) =>
+                                        item.dayOfWeek === workingHour.dayOfWeek
+                                          ? { ...item, closesAt: event.target.value }
+                                          : item,
+                                      ),
+                                    }))
+                                  }
+                                  slotProps={{ htmlInput: { step: 300 } }}
+                                />
+                              </Box>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </Box>
                     </Grid>
 
                     <Grid size={{ xs: 12, sm: 6 }}>
