@@ -8,8 +8,6 @@ services:
         SERVICE: eureka
     container_name: zerp-eureka
     hostname: eureka
-    ports:
-      - "${EUREKA_PORT}:8761"
     environment:
       SERVICE: eureka
       MODULE_NAME: eureka
@@ -20,6 +18,8 @@ services:
     volumes:
       - ../zerp-backend/local/docker-config/eureka.docker.properties:/config/eureka.properties:ro
     networks:
+      - vpn-network
+      - cloudflare_tunnel_network
       - zerp-net
 
   crm:
@@ -36,8 +36,6 @@ services:
       resources:
         limits:
           memory: 256M
-    ports:
-      - "8081:8081"
     environment:
       SERVICE: crm
       MODULE_NAME: crm
@@ -81,8 +79,6 @@ services:
       resources:
         limits:
           memory: 256M
-    ports:
-      - "8082:8082"
     environment:
       SERVICE: employee
       MODULE_NAME: employee
@@ -120,8 +116,6 @@ services:
       resources:
         limits:
           memory: 256M
-    ports:
-      - "8083:8083"
     environment:
       SERVICE: notification
       MODULE_NAME: notification
@@ -165,8 +159,6 @@ services:
       resources:
         limits:
           memory: 256M
-    ports:
-      - "8084:8084"
     environment:
       SERVICE: resource
       MODULE_NAME: resource
@@ -204,8 +196,6 @@ services:
       resources:
         limits:
           memory: 256M
-    ports:
-      - "8085:8085"
     environment:
       SERVICE: sale
       MODULE_NAME: sale
@@ -232,25 +222,6 @@ services:
     networks:
       - zerp-net
 
-  #     LOG4J2_CONFIG_PATH: ${SUGGESTION_LOG4J2_CONFIG_PATH}
-  #     JAVA_OPTS: ${SUGGESTION_JAVA_OPTS}
-  #     POSTGRES_HOST: ${POSTGRES_HOST}
-  #     POSTGRES_PORT: ${POSTGRES_PORT}
-  #     POSTGRES_USER: ${POSTGRES_USER}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #     POSTGRES_DB: ${POSTGRES_DB}
-  #     EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE}
-  #     THUMBOR_HOST: ${THUMBOR_HOST:-http://thumbor:8888}
-  #     MINIO_ENDPOINT: ${MINIO_ENDPOINT:-http://minio:9000}
-  #     SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO:-none}
-  #     spring.config.import: optional:file:/config/suggestion.properties
-  #   volumes:
-  #     - ../zerp-backend/local/docker-config/suggestion.docker.properties:/config/suggestion.properties:ro
-  #   depends_on:
-  #     - eureka
-  #   networks:
-  #     - zerp-net
-
   user:
     image: zerp-user:latest
     build:
@@ -265,8 +236,6 @@ services:
       resources:
         limits:
           memory: 256M
-    ports:
-      - "8087:8087"
     environment:
       SERVICE: user
       MODULE_NAME: user
@@ -309,8 +278,6 @@ services:
         SERVICE: gateway
     container_name: zerp-gateway
     hostname: gateway
-    ports:
-      - "${GATEWAY_PORT}:8080"
     environment:
       SERVICE: gateway
       MODULE_NAME: gateway
@@ -332,8 +299,13 @@ services:
       - sale
       - user
     networks:
+      - cloudflare_tunnel_network
       - zerp-net
 
 networks:
+  vpn-network:
+    external: true
+  cloudflare_tunnel_network:
+    external: true
   zerp-net:
     external: true
