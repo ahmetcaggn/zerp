@@ -181,19 +181,19 @@ for image_name in "${IMAGES[@]}"; do
     image_repo="${image_without_digest}"
   fi
 
-  versioned_image="${image_repo}:${VERSION_TAG}"
-  docker tag "${image_name}" "${versioned_image}"
-  TAGGED_IMAGES+=("${versioned_image}")
+  latest_image="${image_repo}:latest"
+  docker tag "${image_name}" "${latest_image}"
+  TAGGED_IMAGES+=("${latest_image}")
 done
 
 printf '%s\n' "${NEXT_VERSION}" > "${VERSION_FILE}"
-echo "Image version tag: ${VERSION_TAG}"
+echo "Image version tag: ${VERSION_TAG} (not tagged to Docker images)"
 
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "${TMP_DIR}"' EXIT
 
 IMAGE_BUNDLE="${TMP_DIR}/frontend-images-$(date +%Y%m%d%H%M%S).tar"
-docker save -o "${IMAGE_BUNDLE}" "${IMAGES[@]}" "${TAGGED_IMAGES[@]}"
+docker save -o "${IMAGE_BUNDLE}" "${TAGGED_IMAGES[@]}"
 
 REMOTE_BUNDLE="${REMOTE_UPLOAD_DIR}/$(basename "${IMAGE_BUNDLE}")"
 
