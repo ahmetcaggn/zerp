@@ -129,6 +129,7 @@ export interface MessageDictionary {
     tickets: string
     notifications: string
     profile: string
+    shopQr: string
   }
   profile: {
     title: string
@@ -469,6 +470,15 @@ export interface MessageDictionary {
     htmlModeLabel: string
     htmlBodyLabel: string
     recipientPlaceholder: string
+  }
+  shopQr: {
+    title: string
+    subtitle: string
+    scanDescription: string
+    printButton: string
+    downloadButton: string
+    targetUrlLabel: string
+    copySuccessToast: string
   }
 }
 

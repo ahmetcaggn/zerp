@@ -8,6 +8,7 @@ import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded'
 import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded'
 import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded'
+import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded'
 import ReceiptLongRoundedIcon from '@mui/icons-material/ReceiptLongRounded'
 import RuleFolderRoundedIcon from '@mui/icons-material/RuleFolderRounded'
 import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
@@ -57,6 +58,7 @@ type SidebarLabelKey =
   | 'nav.permissionGroups'
   | 'nav.tickets'
   | 'nav.notifications'
+  | 'nav.shopQr'
 
 type SidebarSectionLabelKey = 'nav.management' | 'nav.crm' | 'nav.operations' | 'nav.inventory'
 
@@ -140,6 +142,12 @@ const SHOP_SIDEBAR_SECTIONS: SidebarSection[] = [
         icon: <ReceiptLongRoundedIcon />,
         href: '/sale-history',
         requiredPermission: PermissionActions.READ_SALE_HISTORY,
+      },
+      {
+        id: 'shop-qr',
+        labelKey: 'nav.shopQr',
+        icon: <QrCode2RoundedIcon />,
+        href: '/shop-qr',
       },
     ],
   },

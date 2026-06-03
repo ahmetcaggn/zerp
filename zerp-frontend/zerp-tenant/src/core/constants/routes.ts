@@ -21,6 +21,7 @@ export const ROUTES = {
   sale: '/sale',
   saleHistory: '/sale-history',
   tables: '/tables',
+  shopQr: '/shop-qr',
 } as const
 
 export const PUBLIC_PATHS = [ROUTES.root, ROUTES.login, ROUTES.register] as const
@@ -38,6 +39,7 @@ export const PROTECTED_PATHS = [
   ROUTES.notifications,
   ROUTES.shops,
   ROUTES.profile,
+  ROUTES.shopQr,
 ] as const
 
 export function withLocale(locale: Locale, path: string): string {

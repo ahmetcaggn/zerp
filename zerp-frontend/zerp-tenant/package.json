@@ -30,6 +30,7 @@
     "next-auth": "4.24.13",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-qr-code": "^2.0.21",
     "recharts": "^3.8.1",
     "zod": "^4.1.12"
   },
