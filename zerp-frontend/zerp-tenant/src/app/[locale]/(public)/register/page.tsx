@@ -22,7 +22,7 @@ export default function RegisterPage() {
     }
 
     if (status === 'unauthenticated') {
-      void signIn('keycloak', { callbackUrl: `/${locale}/dashboard` }, { kc_action: 'register' })
+      void signIn('keycloak', { callbackUrl: `/${locale}/dashboard` }, { kc_action: 'register', prompt: 'login' })
     }
   }, [params.locale, status])
 

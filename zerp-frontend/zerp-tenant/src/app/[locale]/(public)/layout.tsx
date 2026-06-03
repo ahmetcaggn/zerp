@@ -12,7 +12,7 @@ export default async function PublicLayout({
 
   return (
     <>
-      <AppTopbar locale={locale as Locale} />
+      <AppTopbar contentWidth="container" locale={locale as Locale} />
       {children}
     </>
   )

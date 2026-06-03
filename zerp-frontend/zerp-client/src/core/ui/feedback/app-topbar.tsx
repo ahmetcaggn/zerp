@@ -3,8 +3,7 @@
 // import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded'
 // import LoginRoundedIcon from '@mui/icons-material/LoginRounded'
 // import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
-import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
-import { AppBar, Container, Stack, Toolbar, Typography } from '@mui/material'
+import { AppBar, Box, Container, Stack, Toolbar, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useRouter } from 'next/navigation'
@@ -71,7 +70,12 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
             }}
           >
             <Stack alignItems="center" direction="row" gap={1.25} minWidth={0}>
-              <StorefrontRoundedIcon color="primary" />
+              <Box
+                component="img"
+                src="/zerp_icon_foreground.svg"
+                alt="ZERP"
+                sx={{ width: 30, height: 30, display: 'block', flexShrink: 0 }}
+              />
               <Typography
                 role="link"
                 tabIndex={0}

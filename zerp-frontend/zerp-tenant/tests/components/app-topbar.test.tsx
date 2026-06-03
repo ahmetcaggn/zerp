@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppTopbar } from '@/core/ui/feedback/app-topbar'
 
 const push = vi.fn()
+const replace = vi.fn()
 const signOut = vi.fn()
 const mediaQueryMock = vi.fn()
 
@@ -14,7 +15,7 @@ vi.mock('@mui/material/useMediaQuery', () => ({
 }))
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push }),
+  useRouter: () => ({ push, replace }),
 }))
 
 vi.mock('next-auth/react', () => ({
@@ -23,6 +24,10 @@ vi.mock('next-auth/react', () => ({
     data: null,
     status: sessionStatus,
   }),
+}))
+
+vi.mock('@/core/auth/client/use-current-user-profile', () => ({
+  useCurrentUserProfile: () => ({ data: null }),
 }))
 
 vi.mock('@/core/i18n/i18n-provider', () => ({
@@ -60,6 +65,7 @@ describe('AppTopbar', () => {
   beforeEach(() => {
     sessionStatus = 'unauthenticated'
     push.mockReset()
+    replace.mockReset()
     signOut.mockReset()
     mediaQueryMock.mockReset()
     mediaQueryMock.mockReturnValue(false)
@@ -89,7 +95,7 @@ describe('AppTopbar', () => {
     })
   })
 
-  it('shows logout in authenticated mobile menu and calls signOut', () => {
+  it('shows logout in authenticated mobile menu and redirects locally after signOut', async () => {
     sessionStatus = 'authenticated'
     mediaQueryMock.mockReturnValue(true)
 
@@ -98,7 +104,10 @@ describe('AppTopbar', () => {
     fireEvent.click(screen.getByLabelText(/open menu/i))
     fireEvent.click(screen.getByRole('button', { name: 'Logout' }))
 
-    expect(signOut).toHaveBeenCalledTimes(1)
-    expect(signOut).toHaveBeenCalledWith({ callbackUrl: '/api/sso-logout' })
+    await waitFor(() => {
+      expect(signOut).toHaveBeenCalledTimes(1)
+      expect(signOut).toHaveBeenCalledWith({ redirect: false })
+      expect(replace).toHaveBeenCalledWith('/tr')
+    })
   })
 })

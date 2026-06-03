@@ -9,7 +9,6 @@ import { isAuthPath, isProtectedPath } from '@/core/utils/route-helpers'
 const INTERNAL_API_URL = process.env.INTERNAL_API_URL ?? 'http://gateway:8080'
 const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET
 const NEXTAUTH_URL = process.env.NEXTAUTH_URL ?? ''
-const SESSION_COOKIE_DOMAIN = process.env.SESSION_COOKIE_DOMAIN
 
 // Stale default NextAuth cookie names that should be cleaned up
 const STALE_NEXTAUTH_COOKIES = [
@@ -96,31 +95,9 @@ async function proxyApiRequest(req: NextRequest, accessToken: string): Promise<N
 export async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl
 
-  // NextAuth internal routes and SSO logout — always pass through
-  if (pathname.startsWith('/api/auth') || pathname === '/api/sso-logout') {
+  // NextAuth internal routes — always pass through
+  if (pathname.startsWith('/api/auth')) {
     return NextResponse.next()
-  }
-
-  // Global SSO logout — if another app set the logout signal, clear this app's session too
-  if (!pathname.startsWith('/api') && req.cookies.has('zerp.global-logout')) {
-    const authCookieName = getAuthCookieName()
-    const isSecure = NEXTAUTH_URL.startsWith('https://')
-    const domain = SESSION_COOKIE_DOMAIN
-    if (req.cookies.has(authCookieName)) {
-      const locale = extractLocale(pathname) ?? DEFAULT_LOCALE
-      const redirectUrl = req.nextUrl.clone()
-      redirectUrl.pathname = `/${locale}/login`
-      redirectUrl.search = ''
-      const response = NextResponse.redirect(redirectUrl)
-      // Must include domain to match original cookie and actually delete it in the browser
-      response.cookies.set(authCookieName, '', { maxAge: 0, path: '/', httpOnly: true, sameSite: 'lax', secure: isSecure, domain })
-      response.cookies.set('zerp.global-logout', '', { maxAge: 0, path: '/', httpOnly: true, sameSite: 'lax', domain })
-      return response
-    }
-    // No session but has logout signal — clear the signal
-    const response = NextResponse.next()
-    response.cookies.set('zerp.global-logout', '', { maxAge: 0, path: '/', httpOnly: true, sameSite: 'lax', domain })
-    return response
   }
 
   // API proxy — verify session, inject Bearer token, forward to backend
@@ -193,5 +170,7 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|manifest.json|sitemap.xml|robots.txt|zerp_icon_.*\\.svg).*)',
+  ],
 }

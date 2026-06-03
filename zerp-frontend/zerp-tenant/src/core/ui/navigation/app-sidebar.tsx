@@ -282,7 +282,12 @@ export function AppSidebar({ locale }: { locale: string }) {
           }}
           onClick={!isExpanded ? handleToggle : undefined}
         >
-          <StorefrontRoundedIcon color="primary" />
+          <Box
+            component="img"
+            src="/zerp_icon_foreground.svg"
+            alt="ZERP"
+            sx={{ width: 30, height: 30, display: 'block' }}
+          />
         </Box>
 
         <Box

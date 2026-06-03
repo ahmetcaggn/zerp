@@ -13,6 +13,13 @@ const localeNames: Record<Locale, string> = {
   en: 'English',
 }
 
+const zerpIcon = {
+  url: '/zerp_icon_rounded.svg',
+  width: 512,
+  height: 512,
+  alt: 'ZERP',
+}
+
 export function buildMetadata(options?: {
   locale?: Locale
   title?: string
@@ -27,8 +34,18 @@ export function buildMetadata(options?: {
   const canonical = new URL(path, appConfig.app.baseUrl).toString()
 
   return {
+    metadataBase: new URL(appConfig.app.baseUrl),
     title,
     description,
+    manifest: '/manifest.json',
+    icons: {
+      icon: [
+        { url: '/zerp_icon_white.svg', type: 'image/svg+xml' },
+        { url: '/favicon.ico', sizes: 'any' },
+      ],
+      shortcut: [{ url: '/zerp_icon_white.svg', type: 'image/svg+xml' }],
+      apple: [{ url: '/zerp_icon_rounded.svg', type: 'image/svg+xml' }],
+    },
     alternates: {
       canonical,
       languages: {
@@ -43,11 +60,13 @@ export function buildMetadata(options?: {
       siteName: appConfig.app.name,
       locale: localeToOg[locale],
       type: 'website',
+      images: [zerpIcon],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [zerpIcon.url],
     },
     other: {
       'x-locale-name': localeNames[locale],

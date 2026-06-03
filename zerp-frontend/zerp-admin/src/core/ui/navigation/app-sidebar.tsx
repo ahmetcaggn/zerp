@@ -5,7 +5,6 @@ import AssignmentTurnedInRoundedIcon from '@mui/icons-material/AssignmentTurnedI
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded'
-import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
 import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded'
 import {
   Box,
@@ -295,7 +294,12 @@ export function AppSidebar({ locale }: { locale: 'tr' | 'en' }) {
           }}
           onClick={!isExpanded ? handleToggle : undefined}
         >
-          <StorefrontRoundedIcon color="primary" />
+          <Box
+            component="img"
+            src="/zerp_icon_foreground.svg"
+            alt="ZERP"
+            sx={{ width: 30, height: 30, display: 'block' }}
+          />
         </Box>
 
         <Box

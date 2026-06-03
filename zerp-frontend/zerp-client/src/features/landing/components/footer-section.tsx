@@ -1,6 +1,5 @@
 'use client'
 
-import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
 
@@ -31,18 +30,16 @@ export function FooterSection() {
           {/* Logo & Tagline */}
           <Stack direction="row" alignItems="center" gap={1.5}>
             <Box
+              component="img"
+              src="/zerp_icon_rounded.svg"
+              alt="ZERP"
               sx={{
                 width: 36,
                 height: 36,
                 borderRadius: 2,
-                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                display: 'block',
               }}
-            >
-              <StorefrontRoundedIcon sx={{ fontSize: 18, color: '#fff' }} />
-            </Box>
+            />
             <Stack gap={0}>
               <Typography fontWeight={700} fontSize="0.9375rem" letterSpacing={0}>
                 {appConfig.app.name}

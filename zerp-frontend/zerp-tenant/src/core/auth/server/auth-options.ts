@@ -193,7 +193,7 @@ export const authOptions: NextAuthOptions = {
         token_endpoint_auth_method: 'none',
       },
       checks: ['pkce', 'state'],
-      authorization: { params: { scope: 'openid profile email' } },
+      authorization: { params: { scope: 'openid profile email', prompt: 'login' } },
     }),
   ],
   pages: {
@@ -265,16 +265,32 @@ export const authOptions: NextAuthOptions = {
   },
   events: {
     async signOut({ token }) {
-      const idToken = (token as JWT | undefined)?.idToken as string | undefined
-      if (!idToken) {
+      const encryptedTokens = (token as JWT | undefined)?.encryptedTokens as string | undefined
+      if (!encryptedTokens) {
         return
       }
 
-      const { keycloakIssuer } = getServerEnv()
-      const logoutUrl = new URL(`${keycloakIssuer}/protocol/openid-connect/logout`)
-      logoutUrl.searchParams.set('id_token_hint', idToken)
+      const { keycloakIssuer, keycloakClientId, keycloakClientSecret } = getServerEnv()
+      const { refreshToken } = await decryptTokens(encryptedTokens)
+      if (!refreshToken) {
+        return
+      }
 
-      await fetch(logoutUrl.toString(), { method: 'GET' }).catch(() => undefined)
+      const body = new URLSearchParams({
+        token: refreshToken,
+        token_type_hint: 'refresh_token',
+        client_id: keycloakClientId,
+      })
+
+      if (keycloakClientSecret) {
+        body.set('client_secret', keycloakClientSecret)
+      }
+
+      await fetch(`${keycloakIssuer}/protocol/openid-connect/revoke`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+      }).catch(() => undefined)
     },
   },
   cookies: {
@@ -285,7 +301,6 @@ export const authOptions: NextAuthOptions = {
         sameSite: 'lax',
         path: '/',
         secure: getServerEnv().nextAuthUrl.startsWith('https://'),
-        domain: getServerEnv().sessionCookieDomain || undefined,
       },
     },
   },

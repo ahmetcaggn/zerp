@@ -8,7 +8,6 @@ const serverEnvSchema = z.object({
   KEYCLOAK_CLIENT_ID: z.string().min(1),
   KEYCLOAK_CLIENT_SECRET: z.string().optional().default(''),
   JWE_SECRET: z.string().min(32),
-  SESSION_COOKIE_DOMAIN: z.string().optional(),
 })
 
 export interface ServerEnv {
@@ -19,7 +18,6 @@ export interface ServerEnv {
   keycloakClientId: string
   keycloakClientSecret: string
   jweSecret: string
-  sessionCookieDomain?: string
 }
 
 let cachedServerEnv: ServerEnv | null = null
@@ -37,7 +35,6 @@ export function getServerEnv(): ServerEnv {
     KEYCLOAK_CLIENT_ID: process.env.KEYCLOAK_CLIENT_ID,
     KEYCLOAK_CLIENT_SECRET: process.env.KEYCLOAK_CLIENT_SECRET,
     JWE_SECRET: process.env.JWE_SECRET,
-    SESSION_COOKIE_DOMAIN: process.env.SESSION_COOKIE_DOMAIN,
   })
 
   cachedServerEnv = {
@@ -48,7 +45,6 @@ export function getServerEnv(): ServerEnv {
     keycloakClientId: parsed.KEYCLOAK_CLIENT_ID,
     keycloakClientSecret: parsed.KEYCLOAK_CLIENT_SECRET,
     jweSecret: parsed.JWE_SECRET,
-    sessionCookieDomain: parsed.SESSION_COOKIE_DOMAIN,
   }
 
   return cachedServerEnv

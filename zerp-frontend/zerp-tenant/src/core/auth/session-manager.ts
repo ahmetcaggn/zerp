@@ -1,5 +1,4 @@
-import { signOut } from 'next-auth/react'
-
+import { logoutToLanding } from '@/core/auth/client/logout'
 import { getClientEnv } from '@/core/config/env.client'
 
 class SessionManager {
@@ -25,7 +24,7 @@ class SessionManager {
 
     if (typeof window !== 'undefined') {
       const { defaultLocale } = getClientEnv()
-      void signOut({ callbackUrl: `/${defaultLocale}/login` })
+      void logoutToLanding(defaultLocale)
     }
   }
 }

@@ -20,10 +20,13 @@ import {
 } from '@mui/material'
 import type { SxProps, Theme } from '@mui/material/styles'
 import type { SvgIconProps } from '@mui/material/SvgIcon'
-import { notFound } from 'next/navigation'
+import type { Route } from 'next'
+import { notFound, redirect } from 'next/navigation'
 import type { ComponentType } from 'react'
 
+import { getAuthSession } from '@/core/auth/server/session'
 import { isLocale } from '@/core/constants/locales'
+import { ROUTES, withLocale } from '@/core/constants/routes'
 import { getMessages } from '@/core/i18n/messages'
 import { responsiveLayout, responsivePageSx } from '@/core/theme/layout'
 
@@ -260,6 +263,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   if (!isLocale(locale)) {
     notFound()
+  }
+
+  const session = await getAuthSession()
+  if (session) {
+    redirect(withLocale(locale, ROUTES.dashboard) as Route)
   }
 
   const messages = getMessages(locale)

@@ -24,11 +24,13 @@ import {
 } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
+import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import type { ReactElement } from 'react'
 import { useMemo, useState } from 'react'
 
+import { logoutToLogin } from '@/core/auth/client/logout'
 import { useCurrentUserProfile } from '@/core/auth/client/use-current-user-profile'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { responsiveLayout } from '@/core/theme/layout'
@@ -117,7 +119,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
     setDrawerOpen(false)
 
     if (action.id === 'logout') {
-      void signOut({ callbackUrl: '/api/sso-logout' })
+      void logoutToLogin(locale, (path) => router.replace(path as Route))
       return
     }
 
@@ -141,7 +143,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
 
   const handleLogoutClick = () => {
     handleMenuClose()
-    void signOut({ callbackUrl: '/api/sso-logout' })
+    void logoutToLogin(locale, (path) => router.replace(path as Route))
   }
 
   return (
