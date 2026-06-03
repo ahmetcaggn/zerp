@@ -118,6 +118,11 @@ if ! command -v ssh >/dev/null 2>&1; then
   exit 1
 fi
 
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "Hata: pnpm bulunamadi." >&2
+  exit 1
+fi
+
 SSH_OPTS=(-p "${SSH_PORT}")
 SCP_OPTS=(-P "${SSH_PORT}")
 if [[ -n "${SSH_KEY}" ]]; then
@@ -125,7 +130,17 @@ if [[ -n "${SSH_KEY}" ]]; then
   SCP_OPTS+=(-i "${SSH_KEY}")
 fi
 
-echo "1/5 Frontend compose image'lari build ediliyor..."
+echo "1/5 Frontend projeleri lokal olarak build ediliyor..."
+for APP_NAME in "zerp-admin" "zerp-tenant" "zerp-client"; do
+  echo "Building ${APP_NAME}..."
+  (
+    cd "${REPO_ROOT}/zerp-frontend/${APP_NAME}"
+    pnpm install --frozen-lockfile=false
+    pnpm build
+  )
+done
+
+echo "Frontend compose image'lari build ediliyor..."
 export DOCKER_DEFAULT_PLATFORM=linux/amd64
 docker compose -p "${PROJECT_NAME}" -f "${LOCAL_COMPOSE_FILE}" build
 
@@ -202,8 +217,8 @@ if [[ ! -f "${REMOTE_COMPOSE_FILE}" ]]; then
 fi
 
 docker load -i "${REMOTE_BUNDLE}"
-docker compose -p "${PROJECT_NAME}" -f "${REMOTE_COMPOSE_FILE}" up -d --no-build --remove-orphans
-rm -f "${REMOTE_BUNDLE}"
+# docker compose -p "${PROJECT_NAME}" -f "${REMOTE_COMPOSE_FILE}" up -d --no-build --remove-orphans
+# rm -f "${REMOTE_BUNDLE}"
 REMOTE_EOF
 
-echo "5/5 Tamamlandi: Build -> Tar -> SCP -> SSH -> Compose Up akisi bitti."
+# echo "5/5 Tamamlandi: Build -> Tar -> SCP -> SSH -> Compose Up akisi bitti."
