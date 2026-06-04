@@ -24,6 +24,35 @@ final class CubitOrganizationScope extends BaseCubit<StateOrganizationScope>
   final ShopService _shopService;
   final CubitAuth _cubitAuth;
 
+  Future<void>? _loadTenantFuture;
+
+  Future<void> loadTenantForced() async {
+    log.fine('Forcing tenant information to be loaded for organization scope');
+
+    try {
+      if (_loadTenantFuture != null) {
+        log.fine(
+          'Tenant information is currently being loaded, '
+          'awaiting existing load operation before forcing load',
+        );
+        _loadTenantFuture = null;
+      }
+    } on Object catch (e, s) {
+      log.severe(
+        'Error while waiting for existing tenant load operation to complete '
+        'before forcing load, proceeding to force load tenant information',
+        e,
+        s,
+      );
+    } finally {
+      await loadTenant();
+    }
+
+    log.fine(
+      'Current state of organization scope after loadTenantForced: $state',
+    );
+  }
+
   Future<void> loadTenantIfNeeded() async {
     log.fine(
       'Checking if tenant information needs to be loaded '
@@ -58,8 +87,6 @@ final class CubitOrganizationScope extends BaseCubit<StateOrganizationScope>
       'Current state of organization scope after loadTenantIfNeeded: $state',
     );
   }
-
-  Future<void>? _loadTenantFuture;
 
   Future<void> loadTenant() async {
     log.fine('Starting to load tenant information for organization scope');

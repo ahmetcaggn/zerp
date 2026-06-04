@@ -31,7 +31,7 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
     super.emit(state);
     if (state is StateAuthAuthenticated) {
       log.info('emit: User authenticated: ${state.username}');
-      unawaited(getIt<CubitOrganizationScope>().loadTenantIfNeeded());
+      unawaited(getIt<CubitOrganizationScope>().loadTenantForced());
     }
   }
 
