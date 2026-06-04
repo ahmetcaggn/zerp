@@ -365,7 +365,21 @@
     "statusChecking": "Checking Connection...",
     "statusConnected": "Connected",
     "statusDisconnected": "Offline",
-    "statusUnknown": "Unknown Status"
+    "statusUnknown": "Unknown Status",
+    "loggingLevelTitle": "Remote Logging Level",
+    "loggingLevelSubtitle": "Adjust the minimum log level required to send logs to the remote server.",
+    "loggingLevel": "Remote Logging Level",
+    "loggingLevelSaveSuccess": "Remote logging level updated successfully!",
+    "loggingLevelDescAll": "ALL: Log absolutely everything.",
+    "loggingLevelDescFinest": "FINEST: Log all detailed developer logs.",
+    "loggingLevelDescFiner": "FINER: Log finer details.",
+    "loggingLevelDescFine": "FINE: Log detailed/fine messages for debugging.",
+    "loggingLevelDescConfig": "CONFIG: Log configuration changes and higher.",
+    "loggingLevelDescInfo": "INFO: Log general informational messages and higher.",
+    "loggingLevelDescWarning": "WARNING: Log warnings, severe errors, and shout messages.",
+    "loggingLevelDescSevere": "SEVERE: Log severe errors and shout messages.",
+    "loggingLevelDescShout": "SHOUT: Only log critical shout messages.",
+    "loggingLevelDescOff": "OFF: Turn off all remote logging."
   },
   "common": {
     "hello": "Hello $name",

@@ -365,7 +365,21 @@
     "statusChecking": "Bağlantı Kontrol Ediliyor...",
     "statusConnected": "Bağlantı Kuruldu",
     "statusDisconnected": "Çevrimdışı",
-    "statusUnknown": "Bilinmeyen Durum"
+    "statusUnknown": "Bilinmeyen Durum",
+    "loggingLevelTitle": "Uzak Günlükleme Seviyesi",
+    "loggingLevelSubtitle": "Logların uzak sunucuya gönderilmesi için gereken minimum günlükleme seviyesini ayarlayın.",
+    "loggingLevel": "Uzak Günlükleme Seviyesi",
+    "loggingLevelSaveSuccess": "Uzak günlükleme seviyesi başarıyla güncellendi!",
+    "loggingLevelDescAll": "ALL: Her şeyi günlüğe kaydet.",
+    "loggingLevelDescFinest": "FINEST: Tüm ayrıntılı geliştirici loglarını kaydet.",
+    "loggingLevelDescFiner": "FINER: Daha ince ayrıntıları kaydet.",
+    "loggingLevelDescFine": "FINE: Hata ayıklama için ayrıntılı logları kaydet.",
+    "loggingLevelDescConfig": "CONFIG: Yapılandırma değişikliklerini ve üstünü kaydet.",
+    "loggingLevelDescInfo": "INFO: Genel bilgilendirici mesajları ve üstünü kaydet.",
+    "loggingLevelDescWarning": "WARNING: Uyarıları, ciddi hataları ve shout mesajlarını kaydet.",
+    "loggingLevelDescSevere": "SEVERE: Ciddi hataları ve shout mesajlarını kaydet.",
+    "loggingLevelDescShout": "SHOUT: Yalnızca kritik shout mesajlarını kaydet.",
+    "loggingLevelDescOff": "OFF: Tüm uzak günlüklemeyi kapat."
   },
   "common": {
     "hello": "Merhaba $name",

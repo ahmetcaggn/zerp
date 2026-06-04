@@ -27,19 +27,30 @@ abstract final class AppInitializer {
     await LocaleSettings.useDeviceLocale();
 
     // logging
+    final settingsCubit = getIt<CubitSettings>();
+    final settingsState = settingsCubit.state;
+    final logSendLevelName = settingsState is StateSettingsLoaded
+        ? (settingsState.currentRemoteLogLevel ?? 'CONFIG')
+        : 'CONFIG';
+    final logSendLevel = Level.LEVELS.firstWhere(
+      (l) => l.name == logSendLevelName,
+      orElse: () => Level.CONFIG,
+    );
+
     final loggerHelper = await RemoteLogging.init(
-      remoteLoggingConfig: const RemoteLoggingConfig(
+      remoteLoggingConfig: RemoteLoggingConfig(
         // ignore: avoid_redundant_argument_values readability
         enableRemoteLogging: true,
         loggerEndpointDevice: '/api/v1/device',
         loggerEndpointLog: '/api/v1/log',
         loggerEndpointLogBatch: '/api/v1/log/batch',
-        logSendLevel: Level.CONFIG,
+        logSendLevel: logSendLevel,
         logPrintLevel: Level.FINE,
         localLogPrintLevel: Level.FINE,
       ),
       deviceDataGenerator: getIt<DeviceIdGenerator>(),
     );
+    getIt.registerSingleton<RemoteLogging>(loggerHelper);
     unawaited(loggerHelper.start(getIt<RemoteLogNetworkInvoker>()));
 
     logger('AppInitializer').config(() => 'App initialization complete');

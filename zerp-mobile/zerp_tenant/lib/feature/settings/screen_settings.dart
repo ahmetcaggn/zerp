@@ -78,6 +78,59 @@ class ScreenSettings extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: theme.dividerColor.withAlpha(50),
+                  ),
+                ),
+                color: theme.cardColor,
+                clipBehavior: Clip.antiAlias,
+                child: ListTile(
+                  onTap: () {
+                    unawaited(
+                      context.router.push(const RouteSettingsLoggingLevel()),
+                    );
+                  },
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  leading: CircleAvatar(
+                    backgroundColor: theme.colorScheme.primary.withAlpha(20),
+                    child: Icon(
+                      Icons.terminal_rounded,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  title: Text(
+                    t.settings.loggingLevel,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      state is StateSettingsLoaded
+                          ? (state.currentRemoteLogLevel ?? 'CONFIG')
+                          : 'CONFIG',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.textTheme.bodyMedium?.color?.withAlpha(
+                          180,
+                        ),
+                      ),
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right_rounded,
+                    color: theme.iconTheme.color?.withAlpha(150),
+                  ),
+                ),
+              ),
             ],
           );
         },

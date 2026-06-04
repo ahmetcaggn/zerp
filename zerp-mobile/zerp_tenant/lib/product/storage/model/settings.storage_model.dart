@@ -9,6 +9,7 @@ abstract class SettingsStorageModel extends StorageBaseModel
     with _$SettingsStorageModel {
   const factory SettingsStorageModel({
     String? apiHost,
+    String? remoteLogLevel,
   }) = _SettingsStorageModel;
 
   const SettingsStorageModel._();
