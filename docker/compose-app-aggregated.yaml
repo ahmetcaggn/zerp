@@ -9,6 +9,7 @@ services:
     container_name: zerp-eureka
     hostname: eureka
     environment:
+      TZ: Europe/Istanbul
       SERVICE: eureka
       MODULE_NAME: eureka
       SPRING_PROFILES_ACTIVE: ${EUREKA_SPRING_PROFILES_ACTIVE}
@@ -32,6 +33,7 @@ services:
     container_name: zerp-aggregated
     hostname: aggregated
     environment:
+      TZ: Europe/Istanbul
       SPRING_PROFILES_ACTIVE: ${AGGREGATED_SPRING_PROFILES_ACTIVE}
       LOG4J2_CONFIG_PATH: ${AGGREGATED_LOG4J2_CONFIG_PATH}
       JAVA_OPTS: ${AGGREGATED_JAVA_OPTS}
@@ -98,6 +100,7 @@ services:
     container_name: zerp-gateway
     hostname: gateway
     environment:
+      TZ: Europe/Istanbul
       SERVICE: gateway
       MODULE_NAME: gateway
       SPRING_PROFILES_ACTIVE: ${GATEWAY_SPRING_PROFILES_ACTIVE}

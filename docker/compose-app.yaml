@@ -10,6 +10,7 @@ services:
     container_name: zerp-eureka
     hostname: eureka
     environment:
+      TZ: Europe/Istanbul
       SERVICE: eureka
       MODULE_NAME: eureka
       SPRING_PROFILES_ACTIVE: ${EUREKA_SPRING_PROFILES_ACTIVE}
@@ -39,6 +40,7 @@ services:
         limits:
           memory: 256M
     environment:
+      TZ: Europe/Istanbul
       SERVICE: crm
       MODULE_NAME: crm
       SPRING_PROFILES_ACTIVE: ${CRM_SPRING_PROFILES_ACTIVE}
@@ -83,6 +85,7 @@ services:
         limits:
           memory: 256M
     environment:
+      TZ: Europe/Istanbul
       SERVICE: employee
       MODULE_NAME: employee
       SPRING_PROFILES_ACTIVE: ${EMPLOYEE_SPRING_PROFILES_ACTIVE}
@@ -121,6 +124,7 @@ services:
         limits:
           memory: 256M
     environment:
+      TZ: Europe/Istanbul
       SERVICE: notification
       MODULE_NAME: notification
       SPRING_PROFILES_ACTIVE: ${NOTIFICATION_SPRING_PROFILES_ACTIVE}
@@ -165,6 +169,7 @@ services:
         limits:
           memory: 256M
     environment:
+      TZ: Europe/Istanbul
       SERVICE: resource
       MODULE_NAME: resource
       SPRING_PROFILES_ACTIVE: ${RESOURCE_SPRING_PROFILES_ACTIVE}
@@ -203,6 +208,7 @@ services:
         limits:
           memory: 256M
     environment:
+      TZ: Europe/Istanbul
       SERVICE: sale
       MODULE_NAME: sale
       SPRING_PROFILES_ACTIVE: ${SALE_SPRING_PROFILES_ACTIVE}
@@ -246,6 +252,7 @@ services:
         limits:
           memory: 256M
     environment:
+      TZ: Europe/Istanbul
       SERVICE: user
       MODULE_NAME: user
       SPRING_PROFILES_ACTIVE: ${USER_SPRING_PROFILES_ACTIVE}
@@ -289,6 +296,7 @@ services:
     container_name: zerp-gateway
     hostname: gateway
     environment:
+      TZ: Europe/Istanbul
       SERVICE: gateway
       MODULE_NAME: gateway
       SPRING_PROFILES_ACTIVE: ${GATEWAY_SPRING_PROFILES_ACTIVE}

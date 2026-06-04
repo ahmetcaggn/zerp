@@ -4,7 +4,7 @@
 
     <Properties>
         <Property name="LOG_PATTERN">
-            %d{yyyy-MM-dd HH:mm:ss.SSS} %p [%t] [correlationId=%X{correlationId}] [clientIp=%X{clientIp}] %c - %m%throwable%n
+            %d{yyyy-MM-dd HH:mm:ss.SSSXXX} %p [%t] [correlationId=%X{correlationId}] [clientIp=%X{clientIp}] %c - %m%throwable%n
         </Property>
         <Property name="LOG_DIR">
             logs/gateway/
