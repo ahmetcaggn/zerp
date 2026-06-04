@@ -1,21 +1,29 @@
 const DEFAULT_LOCATION_TIMEOUT_MS = 8_000
 const DEFAULT_DESIRED_ACCURACY_METERS = 60
+const DEFAULT_CACHED_POSITION_MAX_AGE_MS = 30_000
 
 export interface BestUserPositionOptions {
   timeoutMs?: number
   desiredAccuracyMeters?: number
 }
 
-export function getBestUserPosition(options: BestUserPositionOptions = {}): Promise<GeolocationPosition> {
-  const timeoutMs = options.timeoutMs ?? DEFAULT_LOCATION_TIMEOUT_MS
-  const desiredAccuracyMeters = options.desiredAccuracyMeters ?? DEFAULT_DESIRED_ACCURACY_METERS
-
-  if (!navigator.geolocation) {
-    return Promise.reject(new Error('Geolocation is not supported'))
-  }
-
+function requestCurrentPosition(timeoutMs: number): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
-    let bestPosition: GeolocationPosition | null = null
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: true,
+      timeout: timeoutMs,
+      maximumAge: DEFAULT_CACHED_POSITION_MAX_AGE_MS,
+    })
+  })
+}
+
+function watchForBetterPosition(
+  initialPosition: GeolocationPosition,
+  timeoutMs: number,
+  desiredAccuracyMeters: number,
+): Promise<GeolocationPosition> {
+  return new Promise((resolve) => {
+    let bestPosition = initialPosition
     let settled = false
     let watchId: number | null = null
 
@@ -36,21 +44,12 @@ export function getBestUserPosition(options: BestUserPositionOptions = {}): Prom
     }
 
     const timeoutId = window.setTimeout(() => {
-      if (bestPosition) {
-        finish(bestPosition)
-        return
-      }
-
-      if (!settled) {
-        settled = true
-        cleanup()
-        reject(new Error('Location timeout'))
-      }
+      finish(bestPosition)
     }, timeoutMs)
 
     watchId = navigator.geolocation.watchPosition(
       (position) => {
-        if (!bestPosition || position.coords.accuracy < bestPosition.coords.accuracy) {
+        if (position.coords.accuracy < bestPosition.coords.accuracy) {
           bestPosition = position
         }
 
@@ -58,23 +57,39 @@ export function getBestUserPosition(options: BestUserPositionOptions = {}): Prom
           finish(position)
         }
       },
-      (error) => {
-        if (bestPosition) {
-          finish(bestPosition)
-          return
-        }
-
-        if (!settled) {
-          settled = true
-          cleanup()
-          reject(error)
-        }
+      () => {
+        finish(bestPosition)
       },
       {
         enableHighAccuracy: true,
         timeout: timeoutMs,
-        maximumAge: 0,
+        maximumAge: DEFAULT_CACHED_POSITION_MAX_AGE_MS,
       },
     )
+  })
+}
+
+export function getBestUserPosition(options: BestUserPositionOptions = {}): Promise<GeolocationPosition> {
+  const timeoutMs = options.timeoutMs ?? DEFAULT_LOCATION_TIMEOUT_MS
+  const desiredAccuracyMeters = options.desiredAccuracyMeters ?? DEFAULT_DESIRED_ACCURACY_METERS
+
+  if (typeof window === 'undefined') {
+    return Promise.reject(new Error('Geolocation is only available in the browser'))
+  }
+
+  if (window.isSecureContext === false) {
+    return Promise.reject(new Error('Geolocation requires a secure context'))
+  }
+
+  if (!navigator.geolocation) {
+    return Promise.reject(new Error('Geolocation is not supported'))
+  }
+
+  return requestCurrentPosition(timeoutMs).then((position) => {
+    if (position.coords.accuracy <= desiredAccuracyMeters) {
+      return position
+    }
+
+    return watchForBetterPosition(position, Math.min(timeoutMs, 4_000), desiredAccuracyMeters)
   })
 }

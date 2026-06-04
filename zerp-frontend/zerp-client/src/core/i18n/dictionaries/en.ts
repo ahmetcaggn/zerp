@@ -79,7 +79,8 @@ export const enMessages = {
     getDirections: 'Get directions in Google Maps',
     selectRestaurant: 'Select a restaurant from the map.',
     noNearby: 'No nearby restaurants with coordinates were found.',
-    locationPermissionDenied: 'Location permission was denied.',
+    locationPermissionDenied:
+      'Location permission was denied. Check Location Services and this browser’s website location permission in iPhone settings.',
     locationNotSupported: 'This browser does not support geolocation.',
     locationFailed: 'Location could not be determined. Please try again.',
     locationAccuracy: 'Location accuracy: ±{meters} m',

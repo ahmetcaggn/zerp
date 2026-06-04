@@ -22,9 +22,9 @@ export function MenuItemCard({ menuItem, onClick, onAddToCart }: MenuItemCardPro
       elevation={1}
       sx={{
         display: 'flex',
-        flexDirection: { xs: 'column', sm: 'row' },
+        flexDirection: 'row',
         height: '100%',
-        alignItems: { xs: 'stretch', sm: 'center' },
+        alignItems: 'stretch',
         p: 1,
         cursor: onClick ? 'pointer' : 'default',
         transition: 'transform 0.2s, box-shadow 0.2s',
@@ -42,8 +42,9 @@ export function MenuItemCard({ menuItem, onClick, onAddToCart }: MenuItemCardPro
         alt={menuItem.name}
         objectFit="contain"
         sx={{
-          width: { xs: '100%', sm: 100 },
-          height: { xs: 120, sm: 100 },
+          width: { xs: 104, sm: 100 },
+          height: { xs: 104, sm: 100 },
+          flexShrink: 0,
           borderRadius: 2,
         }}
       />
@@ -53,11 +54,19 @@ export function MenuItemCard({ menuItem, onClick, onAddToCart }: MenuItemCardPro
           display: 'flex',
           flexDirection: 'column',
           flexGrow: 1,
-          ml: { xs: 0, sm: 2 },
-          mt: { xs: 1, sm: 0 },
+          minWidth: 0,
+          ml: { xs: 1.5, sm: 2 },
         }}
       >
-        <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+        <CardContent
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            p: 0,
+            '&:last-child': { pb: 0 },
+          }}
+        >
           <Box
             sx={{
               display: 'flex',
@@ -79,13 +88,14 @@ export function MenuItemCard({ menuItem, onClick, onAddToCart }: MenuItemCardPro
               {t('restaurants.price', { price: menuItem.price })}
             </Typography>
           </Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
             {menuItem.description}
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 'auto' }}>
             <Button
               variant="contained"
               size="small"
+              startIcon={<AddShoppingCartRoundedIcon />}
               disabled={!menuItem.isAvailable}
               onClick={(e) => {
                 e.stopPropagation()

@@ -79,7 +79,8 @@ export const trMessages = {
     getDirections: "Google Maps'te yol tarifi al",
     selectRestaurant: 'Haritadan bir restoran seçin.',
     noNearby: 'Yakınınızda koordinatı tanımlı restoran bulunamadı.',
-    locationPermissionDenied: 'Konum izni reddedildi.',
+    locationPermissionDenied:
+      'Konum izni reddedildi. iPhone ayarlarında Konum Servisleri ve tarayıcınızın web sitesi konum iznini kontrol edin.',
     locationNotSupported: 'Tarayıcı konum özelliğini desteklemiyor.',
     locationFailed: 'Konum alınamadı. Lütfen tekrar deneyin.',
     locationAccuracy: 'Konum hassasiyeti: ±{meters} m',
