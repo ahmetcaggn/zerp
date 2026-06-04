@@ -5,6 +5,7 @@ import {
   Alert,
   alpha,
   Box,
+  ButtonBase,
   CircularProgress,
   Container,
   Stack,
@@ -147,10 +148,13 @@ export function WelcomeScreen() {
         {/* Action Cards */}
         <Stack spacing={2}>
           {/* Primary: Location Button */}
-          <Box
+          <ButtonBase
             onClick={!isLocating ? handleUseLocation : undefined}
             sx={{
               p: 0,
+              width: '100%',
+              display: 'block',
+              textAlign: 'left',
               borderRadius: '20px',
               background: `linear-gradient(145deg, ${primaryColor} 0%, ${alpha(primaryColor, 0.85)} 100%)`,
               boxShadow: `0 16px 48px ${alpha(primaryColor, 0.4)}`,
@@ -233,13 +237,16 @@ export function WelcomeScreen() {
                 />
               )}
             </Box>
-          </Box>
+          </ButtonBase>
 
           {/* Secondary: Browse All */}
-          <Box
+          <ButtonBase
             onClick={!isLocating ? handleManualSelect : undefined}
             sx={{
               p: 0,
+              width: '100%',
+              display: 'block',
+              textAlign: 'left',
               borderRadius: '20px',
               background: theme.palette.background.paper,
               border: `1px solid ${warmBorder}`,
@@ -315,7 +322,7 @@ export function WelcomeScreen() {
                 }}
               />
             </Box>
-          </Box>
+          </ButtonBase>
         </Stack>
 
         {/* Bottom Hint */}
