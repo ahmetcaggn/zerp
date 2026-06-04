@@ -85,6 +85,16 @@ void main() {
       // TODO
     });
 
+    // Set<String> cuisineCategories (default value: const {})
+    test('to test the property `cuisineCategories`', () async {
+      // TODO
+    });
+
+    // List<ShopWorkingHourDTO> workingHours (default value: const [])
+    test('to test the property `workingHours`', () async {
+      // TODO
+    });
+
     // String defaultMenuLanguage
     test('to test the property `defaultMenuLanguage`', () async {
       // TODO

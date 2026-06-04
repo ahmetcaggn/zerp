@@ -16,7 +16,7 @@ void main() {
   // final instance = PublicSaleGetShopsFeedApi();
 
   group('tests for PublicSaleGetShopsFeedApi', () {
-    //Future<ApiResponsePublicShopFeedResponseDTO> getShopsFeed({ String mode, int page, int pageSize, String q, String city, String state, String sortBy, String order, double lat, double lng }) async
+    //Future<ApiResponsePublicShopFeedResponseDTO> getShopsFeed({ String mode, int page, int pageSize, String q, String city, String state, String cuisineCategory, List<String> cuisineCategories, String sortBy, String order, double lat, double lng }) async
     test('test getShopsFeed', () async {
       // TODO
     });

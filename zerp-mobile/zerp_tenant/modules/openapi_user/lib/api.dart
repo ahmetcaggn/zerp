@@ -14,6 +14,7 @@ export 'package:dart_network_layer_core/dart_network_layer_core.dart';
 export 'base/base_request.dart';
 export 'base/api_config.dart';
 
+export 'model/api_response_current_user_profile_dto.dart';
 export 'model/api_response_list_long.dart';
 export 'model/api_response_list_permission_group_assignment_response_dto.dart';
 export 'model/api_response_list_permission_group_response_dto.dart';
@@ -33,6 +34,9 @@ export 'model/api_response_tenant_response_dto.dart';
 export 'model/api_response_user_response_dto.dart';
 export 'model/api_response_username_check_response_dto.dart';
 export 'model/api_response_void.dart';
+export 'model/current_user_profile_dto.dart';
+export 'model/employee_contact_dto.dart';
+export 'model/manager_dto.dart';
 export 'model/meta.dart';
 export 'model/parameter.dart';
 export 'model/permission_create_request_dto.dart';

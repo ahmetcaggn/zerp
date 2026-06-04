@@ -1,0 +1,102 @@
+//
+// AUTO-GENERATED FILE, DO NOT MODIFY!
+//
+
+// ignore_for_file: unused_element, unused_import
+// ignore_for_file: always_put_required_named_parameters_first
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: lines_longer_than_80_chars
+
+import 'package:dart_network_layer_core/dart_network_layer_core.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'table_order_payment_item_selected_extra_option_dto.dart';
+
+
+part 'table_order_payment_item_dto.g.dart';
+
+
+
+@JsonSerializable(
+  checked: true,
+  createToJson: true,
+  disallowUnrecognizedKeys: false,
+  explicitToJson: true,
+)
+class TableOrderPaymentItemDTO extends Schema {
+  /// Returns a new [TableOrderPaymentItemDTO] instance.
+  TableOrderPaymentItemDTO({
+    this.id,
+    this.menuItemId,
+    this.menuItemName,
+    this.quantity,
+    this.unitPrice,
+    this.notes,
+    this.selectedExtraOptions = const [],
+  });
+
+  @JsonKey(name: r'id')
+  final String? id;
+
+  @JsonKey(name: r'menuItemId')
+  final String? menuItemId;
+
+  @JsonKey(name: r'menuItemName')
+  final String? menuItemName;
+
+  @JsonKey(name: r'quantity')
+  final int? quantity;
+
+  @JsonKey(name: r'unitPrice')
+  final num? unitPrice;
+
+  @JsonKey(name: r'notes')
+  final String? notes;
+
+  @JsonKey(name: r'selectedExtraOptions')
+  final List<TableOrderPaymentItemSelectedExtraOptionDTO> selectedExtraOptions;
+
+  /// The factory instance for creating [TableOrderPaymentItemDTO] from JSON.
+  static const factory = TableOrderPaymentItemDTOFactory();
+
+  factory TableOrderPaymentItemDTO.fromJson(Map<String, dynamic> json) => _$TableOrderPaymentItemDTOFromJson(json);
+
+  Map<String, dynamic> toJson() => _$TableOrderPaymentItemDTOToJson(this);
+
+  static List<TableOrderPaymentItemDTO> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <TableOrderPaymentItemDTO>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = TableOrderPaymentItemDTO.fromJson(row as Map<String, dynamic>);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+
+  static Map<String, TableOrderPaymentItemDTO> mapFromJson(dynamic json) {
+    final map = <String, TableOrderPaymentItemDTO>{};
+    if (json is Map && json.isNotEmpty) {
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      for (final entry in json.entries) {
+        final value = TableOrderPaymentItemDTO.fromJson(entry.value as Map<String, dynamic>);
+        if (value != null) {
+          map[entry.key] = value;
+        }
+      }
+    }
+    return map;
+  }
+}
+
+class TableOrderPaymentItemDTOFactory extends JsonSchemaFactory<TableOrderPaymentItemDTO> {
+  const TableOrderPaymentItemDTOFactory();
+
+  @override
+  TableOrderPaymentItemDTO fromJson(dynamic json) => TableOrderPaymentItemDTO.fromJson(json as Map<String, dynamic>);
+}
+
+
+
+

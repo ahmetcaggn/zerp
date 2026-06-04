@@ -24,6 +24,8 @@ Name | Type | Description | Notes
 **website** | **String** |  | [optional] 
 **latitude** | **double** |  | [optional] 
 **longitude** | **double** |  | [optional] 
+**cuisineCategories** | **Set<String>** |  | [optional] [default to const {}]
+**workingHours** | [**List<ShopWorkingHourDTO>**](ShopWorkingHourDTO.md) |  | [optional] [default to const []]
 **distanceKm** | **double** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

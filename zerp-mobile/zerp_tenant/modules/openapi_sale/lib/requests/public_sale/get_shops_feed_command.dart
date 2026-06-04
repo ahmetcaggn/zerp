@@ -183,6 +183,8 @@ class GetShopsFeedCommand extends OpenapiDefinitionBaseRequest<ApiResponsePublic
     this.q,
     this.city,
     this.state,
+    this.cuisineCategory,
+    this.cuisineCategories,
     this.sortBy,
     this.order,
     this.lat,
@@ -195,6 +197,8 @@ class GetShopsFeedCommand extends OpenapiDefinitionBaseRequest<ApiResponsePublic
   final String? q;
   final String? city;
   final String? state;
+  final String? cuisineCategory;
+  final List<String>? cuisineCategories;
   final GetShopsFeedSortByEnum? sortBy;
   final GetShopsFeedOrderEnum? order;
   final double? lat;
@@ -214,6 +218,8 @@ class GetShopsFeedCommand extends OpenapiDefinitionBaseRequest<ApiResponsePublic
     if (q != null) QueryParameter(key: r'q', value: q),
     if (city != null) QueryParameter(key: r'city', value: city),
     if (state != null) QueryParameter(key: r'state', value: state),
+    if (cuisineCategory != null) QueryParameter(key: r'cuisineCategory', value: cuisineCategory),
+    if (cuisineCategories != null) QueryParameter(key: r'cuisineCategories', value: cuisineCategories),
     if (sortBy != null) QueryParameter(key: r'sortBy', value: sortBy!.value),
     if (order != null) QueryParameter(key: r'order', value: order!.value),
     if (lat != null) QueryParameter(key: r'lat', value: lat),

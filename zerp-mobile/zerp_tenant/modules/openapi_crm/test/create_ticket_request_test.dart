@@ -35,11 +35,6 @@ void main() {
       // TODO
     });
 
-    // String tenantId
-    test('to test the property `tenantId`', () async {
-      // TODO
-    });
-
 
   });
 

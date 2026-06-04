@@ -9,6 +9,7 @@
 
 import 'package:dart_network_layer_core/dart_network_layer_core.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'shop_working_hour_dto.dart';
 
 
 part 'public_shop_dto.g.dart';
@@ -40,6 +41,8 @@ class PublicShopDTO extends Schema {
     this.website,
     this.latitude,
     this.longitude,
+    this.cuisineCategories = const {},
+    this.workingHours = const [],
     this.distanceKm,
   });
 
@@ -91,6 +94,12 @@ class PublicShopDTO extends Schema {
   @JsonKey(name: r'longitude')
   final double? longitude;
 
+  @JsonKey(name: r'cuisineCategories')
+  final Set<PublicShopDTOCuisineCategoriesEnum> cuisineCategories;
+
+  @JsonKey(name: r'workingHours')
+  final List<ShopWorkingHourDTO> workingHours;
+
   @JsonKey(name: r'distanceKm')
   final double? distanceKm;
 
@@ -134,6 +143,70 @@ class PublicShopDTOFactory extends JsonSchemaFactory<PublicShopDTO> {
 
   @override
   PublicShopDTO fromJson(dynamic json) => PublicShopDTO.fromJson(json as Map<String, dynamic>);
+}
+
+
+
+enum PublicShopDTOCuisineCategoriesEnum {
+@JsonValue('BURGER')
+BURGER('BURGER'),
+@JsonValue('DONER')
+DONER('DONER'),
+@JsonValue('PIZZA')
+PIZZA('PIZZA'),
+@JsonValue('PIDE_LAHMACUN')
+PIDE_LAHMACUN('PIDE_LAHMACUN'),
+@JsonValue('CIG_KOFTE')
+CIG_KOFTE('CIG_KOFTE'),
+@JsonValue('SOKAK_LEZZETLERI')
+SOKAK_LEZZETLERI('SOKAK_LEZZETLERI'),
+@JsonValue('KOFTE')
+KOFTE('KOFTE'),
+@JsonValue('SALATA_SAGLIK')
+SALATA_SAGLIK('SALATA_SAGLIK'),
+@JsonValue('TATLI')
+TATLI('TATLI'),
+@JsonValue('TAVUK')
+TAVUK('TAVUK'),
+@JsonValue('MANTI_MAKARNA')
+MANTI_MAKARNA('MANTI_MAKARNA'),
+@JsonValue('TANTUNI')
+TANTUNI('TANTUNI'),
+@JsonValue('EV_YEMEKLERI')
+EV_YEMEKLERI('EV_YEMEKLERI'),
+@JsonValue('TOST_SANDVIC')
+TOST_SANDVIC('TOST_SANDVIC'),
+@JsonValue('KEBAP')
+KEBAP('KEBAP'),
+@JsonValue('KAHVE_ICECEK')
+KAHVE_ICECEK('KAHVE_ICECEK'),
+@JsonValue('PASTANE_FIRIN')
+PASTANE_FIRIN('PASTANE_FIRIN'),
+@JsonValue('CORBA')
+CORBA('CORBA'),
+@JsonValue('DUNYA_MUTFAGI_CAFE')
+DUNYA_MUTFAGI_CAFE('DUNYA_MUTFAGI_CAFE'),
+@JsonValue('UZAK_DOGU')
+UZAK_DOGU('UZAK_DOGU'),
+@JsonValue('MEZE')
+MEZE('MEZE'),
+@JsonValue('BALIK_DENIZ_URUNLERI')
+BALIK_DENIZ_URUNLERI('BALIK_DENIZ_URUNLERI'),
+@JsonValue('BOREK')
+BOREK('BOREK'),
+@JsonValue('STEAK')
+STEAK('STEAK'),
+@JsonValue('KAHVALTI')
+KAHVALTI('KAHVALTI'),
+@JsonValue('DONDURMA')
+DONDURMA('DONDURMA');
+
+const PublicShopDTOCuisineCategoriesEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 

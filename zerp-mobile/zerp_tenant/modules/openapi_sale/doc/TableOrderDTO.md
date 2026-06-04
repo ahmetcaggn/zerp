@@ -16,6 +16,9 @@ Name | Type | Description | Notes
 **status** | **String** |  | [optional] 
 **note** | **String** |  | [optional] 
 **items** | [**List<TableOrderItemDTO>**](TableOrderItemDTO.md) |  | [optional] [default to const []]
+**payments** | [**List<TableOrderPaymentDTO>**](TableOrderPaymentDTO.md) |  | [optional] [default to const []]
+**createdAt** | [**DateTime**](DateTime.md) |  | [optional] 
+**updatedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **tenantId** | **String** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

@@ -10,6 +10,7 @@
 import 'package:dart_network_layer_core/dart_network_layer_core.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'table_order_item_create_dto.dart';
+import 'table_order_payment_create_dto.dart';
 
 
 part 'table_order_update_dto.g.dart';
@@ -28,6 +29,7 @@ class TableOrderUpdateDTO extends Schema {
     this.status,
     this.note,
     this.items = const [],
+    this.payments = const [],
   });
 
   @JsonKey(name: r'status')
@@ -38,6 +40,9 @@ class TableOrderUpdateDTO extends Schema {
 
   @JsonKey(name: r'items')
   final List<TableOrderItemCreateDTO> items;
+
+  @JsonKey(name: r'payments')
+  final List<TableOrderPaymentCreateDTO> payments;
 
   /// The factory instance for creating [TableOrderUpdateDTO] from JSON.
   static const factory = TableOrderUpdateDTOFactory();

@@ -11,13 +11,13 @@ import 'package:dart_network_layer_core/dart_network_layer_core.dart';
 
 import '../../base/base_request.dart';
 
-import '../../model/api_response_user_response_dto.dart';
+import '../../model/api_response_current_user_profile_dto.dart';
 
 
 /// Get currently authenticated user profile
 ///
 /// GET /user/me
-class GetCurrentUserCommand extends OpenapiDefinitionBaseRequest<ApiResponseUserResponseDTO> {
+class GetCurrentUserCommand extends OpenapiDefinitionBaseRequest<ApiResponseCurrentUserProfileDTO> {
   GetCurrentUserCommand();
 
 
@@ -31,14 +31,14 @@ class GetCurrentUserCommand extends OpenapiDefinitionBaseRequest<ApiResponseUser
   HttpRequestMethod get method => HttpRequestMethod.get;
 
   @override
-  SchemaFactory<ApiResponseUserResponseDTO> get defaultResponseFactory => ApiResponseUserResponseDTO.factory;
+  SchemaFactory<ApiResponseCurrentUserProfileDTO> get defaultResponseFactory => ApiResponseCurrentUserProfileDTO.factory;
 
   @override
   SchemaFactory get defaultErrorResponseFactory => AnyDataSchema.factory;
 
   @override
   Map<int, SchemaFactory> get responseFactories => {
-    200: ApiResponseUserResponseDTO.factory,
+    200: ApiResponseCurrentUserProfileDTO.factory,
   };
 
   @override

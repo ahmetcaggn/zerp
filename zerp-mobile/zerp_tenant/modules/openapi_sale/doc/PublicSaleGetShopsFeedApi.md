@@ -13,7 +13,7 @@ Method | HTTP request | Description
 
 
 # **getShopsFeed**
-> ApiResponsePublicShopFeedResponseDTO getShopsFeed(mode, page, pageSize, q, city, state, sortBy, order, lat, lng)
+> ApiResponsePublicShopFeedResponseDTO getShopsFeed(mode, page, pageSize, q, city, state, cuisineCategory, cuisineCategories, sortBy, order, lat, lng)
 
 
 
@@ -28,13 +28,15 @@ final pageSize = 56; // int |
 final q = q_example; // String | 
 final city = city_example; // String | 
 final state = state_example; // String | 
+final cuisineCategory = cuisineCategory_example; // String | 
+final cuisineCategories = []; // List<String> | 
 final sortBy = sortBy_example; // String | 
 final order = order_example; // String | 
 final lat = 1.2; // double | 
 final lng = 1.2; // double | 
 
 try {
-    final result = api_instance.getShopsFeed(mode, page, pageSize, q, city, state, sortBy, order, lat, lng);
+    final result = api_instance.getShopsFeed(mode, page, pageSize, q, city, state, cuisineCategory, cuisineCategories, sortBy, order, lat, lng);
     print(result);
 } catch (e) {
     print('Exception when calling PublicSaleGetShopsFeedApi->getShopsFeed: $e\n');
@@ -51,6 +53,8 @@ Name | Type | Description  | Notes
  **q** | **String**|  | [optional] 
  **city** | **String**|  | [optional] 
  **state** | **String**|  | [optional] 
+ **cuisineCategory** | **String**|  | [optional] 
+ **cuisineCategories** | [**List<String>**](String.md)|  | [optional] [default to const []]
  **sortBy** | **String**|  | [optional] 
  **order** | **String**|  | [optional] 
  **lat** | **double**|  | [optional] 

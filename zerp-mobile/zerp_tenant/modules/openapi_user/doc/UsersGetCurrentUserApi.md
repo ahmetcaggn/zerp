@@ -13,7 +13,7 @@ Method | HTTP request | Description
 
 
 # **getCurrentUser**
-> ApiResponseUserResponseDTO getCurrentUser()
+> ApiResponseCurrentUserProfileDTO getCurrentUser()
 
 Get currently authenticated user profile
 
@@ -36,7 +36,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-[**ApiResponseUserResponseDTO**](ApiResponseUserResponseDTO.md)
+[**ApiResponseCurrentUserProfileDTO**](ApiResponseCurrentUserProfileDTO.md)
 
 ### Authorization
 

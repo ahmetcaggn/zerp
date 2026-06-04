@@ -28,7 +28,6 @@ class CreateTicketRequest extends Schema {
     this.description,
     this.priority,
     this.type,
-    this.tenantId,
   });
 
   @JsonKey(name: r'title')
@@ -42,9 +41,6 @@ class CreateTicketRequest extends Schema {
 
   @JsonKey(name: r'type')
   final CreateTicketRequestTypeEnum? type;
-
-  @JsonKey(name: r'tenantId')
-  final String? tenantId;
 
   /// The factory instance for creating [CreateTicketRequest] from JSON.
   static const factory = CreateTicketRequestFactory();

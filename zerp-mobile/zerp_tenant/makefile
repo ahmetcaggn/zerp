@@ -101,7 +101,7 @@ download-user-spec: ensure-specs-dir
 	echo "Downloading User API spec..."; \
 	curl -fL -o $(USER_SPEC_FILE) $(USER_SPEC_URL); \
 
-download-all-specs: download-crm-spec download-employee-spec download-notification-spec download-resource-spec download-sale-spec download-suggestion-spec download-user-spec
+download-all-specs: download-crm-spec download-employee-spec download-notification-spec download-resource-spec download-sale-spec download-user-spec
 	echo "All API specs downloaded successfully!"
 
 # generate
@@ -191,7 +191,7 @@ generate-user-api: download-openapi-cli-if-not-exists download-codegen-if-not-ex
 generate-merged-api-and-pub-get: generate-merged-api
 	cd $(MERGED_OUTPUT_DIR) && flutter pub get
 
-generate-all-apis: generate-crm-api generate-employee-api generate-notification-api generate-resource-api generate-sale-api generate-suggestion-api generate-user-api
+generate-all-apis: generate-crm-api generate-employee-api generate-notification-api generate-resource-api generate-sale-api generate-user-api
 	echo "All API code generated successfully!"
 
 generate-crm-api-and-pub-get: generate-crm-api
@@ -257,7 +257,7 @@ fetch-and-generate-all-apis-and-pub-get: download-all-specs generate-all-apis
 	cd $(NOTIFICATION_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
 	cd $(RESOURCE_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
 	cd $(SALE_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
-	cd $(SUGGESTION_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
+	#cd $(SUGGESTION_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
 	cd $(USER_OUTPUT_DIR) && flutter pub get && dart run build_runner build --delete-conflicting-outputs
 	echo "All APIs fetched, generated, and dependencies installed!"
 

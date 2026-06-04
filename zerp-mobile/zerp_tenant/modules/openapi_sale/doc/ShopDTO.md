@@ -22,6 +22,8 @@ Name | Type | Description | Notes
 **website** | **String** |  | [optional] 
 **latitude** | **double** |  | [optional] 
 **longitude** | **double** |  | [optional] 
+**cuisineCategories** | **Set<String>** |  | [optional] [default to const {}]
+**workingHours** | [**List<ShopWorkingHourDTO>**](ShopWorkingHourDTO.md) |  | [optional] [default to const []]
 **defaultMenuLanguage** | **String** |  | [optional] 
 **tenantId** | **String** |  | [optional] 
 

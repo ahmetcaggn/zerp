@@ -30,6 +30,11 @@ void main() {
       // TODO
     });
 
+    // List<TableOrderPaymentCreateDTO> payments (default value: const [])
+    test('to test the property `payments`', () async {
+      // TODO
+    });
+
 
   });
 

@@ -55,6 +55,21 @@ void main() {
       // TODO
     });
 
+    // List<TableOrderPaymentDTO> payments (default value: const [])
+    test('to test the property `payments`', () async {
+      // TODO
+    });
+
+    // DateTime createdAt
+    test('to test the property `createdAt`', () async {
+      // TODO
+    });
+
+    // DateTime updatedAt
+    test('to test the property `updatedAt`', () async {
+      // TODO
+    });
+
     // String tenantId
     test('to test the property `tenantId`', () async {
       // TODO

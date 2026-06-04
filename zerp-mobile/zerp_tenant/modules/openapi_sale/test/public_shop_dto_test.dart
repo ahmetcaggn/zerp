@@ -95,6 +95,16 @@ void main() {
       // TODO
     });
 
+    // Set<String> cuisineCategories (default value: const {})
+    test('to test the property `cuisineCategories`', () async {
+      // TODO
+    });
+
+    // List<ShopWorkingHourDTO> workingHours (default value: const [])
+    test('to test the property `workingHours`', () async {
+      // TODO
+    });
+
     // double distanceKm
     test('to test the property `distanceKm`', () async {
       // TODO

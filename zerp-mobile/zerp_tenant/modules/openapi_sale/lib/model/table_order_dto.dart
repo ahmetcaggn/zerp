@@ -10,6 +10,7 @@
 import 'package:dart_network_layer_core/dart_network_layer_core.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'table_order_item_dto.dart';
+import 'table_order_payment_dto.dart';
 
 
 part 'table_order_dto.g.dart';
@@ -33,6 +34,9 @@ class TableOrderDTO extends Schema {
     this.status,
     this.note,
     this.items = const [],
+    this.payments = const [],
+    this.createdAt,
+    this.updatedAt,
     this.tenantId,
   });
 
@@ -59,6 +63,15 @@ class TableOrderDTO extends Schema {
 
   @JsonKey(name: r'items')
   final List<TableOrderItemDTO> items;
+
+  @JsonKey(name: r'payments')
+  final List<TableOrderPaymentDTO> payments;
+
+  @JsonKey(name: r'createdAt')
+  final DateTime? createdAt;
+
+  @JsonKey(name: r'updatedAt')
+  final DateTime? updatedAt;
 
   @JsonKey(name: r'tenantId')
   final String? tenantId;

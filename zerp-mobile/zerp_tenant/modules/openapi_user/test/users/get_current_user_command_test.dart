@@ -18,7 +18,7 @@ void main() {
   group('tests for UsersGetCurrentUserApi', () {
     // Get currently authenticated user profile
     //
-    //Future<ApiResponseUserResponseDTO> getCurrentUser() async
+    //Future<ApiResponseCurrentUserProfileDTO> getCurrentUser() async
     test('test getCurrentUser', () async {
       // TODO
     });

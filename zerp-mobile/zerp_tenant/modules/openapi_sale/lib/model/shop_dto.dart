@@ -9,6 +9,7 @@
 
 import 'package:dart_network_layer_core/dart_network_layer_core.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'shop_working_hour_dto.dart';
 
 
 part 'shop_dto.g.dart';
@@ -38,6 +39,8 @@ class ShopDTO extends Schema {
     this.website,
     this.latitude,
     this.longitude,
+    this.cuisineCategories = const {},
+    this.workingHours = const [],
     this.defaultMenuLanguage,
     this.tenantId,
   });
@@ -83,6 +86,12 @@ class ShopDTO extends Schema {
 
   @JsonKey(name: r'longitude')
   final double? longitude;
+
+  @JsonKey(name: r'cuisineCategories')
+  final Set<ShopDTOCuisineCategoriesEnum> cuisineCategories;
+
+  @JsonKey(name: r'workingHours')
+  final List<ShopWorkingHourDTO> workingHours;
 
   @JsonKey(name: r'defaultMenuLanguage')
   final ShopDTODefaultMenuLanguageEnum? defaultMenuLanguage;
@@ -130,6 +139,70 @@ class ShopDTOFactory extends JsonSchemaFactory<ShopDTO> {
 
   @override
   ShopDTO fromJson(dynamic json) => ShopDTO.fromJson(json as Map<String, dynamic>);
+}
+
+
+
+enum ShopDTOCuisineCategoriesEnum {
+@JsonValue('BURGER')
+BURGER('BURGER'),
+@JsonValue('DONER')
+DONER('DONER'),
+@JsonValue('PIZZA')
+PIZZA('PIZZA'),
+@JsonValue('PIDE_LAHMACUN')
+PIDE_LAHMACUN('PIDE_LAHMACUN'),
+@JsonValue('CIG_KOFTE')
+CIG_KOFTE('CIG_KOFTE'),
+@JsonValue('SOKAK_LEZZETLERI')
+SOKAK_LEZZETLERI('SOKAK_LEZZETLERI'),
+@JsonValue('KOFTE')
+KOFTE('KOFTE'),
+@JsonValue('SALATA_SAGLIK')
+SALATA_SAGLIK('SALATA_SAGLIK'),
+@JsonValue('TATLI')
+TATLI('TATLI'),
+@JsonValue('TAVUK')
+TAVUK('TAVUK'),
+@JsonValue('MANTI_MAKARNA')
+MANTI_MAKARNA('MANTI_MAKARNA'),
+@JsonValue('TANTUNI')
+TANTUNI('TANTUNI'),
+@JsonValue('EV_YEMEKLERI')
+EV_YEMEKLERI('EV_YEMEKLERI'),
+@JsonValue('TOST_SANDVIC')
+TOST_SANDVIC('TOST_SANDVIC'),
+@JsonValue('KEBAP')
+KEBAP('KEBAP'),
+@JsonValue('KAHVE_ICECEK')
+KAHVE_ICECEK('KAHVE_ICECEK'),
+@JsonValue('PASTANE_FIRIN')
+PASTANE_FIRIN('PASTANE_FIRIN'),
+@JsonValue('CORBA')
+CORBA('CORBA'),
+@JsonValue('DUNYA_MUTFAGI_CAFE')
+DUNYA_MUTFAGI_CAFE('DUNYA_MUTFAGI_CAFE'),
+@JsonValue('UZAK_DOGU')
+UZAK_DOGU('UZAK_DOGU'),
+@JsonValue('MEZE')
+MEZE('MEZE'),
+@JsonValue('BALIK_DENIZ_URUNLERI')
+BALIK_DENIZ_URUNLERI('BALIK_DENIZ_URUNLERI'),
+@JsonValue('BOREK')
+BOREK('BOREK'),
+@JsonValue('STEAK')
+STEAK('STEAK'),
+@JsonValue('KAHVALTI')
+KAHVALTI('KAHVALTI'),
+@JsonValue('DONDURMA')
+DONDURMA('DONDURMA');
+
+const ShopDTOCuisineCategoriesEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 

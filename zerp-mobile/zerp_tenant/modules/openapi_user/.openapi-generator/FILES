@@ -14,6 +14,7 @@ doc/AdminTenantsPatchAdminTenantApi.md
 doc/AdminTenantsPatchManyAdminTenantsApi.md
 doc/AdminTenantsUpdateAdminTenantApi.md
 doc/AdminTenantsUploadTenantImageApi.md
+doc/ApiResponseCurrentUserProfileDTO.md
 doc/ApiResponseListLong.md
 doc/ApiResponseListPermissionGroupAssignmentResponseDTO.md
 doc/ApiResponseListPermissionGroupResponseDTO.md
@@ -33,6 +34,9 @@ doc/ApiResponseTenantResponseDTO.md
 doc/ApiResponseUserResponseDTO.md
 doc/ApiResponseUsernameCheckResponseDTO.md
 doc/ApiResponseVoid.md
+doc/CurrentUserProfileDTO.md
+doc/EmployeeContactDTO.md
+doc/ManagerDTO.md
 doc/Meta.md
 doc/Parameter.md
 doc/PermissionCreateRequestDTO.md
@@ -85,6 +89,7 @@ doc/UsersGetOneUserApi.md
 lib/api.dart
 lib/base/api_config.dart
 lib/base/base_request.dart
+lib/model/api_response_current_user_profile_dto.dart
 lib/model/api_response_list_long.dart
 lib/model/api_response_list_permission_group_assignment_response_dto.dart
 lib/model/api_response_list_permission_group_response_dto.dart
@@ -104,6 +109,9 @@ lib/model/api_response_tenant_response_dto.dart
 lib/model/api_response_user_response_dto.dart
 lib/model/api_response_username_check_response_dto.dart
 lib/model/api_response_void.dart
+lib/model/current_user_profile_dto.dart
+lib/model/employee_contact_dto.dart
+lib/model/manager_dto.dart
 lib/model/meta.dart
 lib/model/parameter.dart
 lib/model/permission_create_request_dto.dart
@@ -178,6 +186,7 @@ test/admin_tenants/patch_admin_tenant_command_test.dart
 test/admin_tenants/patch_many_admin_tenants_command_test.dart
 test/admin_tenants/update_admin_tenant_command_test.dart
 test/admin_tenants/upload_tenant_image_command_test.dart
+test/api_response_current_user_profile_dto_test.dart
 test/api_response_list_long_test.dart
 test/api_response_list_permission_group_assignment_response_dto_test.dart
 test/api_response_list_permission_group_response_dto_test.dart
@@ -197,6 +206,9 @@ test/api_response_tenant_response_dto_test.dart
 test/api_response_user_response_dto_test.dart
 test/api_response_username_check_response_dto_test.dart
 test/api_response_void_test.dart
+test/current_user_profile_dto_test.dart
+test/employee_contact_dto_test.dart
+test/manager_dto_test.dart
 test/meta_test.dart
 test/parameter_test.dart
 test/permission_create_request_dto_test.dart

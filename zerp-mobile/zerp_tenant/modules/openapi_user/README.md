@@ -103,6 +103,7 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [ApiResponseCurrentUserProfileDTO](doc//ApiResponseCurrentUserProfileDTO.md)
  - [ApiResponseListLong](doc//ApiResponseListLong.md)
  - [ApiResponseListPermissionGroupAssignmentResponseDTO](doc//ApiResponseListPermissionGroupAssignmentResponseDTO.md)
  - [ApiResponseListPermissionGroupResponseDTO](doc//ApiResponseListPermissionGroupResponseDTO.md)
@@ -122,6 +123,9 @@ Class | Method | HTTP request | Description
  - [ApiResponseUserResponseDTO](doc//ApiResponseUserResponseDTO.md)
  - [ApiResponseUsernameCheckResponseDTO](doc//ApiResponseUsernameCheckResponseDTO.md)
  - [ApiResponseVoid](doc//ApiResponseVoid.md)
+ - [CurrentUserProfileDTO](doc//CurrentUserProfileDTO.md)
+ - [EmployeeContactDTO](doc//EmployeeContactDTO.md)
+ - [ManagerDTO](doc//ManagerDTO.md)
  - [Meta](doc//Meta.md)
  - [Parameter](doc//Parameter.md)
  - [PermissionCreateRequestDTO](doc//PermissionCreateRequestDTO.md)
