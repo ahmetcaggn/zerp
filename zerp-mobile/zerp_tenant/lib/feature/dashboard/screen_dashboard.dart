@@ -44,42 +44,56 @@ class ScreenDashboard extends StatelessWidget {
           actions: const [
             _DashboardHeaderActions(),
           ],
-          body: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              const _TenantInfoSection(),
-              const SizedBox(height: 16),
-              const SectionEmployee(),
-              const SizedBox(height: 16),
-              const _ShopSelectorSection(),
-              const SizedBox(height: 12),
-
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  if (constraints.maxWidth >= 600) {
-                    return const Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: SectionTables()),
-                        SizedBox(width: 12),
-                        Expanded(child: SectionCash()),
-                      ],
-                    );
-                  } else {
-                    return const Column(
-                      children: [
-                        SectionTables(),
-                        SizedBox(height: 12),
-                        SectionCash(),
-                      ],
-                    );
+          body: Builder(
+            builder: (context) {
+              return PopScope(
+                canPop: false,
+                onPopInvokedWithResult: (didPop, result) {
+                  if (didPop) return;
+                  final scaffoldState = Scaffold.of(context);
+                  if (!scaffoldState.isDrawerOpen) {
+                    scaffoldState.openDrawer();
                   }
                 },
-              ),
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    const _TenantInfoSection(),
+                    const SizedBox(height: 16),
+                    const SectionEmployee(),
+                    const SizedBox(height: 16),
+                    const _ShopSelectorSection(),
+                    const SizedBox(height: 12),
 
-              const SizedBox(height: 12),
-              const SectionStock(),
-            ],
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        if (constraints.maxWidth >= 600) {
+                          return const Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child: SectionTables()),
+                              SizedBox(width: 12),
+                              Expanded(child: SectionCash()),
+                            ],
+                          );
+                        } else {
+                          return const Column(
+                            children: [
+                              SectionTables(),
+                              SizedBox(height: 12),
+                              SectionCash(),
+                            ],
+                          );
+                        }
+                      },
+                    ),
+
+                    const SizedBox(height: 12),
+                    const SectionStock(),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),
