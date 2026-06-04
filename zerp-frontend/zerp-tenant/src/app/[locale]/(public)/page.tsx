@@ -1,7 +1,6 @@
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded'
-import InsertPhotoRoundedIcon from '@mui/icons-material/InsertPhotoRounded'
 import Inventory2RoundedIcon from '@mui/icons-material/Inventory2Rounded'
 import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded'
 import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded'
@@ -12,13 +11,11 @@ import {
   Button,
   Chip,
   Container,
-  Divider,
   Grid,
   Paper,
   Stack,
   Typography,
 } from '@mui/material'
-import type { SxProps, Theme } from '@mui/material/styles'
 import type { SvgIconProps } from '@mui/material/SvgIcon'
 import type { Route } from 'next'
 import { notFound, redirect } from 'next/navigation'
@@ -28,7 +25,15 @@ import { getAuthSession } from '@/core/auth/server/session'
 import { isLocale } from '@/core/constants/locales'
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { getMessages } from '@/core/i18n/messages'
-import { responsiveLayout, responsivePageSx } from '@/core/theme/layout'
+import { responsivePageSx } from '@/core/theme/layout'
+
+import {
+  LandingImage,
+  LandingImageAlbum,
+  type LandingImageSource,
+  LandingWorkflowAlbum,
+  type LandingWorkflowStep,
+} from './landing-media'
 
 type AccentTone = 'teal' | 'blue' | 'amber' | 'rose'
 
@@ -73,61 +78,39 @@ const moduleIcons: ComponentType<SvgIconProps>[] = [
 
 const moduleTones: AccentTone[] = ['teal', 'blue', 'amber', 'rose', 'teal', 'blue']
 const workflowTones: AccentTone[] = ['teal', 'blue', 'amber', 'rose']
+const landingImagePath = '/zerp-tenant-landing-page-images'
+const playStoreUrl = 'https://play.google.com/store/apps/details?id=org.zerp.tenant'
+const playStoreBadgeSrc = `${landingImagePath}/GetItOnGooglePlay_Badge_Web_color_Turkish.svg`
+const moduleImageFiles = [
+  ['table-and-addition-tracking.webp', 'table-and-addition-tracking_1.webp'],
+  ['menu-and-recipe-management_1.webp', 'menu-and-recipe-management_2.webp'],
+  ['stock-management_1.webp', 'stock-management_2.webp', 'stock-management_3.webp'],
+  ['payment_1.webp', 'payment_2.webp'],
+  [
+    'employee-and-permission-and-ticket-and-shop_1.webp',
+    'employee-and-permission-and-ticket-and-shop_2.webp',
+    'employee-and-permission-and-ticket-and-shop_3.webp',
+    'employee-and-permission-and-ticket-and-shop_4.webp',
+  ],
+  ['customer-and-qr_1.webp', 'customer-and-qr_2.webp'],
+] as const
+const mobileImageFiles = ['mobile_1.webp', 'mobile_2.webp'] as const
+const serviceFlowImageFiles = [
+  'service_flow_image_1.webp',
+  'service_flow_image_2.webp',
+  'service_flow_image_3.webp',
+  'service_flow_image_4.webp',
+] as const
 
-function ImagePlaceholder({
-  aspectRatio = '16/9',
-  text = 'Görsel Alanı',
-  sx,
-  tone = 'blue',
-}: {
-  aspectRatio?: string | { xs?: string; sm?: string; md?: string; lg?: string }
-  text?: string
-  sx?: SxProps<Theme>
-  tone?: AccentTone
-}) {
-  const accent = accentByTone[tone]
-  return (
-    <Box
-      sx={[
-        {
-          width: '100%',
-          aspectRatio,
-          backgroundColor: accent.surface,
-          border: '2px dashed',
-          borderColor: accent.border,
-          borderRadius: 3,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
-          px: { xs: 2, sm: 3 },
-          position: 'relative',
-        },
-        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
-      ]}
-    >
-      <InsertPhotoRoundedIcon
-        sx={{ fontSize: { xs: 34, sm: 42, md: 48 }, color: accent.main, mb: 1, opacity: 0.8 }}
-      />
-      <Typography
-        variant="overline"
-        sx={{
-          color: accent.main,
-          fontWeight: 800,
-          letterSpacing: 0,
-          lineHeight: 1.35,
-          maxWidth: '100%',
-          opacity: 0.8,
-          textAlign: 'center',
-          whiteSpace: 'normal',
-          wordBreak: 'break-word',
-        }}
-      >
-        {text}
-      </Typography>
-    </Box>
-  )
+function imageSrc(fileName: string) {
+  return `${landingImagePath}/${fileName}`
+}
+
+function landingImages(files: readonly string[], altBase: string): LandingImageSource[] {
+  return files.map((fileName, index) => ({
+    alt: files.length > 1 ? `${altBase} ${index + 1}` : altBase,
+    src: imageSrc(fileName),
+  }))
 }
 
 function SectionHeading({
@@ -191,11 +174,13 @@ function SectionHeading({
 function FeatureCard({
   description,
   icon: Icon,
+  images,
   title,
   tone,
 }: {
   description: string
   icon: ComponentType<SvgIconProps>
+  images: LandingImageSource[]
   title: string
   tone: AccentTone
 }) {
@@ -220,11 +205,16 @@ function FeatureCard({
         },
       }}
     >
-      <ImagePlaceholder
-        text="Özellik Görseli"
-        aspectRatio="16/9"
-        tone={tone}
-        sx={{ borderRadius: 1.5, mb: 2.5, border: 'none' }}
+      <LandingImageAlbum
+        images={images}
+        aspectRatio="1650/1031"
+        objectFit="contain"
+        sizes="(max-width: 600px) 92vw, (max-width: 1200px) 46vw, 620px"
+        sx={{ mb: 2.5 }}
+        itemSx={{
+          backgroundColor: 'background.paper',
+          borderRadius: 1.5,
+        }}
       />
       <Stack spacing={1.5} sx={{ flex: 1 }}>
         <Stack direction="row" alignItems="center" spacing={1.5}>
@@ -272,6 +262,23 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   const messages = getMessages(locale)
   const home = messages.home
+  const heroImage: LandingImageSource = {
+    alt: home.mockup.ariaLabel,
+    src: imageSrc('zerp-tenant-operation-panel.webp'),
+  }
+  const moduleImageSets = moduleImageFiles.map((files, index) =>
+    landingImages(files, home.modules[index]?.title ?? home.modulesTitle),
+  )
+  const mobileImages = landingImages(mobileImageFiles, 'ZERP mobile app')
+  const workflowSteps: LandingWorkflowStep[] = home.workflow.map((item, index) => ({
+    description: item.description,
+    image: {
+      alt: item.title,
+      src: imageSrc(serviceFlowImageFiles[index] ?? serviceFlowImageFiles[0]),
+    },
+    number: String(index + 1).padStart(2, '0'),
+    title: item.title,
+  }))
 
   return (
     <Box id="top" component="main">
@@ -350,7 +357,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 sx={{ alignItems: { xs: 'stretch', sm: 'center' } }}
               >
                 <Button
-                  href="#demo"
+                  href={`/${locale}/register`}
                   size="large"
                   variant="contained"
                   endIcon={<ArrowForwardRoundedIcon />}
@@ -363,6 +370,34 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   }}
                 >
                   {home.primaryCta}
+                </Button>
+                <Button
+                  aria-label={home.playStoreCta}
+                  href={playStoreUrl}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  sx={{
+                    alignItems: 'center',
+                    backgroundColor: 'transparent',
+                    border: 0,
+                    borderRadius: 0,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    lineHeight: 0,
+                    minHeight: 0,
+                    minWidth: 0,
+                    p: 0,
+                    '&:hover': {
+                      backgroundColor: 'transparent',
+                    },
+                  }}
+                >
+                  <Box
+                    component="img"
+                    alt=""
+                    src={playStoreBadgeSrc}
+                    sx={{ display: 'block', height: 40, width: 'auto' }}
+                  />
                 </Button>
               </Stack>
 
@@ -398,14 +433,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   zIndex: -1,
                 }}
               />
-              <ImagePlaceholder
-                text={home.mockup.windowTitle}
-                aspectRatio={{ xs: '16/11', sm: '4/3' }}
-                tone="teal"
+              <LandingImage
+                {...heroImage}
+                aspectRatio={{ xs: '16/11', sm: '1891/1031' }}
+                objectFit="contain"
+                priority
+                sizes="(max-width: 1200px) 100vw, 46vw"
                 sx={{
                   boxShadow: '0 24px 64px rgba(0,0,0,0.1)',
-                  border: 'none',
                   backgroundColor: 'background.paper',
+                  borderRadius: { xs: 3, md: 4 },
                 }}
               />
             </Box>
@@ -477,15 +514,15 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                         description={home.modules[0].description}
                       />
                       <Stack spacing={2}>
-                        {[1, 2, 3].map((idx) => (
-                          <Stack key={idx} direction="row" spacing={1.5} alignItems="center">
+                        {home.tableFeatureBenefits.map((benefit) => (
+                          <Stack key={benefit} direction="row" spacing={1.5} alignItems="center">
                             <CheckCircleRoundedIcon
                               sx={{ color: accentByTone.teal.main, fontSize: 20 }}
                             />
                             <Typography
                               sx={{ fontWeight: 600, color: 'text.secondary', lineHeight: 1.5 }}
                             >
-                              Etkili özellik açıklaması {idx}
+                              {benefit}
                             </Typography>
                           </Stack>
                         ))}
@@ -493,11 +530,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     </Stack>
                   </Grid>
                   <Grid size={{ xs: 12, md: 7 }}>
-                    <ImagePlaceholder
-                      text="Ürün detay görseli"
+                    <LandingImageAlbum
+                      images={moduleImageSets[0] ?? []}
                       aspectRatio={{ xs: '4/3', sm: '16/10' }}
-                      tone="teal"
+                      objectFit="cover"
+                      sizes="(max-width: 900px) 86vw, 54vw"
                       sx={{ borderRadius: { xs: 3, md: 4 } }}
+                      itemSx={{
+                        borderRadius: { xs: 3, md: 4 },
+                        flex: { xs: '0 0 86%', sm: '0 0 76%', md: '0 0 72%' },
+                      }}
                     />
                   </Grid>
                 </Grid>
@@ -512,58 +554,58 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   >
                     <Grid size={{ xs: 12, md: 7 }}>
                       <Stack
-                        direction={{ xs: 'row', sm: 'row' }}
-                        spacing={{ xs: 1.5, sm: 2 }}
+                        direction="row"
+                        spacing={{ xs: 1.5, sm: 2.5 }}
                         sx={{
                           alignItems: 'flex-start',
+                          justifyContent: 'center',
                           mx: 'auto',
-                          maxWidth: { xs: 420, md: 'none' },
+                          maxWidth: { xs: 360, sm: 460, md: 520 },
                         }}
                       >
-                        <ImagePlaceholder
-                          text="Mobil arayüz 1"
-                          aspectRatio="9/16"
-                          tone="blue"
-                          sx={{ borderRadius: { xs: 3, md: 4 } }}
-                        />
-                        <ImagePlaceholder
-                          text="Mobil arayüz 2"
-                          aspectRatio="9/16"
-                          tone="amber"
-                          sx={{
-                            borderRadius: { xs: 3, md: 4 },
-                            transform: { sm: 'translateY(32px)' },
-                          }}
-                        />
+                        {mobileImages.map((image, index) => (
+                          <LandingImage
+                            key={image.src}
+                            {...image}
+                            aspectRatio="9/16"
+                            objectFit="contain"
+                            sizes="(max-width: 600px) 42vw, (max-width: 900px) 220px, 240px"
+                            sx={{
+                              backgroundColor: 'background.paper',
+                              borderRadius: { xs: 2.5, md: 3.5 },
+                              boxShadow: '0 20px 48px rgba(15, 23, 42, 0.09)',
+                              flex: '1 1 0',
+                              minWidth: 0,
+                              transform: index === 1 ? { sm: 'translateY(28px)' } : 'none',
+                            }}
+                          />
+                        ))}
                       </Stack>
                     </Grid>
                     <Grid size={{ xs: 12, md: 5 }}>
                       <Stack spacing={3}>
                         <SectionHeading
-                          eyebrow="Tüm Cihazlarda Kullanım"
-                          title={home.modules[1].title}
-                          description={home.modules[1].description}
+                          eyebrow={home.mobileFeature.eyebrow}
+                          title={home.mobileFeature.title}
+                          description={home.mobileFeature.description}
                         />
                         <Stack spacing={2}>
-                          {[1, 2].map((idx) => (
-                            <Stack key={idx} direction="row" spacing={1.5}>
+                          {home.mobileFeature.benefits.map((benefit) => (
+                            <Stack key={benefit} direction="row" spacing={1.5} alignItems="baseline">
                               <Box
                                 sx={{
-                                  mt: 0.5,
-                                  backgroundColor: accentByTone.blue.surface,
+                                  backgroundColor: accentByTone.blue.main,
                                   borderRadius: '50%',
-                                  p: 0.5,
+                                  flex: '0 0 auto',
+                                  height: 8,
+                                  transform: 'translateY(-1px)',
+                                  width: 8,
                                 }}
-                              >
-                                <ArrowForwardRoundedIcon
-                                  sx={{ color: accentByTone.blue.main, fontSize: 16 }}
-                                />
-                              </Box>
+                              />
                               <Typography
                                 sx={{ fontWeight: 600, color: 'text.secondary', lineHeight: 1.6 }}
                               >
-                                Kullanıcıların en çok değer verdiği detaylı fayda açıklaması alanı{' '}
-                                {idx}.
+                                {benefit}
                               </Typography>
                             </Stack>
                           ))}
@@ -587,10 +629,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               />
               <Grid container spacing={{ xs: 2, md: 3 }}>
                 {home.modules.map((item, index) => (
-                  <Grid key={item.title} size={{ xs: 12, sm: 6, lg: 4 }}>
+                  <Grid key={item.title} size={{ xs: 12, md: 6 }}>
                     <FeatureCard
                       description={item.description}
                       icon={moduleIcons[index % moduleIcons.length]}
+                      images={moduleImageSets[index] ?? []}
                       title={item.title}
                       tone={moduleTones[index % moduleTones.length]}
                     />
@@ -619,53 +662,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 description={home.workflowDescription}
               />
 
-              <ImagePlaceholder
-                text="Servis akışı görseli"
-                aspectRatio={{ xs: '4/3', sm: '16/9', md: '21/9' }}
-                tone="rose"
-                sx={{ borderRadius: 3, mb: { xs: 0, md: 2 } }}
-              />
-
-              <Grid container spacing={{ xs: 3, md: 4 }}>
-                {home.workflow.map((item, index) => {
-                  const accent = accentByTone[workflowTones[index % workflowTones.length]]
-
-                  return (
-                    <Grid key={item.title} size={{ xs: 12, md: 3 }}>
-                      <Box sx={{ position: 'relative', pt: 3 }}>
-                        <Typography
-                          sx={{
-                            color: accent.soft,
-                            fontFamily:
-                              'var(--font-space-grotesk), var(--font-dm-sans), sans-serif',
-                            fontSize: { xs: 56, md: 80 },
-                            fontWeight: 900,
-                            lineHeight: 1,
-                            position: 'absolute',
-                            top: -20,
-                            left: { xs: 0, md: -10 },
-                            opacity: 0.3,
-                            zIndex: 0,
-                          }}
-                        >
-                          {String(index + 1).padStart(2, '0')}
-                        </Typography>
-                        <Box sx={{ position: 'relative', zIndex: 1 }}>
-                          <Typography
-                            component="h3"
-                            sx={{ fontWeight: 900, mb: 1, fontSize: '1.15rem' }}
-                          >
-                            {item.title}
-                          </Typography>
-                          <Typography color="text.secondary" sx={{ lineHeight: 1.65 }}>
-                            {item.description}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Grid>
-                  )
-                })}
-              </Grid>
+              <LandingWorkflowAlbum steps={workflowSteps} />
             </Stack>
           </Box>
 
@@ -676,7 +673,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               display: 'grid',
               gap: { xs: 4, md: 6 },
               gridTemplateColumns: { xs: '1fr', lg: '1fr 2fr' },
-              alignItems: 'center',
+              alignItems: 'start',
             }}
           >
             <Stack spacing={3}>
@@ -684,12 +681,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 eyebrow={home.differenceEyebrow}
                 title={home.differenceTitle}
                 description={home.differenceDescription}
-              />
-              <ImagePlaceholder
-                text="Karşılaştırma veya Güven Sembolü (Kare)"
-                aspectRatio="1/1"
-                tone="amber"
-                sx={{ borderRadius: 4, display: { xs: 'none', lg: 'flex' } }}
               />
             </Stack>
 
@@ -724,134 +715,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   </Grid>
                 )
               })}
-            </Grid>
-          </Box>
-
-          {/* 7. DEMO / CTA CTA WITH IMAGE */}
-          <Box
-            id="demo"
-            component="section"
-            sx={{
-              scrollMarginTop: {
-                xs: `calc(${responsiveLayout.toolbarMinHeight.xs}px + 24px)`,
-                sm: `calc(${responsiveLayout.toolbarMinHeight.sm}px + 24px)`,
-              },
-              borderRadius: { xs: 3, md: 4 },
-              border: 'none',
-              backgroundColor: accentByTone.blue.main,
-              color: 'common.white',
-              p: { xs: 2.5, sm: 3, md: 6 },
-              position: 'relative',
-              overflow: 'hidden',
-            }}
-          >
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 0,
-                right: 0,
-                width: { xs: '100%', md: '50%' },
-                height: '100%',
-                background: `linear-gradient(90deg, transparent, rgba(255,255,255,0.1))`,
-                zIndex: 0,
-              }}
-            />
-
-            <Grid
-              container
-              spacing={{ xs: 4, md: 6 }}
-              alignItems="center"
-              sx={{ position: 'relative', zIndex: 1 }}
-            >
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Stack spacing={3}>
-                  <Box>
-                    <Typography
-                      component="p"
-                      variant="overline"
-                      sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 800, letterSpacing: 1 }}
-                    >
-                      {home.demoEyebrow}
-                    </Typography>
-                    <Typography
-                      component="h2"
-                      variant="h2"
-                      sx={{
-                        fontFamily: 'var(--font-space-grotesk), var(--font-dm-sans), sans-serif',
-                        letterSpacing: 0,
-                        fontSize: { xs: '1.85rem', sm: '2.15rem', md: '2.5rem' },
-                        mt: 1,
-                      }}
-                    >
-                      {home.demoTitle}
-                    </Typography>
-                  </Box>
-                  <Typography
-                    sx={{
-                      fontSize: { xs: '1rem', md: '1.15rem' },
-                      lineHeight: 1.75,
-                      color: 'rgba(255,255,255,0.9)',
-                    }}
-                  >
-                    {home.demoDescription}
-                  </Typography>
-
-                  <Stack spacing={2} sx={{ mt: 2 }}>
-                    {home.demoSteps.map((step) => (
-                      <Stack key={step} direction="row" spacing={1.5} alignItems="flex-start">
-                        <CheckCircleRoundedIcon
-                          sx={{ color: 'rgba(255,255,255,0.9)', mt: 0.25 }}
-                          fontSize="small"
-                        />
-                        <Typography sx={{ lineHeight: 1.55, fontWeight: 600 }}>{step}</Typography>
-                      </Stack>
-                    ))}
-                  </Stack>
-
-                  <Stack
-                    direction={{ xs: 'column', sm: 'row' }}
-                    gap={2}
-                    sx={{ alignItems: { xs: 'stretch', sm: 'center' }, pt: 2 }}
-                  >
-                    <Button
-                      href={`/${locale}/register`}
-                      variant="contained"
-                      size="large"
-                      endIcon={<ArrowForwardRoundedIcon />}
-                      sx={{
-                        borderRadius: 2,
-                        fontWeight: 900,
-                        backgroundColor: 'common.white',
-                        color: accentByTone.blue.main,
-                        '&:hover': {
-                          backgroundColor: 'rgba(255,255,255,0.9)',
-                        },
-                      }}
-                    >
-                      {home.demoRegisterCta}
-                    </Button>
-                  </Stack>
-                </Stack>
-              </Grid>
-
-              <Grid size={{ xs: 12, md: 6 }}>
-                <ImagePlaceholder
-                  text="Demo arayüz görseli"
-                  aspectRatio={{ xs: '16/10', md: '1/1' }}
-                  tone="blue"
-                  sx={{
-                    borderRadius: { xs: 3, md: 4 },
-                    border: 'none',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    backdropFilter: 'blur(10px)',
-                    color: 'white',
-                    '& svg, & .MuiTypography-root': {
-                      color: 'white !important',
-                      opacity: '1 !important',
-                    },
-                  }}
-                />
-              </Grid>
             </Grid>
           </Box>
         </Stack>

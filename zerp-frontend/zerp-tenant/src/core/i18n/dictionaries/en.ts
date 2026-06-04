@@ -57,6 +57,7 @@ export const enMessages = {
     cta: 'Request a Demo',
     primaryCta: 'Request a Demo',
     secondaryCta: 'Create Account',
+    playStoreCta: 'Open on Play Store',
     heroTags: ['Cafe and restaurant ERP', 'Tables + stock + checkout', 'Multi-branch ready'],
     proofPoints: [
       { value: 'One panel', label: 'manage shops, stock, checkout, and teams in one flow' },
@@ -101,12 +102,12 @@ export const enMessages = {
       {
         title: 'Checkout and sales channels',
         description:
-          'Table service, delivery, takeaway, and QR orders roll into one performance view.',
+          'Table service and QR orders are handled with partial, item-based, and split-amount payment scenarios.',
       },
       {
         title: 'Staff and permissions',
         description:
-          'Team members work within role, shop, and operation-specific access boundaries.',
+          'Staff records, permission groups, support tickets, and shop scope are controlled in one management flow.',
       },
       {
         title: 'QR and guest flow',
@@ -114,20 +115,35 @@ export const enMessages = {
           'Tableside ordering and online menu flows connect back to the operations panel.',
       },
     ],
+    tableFeatureBenefits: [
+      'Table status, open checks, and payment-waiting accounts separate clearly at a glance.',
+      'Service teams follow order flow by table, reducing confusion during rush hours.',
+      'Full, partial, and item-based payment scenarios make check closing faster.',
+    ],
+    mobileFeature: {
+      eyebrow: 'Multiplatform',
+      title: 'Mobile app',
+      description:
+        'Table, stock, menu, and team operations stay on the same data model across the web panel and mobile app.',
+      benefits: [
+        'Managers can follow shop performance and critical alerts even when they are away from the floor.',
+        'Field teams can reach table, order, and operation details quickly from a mobile device.',
+      ],
+    },
     workflowEyebrow: 'Service Flow',
     workflowTitle: 'A calm flow for rush-hour decisions',
     workflowDescription:
       'Baristas, waiters, cashiers, and owners work from the same operational truth instead of scattered screens.',
     workflow: [
       {
+        title: 'Kitchen and stock are managed',
+        description:
+          'The product recipe keeps critical ingredients and expected stock movement current.',
+      },
+      {
         title: 'Order is placed',
         description:
           'Table, QR, or delivery channel routes the order into the correct service flow.',
-      },
-      {
-        title: 'Kitchen and stock react',
-        description:
-          'The product recipe keeps critical ingredients and expected stock movement current.',
       },
       {
         title: 'Payment closes',
@@ -140,7 +156,7 @@ export const enMessages = {
       },
     ],
     differenceEyebrow: 'What Makes It Different',
-    differenceTitle: 'POS speed without losing ERP depth',
+    differenceTitle: 'Fast service without losing ERP depth',
     differenceDescription:
       'Common restaurant tools are fast, but stock, permissions, branches, and cost data often live apart. ZERP brings them into one decision space.',
     differences: [
@@ -163,17 +179,6 @@ export const enMessages = {
         description: 'Employees, permission groups, and shop scope support operational security.',
       },
     ],
-    demoEyebrow: 'Demo Request',
-    demoTitle: 'Walk through ZERP around your own service rhythm',
-    demoDescription:
-      'This is currently a guided demo area. Until a real lead endpoint is added, the fastest path is to continue into registration and try the tenant panel.',
-    demoSteps: [
-      'Position your cafe, restaurant, or multi-branch operation.',
-      'Review table, menu, stock, and checkout screens with a sample service flow.',
-      'Move through registration to open the tenant panel for setup.',
-    ],
-    demoRegisterCta: 'Continue to Registration',
-    demoBackCta: 'Back to Top',
     mockup: {
       ariaLabel: 'Example ZERP restaurant ERP product interface',
       windowTitle: 'ZERP Tenant Operations Panel',

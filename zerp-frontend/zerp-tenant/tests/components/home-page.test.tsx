@@ -23,7 +23,7 @@ describe('HomePage', () => {
     redirect.mockReset()
   })
 
-  it('renders the Turkish restaurant ERP landing page with demo and register CTAs', async () => {
+  it('renders the Turkish restaurant ERP landing page with demo and Play Store CTAs', async () => {
     const ui = await HomePage({ params: Promise.resolve({ locale: 'tr' }) })
 
     render(ui)
@@ -34,12 +34,17 @@ describe('HomePage', () => {
         name: 'Kafe ve restoran operasyonunu tek ekranda yönetin',
       }),
     ).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Demo Talebi' })).toHaveAttribute('href', '#demo')
-    expect(screen.getByRole('link', { name: 'Kayıt Akışına Geç' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Demo Talebi' })).toHaveAttribute(
       'href',
       '/tr/register',
     )
-    expect(screen.getByText('ZERP Tenant Operasyon Paneli')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: "Play Store'dan Eriş" })).toHaveAttribute(
+      'href',
+      'https://play.google.com/store/apps/details?id=org.zerp.tenant',
+    )
+    expect(
+      screen.getByRole('img', { name: 'ZERP restoran ERP ürün arayüzü örneği' }),
+    ).toBeInTheDocument()
   })
 
   it('renders the English landing page with localized CTAs', async () => {
@@ -53,12 +58,17 @@ describe('HomePage', () => {
         name: 'Run cafe and restaurant operations from one clear workspace',
       }),
     ).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Request a Demo' })).toHaveAttribute('href', '#demo')
-    expect(screen.getByRole('link', { name: 'Continue to Registration' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Request a Demo' })).toHaveAttribute(
       'href',
       '/en/register',
     )
-    expect(screen.getByText('ZERP Tenant Operations Panel')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Open on Play Store' })).toHaveAttribute(
+      'href',
+      'https://play.google.com/store/apps/details?id=org.zerp.tenant',
+    )
+    expect(
+      screen.getByRole('img', { name: 'Example ZERP restaurant ERP product interface' }),
+    ).toBeInTheDocument()
   })
 
   it('redirects authenticated users to the localized dashboard', async () => {

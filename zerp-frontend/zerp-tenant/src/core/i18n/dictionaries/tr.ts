@@ -57,6 +57,7 @@ export const trMessages = {
     cta: 'Demo Talebi',
     primaryCta: 'Demo Talebi',
     secondaryCta: 'Kayıt Ol',
+    playStoreCta: "Play Store'dan Eriş",
     heroTags: ['Kafe ve restoran ERP', 'Masa + stok + kasa', 'Çok şubeli yönetim'],
     proofPoints: [
       { value: 'Tek panel', label: 'şube, stok, kasa ve ekibi aynı akışta yönetir' },
@@ -91,36 +92,52 @@ export const trMessages = {
         description: 'Ürün, kategori, ekstra seçenek ve reçete ilişkileri şube bazında düzenlenir.',
       },
       {
-        title: 'Stok ve kritik eşik',
+        title: 'Stok yönetimi ve takibi',
         description:
           'Gerçek stok, beklenen stok ve sayım farkları servis öncesi görünür hale gelir.',
       },
       {
         title: 'Kasa ve kanal satışları',
         description:
-          'Masa servisi, paket, gel-al ve QR siparişleri tek performans görünümünde toplanır.',
+          'Masa servisi ve QR siparişleri; parçalı ödeme, ürün bazlı ödeme ve tutarı bölerek ödeme senaryolarıyla yönetilir.',
       },
       {
-        title: 'Çalışan ve yetki',
-        description: 'Ekip üyeleri rol, mağaza ve operasyon kapsamına göre kontrollü çalışır.',
+        title: 'Çalışan, yetki, ticket desteği ve mağaza yönetimi',
+        description:
+          'Çalışan kayıtları, yetki grupları, destek talepleri ve mağaza kapsamı tek yönetim akışında kontrol edilir.',
       },
       {
         title: 'QR ve müşteri akışı',
         description: 'Masadan sipariş ve online menü akışları operasyon paneline bağlanır.',
       },
     ],
+    tableFeatureBenefits: [
+      'Masa durumu, açık adisyon ve ödeme bekleyen hesaplar tek bakışta ayrışır.',
+      'Servis ekibi sipariş akışını masaya bağlı takip eder; yoğun saatlerde karışıklık azalır.',
+      'Tam, parçalı veya ürün bazlı ödeme senaryoları adisyon kapanışını hızlandırır.',
+    ],
+    mobileFeature: {
+      eyebrow: 'Multiplatform',
+      title: 'Mobil uygulama',
+      description:
+        'Masa, stok, menü ve ekip operasyonu web panelinden ya da mobil uygulamadan aynı veriyle yönetilir.',
+      benefits: [
+        'Yönetici mağaza performansını ve kritik uyarıları işletme dışında da takip eder.',
+        'Saha ekibi masa, sipariş ve operasyon detaylarına mobil cihazdan hızlıca erişir.',
+      ],
+    },
     workflowEyebrow: 'Servis Akışı',
     workflowTitle: 'Yoğun saatlerde karar veren sade bir akış',
     workflowDescription:
       'Barista, garson, kasiyer ve işletme sahibi farklı ekranlara dağılmadan aynı operasyon verisine bakar.',
     workflow: [
       {
-        title: 'Sipariş alınır',
-        description: 'Masa, QR veya paket kanalı siparişi doğru servis akışına düşürür.',
+        title: 'Mutfak ve stok yönetilir',
+        description: 'Ürün reçetesi kritik malzemeleri ve beklenen stok hareketini güncel tutar.',
       },
       {
-        title: 'Mutfak ve stok etkilenir',
-        description: 'Ürün reçetesi kritik malzemeleri ve beklenen stok hareketini güncel tutar.',
+        title: 'Sipariş alınır',
+        description: 'Masa, QR veya paket kanalı siparişi doğru servis akışına düşürür.',
       },
       {
         title: 'Ödeme kapanır',
@@ -132,7 +149,7 @@ export const trMessages = {
       },
     ],
     differenceEyebrow: 'Neyi Farklı Yapar',
-    differenceTitle: 'POS hissi hızlı, ERP derinliği kaybolmaz',
+    differenceTitle: 'Hızlı kullanım, ERP derinliği kaybolmaz',
     differenceDescription:
       'Sektördeki yaygın araçların güçlü tarafı hızdır; eksik kalan taraf ise stok, yetki, şube ve maliyet bilgisinin ayrı ayrı yaşamasıdır. ZERP bunları tek karar alanında toplar.',
     differences: [
@@ -154,17 +171,6 @@ export const trMessages = {
         description: 'Çalışan, yetki grubu ve mağaza kapsamı operasyon güvenliğini destekler.',
       },
     ],
-    demoEyebrow: 'Demo Talebi',
-    demoTitle: 'İşletmenizin servis ritmine göre birlikte gezelim',
-    demoDescription:
-      'Bu bölüm şimdilik yönlendirici demo alanıdır. Gerçek lead endpointi eklenene kadar en hızlı yol kayıt akışına geçmek ve tenant panelini denemektir.',
-    demoSteps: [
-      'Kafe, restoran veya çok şubeli yapınızı birlikte konumlandırın.',
-      'Masa, menü, stok ve kasa ekranlarını örnek operasyonla inceleyin.',
-      'Uygun kurulum akışı için kayıt adımından tenant paneline ilerleyin.',
-    ],
-    demoRegisterCta: 'Kayıt Akışına Geç',
-    demoBackCta: 'Başa Dön',
     mockup: {
       ariaLabel: 'ZERP restoran ERP ürün arayüzü örneği',
       windowTitle: 'ZERP Tenant Operasyon Paneli',

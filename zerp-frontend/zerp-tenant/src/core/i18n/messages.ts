@@ -145,6 +145,7 @@ export interface MessageDictionary {
     cta: string
     primaryCta: string
     secondaryCta: string
+    playStoreCta: string
     heroTags: readonly string[]
     proofPoints: ReadonlyArray<{
       value: string
@@ -161,6 +162,13 @@ export interface MessageDictionary {
       title: string
       description: string
     }>
+    tableFeatureBenefits: readonly string[]
+    mobileFeature: {
+      eyebrow: string
+      title: string
+      description: string
+      benefits: readonly string[]
+    }
     workflowEyebrow: string
     workflowTitle: string
     workflowDescription: string
@@ -175,12 +183,6 @@ export interface MessageDictionary {
       title: string
       description: string
     }>
-    demoEyebrow: string
-    demoTitle: string
-    demoDescription: string
-    demoSteps: readonly string[]
-    demoRegisterCta: string
-    demoBackCta: string
     mockup: {
       ariaLabel: string
       windowTitle: string

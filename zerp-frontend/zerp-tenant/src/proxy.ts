@@ -9,6 +9,7 @@ import { isAuthPath, isProtectedPath } from '@/core/utils/route-helpers'
 const INTERNAL_API_URL = process.env.INTERNAL_API_URL ?? 'http://gateway:8080'
 const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET
 const NEXTAUTH_URL = process.env.NEXTAUTH_URL ?? ''
+const PUBLIC_ASSET_PREFIXES = ['/zerp-tenant-landing-page-images/']
 
 // Stale default NextAuth cookie names that should be cleaned up
 const STALE_NEXTAUTH_COOKIES = [
@@ -43,6 +44,10 @@ function deleteStaleAuthCookies(response: NextResponse): void {
   for (const name of STALE_NEXTAUTH_COOKIES) {
     response.cookies.delete(name)
   }
+}
+
+function isPublicAssetPath(pathname: string): boolean {
+  return PUBLIC_ASSET_PREFIXES.some((prefix) => pathname.startsWith(prefix))
 }
 
 async function proxyApiRequest(req: NextRequest, accessToken: string): Promise<NextResponse> {
@@ -97,6 +102,10 @@ export async function proxy(req: NextRequest) {
 
   // NextAuth internal routes — always pass through
   if (pathname.startsWith('/api/auth')) {
+    return NextResponse.next()
+  }
+
+  if (isPublicAssetPath(pathname)) {
     return NextResponse.next()
   }
 
@@ -172,6 +181,6 @@ export async function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|manifest.json|sitemap.xml|robots.txt|zerp_icon_.*\\.svg).*)',
+    '/((?!_next/static|_next/image|favicon.ico|manifest.json|sitemap.xml|robots.txt|zerp_icon_.*\\.svg|zerp-tenant-landing-page-images/.*).*)',
   ],
 }
