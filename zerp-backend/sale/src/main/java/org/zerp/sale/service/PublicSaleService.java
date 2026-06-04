@@ -3,7 +3,6 @@ package org.zerp.sale.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import feign.FeignException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -78,9 +77,6 @@ public class PublicSaleService {
     private final PublicCartOrderRepository publicCartOrderRepository;
     private final PublicCartOrderItemRepository publicCartOrderItemRepository;
     private final ThumborFeignClient thumborFeignClient;
-
-    @Value("${app.sale.menu-item-images.folder:saleMenuItems}")
-    private String menuItemImageFolder;
 
     @Transactional(readOnly = true)
     public List<PublicShopDTO> listShops() {
@@ -321,8 +317,10 @@ public class PublicSaleService {
         try {
             thumborResponse = thumborFeignClient.getProfileImage(normalizedImageId, resolvedSize);
         } catch (FeignException.NotFound e) {
+            log.warn("Image not found in thumbor for imageId {}", normalizedImageId, e);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found: " + normalizedImageId, e);
         } catch (FeignException e) {
+            log.error("Error fetching image from thumbor for imageId {}", normalizedImageId, e);
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to fetch image from thumbor", e);
         }
 
