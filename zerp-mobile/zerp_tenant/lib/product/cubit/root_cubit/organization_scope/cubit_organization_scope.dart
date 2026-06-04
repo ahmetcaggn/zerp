@@ -122,6 +122,7 @@ final class CubitOrganizationScope extends BaseCubit<StateOrganizationScope>
         ),
       );
     } finally {
+      log.fine('Current state after attempting to load tenant: $state');
       _loadTenantFuture = null;
       if (state is StateOrganizationScopeLoading) {
         log.shout(

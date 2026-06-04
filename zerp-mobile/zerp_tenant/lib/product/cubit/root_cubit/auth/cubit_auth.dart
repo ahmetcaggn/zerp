@@ -30,6 +30,7 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
   void emit(StateAuth state) {
     super.emit(state);
     if (state is StateAuthAuthenticated) {
+      log.info('emit: User authenticated: ${state.username}');
       unawaited(getIt<CubitOrganizationScope>().loadTenantIfNeeded());
     }
   }
@@ -44,14 +45,18 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
     _ongoingCheck = completer.future;
 
     try {
-      final sessionStatus = await _authService.checkSessionOnlineStatus();
+      final sessionStatus = await _authService
+          .checkSessionOnlineStatus()
+          .timeout(const Duration(seconds: 20));
       if (sessionStatus == AuthSessionOnlineStatus.invalid) {
         emit(const StateAuthUnauthenticated());
         await _navigateToLoginIfNeeded();
         return;
       }
 
-      final claims = await _authStorageService.authClaimsIfValid;
+      final claims = await _authStorageService.authClaimsIfValid.timeout(
+        const Duration(seconds: 5),
+      );
       if (claims != null) {
         emit(StateAuthAuthenticated(username: claims.preferredUsername));
       } else {
@@ -63,6 +68,7 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
       emit(StateAuthError(message: t.auth.errors.checkFailed));
       await _navigateToLoginIfNeeded();
     } finally {
+      log.fine('Finished checkAuthRemote, clearing ongoing check');
       _ongoingCheck = null;
       completer.complete();
     }
@@ -79,9 +85,7 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
       } else {
         log.warning('Login failed: No claims returned');
         emit(
-          StateAuthError(
-            message: t.auth.errors.loginNoClaims,
-          ),
+          StateAuthError(message: t.auth.errors.loginNoClaims),
         );
       }
     } on Object catch (e, s) {

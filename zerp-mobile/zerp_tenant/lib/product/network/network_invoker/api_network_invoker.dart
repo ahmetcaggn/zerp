@@ -199,7 +199,7 @@ final class _DioLoggerInterceptor extends LogInterceptor
     log.fine(
       'Dio Response: ${response.statusCode} ${response.requestOptions.method} '
       '${response.requestOptions.uri} '
-      'Headers: ${response.headers} '
+      'Headers: ${response.headers.map} '
       'Query Parameters: ${response.requestOptions.queryParameters} '
       'Data: ${response.data}',
     );
