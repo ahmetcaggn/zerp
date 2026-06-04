@@ -90,51 +90,81 @@ final class CatalogSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Expanded(
-          child: Builder(
-            builder: (context) {
-              final filteredItems = menuItems.where((item) {
-                if (selectedCategoryId == null) return true;
-                return item.categoryId == selectedCategoryId;
-              }).toList();
-
-              if (filteredItems.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 24,
-                  ),
-                  child: Center(
-                    child: Text(
-                      context.t.sale.order.noProducts,
-                    ),
-                  ),
-                );
-              }
-
-              return GridView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                shrinkWrap: true,
-                physics: scrollable
-                    ? null
-                    : const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 192,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                ),
-                itemCount: filteredItems.length,
-                itemBuilder: (context, index) {
-                  final item = filteredItems[index];
-                  return CatalogItem(
-                    extraOptions: extraOptions,
-                    data: item,
-                  );
-                },
-              );
-            },
+        if (scrollable)
+          Expanded(
+            child: _CatalogGrid(
+              menuItems: menuItems,
+              extraOptions: extraOptions,
+              selectedCategoryId: selectedCategoryId,
+              scrollable: scrollable,
+            ),
+          )
+        else
+          _CatalogGrid(
+            menuItems: menuItems,
+            extraOptions: extraOptions,
+            selectedCategoryId: selectedCategoryId,
+            scrollable: scrollable,
           ),
-        ),
       ],
+    );
+  }
+}
+
+final class _CatalogGrid extends StatelessWidget {
+  const _CatalogGrid({
+    required this.menuItems,
+    required this.extraOptions,
+    required this.selectedCategoryId,
+    required this.scrollable,
+  });
+
+  final List<MenuItemDTO> menuItems;
+  final List<ProductExtraOptionDTO> extraOptions;
+  final String? selectedCategoryId;
+  final bool scrollable;
+
+  @override
+  Widget build(BuildContext context) {
+    return Builder(
+      builder: (context) {
+        final filteredItems = menuItems.where((item) {
+          if (selectedCategoryId == null) return true;
+          return item.categoryId == selectedCategoryId;
+        }).toList();
+
+        if (filteredItems.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 24,
+            ),
+            child: Center(
+              child: Text(
+                context.t.sale.order.noProducts,
+              ),
+            ),
+          );
+        }
+
+        return GridView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          shrinkWrap: !scrollable,
+          physics: scrollable ? null : const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 192,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+          ),
+          itemCount: filteredItems.length,
+          itemBuilder: (context, index) {
+            final item = filteredItems[index];
+            return CatalogItem(
+              extraOptions: extraOptions,
+              data: item,
+            );
+          },
+        );
+      },
     );
   }
 }
