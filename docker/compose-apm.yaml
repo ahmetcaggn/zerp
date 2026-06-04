@@ -15,7 +15,7 @@ services:
       - zerp-net
 
   grafana:
-    image: grafana/grafana:7.0.1
+    image: grafana/grafana:11.6.0
     volumes:
       # - /data/grafana:/var/lib/grafana
       - grafana-data:/var/lib/grafana
