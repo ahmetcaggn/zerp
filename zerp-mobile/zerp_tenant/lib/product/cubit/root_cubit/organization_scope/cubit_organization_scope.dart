@@ -123,6 +123,13 @@ final class CubitOrganizationScope extends BaseCubit<StateOrganizationScope>
       );
     } finally {
       _loadTenantFuture = null;
+      if (state is StateOrganizationScopeLoading) {
+        log.shout(
+          'Tenant loading completed but state is still loading, '
+          'this should not happen, resetting to initial state',
+        );
+        emit(const StateOrganizationScopeInitial());
+      }
     }
   }
 
