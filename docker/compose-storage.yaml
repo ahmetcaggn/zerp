@@ -12,6 +12,8 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
       - minio_data:/data
+    networks:
+      - zerp-net
 
   thumbor:
     image: beeyev/thumbor-s3:slim-alpine
@@ -48,6 +50,12 @@ services:
       HTTP_LOADER_VALIDATE_CERTS: "False"
     depends_on:
       - minio
+    networks:
+      - zerp-net
 
 volumes:
   minio_data:
+
+networks:
+  zerp-net:
+    external: true
