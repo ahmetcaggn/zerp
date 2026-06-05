@@ -22,6 +22,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { alpha } from '@mui/material/styles'
 import jsQR from 'jsqr'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -74,7 +75,14 @@ function QtyControl({
         size="small"
         disabled={disabled}
         onClick={onMinus}
-        sx={{ width: btnSize, height: btnSize, border: '1.5px solid', borderColor: 'divider', borderRadius: 1.5, p: 0 }}
+        sx={{
+          width: btnSize,
+          height: btnSize,
+          border: '1.5px solid',
+          borderColor: 'divider',
+          borderRadius: 1.5,
+          p: 0,
+        }}
       >
         <RemoveIcon sx={{ fontSize: iconSize }} />
       </IconButton>
@@ -85,7 +93,14 @@ function QtyControl({
         size="small"
         disabled={disabled}
         onClick={onPlus}
-        sx={{ width: btnSize, height: btnSize, border: '1.5px solid', borderColor: 'divider', borderRadius: 1.5, p: 0 }}
+        sx={{
+          width: btnSize,
+          height: btnSize,
+          border: '1.5px solid',
+          borderColor: 'divider',
+          borderRadius: 1.5,
+          p: 0,
+        }}
       >
         <AddIcon sx={{ fontSize: iconSize }} />
       </IconButton>
@@ -146,7 +161,7 @@ export function OrderPanel({
   }
 
   const stopCamera = useCallback(() => {
-    streamRef.current?.getTracks().forEach(track => track.stop())
+    streamRef.current?.getTracks().forEach((track) => track.stop())
     streamRef.current = null
     if (videoRef.current) {
       videoRef.current.srcObject = null
@@ -163,15 +178,18 @@ export function OrderPanel({
     setCameraError(null)
   }, [stopCamera])
 
-  const submitImport = useCallback((value: string) => {
-    const code = extractPublicCartOrderCode(value)
-    if (!code) {
-      setImportError(t('pos.importQrInvalid'))
-      return
-    }
-    setImportError(null)
-    onImportPublicCartOrder(code, handleCloseImportDialog)
-  }, [handleCloseImportDialog, onImportPublicCartOrder, t])
+  const submitImport = useCallback(
+    (value: string) => {
+      const code = extractPublicCartOrderCode(value)
+      if (!code) {
+        setImportError(t('pos.importQrInvalid'))
+        return
+      }
+      setImportError(null)
+      onImportPublicCartOrder(code, handleCloseImportDialog)
+    },
+    [handleCloseImportDialog, onImportPublicCartOrder, t],
+  )
 
   async function startCamera() {
     setCameraError(null)
@@ -205,7 +223,12 @@ export function OrderPanel({
       const video = videoRef.current
       const qrCanvas = qrCanvasRef.current
       if (!video || !qrCanvas || scanLockedRef.current) return
-      if (video.readyState < video.HAVE_CURRENT_DATA || video.videoWidth <= 0 || video.videoHeight <= 0) return
+      if (
+        video.readyState < video.HAVE_CURRENT_DATA ||
+        video.videoWidth <= 0 ||
+        video.videoHeight <= 0
+      )
+        return
 
       if (qrCanvas.width !== video.videoWidth || qrCanvas.height !== video.videoHeight) {
         qrCanvas.width = video.videoWidth
@@ -217,7 +240,9 @@ export function OrderPanel({
 
       context.drawImage(video, 0, 0, qrCanvas.width, qrCanvas.height)
       const frame = context.getImageData(0, 0, qrCanvas.width, qrCanvas.height)
-      const detected = jsQR(frame.data, frame.width, frame.height, { inversionAttempts: 'attemptBoth' })
+      const detected = jsQR(frame.data, frame.width, frame.height, {
+        inversionAttempts: 'attemptBoth',
+      })
       const rawValue = detected?.data
       if (!rawValue || !extractPublicCartOrderCode(rawValue)) return
 
@@ -245,10 +270,21 @@ export function OrderPanel({
       }}
     >
       <Box sx={{ px: 2.5, py: 2, borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
-        <Typography variant="overline" sx={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: 1.5, color: 'text.secondary', lineHeight: 1 }}>
+        <Typography
+          variant="overline"
+          sx={{
+            fontSize: '0.65rem',
+            fontWeight: 700,
+            letterSpacing: 1.5,
+            color: 'text.secondary',
+            lineHeight: 1,
+          }}
+        >
           {t('pos.orderPanelTitle')}
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 0.5 }}>
+        <Box
+          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 0.5 }}
+        >
           <Typography variant="h6" fontWeight={800} lineHeight={1}>
             {table?.name ?? '—'}
           </Typography>
@@ -280,7 +316,15 @@ export function OrderPanel({
             <Box key={order.id}>
               {orderIdx === 0 && (
                 <Box sx={{ px: 2.5, pt: 2, pb: 0.5 }}>
-                  <Typography variant="overline" sx={{ fontSize: '0.63rem', fontWeight: 700, letterSpacing: 1.2, color: 'text.secondary' }}>
+                  <Typography
+                    variant="overline"
+                    sx={{
+                      fontSize: '0.63rem',
+                      fontWeight: 700,
+                      letterSpacing: 1.2,
+                      color: 'text.secondary',
+                    }}
+                  >
                     {t('pos.openOrdersSection')}
                   </Typography>
                 </Box>
@@ -294,31 +338,67 @@ export function OrderPanel({
                   borderColor: isActiveOrder ? 'warning.main' : 'divider',
                   borderRadius: 2.5,
                   overflow: 'hidden',
-                  boxShadow: isActiveOrder ? theme => `0 0 0 2px ${theme.palette.warning.light}` : 'none',
+                  boxShadow: isActiveOrder
+                    ? (theme) => `0 0 0 2px ${theme.palette.warning.light}`
+                    : 'none',
                 }}
               >
-                <Box sx={{ px: 2, py: 1.25, bgcolor: isActiveOrder ? 'warning.50' : 'grey.50', display: 'flex', alignItems: 'center', gap: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Box
+                  sx={{
+                    px: 2,
+                    py: 1.25,
+                    bgcolor: (theme) =>
+                      isActiveOrder
+                        ? alpha(
+                            theme.palette.warning.main,
+                            theme.palette.mode === 'dark' ? 0.18 : 0.12,
+                          )
+                        : theme.palette.action.hover,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                  }}
+                >
                   <Box sx={{ minWidth: 0, flex: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Chip label={t('pos.openStatus')} color="warning" size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700 }} />
+                      <Chip
+                        label={t('pos.openStatus')}
+                        color="warning"
+                        size="small"
+                        sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700 }}
+                      />
                       <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.82rem' }}>
                         {t('sale.cashier.itemCount').replace('{n}', String(order.items.length))}
                       </Typography>
                     </Box>
                     {order.note && (
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.35, fontStyle: 'italic' }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ display: 'block', mt: 0.35, fontStyle: 'italic' }}
+                      >
                         {t('sale.tableOrder.form.note')}: {order.note}
                       </Typography>
                     )}
                   </Box>
-                  <Typography variant="body2" fontWeight={800} color="primary.main" sx={{ whiteSpace: 'nowrap' }}>
+                  <Typography
+                    variant="body2"
+                    fontWeight={800}
+                    color="primary.main"
+                    sx={{ whiteSpace: 'nowrap' }}
+                  >
                     {oTotal.toFixed(2)} ₺
                   </Typography>
                 </Box>
 
                 <Box sx={{ px: 1.5, pt: 1, pb: 0.5 }}>
-                  {order.items.map(item => {
-                    const baseUnitPrice = getBaseUnitPrice(item.unitPrice, item.selectedExtraOptions)
+                  {order.items.map((item) => {
+                    const baseUnitPrice = getBaseUnitPrice(
+                      item.unitPrice,
+                      item.selectedExtraOptions,
+                    )
                     const lineTotal = item.unitPrice * item.quantity
                     const extras = item.selectedExtraOptions ?? []
                     const isSimpleLine = item.quantity === 1 && extras.length === 0
@@ -344,7 +424,14 @@ export function OrderPanel({
                           onPlus={() => onUpdateOrderItemQty(order, item.id, 1)}
                         />
                         <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 1 }}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'baseline',
+                              justifyContent: 'space-between',
+                              gap: 1,
+                            }}
+                          >
                             <Typography variant="caption" fontWeight={600}>
                               {item.quantity}× {item.menuItemName ?? item.menuItemId}
                             </Typography>
@@ -354,12 +441,24 @@ export function OrderPanel({
                           </Box>
                           {extras.length > 0 && (
                             <Box sx={{ mt: 0.25, pl: 1.25 }}>
-                              {extras.map(option => (
-                                <Box key={option.extraOptionId} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 1 }}>
+                              {extras.map((option) => (
+                                <Box
+                                  key={option.extraOptionId}
+                                  sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'baseline',
+                                    gap: 1,
+                                  }}
+                                >
                                   <Typography variant="caption" color="text.secondary">
                                     + {option.name}
                                   </Typography>
-                                  <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    sx={{ whiteSpace: 'nowrap' }}
+                                  >
                                     {option.price.toFixed(2)} ₺
                                   </Typography>
                                 </Box>
@@ -367,7 +466,11 @@ export function OrderPanel({
                             </Box>
                           )}
                           {item.notes && (
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25, fontStyle: 'italic' }}>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ display: 'block', mt: 0.25, fontStyle: 'italic' }}
+                            >
                               {t('sale.tableOrder.form.notes')}: {item.notes}
                             </Typography>
                           )}
@@ -406,7 +509,16 @@ export function OrderPanel({
                   })}
                 </Box>
 
-                <Box sx={{ px: 1.5, pb: 1.25, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
+                <Box
+                  sx={{
+                    px: 1.5,
+                    pb: 1.25,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
                     <IconButton
                       size="small"
@@ -433,7 +545,14 @@ export function OrderPanel({
                     variant="text"
                     disabled={isPending}
                     onClick={() => onCancelOrder(order.id)}
-                    sx={{ fontSize: '0.72rem', py: 0.5, borderRadius: 1.5, opacity: 0.75, '&:hover': { opacity: 1 }, ml: 'auto' }}
+                    sx={{
+                      fontSize: '0.72rem',
+                      py: 0.5,
+                      borderRadius: 1.5,
+                      opacity: 0.75,
+                      '&:hover': { opacity: 1 },
+                      ml: 'auto',
+                    }}
                   >
                     {t('pos.cancelOrderBtn')}
                   </Button>
@@ -446,13 +565,32 @@ export function OrderPanel({
         {cart.length > 0 && (
           <Box>
             <Box sx={{ px: 2.5, pt: existingOrders.length > 0 ? 0.5 : 2, pb: 0.5 }}>
-              <Typography variant="overline" sx={{ fontSize: '0.63rem', fontWeight: 700, letterSpacing: 1.2, color: 'primary.main' }}>
+              <Typography
+                variant="overline"
+                sx={{
+                  fontSize: '0.63rem',
+                  fontWeight: 700,
+                  letterSpacing: 1.2,
+                  color: 'primary.main',
+                }}
+              >
                 {t('pos.newItemsSection')}
               </Typography>
             </Box>
-            <Box sx={{ mx: 1.5, mb: 1, border: '1.5px solid', borderColor: 'primary.light', borderRadius: 2.5, overflow: 'hidden', bgcolor: 'primary.50' }}>
+            <Box
+              sx={{
+                mx: 1.5,
+                mb: 1,
+                border: '1.5px solid',
+                borderColor: 'primary.light',
+                borderRadius: 2.5,
+                overflow: 'hidden',
+                bgcolor: (theme) =>
+                  alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.16 : 0.08),
+              }}
+            >
               <Box sx={{ px: 1.5, py: 0.75 }}>
-                {cart.map(item => {
+                {cart.map((item) => {
                   const baseUnitPrice = getBaseUnitPrice(item.price, item.selectedExtraOptions)
                   const lineTotal = item.price * item.quantity
                   const extras = item.selectedExtraOptions ?? []
@@ -477,22 +615,46 @@ export function OrderPanel({
                         onPlus={() => onUpdateQuantity(item.cartKey, 1)}
                       />
                       <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 1 }}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'baseline',
+                            justifyContent: 'space-between',
+                            gap: 1,
+                          }}
+                        >
                           <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.84rem' }}>
                             {item.quantity}× {item.name}
                           </Typography>
-                          <Typography variant="body2" fontWeight={700} color="text.primary" sx={{ fontSize: '0.84rem', whiteSpace: 'nowrap' }}>
+                          <Typography
+                            variant="body2"
+                            fontWeight={700}
+                            color="text.primary"
+                            sx={{ fontSize: '0.84rem', whiteSpace: 'nowrap' }}
+                          >
                             {baseUnitPrice.toFixed(2)} ₺
                           </Typography>
                         </Box>
                         {extras.length > 0 && (
                           <Box sx={{ mt: 0.25, pl: 1.25 }}>
-                            {extras.map(option => (
-                              <Box key={option.extraOptionId} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 1 }}>
+                            {extras.map((option) => (
+                              <Box
+                                key={option.extraOptionId}
+                                sx={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'baseline',
+                                  gap: 1,
+                                }}
+                              >
                                 <Typography variant="caption" color="text.secondary">
                                   + {option.name}
                                 </Typography>
-                                <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{ whiteSpace: 'nowrap' }}
+                                >
                                   {option.price.toFixed(2)} ₺
                                 </Typography>
                               </Box>
@@ -500,7 +662,11 @@ export function OrderPanel({
                           </Box>
                         )}
                         {item.notes && (
-                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25, fontStyle: 'italic' }}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ display: 'block', mt: 0.25, fontStyle: 'italic' }}
+                          >
                             {t('sale.tableOrder.form.notes')}: {item.notes}
                           </Typography>
                         )}
@@ -520,7 +686,12 @@ export function OrderPanel({
                             <Typography variant="caption" fontWeight={600} color="text.secondary">
                               Toplam
                             </Typography>
-                            <Typography variant="body2" fontWeight={800} color="primary.main" sx={{ whiteSpace: 'nowrap' }}>
+                            <Typography
+                              variant="body2"
+                              fontWeight={800}
+                              color="primary.main"
+                              sx={{ whiteSpace: 'nowrap' }}
+                            >
                               {lineTotal.toFixed(2)} ₺
                             </Typography>
                           </Box>
@@ -543,13 +714,16 @@ export function OrderPanel({
                   placeholder={t('pos.orderNotePlaceholder')}
                   size="small"
                   value={orderNote}
-                  onChange={e => onNoteChange(e.target.value)}
+                  onChange={(e) => onNoteChange(e.target.value)}
                   multiline
                   rows={2}
                   fullWidth
                   sx={{
                     mt: 0.5,
-                    '& .MuiOutlinedInput-root': { fontSize: '0.82rem', bgcolor: 'background.paper' },
+                    '& .MuiOutlinedInput-root': {
+                      fontSize: '0.82rem',
+                      bgcolor: 'background.paper',
+                    },
                   }}
                 />
               </Box>
@@ -558,7 +732,17 @@ export function OrderPanel({
         )}
 
         {!hasAnything && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 220, gap: 1.5, color: 'text.disabled' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: 220,
+              gap: 1.5,
+              color: 'text.disabled',
+            }}
+          >
             <ShoppingCartOutlinedIcon sx={{ fontSize: 48, opacity: 0.25 }} />
             <Typography variant="body2" textAlign="center" fontSize="0.84rem">
               {t('pos.addFromMenuHint')}
@@ -567,11 +751,28 @@ export function OrderPanel({
         )}
       </Box>
 
-      <Box sx={{ borderTop: 1, borderColor: 'divider', p: 2, flexShrink: 0, bgcolor: 'background.paper' }}>
+      <Box
+        sx={{
+          borderTop: 1,
+          borderColor: 'divider',
+          p: 2,
+          flexShrink: 0,
+          bgcolor: 'background.paper',
+        }}
+      >
         {cart.length > 0 && (
           <>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-              <Typography variant="body2" color="text.secondary">{t('pos.cartTotalLabel')}</Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 1.5,
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                {t('pos.cartTotalLabel')}
+              </Typography>
               <Typography variant="subtitle1" fontWeight={800} color="primary.main">
                 {cartTotal.toFixed(2)} ₺
               </Typography>
@@ -618,16 +819,13 @@ export function OrderPanel({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setNoteDialogOrderId(null)}>{t('common.cancel')}</Button>
-          <Button variant="contained" disabled={isPending} onClick={handleSaveOrderNote}>{t('common.save')}</Button>
+          <Button variant="contained" disabled={isPending} onClick={handleSaveOrderNote}>
+            {t('common.save')}
+          </Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog
-        open={importDialogOpen}
-        onClose={handleCloseImportDialog}
-        fullWidth
-        maxWidth="xs"
-      >
+      <Dialog open={importDialogOpen} onClose={handleCloseImportDialog} fullWidth maxWidth="xs">
         <DialogTitle>{t('pos.importQrTitle')}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ pt: 0.5 }}>
@@ -684,7 +882,11 @@ export function OrderPanel({
             disabled={isImportPending}
             onClick={() => submitImport(manualQrValue)}
           >
-            {isImportPending ? <CircularProgress size={20} color="inherit" /> : t('pos.importQrSubmit')}
+            {isImportPending ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              t('pos.importQrSubmit')
+            )}
           </Button>
         </DialogActions>
       </Dialog>

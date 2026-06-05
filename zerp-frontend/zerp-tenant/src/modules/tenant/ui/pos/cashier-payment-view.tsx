@@ -1009,7 +1009,15 @@ export function CashierPaymentView() {
           flexDirection: 'column',
         }}
       >
-        <Box sx={{ px: 2, py: 2, borderBottom: 1, borderColor: 'divider', bgcolor: 'grey.50' }}>
+        <Box
+          sx={{
+            px: 2,
+            py: 2,
+            borderBottom: 1,
+            borderColor: 'divider',
+            bgcolor: 'background.default',
+          }}
+        >
           <Typography
             variant="overline"
             sx={{
@@ -1099,7 +1107,7 @@ export function CashierPaymentView() {
           display: 'flex',
           flexDirection: 'column',
           p: 3,
-          bgcolor: 'grey.50',
+          bgcolor: 'background.default',
         }}
       >
         {!selectedTable ? (

@@ -1,6 +1,7 @@
+import { Box, CircularProgress } from '@mui/material'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { Box, CircularProgress } from '@mui/material'
+
 import { buildMetadata } from '@/core/seo/metadata'
 import { TablesContent } from '@/modules/tenant/ui/pos/tables-content'
 
@@ -16,11 +17,14 @@ export default function TablesPage() {
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
+        bgcolor: 'background.default',
       }}
     >
       <Suspense
         fallback={
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
+          >
             <CircularProgress />
           </Box>
         }

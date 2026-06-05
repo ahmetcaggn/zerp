@@ -1,20 +1,20 @@
 'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import {
-  Box, Chip, CircularProgress, Fab, Stack, Typography,
-} from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import TableRestaurantIcon from '@mui/icons-material/TableRestaurant'
+import { Box, Chip, CircularProgress, Fab, Stack, Typography } from '@mui/material'
 import type { Route } from 'next'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
-import { useShopTables, useDeleteShopTable, usePatchShopTable } from '../../hooks/use-shop-tables'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
-import { TableCard } from './table-card'
-import { ShopTableFormDialog } from '../sale/tables/shop-table-form-dialog'
+
+import { useDeleteShopTable, usePatchShopTable, useShopTables } from '../../hooks/use-shop-tables'
 import type { ShopTableResponseDto, ShopTableStatus } from '../../types/sale'
+import { ShopTableFormDialog } from '../sale/tables/shop-table-form-dialog'
+import { TableCard } from './table-card'
 
 type StatusFilter = 'ALL' | ShopTableStatus
 
@@ -23,12 +23,16 @@ export function FloorView() {
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
 
-  const FILTERS: { label: string; value: StatusFilter; color: 'default' | 'success' | 'error' | 'warning' }[] = [
-    { label: t('pos.filterAll'),          value: 'ALL',          color: 'default' },
-    { label: t('pos.statusAvailable'),    value: 'AVAILABLE',    color: 'success' },
-    { label: t('pos.statusOccupied'),     value: 'OCCUPIED',     color: 'error'   },
-    { label: t('pos.statusReserved'),     value: 'RESERVED',     color: 'warning' },
-    { label: t('pos.statusOutOfOrder'),   value: 'OUT_OF_ORDER', color: 'default' },
+  const FILTERS: {
+    label: string
+    value: StatusFilter
+    color: 'default' | 'success' | 'error' | 'warning'
+  }[] = [
+    { label: t('pos.filterAll'), value: 'ALL', color: 'default' },
+    { label: t('pos.statusAvailable'), value: 'AVAILABLE', color: 'success' },
+    { label: t('pos.statusOccupied'), value: 'OCCUPIED', color: 'error' },
+    { label: t('pos.statusReserved'), value: 'RESERVED', color: 'warning' },
+    { label: t('pos.statusOutOfOrder'), value: 'OUT_OF_ORDER', color: 'default' },
   ]
   const router = useRouter()
   const { showToast } = useToast()
@@ -46,7 +50,7 @@ export function FloorView() {
   const { mutate: patchTable } = usePatchShopTable()
 
   const all = data?.data ?? []
-  const filtered = statusFilter === 'ALL' ? all : all.filter(t => t.status === statusFilter)
+  const filtered = statusFilter === 'ALL' ? all : all.filter((t) => t.status === statusFilter)
 
   const counts = all.reduce<Record<string, number>>((acc, t) => {
     acc[t.status] = (acc[t.status] ?? 0) + 1
@@ -90,18 +94,28 @@ export function FloorView() {
   }
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        bgcolor: 'background.default',
+      }}
+    >
       {/* Status filter bar */}
       <Box
         sx={{
-          px: 2.5, py: 1.5,
-          borderBottom: 1, borderColor: 'divider',
+          px: 2.5,
+          py: 1.5,
+          borderBottom: 1,
+          borderColor: 'divider',
           bgcolor: 'background.paper',
           flexShrink: 0,
         }}
       >
         <Stack direction="row" gap={1} flexWrap="wrap" alignItems="center">
-          {FILTERS.map(f => {
+          {FILTERS.map((f) => {
             const count = f.value === 'ALL' ? all.length : (counts[f.value] ?? 0)
             const active = statusFilter === f.value
             return (
@@ -125,32 +139,57 @@ export function FloorView() {
       </Box>
 
       {/* Table grid */}
-      <Box sx={{ flex: 1, overflowY: 'auto', p: { xs: 2, sm: 3 } }}>
+      <Box sx={{ flex: 1, overflowY: 'auto', p: { xs: 2, sm: 3 }, bgcolor: 'background.default' }}>
         {isLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50%' }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50%' }}
+          >
             <CircularProgress size={48} thickness={3} />
           </Box>
         ) : filtered.length === 0 ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '50%', gap: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '50%',
+              gap: 2,
+            }}
+          >
             <TableRestaurantIcon sx={{ fontSize: 80, color: 'action.disabled' }} />
             <Typography variant="h6" color="text.secondary">
               {all.length === 0 ? t('pos.noTablesYet') : t('pos.noTablesForFilter')}
             </Typography>
           </Box>
         ) : isMultiFloor ? (
-          floors.map(floor => (
+          floors.map((floor) => (
             <Box key={floor} sx={{ mb: 4 }}>
               <Typography
                 variant="overline"
-                sx={{ display: 'block', mb: 1.5, fontWeight: 700, color: 'text.secondary', letterSpacing: 1.5 }}
+                sx={{
+                  display: 'block',
+                  mb: 1.5,
+                  fontWeight: 700,
+                  color: 'text.secondary',
+                  letterSpacing: 1.5,
+                }}
               >
-                {floor === 0 ? t('pos.groundFloor') : t('pos.floorLabel').replace('{n}', String(floor))}
+                {floor === 0
+                  ? t('pos.groundFloor')
+                  : t('pos.floorLabel').replace('{n}', String(floor))}
                 <Box component="span" sx={{ ml: 1, fontWeight: 400, opacity: 0.7 }}>
                   ({byFloor[floor].length})
                 </Box>
               </Typography>
-              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))', gap: 2 }}>
-                {byFloor[floor].map(t => (
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))',
+                  gap: 2,
+                }}
+              >
+                {byFloor[floor].map((t) => (
                   <TableCard
                     key={t.id}
                     table={t}
@@ -164,8 +203,14 @@ export function FloorView() {
             </Box>
           ))
         ) : (
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))', gap: 2 }}>
-            {filtered.map(t => (
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))',
+              gap: 2,
+            }}
+          >
+            {filtered.map((t) => (
               <TableCard
                 key={t.id}
                 table={t}
@@ -183,7 +228,10 @@ export function FloorView() {
       <Fab
         color="primary"
         aria-label={t('sale.table.createButton')}
-        onClick={() => { setEditTable(null); setFormOpen(true) }}
+        onClick={() => {
+          setEditTable(null)
+          setFormOpen(true)
+        }}
         sx={{ position: 'fixed', bottom: 32, right: 32, width: 60, height: 60, boxShadow: 8 }}
       >
         <AddIcon sx={{ fontSize: 28 }} />
@@ -194,7 +242,10 @@ export function FloorView() {
           open
           mode={editTable ? 'edit' : 'create'}
           table={editTable}
-          onClose={() => { setFormOpen(false); setEditTable(null) }}
+          onClose={() => {
+            setFormOpen(false)
+            setEditTable(null)
+          }}
         />
       )}
     </Box>
