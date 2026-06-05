@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' hide RouteSettings;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/network_indicator/cubit_network_indicator.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
+import 'package:zerp_tenant/product/ui/layout/widget/app_message_bar.dart';
 import 'package:zerp_tenant/product/ui/layout/widget/network_indicator_bottom_sheet.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
@@ -88,6 +89,7 @@ class AppScaffold extends StatelessWidget {
             elevation: 2,
           ),
           const _OrganizationScopeError(),
+          const AppMessageBar(),
           Expanded(child: body),
         ],
       ),

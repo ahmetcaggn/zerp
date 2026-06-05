@@ -12,6 +12,7 @@ import 'package:zerp_tenant/feature/sale/table/order/widget/order_section.dart';
 import 'package:zerp_tenant/feature/sale/table/order/widget/order_tab_bar.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
+import 'package:zerp_tenant/product/ui/layout/app_scaffold_messenger.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @RoutePage()
@@ -378,20 +379,14 @@ final class _BottomSection extends StatelessWidget {
               onPressed: cartItems.isEmpty
                   ? null
                   : () async {
-                      final messenger = ScaffoldMessenger.of(
-                        context,
-                      );
+                      final messenger = AppScaffoldMessenger.of(context);
                       final router = context.router;
                       final success = await context
                           .read<CubitTableOrder>()
                           .saveOrder(tableId: tableId);
                       if (context.mounted && success) {
-                        messenger.showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              context.t.sale.order.orderSavedSuccess,
-                            ),
-                          ),
+                        messenger.showSuccess(
+                          context.t.sale.order.orderSavedSuccess,
                         );
                         router.pop();
                       }

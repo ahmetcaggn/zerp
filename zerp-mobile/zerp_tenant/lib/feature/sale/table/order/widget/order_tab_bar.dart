@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zerp_tenant/feature/sale/table/order/cubit/cubit_table_order.dart';
 import 'package:zerp_tenant/feature/sale/table/order/widget/import_code_dialog.dart';
+import 'package:zerp_tenant/product/ui/layout/app_scaffold_messenger.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 class OrderTabBar extends StatelessWidget {
@@ -18,7 +19,7 @@ class OrderTabBar extends StatelessWidget {
     final code = await ImportCodeDialog.show(context);
     if (code != null && code.isNotEmpty) {
       if (!context.mounted) return;
-      final messenger = ScaffoldMessenger.of(context);
+      final messenger = AppScaffoldMessenger.of(context);
       final strings = context.t;
       final success = await context
           .read<CubitTableOrder>()
@@ -27,16 +28,11 @@ class OrderTabBar extends StatelessWidget {
             tableId: tableId,
           );
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              success
-                  ? strings.sale.order.qrImportSuccess
-                  : strings.sale.order.qrImportError,
-            ),
-            backgroundColor: success ? Colors.green : Colors.red,
-          ),
-        );
+        if (success) {
+          messenger.showSuccess(strings.sale.order.qrImportSuccess);
+        } else {
+          messenger.showError(strings.sale.order.qrImportError);
+        }
       }
     }
   }
@@ -79,12 +75,8 @@ class OrderTabBar extends StatelessWidget {
                 label: Text(context.t.sale.order.newOrder),
                 onPressed: state.hasUnsavedChanges
                     ? () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              context.t.sale.order.hasUnsavedOrders,
-                            ),
-                          ),
+                        AppScaffoldMessenger.of(context).showWarning(
+                          context.t.sale.order.hasUnsavedOrders,
                         );
                       }
                     : () => _scanQrForNewOrder(context),
@@ -96,12 +88,8 @@ class OrderTabBar extends StatelessWidget {
               label: Text(context.t.sale.order.newOrder),
               onPressed: state.hasUnsavedChanges
                   ? () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            context.t.sale.order.hasUnsavedOrders,
-                          ),
-                        ),
+                      AppScaffoldMessenger.of(context).showWarning(
+                        context.t.sale.order.hasUnsavedOrders,
                       );
                     }
                   : () => context.read<CubitTableOrder>().addNewOrder(),

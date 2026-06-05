@@ -11,6 +11,7 @@ import 'package:zerp_tenant/feature/employee/single_employee/edit_employee/cubit
 import 'package:zerp_tenant/feature/employee/view/widget_username_field.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
+import 'package:zerp_tenant/product/ui/layout/app_scaffold_messenger.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @RoutePage()
@@ -162,15 +163,13 @@ class _EditEmployeeViewState extends State<_EditEmployeeView> {
 
   void _listener(BuildContext context, StateEditEmployee state) {
     if (state is StateEditEmployeeSuccess) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.t.employee.edit.success)),
+      AppScaffoldMessenger.of(context).showSuccess(
+        context.t.employee.edit.success,
       );
       unawaited(widget.cubitEmployee.loadEmployees());
       unawaited(context.router.maybePop());
     } else if (state is StateEditEmployeeError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(state.message)),
-      );
+      AppScaffoldMessenger.of(context).showError(state.message);
     }
   }
 

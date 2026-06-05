@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zerp_tenant/feature/sale/table/order/cubit/cubit_table_order.dart';
 import 'package:zerp_tenant/feature/sale/table/order/widget/cancel_order_confirm_dialog.dart';
 import 'package:zerp_tenant/feature/sale/table/order/widget/import_code_dialog.dart';
+import 'package:zerp_tenant/product/ui/layout/app_scaffold_messenger.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 class OrderHeader extends StatelessWidget {
@@ -19,7 +20,7 @@ class OrderHeader extends StatelessWidget {
     final code = await ImportCodeDialog.show(context);
     if (code != null && code.isNotEmpty) {
       if (!context.mounted) return;
-      final messenger = ScaffoldMessenger.of(context);
+      final messenger = AppScaffoldMessenger.of(context);
       final strings = context.t;
       final success = await context
           .read<CubitTableOrder>()
@@ -28,16 +29,11 @@ class OrderHeader extends StatelessWidget {
             tableId: tableId,
           );
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              success
-                  ? strings.sale.order.qrImportSuccess
-                  : strings.sale.order.qrImportError,
-            ),
-            backgroundColor: success ? Colors.green : Colors.red,
-          ),
-        );
+        if (success) {
+          messenger.showSuccess(strings.sale.order.qrImportSuccess);
+        } else {
+          messenger.showError(strings.sale.order.qrImportError);
+        }
       }
     }
   }
@@ -46,15 +42,13 @@ class OrderHeader extends StatelessWidget {
     final confirm = await CancelOrderConfirmDialog.show(context);
     if (confirm == true) {
       if (!context.mounted) return;
-      final messenger = ScaffoldMessenger.of(context);
+      final messenger = AppScaffoldMessenger.of(context);
       final cancelMsg = context.t.sale.order.orderCancelled;
       final success = await context.read<CubitTableOrder>().cancelOrder(
         tableId: tableId,
       );
       if (context.mounted && success) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(cancelMsg)),
-        );
+        messenger.showSuccess(cancelMsg);
       }
     }
   }

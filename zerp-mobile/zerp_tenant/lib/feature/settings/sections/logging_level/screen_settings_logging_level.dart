@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/settings/cubit_settings.dart';
 import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
+import 'package:zerp_tenant/product/ui/layout/app_scaffold_messenger.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @RoutePage()
@@ -104,15 +105,8 @@ class ScreenSettingsLoggingLevel extends StatelessWidget {
                             .updateRemoteLogLevel(level);
 
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(t.settings.loggingLevelSaveSuccess),
-                              backgroundColor: Colors.green,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
+                          AppScaffoldMessenger.of(context).showSuccess(
+                            t.settings.loggingLevelSaveSuccess,
                           );
                         }
                       },

@@ -58,6 +58,7 @@ import '../../../feature/stock/cubit/cubit_stock_counts.dart' as _i273;
 import '../../../feature/stock/cubit/cubit_stock_movements.dart' as _i121;
 import '../../../feature/stock/cubit/cubit_stock_operations.dart' as _i946;
 import '../../../feature/stock/cubit/cubit_stock_resources.dart' as _i994;
+import '../../cubit/root_cubit/app_messenger/cubit_app_messenger.dart' as _i820;
 import '../../cubit/root_cubit/auth/cubit_auth.dart' as _i200;
 import '../../cubit/root_cubit/error/cubit_error.dart' as _i139;
 import '../../cubit/root_cubit/network_indicator/cubit_network_indicator.dart'
@@ -100,6 +101,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => serviceModule.secureStorage,
     );
+    gh.lazySingleton<_i820.CubitAppMessenger>(() => _i820.CubitAppMessenger());
     gh.lazySingleton<_i139.CubitError>(() => _i139.CubitError());
     gh.lazySingleton<_i693.RemoteLogNetworkInvoker>(
       () => _i693.RemoteLogNetworkInvoker(),

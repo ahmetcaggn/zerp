@@ -25,12 +25,8 @@ mixin _MixinCreatePermission on State<_CreatePermissionView> {
 
     if (formKey.currentState?.validate() ?? false) {
       if (selectedActionStr == null || selectedTargetType == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.t.employee.details.permissionCreate.errorSelectAction,
-            ),
-          ),
+        AppScaffoldMessenger.of(context).showWarning(
+          context.t.employee.details.permissionCreate.errorSelectAction,
         );
         return;
       }
@@ -68,19 +64,15 @@ mixin _MixinCreatePermission on State<_CreatePermissionView> {
       setState(() {
         _isSubmitting = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.t.employee.details.permissionCreate.success),
-        ),
+      AppScaffoldMessenger.of(context).showSuccess(
+        context.t.employee.details.permissionCreate.success,
       );
       unawaited(context.router.maybePop());
     } else if (state is StateCreatePermissionError) {
       setState(() {
         _isSubmitting = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(state.message)),
-      );
+      AppScaffoldMessenger.of(context).showError(state.message);
     }
   }
 }

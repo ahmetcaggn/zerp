@@ -7,6 +7,7 @@ import 'package:openapi_sale/api.dart';
 import 'package:zerp_tenant/feature/sale/cash/cubit/cubit_cash_payment.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
+import 'package:zerp_tenant/product/ui/layout/app_scaffold_messenger.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @RoutePage()
@@ -129,19 +130,14 @@ class _ViewState extends State<_View> {
     return BlocListener<CubitCashPayment, StateCashPayment>(
       listener: (context, state) {
         if (state is StateCashPaymentSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.t.sale.cash.paymentReceivedToast)),
+          AppScaffoldMessenger.of(context).showSuccess(
+            context.t.sale.cash.paymentReceivedToast,
           );
           // Navigate back once to ScreenCashOrder (table page).
           // ScreenCashOrder will handle refreshing orders and the tables list.
           unawaited(context.router.maybePopTop());
         } else if (state is StateCashPaymentError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: theme.colorScheme.error,
-            ),
-          );
+          AppScaffoldMessenger.of(context).showError(state.message);
         }
       },
       child: AppScaffold(
