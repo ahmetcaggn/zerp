@@ -25,6 +25,10 @@ scrape_configs:
           # - 'suggestion:8080'
           - 'user:8080'
 
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+      
   # - job_name: 'aggregated-services'
   #   metrics_path: '/actuator/prometheus'
   #   static_configs:

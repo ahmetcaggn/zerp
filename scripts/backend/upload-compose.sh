@@ -34,6 +34,7 @@ FILES_TO_UPLOAD=(
     "prometheus.yml"
     "logstash.conf"
     "compose-opensearch.yaml"
+    "compose-cadvisor.yaml"
 )
 
 show_help() {
