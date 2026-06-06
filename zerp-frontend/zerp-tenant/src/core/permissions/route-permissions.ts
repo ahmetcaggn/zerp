@@ -1,3 +1,5 @@
+import { ROUTES } from '@/core/constants/routes'
+
 import { type PermissionAction, PermissionActions } from './use-permissions'
 
 interface RoutePermissionChecks {
@@ -8,7 +10,7 @@ interface RoutePermissionChecks {
   hasAnyShopPermission: (actions: readonly PermissionAction[], shopId?: string | null) => boolean
 }
 
-type RoutePermissionScope = 'ACTION' | 'TENANT' | 'SHOP'
+type RoutePermissionScope = 'ACTION' | 'TENANT' | 'SHOP' | 'DASHBOARD'
 
 interface RoutePermissionMatch {
   pattern: RegExp
@@ -96,7 +98,11 @@ const PERMISSION_GROUP_PAGE_ACTIONS: readonly PermissionAction[] = [
 ]
 
 const ROUTE_PERMISSION_RULES: readonly RoutePermissionMatch[] = [
-  { pattern: /^\/dashboard\/?$/, allow: true },
+  {
+    pattern: /^\/dashboard\/?$/,
+    scope: 'DASHBOARD',
+    actions: [PermissionActions.READ_DASHBOARD, PermissionActions.READ_SHOP],
+  },
   { pattern: /^\/profile\/?$/, allow: true },
   { pattern: /^\/test(?:\/.*)?$/, allow: true },
   { pattern: /^\/shops\/?$/, scope: 'ACTION', actions: SHOP_PAGE_ACTIONS },
@@ -120,6 +126,20 @@ const ROUTE_PERMISSION_RULES: readonly RoutePermissionMatch[] = [
   { pattern: /^\/shop-qr\/?$/, scope: 'SHOP', actions: SHOP_READ_ACTIONS },
   { pattern: /^\/stock\/?$/, scope: 'SHOP', actions: STOCK_PAGE_ACTIONS },
 ]
+
+const FALLBACK_ROUTE_CANDIDATES = [
+  ROUTES.dashboard,
+  ROUTES.shops,
+  ROUTES.catalog,
+  ROUTES.tables,
+  ROUTES.sale,
+  ROUTES.saleHistory,
+  ROUTES.shopQr,
+  ROUTES.stock,
+  ROUTES.employees,
+  ROUTES.permissionGroups,
+  ROUTES.tickets,
+] as const
 
 export function removeLocalePrefix(pathname: string, locale: string): string {
   const normalizedPathname = pathname.split('?')[0]?.replace(/\/+$/, '') || '/'
@@ -175,5 +195,28 @@ export function canAccessProtectedRoute(routePath: string, checks: RoutePermissi
     )
   }
 
+  if (matchedRule.scope === 'DASHBOARD') {
+    return checks.currentShopId
+      ? checks.hasAnyShopPermission(actions, checks.currentShopId) ||
+          checks.hasAnyPermission(actions)
+      : actions.some((action) => checks.hasTenantPermission(action)) ||
+          checks.hasAnyPermission(actions)
+  }
+
   return checks.hasAnyPermission(actions) || checks.hasTenantPermission(PermissionActions.ADMIN)
+}
+
+export function getFirstAccessibleProtectedRoute(
+  checks: RoutePermissionChecks,
+  excludeRoute?: string,
+): string | undefined {
+  const normalizedExcludeRoute = excludeRoute?.replace(/\/+$/, '') || undefined
+
+  return FALLBACK_ROUTE_CANDIDATES.find((route) => {
+    const normalizedRoute = route.replace(/\/+$/, '') || '/'
+    return (
+      normalizedRoute !== normalizedExcludeRoute &&
+      canAccessProtectedRoute(normalizedRoute, checks)
+    )
+  })
 }

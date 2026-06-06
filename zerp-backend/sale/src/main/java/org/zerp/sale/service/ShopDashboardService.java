@@ -67,8 +67,8 @@ public class ShopDashboardService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Shop");
         }
 
-        if (!shopPermissionEvaluator.canRead(userId, shop)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Shop");
+        if (!shopPermissionEvaluator.canReadDashboard(userId, shop)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Dashboard");
         }
 
         ZoneId zoneId = ZoneId.systemDefault();

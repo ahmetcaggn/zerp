@@ -2,8 +2,10 @@ package org.zerp.sale.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.entity.Shop;
 import org.zerp.common.entity.sale.TableOrderStatus;
 import org.zerp.common.util.header.CurrentTenantIdResolver;
@@ -57,13 +59,16 @@ public class TenantDashboardService {
         Specification<Shop> tenantFilter = (root, query, cb) -> cb.equal(root.get("tenantId"), tenantId);
         List<Shop> accessibleShops = shopRepository.findAll(Specification.allOf(
                 tenantFilter,
-                shopPermissionEvaluator.filterRead(userId)
+                shopPermissionEvaluator.filterReadDashboard(userId)
         ));
 
         ZoneId zoneId = ZoneId.systemDefault();
         LocalDateTime now = LocalDateTime.now(zoneId);
 
         if (accessibleShops.isEmpty()) {
+            if (!shopPermissionEvaluator.canReadTenantDashboard(userId, tenantId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to read Dashboard");
+            }
             return buildEmptyOverview(now);
         }
 

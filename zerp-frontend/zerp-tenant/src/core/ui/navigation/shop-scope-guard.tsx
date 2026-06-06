@@ -6,21 +6,39 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
+import { getFirstAccessibleProtectedRoute } from '@/core/permissions/route-permissions'
+import { useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import type { Locale } from '@/core/types/common'
 
 export function ShopScopeGuard({ locale }: { locale: Locale }) {
   const router = useRouter()
   const pathname = usePathname()
-  const { isScopeReady, isScopeSwitching, scopeSwitchTransaction, completeScopeSwitch } = useShopScope()
+  const { scope, isScopeReady, isScopeSwitching, scopeSwitchTransaction, completeScopeSwitch } = useShopScope()
+  const {
+    hasAnyPermission,
+    hasTenantPermission,
+    hasShopPermission,
+    hasAnyShopPermission,
+  } = useCurrentUserPermissions()
   const shopSwitchingLabel = locale === 'tr' ? 'Şube değiştiriliyor...' : 'Switching branch...'
 
   useEffect(() => {
     if (!isScopeReady || !scopeSwitchTransaction?.isCommitted) return
 
-    const dashboardPath = withLocale(locale, ROUTES.dashboard)
-    if (pathname !== dashboardPath) {
-      router.replace(dashboardPath as Route)
+    const currentShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+    const targetRoute =
+      getFirstAccessibleProtectedRoute({
+        currentShopId,
+        hasAnyPermission,
+        hasTenantPermission,
+        hasShopPermission,
+        hasAnyShopPermission,
+      }) ?? ROUTES.unauthorized
+    const targetPath = withLocale(locale, targetRoute)
+
+    if (pathname !== targetPath) {
+      router.replace(targetPath as Route)
       return
     }
 
@@ -29,7 +47,19 @@ export function ShopScopeGuard({ locale }: { locale: Locale }) {
     }, 140)
 
     return () => window.clearTimeout(finishTimer)
-  }, [isScopeReady, scopeSwitchTransaction, locale, pathname, router, completeScopeSwitch])
+  }, [
+    completeScopeSwitch,
+    hasAnyPermission,
+    hasAnyShopPermission,
+    hasShopPermission,
+    hasTenantPermission,
+    isScopeReady,
+    locale,
+    pathname,
+    router,
+    scope,
+    scopeSwitchTransaction,
+  ])
 
   return (
     <Backdrop

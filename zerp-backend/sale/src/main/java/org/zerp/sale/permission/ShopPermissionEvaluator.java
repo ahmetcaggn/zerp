@@ -20,7 +20,8 @@ import java.util.UUID;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class ShopPermissionEvaluator {    private final PermissionRepository permissionRepository;
+public class ShopPermissionEvaluator {
+    private final PermissionRepository permissionRepository;
     private final CommonPermissionService commonPermissionService;
 
     public boolean canRead(UUID userId, Shop target) {
@@ -67,6 +68,70 @@ public class ShopPermissionEvaluator {    private final PermissionRepository per
                 userId, PermissionTargetType.SHOP, PermissionAction.READ_SHOP);
         Set<UUID> permittedTenantIds = commonPermissionService.getAllPermitted(
                 userId, PermissionTargetType.TENANT, PermissionAction.READ_SHOP);
+
+        return Specification.anyOf(
+                (root, _, _) -> root.get("id").in(permittedShopIds),
+                (root, _, _) -> root.get("tenantId").in(permittedTenantIds)
+        );
+    }
+
+    public boolean canReadDashboard(UUID userId, Shop target) {
+        UUID shopId;
+        UUID tenantId;
+        try {
+            shopId = target.getId();
+            tenantId = target.getTenantId();
+        } catch (NullPointerException e) {
+            log.error("Null pointer while evaluating canReadDashboard for Shop userId={}", userId, e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid shop structure");
+        }
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting dashboard access to shop", userId, tenantId);
+            return true;
+        }
+
+        List<Permission> result = permissionRepository.findAllByUserAndShopHierarchy(
+                userId, PermissionAction.READ_DASHBOARD, shopId, tenantId);
+        boolean canReadDashboard = !result.isEmpty();
+        log.debug("canReadDashboard result for user {} on shop {} - permitted: {}", userId, shopId, canReadDashboard);
+        return canReadDashboard;
+    }
+
+    public boolean canReadTenantDashboard(UUID userId, UUID tenantId) {
+        if (commonPermissionService.isAdminAny(userId, tenantId)) {
+            log.debug("User {} is admin for tenant {}, granting tenant dashboard access", userId, tenantId);
+            return true;
+        }
+
+        List<Permission> result = permissionRepository.findAllByUserAndShopHierarchy(
+                userId, PermissionAction.READ_DASHBOARD, null, tenantId);
+        boolean canReadTenantDashboard = !result.isEmpty();
+        log.debug("canReadTenantDashboard result for user {} on tenant {} - permitted: {}",
+                userId, tenantId, canReadTenantDashboard);
+        return canReadTenantDashboard;
+    }
+
+    public Specification<Shop> filterReadDashboard(UUID userId) {
+        boolean hasRootPermission = commonPermissionService.hasRootPermission(userId, PermissionAction.READ_DASHBOARD);
+        if (hasRootPermission) {
+            return Specification.unrestricted();
+        }
+
+        boolean isAdminOnTenantRoot = commonPermissionService.isAdminOnTenantRoot(userId);
+        if (isAdminOnTenantRoot) {
+            return Specification.unrestricted();
+        }
+
+        UUID managingTenantId = commonPermissionService.getTenantIdIfTheUserIsAdminOnIt(userId);
+        if (managingTenantId != null) {
+            return (root, _, _) -> root.get("tenantId").equalTo(managingTenantId);
+        }
+        log.trace("Creating filterReadDashboard specification for userId: {}", userId);
+
+        Set<UUID> permittedShopIds = commonPermissionService.getAllPermitted(
+                userId, PermissionTargetType.SHOP, PermissionAction.READ_DASHBOARD);
+        Set<UUID> permittedTenantIds = commonPermissionService.getAllPermitted(
+                userId, PermissionTargetType.TENANT, PermissionAction.READ_DASHBOARD);
 
         return Specification.anyOf(
                 (root, _, _) -> root.get("id").in(permittedShopIds),

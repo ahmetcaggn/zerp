@@ -283,6 +283,30 @@ export function AppSidebar({ locale }: { locale: string }) {
     [getDisabledReason, isLoadingPermissions, loadingReason, unauthorizedReason],
   )
 
+  const dashboardAction = React.useMemo(
+    () =>
+      withPermissionState(
+        DASHBOARD_ACTION,
+        isShopScope
+          ? hasAnyShopPermission(
+              [PermissionActions.READ_DASHBOARD, PermissionActions.READ_SHOP],
+              currentShopId,
+            ) ||
+              hasAnyPermission([PermissionActions.READ_DASHBOARD, PermissionActions.READ_SHOP])
+          : hasTenantPermission(PermissionActions.READ_DASHBOARD) ||
+              hasTenantPermission(PermissionActions.READ_SHOP) ||
+              hasAnyPermission([PermissionActions.READ_DASHBOARD, PermissionActions.READ_SHOP]),
+      ),
+    [
+      currentShopId,
+      hasAnyPermission,
+      hasAnyShopPermission,
+      hasTenantPermission,
+      isShopScope,
+      withPermissionState,
+    ],
+  )
+
   const sidebarSections = React.useMemo<SidebarSection[]>(() => {
     if (!isShopScope) {
       return GLOBAL_SIDEBAR_SECTIONS.map((section) => ({
@@ -525,7 +549,7 @@ export function AppSidebar({ locale }: { locale: string }) {
         </Box>
       </Box>
 
-      <List sx={{ pt: 1 }}>{renderAction(DASHBOARD_ACTION)}</List>
+      <List sx={{ pt: 1 }}>{renderAction(dashboardAction)}</List>
 
       <Divider sx={{ my: 1 }} />
 

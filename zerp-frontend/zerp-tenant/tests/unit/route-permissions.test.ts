@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { canAccessProtectedRoute } from '@/core/permissions/route-permissions'
+import {
+  canAccessProtectedRoute,
+  getFirstAccessibleProtectedRoute,
+} from '@/core/permissions/route-permissions'
 import { type PermissionAction, PermissionActions } from '@/core/permissions/use-permissions'
 
 function createChecks(
@@ -22,6 +25,54 @@ function createChecks(
 }
 
 describe('route permissions', () => {
+  it('allows the dashboard route with only shop read permission', () => {
+    expect(
+      canAccessProtectedRoute('/dashboard', createChecks([PermissionActions.READ_SHOP])),
+    ).toBe(true)
+  })
+
+  it('allows the shops route with only shop read permission', () => {
+    expect(canAccessProtectedRoute('/shops', createChecks([PermissionActions.READ_SHOP]))).toBe(
+      true,
+    )
+  })
+
+  it('falls back from dashboard to shops for shop read users', () => {
+    expect(
+      getFirstAccessibleProtectedRoute(
+        {
+          ...createChecks([PermissionActions.READ_SHOP]),
+          currentShopId: undefined,
+        },
+        '/dashboard',
+      ),
+    ).toBe('/shops')
+  })
+
+  it('allows the tenant dashboard route with tenant dashboard permission', () => {
+    expect(
+      canAccessProtectedRoute('/dashboard', {
+        ...createChecks([], [PermissionActions.READ_DASHBOARD]),
+        currentShopId: undefined,
+      }),
+    ).toBe(true)
+  })
+
+  it('allows the tenant dashboard route with a shop-scoped dashboard permission', () => {
+    expect(
+      canAccessProtectedRoute('/dashboard', {
+        ...createChecks([PermissionActions.READ_DASHBOARD]),
+        currentShopId: undefined,
+      }),
+    ).toBe(true)
+  })
+
+  it('allows the shop dashboard route with shop dashboard permission', () => {
+    expect(
+      canAccessProtectedRoute('/dashboard', createChecks([], [PermissionActions.READ_DASHBOARD])),
+    ).toBe(true)
+  })
+
   it('does not allow the cashier route with only catalog read permissions', () => {
     expect(
       canAccessProtectedRoute(

@@ -10,7 +10,11 @@ import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import type { Locale } from '@/core/types/common'
 
-import { canAccessProtectedRoute, removeLocalePrefix } from './route-permissions'
+import {
+  canAccessProtectedRoute,
+  getFirstAccessibleProtectedRoute,
+  removeLocalePrefix,
+} from './route-permissions'
 import { useCurrentUserPermissions } from './use-permissions'
 
 export function PermissionRouteGuard({
@@ -35,23 +39,25 @@ export function PermissionRouteGuard({
   const routePath = useMemo(() => removeLocalePrefix(pathname, locale), [locale, pathname])
   const currentShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
   const isLoading = isLoadingPermissions || !isScopeReady || isScopeSwitching
-  const canAccessRoute = useMemo(
-    () =>
-      canAccessProtectedRoute(routePath, {
-        currentShopId,
-        hasAnyPermission,
-        hasTenantPermission,
-        hasShopPermission,
-        hasAnyShopPermission,
-      }),
+  const routePermissionChecks = useMemo(
+    () => ({
+      currentShopId,
+      hasAnyPermission,
+      hasTenantPermission,
+      hasShopPermission,
+      hasAnyShopPermission,
+    }),
     [
       currentShopId,
       hasAnyPermission,
       hasAnyShopPermission,
       hasShopPermission,
       hasTenantPermission,
-      routePath,
     ],
+  )
+  const canAccessRoute = useMemo(
+    () => canAccessProtectedRoute(routePath, routePermissionChecks),
+    [routePath, routePermissionChecks],
   )
 
   useEffect(() => {
@@ -59,8 +65,13 @@ export function PermissionRouteGuard({
       return
     }
 
-    router.replace(withLocale(locale, ROUTES.unauthorized) as Route)
-  }, [canAccessRoute, isLoading, locale, router])
+    const fallbackRoute =
+      routePath === ROUTES.dashboard
+        ? getFirstAccessibleProtectedRoute(routePermissionChecks, routePath)
+        : undefined
+
+    router.replace(withLocale(locale, fallbackRoute ?? ROUTES.unauthorized) as Route)
+  }, [canAccessRoute, isLoading, locale, routePath, routePermissionChecks, router])
 
   if (isLoading || !canAccessRoute) {
     return (
