@@ -14,6 +14,14 @@ import java.util.UUID;
 
 @Repository
 public interface PermissionRepository extends JpaRepository<Permission, Long>, JpaSpecificationExecutor<Permission> {
+    /**
+     * Returns every {@link Permission} row that belongs to the given user,
+     * across all target types and target IDs. Used to build the full
+     * permission tree for a user in a single query.
+     */
+    @Query("SELECT p FROM Permission p WHERE p.userId = :userId")
+    List<Permission> findAllByUserId(@Param("userId") UUID userId);
+
     List<Permission> findAllByUserIdAndTargetTypeAndActionAndTargetId(
             UUID userId,
             PermissionTargetType targetType,

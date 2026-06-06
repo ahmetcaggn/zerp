@@ -134,4 +134,43 @@ public class PermittableRepository {
             return Page.empty();
         }
     }
+
+    /**
+     * Bulk-loads {@link Permittable} entities of a given {@link PermissionTargetType}
+     * whose IDs are in the provided collection.
+     * <p>
+     * Returns an empty list if the targetType is not mapped to any entity class,
+     * or if the mapped class does not implement {@link Permittable}.
+     *
+     * @param targetType the permission target type to look up
+     * @param ids        the set of entity IDs to fetch
+     * @return the matching Permittable entities in an unspecified order
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public List<Permittable> findAllByTargetTypeAndIds(
+            PermissionTargetType targetType,
+            Collection<UUID> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Class<?> entityClass = targetTypeToEntityClass.get(targetType);
+        if (entityClass == null || !Permittable.class.isAssignableFrom(entityClass)) {
+            log.debug("No Permittable entity mapped to targetType: {}", targetType);
+            return Collections.emptyList();
+        }
+
+        try {
+            var cb = entityManager.getCriteriaBuilder();
+            var query = cb.createQuery(entityClass);
+            var root = query.from(entityClass);
+            query.select((Selection) root)
+                    .where(root.get("id").in(ids));
+            return (List<Permittable>) entityManager.createQuery(query).getResultList();
+        } catch (Exception e) {
+            log.error("Failed to bulk-load permittables for type {} with {} ids: {}",
+                    targetType, ids.size(), e.getMessage());
+            return Collections.emptyList();
+        }
+    }
 }
+

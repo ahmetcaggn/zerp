@@ -5,12 +5,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.zerp.common.dto.ApiResponse;
 import org.zerp.common.resource.controller.ResourceController;
 import org.zerp.user.dto.permittable.PermittableResponseDTO;
+import org.zerp.user.dto.permittable.PermittableTreeNodeDTO;
 import org.zerp.user.service.PermittableService;
 
 import java.util.List;
@@ -27,6 +29,12 @@ public class PermittableController extends ResourceController<PermittableRespons
     @Override
     protected PermittableService getService() {
         return service;
+    }
+
+    @GetMapping("/tree")
+    public ResponseEntity<ApiResponse<PermittableTreeNodeDTO>> getTree() {
+        PermittableTreeNodeDTO tree = service.getPermittableTree();
+        return ResponseEntity.ok(ApiResponse.success(tree));
     }
 
     @Override
