@@ -272,8 +272,15 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
     @Transactional
     public EmployeeResponseDto patch(UUID id, Map<String, Object> fields) {
         UUID userId = resolveCurrentUserId();
-        Employee employee = employeeRepository.findByIdWithContactsAndNotDeleted(id)
-                .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
+        Employee employee;
+        Boolean isDeleted = fields.containsKey("isDeleted") ? (Boolean) fields.get("isDeleted") : null;
+        if(isDeleted != null && !isDeleted) {
+            employee = employeeRepository.findByIdAndDeletedTrue(id).orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
+        }else{
+            employee = employeeRepository.findByIdWithContactsAndNotDeleted(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
+
+        }
 
         if (!permissionEvaluator.canPatch(userId, employee)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to patch Employee");
@@ -293,7 +300,9 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
                     usernameChanged ? username : employee.getUsername());
         }
 
-        applyFieldUpdates(employee, fields);
+        if (isDeleted != null && !isDeleted) {
+            employee.restoreEmployee();
+        }
 
         if (fields.containsKey("managerId")) {
             UUID managerId = UUID.fromString(fields.get("managerId").toString());
@@ -310,6 +319,8 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
             List<EmployeeContactDto> contactDtos = (List<EmployeeContactDto>) fields.get("contacts");
             updateContacts(employee, contactDtos);
         }
+
+        applyFieldUpdates(employee, fields);
 
         return employeeMapper.toResponseDto(employeeRepository.save(employee));
     }

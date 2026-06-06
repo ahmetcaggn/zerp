@@ -8,6 +8,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  Card,
   Chip,
   CircularProgress,
   Dialog,
@@ -20,6 +21,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   TextField,
@@ -317,69 +319,199 @@ export function PermissionGroupList() {
       {mergedGroups.length === 0 ? (
         <Typography color="text.secondary">{t('permissionGroups.emptyState')}</Typography>
       ) : (
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>{t('permissionGroups.nameColumnHeader')}</TableCell>
-              <TableCell>{t('permissionGroups.sourceColumnHeader')}</TableCell>
-              <TableCell>{t('permissionGroups.scopeColumnHeader')}</TableCell>
-              <TableCell>{t('permissionGroups.actionCountColumnHeader')}</TableCell>
-              <TableCell align="right">{t('common.actions')}</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {mergedGroups.map((group) => {
-              const routeId = toRouteId(group)
-              const sourceLabel =
-                group.source === 'PREDEFINED'
-                  ? t('permissionGroups.predefinedBadge')
-                  : t('permissionGroups.customBadge')
+          <>
+            {/* Desktop Table View */}
+            <TableContainer sx={{ display: { xs: 'none', md: 'block' } }}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{t('permissionGroups.nameColumnHeader')}</TableCell>
+                    <TableCell>{t('permissionGroups.sourceColumnHeader')}</TableCell>
+                    <TableCell>{t('permissionGroups.scopeColumnHeader')}</TableCell>
+                    <TableCell>{t('permissionGroups.actionCountColumnHeader')}</TableCell>
+                    <TableCell align="right">{t('common.actions')}</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {mergedGroups.map((group) => {
+                    const routeId = toRouteId(group)
+                    const sourceLabel =
+                      group.source === 'PREDEFINED'
+                        ? t('permissionGroups.predefinedBadge')
+                        : t('permissionGroups.customBadge')
 
-              return (
-                <TableRow key={`${group.source}:${group.code ?? group.id}`} hover>
-                  <TableCell>{group.name}</TableCell>
-                  <TableCell>{sourceLabel}</TableCell>
-                  <TableCell>{prettifyPermissionEnumName(group.scopeType)}</TableCell>
-                  <TableCell>{group.actions.length}</TableCell>
-                  <TableCell align="right">
-                    <Tooltip title={t('permissionGroups.openDetailButton')}>
-                      <IconButton
-                        size="small"
-                        onClick={() =>
-                          router.push(
-                            withLocale(locale, `${ROUTES.permissionGroups}/${routeId}`) as Route,
-                          )
-                        }
-                      >
-                        <OpenInNewIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    return (
+                      <TableRow key={`${group.source}:${group.code ?? group.id}`} hover>
+                        <TableCell>{group.name}</TableCell>
+                        <TableCell>{sourceLabel}</TableCell>
+                        <TableCell>{prettifyPermissionEnumName(group.scopeType)}</TableCell>
+                        <TableCell>{group.actions.length}</TableCell>
+                        <TableCell align="right">
+                          <Tooltip title={t('permissionGroups.openDetailButton')}>
+                            <IconButton
+                              size="small"
+                              onClick={() =>
+                                router.push(
+                                  withLocale(locale, `${ROUTES.permissionGroups}/${routeId}`) as Route,
+                                )
+                              }
+                            >
+                              <OpenInNewIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
 
-                    {group.source === 'CUSTOM' && (
-                      <>
-                        <Tooltip title={t('permissionGroups.editButton')}>
-                          <IconButton size="small" onClick={() => openEditDialog(group)}>
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title={t('permissionGroups.deleteButton')}>
-                          <IconButton
-                            size="small"
-                            color="error"
-                            disabled={isDeletePending}
-                            onClick={() => handleDelete(group.id)}
+                          {group.source === 'CUSTOM' && (
+                            <>
+                              <Tooltip title={t('permissionGroups.editButton')}>
+                                <IconButton size="small" onClick={() => openEditDialog(group)}>
+                                  <EditIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title={t('permissionGroups.deleteButton')}>
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  disabled={isDeletePending}
+                                  onClick={() => handleDelete(group.id)}
+                                >
+                                  <DeleteIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            </>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {/* Mobile Card View */}
+            <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 2 }}>
+              {mergedGroups.map((group) => {
+                const routeId = toRouteId(group)
+                const sourceLabel =
+                  group.source === 'PREDEFINED'
+                    ? t('permissionGroups.predefinedBadge')
+                    : t('permissionGroups.customBadge')
+
+                return (
+                  <Card
+                    key={`${group.source}:${group.code ?? group.id}`}
+                    variant="outlined"
+                    sx={{
+                      borderRadius: 2,
+                      borderColor: 'divider',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                        borderColor: 'primary.light',
+                      },
+                    }}
+                  >
+                    <Box
+                      onClick={() =>
+                        router.push(
+                          withLocale(locale, `${ROUTES.permissionGroups}/${routeId}`) as Route,
+                        )
+                      }
+                      sx={{ p: 2, cursor: 'pointer' }}
+                    >
+                      <Stack spacing={1.5}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight={700}
+                            color="text.primary"
+                            sx={{ lineHeight: 1.3, overflowWrap: 'anywhere' }}
                           >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </>
-                    )}
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
+                            {group.name}
+                          </Typography>
+                          <Chip
+                            label={sourceLabel}
+                            size="small"
+                            color={group.source === 'PREDEFINED' ? 'default' : 'primary'}
+                            variant="outlined"
+                          />
+                        </Box>
+
+                        {group.description && (
+                          <Typography variant="body2" color="text.secondary" sx={{ overflowWrap: 'anywhere' }}>
+                            {group.description}
+                          </Typography>
+                        )}
+
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: 1.5,
+                            pt: 1.5,
+                            borderTop: '1px solid',
+                            borderColor: 'divider',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                            <Chip
+                              label={prettifyPermissionEnumName(group.scopeType)}
+                              size="small"
+                              variant="outlined"
+                            />
+                            <Chip
+                              label={`${group.actions.length} ${t('permissionGroups.actionsField')}`}
+                              size="small"
+                              color="secondary"
+                              variant="outlined"
+                            />
+                          </Box>
+
+                          <Box sx={{ display: 'flex', gap: 0.5, ml: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                            <Tooltip title={t('permissionGroups.openDetailButton')}>
+                              <IconButton
+                                size="small"
+                                onClick={() =>
+                                  router.push(
+                                    withLocale(locale, `${ROUTES.permissionGroups}/${routeId}`) as Route,
+                                  )
+                                }
+                              >
+                                <OpenInNewIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+
+                            {group.source === 'CUSTOM' && (
+                              <>
+                                <Tooltip title={t('permissionGroups.editButton')}>
+                                  <IconButton size="small" onClick={() => openEditDialog(group)}>
+                                    <EditIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title={t('permissionGroups.deleteButton')}>
+                                  <IconButton
+                                    size="small"
+                                    color="error"
+                                    disabled={isDeletePending}
+                                    onClick={() => handleDelete(group.id)}
+                                  >
+                                    <DeleteIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              </>
+                            )}
+                          </Box>
+                        </Box>
+                      </Stack>
+                    </Box>
+                  </Card>
+                )
+              })}
+            </Box>
+          </>
       )}
 
       <GroupFormDialog

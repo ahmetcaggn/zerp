@@ -42,18 +42,18 @@ public class EmployeeController extends ResourceController<EmployeeResponseDto, 
         return ResponseEntity.ok(buildResponse(employees, "Search results retrieved successfully"));
     }
 
-    @GetMapping("/deleted")
-    public ResponseEntity<ApiResponse<List<EmployeeListResponseDto>>> getDeletedEmployees() {
-        List<EmployeeListResponseDto> employees = employeeService.getDeletedEmployees();
-        return ResponseEntity.ok(buildResponse(employees, "Deleted employees retrieved successfully"));
-    }
+//    @GetMapping("/deleted")
+//    public ResponseEntity<ApiResponse<List<EmployeeListResponseDto>>> getDeletedEmployees() {
+//        List<EmployeeListResponseDto> employees = employeeService.getDeletedEmployees();
+//        return ResponseEntity.ok(buildResponse(employees, "Deleted employees retrieved successfully"));
+//    }
 
-    @GetMapping("/deleted/paginated")
-    public ResponseEntity<ApiResponse<Page<EmployeeListResponseDto>>> getDeletedEmployeesPaginated(
-            @PageableDefault(size = 20) Pageable pageable) {
-        Page<EmployeeListResponseDto> employees = employeeService.getDeletedEmployeesPaginated(pageable);
-        return ResponseEntity.ok(buildResponse(employees, "Deleted employees retrieved successfully"));
-    }
+//    @GetMapping("/deleted/paginated")
+//    public ResponseEntity<ApiResponse<Page<EmployeeListResponseDto>>> getDeletedEmployeesPaginated(
+//            @PageableDefault(size = 20) Pageable pageable) {
+//        Page<EmployeeListResponseDto> employees = employeeService.getDeletedEmployeesPaginated(pageable);
+//        return ResponseEntity.ok(buildResponse(employees, "Deleted employees retrieved successfully"));
+//    }
 
     @PostMapping("/admin")
     public ResponseEntity<ApiResponse<EmployeeResponseDto>> createForTenant(

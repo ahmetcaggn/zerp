@@ -6,13 +6,20 @@ import VisibilityIcon from '@mui/icons-material/Visibility'
 import {
   Box,
   Button,
+  Card,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
+  Stack,
   Tab,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TablePagination,
   TableRow,
@@ -30,7 +37,7 @@ import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
-import { useDeleteEmployee, useEmployees,useEmployeeSearch } from '../hooks/use-employees'
+import { useDeleteEmployee, useEmployees, useEmployeeSearch } from '../hooks/use-employees'
 import type { EmployeeListResponseDto } from '../types/employee'
 import type { EmploymentStatusValue } from '../types/employee'
 import { DeletedEmployees } from './deleted-employees'
@@ -62,6 +69,7 @@ export function EmployeeList() {
   const [debouncedKeyword, setDebouncedKeyword] = useState('')
   const [permissionDialogEmployee, setPermissionDialogEmployee] =
     useState<EmployeeListResponseDto | undefined>(undefined)
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
 
   useEffect(() => {
     const id = setTimeout(() => setDebouncedKeyword(searchInput.trim()), 400)
@@ -86,10 +94,11 @@ export function EmployeeList() {
   const params = {
     pagination: { page: page + 1, perPage: rowsPerPage },
     sort: { field: 'id', order: 'ASC' as const },
+    filter: { 'deleted.eq': 'false' },
   }
 
   const isSearching = debouncedKeyword.length >= 2
-  const listResult = useEmployees(isSearching ? undefined : params)
+  const listResult = useEmployees(params, { enabled: !isSearching })
   const searchResult = useEmployeeSearch(debouncedKeyword, params)
 
   const { data, isLoading, error } = isSearching ? searchResult : listResult
@@ -144,78 +153,175 @@ export function EmployeeList() {
               {t('employees.emptyState')}
             </Typography>
           ) : (
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>{t('employees.fullNameColumnHeader')}</TableCell>
-                  <TableCell>{t('employees.emailColumnHeader')}</TableCell>
-                  <TableCell>{t('employees.phoneColumnHeader')}</TableCell>
-                  <TableCell>{t('employees.statusColumnHeader')}</TableCell>
-                  <TableCell align="right">{t('common.actions')}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+            <>
+              {/* Desktop Table View */}
+              <TableContainer sx={{ display: { xs: 'none', md: 'block' } }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>{t('employees.fullNameColumnHeader')}</TableCell>
+                      <TableCell>{t('employees.emailColumnHeader')}</TableCell>
+                      <TableCell>{t('employees.phoneColumnHeader')}</TableCell>
+                      <TableCell>{t('employees.statusColumnHeader')}</TableCell>
+                      <TableCell align="right">{t('common.actions')}</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {rows.map((emp) => (
+                      <TableRow key={emp.id} hover>
+                        <TableCell>{`${emp.firstName ?? ''} ${emp.lastName ?? ''}`}</TableCell>
+                        <TableCell>{emp.email}</TableCell>
+                        <TableCell>{emp.phoneNumber ?? '—'}</TableCell>
+                        <TableCell>
+                          {emp.status && (
+                            <Chip
+                              label={emp.status}
+                              color={STATUS_COLOR[emp.status] ?? 'default'}
+                              size="small"
+                            />
+                          )}
+                        </TableCell>
+                        <TableCell align="right">
+                          <Tooltip title={t('employees.editButton')}>
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                if (emp.id !== undefined) {
+                                  router.push(withLocale(locale, `${ROUTES.employees}/${emp.id}`) as Route)
+                                }
+                              }}
+                            >
+                              <VisibilityIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title={t('employees.permissionsDialogTitle')}>
+                            <IconButton
+                              size="small"
+                              onClick={() => setPermissionDialogEmployee(emp)}
+                            >
+                              <AdminPanelSettingsIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title={t('employees.deleteButton')}>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => {
+                                if (emp.id !== undefined) {
+                                  setDeleteConfirmId(String(emp.id))
+                                }
+                              }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              {/* Mobile Card View */}
+              <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 2 }}>
                 {rows.map((emp) => (
-                  <TableRow key={emp.id} hover>
-                    <TableCell>{`${emp.firstName ?? ''} ${emp.lastName ?? ''}`}</TableCell>
-                    <TableCell>{emp.email}</TableCell>
-                    <TableCell>{emp.phoneNumber ?? '—'}</TableCell>
-                    <TableCell>
-                      {emp.status && (
-                        <Chip
-                          label={emp.status}
-                          color={STATUS_COLOR[emp.status] ?? 'default'}
-                          size="small"
-                        />
-                      )}
-                    </TableCell>
-                    <TableCell align="right">
-                      <Tooltip title={t('employees.editButton')}>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            if (emp.id !== undefined) {
-                              router.push(withLocale(locale, `${ROUTES.employees}/${emp.id}`) as Route)
-                            }
-                          }}
+                  <Card
+                    key={emp.id}
+                    variant="outlined"
+                    sx={{
+                      borderRadius: 2,
+                      borderColor: 'divider',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                        borderColor: 'primary.light',
+                      },
+                    }}
+                  >
+                    <Box sx={{ p: 2 }}>
+                      <Stack spacing={1.5}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight={700}
+                            color="text.primary"
+                            sx={{ lineHeight: 1.3 }}
+                          >
+                            {`${emp.firstName ?? ''} ${emp.lastName ?? ''}`}
+                          </Typography>
+                          {emp.status && (
+                            <Chip
+                              label={emp.status}
+                              color={STATUS_COLOR[emp.status] ?? 'default'}
+                              size="small"
+                            />
+                          )}
+                        </Box>
+
+                        <Stack spacing={0.5}>
+                          <Typography variant="body2" color="text.secondary">
+                            {emp.email}
+                          </Typography>
+                          {emp.phoneNumber && (
+                            <Typography variant="body2" color="text.secondary">
+                              {emp.phoneNumber}
+                            </Typography>
+                          )}
+                        </Stack>
+
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            gap: 1.5,
+                            pt: 1.5,
+                            borderTop: '1px solid',
+                            borderColor: 'divider',
+                            justifyContent: 'flex-end',
+                            alignItems: 'center',
+                      }}
                         >
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={t('employees.permissionsDialogTitle')}>
-                        <IconButton
-                          size="small"
-                          onClick={() => setPermissionDialogEmployee(emp)}
-                        >
-                          <AdminPanelSettingsIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={t('employees.deleteButton')}>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => {
-                            if (emp.id !== undefined) {
-                              deleteEmployee(String(emp.id), {
-                                onSuccess: () =>
-                                  showToast(
-                                    t('employees.employeeDeletedToast'),
-                                    { severity: 'success' },
-                                  ),
-                                onError: (err) =>
-                                  showToast(getUserFriendlyError(err), { severity: 'error' }),
-                              })
-                            }
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
+                          <Tooltip title={t('employees.editButton')}>
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                if (emp.id !== undefined) {
+                                  router.push(withLocale(locale, `${ROUTES.employees}/${emp.id}`) as Route)
+                                }
+                              }}
+                            >
+                              <VisibilityIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title={t('employees.permissionsDialogTitle')}>
+                            <IconButton
+                              size="small"
+                              onClick={() => setPermissionDialogEmployee(emp)}
+                            >
+                              <AdminPanelSettingsIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title={t('employees.deleteButton')}>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => {
+                                if (emp.id !== undefined) {
+                                  setDeleteConfirmId(String(emp.id))
+                                }
+                              }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      </Stack>
+                    </Box>
+                  </Card>
                 ))}
-              </TableBody>
-            </Table>
+              </Box>
+            </>
           )}
 
           <TablePagination
@@ -238,6 +344,43 @@ export function EmployeeList() {
         employee={permissionDialogEmployee}
         onClose={() => setPermissionDialogEmployee(undefined)}
       />
+
+      <Dialog
+        open={Boolean(deleteConfirmId)}
+        onClose={() => setDeleteConfirmId(null)}
+      >
+        <DialogTitle>{t('employees.deleteConfirmTitle')}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">{t('employees.deleteConfirmText')}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConfirmId(null)}>{t('common.cancel')}</Button>
+          <Button
+            onClick={() => {
+              if (deleteConfirmId) {
+                deleteEmployee(deleteConfirmId, {
+                  onSuccess: () => {
+                    showToast(
+                      t('employees.employeeDeletedToast'),
+                      { severity: 'success' },
+                    )
+                    setDeleteConfirmId(null)
+                  },
+                  onError: (err) => {
+                    showToast(getUserFriendlyError(err), { severity: 'error' })
+                    setDeleteConfirmId(null)
+                  },
+                })
+              }
+            }}
+            variant="contained"
+            color="error"
+            autoFocus
+          >
+            {t('employees.deleteButton')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

@@ -78,4 +78,11 @@ public class Employee extends AppUser implements Permittable {
         this.deleted = true;
         this.deletedAt = now;
     }
+
+    public void restoreEmployee() {
+        this.status = EmploymentStatus.ACTIVE;
+        this.terminationDate = null;
+        this.deleted = false;
+        this.deletedAt = null;
+    }
 }

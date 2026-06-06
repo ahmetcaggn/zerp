@@ -89,4 +89,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID>, JpaSp
             "LOWER(e.lastName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(e.email) LIKE LOWER(CONCAT('%', :keyword, '%')) ")
     Page<Employee> searchEmployees(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT e FROM Employee e WHERE e.id = :id and e.deleted=true")
+    Optional<Employee> findByIdAndDeletedTrue(UUID id);
 }

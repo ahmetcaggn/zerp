@@ -34,8 +34,11 @@ export function useEmployeeSearch(keyword: string, params: RaListParams = {}) {
 }
 
 export function useDeletedEmployees(params: RaListParams = {}) {
-  return useQuery({
-    queryKey: [...queryKeys.tenant.employees, 'deleted', params],
-    queryFn: () => employeeClient.deletedPaginated(params),
+  return useEmployees({
+    ...params,
+    filter: {
+      ...params.filter,
+      'deleted.eq': 'true',
+    },
   })
 }

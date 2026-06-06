@@ -6,6 +6,7 @@ import SearchIcon from '@mui/icons-material/Search'
 import {
   Box,
   Button,
+  Card,
   Chip,
   CircularProgress,
   FormControl,
@@ -14,9 +15,11 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  Stack,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TablePagination,
   TableRow,
@@ -271,134 +274,255 @@ export function TicketList() {
           {t('tickets.emptyState')}
         </Typography>
       ) : (
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'title'}
-                  direction={sortField === 'title' ? sortDir : 'asc'}
-                  onClick={() => handleSort('title')}
-                >
-                  {t('tickets.titleColumnHeader')}
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'status'}
-                  direction={sortField === 'status' ? sortDir : 'asc'}
-                  onClick={() => handleSort('status')}
-                >
-                  {t('tickets.statusLabel')}
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'priority'}
-                  direction={sortField === 'priority' ? sortDir : 'asc'}
-                  onClick={() => handleSort('priority')}
-                >
-                  {t('tickets.priorityLabel')}
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'type'}
-                  direction={sortField === 'type' ? sortDir : 'asc'}
-                  onClick={() => handleSort('type')}
-                >
-                  {t('tickets.typeLabel')}
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'createdAt'}
-                  direction={sortField === 'createdAt' ? sortDir : 'asc'}
-                  onClick={() => handleSort('createdAt')}
-                >
-                  {t('tickets.createdAtColumnHeader')}
-                </TableSortLabel>
-              </TableCell>
-              <TableCell align="right">{t('common.actions')}</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((ticket) => (
-              <TableRow
-                key={ticket.id}
-                hover
-                sx={{ cursor: 'pointer' }}
-                onClick={() => {
-                  if (ticket.id !== undefined)
-                    router.push(withLocale(locale, `${ROUTES.tickets}/${ticket.id}`) as Route)
-                }}
-              >
-                <TableCell>
-                  <Typography variant="body2" fontWeight={500} noWrap sx={{ maxWidth: 320 }}>
-                    {ticket.title ?? '—'}
-                  </Typography>
-                  {ticket.description && (
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      noWrap
-                      sx={{ display: 'block', maxWidth: 320 }}
-                    >
-                      {ticket.description}
-                    </Typography>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {ticket.status ? (
-                    <Chip
-                      label={ticket.status}
-                      color={STATUS_COLOR[ticket.status as TicketStatusString] ?? 'default'}
-                      size="small"
-                    />
-                  ) : (
-                    '—'
-                  )}
-                </TableCell>
-                <TableCell>
-                  {ticket.priority ? (
-                    <Chip
-                      label={ticket.priority}
-                      color={PRIORITY_COLOR[ticket.priority as TicketPriorityString] ?? 'default'}
-                      size="small"
-                      variant="outlined"
-                    />
-                  ) : (
-                    '—'
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2">{ticket.type ?? '—'}</Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" color="text.secondary">
-                    {ticket.createdAt
-                      ? new Date(ticket.createdAt).toLocaleString(dateLocale)
-                      : '—'}
-                  </Typography>
-                </TableCell>
-                <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                  <Tooltip title={t('tickets.detailTooltip')}>
-                    <IconButton
-                      size="small"
+          <>
+            {/* Desktop Table View */}
+            <TableContainer sx={{ display: { xs: 'none', md: 'block' } }}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>
+                      <TableSortLabel
+                        active={sortField === 'title'}
+                        direction={sortField === 'title' ? sortDir : 'asc'}
+                        onClick={() => handleSort('title')}
+                      >
+                        {t('tickets.titleColumnHeader')}
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell>
+                      <TableSortLabel
+                        active={sortField === 'status'}
+                        direction={sortField === 'status' ? sortDir : 'asc'}
+                        onClick={() => handleSort('status')}
+                      >
+                        {t('tickets.statusLabel')}
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell>
+                      <TableSortLabel
+                        active={sortField === 'priority'}
+                        direction={sortField === 'priority' ? sortDir : 'asc'}
+                        onClick={() => handleSort('priority')}
+                      >
+                        {t('tickets.priorityLabel')}
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell>
+                      <TableSortLabel
+                        active={sortField === 'type'}
+                        direction={sortField === 'type' ? sortDir : 'asc'}
+                        onClick={() => handleSort('type')}
+                      >
+                        {t('tickets.typeLabel')}
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell>
+                      <TableSortLabel
+                        active={sortField === 'createdAt'}
+                        direction={sortField === 'createdAt' ? sortDir : 'asc'}
+                        onClick={() => handleSort('createdAt')}
+                      >
+                        {t('tickets.createdAtColumnHeader')}
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell align="right">{t('common.actions')}</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows.map((ticket) => (
+                    <TableRow
+                      key={ticket.id}
+                      hover
+                      sx={{ cursor: 'pointer' }}
                       onClick={() => {
                         if (ticket.id !== undefined)
                           router.push(withLocale(locale, `${ROUTES.tickets}/${ticket.id}`) as Route)
                       }}
                     >
-                      <OpenInNewIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
+                      <TableCell>
+                        <Typography variant="body2" fontWeight={500} noWrap sx={{ maxWidth: 320 }}>
+                          {ticket.title ?? '—'}
+                        </Typography>
+                        {ticket.description && (
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            noWrap
+                            sx={{ display: 'block', maxWidth: 320 }}
+                          >
+                            {ticket.description}
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {ticket.status ? (
+                          <Chip
+                            label={ticket.status}
+                            color={STATUS_COLOR[ticket.status as TicketStatusString] ?? 'default'}
+                            size="small"
+                          />
+                        ) : (
+                          '—'
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {ticket.priority ? (
+                          <Chip
+                            label={ticket.priority}
+                            color={PRIORITY_COLOR[ticket.priority as TicketPriorityString] ?? 'default'}
+                            size="small"
+                            variant="outlined"
+                          />
+                        ) : (
+                          '—'
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{ticket.type ?? '—'}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" color="text.secondary">
+                          {ticket.createdAt
+                            ? new Date(ticket.createdAt).toLocaleString(dateLocale)
+                            : '—'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                        <Tooltip title={t('tickets.detailTooltip')}>
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              if (ticket.id !== undefined)
+                                router.push(withLocale(locale, `${ROUTES.tickets}/${ticket.id}`) as Route)
+                            }}
+                          >
+                            <OpenInNewIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {/* Mobile Card View */}
+            <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 2 }}>
+              {rows.map((ticket) => (
+                <Card
+                  key={ticket.id}
+                  variant="outlined"
+                  sx={{
+                    borderRadius: 2,
+                    borderColor: 'divider',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                      borderColor: 'primary.light',
+                    },
+                  }}
+                >
+                  <Box
+                    onClick={() => {
+                      if (ticket.id !== undefined)
+                        router.push(withLocale(locale, `${ROUTES.tickets}/${ticket.id}`) as Route)
+                    }}
+                    sx={{ p: 2, cursor: 'pointer' }}
+                  >
+                    <Stack spacing={1.5}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+                        <Typography
+                          variant="subtitle1"
+                          fontWeight={700}
+                          color="text.primary"
+                          sx={{ lineHeight: 1.3, overflowWrap: 'anywhere' }}
+                        >
+                          {ticket.title ?? '—'}
+                        </Typography>
+                        {ticket.status && (
+                          <Chip
+                            label={ticket.status}
+                            color={STATUS_COLOR[ticket.status as TicketStatusString] ?? 'default'}
+                            size="small"
+                          />
+                        )}
+                      </Box>
+
+                      {ticket.description && (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            overflowWrap: 'anywhere',
+                          }}
+                        >
+                          {ticket.description}
+                        </Typography>
+                      )}
+
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 1.5,
+                          pt: 1.5,
+                          borderTop: '1px solid',
+                          borderColor: 'divider',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                          {ticket.type && (
+                            <Chip
+                              label={ticket.type}
+                              size="small"
+                              variant="outlined"
+                            />
+                          )}
+                          {ticket.priority && (
+                            <Chip
+                              label={ticket.priority}
+                              color={PRIORITY_COLOR[ticket.priority as TicketPriorityString] ?? 'default'}
+                              size="small"
+                              variant="outlined"
+                            />
+                          )}
+                        </Box>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                          <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
+                            {ticket.createdAt
+                              ? new Date(ticket.createdAt).toLocaleString(dateLocale)
+                              : '—'}
+                          </Typography>
+                          <Tooltip title={t('tickets.detailTooltip')}>
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                if (ticket.id !== undefined)
+                                  router.push(withLocale(locale, `${ROUTES.tickets}/${ticket.id}`) as Route)
+                              }}
+                            >
+                              <OpenInNewIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      </Box>
+                    </Stack>
+                  </Box>
+                </Card>
+              ))}
+            </Box>
+          </>
+        )}
 
       <TablePagination
         component="div"
