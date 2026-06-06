@@ -40,6 +40,17 @@ Please follow the [installation procedure](#installation--usage) and then run th
 ```dart
 import 'package:openapi_notification/api.dart';
 
+
+final api_instance = EmailControllerSendEmailApi();
+final emailEmployeeListRequestDto = EmailEmployeeListRequestDto(); // EmailEmployeeListRequestDto | 
+
+try {
+    final result = api_instance.sendEmail(emailEmployeeListRequestDto);
+    print(result);
+} catch (e) {
+    print('Exception when calling EmailControllerSendEmailApi->sendEmail: $e\n');
+}
+
 ```
 
 ## Documentation for API Endpoints
@@ -48,10 +59,36 @@ All URIs are relative to *https://api.zeerp.tech*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*EmailControllerSendEmailApi* | [**sendEmail**](doc//EmailControllerSendEmailApi.md#) | **POST** /notification/email/send | 
+*EmailControllerSendEmailToListApi* | [**sendEmailToList**](doc//EmailControllerSendEmailToListApi.md#) | **POST** /notification/email/sendToList | 
+*EmailControllerSendEmailToListWithHtmlApi* | [**sendEmailToListWithHtml**](doc//EmailControllerSendEmailToListWithHtmlApi.md#) | **POST** /notification/email/sendToListHtml | 
+*EmailControllerSendSingleEmailApi* | [**sendSingleEmail**](doc//EmailControllerSendSingleEmailApi.md#) | **POST** /notification/email/sendSingle | 
+*ObjectsCallPatchApi* | [**callPatch**](doc//ObjectsCallPatchApi.md#) | **PATCH** /notification/announcements/{id} | Update: Update an existing entity
+*ObjectsCreateApi* | [**create**](doc//ObjectsCreateApi.md#) | **POST** /notification/announcements | Create: Create a new entity
+*ObjectsDeleteApi* | [**delete**](doc//ObjectsDeleteApi.md#) | **DELETE** /notification/announcements/{id} | Delete: Delete a single entity
+*ObjectsDeleteManyApi* | [**deleteMany**](doc//ObjectsDeleteManyApi.md#) | **DELETE** /notification/announcements | DeleteMany: Delete multiple entities
+*ObjectsGetListApi* | [**getList**](doc//ObjectsGetListApi.md#) | **GET** /notification/announcements | GetList: Get paginated list of entities with filtering
+*ObjectsGetManyApi* | [**getMany**](doc//ObjectsGetManyApi.md#) | **GET** /notification/announcements/many | GetMany: Get multiple entities by IDs
+*ObjectsGetOneApi* | [**getOne**](doc//ObjectsGetOneApi.md#) | **GET** /notification/announcements/{id} | GetOne: Get single entity by ID
+*ObjectsPatchManyApi* | [**patchMany**](doc//ObjectsPatchManyApi.md#) | **PATCH** /notification/announcements | UpdateMany: Update multiple entities
+*ObjectsUpdateApi* | [**update**](doc//ObjectsUpdateApi.md#) | **PUT** /notification/announcements/{id} | Update: Update an existing entity
 
 
 ## Documentation For Models
 
+ - [AnnouncementRecipientResponseDto](doc//AnnouncementRecipientResponseDto.md)
+ - [AnnouncementResponseDto](doc//AnnouncementResponseDto.md)
+ - [ApiResponseAnnouncementResponseDto](doc//ApiResponseAnnouncementResponseDto.md)
+ - [ApiResponseListAnnouncementResponseDto](doc//ApiResponseListAnnouncementResponseDto.md)
+ - [ApiResponseListUUID](doc//ApiResponseListUUID.md)
+ - [ApiResponseVoid](doc//ApiResponseVoid.md)
+ - [CreateAnnouncementRequestDto](doc//CreateAnnouncementRequestDto.md)
+ - [EmailEmployeeListRequestDto](doc//EmailEmployeeListRequestDto.md)
+ - [EmailListHtmlRequestDto](doc//EmailListHtmlRequestDto.md)
+ - [EmailListRequestDto](doc//EmailListRequestDto.md)
+ - [EmailSingleRequestDto](doc//EmailSingleRequestDto.md)
+ - [Meta](doc//Meta.md)
+ - [Parameter](doc//Parameter.md)
 
 
 ## Documentation For Authorization
@@ -60,5 +97,6 @@ Endpoints do not require authorization.
 
 
 ## Author
+
 
 

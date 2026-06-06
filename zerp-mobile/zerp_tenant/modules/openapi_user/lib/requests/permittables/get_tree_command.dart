@@ -11,42 +11,33 @@ import 'package:dart_network_layer_core/dart_network_layer_core.dart';
 
 import '../../base/base_request.dart';
 
-import '../../model/api_response_page_employee_list_response_dto.dart';
-import '../../model/pageable.dart';
+import '../../model/api_response_permittable_tree_node_dto.dart';
 
 
 ///
-/// GET /employee/deleted/paginated
-class GetDeletedEmployeesPaginatedCommand extends OpenapiDefinitionBaseRequest<ApiResponsePageEmployeeListResponseDto> {
-  GetDeletedEmployeesPaginatedCommand({
-    required this.pageable,
-  });
+/// GET /user/permittables/tree
+class GetTreeCommand extends OpenapiDefinitionBaseRequest<ApiResponsePermittableTreeNodeDTO> {
+  GetTreeCommand();
 
-  final Pageable pageable;
 
   @override
   String get path {
-    var p = r'/employee/deleted/paginated';
+    var p = r'/user/permittables/tree';
     return p;
   }
-
-  @override
-  List<QueryParameter> get queryParameters => [
-    QueryParameter(key: r'pageable', value: pageable),
-  ];
 
   @override
   HttpRequestMethod get method => HttpRequestMethod.get;
 
   @override
-  SchemaFactory<ApiResponsePageEmployeeListResponseDto> get defaultResponseFactory => ApiResponsePageEmployeeListResponseDto.factory;
+  SchemaFactory<ApiResponsePermittableTreeNodeDTO> get defaultResponseFactory => ApiResponsePermittableTreeNodeDTO.factory;
 
   @override
   SchemaFactory get defaultErrorResponseFactory => AnyDataSchema.factory;
 
   @override
   Map<int, SchemaFactory> get responseFactories => {
-    200: ApiResponsePageEmployeeListResponseDto.factory,
+    200: ApiResponsePermittableTreeNodeDTO.factory,
   };
 
   @override

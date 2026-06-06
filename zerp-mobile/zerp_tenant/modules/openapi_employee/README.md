@@ -63,8 +63,6 @@ Class | Method | HTTP request | Description
 *EmployeesCreateForTenantApi* | [**createForTenant**](doc//EmployeesCreateForTenantApi.md#) | **POST** /employee/admin | 
 *EmployeesDeleteEmployeeApi* | [**deleteEmployee**](doc//EmployeesDeleteEmployeeApi.md#) | **DELETE** /employee/{id} | Delete: Delete a single entity
 *EmployeesDeleteManyEmployeesApi* | [**deleteManyEmployees**](doc//EmployeesDeleteManyEmployeesApi.md#) | **DELETE** /employee | DeleteMany: Delete multiple entities
-*EmployeesGetDeletedEmployeesApi* | [**getDeletedEmployees**](doc//EmployeesGetDeletedEmployeesApi.md#) | **GET** /employee/deleted | 
-*EmployeesGetDeletedEmployeesPaginatedApi* | [**getDeletedEmployeesPaginated**](doc//EmployeesGetDeletedEmployeesPaginatedApi.md#) | **GET** /employee/deleted/paginated | 
 *EmployeesGetListEmployeesApi* | [**getListEmployees**](doc//EmployeesGetListEmployeesApi.md#) | **GET** /employee | GetList: Get paginated list of entities with filtering
 *EmployeesGetManyEmployeesApi* | [**getManyEmployees**](doc//EmployeesGetManyEmployeesApi.md#) | **GET** /employee/many | GetMany: Get multiple entities by IDs
 *EmployeesGetOneEmployeeApi* | [**getOneEmployee**](doc//EmployeesGetOneEmployeeApi.md#) | **GET** /employee/{id} | GetOne: Get single entity by ID

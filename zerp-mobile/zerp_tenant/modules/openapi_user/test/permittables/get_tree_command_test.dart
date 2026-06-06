@@ -7,17 +7,17 @@
 // ignore_for_file: constant_identifier_names
 // ignore_for_file: lines_longer_than_80_chars
 
-import 'package:openapi_employee/api.dart';
+import 'package:openapi_user/api.dart';
 import 'package:test/test.dart';
 
 
-/// tests for EmployeesGetDeletedEmployeesApi
+/// tests for PermittablesGetTreeApi
 void main() {
-  // final instance = EmployeesGetDeletedEmployeesApi();
+  // final instance = PermittablesGetTreeApi();
 
-  group('tests for EmployeesGetDeletedEmployeesApi', () {
-    //Future<ApiResponseListEmployeeListResponseDto> getDeletedEmployees() async
-    test('test getDeletedEmployees', () async {
+  group('tests for PermittablesGetTreeApi', () {
+    //Future<ApiResponsePermittableTreeNodeDTO> getTree() async
+    test('test getTree', () async {
       // TODO
     });
 

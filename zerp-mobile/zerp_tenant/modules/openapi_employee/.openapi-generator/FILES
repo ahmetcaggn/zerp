@@ -18,8 +18,6 @@ doc/EmployeesCreateEmployeeApi.md
 doc/EmployeesCreateForTenantApi.md
 doc/EmployeesDeleteEmployeeApi.md
 doc/EmployeesDeleteManyEmployeesApi.md
-doc/EmployeesGetDeletedEmployeesApi.md
-doc/EmployeesGetDeletedEmployeesPaginatedApi.md
 doc/EmployeesGetListEmployeesApi.md
 doc/EmployeesGetManyEmployeesApi.md
 doc/EmployeesGetOneEmployeeApi.md
@@ -62,8 +60,6 @@ lib/requests/employees/create_employee_command.dart
 lib/requests/employees/create_for_tenant_command.dart
 lib/requests/employees/delete_employee_command.dart
 lib/requests/employees/delete_many_employees_command.dart
-lib/requests/employees/get_deleted_employees_command.dart
-lib/requests/employees/get_deleted_employees_paginated_command.dart
 lib/requests/employees/get_list_employees_command.dart
 lib/requests/employees/get_many_employees_command.dart
 lib/requests/employees/get_one_employee_command.dart
@@ -88,8 +84,6 @@ test/employees/create_employee_command_test.dart
 test/employees/create_for_tenant_command_test.dart
 test/employees/delete_employee_command_test.dart
 test/employees/delete_many_employees_command_test.dart
-test/employees/get_deleted_employees_command_test.dart
-test/employees/get_deleted_employees_paginated_command_test.dart
 test/employees/get_list_employees_command_test.dart
 test/employees/get_many_employees_command_test.dart
 test/employees/get_one_employee_command_test.dart

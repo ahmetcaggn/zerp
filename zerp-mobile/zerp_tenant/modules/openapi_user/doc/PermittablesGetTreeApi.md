@@ -1,33 +1,33 @@
-# openapi_employee.api.EmployeesGetDeletedEmployeesApi
+# openapi_user.api.PermittablesGetTreeApi
 
 ## Load the API package
 ```dart
-import 'package:openapi_employee/api.dart';
+import 'package:openapi_user/api.dart';
 ```
 
 All URIs are relative to *https://api.zeerp.tech*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**getDeletedEmployees**](EmployeesGetDeletedEmployeesApi.md#) | **GET** /employee/deleted | 
+[**getTree**](PermittablesGetTreeApi.md#) | **GET** /user/permittables/tree | 
 
 
-# **getDeletedEmployees**
-> ApiResponseListEmployeeListResponseDto getDeletedEmployees()
+# **getTree**
+> ApiResponsePermittableTreeNodeDTO getTree()
 
 
 
 ### Example
 ```dart
-import 'package:openapi_employee/api.dart';
+import 'package:openapi_user/api.dart';
 
-final api_instance = EmployeesGetDeletedEmployeesApi();
+final api_instance = PermittablesGetTreeApi();
 
 try {
-    final result = api_instance.getDeletedEmployees();
+    final result = api_instance.getTree();
     print(result);
 } catch (e) {
-    print('Exception when calling EmployeesGetDeletedEmployeesApi->getDeletedEmployees: $e\n');
+    print('Exception when calling PermittablesGetTreeApi->getTree: $e\n');
 }
 ```
 
@@ -36,7 +36,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-[**ApiResponseListEmployeeListResponseDto**](ApiResponseListEmployeeListResponseDto.md)
+[**ApiResponsePermittableTreeNodeDTO**](ApiResponsePermittableTreeNodeDTO.md)
 
 ### Authorization
 

@@ -94,6 +94,7 @@ Class | Method | HTTP request | Description
 *PermissionsPatchPermissionApi* | [**patchPermission**](doc//PermissionsPatchPermissionApi.md#) | **PATCH** /user/permissions/{id} | Update: Update an existing entity
 *PermissionsUpdatePermissionApi* | [**updatePermission**](doc//PermissionsUpdatePermissionApi.md#) | **PUT** /user/permissions/{id} | Update: Update an existing entity
 *PermittablesGetListPermittablesApi* | [**getListPermittables**](doc//PermittablesGetListPermittablesApi.md#) | **GET** /user/permittables | GetList: Get paginated list of entities with filtering
+*PermittablesGetTreeApi* | [**getTree**](doc//PermittablesGetTreeApi.md#) | **GET** /user/permittables/tree | 
 *UsernamesCheckUsernameApi* | [**checkUsername**](doc//UsernamesCheckUsernameApi.md#) | **GET** /user/usernames/check | 
 *UsersGetCurrentUserApi* | [**getCurrentUser**](doc//UsersGetCurrentUserApi.md#) | **GET** /user/me | Get currently authenticated user profile
 *UsersGetListUsersApi* | [**getListUsers**](doc//UsersGetListUsersApi.md#) | **GET** /user | GetList: Get paginated list of entities with filtering
@@ -117,6 +118,7 @@ Class | Method | HTTP request | Description
  - [ApiResponsePermissionGroupAssignmentRevokeResponseDTO](doc//ApiResponsePermissionGroupAssignmentRevokeResponseDTO.md)
  - [ApiResponsePermissionGroupResponseDTO](doc//ApiResponsePermissionGroupResponseDTO.md)
  - [ApiResponsePermissionResponse](doc//ApiResponsePermissionResponse.md)
+ - [ApiResponsePermittableTreeNodeDTO](doc//ApiResponsePermittableTreeNodeDTO.md)
  - [ApiResponseTenantImageUploadResponseDTO](doc//ApiResponseTenantImageUploadResponseDTO.md)
  - [ApiResponseTenantNameCheckResponseDTO](doc//ApiResponseTenantNameCheckResponseDTO.md)
  - [ApiResponseTenantResponseDTO](doc//ApiResponseTenantResponseDTO.md)
@@ -140,6 +142,7 @@ Class | Method | HTTP request | Description
  - [PermissionResponse](doc//PermissionResponse.md)
  - [PermissionUpdateRequest](doc//PermissionUpdateRequest.md)
  - [PermittableResponseDTO](doc//PermittableResponseDTO.md)
+ - [PermittableTreeNodeDTO](doc//PermittableTreeNodeDTO.md)
  - [TenantCreateRequestDTO](doc//TenantCreateRequestDTO.md)
  - [TenantImageUploadResponseDTO](doc//TenantImageUploadResponseDTO.md)
  - [TenantNameCheckResponseDTO](doc//TenantNameCheckResponseDTO.md)

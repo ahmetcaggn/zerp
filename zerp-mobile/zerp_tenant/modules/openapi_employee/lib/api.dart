@@ -39,8 +39,6 @@ export 'requests/employees/create_employee_command.dart';
 export 'requests/employees/create_for_tenant_command.dart';
 export 'requests/employees/delete_employee_command.dart';
 export 'requests/employees/delete_many_employees_command.dart';
-export 'requests/employees/get_deleted_employees_command.dart';
-export 'requests/employees/get_deleted_employees_paginated_command.dart';
 export 'requests/employees/get_list_employees_command.dart';
 export 'requests/employees/get_many_employees_command.dart';
 export 'requests/employees/get_one_employee_command.dart';

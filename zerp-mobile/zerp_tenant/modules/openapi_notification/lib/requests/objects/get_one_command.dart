@@ -11,18 +11,25 @@ import 'package:dart_network_layer_core/dart_network_layer_core.dart';
 
 import '../../base/base_request.dart';
 
-import '../../model/api_response_list_employee_list_response_dto.dart';
+import '../../model/api_response_announcement_response_dto.dart';
 
 
+/// GetOne: Get single entity by ID
+/// Retrieves a single entity by its unique identifier. Implements ra-spring-data-provider's getOne operation. 
 ///
-/// GET /employee/deleted
-class GetDeletedEmployeesCommand extends OpenapiDefinitionBaseRequest<ApiResponseListEmployeeListResponseDto> {
-  GetDeletedEmployeesCommand();
+/// GET /notification/announcements/{id}
+class GetOneCommand extends OpenapiDefinitionBaseRequest<ApiResponseAnnouncementResponseDto> {
+  GetOneCommand({
+    required this.id,
+  });
 
+  /// Unique identifier of the entity to retrieve
+  final String id;
 
   @override
   String get path {
-    var p = r'/employee/deleted';
+    var p = r'/notification/announcements/{id}';
+    p = p.replaceAll('{id}', id);
     return p;
   }
 
@@ -30,14 +37,14 @@ class GetDeletedEmployeesCommand extends OpenapiDefinitionBaseRequest<ApiRespons
   HttpRequestMethod get method => HttpRequestMethod.get;
 
   @override
-  SchemaFactory<ApiResponseListEmployeeListResponseDto> get defaultResponseFactory => ApiResponseListEmployeeListResponseDto.factory;
+  SchemaFactory<ApiResponseAnnouncementResponseDto> get defaultResponseFactory => ApiResponseAnnouncementResponseDto.factory;
 
   @override
   SchemaFactory get defaultErrorResponseFactory => AnyDataSchema.factory;
 
   @override
   Map<int, SchemaFactory> get responseFactories => {
-    200: ApiResponseListEmployeeListResponseDto.factory,
+    200: ApiResponseAnnouncementResponseDto.factory,
   };
 
   @override

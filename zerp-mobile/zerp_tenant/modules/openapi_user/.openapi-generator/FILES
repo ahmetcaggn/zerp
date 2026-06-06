@@ -28,6 +28,7 @@ doc/ApiResponsePermissionGroupAssignResponseDTO.md
 doc/ApiResponsePermissionGroupAssignmentRevokeResponseDTO.md
 doc/ApiResponsePermissionGroupResponseDTO.md
 doc/ApiResponsePermissionResponse.md
+doc/ApiResponsePermittableTreeNodeDTO.md
 doc/ApiResponseTenantImageUploadResponseDTO.md
 doc/ApiResponseTenantNameCheckResponseDTO.md
 doc/ApiResponseTenantResponseDTO.md
@@ -73,7 +74,9 @@ doc/PermissionsPatchManyPermissionsApi.md
 doc/PermissionsPatchPermissionApi.md
 doc/PermissionsUpdatePermissionApi.md
 doc/PermittableResponseDTO.md
+doc/PermittableTreeNodeDTO.md
 doc/PermittablesGetListPermittablesApi.md
+doc/PermittablesGetTreeApi.md
 doc/TenantCreateRequestDTO.md
 doc/TenantImageUploadResponseDTO.md
 doc/TenantNameCheckResponseDTO.md
@@ -103,6 +106,7 @@ lib/model/api_response_permission_group_assign_response_dto.dart
 lib/model/api_response_permission_group_assignment_revoke_response_dto.dart
 lib/model/api_response_permission_group_response_dto.dart
 lib/model/api_response_permission_response.dart
+lib/model/api_response_permittable_tree_node_dto.dart
 lib/model/api_response_tenant_image_upload_response_dto.dart
 lib/model/api_response_tenant_name_check_response_dto.dart
 lib/model/api_response_tenant_response_dto.dart
@@ -126,6 +130,7 @@ lib/model/permission_group_update_request_dto.dart
 lib/model/permission_response.dart
 lib/model/permission_update_request.dart
 lib/model/permittable_response_dto.dart
+lib/model/permittable_tree_node_dto.dart
 lib/model/tenant_create_request_dto.dart
 lib/model/tenant_image_upload_response_dto.dart
 lib/model/tenant_name_check_response_dto.dart
@@ -168,6 +173,7 @@ lib/requests/permissions/patch_many_permissions_command.dart
 lib/requests/permissions/patch_permission_command.dart
 lib/requests/permissions/update_permission_command.dart
 lib/requests/permittables/get_list_permittables_command.dart
+lib/requests/permittables/get_tree_command.dart
 lib/requests/usernames/check_username_command.dart
 lib/requests/users/get_current_user_command.dart
 lib/requests/users/get_list_users_command.dart
@@ -200,6 +206,7 @@ test/api_response_permission_group_assign_response_dto_test.dart
 test/api_response_permission_group_assignment_revoke_response_dto_test.dart
 test/api_response_permission_group_response_dto_test.dart
 test/api_response_permission_response_test.dart
+test/api_response_permittable_tree_node_dto_test.dart
 test/api_response_tenant_image_upload_response_dto_test.dart
 test/api_response_tenant_name_check_response_dto_test.dart
 test/api_response_tenant_response_dto_test.dart
@@ -245,7 +252,9 @@ test/permissions/patch_many_permissions_command_test.dart
 test/permissions/patch_permission_command_test.dart
 test/permissions/update_permission_command_test.dart
 test/permittable_response_dto_test.dart
+test/permittable_tree_node_dto_test.dart
 test/permittables/get_list_permittables_command_test.dart
+test/permittables/get_tree_command_test.dart
 test/tenant_create_request_dto_test.dart
 test/tenant_image_upload_response_dto_test.dart
 test/tenant_name_check_response_dto_test.dart
