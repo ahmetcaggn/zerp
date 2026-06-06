@@ -1,4 +1,3 @@
-import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded'
 import Inventory2RoundedIcon from '@mui/icons-material/Inventory2Rounded'
@@ -6,16 +5,7 @@ import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded'
 import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded'
 import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded'
 import TableRestaurantRoundedIcon from '@mui/icons-material/TableRestaurantRounded'
-import {
-  Box,
-  Button,
-  Chip,
-  Container,
-  Grid,
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material'
+import { Box, Button, Chip, Container, Grid, Paper, Stack, Typography } from '@mui/material'
 import type { SvgIconProps } from '@mui/material/SvgIcon'
 import type { Route } from 'next'
 import { notFound, redirect } from 'next/navigation'
@@ -27,6 +17,7 @@ import { ROUTES, withLocale } from '@/core/constants/routes'
 import { getMessages } from '@/core/i18n/messages'
 import { responsivePageSx } from '@/core/theme/layout'
 
+import { DemoRequestDialog } from './demo-request-dialog'
 import {
   LandingImage,
   LandingImageAlbum,
@@ -81,6 +72,7 @@ const workflowTones: AccentTone[] = ['teal', 'blue', 'amber', 'rose']
 const landingImagePath = '/zerp-tenant-landing-page-images'
 const playStoreUrl = 'https://play.google.com/store/apps/details?id=org.zerp.tenant'
 const playStoreBadgeSrc = `${landingImagePath}/GetItOnGooglePlay_Badge_Web_color_Turkish.svg`
+const demoRequestEmail = process.env.DEMO_REQUEST_EMAIL ?? 'pomocra@gmail.com'
 const moduleImageFiles = [
   ['table-and-addition-tracking.webp', 'table-and-addition-tracking_1.webp'],
   ['menu-and-recipe-management_1.webp', 'menu-and-recipe-management_2.webp'],
@@ -356,21 +348,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 gap={2}
                 sx={{ alignItems: { xs: 'stretch', sm: 'center' } }}
               >
-                <Button
-                  href={`/${locale}/register`}
-                  size="large"
-                  variant="contained"
-                  endIcon={<ArrowForwardRoundedIcon />}
-                  sx={{
-                    minHeight: 52,
-                    borderRadius: 2,
-                    px: 3.5,
-                    fontWeight: 800,
-                    fontSize: '1rem',
+                <DemoRequestDialog
+                  recipientEmail={demoRequestEmail}
+                  texts={{
+                    ...home.demoRequest,
+                    cancel: messages.common.cancel,
                   }}
-                >
-                  {home.primaryCta}
-                </Button>
+                  triggerLabel={home.primaryCta}
+                />
                 <Button
                   aria-label={home.playStoreCta}
                   href={playStoreUrl}
@@ -591,7 +576,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                         />
                         <Stack spacing={2}>
                           {home.mobileFeature.benefits.map((benefit) => (
-                            <Stack key={benefit} direction="row" spacing={1.5} alignItems="baseline">
+                            <Stack
+                              key={benefit}
+                              direction="row"
+                              spacing={1.5}
+                              alignItems="baseline"
+                            >
                               <Box
                                 sx={{
                                   backgroundColor: accentByTone.blue.main,

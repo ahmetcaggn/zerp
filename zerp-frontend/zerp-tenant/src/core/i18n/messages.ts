@@ -146,6 +146,23 @@ export interface MessageDictionary {
     primaryCta: string
     secondaryCta: string
     playStoreCta: string
+    demoRequest: {
+      title: string
+      description: string
+      fullNameLabel: string
+      emailLabel: string
+      companyNameLabel: string
+      serviceAreaLabel: string
+      noteLabel: string
+      submit: string
+      subject: string
+      bodyIntro: string
+      fullNameBodyLabel: string
+      emailBodyLabel: string
+      companyNameBodyLabel: string
+      serviceAreaBodyLabel: string
+      noteBodyLabel: string
+    }
     heroTags: readonly string[]
     proofPoints: ReadonlyArray<{
       value: string

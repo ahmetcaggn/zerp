@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import HomePage from '@/app/[locale]/(public)/page'
@@ -34,10 +35,7 @@ describe('HomePage', () => {
         name: 'Kafe ve restoran operasyonunu tek ekranda yönetin',
       }),
     ).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Demo Talebi' })).toHaveAttribute(
-      'href',
-      '/tr/register',
-    )
+    expect(screen.getByRole('button', { name: 'Demo Talebi' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: "Play Store'dan Eriş" })).toHaveAttribute(
       'href',
       'https://play.google.com/store/apps/details?id=org.zerp.tenant',
@@ -58,10 +56,7 @@ describe('HomePage', () => {
         name: 'Run cafe and restaurant operations from one clear workspace',
       }),
     ).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Request a Demo' })).toHaveAttribute(
-      'href',
-      '/en/register',
-    )
+    expect(screen.getByRole('button', { name: 'Request a Demo' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Open on Play Store' })).toHaveAttribute(
       'href',
       'https://play.google.com/store/apps/details?id=org.zerp.tenant',
@@ -77,5 +72,41 @@ describe('HomePage', () => {
     await HomePage({ params: Promise.resolve({ locale: 'tr' }) })
 
     expect(redirect).toHaveBeenCalledWith('/tr/dashboard')
+  })
+
+  it('opens Gmail compose with Turkish demo request form values', async () => {
+    const user = userEvent.setup()
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+    const ui = await HomePage({ params: Promise.resolve({ locale: 'tr' }) })
+
+    render(ui)
+
+    await user.click(screen.getByRole('button', { name: 'Demo Talebi' }))
+    expect(screen.getByRole('dialog', { name: 'Demo talebi' })).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText(/Ad soyad/), 'Ada Lovelace')
+    await user.type(screen.getByLabelText(/E-posta adresi/), 'ada@example.com')
+    await user.type(screen.getByLabelText(/Firma adı/), 'Analytical Cafe')
+    await user.type(screen.getByLabelText(/Firma hizmet alanı/), 'Kahve ve restoran')
+    await user.type(screen.getByLabelText(/Ek not/), '2 subeli isletme')
+    await user.click(screen.getByRole('button', { name: 'Talepte Bulun' }))
+
+    expect(openSpy).toHaveBeenCalledTimes(1)
+    const [composeUrl, target] = openSpy.mock.calls[0]
+    const url = new URL(String(composeUrl))
+
+    expect(target).toBe('_blank')
+    expect(url.origin).toBe('https://mail.google.com')
+    expect(url.searchParams.get('view')).toBe('cm')
+    expect(url.searchParams.get('fs')).toBe('1')
+    expect(url.searchParams.get('to')).toBe('pomocra@gmail.com')
+    expect(url.searchParams.get('su')).toBe('ZERP demo talebi')
+    expect(url.searchParams.get('body')).toContain('Ad soyad: Ada Lovelace')
+    expect(url.searchParams.get('body')).toContain('E-posta: ada@example.com')
+    expect(url.searchParams.get('body')).toContain('Firma adı: Analytical Cafe')
+    expect(url.searchParams.get('body')).toContain('Hizmet alanı: Kahve ve restoran')
+    expect(url.searchParams.get('body')).toContain('Ek not: 2 subeli isletme')
+
+    openSpy.mockRestore()
   })
 })
