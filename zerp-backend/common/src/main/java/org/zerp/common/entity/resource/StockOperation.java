@@ -16,7 +16,7 @@ import java.util.UUID;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "stock_operations")
-@SQLDelete(sql = "UPDATE stock_operations SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE stock_operations SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? AND version = ?")
 @SQLRestriction("deleted = false")
 public class StockOperation extends BaseEntity {
     @Id

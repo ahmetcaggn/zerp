@@ -19,7 +19,7 @@ import java.util.UUID;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(name= "tenants")
-@SQLDelete(sql = "UPDATE tenants SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE tenants SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? AND version = ?")
 @SQLRestriction("deleted = false")
 @PermissionTargetTypeAnnotation(type = PermissionTargetType.TENANT)
 public class Tenant extends CommonBaseEntity implements Permittable {

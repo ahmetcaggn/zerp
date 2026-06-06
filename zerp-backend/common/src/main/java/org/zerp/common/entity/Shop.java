@@ -43,7 +43,7 @@ import java.util.UUID;
                 @UniqueConstraint(name = "uk_shops_tenant_name", columnNames = {"tenant_id", "name"})
         }
 )
-@SQLDelete(sql = "UPDATE shops SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE shops SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? AND version = ?")
 @SQLRestriction("deleted = false")
 @PermissionTargetTypeAnnotation(type = PermissionTargetType.SHOP)
 public class Shop extends BaseEntity implements Permittable {

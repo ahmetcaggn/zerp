@@ -19,7 +19,7 @@ import java.util.UUID;
 @Table(name = "stock_resources")
 @Getter
 @Setter
-@SQLDelete(sql = "UPDATE stock_resources SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE stock_resources SET deleted = true, deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? AND version = ?")
 @SQLRestriction("deleted = false")
 @PermissionTargetTypeAnnotation(type = PermissionTargetType.STOCK_RESOURCE)
 public class StockResource extends BaseEntity implements Permittable {
