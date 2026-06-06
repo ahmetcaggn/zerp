@@ -103,7 +103,7 @@ const quickActionStyles: Record<
     bg: 'rgba(32, 180, 134, 0.12)',
     color: '#0f766e',
   },
-  'send-notification': {
+  'create-announcement': {
     icon: <SendIcon sx={{ fontSize: 18 }} />,
     bg: 'rgba(59, 130, 246, 0.12)',
     color: '#1d4ed8',
@@ -135,10 +135,10 @@ const quickActions: SalesDashboardQuickAction[] = [
     href: ROUTES.employees,
   },
   {
-    id: 'send-notification',
-    label: 'Bildirim Gönder',
+    id: 'create-announcement',
+    label: 'Duyuru Oluştur',
     description: 'Mağazalara veya ekiplere hızlı duyuru oluştur.',
-    href: ROUTES.notifications,
+    href: ROUTES.announcements,
   },
   {
     id: 'new-ticket',

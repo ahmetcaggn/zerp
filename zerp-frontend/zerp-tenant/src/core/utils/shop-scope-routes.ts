@@ -10,7 +10,7 @@ export const SHOP_ONLY_PATHS = [
 export const GLOBAL_ONLY_PATHS = [
   ROUTES.employees,
   ROUTES.tickets,
-  ROUTES.notifications,
+  ROUTES.announcements,
 ] as const
 
 export function isShopOnlyPath(pathname: string): boolean {

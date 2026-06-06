@@ -127,7 +127,7 @@ export interface MessageDictionary {
     employees: string
     permissionGroups: string
     tickets: string
-    notifications: string
+    announcements: string
     profile: string
     shopQr: string
   }
@@ -234,7 +234,7 @@ export interface MessageDictionary {
     recentEmployeesTitle: string
     quickActionsTitle: string
     addEmployeeAction: string
-    sendNotificationAction: string
+    createAnnouncementAction: string
     newTicketAction: string
   }
   shops: {
@@ -462,16 +462,33 @@ export interface MessageDictionary {
     ticketDeletedToast: string
     ticketCreatedToast: string
   }
-  notifications: {
+  announcements: {
     title: string
+    createTitle: string
+    detailTitle: string
+    createButton: string
     sendButton: string
-    recipientsLabel: string
+    recipientModeLabel: string
+    allEmployeesLabel: string
+    selectedEmployeesLabel: string
+    recipientsColumnHeader: string
+    recipientCountLabel: string
+    recipientsSectionTitle: string
+    announcementInfoTitle: string
+    contentSectionTitle: string
+    noRecipientsLabel: string
+    senderColumnHeader: string
+    titleColumnHeader: string
+    createdAtColumnHeader: string
     subjectLabel: string
-    bodyLabel: string
-    sentSuccess: string
-    htmlModeLabel: string
-    htmlBodyLabel: string
-    recipientPlaceholder: string
+    contentLabel: string
+    employeeSearchLabel: string
+    employeeSearchPlaceholder: string
+    emptyState: string
+    createdSuccess: string
+    titleRequiredWarning: string
+    contentRequiredWarning: string
+    recipientsRequiredWarning: string
   }
   shopQr: {
     title: string

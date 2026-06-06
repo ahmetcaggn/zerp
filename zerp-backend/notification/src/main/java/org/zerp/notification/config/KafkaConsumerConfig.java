@@ -15,7 +15,7 @@ import java.util.Map;
 @Configuration
 public class KafkaConsumerConfig {
 
-    @Value("${kafka.url}")
+    @Value("${kafka.url:kafka:9092}")
     private String bootstrapServer;
 
     @Bean

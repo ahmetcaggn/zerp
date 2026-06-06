@@ -1,10 +1,9 @@
 'use client'
 import { Box, Button, Typography } from '@mui/material'
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber'
-import GroupsIcon from '@mui/icons-material/Groups'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
-import SendIcon from '@mui/icons-material/Send'
+import CampaignIcon from '@mui/icons-material/Campaign'
 import InventoryIcon from '@mui/icons-material/Inventory'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
@@ -18,9 +17,9 @@ export function DashboardQuickActions() {
   const actions = [
     { label: t('dashboard.addEmployeeAction'), icon: <PersonAddIcon />, href: ROUTES.employees },
     {
-      label: t('dashboard.sendNotificationAction'),
-      icon: <SendIcon />,
-      href: ROUTES.notifications,
+      label: t('dashboard.createAnnouncementAction'),
+      icon: <CampaignIcon />,
+      href: ROUTES.announcements,
     },
     { label: t('dashboard.newTicketAction'), icon: <ConfirmationNumberIcon />, href: ROUTES.tickets },
     { label: t('dashboard.viewStockAction'), icon: <InventoryIcon />, href: ROUTES.stock },

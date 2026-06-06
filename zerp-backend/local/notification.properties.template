@@ -11,4 +11,8 @@ spring.mail.port=
 spring.mail.username=
 spring.mail.password=
 
+# Kafka config
+kafka.url=${KAFKA_BOOTSTRAP:localhost:29092}
+kafka.topic.email=${KAFKA_TOPIC_EMAIL:email-notifications}
+
 eureka.client.service-url.defaultZone=http://localhost:8761/eureka/

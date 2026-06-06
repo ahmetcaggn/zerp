@@ -88,6 +88,8 @@ public enum PredefinedPermissionGroupCode {
                     PermissionAction.UPDATE_TENANT,
                     PermissionAction.READ_EMPLOYEE,
                     PermissionAction.CREATE_EMPLOYEE,
+                    PermissionAction.READ_ANNOUNCEMENT,
+                    PermissionAction.CREATE_ANNOUNCEMENT,
                     PermissionAction.UPDATE_EMPLOYEE,
                     PermissionAction.READ_USER,
                     PermissionAction.READ_PERMISSION,

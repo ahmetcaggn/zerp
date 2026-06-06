@@ -7,7 +7,7 @@ export const queryKeys = {
     tickets:        ['tenant', 'tickets'] as const,
     permissions:    ['tenant', 'permissions'] as const,
     permissionGroups: ['tenant', 'permission-groups'] as const,
-    notifications:  ['tenant', 'notifications'] as const,
+    announcements:  ['tenant', 'announcements'] as const,
     stockResources:      ['tenant', 'stock-resources'] as const,
     stockOverview:       ['tenant', 'stock-overview'] as const,
     stockMovements:      ['tenant', 'stock-movements'] as const,

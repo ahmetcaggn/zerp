@@ -34,6 +34,9 @@ public class EmailKafkaConsumer {
                 case HTML:
                     handleHtmlEmail(emailMessage);
                     break;
+                case ANNOUNCEMENT:
+                    handleAnnouncementEmail(emailMessage);
+                    break;
                 default:
                     log.warn("Unknown email type: {}", emailMessage.getType());
             }
@@ -90,4 +93,22 @@ public class EmailKafkaConsumer {
         );
         log.info("Successfully sent HTML email to {} recipients", emailMessage.getToList().size());
     }
+
+    private void handleAnnouncementEmail(KafkaEmailMessage emailMessage) {
+        if (emailMessage.getToList() == null || emailMessage.getToList().isEmpty()) {
+            log.error("ANNOUNCEMENT email type requires 'toList' field");
+            return;
+        }
+
+        log.info("Sending announcement email to {} recipients", emailMessage.getToList().size());
+        emailService.sendAnnouncementEmail(
+                emailMessage.getToList(),
+                emailMessage.getCcList(),
+                emailMessage.getSubject(),
+                emailMessage.getBody(),
+                emailMessage.getSenderName()
+        );
+        log.info("Successfully sent announcement email to {} recipients", emailMessage.getToList().size());
+    }
 }
+

@@ -10,7 +10,7 @@ describe('shop scope route helpers', () => {
 
   it('detects global-only paths', () => {
     expect(isGlobalOnlyPath('/employees')).toBe(true)
-    expect(isGlobalOnlyPath('/notifications')).toBe(true)
+    expect(isGlobalOnlyPath('/announcements')).toBe(true)
     expect(isGlobalOnlyPath('/stock')).toBe(false)
   })
 })

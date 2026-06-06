@@ -6,16 +6,21 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class EmailService {
     private final JavaMailSender mailSender;
+    private final ResourceLoader resourceLoader;
 
     @Value("${spring.mail.username}")
     private String EMAIL_FROM;
@@ -180,5 +185,69 @@ public class EmailService {
         } catch (MessagingException e) {
             throw new RuntimeException("Failed to send HTML email to list", e);
         }
+    }
+
+    public void sendAnnouncementEmail(List<String> toList, List<String> ccList, String subject, String body, String senderName) {
+        if (toList == null || toList.isEmpty()) {
+            throw new IllegalArgumentException("Recipient list cannot be null or empty");
+        }
+
+        String plainTextBody = buildAnnouncementPlainText(toList, ccList, subject, body, senderName);
+        String htmlBody = renderAnnouncementTemplate(subject, body, senderName);
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setTo(toList.toArray(String[]::new));
+            if (ccList != null && !ccList.isEmpty()) {
+                helper.setCc(ccList.toArray(String[]::new));
+            }
+            helper.setSubject(safeValue(subject));
+            helper.setFrom(EMAIL_FROM);
+            helper.setText(plainTextBody, htmlBody);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send announcement email", e);
+        }
+    }
+
+    private String buildAnnouncementPlainText(List<String> toList, List<String> ccList, String subject, String body, String senderName) {
+        return "To: " + String.join(", ", toList) + "\n" +
+                "Cc: " + ((ccList == null || ccList.isEmpty()) ? "-" : String.join(", ", ccList)) + "\n\n" +
+                "Title: " + safeValue(subject) + "\n" +
+                "Sender: " + safeValue(senderName) + "\n\n" +
+                safeValue(body) + "\n\n" +
+                "ZERP";
+    }
+
+    private String renderAnnouncementTemplate(String subject, String body, String senderName) {
+        try {
+            Resource resource = resourceLoader.getResource("classpath:templates/announcment.html");
+            String template = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+            return template
+                    .replace("${announcmentBaslik}", escapeHtml(subject))
+                    .replace("${announcementTitle}", escapeHtml(subject))
+                    .replace("${senderName}", escapeHtml(senderName))
+                    .replace("${anouncmentIcerik}", escapeHtml(body).replace("\n", "<br/>"))
+                    .replace("${announcementContent}", escapeHtml(body).replace("\n", "<br/>"));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to render announcement email template", e);
+        }
+    }
+
+    private String safeValue(String value) {
+        return value == null ? "" : value;
+    }
+
+    private String escapeHtml(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 }

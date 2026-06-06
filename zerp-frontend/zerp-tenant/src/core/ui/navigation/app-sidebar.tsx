@@ -2,10 +2,10 @@
 
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import CampaignRoundedIcon from '@mui/icons-material/CampaignRounded'
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
 import InventoryRoundedIcon from '@mui/icons-material/InventoryRounded'
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
-import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded'
 import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded'
 import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded'
 import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded'
@@ -57,7 +57,7 @@ type SidebarLabelKey =
   | 'nav.employees'
   | 'nav.permissionGroups'
   | 'nav.tickets'
-  | 'nav.notifications'
+  | 'nav.announcements'
   | 'nav.shopQr'
 
 type SidebarSectionLabelKey = 'nav.management' | 'nav.crm' | 'nav.operations' | 'nav.inventory'
@@ -114,10 +114,10 @@ const GLOBAL_SIDEBAR_SECTIONS: SidebarSection[] = [
         href: '/tickets',
       },
       {
-        id: 'notifications',
-        labelKey: 'nav.notifications',
-        icon: <NotificationsRoundedIcon />,
-        href: '/notifications',
+        id: 'announcements',
+        labelKey: 'nav.announcements',
+        icon: <CampaignRoundedIcon />,
+        href: '/announcements',
       },
     ],
   },
