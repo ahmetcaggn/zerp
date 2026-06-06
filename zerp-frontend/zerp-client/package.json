@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "cross-env NODE_OPTIONS=--max-http-header-size=32768 next dev -p 3002",
     "build": "next build",
-    "start": "cross-env NODE_OPTIONS=--max-http-header-size=32768 next start -p 3002",
+    "start": "cross-env NODE_OPTIONS=--max-http-header-size=32768 next start -H 0.0.0.0 -p 3002",
     "lint": "eslint .",
     "format": "prettier --check .",
     "format:write": "prettier --write .",

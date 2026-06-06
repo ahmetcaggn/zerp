@@ -3,42 +3,35 @@ name: zerp-frontend
 services:
   zerp-admin:
     container_name: zerp-admin
-    image: zerp-frontend-zerp-admin:latest
+    image: ahmetcaggn/zerp-admin:latest
     env_file:
       - ../zerp-frontend/zerp-admin/.env
     expose:
       - "3000"
     networks:
-      - zerp-frontend-net
       - cloudflare_tunnel_network
 
   zerp-tenant:
     container_name: zerp-tenant
-    image: zerp-frontend-zerp-tenant:latest
+    image: ahmetcaggn/zerp-tenant:latest
     env_file:
       - ../zerp-frontend/zerp-tenant/.env
     expose:
       - "3000"
     networks:
-      - zerp-frontend-net
       - cloudflare_tunnel_network
 
   zerp-client:
     container_name: zerp-client
-    image: zerp-frontend-zerp-client:latest
+    image: ahmetcaggn/zerp-client:latest
     env_file:
       - ../zerp-frontend/zerp-client/.env
     expose:
       - "3000"
     networks:
-      - zerp-frontend-net
       - cloudflare_tunnel_network
 
 
 networks:
-  zerp-frontend-net:
-    name: zerp-frontend-net
-    driver: bridge
   cloudflare_tunnel_network:
-    driver: bridge
     external: true
