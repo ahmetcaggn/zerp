@@ -14,6 +14,7 @@ abstract class AuthClaims with _$AuthClaims {
     required String tenantId,
     String? firstName,
     String? lastName,
+    String? email,
   }) = _AuthClaims;
 
   factory AuthClaims.fromJson(Map<String, dynamic> json) =>

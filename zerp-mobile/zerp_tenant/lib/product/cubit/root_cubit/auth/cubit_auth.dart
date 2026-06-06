@@ -58,7 +58,10 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
         const Duration(seconds: 5),
       );
       if (claims != null) {
-        emit(StateAuthAuthenticated(username: claims.preferredUsername));
+        emit(StateAuthAuthenticated(
+          username: claims.preferredUsername,
+          email: claims.email,
+        ));
       } else {
         emit(const StateAuthUnauthenticated());
         await _navigateToLoginIfNeeded();
@@ -80,7 +83,10 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
       final claims = await _authService.login();
       if (claims != null) {
         log.info('Login successful for user ${claims.preferredUsername}');
-        emit(StateAuthAuthenticated(username: claims.preferredUsername));
+        emit(StateAuthAuthenticated(
+          username: claims.preferredUsername,
+          email: claims.email,
+        ));
         await _popLoginIfNeeded();
       } else {
         log.warning('Login failed: No claims returned');

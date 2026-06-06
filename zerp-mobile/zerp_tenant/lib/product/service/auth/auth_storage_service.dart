@@ -164,6 +164,7 @@ final class AuthStorageService with LoggerMixin<AuthStorageService> {
     // optional claims from access token
     final firstName = accessClaims['first_name'];
     final lastName = accessClaims['last_name'];
+    final email = accessClaims['email'] ?? idClaims?['email'];
 
     return AuthClaims(
       accessTokenClaims: accessClaims,
@@ -174,6 +175,7 @@ final class AuthStorageService with LoggerMixin<AuthStorageService> {
       tenantId: tenantId,
       firstName: firstName?.toString(),
       lastName: lastName?.toString(),
+      email: email?.toString(),
     );
   }
 }

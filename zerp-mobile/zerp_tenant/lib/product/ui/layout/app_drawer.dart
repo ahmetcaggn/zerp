@@ -2,7 +2,11 @@ import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart' hide RouteSettings;
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zerp_tenant/feature/auth/view/widget/logging_out_dialog.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/auth/state_auth.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
@@ -11,6 +15,21 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authState = context.watch<CubitAuth>().state;
+    final orgState = context.watch<CubitOrganizationScope>().state;
+
+    String? username;
+    String? email;
+    if (authState is StateAuthAuthenticated) {
+      username = authState.username;
+      email = authState.email;
+    }
+
+    String? firmName;
+    if (orgState is StateOrganizationScopeTenant) {
+      firmName = orgState.tenant.name;
+    }
+
     return Drawer(
       child: Column(
         children: [
@@ -26,21 +45,86 @@ class AppDrawer extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text(
-                        context.t.app.name,
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.white.withValues(alpha: 0.2),
+                            radius: 24,
+                            child: Text(
+                              (username != null && username.isNotEmpty)
+                                  ? username[0].toUpperCase()
+                                  : 'U',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
                             ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  username ?? '',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (email != null && email.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    email,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: Colors.white70,
+                                        ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        context.t.app.menu,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white70,
+                      if (firmName != null && firmName.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.business,
+                              color: Colors.white70,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                firmName,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),

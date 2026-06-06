@@ -13,9 +13,11 @@ final class StateAuthLoading extends StateAuth {
 final class StateAuthAuthenticated extends StateAuth {
   const StateAuthAuthenticated({
     required this.username,
+    this.email,
   });
 
   final String username;
+  final String? email;
 }
 
 final class StateAuthUnauthenticated extends StateAuth {

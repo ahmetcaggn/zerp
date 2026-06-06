@@ -29,7 +29,6 @@ final class _AppMessageBarState extends State<AppMessageBar> {
   /// exactly which indices to insert / remove.
   final List<AppMessage> _messages = [];
 
-
   // ---------------------------------------------------------------------------
   // State diffing
   // ---------------------------------------------------------------------------
@@ -155,25 +154,25 @@ final class _MessageBanner extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return switch (type) {
       AppMessageType.info => _BannerStyle(
-          backgroundColor: cs.primaryContainer,
-          foregroundColor: cs.onPrimaryContainer,
-          icon: Icons.info_outline_rounded,
-        ),
+        backgroundColor: cs.primaryContainer,
+        foregroundColor: cs.onPrimaryContainer,
+        icon: Icons.info_outline_rounded,
+      ),
       AppMessageType.success => const _BannerStyle(
-          backgroundColor: Color(0xFF1E4620),
-          foregroundColor: Color(0xFFB9F6CA),
-          icon: Icons.check_circle_outline_rounded,
-        ),
+        backgroundColor: Color(0xFF1E4620),
+        foregroundColor: Color(0xFFB9F6CA),
+        icon: Icons.check_circle_outline_rounded,
+      ),
       AppMessageType.warning => const _BannerStyle(
-          backgroundColor: Color(0xFF4A3200),
-          foregroundColor: Color(0xFFFFE082),
-          icon: Icons.warning_amber_rounded,
-        ),
+        backgroundColor: Color(0xFF4A3200),
+        foregroundColor: Color(0xFFFFE082),
+        icon: Icons.warning_amber_rounded,
+      ),
       AppMessageType.error => _BannerStyle(
-          backgroundColor: cs.errorContainer,
-          foregroundColor: cs.onErrorContainer,
-          icon: Icons.error_outline_rounded,
-        ),
+        backgroundColor: cs.errorContainer,
+        foregroundColor: cs.onErrorContainer,
+        icon: Icons.error_outline_rounded,
+      ),
     };
   }
 }
