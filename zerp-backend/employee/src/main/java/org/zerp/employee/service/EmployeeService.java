@@ -195,6 +195,7 @@ public class EmployeeService implements IResourceService<EmployeeResponseDto, Em
         if (dto.getContacts() != null && !dto.getContacts().isEmpty()) {
             for (EmployeeContactDto contactDto : dto.getContacts()) {
                 EmployeeContact contact = employeeMapper.toContactEntity(contactDto);
+                contact.setTenantId(tenantId);
                 employee.addContact(contact);
             }
         }
