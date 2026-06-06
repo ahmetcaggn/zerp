@@ -2,6 +2,7 @@
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -10,6 +11,7 @@ import {
   FormControlLabel,
   Switch,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import type { Route } from 'next'
@@ -18,11 +20,13 @@ import { useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
 import { useCreateProduct, useProduct, useUpdateProduct } from '../../../hooks/use-products'
+import { shopParents, targetWithParents } from '../../../permissions/permission-targets'
 import type { ProductResponseDto } from '../../../types/sale'
 import { ProductExtraOptionManager } from './product-extra-option-manager'
 import { ProductRecipeManager } from './product-recipe-manager'
@@ -43,12 +47,16 @@ function ProductFormCard({
   title,
   initial,
   isPending,
+  disabled,
+  disabledReason,
   onCancel,
   onSubmit,
 }: {
   title: string
   initial: ProductFormValue
   isPending: boolean
+  disabled: boolean
+  disabledReason?: string
   onCancel: () => void
   onSubmit: (value: ProductFormValue) => void
 }) {
@@ -69,6 +77,7 @@ function ProductFormCard({
         <form
           onSubmit={(e) => {
             e.preventDefault()
+            if (disabled) return
             if (!name.trim()) return
             onSubmit({ name: name.trim(), description, preparationTime, isActive })
           }}
@@ -80,6 +89,7 @@ function ProductFormCard({
               onChange={(e) => setName(e.target.value)}
               required
               fullWidth
+              disabled={disabled}
             />
 
             <TextField
@@ -89,6 +99,7 @@ function ProductFormCard({
               multiline
               rows={3}
               fullWidth
+              disabled={disabled}
             />
 
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr' }, gap: 2 }}>
@@ -99,11 +110,18 @@ function ProductFormCard({
                 onChange={(e) => setPreparationTime(e.target.value)}
                 fullWidth
                 inputProps={{ min: 0 }}
+                disabled={disabled}
               />
             </Box>
 
             <FormControlLabel
-              control={<Switch checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />}
+              control={
+                <Switch
+                  checked={isActive}
+                  disabled={disabled}
+                  onChange={(e) => setIsActive(e.target.checked)}
+                />
+              }
               label={t('sale.product.form.isActive')}
             />
 
@@ -111,9 +129,13 @@ function ProductFormCard({
               <Button onClick={onCancel} disabled={isPending}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" variant="contained" disabled={isPending}>
-                {isPending ? t('common.loading') : t('common.save')}
-              </Button>
+              <Tooltip title={disabledReason ?? ''}>
+                <span>
+                  <Button type="submit" variant="contained" disabled={isPending || disabled}>
+                    {isPending ? t('common.loading') : t('common.save')}
+                  </Button>
+                </span>
+              </Tooltip>
             </Box>
           </Box>
         </form>
@@ -127,9 +149,29 @@ export function ProductEditorPage({ mode, productId }: Props) {
   const router = useRouter()
   const { showToast } = useToast()
   const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
+
+  const canCreateProduct = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.CREATE_PRODUCT, selectedShopId),
+  )
+  const canReadProduct =
+    mode === 'edit'
+      ? hasPermissionForTarget(
+          PermissionActions.READ_PRODUCT,
+          targetWithParents(
+            'PRODUCT',
+            productId,
+            currentTenantId,
+            shopParents(selectedShopId, currentTenantId),
+          ),
+        )
+      : true
 
   const { data: product, isLoading: isLoadingProduct } = useProduct(
     mode === 'edit' ? productId : undefined,
+    { enabled: canReadProduct },
   )
 
   const { mutate: createProduct, isPending: isCreating } = useCreateProduct()
@@ -154,6 +196,10 @@ export function ProductEditorPage({ mode, productId }: Props) {
       showToast(t('sale.catalog.selectShopWarning'), { severity: 'warning' })
       return
     }
+    if (!canCreateProduct) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
 
     createProduct(
       { ...mapFormToPayload(value), shopId: scope.shopId },
@@ -168,6 +214,20 @@ export function ProductEditorPage({ mode, productId }: Props) {
   }
 
   function handleUpdate(currentProduct: ProductResponseDto, value: ProductFormValue) {
+    const canUpdateProduct = hasPermissionForTarget(
+      PermissionActions.UPDATE_PRODUCT,
+      targetWithParents(
+        'PRODUCT',
+        currentProduct.id,
+        currentTenantId,
+        shopParents(currentProduct.shopId, currentTenantId),
+      ),
+    )
+    if (!canUpdateProduct) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     updateProduct(
       { id: currentProduct.id, data: mapFormToPayload(value) },
       {
@@ -178,6 +238,14 @@ export function ProductEditorPage({ mode, productId }: Props) {
   }
 
   if (mode === 'edit') {
+    if (!canReadProduct) {
+      return (
+        <Box sx={{ p: 4 }}>
+          <Alert severity="warning">{unauthorizedReason}</Alert>
+        </Box>
+      )
+    }
+
     if (isLoadingProduct) {
       return (
         <Box sx={{ py: 8, display: 'flex', justifyContent: 'center' }}>
@@ -194,9 +262,27 @@ export function ProductEditorPage({ mode, productId }: Props) {
       )
     }
 
+    const canUpdateProduct = hasPermissionForTarget(
+      PermissionActions.UPDATE_PRODUCT,
+      targetWithParents(
+        'PRODUCT',
+        product.id,
+        currentTenantId,
+        shopParents(product.shopId, currentTenantId),
+      ),
+    )
+
     return (
       <Box sx={{ p: { xs: 2, md: 4 }, width: '100%', display: 'grid', gap: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 2,
+            flexWrap: 'wrap',
+          }}
+        >
           <Button startIcon={<ArrowBackIcon />} onClick={() => goTo(ROUTES.catalog)}>
             {t('common.back')}
           </Button>
@@ -212,19 +298,41 @@ export function ProductEditorPage({ mode, productId }: Props) {
             isActive: product.isActive,
           }}
           isPending={isPending}
+          disabled={!canUpdateProduct}
+          disabledReason={unauthorizedReason}
           onCancel={() => goTo(ROUTES.catalog)}
           onSubmit={(value) => handleUpdate(product, value)}
         />
 
-        <ProductRecipeManager productId={product.id} productName={product.name} />
-        <ProductExtraOptionManager productId={product.id} productName={product.name} />
+        <ProductRecipeManager
+          productId={product.id}
+          productName={product.name}
+          productShopId={product.shopId}
+        />
+        <ProductExtraOptionManager
+          productId={product.id}
+          productName={product.name}
+          productShopId={product.shopId}
+        />
       </Box>
     )
   }
 
+  const createDisabledReason = !selectedShopId
+    ? t('sale.catalog.selectShopWarning')
+    : unauthorizedReason
+
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, width: '100%', display: 'grid', gap: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 2,
+          flexWrap: 'wrap',
+        }}
+      >
         <Button startIcon={<ArrowBackIcon />} onClick={() => goTo(ROUTES.catalog)}>
           {t('common.back')}
         </Button>
@@ -240,6 +348,8 @@ export function ProductEditorPage({ mode, productId }: Props) {
           isActive: true,
         }}
         isPending={isPending}
+        disabled={!selectedShopId || !canCreateProduct}
+        disabledReason={createDisabledReason}
         onCancel={() => goTo(ROUTES.catalog)}
         onSubmit={handleCreate}
       />

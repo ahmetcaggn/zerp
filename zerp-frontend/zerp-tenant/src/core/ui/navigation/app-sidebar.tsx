@@ -1,8 +1,7 @@
 'use client'
 
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import CampaignRoundedIcon from '@mui/icons-material/CampaignRounded'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
 import InventoryRoundedIcon from '@mui/icons-material/InventoryRounded'
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
@@ -24,7 +23,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Stack,
   Tooltip,
   Typography,
   useMediaQuery,
@@ -67,7 +65,8 @@ interface SidebarAction {
   labelKey: SidebarLabelKey
   icon: React.ReactElement
   href: string
-  requiredPermission?: PermissionAction
+  disabled?: boolean
+  disabledReason?: string
 }
 
 interface SidebarSection {
@@ -141,7 +140,6 @@ const SHOP_SIDEBAR_SECTIONS: SidebarSection[] = [
         labelKey: 'nav.saleHistory',
         icon: <ReceiptLongRoundedIcon />,
         href: '/sale-history',
-        requiredPermission: PermissionActions.READ_SALE_HISTORY,
       },
       {
         id: 'shop-qr',
@@ -160,6 +158,86 @@ const SHOP_SIDEBAR_SECTIONS: SidebarSection[] = [
   },
 ]
 
+const GLOBAL_SHOP_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.READ_SHOP,
+  PermissionActions.UPDATE_SHOP,
+]
+
+const GLOBAL_EMPLOYEE_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.READ_EMPLOYEE,
+  PermissionActions.UPDATE_EMPLOYEE,
+  PermissionActions.DELETE_EMPLOYEE,
+  PermissionActions.CREATE_EMPLOYEE,
+]
+
+const GLOBAL_TICKET_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.READ_TICKET,
+  PermissionActions.UPDATE_TICKET,
+  PermissionActions.DELETE_TICKET,
+  PermissionActions.CREATE_TICKET,
+  PermissionActions.READ_TICKET_COMMENT,
+  PermissionActions.CREATE_TICKET_COMMENT,
+  PermissionActions.READ_TICKET_ASSIGNMENT,
+  PermissionActions.CREATE_TICKET_ASSIGNMENT,
+  PermissionActions.READ_TICKET_ATTACHMENT,
+  PermissionActions.CREATE_TICKET_ATTACHMENT,
+  PermissionActions.READ_TICKET_HISTORY,
+  PermissionActions.READ_TICKET_SLA_TRACKING,
+]
+
+const SHOP_CATALOG_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.READ_PRODUCT,
+  PermissionActions.CREATE_PRODUCT,
+  PermissionActions.UPDATE_PRODUCT,
+  PermissionActions.READ_MENU,
+  PermissionActions.CREATE_MENU,
+  PermissionActions.READ_MENU_ITEM,
+  PermissionActions.CREATE_MENU_ITEM,
+  PermissionActions.UPDATE_MENU_ITEM,
+  PermissionActions.DELETE_MENU_ITEM,
+]
+
+const SHOP_TABLE_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.READ_SHOP_TABLE,
+  PermissionActions.CREATE_SHOP_TABLE,
+  PermissionActions.UPDATE_SHOP_TABLE,
+  PermissionActions.READ_TABLE_ORDER,
+]
+
+const SHOP_SALE_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.READ_SHOP_TABLE,
+  PermissionActions.READ_TABLE_ORDER,
+  PermissionActions.CREATE_TABLE_ORDER,
+  PermissionActions.UPDATE_TABLE_ORDER,
+  PermissionActions.READ_MENU,
+  PermissionActions.READ_MENU_CATEGORY,
+  PermissionActions.READ_MENU_ITEM,
+  PermissionActions.READ_PRODUCT,
+  PermissionActions.READ_PRODUCT_RECIPE,
+  PermissionActions.READ_PRODUCT_EXTRA_OPTION,
+]
+
+const SHOP_SALE_HISTORY_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.READ_SALE_HISTORY,
+  PermissionActions.READ_TABLE_ORDER,
+]
+
+const SHOP_STOCK_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.READ_STOCK_RESOURCE,
+  PermissionActions.CREATE_STOCK_RESOURCE,
+  PermissionActions.UPDATE_STOCK_RESOURCE,
+  PermissionActions.READ_STOCK_MOVEMENT,
+  PermissionActions.CREATE_STOCK_MOVEMENT,
+  PermissionActions.CREATE_STOCK_ENTRY,
+  PermissionActions.CREATE_STOCK_ADJUSTMENT,
+  PermissionActions.CREATE_STOCK_WASTE,
+  PermissionActions.CREATE_STOCK_RETURN,
+  PermissionActions.UPDATE_STOCK_MOVEMENT,
+  PermissionActions.READ_STOCK_COUNT,
+  PermissionActions.CREATE_STOCK_COUNT,
+  PermissionActions.UPDATE_STOCK_COUNT,
+]
+
 export function AppSidebar({ locale }: { locale: string }) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
@@ -168,24 +246,132 @@ export function AppSidebar({ locale }: { locale: string }) {
   const pathname = usePathname()
   const { t } = useI18n()
   const { scope } = useShopScope()
-  const { hasPermission } = useCurrentUserPermissions()
+  const {
+    hasAnyPermission,
+    hasTenantPermission,
+    hasShopPermission,
+    hasAnyShopPermission,
+    getDisabledReason,
+    isLoadingPermissions,
+  } = useCurrentUserPermissions()
   const isShopScope = scope.mode === 'SHOP'
-  const sidebarSections = isShopScope ? SHOP_SIDEBAR_SECTIONS : GLOBAL_SIDEBAR_SECTIONS
+  const currentShopId = isShopScope ? scope.shopId : undefined
+  const unauthorizedReason = t('common.unauthorized')
+  const loadingReason = t('common.loading')
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsExpanded(!isMobile)
   }, [isMobile])
 
   const handleToggle = () => setIsExpanded((prev) => !prev)
 
+  const withPermissionState = React.useCallback(
+    (action: SidebarAction, canAccess: boolean): SidebarAction => ({
+      ...action,
+      disabled: isLoadingPermissions || !canAccess,
+      disabledReason: isLoadingPermissions
+        ? loadingReason
+        : getDisabledReason(canAccess, unauthorizedReason),
+    }),
+    [getDisabledReason, isLoadingPermissions, loadingReason, unauthorizedReason],
+  )
+
+  const sidebarSections = React.useMemo<SidebarSection[]>(() => {
+    if (!isShopScope) {
+      return GLOBAL_SIDEBAR_SECTIONS.map((section) => ({
+        ...section,
+        actions: section.actions.map((action) => {
+          switch (action.id) {
+            case 'shops':
+              return withPermissionState(
+                action,
+                hasAnyPermission(GLOBAL_SHOP_ACTIONS) ||
+                  hasTenantPermission(PermissionActions.ADMIN),
+              )
+            case 'employees':
+              return withPermissionState(
+                action,
+                hasAnyPermission(GLOBAL_EMPLOYEE_ACTIONS) ||
+                  hasTenantPermission(PermissionActions.ADMIN),
+              )
+            case 'permission-groups':
+              return withPermissionState(action, hasTenantPermission(PermissionActions.ADMIN))
+            case 'tickets':
+              return withPermissionState(
+                action,
+                hasAnyPermission(GLOBAL_TICKET_ACTIONS) ||
+                  hasTenantPermission(PermissionActions.ADMIN),
+              )
+            default:
+              return action
+          }
+        }),
+      }))
+    }
+
+    return SHOP_SIDEBAR_SECTIONS.map((section) => ({
+      ...section,
+      actions: section.actions.map((action) => {
+        switch (action.id) {
+          case 'catalog':
+            return withPermissionState(
+              action,
+              hasAnyShopPermission(SHOP_CATALOG_ACTIONS, currentShopId),
+            )
+          case 'tables':
+            return withPermissionState(
+              action,
+              hasAnyShopPermission(SHOP_TABLE_ACTIONS, currentShopId),
+            )
+          case 'sale':
+            return withPermissionState(
+              action,
+              hasAnyShopPermission(SHOP_SALE_ACTIONS, currentShopId),
+            )
+          case 'sale-history':
+            return withPermissionState(
+              action,
+              hasAnyShopPermission(SHOP_SALE_HISTORY_ACTIONS, currentShopId),
+            )
+          case 'shop-qr':
+            return withPermissionState(
+              action,
+              hasShopPermission(PermissionActions.READ_SHOP, currentShopId),
+            )
+          case 'stock':
+            return withPermissionState(
+              action,
+              hasAnyShopPermission(SHOP_STOCK_ACTIONS, currentShopId),
+            )
+          default:
+            return action
+        }
+      }),
+    }))
+  }, [
+    currentShopId,
+    hasAnyPermission,
+    hasAnyShopPermission,
+    hasShopPermission,
+    hasTenantPermission,
+    isShopScope,
+    withPermissionState,
+  ])
+
   const renderAction = (action: SidebarAction, nested = false) => {
     const hrefWithLocale = `/${locale}${action.href}`
     const isSelected = pathname === hrefWithLocale || pathname.startsWith(`${hrefWithLocale}/`)
+    const isDisabled = Boolean(action.disabled)
+    const tooltipTitle = isDisabled ? action.disabledReason : t(action.labelKey)
 
     const listItemButton = (
       <ListItemButton
-        onClick={() => router.push(hrefWithLocale as Route)}
-        selected={isSelected}
+        disabled={isDisabled}
+        onClick={() => {
+          if (!isDisabled) router.push(hrefWithLocale as Route)
+        }}
+        selected={!isDisabled && isSelected}
         sx={{
           minHeight: 48,
           justifyContent: 'flex-start',
@@ -198,7 +384,7 @@ export function AppSidebar({ locale }: { locale: string }) {
             minWidth: 64,
             display: 'flex',
             justifyContent: 'center',
-            color: isSelected ? 'primary.main' : 'inherit',
+            color: !isDisabled && isSelected ? 'primary.main' : 'inherit',
           }}
         >
           {action.icon}
@@ -210,9 +396,9 @@ export function AppSidebar({ locale }: { locale: string }) {
             transition: theme.transitions.create('opacity', {
               duration: theme.transitions.duration.shorter,
             }),
-            color: isSelected ? 'primary.main' : 'inherit',
+            color: !isDisabled && isSelected ? 'primary.main' : 'inherit',
             '& .MuiTypography-root': {
-              fontWeight: isSelected ? 600 : 400,
+              fontWeight: !isDisabled && isSelected ? 600 : 400,
               whiteSpace: 'nowrap',
             },
           }}
@@ -222,11 +408,11 @@ export function AppSidebar({ locale }: { locale: string }) {
 
     return (
       <ListItem key={action.id} disablePadding sx={{ display: 'block' }}>
-        {isExpanded ? (
+        {isExpanded && !isDisabled ? (
           listItemButton
         ) : (
-          <Tooltip title={t(action.labelKey)} placement="right">
-            {listItemButton}
+          <Tooltip title={tooltipTitle} placement="right">
+            <span style={{ display: 'block' }}>{listItemButton}</span>
           </Tooltip>
         )}
       </ListItem>
@@ -338,11 +524,7 @@ export function AppSidebar({ locale }: { locale: string }) {
               {t(section.labelKey)}
             </Typography>
           )}
-          {section.actions
-            .filter(
-              (action) => !action.requiredPermission || hasPermission(action.requiredPermission),
-            )
-            .map((action) => renderAction(action, true))}
+          {section.actions.map((action) => renderAction(action, true))}
         </List>
       ))}
     </Drawer>

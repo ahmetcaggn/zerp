@@ -1,6 +1,9 @@
 'use client'
 
+/* eslint-disable react-hooks/set-state-in-effect */
+
 import {
+  Alert,
   Box,
   Button,
   Dialog,
@@ -15,9 +18,13 @@ import {
   TextField,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
+
 import { useUpdateStockCount } from '../../hooks/use-stock-counts'
+import { shopParents, targetWithParents } from '../../permissions/permission-targets'
 import type { StockCountResponseDto } from '../../types/stock'
 
 interface StockCountEntryDialogProps {
@@ -57,6 +64,7 @@ function formatDecimal(value: number, precision = 3): string {
 export function StockCountEntryDialog({ open, count, onClose }: StockCountEntryDialogProps) {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { currentTenantId, hasPermissionForTarget } = useCurrentUserPermissions()
   const updateMutation = useUpdateStockCount()
 
   const [items, setItems] = useState<FormItem[]>([])
@@ -86,7 +94,13 @@ export function StockCountEntryDialog({ open, count, onClose }: StockCountEntryD
 
   const handleSave = async () => {
     if (!count) return
-    const hasMissingActual = items.some((it) => !Number.isFinite(parseDecimalInput(it.actualQuantityInput)))
+    if (!canUpdateCount) {
+      showToast(t('common.unauthorized'), { severity: 'warning' })
+      return
+    }
+    const hasMissingActual = items.some(
+      (it) => !Number.isFinite(parseDecimalInput(it.actualQuantityInput)),
+    )
     if (hasMissingActual) {
       showToast('Please fill actual quantity for all items.', { severity: 'warning' })
       return
@@ -112,11 +126,30 @@ export function StockCountEntryDialog({ open, count, onClose }: StockCountEntryD
   }
 
   const isPending = updateMutation.isPending
+  const canUpdateCount = Boolean(
+    count &&
+    hasPermissionForTarget(
+      PermissionActions.UPDATE_STOCK_COUNT,
+      targetWithParents(
+        'STOCK_COUNT',
+        count.id,
+        currentTenantId,
+        shopParents(count.shopId, currentTenantId),
+      ),
+    ),
+  )
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
-      <DialogTitle>{t('stock.count.createButton')} - {count?.countDate}</DialogTitle>
+      <DialogTitle>
+        {t('stock.count.createButton')} - {count?.countDate}
+      </DialogTitle>
       <DialogContent dividers>
+        {!canUpdateCount && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {t('common.unauthorized')}
+          </Alert>
+        )}
         <Box sx={{ overflowX: 'auto' }}>
           <Table size="small">
             <TableHead>
@@ -155,9 +188,16 @@ export function StockCountEntryDialog({ open, count, onClose }: StockCountEntryD
                           })
                         }}
                         inputProps={{ inputMode: 'decimal' }}
+                        disabled={!canUpdateCount}
                       />
                     </TableCell>
-                    <TableCell align="right" sx={{ color: diff < 0 ? 'error.main' : diff > 0 ? 'success.main' : 'text.primary', fontWeight: 600 }}>
+                    <TableCell
+                      align="right"
+                      sx={{
+                        color: diff < 0 ? 'error.main' : diff > 0 ? 'success.main' : 'text.primary',
+                        fontWeight: 600,
+                      }}
+                    >
                       {hasActual ? formatDecimal(diff) : '-'}
                     </TableCell>
                     <TableCell>
@@ -166,6 +206,7 @@ export function StockCountEntryDialog({ open, count, onClose }: StockCountEntryD
                         value={item.notes ?? ''}
                         onChange={(e) => setItem(item.stockCountItemId, { notes: e.target.value })}
                         fullWidth
+                        disabled={!canUpdateCount}
                       />
                     </TableCell>
                   </TableRow>
@@ -176,8 +217,10 @@ export function StockCountEntryDialog({ open, count, onClose }: StockCountEntryD
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={isPending}>{t('common.cancel')}</Button>
-        <Button onClick={handleSave} variant="contained" disabled={isPending}>
+        <Button onClick={onClose} disabled={isPending}>
+          {t('common.cancel')}
+        </Button>
+        <Button onClick={handleSave} variant="contained" disabled={isPending || !canUpdateCount}>
           {isPending ? t('common.loading') : t('common.save')}
         </Button>
       </DialogActions>

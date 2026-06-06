@@ -22,6 +22,7 @@ import {
   MenuItem,
   Select,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useMemo, useState } from 'react'
@@ -31,11 +32,7 @@ import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
 import { permissionClient } from '../api/permission-client'
-import {
-  useCreateEmployee,
-  useEmployees,
-  useUpdateEmployee,
-} from '../hooks/use-employees'
+import { useCreateEmployee, useEmployees, useUpdateEmployee } from '../hooks/use-employees'
 import { useUsernameCheck } from '../hooks/use-username-check'
 import {
   ContactType,
@@ -53,13 +50,22 @@ interface Props {
   mode: 'create' | 'edit'
   employee?: EmployeeResponseDto
   onClose: () => void
+  disabled?: boolean
+  disabledReason?: string
 }
 
 const STATUS_OPTIONS = Object.values(EmploymentStatus)
 const CONTACT_TYPE_OPTIONS = Object.values(ContactType)
 const EMPTY_CONTACT: EmployeeContactDto = { type: ContactType.WorkPhone, value: '' }
 
-export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
+export function EmployeeFormDialog({
+  open,
+  mode,
+  employee,
+  onClose,
+  disabled = false,
+  disabledReason,
+}: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
 
@@ -122,6 +128,11 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
   }
 
   function handleSubmit() {
+    if (disabled) {
+      showToast(disabledReason ?? t('common.unauthorized'), { severity: 'warning' })
+      return
+    }
+
     if (!firstName || !lastName || !email || !hireDate) {
       showToast(t('employees.requiredFieldsWarning'), { severity: 'warning' })
       return
@@ -151,33 +162,36 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
         showToast(t('employees.usernameUnavailable'), { severity: 'warning' })
         return
       }
-      createEmployee({ username, tempPassword, ...sharedFields }, {
-        onSuccess: async (createdEmployee) => {
-          const createdEmployeeUserId =
-            createdEmployee?.id !== undefined ? String(createdEmployee.id) : undefined
+      createEmployee(
+        { username, tempPassword, ...sharedFields },
+        {
+          onSuccess: async (createdEmployee) => {
+            const createdEmployeeUserId =
+              createdEmployee?.id !== undefined ? String(createdEmployee.id) : undefined
 
-          if (createdEmployeeUserId && draftPermissions.length > 0) {
-            try {
-              await Promise.all(
-                draftPermissions.map((permission) =>
-                  permissionClient.create({
-                    userId: createdEmployeeUserId,
-                    action: permission.action,
-                    targetType: permission.targetType,
-                    targetId: permission.targetId,
-                  }),
-                ),
-              )
-            } catch {
-              showToast(t('employees.permissionAssignPartialError'), { severity: 'warning' })
+            if (createdEmployeeUserId && draftPermissions.length > 0) {
+              try {
+                await Promise.all(
+                  draftPermissions.map((permission) =>
+                    permissionClient.create({
+                      userId: createdEmployeeUserId,
+                      action: permission.action,
+                      targetType: permission.targetType,
+                      targetId: permission.targetId,
+                    }),
+                  ),
+                )
+              } catch {
+                showToast(t('employees.permissionAssignPartialError'), { severity: 'warning' })
+              }
             }
-          }
 
-          showToast(t('employees.employeeCreatedToast'), { severity: 'success' })
-          onClose()
+            showToast(t('employees.employeeCreatedToast'), { severity: 'success' })
+            onClose()
+          },
+          onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
         },
-        onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-      })
+      )
     } else if (employee?.id !== undefined) {
       updateEmployee(
         { id: String(employee.id), data: sharedFields },
@@ -201,9 +215,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
   }
 
   function updateContact(index: number, field: keyof EmployeeContactDto, value: string) {
-    setContacts((prev) =>
-      prev.map((c, i) => (i === index ? { ...c, [field]: value } : c)),
-    )
+    setContacts((prev) => prev.map((c, i) => (i === index ? { ...c, [field]: value } : c)))
   }
 
   function addDraftPermission(permission: PermissionAssignmentInput) {
@@ -243,6 +255,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
               onChange={(e) => setUsername(e.target.value)}
               size="small"
               fullWidth
+              disabled={disabled}
               error={usernameStatus === 'unavailable' || usernameStatus === 'error'}
               helperText={
                 usernameStatus === 'idle'
@@ -293,6 +306,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
               onChange={(e) => setTempPassword(e.target.value)}
               size="small"
               fullWidth
+              disabled={disabled}
             />
           )}
 
@@ -303,6 +317,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
               onChange={(e) => setFirstName(e.target.value)}
               fullWidth
               size="small"
+              disabled={disabled}
             />
             <TextField
               label={t('employees.lastNameField')}
@@ -310,6 +325,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
               onChange={(e) => setLastName(e.target.value)}
               fullWidth
               size="small"
+              disabled={disabled}
             />
           </Box>
 
@@ -319,6 +335,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             size="small"
+            disabled={disabled}
           />
 
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -329,6 +346,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
               onChange={(e) => setHireDate(e.target.value)}
               size="small"
               fullWidth
+              disabled={disabled}
               slotProps={{ inputLabel: { shrink: true } }}
             />
             <TextField
@@ -338,6 +356,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
               onChange={(e) => setDateOfBirth(e.target.value)}
               size="small"
               fullWidth
+              disabled={disabled}
               slotProps={{ inputLabel: { shrink: true } }}
             />
           </Box>
@@ -349,6 +368,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
               onChange={(e) => setPhoneNumber(e.target.value)}
               size="small"
               fullWidth
+              disabled={disabled}
             />
             <TextField
               label={t('employees.nationalIdField')}
@@ -356,11 +376,12 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
               onChange={(e) => setNationalId(e.target.value)}
               size="small"
               fullWidth
+              disabled={disabled}
             />
           </Box>
 
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <FormControl size="small" fullWidth>
+            <FormControl size="small" fullWidth disabled={disabled}>
               <InputLabel>{t('employees.statusField')}</InputLabel>
               <Select
                 value={status}
@@ -382,10 +403,11 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
               onChange={(e) => setSalary(e.target.value)}
               size="small"
               fullWidth
+              disabled={disabled}
             />
           </Box>
 
-          <FormControl size="small" fullWidth>
+          <FormControl size="small" fullWidth disabled={disabled}>
             <InputLabel>{t('employees.managerField')}</InputLabel>
             <Select
               value={managerId}
@@ -404,7 +426,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
           {mode === 'create' && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <PermissionAssignmentBuilder
-                disabled={isPending}
+                disabled={isPending || disabled}
                 existingKeys={existingDraftPermissionKeys}
                 onAdd={addDraftPermission}
               />
@@ -418,6 +440,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
                         <IconButton
                           size="small"
                           color="error"
+                          disabled={disabled}
                           onClick={() => removeDraftPermission(index)}
                         >
                           <DeleteIcon fontSize="small" />
@@ -444,10 +467,8 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
                 mb: 1,
               }}
             >
-              <Typography variant="subtitle2">
-                {t('employees.contactInfoSection')}
-              </Typography>
-              <Button size="small" startIcon={<AddIcon />} onClick={addContact}>
+              <Typography variant="subtitle2">{t('employees.contactInfoSection')}</Typography>
+              <Button size="small" startIcon={<AddIcon />} onClick={addContact} disabled={disabled}>
                 {t('employees.addContactButton')}
               </Button>
             </Box>
@@ -460,6 +481,7 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
                     value={c.type}
                     label={t('employees.contactTypeLabel')}
                     onChange={(e) => updateContact(i, 'type', e.target.value)}
+                    disabled={disabled}
                   >
                     {CONTACT_TYPE_OPTIONS.map((ct) => (
                       <MenuItem key={ct} value={ct}>
@@ -474,8 +496,14 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
                   onChange={(e) => updateContact(i, 'value', e.target.value)}
                   size="small"
                   fullWidth
+                  disabled={disabled}
                 />
-                <IconButton size="small" color="error" onClick={() => removeContact(i)}>
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => removeContact(i)}
+                  disabled={disabled}
+                >
                   <RemoveCircleOutlineIcon fontSize="small" />
                 </IconButton>
               </Box>
@@ -488,22 +516,25 @@ export function EmployeeFormDialog({ open, mode, employee, onClose }: Props) {
         <Button onClick={onClose} disabled={isPending}>
           {t('common.cancel')}
         </Button>
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          disabled={
-            isPending ||
-            (mode === 'create' && usernameStatus !== 'available')
-          }
-        >
-          {isPending ? (
-            <CircularProgress size={20} />
-          ) : mode === 'create' ? (
-            t('common.create')
-          ) : (
-            t('common.save')
-          )}
-        </Button>
+        <Tooltip title={disabledReason ?? ''}>
+          <span>
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              disabled={
+                disabled || isPending || (mode === 'create' && usernameStatus !== 'available')
+              }
+            >
+              {isPending ? (
+                <CircularProgress size={20} />
+              ) : mode === 'create' ? (
+                t('common.create')
+              ) : (
+                t('common.save')
+              )}
+            </Button>
+          </span>
+        </Tooltip>
       </DialogActions>
     </Dialog>
   )

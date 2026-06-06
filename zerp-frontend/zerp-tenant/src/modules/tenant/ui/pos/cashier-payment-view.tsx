@@ -14,6 +14,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Alert,
   Box,
   Button,
   Card,
@@ -31,6 +32,7 @@ import {
 import { useMemo, useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
@@ -41,6 +43,11 @@ import {
   useTableOrders,
   useUpdateTableOrder,
 } from '../../hooks/use-table-orders'
+import {
+  shopParents,
+  shopTableParents,
+  targetWithParents,
+} from '../../permissions/permission-targets'
 import type {
   ShopTableResponseDto,
   ShopTableStatus,
@@ -151,6 +158,7 @@ function SelectionStage({
   onSelectAll,
   onClearAll,
   onProceed,
+  canProceed,
 }: {
   orders: TableOrderResponseDto[]
   selectedQtys: SelectedQtys
@@ -158,6 +166,7 @@ function SelectionStage({
   onSelectAll: () => void
   onClearAll: () => void
   onProceed: () => void
+  canProceed: boolean
 }) {
   const { t } = useI18n()
 
@@ -368,7 +377,7 @@ function SelectionStage({
           size="large"
           endIcon={<ShoppingCartCheckoutIcon />}
           onClick={onProceed}
-          disabled={totalSelectedQty === 0}
+          disabled={totalSelectedQty === 0 || !canProceed}
           sx={{ fontWeight: 700, py: 1.25, borderRadius: 2 }}
         >
           Ödemeye Geç
@@ -383,11 +392,13 @@ function SelectionStage({
 function PaymentStage({
   orders,
   selectedQtys,
+  canUpdateOrder,
   onBack,
   onSuccess,
 }: {
   orders: TableOrderResponseDto[]
   selectedQtys: SelectedQtys
+  canUpdateOrder: (order: TableOrderResponseDto) => boolean
   onBack: () => void
   onSuccess: () => void
 }) {
@@ -452,6 +463,7 @@ function PaymentStage({
       : 0
   const hasOpenAmountSplit = paidSoFar > 0.001 && remaining > 0.001
   const effectiveSplitMode = splitMode || hasOpenAmountSplit
+  const canPay = paymentPlan.every(({ order }) => canUpdateOrder(order))
 
   function selectedPaymentItems(selectedItems: { item: TableOrderItemDto; selectedQty: number }[]) {
     return selectedItems.map(({ item, selectedQty }) => ({
@@ -586,10 +598,12 @@ function PaymentStage({
   }
 
   function executePayment() {
+    if (!canPay) return
     executeClosingPayment(buildFullPaymentsByOrder())
   }
 
   function handlePaySplitAmount() {
+    if (!canPay) return
     if (payableSplitAmount <= 0.001 || remaining <= 0.001) return
 
     const isFinalSplitPayment = payableSplitAmount >= remaining - 0.001
@@ -819,7 +833,7 @@ function PaymentStage({
                 variant="contained"
                 color="success"
                 onClick={handlePaySplitAmount}
-                disabled={payableSplitAmount <= 0.001 || isPending}
+                disabled={payableSplitAmount <= 0.001 || isPending || !canPay}
                 sx={{ fontWeight: 700, minWidth: 120 }}
               >
                 {payableSplitAmount > 0.001
@@ -844,7 +858,7 @@ function PaymentStage({
             size="large"
             startIcon={isPending ? undefined : <PaymentIcon />}
             onClick={() => executePayment()}
-            disabled={isPending}
+            disabled={isPending || !canPay}
             sx={{ fontWeight: 700, py: 1.5, borderRadius: 2, fontSize: '1rem' }}
           >
             {isPending ? (
@@ -863,9 +877,19 @@ function PaymentStage({
 
 function TableOrderDetails({ table }: { table: ShopTableResponseDto }) {
   const { t } = useI18n()
+  const { currentTenantId, hasPermissionForTarget } = useCurrentUserPermissions()
 
   const [stage, setStage] = useState<Stage>('SELECT')
   const [selectedQtys, setSelectedQtys] = useState<SelectedQtys>(new Map())
+  const canReadOrders = hasPermissionForTarget(
+    PermissionActions.READ_TABLE_ORDER,
+    targetWithParents(
+      'SHOP_TABLE',
+      table.id,
+      currentTenantId,
+      shopParents(table.shopId, currentTenantId),
+    ),
+  )
 
   const { data: ordersData, isLoading } = useTableOrders(
     {
@@ -877,7 +901,11 @@ function TableOrderDetails({ table }: { table: ShopTableResponseDto }) {
       },
       pagination: { page: 1, perPage: 20 },
     },
-    { refetchInterval: POLL_INTERVAL, refetchOnWindowFocus: true },
+    {
+      enabled: canReadOrders,
+      refetchInterval: POLL_INTERVAL,
+      refetchOnWindowFocus: true,
+    },
   )
 
   const orders: TableOrderResponseDto[] = ordersData?.data ?? []
@@ -912,6 +940,26 @@ function TableOrderDetails({ table }: { table: ShopTableResponseDto }) {
   function handlePaymentSuccess() {
     setStage('SELECT')
     setSelectedQtys(new Map())
+  }
+
+  function canUpdateOrder(order: TableOrderResponseDto): boolean {
+    return hasPermissionForTarget(
+      PermissionActions.UPDATE_TABLE_ORDER,
+      targetWithParents(
+        'TABLE_ORDER',
+        order.id,
+        currentTenantId,
+        shopTableParents(order.shopTableId, order.shopId, currentTenantId),
+      ),
+    )
+  }
+
+  const canProceedToPayment = orders
+    .filter((order) => order.items.some((item) => (selectedQtys.get(item.id) ?? 0) > 0))
+    .every(canUpdateOrder)
+
+  if (!canReadOrders) {
+    return <Alert severity="warning">{t('common.unauthorized')}</Alert>
   }
 
   if (isLoading) {
@@ -949,6 +997,7 @@ function TableOrderDetails({ table }: { table: ShopTableResponseDto }) {
       <PaymentStage
         orders={orders}
         selectedQtys={selectedQtys}
+        canUpdateOrder={canUpdateOrder}
         onBack={handleBack}
         onSuccess={handlePaymentSuccess}
       />
@@ -963,6 +1012,7 @@ function TableOrderDetails({ table }: { table: ShopTableResponseDto }) {
       onSelectAll={handleSelectAll}
       onClearAll={handleClearAll}
       onProceed={handleProceed}
+      canProceed={canProceedToPayment}
     />
   )
 }
@@ -973,7 +1023,11 @@ export function CashierPaymentView() {
   const { t } = useI18n()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
   const [selectedTable, setSelectedTable] = useState<ShopTableResponseDto | null>(null)
+  const canReadTables = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_SHOP_TABLE, selectedShopId),
+  )
 
   const { data: tablesData, isLoading } = useShopTables(
     {
@@ -981,7 +1035,11 @@ export function CashierPaymentView() {
       sort: { field: 'name', order: 'ASC' },
       ...(selectedShopId ? { filter: { shopId: selectedShopId, 'shop.id': selectedShopId } } : {}),
     },
-    { refetchInterval: POLL_INTERVAL, refetchOnWindowFocus: true },
+    {
+      enabled: canReadTables,
+      refetchInterval: POLL_INTERVAL,
+      refetchOnWindowFocus: true,
+    },
   )
 
   const STATUS_CONFIG = useStatusConfig(t)
@@ -992,6 +1050,18 @@ export function CashierPaymentView() {
 
   function isSelectable(status: ShopTableStatus) {
     return status === 'OCCUPIED' || status === 'RESERVED'
+  }
+
+  function canReadTableOrders(table: ShopTableResponseDto): boolean {
+    return hasPermissionForTarget(
+      PermissionActions.READ_TABLE_ORDER,
+      targetWithParents(
+        'SHOP_TABLE',
+        table.id,
+        currentTenantId,
+        shopParents(table.shopId, currentTenantId),
+      ),
+    )
   }
 
   return (
@@ -1041,6 +1111,8 @@ export function CashierPaymentView() {
             <Box sx={{ display: 'flex', justifyContent: 'center', pt: 4 }}>
               <CircularProgress size={32} />
             </Box>
+          ) : !canReadTables ? (
+            <Alert severity="warning">{t('common.unauthorized')}</Alert>
           ) : tables.length === 0 ? (
             <Box
               sx={{
@@ -1060,7 +1132,7 @@ export function CashierPaymentView() {
           ) : (
             tables.map((table) => {
               const cfg = STATUS_CONFIG[table.status]
-              const selectable = isSelectable(table.status)
+              const selectable = isSelectable(table.status) && canReadTableOrders(table)
               const isSelected = selectedTable?.id === table.id
               return (
                 <Card

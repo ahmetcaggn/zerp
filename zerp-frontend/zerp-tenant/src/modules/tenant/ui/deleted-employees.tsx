@@ -1,6 +1,7 @@
 'use client'
 import RestoreIcon from '@mui/icons-material/Restore'
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -17,27 +18,41 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
 import { useDeletedEmployees, usePatchEmployee } from '../hooks/use-employees'
 
-export function DeletedEmployees() {
+interface Props {
+  canRead: boolean
+}
+
+export function DeletedEmployees({ canRead }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { currentTenantId, hasPermissionForTarget, getDisabledReason, isLoadingPermissions } =
+    useCurrentUserPermissions()
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
+  const unauthorizedReason = t('common.unauthorized')
+  const loadingReason = t('common.loading')
+
 
   const [restoreConfirmId, setRestoreConfirmId] = useState<string | null>(null)
 
-  const { data, isLoading, error } = useDeletedEmployees({
-    pagination: { page: page + 1, perPage: rowsPerPage },
-  })
+  const { data, isLoading, error } = useDeletedEmployees(
+    {
+      pagination: { page: page + 1, perPage: rowsPerPage },
+    },
+    canRead,
+  )
   const { mutate: patchEmployee } = usePatchEmployee()
 
   if (error) showToast(getUserFriendlyError(error), { severity: 'error' })
@@ -46,14 +61,42 @@ export function DeletedEmployees() {
   const total = data?.total ?? 0
 
   function handleRestore(id: string) {
+    const canRestore = hasPermissionForTarget(PermissionActions.UPDATE_EMPLOYEE, {
+      targetType: 'EMPLOYEE',
+      targetId: id,
+      tenantId: currentTenantId,
+      parentTargets: currentTenantId
+        ? [{ targetType: 'TENANT', targetId: currentTenantId }]
+        : undefined,
+    })
+
+    if (!canRestore) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     patchEmployee(
       { id, fields: { isDeleted: false } },
       {
-        onSuccess: () =>
-          showToast(t('employees.employeeRestoredToast'), { severity: 'success' }),
+        onSuccess: () => showToast(t('employees.employeeRestoredToast'), { severity: 'success' }),
         onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
       },
     )
+  }
+
+  function canRestoreEmployee(id?: number): boolean {
+    return hasPermissionForTarget(PermissionActions.UPDATE_EMPLOYEE, {
+      targetType: 'EMPLOYEE',
+      targetId: id !== undefined ? String(id) : undefined,
+      tenantId: currentTenantId,
+      parentTargets: currentTenantId
+        ? [{ targetType: 'TENANT', targetId: currentTenantId }]
+        : undefined,
+    })
+  }
+
+  if (!canRead && !isLoadingPermissions) {
+    return <Alert severity="warning">{unauthorizedReason}</Alert>
   }
 
   if (isLoading) {
@@ -86,23 +129,35 @@ export function DeletedEmployees() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((emp) => (
-              <TableRow key={emp.id}>
-                <TableCell>{`${emp.firstName ?? ''} ${emp.lastName ?? ''}`}</TableCell>
-                <TableCell>{emp.email}</TableCell>
-                <TableCell>{emp.phoneNumber ?? '—'}</TableCell>
-                <TableCell align="right">
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<RestoreIcon />}
-                    onClick={() => emp.id !== undefined && setRestoreConfirmId(String(emp.id))}
-                  >
-                    {t('employees.restoreButton')}
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {rows.map((emp) => {
+              const canRestore = canRestoreEmployee(emp.id)
+              const restoreDisabledReason = isLoadingPermissions
+                ? loadingReason
+                : getDisabledReason(canRestore, unauthorizedReason)
+
+              return (
+                <TableRow key={emp.id}>
+                  <TableCell>{`${emp.firstName ?? ''} ${emp.lastName ?? ''}`}</TableCell>
+                  <TableCell>{emp.email}</TableCell>
+                  <TableCell>{emp.phoneNumber ?? '—'}</TableCell>
+                  <TableCell align="right">
+                    <Tooltip title={restoreDisabledReason ?? ''}>
+                      <span>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          startIcon={<RestoreIcon />}
+                          disabled={!canRestore}
+                          onClick={() => emp.id !== undefined && setRestoreConfirmId(String(emp.id))}
+                        >
+                          {t('employees.restoreButton')}
+                        </Button>
+                      </span>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </TableContainer>
@@ -127,7 +182,9 @@ export function DeletedEmployees() {
           >
             <Box sx={{ p: 2 }}>
               <Stack spacing={1.5}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box
+                  sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
                   <Typography
                     variant="subtitle1"
                     fontWeight={700}
@@ -174,6 +231,7 @@ export function DeletedEmployees() {
           </Card>
         ))}
       </Box>
+
       <TablePagination
         component="div"
         count={total}
@@ -187,10 +245,7 @@ export function DeletedEmployees() {
         rowsPerPageOptions={[10, 25]}
       />
 
-      <Dialog
-        open={Boolean(restoreConfirmId)}
-        onClose={() => setRestoreConfirmId(null)}
-      >
+      <Dialog open={Boolean(restoreConfirmId)} onClose={() => setRestoreConfirmId(null)}>
         <DialogTitle>{t('employees.restoreConfirmTitle')}</DialogTitle>
         <DialogContent>
           <Typography variant="body2">{t('employees.restoreConfirmText')}</Typography>

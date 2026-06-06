@@ -7,6 +7,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -21,6 +22,7 @@ import {
   Paper,
   Select,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import type { Route } from 'next'
@@ -29,17 +31,13 @@ import { useMemo, useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
 import { permissionClient } from '../api/permission-client'
-import {
-  useCreateEmployee,
-  useEmployees,
-} from '../hooks/use-employees'
-import {
-  useAssignPermissionGroup,
-} from '../hooks/use-permission-groups'
+import { useCreateEmployee, useEmployees } from '../hooks/use-employees'
+import { useAssignPermissionGroup } from '../hooks/use-permission-groups'
 import { useShops } from '../hooks/use-shops'
 import { useUsernameCheck } from '../hooks/use-username-check'
 import {
@@ -64,10 +62,26 @@ export function EmployeeCreatePage() {
   const { t, locale } = useI18n()
   const { showToast } = useToast()
   const router = useRouter()
+  const { hasPermission, hasTenantPermission, getDisabledReason, isLoadingPermissions } =
+    useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
+  const loadingReason = t('common.loading')
+  const canCreateEmployee = hasTenantPermission(PermissionActions.CREATE_EMPLOYEE)
+  const canManagePermissions = hasTenantPermission(PermissionActions.ADMIN)
+  const canReadEmployees =
+    hasPermission(PermissionActions.READ_EMPLOYEE) ||
+    hasTenantPermission(PermissionActions.READ_EMPLOYEE)
+  const formDisabled = isLoadingPermissions || !canCreateEmployee
+  const createDisabledReason = isLoadingPermissions
+    ? loadingReason
+    : getDisabledReason(canCreateEmployee, unauthorizedReason)
+  const managePermissionsDisabledReason = isLoadingPermissions
+    ? loadingReason
+    : getDisabledReason(canManagePermissions, unauthorizedReason)
 
   const [username, setUsername] = useState('')
   const [tempPassword, setTempPassword] = useState('')
-  const usernameStatus = useUsernameCheck(username)
+  const usernameStatus = useUsernameCheck(canCreateEmployee ? username : '')
 
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -100,13 +114,19 @@ export function EmployeeCreatePage() {
     return keys
   }, [draftPermissions])
 
-  const { data: managersResult } = useEmployees({ pagination: { page: 1, perPage: 50 } })
+  const { data: managersResult } = useEmployees(
+    { pagination: { page: 1, perPage: 50 } },
+    { enabled: canReadEmployees },
+  )
   const managerOptions = managersResult?.data ?? []
 
-  const { data: shopsResult } = useShops({
-    pagination: { page: 1, perPage: 100 },
-    sort: { field: 'name', order: 'ASC' },
-  })
+  const { data: shopsResult } = useShops(
+    {
+      pagination: { page: 1, perPage: 100 },
+      sort: { field: 'name', order: 'ASC' },
+    },
+    canManagePermissions,
+  )
 
   const shopOptions = useMemo(
     () =>
@@ -131,7 +151,9 @@ export function EmployeeCreatePage() {
   }
 
   function updateContact(index: number, field: keyof EmployeeContactDto, value: string) {
-    setContacts((prev) => prev.map((contact, i) => (i === index ? { ...contact, [field]: value } : contact)))
+    setContacts((prev) =>
+      prev.map((contact, i) => (i === index ? { ...contact, [field]: value } : contact)),
+    )
   }
 
   function addDraftPermission(permission: PermissionAssignmentInput) {
@@ -151,6 +173,11 @@ export function EmployeeCreatePage() {
   }
 
   async function handleSubmit() {
+    if (!canCreateEmployee) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     if (!firstName || !lastName || !email || !hireDate) {
       showToast(t('employees.requiredFieldsWarning'), { severity: 'warning' })
       return
@@ -166,7 +193,7 @@ export function EmployeeCreatePage() {
       return
     }
 
-    if (selectedGroup?.scopeType === 'SHOP' && !selectedGroupShopId) {
+    if (canManagePermissions && selectedGroup?.scopeType === 'SHOP' && !selectedGroupShopId) {
       showToast(t('permissionGroups.scopeTargetRequired'), { severity: 'warning' })
       return
     }
@@ -194,7 +221,7 @@ export function EmployeeCreatePage() {
       const createdEmployeeUserId =
         createdEmployee?.id !== undefined ? String(createdEmployee.id) : undefined
 
-      if (createdEmployeeUserId && draftPermissions.length > 0) {
+      if (createdEmployeeUserId && canManagePermissions && draftPermissions.length > 0) {
         try {
           await Promise.all(
             draftPermissions.map((permission) =>
@@ -211,7 +238,7 @@ export function EmployeeCreatePage() {
         }
       }
 
-      if (createdEmployeeUserId && selectedGroup) {
+      if (createdEmployeeUserId && canManagePermissions && selectedGroup) {
         try {
           const assignResponse = await assignGroupAsync({
             userId: createdEmployeeUserId,
@@ -256,6 +283,9 @@ export function EmployeeCreatePage() {
       <Paper variant="outlined" sx={{ p: { xs: 2, md: 3 } }}>
         <Box sx={{ display: 'grid', gap: 2 }}>
           <Typography variant="h5">{t('employees.createButton')}</Typography>
+          {!canCreateEmployee && !isLoadingPermissions ? (
+            <Alert severity="warning">{unauthorizedReason}</Alert>
+          ) : null}
 
           <TextField
             label={t('employees.usernameField')}
@@ -263,6 +293,7 @@ export function EmployeeCreatePage() {
             onChange={(event) => setUsername(event.target.value)}
             size="small"
             fullWidth
+            disabled={formDisabled}
             error={usernameStatus === 'unavailable' || usernameStatus === 'error'}
             helperText={
               usernameStatus === 'idle'
@@ -311,6 +342,7 @@ export function EmployeeCreatePage() {
             onChange={(event) => setTempPassword(event.target.value)}
             size="small"
             fullWidth
+            disabled={formDisabled}
           />
 
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -320,6 +352,7 @@ export function EmployeeCreatePage() {
               onChange={(event) => setFirstName(event.target.value)}
               fullWidth
               size="small"
+              disabled={formDisabled}
             />
             <TextField
               label={t('employees.lastNameField')}
@@ -327,6 +360,7 @@ export function EmployeeCreatePage() {
               onChange={(event) => setLastName(event.target.value)}
               fullWidth
               size="small"
+              disabled={formDisabled}
             />
           </Box>
 
@@ -336,6 +370,7 @@ export function EmployeeCreatePage() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             size="small"
+            disabled={formDisabled}
           />
 
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -346,6 +381,7 @@ export function EmployeeCreatePage() {
               onChange={(event) => setHireDate(event.target.value)}
               size="small"
               fullWidth
+              disabled={formDisabled}
               slotProps={{ inputLabel: { shrink: true } }}
             />
             <TextField
@@ -355,6 +391,7 @@ export function EmployeeCreatePage() {
               onChange={(event) => setDateOfBirth(event.target.value)}
               size="small"
               fullWidth
+              disabled={formDisabled}
               slotProps={{ inputLabel: { shrink: true } }}
             />
           </Box>
@@ -366,6 +403,7 @@ export function EmployeeCreatePage() {
               onChange={(event) => setPhoneNumber(event.target.value)}
               size="small"
               fullWidth
+              disabled={formDisabled}
             />
             <TextField
               label={t('employees.nationalIdField')}
@@ -373,11 +411,12 @@ export function EmployeeCreatePage() {
               onChange={(event) => setNationalId(event.target.value)}
               size="small"
               fullWidth
+              disabled={formDisabled}
             />
           </Box>
 
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <FormControl size="small" fullWidth>
+            <FormControl size="small" fullWidth disabled={formDisabled}>
               <InputLabel>{t('employees.statusField')}</InputLabel>
               <Select
                 value={status}
@@ -399,10 +438,11 @@ export function EmployeeCreatePage() {
               onChange={(event) => setSalary(event.target.value)}
               size="small"
               fullWidth
+              disabled={formDisabled}
             />
           </Box>
 
-          <FormControl size="small" fullWidth>
+          <FormControl size="small" fullWidth disabled={formDisabled}>
             <InputLabel>{t('employees.managerField')}</InputLabel>
             <Select
               value={managerId}
@@ -418,23 +458,27 @@ export function EmployeeCreatePage() {
             </Select>
           </FormControl>
 
-          <PermissionGroupSelector
-            disabled={isPending}
-            value={selectedGroup}
-            onChange={(next) => {
-              setSelectedGroup(next)
-              if (next?.scopeType !== 'SHOP') {
-                setSelectedGroupShopId('')
-              }
-            }}
-            selectedShopId={selectedGroupShopId}
-            onSelectedShopIdChange={setSelectedGroupShopId}
-            shopOptions={shopOptions}
-          />
+          <Tooltip title={managePermissionsDisabledReason ?? ''}>
+            <span>
+              <PermissionGroupSelector
+                disabled={isPending || !canManagePermissions}
+                value={selectedGroup}
+                onChange={(next) => {
+                  setSelectedGroup(next)
+                  if (next?.scopeType !== 'SHOP') {
+                    setSelectedGroupShopId('')
+                  }
+                }}
+                selectedShopId={selectedGroupShopId}
+                onSelectedShopIdChange={setSelectedGroupShopId}
+                shopOptions={shopOptions}
+              />
+            </span>
+          </Tooltip>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <PermissionAssignmentBuilder
-              disabled={isPending}
+              disabled={isPending || !canManagePermissions}
               existingKeys={existingDraftPermissionKeys}
               onAdd={addDraftPermission}
             />
@@ -448,6 +492,7 @@ export function EmployeeCreatePage() {
                       <IconButton
                         size="small"
                         color="error"
+                        disabled={!canManagePermissions}
                         onClick={() => removeDraftPermission(index)}
                       >
                         <DeleteIcon fontSize="small" />
@@ -465,9 +510,16 @@ export function EmployeeCreatePage() {
           </Box>
 
           <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Box
+              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}
+            >
               <Typography variant="subtitle2">{t('employees.contactInfoSection')}</Typography>
-              <Button size="small" startIcon={<AddIcon />} onClick={addContact}>
+              <Button
+                size="small"
+                startIcon={<AddIcon />}
+                onClick={addContact}
+                disabled={formDisabled}
+              >
                 {t('employees.addContactButton')}
               </Button>
             </Box>
@@ -480,6 +532,7 @@ export function EmployeeCreatePage() {
                     value={contact.type}
                     label={t('employees.contactTypeLabel')}
                     onChange={(event) => updateContact(index, 'type', event.target.value)}
+                    disabled={formDisabled}
                   >
                     {CONTACT_TYPE_OPTIONS.map((type) => (
                       <MenuItem key={type} value={type}>
@@ -494,8 +547,14 @@ export function EmployeeCreatePage() {
                   onChange={(event) => updateContact(index, 'value', event.target.value)}
                   size="small"
                   fullWidth
+                  disabled={formDisabled}
                 />
-                <IconButton size="small" color="error" onClick={() => removeContact(index)}>
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => removeContact(index)}
+                  disabled={formDisabled}
+                >
                   <RemoveCircleOutlineIcon fontSize="small" />
                 </IconButton>
               </Box>
@@ -503,15 +562,19 @@ export function EmployeeCreatePage() {
           </Box>
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button
-              variant="contained"
-              onClick={() => {
-                void handleSubmit()
-              }}
-              disabled={isPending || usernameStatus !== 'available'}
-            >
-              {isPending ? <CircularProgress size={20} /> : t('common.create')}
-            </Button>
+            <Tooltip title={createDisabledReason ?? ''}>
+              <span>
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    void handleSubmit()
+                  }}
+                  disabled={isPending || usernameStatus !== 'available' || !canCreateEmployee}
+                >
+                  {isPending ? <CircularProgress size={20} /> : t('common.create')}
+                </Button>
+              </span>
+            </Tooltip>
           </Box>
         </Box>
       </Paper>

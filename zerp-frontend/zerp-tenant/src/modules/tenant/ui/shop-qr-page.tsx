@@ -25,6 +25,7 @@ import React, { useMemo } from 'react'
 import QRCode from 'react-qr-code'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 
@@ -32,12 +33,14 @@ export function ShopQrPage() {
   const { t, locale } = useI18n()
   const { showToast } = useToast()
   const { scope, shops } = useShopScope()
+  const { hasShopPermission } = useCurrentUserPermissions()
 
   const isShopScope = scope.mode === 'SHOP'
   const shopId = scope.mode === 'SHOP' ? scope.shopId : undefined
   const shopName = scope.mode === 'SHOP' ? scope.shopName : ''
 
   const selectedShop = useMemo(() => shops.find((shop) => shop.id === shopId), [shopId, shops])
+  const canReadShop = Boolean(shopId && hasShopPermission(PermissionActions.READ_SHOP, shopId))
 
   const targetUrl = useMemo(() => {
     if (!shopId) return ''
@@ -178,6 +181,24 @@ export function ShopQrPage() {
         </Box>
         <Alert severity="warning" variant="outlined" sx={{ borderRadius: 3 }}>
           {t('sale.catalog.selectShopWarning')}
+        </Alert>
+      </Box>
+    )
+  }
+
+  if (!canReadShop) {
+    return (
+      <Box sx={{ p: { xs: 2, md: 4 }, width: '100%', display: 'grid', gap: 3 }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.75 }}>
+            {t('shopQr.title')}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {t('shopQr.subtitle')}
+          </Typography>
+        </Box>
+        <Alert severity="warning" variant="outlined" sx={{ borderRadius: 3 }}>
+          {t('common.unauthorized')}
         </Alert>
       </Box>
     )

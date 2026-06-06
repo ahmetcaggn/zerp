@@ -344,7 +344,8 @@ export const trMessages = {
     requiredName: 'Mağaza adı zorunludur.',
     latitudeValidation: 'Enlem değeri -90 ile 90 arasında olmalıdır.',
     longitudeValidation: 'Boylam değeri -180 ile 180 arasında olmalıdır.',
-    workingHoursValidation: '24 saat açık olmayan günlerde açılış saati kapanış saatinden önce olmalıdır.',
+    workingHoursValidation:
+      '24 saat açık olmayan günlerde açılış saati kapanış saatinden önce olmalıdır.',
     updatedToast: 'Mağaza bilgileri güncellendi.',
     imageUploadedToast: 'Mağaza görseli güncellendi.',
     imageUploadError: 'Görsel yükleme işlemi başarısız.',
@@ -609,12 +610,6 @@ export const trMessages = {
   },
   stock: {
     title: 'Stok Yönetimi',
-    kpi: {
-      totalVariance: 'Toplam Sapma',
-      negativeVarianceSku: 'Negatif Sapmalı SKU',
-      topRisky5: 'En Riskli 5 Ürün',
-      lastCountVariance: 'Son Sayım Sapması',
-    },
     tabs: {
       resources: 'Stoklar',
       movements: 'Hareketler',

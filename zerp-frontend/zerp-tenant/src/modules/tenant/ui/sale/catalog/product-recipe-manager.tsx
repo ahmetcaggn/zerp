@@ -4,6 +4,7 @@ import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -25,6 +26,7 @@ import {
 import { useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
@@ -36,7 +38,16 @@ import {
   useUpdateProductRecipe,
 } from '../../../hooks/use-product-recipes'
 import { useStockResources } from '../../../hooks/use-stock-resources'
-import type { ProductRecipeItemCreateDto, ProductRecipeResponseDto, UnitType } from '../../../types/sale'
+import {
+  productParents,
+  shopParents,
+  targetWithParents,
+} from '../../../permissions/permission-targets'
+import type {
+  ProductRecipeItemCreateDto,
+  ProductRecipeResponseDto,
+  UnitType,
+} from '../../../types/sale'
 
 const UNIT_TYPES: UnitType[] = ['PIECE', 'GRAM', 'KILOGRAM', 'MILLILITER', 'LITER']
 
@@ -64,23 +75,55 @@ const EMPTY_FORM = (): RecipeFormState => ({
 interface Props {
   productId: string
   productName: string
+  productShopId: string
 }
 
-export function ProductRecipeManager({ productId, productName }: Props) {
+export function ProductRecipeManager({ productId, productName, productShopId }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
+  const resolvedShopId = productShopId ?? selectedShopId
 
-  const { data: recipesResult, isLoading } = useProductRecipes({
-    filter: { productId },
-  })
+  const canReadRecipes = hasPermissionForTarget(
+    PermissionActions.READ_PRODUCT_RECIPE,
+    targetWithParents(
+      'PRODUCT',
+      productId,
+      currentTenantId,
+      shopParents(resolvedShopId, currentTenantId),
+    ),
+  )
+  const canCreateRecipe = hasPermissionForTarget(
+    PermissionActions.CREATE_PRODUCT_RECIPE,
+    targetWithParents(
+      'PRODUCT',
+      productId,
+      currentTenantId,
+      shopParents(resolvedShopId, currentTenantId),
+    ),
+  )
+  const canReadStockResources = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_STOCK_RESOURCE, selectedShopId),
+  )
+
+  const { data: recipesResult, isLoading } = useProductRecipes(
+    {
+      filter: { productId },
+    },
+    { enabled: canReadRecipes },
+  )
   const recipes = recipesResult?.data ?? []
 
-  const { data: resourcesResult } = useStockResources({
-    pagination: { page: 1, perPage: 200 },
-    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
-  })
+  const { data: resourcesResult } = useStockResources(
+    {
+      pagination: { page: 1, perPage: 200 },
+      ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+    },
+    { enabled: canReadStockResources },
+  )
   const stockResources = resourcesResult?.data ?? []
 
   const { mutate: createRecipe, isPending: isCreating } = useCreateProductRecipe()
@@ -93,13 +136,45 @@ export function ProductRecipeManager({ productId, productName }: Props) {
 
   const isPending = isCreating || isUpdating
 
+  function canUpdateRecipe(recipe: ProductRecipeResponseDto): boolean {
+    return hasPermissionForTarget(
+      PermissionActions.UPDATE_PRODUCT_RECIPE,
+      targetWithParents(
+        'PRODUCT_RECIPE',
+        recipe.id,
+        currentTenantId,
+        productParents(productId, resolvedShopId, currentTenantId),
+      ),
+    )
+  }
+
+  function canDeleteRecipe(recipe: ProductRecipeResponseDto): boolean {
+    return hasPermissionForTarget(
+      PermissionActions.DELETE_PRODUCT_RECIPE,
+      targetWithParents(
+        'PRODUCT_RECIPE',
+        recipe.id,
+        currentTenantId,
+        productParents(productId, resolvedShopId, currentTenantId),
+      ),
+    )
+  }
+
   function openCreate() {
+    if (!canCreateRecipe) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
     setEditingId(null)
     setForm(EMPTY_FORM())
     setShowForm(true)
   }
 
   function openEdit(recipe: ProductRecipeResponseDto) {
+    if (!canUpdateRecipe(recipe)) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
     setEditingId(recipe.id)
     setForm({
       name: recipe.name,
@@ -147,6 +222,11 @@ export function ProductRecipeManager({ productId, productName }: Props) {
     const validItems = form.items.filter((item) => item.stockResourceId && item.quantity > 0)
 
     if (editingId) {
+      const activeRecipe = recipes.find((recipe) => recipe.id === editingId)
+      if (!activeRecipe || !canUpdateRecipe(activeRecipe)) {
+        showToast(unauthorizedReason, { severity: 'warning' })
+        return
+      }
       updateRecipe(
         {
           id: editingId,
@@ -168,6 +248,11 @@ export function ProductRecipeManager({ productId, productName }: Props) {
       return
     }
 
+    if (!canCreateRecipe) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     createRecipe(
       {
         productId,
@@ -186,8 +271,13 @@ export function ProductRecipeManager({ productId, productName }: Props) {
     )
   }
 
-  function handleDelete(id: string) {
-    deleteRecipe(id, {
+  function handleDelete(recipe: ProductRecipeResponseDto) {
+    if (!canDeleteRecipe(recipe)) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
+    deleteRecipe(recipe.id, {
       onSuccess: () => showToast(t('sale.recipe.deletedToast')),
       onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
     })
@@ -196,7 +286,16 @@ export function ProductRecipeManager({ productId, productName }: Props) {
   return (
     <Card variant="outlined">
       <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 1, flexWrap: 'wrap' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 2,
+            gap: 1,
+            flexWrap: 'wrap',
+          }}
+        >
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
               {t('sale.recipe.title')}
@@ -206,11 +305,26 @@ export function ProductRecipeManager({ productId, productName }: Props) {
             </Typography>
           </Box>
           {!showForm && (
-            <Button variant="outlined" startIcon={<AddIcon />} onClick={openCreate}>
-              {t('sale.recipe.createButton')}
-            </Button>
+            <Tooltip title={canCreateRecipe ? '' : unauthorizedReason}>
+              <span>
+                <Button
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  disabled={!canCreateRecipe}
+                  onClick={openCreate}
+                >
+                  {t('sale.recipe.createButton')}
+                </Button>
+              </span>
+            </Tooltip>
           )}
         </Box>
+
+        {!canReadRecipes && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {unauthorizedReason}
+          </Alert>
+        )}
 
         {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
@@ -231,21 +345,42 @@ export function ProductRecipeManager({ productId, productName }: Props) {
                   mb: 1.5,
                 }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box
+                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Typography fontWeight={600}>{recipe.name}</Typography>
-                    {recipe.isDefault && <Chip label={t('sale.recipe.form.isDefault')} size="small" color="primary" />}
+                    {recipe.isDefault && (
+                      <Chip label={t('sale.recipe.form.isDefault')} size="small" color="primary" />
+                    )}
                   </Box>
                   <Box>
-                    <Tooltip title={t('common.edit')}>
-                      <IconButton size="small" onClick={() => openEdit(recipe)}>
-                        <EditIcon fontSize="small" />
-                      </IconButton>
+                    <Tooltip
+                      title={canUpdateRecipe(recipe) ? t('common.edit') : unauthorizedReason}
+                    >
+                      <span>
+                        <IconButton
+                          size="small"
+                          disabled={!canUpdateRecipe(recipe)}
+                          onClick={() => openEdit(recipe)}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </span>
                     </Tooltip>
-                    <Tooltip title={t('common.delete')}>
-                      <IconButton size="small" color="error" onClick={() => handleDelete(recipe.id)}>
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                    <Tooltip
+                      title={canDeleteRecipe(recipe) ? t('common.delete') : unauthorizedReason}
+                    >
+                      <span>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          disabled={!canDeleteRecipe(recipe)}
+                          onClick={() => handleDelete(recipe)}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </span>
                     </Tooltip>
                   </Box>
                 </Box>
@@ -289,12 +424,16 @@ export function ProductRecipeManager({ productId, productName }: Props) {
                     onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
                     required
                     fullWidth
+                    disabled={isPending}
                   />
                   <FormControlLabel
                     control={
                       <Checkbox
                         checked={form.isDefault}
-                        onChange={(e) => setForm((prev) => ({ ...prev, isDefault: e.target.checked }))}
+                        disabled={isPending}
+                        onChange={(e) =>
+                          setForm((prev) => ({ ...prev, isDefault: e.target.checked }))
+                        }
                       />
                     }
                     label={t('sale.recipe.form.isDefault')}
@@ -308,12 +447,19 @@ export function ProductRecipeManager({ productId, productName }: Props) {
                   multiline
                   rows={2}
                   fullWidth
+                  disabled={isPending}
                 />
 
                 <Typography variant="subtitle2">{t('sale.recipe.form.addItem')}</Typography>
                 {form.items.map((item, index) => (
-                  <Box key={index} sx={{ display: 'flex', gap: 1, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                    <FormControl sx={{ minWidth: 180, flex: 2 }}>
+                  <Box
+                    key={index}
+                    sx={{ display: 'flex', gap: 1, alignItems: 'flex-start', flexWrap: 'wrap' }}
+                  >
+                    <FormControl
+                      sx={{ minWidth: 180, flex: 2 }}
+                      disabled={!canReadStockResources || isPending}
+                    >
                       <InputLabel>{t('sale.recipe.form.stockResource')}</InputLabel>
                       <Select
                         value={item.stockResourceId}
@@ -337,9 +483,10 @@ export function ProductRecipeManager({ productId, productName }: Props) {
                       size="small"
                       sx={{ width: 110 }}
                       inputProps={{ min: 0, step: '0.001' }}
+                      disabled={isPending}
                     />
 
-                    <FormControl sx={{ minWidth: 130 }}>
+                    <FormControl sx={{ minWidth: 130 }} disabled={isPending}>
                       <InputLabel>{t('sale.recipe.form.unitType')}</InputLabel>
                       <Select
                         value={item.unitType}
@@ -361,15 +508,27 @@ export function ProductRecipeManager({ productId, productName }: Props) {
                       onChange={(e) => updateItem(index, 'notes', e.target.value)}
                       size="small"
                       sx={{ flex: 1 }}
+                      disabled={isPending}
                     />
 
-                    <IconButton size="small" color="error" onClick={() => removeItem(index)} disabled={form.items.length === 1}>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => removeItem(index)}
+                      disabled={form.items.length === 1}
+                    >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Box>
                 ))}
 
-                <Button startIcon={<AddIcon />} onClick={addItem} size="small" sx={{ alignSelf: 'flex-start' }}>
+                <Button
+                  startIcon={<AddIcon />}
+                  onClick={addItem}
+                  size="small"
+                  sx={{ alignSelf: 'flex-start' }}
+                  disabled={isPending}
+                >
                   {t('sale.recipe.form.addItem')}
                 </Button>
 

@@ -48,6 +48,9 @@ interface Props {
   activeEditOrderId: string | null
   onToggleEditOrder: (orderId: string) => void
   onImportPublicCartOrder: (code: string, onSuccess?: () => void) => void
+  canCreateOrder: boolean
+  canUpdateOrder: (order: TableOrderResponseDto) => boolean
+  canDeleteOrder: (order: TableOrderResponseDto) => boolean
   isImportPending: boolean
   isPending: boolean
 }
@@ -123,6 +126,9 @@ export function OrderPanel({
   activeEditOrderId,
   onToggleEditOrder,
   onImportPublicCartOrder,
+  canCreateOrder,
+  canUpdateOrder,
+  canDeleteOrder,
   isImportPending,
   isPending,
 }: Props) {
@@ -300,7 +306,7 @@ export function OrderPanel({
           variant="outlined"
           startIcon={<QrCodeScannerIcon />}
           onClick={() => setImportDialogOpen(true)}
-          disabled={!table || isPending || isImportPending}
+          disabled={!table || isPending || isImportPending || !canCreateOrder}
           sx={{ mt: 1.5, borderRadius: 2, fontWeight: 700 }}
         >
           {t('pos.importQrButton')}
@@ -419,7 +425,7 @@ export function OrderPanel({
                         <QtyControl
                           size="sm"
                           qty={item.quantity}
-                          disabled={isPending}
+                          disabled={isPending || !canUpdateOrder(order)}
                           onMinus={() => onUpdateOrderItemQty(order, item.id, -1)}
                           onPlus={() => onUpdateOrderItemQty(order, item.id, 1)}
                         />
@@ -498,7 +504,7 @@ export function OrderPanel({
                         </Box>
                         <IconButton
                           size="small"
-                          disabled={isPending}
+                          disabled={isPending || (!canUpdateOrder(order) && !canDeleteOrder(order))}
                           onClick={() => onUpdateOrderItemQty(order, item.id, -item.quantity)}
                           sx={{ color: 'error.light', width: 22, height: 22, flexShrink: 0 }}
                         >
@@ -522,7 +528,7 @@ export function OrderPanel({
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
                     <IconButton
                       size="small"
-                      disabled={isPending}
+                      disabled={isPending || !canUpdateOrder(order)}
                       onClick={() => onToggleEditOrder(order.id)}
                       sx={{ color: isActiveOrder ? 'warning.dark' : 'text.secondary' }}
                       aria-label={t('common.edit')}
@@ -531,7 +537,7 @@ export function OrderPanel({
                     </IconButton>
                     <IconButton
                       size="small"
-                      disabled={isPending}
+                      disabled={isPending || !canUpdateOrder(order)}
                       onClick={() => handleOpenNoteDialog(order)}
                       sx={{ color: 'text.secondary' }}
                       aria-label={t('sale.tableOrder.form.note')}
@@ -543,7 +549,7 @@ export function OrderPanel({
                     size="small"
                     color="error"
                     variant="text"
-                    disabled={isPending}
+                    disabled={isPending || !canUpdateOrder(order)}
                     onClick={() => onCancelOrder(order.id)}
                     sx={{
                       fontSize: '0.72rem',
@@ -611,6 +617,7 @@ export function OrderPanel({
                     >
                       <QtyControl
                         qty={item.quantity}
+                        disabled={isPending || !canCreateOrder}
                         onMinus={() => onUpdateQuantity(item.cartKey, -1)}
                         onPlus={() => onUpdateQuantity(item.cartKey, 1)}
                       />
@@ -699,6 +706,7 @@ export function OrderPanel({
                       </Box>
                       <IconButton
                         size="small"
+                        disabled={isPending || !canCreateOrder}
                         onClick={() => onRemove(item.cartKey)}
                         sx={{ color: 'error.light', width: 26, height: 26, flexShrink: 0 }}
                       >
@@ -783,7 +791,7 @@ export function OrderPanel({
               size="large"
               endIcon={isPending ? undefined : <SendIcon />}
               onClick={onPlaceOrder}
-              disabled={isPending || !table}
+              disabled={isPending || !table || !canCreateOrder}
               sx={{ fontWeight: 700, py: 1.5, fontSize: '1rem', borderRadius: 2.5, boxShadow: 2 }}
             >
               {isPending ? <CircularProgress size={22} color="inherit" /> : t('pos.placeOrderBtn')}
@@ -819,7 +827,16 @@ export function OrderPanel({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setNoteDialogOrderId(null)}>{t('common.cancel')}</Button>
-          <Button variant="contained" disabled={isPending} onClick={handleSaveOrderNote}>
+          <Button
+            variant="contained"
+            disabled={
+              isPending ||
+              !existingOrders.some(
+                (order) => order.id === noteDialogOrderId && canUpdateOrder(order),
+              )
+            }
+            onClick={handleSaveOrderNote}
+          >
             {t('common.save')}
           </Button>
         </DialogActions>
@@ -856,7 +873,7 @@ export function OrderPanel({
               variant={isCameraActive ? 'outlined' : 'contained'}
               startIcon={<QrCodeScannerIcon />}
               onClick={isCameraActive ? stopCamera : startCamera}
-              disabled={isImportPending}
+              disabled={isImportPending || !canCreateOrder}
             >
               {isCameraActive ? t('pos.importQrCameraStop') : t('pos.importQrCameraStart')}
             </Button>
@@ -871,7 +888,7 @@ export function OrderPanel({
               }}
               fullWidth
               size="small"
-              disabled={isImportPending}
+              disabled={isImportPending || !canCreateOrder}
             />
           </Stack>
         </DialogContent>
@@ -879,7 +896,7 @@ export function OrderPanel({
           <Button onClick={handleCloseImportDialog}>{t('common.cancel')}</Button>
           <Button
             variant="contained"
-            disabled={isImportPending}
+            disabled={isImportPending || !canCreateOrder}
             onClick={() => submitImport(manualQrValue)}
           >
             {isImportPending ? (

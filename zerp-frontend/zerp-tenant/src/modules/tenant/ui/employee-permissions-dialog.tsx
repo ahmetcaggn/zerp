@@ -2,6 +2,7 @@
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -23,6 +24,7 @@ import {
 import { useMemo, useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
@@ -31,12 +33,16 @@ import {
   usePermissionGroupAssignments,
   useRevokePermissionGroupAssignment,
 } from '../hooks/use-permission-groups'
-import { useCreatePermission, useDeletePermission, useEmployeePermissions } from '../hooks/use-permissions'
+import {
+  useCreatePermission,
+  useDeletePermission,
+  useEmployeePermissions,
+} from '../hooks/use-permissions'
 import { useShops } from '../hooks/use-shops'
 import type { EmployeeListResponseDto } from '../types/employee'
 import { prettifyPermissionEnumName, toPermissionKey } from '../types/permission'
-import { buildRevokeGroupToast } from './permission-group-revoke-toast'
 import { PermissionAssignmentBuilder } from './permission-assignment-builder'
+import { buildRevokeGroupToast } from './permission-group-revoke-toast'
 import {
   type PermissionGroupSelectionValue,
   PermissionGroupSelector,
@@ -51,29 +57,45 @@ interface Props {
 export function EmployeePermissionsDialog({ open, employee, onClose }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { hasTenantPermission, getDisabledReason, isLoadingPermissions } =
+    useCurrentUserPermissions()
   const [searchInput, setSearchInput] = useState('')
 
   const employeeUserId = employee?.id !== undefined ? String(employee.id) : undefined
   const employeeFullName = `${employee?.firstName ?? ''} ${employee?.lastName ?? ''}`.trim()
+  const unauthorizedReason = t('common.unauthorized')
+  const loadingReason = t('common.loading')
+  const canManagePermissions = hasTenantPermission(PermissionActions.ADMIN)
+  const manageDisabledReason = isLoadingPermissions
+    ? loadingReason
+    : getDisabledReason(canManagePermissions, unauthorizedReason)
 
   const {
     data: permissions = [],
     isLoading,
     error,
-  } = useEmployeePermissions(employeeUserId, open && Boolean(employeeUserId))
+  } = useEmployeePermissions(
+    employeeUserId,
+    open && Boolean(employeeUserId) && canManagePermissions,
+  )
   const { mutate: createPermission, isPending: isCreatePending } = useCreatePermission()
   const { mutate: deletePermission, isPending: isDeletePending } = useDeletePermission()
-  const { mutateAsync: assignPermissionGroup, isPending: isAssignPending } = useAssignPermissionGroup()
+  const { mutateAsync: assignPermissionGroup, isPending: isAssignPending } =
+    useAssignPermissionGroup()
   const { mutateAsync: revokePermissionGroupAssignment, isPending: isRevokeAssignPending } =
     useRevokePermissionGroupAssignment()
-  const {
-    data: groupAssignments = [],
-    isLoading: isGroupAssignmentsLoading,
-  } = usePermissionGroupAssignments(employeeUserId, open && Boolean(employeeUserId))
-  const { data: shopsResult } = useShops({
-    pagination: { page: 1, perPage: 100 },
-    sort: { field: 'name', order: 'ASC' },
-  })
+  const { data: groupAssignments = [], isLoading: isGroupAssignmentsLoading } =
+    usePermissionGroupAssignments(
+      employeeUserId,
+      open && Boolean(employeeUserId) && canManagePermissions,
+    )
+  const { data: shopsResult } = useShops(
+    {
+      pagination: { page: 1, perPage: 100 },
+      sort: { field: 'name', order: 'ASC' },
+    },
+    open && canManagePermissions,
+  )
   const shopOptions = useMemo(
     () =>
       (shopsResult?.data ?? []).map((shop) => ({
@@ -117,11 +139,12 @@ export function EmployeePermissionsDialog({ open, employee, onClose }: Props) {
     })
   }, [permissions, searchInput])
 
-  function handleAddPermission(input: {
-    action: string
-    targetType: string
-    targetId: string
-  }) {
+  function handleAddPermission(input: { action: string; targetType: string; targetId: string }) {
+    if (!canManagePermissions) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     if (!employeeUserId) return
 
     createPermission(
@@ -145,6 +168,11 @@ export function EmployeePermissionsDialog({ open, employee, onClose }: Props) {
   }
 
   function handleDeletePermission(permissionId: number | undefined) {
+    if (!canManagePermissions) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     if (!employeeUserId || permissionId === undefined) return
 
     deletePermission(
@@ -163,6 +191,11 @@ export function EmployeePermissionsDialog({ open, employee, onClose }: Props) {
   }
 
   async function handleApplyGroup() {
+    if (!canManagePermissions) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     if (!employeeUserId || !selectedGroup) return
 
     if (selectedGroup.scopeType === 'SHOP' && !selectedGroupShopId) {
@@ -192,6 +225,11 @@ export function EmployeePermissionsDialog({ open, employee, onClose }: Props) {
   }
 
   async function handleRevokeGroupAssignment(assignmentId: string) {
+    if (!canManagePermissions) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     if (!employeeUserId) return
 
     try {
@@ -216,15 +254,20 @@ export function EmployeePermissionsDialog({ open, employee, onClose }: Props) {
               ? t('employees.permissionsDialogSubtitle', { employee: employeeFullName })
               : t('employees.permissionsDialogSubtitle', { employee: '—' })}
           </Typography>
+          {!canManagePermissions && !isLoadingPermissions ? (
+            <Alert severity="warning">{unauthorizedReason}</Alert>
+          ) : null}
 
           <PermissionAssignmentBuilder
-            disabled={!employeeUserId || isCreatePending || isAssignPending}
+            disabled={
+              !employeeUserId || isCreatePending || isAssignPending || !canManagePermissions
+            }
             existingKeys={existingKeys}
             onAdd={handleAddPermission}
           />
 
           <PermissionGroupSelector
-            disabled={!employeeUserId || isAssignPending}
+            disabled={!employeeUserId || isAssignPending || !canManagePermissions}
             value={selectedGroup}
             onChange={(next) => {
               setSelectedGroup(next)
@@ -238,16 +281,26 @@ export function EmployeePermissionsDialog({ open, employee, onClose }: Props) {
           />
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={() => {
-                void handleApplyGroup()
-              }}
-              disabled={!employeeUserId || !selectedGroup || isAssignPending}
-            >
-              {isAssignPending ? <CircularProgress size={14} /> : t('permissionGroups.applyButton')}
-            </Button>
+            <Tooltip title={manageDisabledReason ?? ''}>
+              <span>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => {
+                    void handleApplyGroup()
+                  }}
+                  disabled={
+                    !employeeUserId || !selectedGroup || isAssignPending || !canManagePermissions
+                  }
+                >
+                  {isAssignPending ? (
+                    <CircularProgress size={14} />
+                  ) : (
+                    t('permissionGroups.applyButton')
+                  )}
+                </Button>
+              </span>
+            </Tooltip>
           </Box>
 
           <Box>
@@ -276,7 +329,9 @@ export function EmployeePermissionsDialog({ open, employee, onClose }: Props) {
                   {groupAssignments.map((assignment) => (
                     <TableRow key={assignment.id}>
                       <TableCell>{assignment.groupName}</TableCell>
-                      <TableCell>{prettifyPermissionEnumName(assignment.groupScopeType ?? '')}</TableCell>
+                      <TableCell>
+                        {prettifyPermissionEnumName(assignment.groupScopeType ?? '')}
+                      </TableCell>
                       <TableCell>{assignment.targetId}</TableCell>
                       <TableCell align="right">
                         <Tooltip title={t('permissionGroups.revokeButton')}>
@@ -284,7 +339,7 @@ export function EmployeePermissionsDialog({ open, employee, onClose }: Props) {
                             <IconButton
                               size="small"
                               color="error"
-                              disabled={isRevokeAssignPending}
+                              disabled={isRevokeAssignPending || !canManagePermissions}
                               onClick={() => {
                                 void handleRevokeGroupAssignment(assignment.id)
                               }}
@@ -306,6 +361,7 @@ export function EmployeePermissionsDialog({ open, employee, onClose }: Props) {
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
             size="small"
+            disabled={!canManagePermissions}
           />
 
           {isLoading ? (
@@ -338,7 +394,11 @@ export function EmployeePermissionsDialog({ open, employee, onClose }: Props) {
                           <IconButton
                             size="small"
                             color="error"
-                            disabled={isDeletePending || permission.id === undefined}
+                            disabled={
+                              isDeletePending ||
+                              permission.id === undefined ||
+                              !canManagePermissions
+                            }
                             onClick={() => handleDeletePermission(permission.id)}
                           >
                             <DeleteIcon fontSize="small" />

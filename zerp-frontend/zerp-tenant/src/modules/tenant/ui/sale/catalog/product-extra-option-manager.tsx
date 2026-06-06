@@ -4,6 +4,7 @@ import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -25,6 +26,7 @@ import {
 import { useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
@@ -36,6 +38,11 @@ import {
   useUpdateProductExtraOption,
 } from '../../../hooks/use-product-extra-options'
 import { useStockResources } from '../../../hooks/use-stock-resources'
+import {
+  productParents,
+  shopParents,
+  targetWithParents,
+} from '../../../permissions/permission-targets'
 import type {
   ProductExtraOptionItemCreateDto,
   ProductExtraOptionResponseDto,
@@ -69,23 +76,55 @@ const EMPTY_FORM = (): OptionFormState => ({
 interface Props {
   productId: string
   productName: string
+  productShopId: string
 }
 
-export function ProductExtraOptionManager({ productId, productName }: Props) {
+export function ProductExtraOptionManager({ productId, productName, productShopId }: Props) {
   const { t, locale } = useI18n()
   const { showToast } = useToast()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
+  const resolvedShopId = productShopId ?? selectedShopId
 
-  const { data: optionsResult, isLoading } = useProductExtraOptions({
-    filter: { productId },
-  })
+  const canReadOptions = hasPermissionForTarget(
+    PermissionActions.READ_PRODUCT_EXTRA_OPTION,
+    targetWithParents(
+      'PRODUCT',
+      productId,
+      currentTenantId,
+      shopParents(resolvedShopId, currentTenantId),
+    ),
+  )
+  const canCreateOption = hasPermissionForTarget(
+    PermissionActions.CREATE_PRODUCT_EXTRA_OPTION,
+    targetWithParents(
+      'PRODUCT',
+      productId,
+      currentTenantId,
+      shopParents(resolvedShopId, currentTenantId),
+    ),
+  )
+  const canReadStockResources = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_STOCK_RESOURCE, selectedShopId),
+  )
+
+  const { data: optionsResult, isLoading } = useProductExtraOptions(
+    {
+      filter: { productId },
+    },
+    { enabled: canReadOptions },
+  )
   const options = optionsResult?.data ?? []
 
-  const { data: resourcesResult } = useStockResources({
-    pagination: { page: 1, perPage: 200 },
-    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
-  })
+  const { data: resourcesResult } = useStockResources(
+    {
+      pagination: { page: 1, perPage: 200 },
+      ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+    },
+    { enabled: canReadStockResources },
+  )
   const stockResources = resourcesResult?.data ?? []
 
   const { mutate: createOption, isPending: isCreating } = useCreateProductExtraOption()
@@ -98,13 +137,45 @@ export function ProductExtraOptionManager({ productId, productName }: Props) {
 
   const isPending = isCreating || isUpdating
 
+  function canUpdateOption(option: ProductExtraOptionResponseDto): boolean {
+    return hasPermissionForTarget(
+      PermissionActions.UPDATE_PRODUCT_EXTRA_OPTION,
+      targetWithParents(
+        'PRODUCT_EXTRA_OPTION',
+        option.id,
+        currentTenantId,
+        productParents(productId, resolvedShopId, currentTenantId),
+      ),
+    )
+  }
+
+  function canDeleteOption(option: ProductExtraOptionResponseDto): boolean {
+    return hasPermissionForTarget(
+      PermissionActions.DELETE_PRODUCT_EXTRA_OPTION,
+      targetWithParents(
+        'PRODUCT_EXTRA_OPTION',
+        option.id,
+        currentTenantId,
+        productParents(productId, resolvedShopId, currentTenantId),
+      ),
+    )
+  }
+
   function openCreate() {
+    if (!canCreateOption) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
     setEditingId(null)
     setForm(EMPTY_FORM())
     setShowForm(true)
   }
 
   function openEdit(option: ProductExtraOptionResponseDto) {
+    if (!canUpdateOption(option)) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
     setEditingId(option.id)
     setForm({
       name: option.name,
@@ -152,6 +223,11 @@ export function ProductExtraOptionManager({ productId, productName }: Props) {
     }
 
     if (editingId) {
+      const activeOption = options.find((option) => option.id === editingId)
+      if (!activeOption || !canUpdateOption(activeOption)) {
+        showToast(unauthorizedReason, { severity: 'warning' })
+        return
+      }
       updateOption(
         { id: editingId, data: payload },
         {
@@ -162,6 +238,11 @@ export function ProductExtraOptionManager({ productId, productName }: Props) {
           onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
         },
       )
+      return
+    }
+
+    if (!canCreateOption) {
+      showToast(unauthorizedReason, { severity: 'warning' })
       return
     }
 
@@ -177,8 +258,13 @@ export function ProductExtraOptionManager({ productId, productName }: Props) {
     )
   }
 
-  function handleDelete(id: string) {
-    deleteOption(id, {
+  function handleDelete(option: ProductExtraOptionResponseDto) {
+    if (!canDeleteOption(option)) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
+    deleteOption(option.id, {
       onSuccess: () => showToast(t('sale.extraOption.deletedToast')),
       onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
     })
@@ -187,7 +273,16 @@ export function ProductExtraOptionManager({ productId, productName }: Props) {
   return (
     <Card variant="outlined">
       <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 1, flexWrap: 'wrap' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 2,
+            gap: 1,
+            flexWrap: 'wrap',
+          }}
+        >
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
               {t('sale.extraOption.title')}
@@ -197,11 +292,26 @@ export function ProductExtraOptionManager({ productId, productName }: Props) {
             </Typography>
           </Box>
           {!showForm && (
-            <Button variant="outlined" startIcon={<AddIcon />} onClick={openCreate}>
-              {t('sale.extraOption.createButton')}
-            </Button>
+            <Tooltip title={canCreateOption ? '' : unauthorizedReason}>
+              <span>
+                <Button
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  disabled={!canCreateOption}
+                  onClick={openCreate}
+                >
+                  {t('sale.extraOption.createButton')}
+                </Button>
+              </span>
+            </Tooltip>
           )}
         </Box>
+
+        {!canReadOptions && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {unauthorizedReason}
+          </Alert>
+        )}
 
         {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
@@ -222,7 +332,9 @@ export function ProductExtraOptionManager({ productId, productName }: Props) {
                   mb: 1.5,
                 }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box
+                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                     <Typography fontWeight={600}>{option.name}</Typography>
                     <Chip label={`₺${option.price}`} size="small" variant="outlined" />
@@ -235,15 +347,32 @@ export function ProductExtraOptionManager({ productId, productName }: Props) {
                     )}
                   </Box>
                   <Box>
-                    <Tooltip title={t('common.edit')}>
-                      <IconButton size="small" onClick={() => openEdit(option)}>
-                        <EditIcon fontSize="small" />
-                      </IconButton>
+                    <Tooltip
+                      title={canUpdateOption(option) ? t('common.edit') : unauthorizedReason}
+                    >
+                      <span>
+                        <IconButton
+                          size="small"
+                          disabled={!canUpdateOption(option)}
+                          onClick={() => openEdit(option)}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </span>
                     </Tooltip>
-                    <Tooltip title={t('common.delete')}>
-                      <IconButton size="small" color="error" onClick={() => handleDelete(option.id)}>
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                    <Tooltip
+                      title={canDeleteOption(option) ? t('common.delete') : unauthorizedReason}
+                    >
+                      <span>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          disabled={!canDeleteOption(option)}
+                          onClick={() => handleDelete(option)}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </span>
                     </Tooltip>
                   </Box>
                 </Box>
@@ -287,6 +416,7 @@ export function ProductExtraOptionManager({ productId, productName }: Props) {
                     onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
                     required
                     fullWidth
+                    disabled={isPending}
                   />
 
                   <TextField
@@ -296,13 +426,17 @@ export function ProductExtraOptionManager({ productId, productName }: Props) {
                     onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
                     sx={{ width: 140 }}
                     inputProps={{ min: 0, step: '0.01' }}
+                    disabled={isPending}
                   />
 
                   <FormControlLabel
                     control={
                       <Switch
                         checked={form.isActive}
-                        onChange={(e) => setForm((prev) => ({ ...prev, isActive: e.target.checked }))}
+                        disabled={isPending}
+                        onChange={(e) =>
+                          setForm((prev) => ({ ...prev, isActive: e.target.checked }))
+                        }
                       />
                     }
                     label={t('sale.extraOption.form.isActive')}
@@ -316,12 +450,19 @@ export function ProductExtraOptionManager({ productId, productName }: Props) {
                   multiline
                   rows={2}
                   fullWidth
+                  disabled={isPending}
                 />
 
                 <Typography variant="subtitle2">{t('sale.extraOption.form.addItem')}</Typography>
                 {form.items.map((item, index) => (
-                  <Box key={index} sx={{ display: 'flex', gap: 1, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                    <FormControl sx={{ minWidth: 180, flex: 2 }}>
+                  <Box
+                    key={index}
+                    sx={{ display: 'flex', gap: 1, alignItems: 'flex-start', flexWrap: 'wrap' }}
+                  >
+                    <FormControl
+                      sx={{ minWidth: 180, flex: 2 }}
+                      disabled={!canReadStockResources || isPending}
+                    >
                       <InputLabel>{t('sale.extraOption.form.stockResource')}</InputLabel>
                       <Select
                         value={item.stockResourceId}
@@ -345,9 +486,10 @@ export function ProductExtraOptionManager({ productId, productName }: Props) {
                       size="small"
                       sx={{ width: 100 }}
                       inputProps={{ min: 0, step: '0.001' }}
+                      disabled={isPending}
                     />
 
-                    <FormControl sx={{ minWidth: 120 }}>
+                    <FormControl sx={{ minWidth: 120 }} disabled={isPending}>
                       <InputLabel>{t('sale.extraOption.form.unitType')}</InputLabel>
                       <Select
                         value={item.unitType}
@@ -367,9 +509,12 @@ export function ProductExtraOptionManager({ productId, productName }: Props) {
                       size="small"
                       color="error"
                       onClick={() => {
-                        setForm((prev) => ({ ...prev, items: prev.items.filter((_, current) => current !== index) }))
+                        setForm((prev) => ({
+                          ...prev,
+                          items: prev.items.filter((_, current) => current !== index),
+                        }))
                       }}
-                      disabled={form.items.length === 1}
+                      disabled={form.items.length === 1 || isPending}
                     >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
@@ -378,9 +523,12 @@ export function ProductExtraOptionManager({ productId, productName }: Props) {
 
                 <Button
                   startIcon={<AddIcon />}
-                  onClick={() => setForm((prev) => ({ ...prev, items: [...prev.items, EMPTY_ITEM()] }))}
+                  onClick={() =>
+                    setForm((prev) => ({ ...prev, items: [...prev.items, EMPTY_ITEM()] }))
+                  }
                   size="small"
                   sx={{ alignSelf: 'flex-start' }}
+                  disabled={isPending}
                 >
                   {t('sale.extraOption.form.addItem')}
                 </Button>

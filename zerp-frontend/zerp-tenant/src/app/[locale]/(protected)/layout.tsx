@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { appConfig } from '@/core/config/app-config'
 import { isLocale } from '@/core/constants/locales'
 import { requireRole } from '@/core/guards/require-role'
+import { PermissionRouteGuard } from '@/core/permissions/permission-route-guard'
 import { responsivePageSx } from '@/core/theme/layout'
 import type { Locale } from '@/core/types/common'
 import { AppTopbar } from '@/core/ui/feedback/app-topbar'
@@ -37,7 +38,10 @@ export default async function ProtectedLayout({
         <AppTopbar locale={locale as Locale} />
         <ShopScopeGuard locale={locale as Locale} />
         <ShopScopeResetBoundary>
-          <Box component="main" sx={{ flexGrow: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+          <Box
+            component="main"
+            sx={{ flexGrow: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}
+          >
             <Container
               maxWidth={false}
               sx={{
@@ -47,7 +51,7 @@ export default async function ProtectedLayout({
                 flexDirection: 'column',
               }}
             >
-              {children}
+              <PermissionRouteGuard locale={locale as Locale}>{children}</PermissionRouteGuard>
             </Container>
           </Box>
         </ShopScopeResetBoundary>

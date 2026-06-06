@@ -12,6 +12,7 @@ import {
   MenuItem,
   Select,
   TextField,
+  Tooltip,
 } from '@mui/material'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
@@ -29,12 +30,14 @@ import { TicketPriority, TicketType } from '../types/ticket'
 interface Props {
   open: boolean
   onClose: () => void
+  canCreate: boolean
+  disabledReason?: string
 }
 
 const PRIORITY_OPTIONS = Object.values(TicketPriority)
 const TYPE_OPTIONS = Object.values(TicketType)
 
-export function TicketCreateDialog({ open, onClose }: Props) {
+export function TicketCreateDialog({ open, onClose, canCreate, disabledReason }: Props) {
   const { t, locale } = useI18n()
   const { showToast } = useToast()
   const router = useRouter()
@@ -47,6 +50,11 @@ export function TicketCreateDialog({ open, onClose }: Props) {
   const { mutate: createTicket, isPending } = useCreateTicket()
 
   function handleSubmit() {
+    if (!canCreate) {
+      showToast(disabledReason ?? t('common.unauthorized'), { severity: 'warning' })
+      return
+    }
+
     if (!title.trim()) {
       showToast(t('tickets.titleRequiredWarning'), { severity: 'warning' })
       return
@@ -84,6 +92,7 @@ export function TicketCreateDialog({ open, onClose }: Props) {
             onChange={(e) => setTitle(e.target.value)}
             size="small"
             fullWidth
+            disabled={!canCreate}
           />
 
           <TextField
@@ -94,10 +103,11 @@ export function TicketCreateDialog({ open, onClose }: Props) {
             fullWidth
             multiline
             minRows={3}
+            disabled={!canCreate}
           />
 
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <FormControl size="small" fullWidth>
+            <FormControl size="small" fullWidth disabled={!canCreate}>
               <InputLabel>{t('tickets.priorityLabel')}</InputLabel>
               <Select
                 value={priority}
@@ -112,7 +122,7 @@ export function TicketCreateDialog({ open, onClose }: Props) {
               </Select>
             </FormControl>
 
-            <FormControl size="small" fullWidth>
+            <FormControl size="small" fullWidth disabled={!canCreate}>
               <InputLabel>{t('tickets.typeLabel')}</InputLabel>
               <Select
                 value={type}
@@ -134,9 +144,13 @@ export function TicketCreateDialog({ open, onClose }: Props) {
         <Button onClick={onClose} disabled={isPending}>
           {t('common.cancel')}
         </Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={isPending}>
-          {isPending ? <CircularProgress size={20} /> : t('common.create')}
-        </Button>
+        <Tooltip title={disabledReason ?? ''}>
+          <span>
+            <Button variant="contained" onClick={handleSubmit} disabled={isPending || !canCreate}>
+              {isPending ? <CircularProgress size={20} /> : t('common.create')}
+            </Button>
+          </span>
+        </Tooltip>
       </DialogActions>
     </Dialog>
   )

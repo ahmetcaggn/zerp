@@ -3,6 +3,7 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -15,6 +16,7 @@ import {
   MenuItem,
   Select,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import type { Route } from 'next'
@@ -23,6 +25,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
@@ -35,6 +38,12 @@ import {
   useUploadMenuItemImage,
 } from '../../../hooks/use-menu-items'
 import { useProducts } from '../../../hooks/use-products'
+import {
+  menuCategoryParents,
+  menuParents,
+  shopParents,
+  targetWithParents,
+} from '../../../permissions/permission-targets'
 import type {
   MenuCategoryResponseDto,
   MenuItemProductItemDto,
@@ -107,9 +116,8 @@ function MenuItemPreviewCard({
   const displayName = name.trim() || t('sale.menuItem.form.name')
   const displayDescription = description.trim() || t('sale.menuItem.form.description')
   const numericPrice = Number(price)
-  const displayPrice = Number.isFinite(numericPrice) && numericPrice > 0
-    ? `₺${numericPrice.toFixed(2)}`
-    : '₺0.00'
+  const displayPrice =
+    Number.isFinite(numericPrice) && numericPrice > 0 ? `₺${numericPrice.toFixed(2)}` : '₺0.00'
 
   return (
     <Card variant="outlined" sx={{ position: { md: 'sticky' }, top: { md: 24 } }}>
@@ -128,11 +136,22 @@ function MenuItemPreviewCard({
           />
 
           <Box sx={{ p: 1 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, alignItems: 'flex-start' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: 1,
+                alignItems: 'flex-start',
+              }}
+            >
               <Typography variant="subtitle1" sx={{ fontWeight: 700, wordBreak: 'break-word' }}>
                 {displayName}
               </Typography>
-              <Typography variant="subtitle1" color="primary.main" sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}>
+              <Typography
+                variant="subtitle1"
+                color="primary.main"
+                sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}
+              >
                 {displayPrice}
               </Typography>
             </Box>
@@ -147,7 +166,11 @@ function MenuItemPreviewCard({
 
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
               {selectedProducts.length === 0 ? (
-                <Chip size="small" variant="outlined" label={t('sale.menuItem.preview.noProducts')} />
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  label={t('sale.menuItem.preview.noProducts')}
+                />
               ) : (
                 selectedProducts.map((productName) => (
                   <Chip key={productName} size="small" label={productName} />
@@ -179,7 +202,16 @@ function MenuItemQuickActions({
       : ROUTES.catalog
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: 1,
+        flexWrap: 'wrap',
+        mb: 2,
+      }}
+    >
       <Button startIcon={<ArrowBackIcon />} onClick={() => onNavigate(categoriesPath)}>
         {t('sale.catalog.backToCategories')}
       </Button>
@@ -192,12 +224,20 @@ function MenuItemQuickActions({
           {t('sale.catalog.quickCategories')}
         </Button>
         {menuId && (
-          <Button size="small" variant="outlined" onClick={() => onNavigate(`${ROUTES.catalogMenus}/${menuId}`)}>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => onNavigate(`${ROUTES.catalogMenus}/${menuId}`)}
+          >
             {t('sale.catalog.quickMenu')}
           </Button>
         )}
         {categoryId && (
-          <Button size="small" variant="outlined" onClick={() => onNavigate(`${ROUTES.catalog}/categories/${categoryId}`)}>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => onNavigate(`${ROUTES.catalog}/categories/${categoryId}`)}
+          >
             {t('sale.catalog.quickCategory')}
           </Button>
         )}
@@ -215,6 +255,9 @@ function MenuItemFormCard({
   selectedCategoryLabel,
   showLinkedProducts,
   isPending,
+  disabled,
+  disabledReason,
+  canSubmitValue,
   onOpenProduct,
   onCancel,
   onSubmit,
@@ -227,6 +270,9 @@ function MenuItemFormCard({
   selectedCategoryLabel?: string
   showLinkedProducts: boolean
   isPending: boolean
+  disabled: boolean
+  disabledReason?: string
+  canSubmitValue: (value: MenuItemFormValue) => boolean
   onOpenProduct: (id: string) => void
   onCancel: (categoryId: string) => void
   onSubmit: (value: MenuItemFormValue) => void
@@ -240,8 +286,12 @@ function MenuItemFormCard({
   const [imageId, setImageId] = useState(initial.imageId)
   const [calories, setCalories] = useState(initial.calories)
   const [weight, setWeight] = useState(initial.weight)
-  const [ingredientsInput, setIngredientsInput] = useState(stringifyCommaSeparatedList(initial.ingredients))
-  const [allergensInput, setAllergensInput] = useState(stringifyCommaSeparatedList(initial.allergens))
+  const [ingredientsInput, setIngredientsInput] = useState(
+    stringifyCommaSeparatedList(initial.ingredients),
+  )
+  const [allergensInput, setAllergensInput] = useState(
+    stringifyCommaSeparatedList(initial.allergens),
+  )
   const [categoryId, setCategoryId] = useState(initial.categoryId)
   const [productItems, setProductItems] = useState<MenuItemProductItemDto[]>(initial.productItems)
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null)
@@ -266,7 +316,9 @@ function MenuItemFormCard({
           }
           return { product, quantity: item.quantity }
         })
-        .filter((entry): entry is { product: ProductResponseDto; quantity: number } => Boolean(entry)),
+        .filter((entry): entry is { product: ProductResponseDto; quantity: number } =>
+          Boolean(entry),
+        ),
     [products, productItems],
   )
 
@@ -276,13 +328,30 @@ function MenuItemFormCard({
   )
 
   const previewImageSrc = localPreviewUrl ?? buildPublicImageUrl(imageId)
-  const isSubmitDisabled = isPending || isUploadingImage
+  const currentValue: MenuItemFormValue = {
+    name: name.trim(),
+    description,
+    price,
+    imageId,
+    calories,
+    weight,
+    ingredients: parseCommaSeparatedList(ingredientsInput),
+    allergens: parseCommaSeparatedList(allergensInput),
+    categoryId,
+    productItems,
+  }
+  const canSubmit = !disabled && canSubmitValue(currentValue)
+  const isSubmitDisabled = isPending || isUploadingImage || !canSubmit
 
   async function handleImageSelected(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFile = event.target.files?.[0]
     event.target.value = ''
 
     if (!selectedFile) {
+      return
+    }
+    if (!canSubmit) {
+      showToast(disabledReason ?? t('common.unauthorized'), { severity: 'warning' })
       return
     }
 
@@ -308,7 +377,13 @@ function MenuItemFormCard({
   }
 
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1.25fr) minmax(320px, 0.75fr)' }, gap: 3 }}>
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1.25fr) minmax(320px, 0.75fr)' },
+        gap: 3,
+      }}
+    >
       <Box sx={{ display: 'grid', gap: 2 }}>
         <Card variant="outlined">
           <CardContent>
@@ -319,6 +394,7 @@ function MenuItemFormCard({
             <form
               onSubmit={(e) => {
                 e.preventDefault()
+                if (!canSubmit) return
                 if (!name.trim() || !price || !categoryId) return
                 onSubmit({
                   name: name.trim(),
@@ -341,6 +417,7 @@ function MenuItemFormCard({
                   onChange={(e) => setName(e.target.value)}
                   required
                   fullWidth
+                  disabled={disabled}
                 />
 
                 <TextField
@@ -350,6 +427,7 @@ function MenuItemFormCard({
                   multiline
                   rows={3}
                   fullWidth
+                  disabled={disabled}
                 />
 
                 <TextField
@@ -360,6 +438,7 @@ function MenuItemFormCard({
                   required
                   fullWidth
                   inputProps={{ min: 0, step: '0.01' }}
+                  disabled={disabled}
                 />
 
                 <Box sx={{ display: 'flex', gap: 2 }}>
@@ -370,12 +449,14 @@ function MenuItemFormCard({
                     onChange={(e) => setCalories(e.target.value)}
                     fullWidth
                     inputProps={{ min: 0, step: '1' }}
+                    disabled={disabled}
                   />
                   <TextField
                     label={t('sale.menuItem.form.weight')}
                     value={weight}
                     onChange={(e) => setWeight(e.target.value)}
                     fullWidth
+                    disabled={disabled}
                   />
                 </Box>
 
@@ -385,6 +466,7 @@ function MenuItemFormCard({
                   onChange={(e) => setIngredientsInput(e.target.value)}
                   fullWidth
                   helperText={t('sale.menuItem.form.listInputHint')}
+                  disabled={disabled}
                 />
 
                 <TextField
@@ -393,6 +475,7 @@ function MenuItemFormCard({
                   onChange={(e) => setAllergensInput(e.target.value)}
                   fullWidth
                   helperText={t('sale.menuItem.form.listInputHint')}
+                  disabled={disabled}
                 />
 
                 <Box sx={{ display: 'grid', gap: 1 }}>
@@ -400,9 +483,11 @@ function MenuItemFormCard({
                     component="label"
                     variant="outlined"
                     startIcon={<CloudUploadIcon />}
-                    disabled={isUploadingImage || isPending}
+                    disabled={isSubmitDisabled}
                   >
-                    {isUploadingImage ? t('sale.menuItem.form.imageUploading') : t('sale.menuItem.form.imageUpload')}
+                    {isUploadingImage
+                      ? t('sale.menuItem.form.imageUploading')
+                      : t('sale.menuItem.form.imageUpload')}
                     <input
                       hidden
                       type="file"
@@ -419,13 +504,15 @@ function MenuItemFormCard({
 
                 {lockCategory ? (
                   <Box>
-                    <Typography variant="subtitle2">{t('sale.menuItem.form.categoryId')}</Typography>
+                    <Typography variant="subtitle2">
+                      {t('sale.menuItem.form.categoryId')}
+                    </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {selectedCategoryLabel || t('sale.catalog.selectedCategoryLabel')}
                     </Typography>
                   </Box>
                 ) : (
-                  <FormControl fullWidth required>
+                  <FormControl fullWidth required disabled={disabled}>
                     <InputLabel>{t('sale.menuItem.form.categoryId')}</InputLabel>
                     <Select
                       value={categoryId}
@@ -455,9 +542,13 @@ function MenuItemFormCard({
                   <Button onClick={() => onCancel(categoryId)} disabled={isSubmitDisabled}>
                     {t('common.cancel')}
                   </Button>
-                  <Button type="submit" variant="contained" disabled={isSubmitDisabled}>
-                    {isSubmitDisabled ? t('common.loading') : t('common.save')}
-                  </Button>
+                  <Tooltip title={!canSubmit ? (disabledReason ?? '') : ''}>
+                    <span>
+                      <Button type="submit" variant="contained" disabled={isSubmitDisabled}>
+                        {isPending || isUploadingImage ? t('common.loading') : t('common.save')}
+                      </Button>
+                    </span>
+                  </Tooltip>
                 </Box>
               </Box>
             </form>
@@ -479,10 +570,11 @@ function MenuItemFormCard({
                       key={item.productId}
                       size="small"
                       variant="outlined"
+                      disabled={disabled}
                       onClick={() => onOpenProduct(item.productId)}
                     >
-                      {(products.find((product) => product.id === item.productId)?.name ?? item.productId) +
-                        ` x${item.quantity}`}
+                      {(products.find((product) => product.id === item.productId)?.name ??
+                        item.productId) + ` x${item.quantity}`}
                     </Button>
                   ))}
                 </Box>
@@ -514,26 +606,57 @@ export function MenuItemFormPage({
   const { showToast } = useToast()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
+
+  const canReadMenuItem =
+    mode === 'edit'
+      ? hasPermissionForTarget(
+          PermissionActions.READ_MENU_ITEM,
+          targetWithParents(
+            'MENU_ITEM',
+            menuItemId,
+            currentTenantId,
+            shopParents(selectedShopId, currentTenantId),
+          ),
+        )
+      : true
+  const canReadCategories = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_MENU_CATEGORY, selectedShopId),
+  )
+  const canReadProducts = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_PRODUCT, selectedShopId),
+  )
 
   const { data: menuItem, isLoading: isLoadingMenuItem } = useMenuItem(
     mode === 'edit' ? menuItemId : undefined,
+    { enabled: canReadMenuItem },
   )
 
-  const { data: categoriesResult, isLoading: isLoadingCategories } = useMenuCategories({
-    pagination: { page: 1, perPage: 300 },
-    sort: { field: 'displayOrder', order: 'ASC' },
-    ...(selectedShopId ? { filter: { 'menu.shop.id': selectedShopId } } : {}),
-  })
+  const { data: categoriesResult, isLoading: isLoadingCategories } = useMenuCategories(
+    {
+      pagination: { page: 1, perPage: 300 },
+      sort: { field: 'displayOrder', order: 'ASC' },
+      ...(selectedShopId ? { filter: { 'menu.shop.id': selectedShopId } } : {}),
+    },
+    { enabled: canReadCategories },
+  )
 
-  const { data: productsResult, isLoading: isLoadingProducts } = useProducts({
-    pagination: { page: 1, perPage: 1000 },
-    sort: { field: 'name', order: 'ASC' },
-    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
-  })
+  const { data: productsResult, isLoading: isLoadingProducts } = useProducts(
+    {
+      pagination: { page: 1, perPage: 1000 },
+      sort: { field: 'name', order: 'ASC' },
+      ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+    },
+    { enabled: canReadProducts },
+  )
 
   const categories = useMemo(() => categoriesResult?.data ?? [], [categoriesResult?.data])
   const products = useMemo(() => productsResult?.data ?? [], [productsResult?.data])
-  const categoriesById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories])
+  const categoriesById = useMemo(
+    () => new Map(categories.map((category) => [category.id, category])),
+    [categories],
+  )
 
   const { mutate: createMenuItem, isPending: isCreating } = useCreateMenuItem()
   const { mutate: updateMenuItem, isPending: isUpdating } = useUpdateMenuItem()
@@ -543,7 +666,40 @@ export function MenuItemFormPage({
     router.push(withLocale(locale, path) as Route)
   }
 
+  function canCreateForCategory(categoryIdValue: string): boolean {
+    const category = categoriesById.get(categoryIdValue)
+    return hasPermissionForTarget(
+      PermissionActions.CREATE_MENU_ITEM,
+      targetWithParents(
+        'MENU_CATEGORY',
+        categoryIdValue,
+        currentTenantId,
+        category
+          ? menuParents(category.menuId, selectedShopId, currentTenantId)
+          : shopParents(selectedShopId, currentTenantId),
+      ),
+    )
+  }
+
+  function canUpdateItem(item: MenuItemResponseDto, categoryIdValue = item.categoryId): boolean {
+    const category = categoriesById.get(categoryIdValue)
+    return hasPermissionForTarget(
+      PermissionActions.UPDATE_MENU_ITEM,
+      targetWithParents(
+        'MENU_ITEM',
+        item.id,
+        currentTenantId,
+        menuCategoryParents(categoryIdValue, category?.menuId, selectedShopId, currentTenantId),
+      ),
+    )
+  }
+
   function handleCreate(value: MenuItemFormValue) {
+    if (!canCreateForCategory(value.categoryId)) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     createMenuItem(
       {
         name: value.name,
@@ -568,6 +724,11 @@ export function MenuItemFormPage({
   }
 
   function handleUpdate(currentItem: MenuItemResponseDto, value: MenuItemFormValue) {
+    if (!canUpdateItem(currentItem, value.categoryId)) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     updateMenuItem(
       {
         id: currentItem.id,
@@ -603,6 +764,14 @@ export function MenuItemFormPage({
   }
 
   if (mode === 'edit') {
+    if (!canReadMenuItem) {
+      return (
+        <Box sx={{ p: 4 }}>
+          <Alert severity="warning">{unauthorizedReason}</Alert>
+        </Box>
+      )
+    }
+
     if (!menuItem) {
       return (
         <Box sx={{ p: 4 }}>
@@ -642,6 +811,9 @@ export function MenuItemFormPage({
           selectedCategoryLabel={categories.find((item) => item.id === menuItem.categoryId)?.name}
           showLinkedProducts={showLinkedProducts}
           isPending={isPending}
+          disabled={!canUpdateItem(menuItem)}
+          disabledReason={unauthorizedReason}
+          canSubmitValue={(value) => canUpdateItem(menuItem, value.categoryId)}
           onOpenProduct={(id) => goTo(`${ROUTES.catalog}/products/${id}`)}
           onCancel={(categoryId) =>
             goTo(categoryId ? `${ROUTES.catalog}/categories/${categoryId}` : ROUTES.catalog)
@@ -687,6 +859,9 @@ export function MenuItemFormPage({
         selectedCategoryLabel={initialCategoryLabel}
         showLinkedProducts={false}
         isPending={isPending}
+        disabled={false}
+        disabledReason={unauthorizedReason}
+        canSubmitValue={(value) => canCreateForCategory(value.categoryId)}
         onOpenProduct={(id) => goTo(`${ROUTES.catalog}/products/${id}`)}
         onCancel={(categoryId) =>
           goTo(categoryId ? `${ROUTES.catalog}/categories/${categoryId}` : ROUTES.catalog)

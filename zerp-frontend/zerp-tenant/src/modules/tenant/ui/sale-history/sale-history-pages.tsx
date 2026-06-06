@@ -108,18 +108,39 @@ function ScopeOrPermissionMessage() {
 
 export function SaleHistoryListPage() {
   const { scope } = useShopScope()
-  const { hasPermission } = useCurrentUserPermissions()
+  const { hasAnyShopPermission, hasShopPermission } = useCurrentUserPermissions()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
-  const canReadSaleHistory = hasPermission(PermissionActions.READ_SALE_HISTORY)
+  const canReadSaleHistory = Boolean(
+    selectedShopId &&
+    hasAnyShopPermission(
+      [PermissionActions.READ_SALE_HISTORY, PermissionActions.READ_TABLE_ORDER],
+      selectedShopId,
+    ),
+  )
+  const canReadShopTables = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_SHOP_TABLE, selectedShopId),
+  )
 
   if (!selectedShopId || !canReadSaleHistory) {
     return <ScopeOrPermissionMessage />
   }
 
-  return <SaleHistoryListContent key={selectedShopId} selectedShopId={selectedShopId} />
+  return (
+    <SaleHistoryListContent
+      key={selectedShopId}
+      selectedShopId={selectedShopId}
+      canReadShopTables={canReadShopTables}
+    />
+  )
 }
 
-function SaleHistoryListContent({ selectedShopId }: { selectedShopId: string }) {
+function SaleHistoryListContent({
+  selectedShopId,
+  canReadShopTables,
+}: {
+  selectedShopId: string
+  canReadShopTables: boolean
+}) {
   const { t, locale } = useI18n()
   const router = useRouter()
   const [page, setPage] = useState(0)
@@ -139,7 +160,7 @@ function SaleHistoryListContent({ selectedShopId }: { selectedShopId: string }) 
       filter: { shopId: selectedShopId, 'shop.id': selectedShopId },
     },
     {
-      enabled: true,
+      enabled: canReadShopTables,
     },
   )
   const filters = useMemo(() => {
@@ -455,10 +476,17 @@ export function SaleHistoryDetailPage({ tableOrderId }: { tableOrderId: string }
   const { t, locale } = useI18n()
   const router = useRouter()
   const { scope } = useShopScope()
-  const { hasPermission } = useCurrentUserPermissions()
-  const canReadSaleHistory = hasPermission(PermissionActions.READ_SALE_HISTORY)
+  const { hasAnyShopPermission } = useCurrentUserPermissions()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+  const canReadSaleHistory = Boolean(
+    selectedShopId &&
+    hasAnyShopPermission(
+      [PermissionActions.READ_SALE_HISTORY, PermissionActions.READ_TABLE_ORDER],
+      selectedShopId,
+    ),
+  )
   const { data: order, isLoading } = useTableOrder(
-    scope.mode === 'SHOP' && canReadSaleHistory ? tableOrderId : undefined,
+    selectedShopId && canReadSaleHistory ? tableOrderId : undefined,
   )
 
   function goTo(path: string) {

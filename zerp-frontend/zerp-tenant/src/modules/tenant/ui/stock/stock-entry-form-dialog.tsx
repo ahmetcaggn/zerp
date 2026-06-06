@@ -14,11 +14,15 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
+
 import { useCreateStockEntry } from '../../hooks/use-stock-operations'
 import { useStockResources } from '../../hooks/use-stock-resources'
+import { shopParents, targetWithParents } from '../../permissions/permission-targets'
 import type { StockEntryCreateRequestDto } from '../../types/stock'
 
 interface StockEntryFormDialogProps {
@@ -59,12 +63,19 @@ function normalizeQuantityForPayload(value: string): number {
 export function StockEntryFormDialog({ open, onClose, shopId }: StockEntryFormDialogProps) {
   const { t } = useI18n()
   const { showToast } = useToast()
+  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
   const createMutation = useCreateStockEntry()
-  const { data: resourcesData } = useStockResources({
-    pagination: { page: 1, perPage: 300 },
-    sort: { field: 'name', order: 'ASC' },
-    ...(shopId ? { filter: { 'shop.id': shopId } } : {}),
-  })
+  const canReadResources = Boolean(
+    shopId && hasShopPermission(PermissionActions.READ_STOCK_RESOURCE, shopId),
+  )
+  const { data: resourcesData } = useStockResources(
+    {
+      pagination: { page: 1, perPage: 300 },
+      sort: { field: 'name', order: 'ASC' },
+      ...(shopId ? { filter: { 'shop.id': shopId } } : {}),
+    },
+    { enabled: canReadResources },
+  )
 
   const [referenceNo, setReferenceNo] = useState('')
   const [notes, setNotes] = useState('')
@@ -72,13 +83,27 @@ export function StockEntryFormDialog({ open, onClose, shopId }: StockEntryFormDi
 
   const resources = resourcesData?.data ?? []
   const isPending = createMutation.isPending
-  const canSubmit = useMemo(
-    () =>
-      Boolean(shopId) &&
-      items.length > 0 &&
-      items.every((item) => item.stockResourceId && normalizeQuantityForPayload(item.quantityInput) > 0),
-    [items, shopId],
-  )
+  const canCreateForResource = (stockResourceId: string) => {
+    const resource = resources.find((item) => item.id === stockResourceId)
+    return hasPermissionForTarget(
+      PermissionActions.CREATE_STOCK_ENTRY,
+      targetWithParents(
+        'STOCK_RESOURCE',
+        stockResourceId,
+        currentTenantId,
+        shopParents(resource?.shopId ?? shopId, currentTenantId),
+      ),
+    )
+  }
+  const canSubmit =
+    Boolean(shopId) &&
+    items.length > 0 &&
+    items.every(
+      (item) =>
+        item.stockResourceId &&
+        normalizeQuantityForPayload(item.quantityInput) > 0 &&
+        canCreateForResource(item.stockResourceId),
+    )
 
   const setItem = (index: number, patch: Partial<StockEntryItemFormState>) => {
     setItems((prev) => prev.map((item, i) => (i === index ? { ...item, ...patch } : item)))
@@ -159,58 +184,74 @@ export function StockEntryFormDialog({ open, onClose, shopId }: StockEntryFormDi
 
             {items.map((item, index) => {
               return (
-              <Box key={index} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1.5 }}>
-                <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} alignItems={{ md: 'center' }}>
-                  <TextField
-                    select
-                    label={t('stock.tabs.resources')}
-                    value={item.stockResourceId}
-                    onChange={(e) => setItem(index, { stockResourceId: e.target.value })}
-                    sx={{ minWidth: 220 }}
-                    required
+                <Box
+                  key={index}
+                  sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1.5 }}
+                >
+                  <Stack
+                    direction={{ xs: 'column', md: 'row' }}
+                    spacing={1.5}
+                    alignItems={{ md: 'center' }}
                   >
-                    {resources.map((resource) => (
-                      <MenuItem key={resource.id} value={resource.id}>
-                        {resource.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                  <TextField
-                    label={t('stock.operation.quantity')}
-                    type="text"
-                    value={item.quantityInput}
-                    onChange={(e) => setItem(index, { quantityInput: e.target.value })}
-                    inputProps={{ inputMode: 'decimal' }}
-                    sx={{ minWidth: 140 }}
-                    required
-                  />
-                  <TextField
-                    label={t('stock.operation.referenceNoItem')}
-                    value={item.referenceNo ?? ''}
-                    onChange={(e) => setItem(index, { referenceNo: e.target.value })}
-                    sx={{ minWidth: 160 }}
-                  />
-                  <TextField
-                    label={t('stock.operation.notes')}
-                    value={item.notes ?? ''}
-                    onChange={(e) => setItem(index, { notes: e.target.value })}
-                    sx={{ minWidth: 180, flex: 1 }}
-                  />
-                  <IconButton
-                    onClick={() => removeItem(index)}
-                    disabled={items.length === 1}
-                    size="small"
-                    color="error"
-                    aria-label={t('stock.operation.removeItem')}
-                  >
-                    <DeleteOutlineIcon fontSize="small" />
-                  </IconButton>
-                </Stack>
-              </Box>
+                    <TextField
+                      select
+                      label={t('stock.tabs.resources')}
+                      value={item.stockResourceId}
+                      onChange={(e) => setItem(index, { stockResourceId: e.target.value })}
+                      sx={{ minWidth: 220 }}
+                      disabled={!canReadResources || isPending}
+                      required
+                    >
+                      {resources.map((resource) => (
+                        <MenuItem key={resource.id} value={resource.id}>
+                          {resource.name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                    <TextField
+                      label={t('stock.operation.quantity')}
+                      type="text"
+                      value={item.quantityInput}
+                      onChange={(e) => setItem(index, { quantityInput: e.target.value })}
+                      inputProps={{ inputMode: 'decimal' }}
+                      sx={{ minWidth: 140 }}
+                      disabled={isPending}
+                      required
+                    />
+                    <TextField
+                      label={t('stock.operation.referenceNoItem')}
+                      value={item.referenceNo ?? ''}
+                      onChange={(e) => setItem(index, { referenceNo: e.target.value })}
+                      sx={{ minWidth: 160 }}
+                      disabled={isPending}
+                    />
+                    <TextField
+                      label={t('stock.operation.notes')}
+                      value={item.notes ?? ''}
+                      onChange={(e) => setItem(index, { notes: e.target.value })}
+                      sx={{ minWidth: 180, flex: 1 }}
+                      disabled={isPending}
+                    />
+                    <IconButton
+                      onClick={() => removeItem(index)}
+                      disabled={items.length === 1}
+                      size="small"
+                      color="error"
+                      aria-label={t('stock.operation.removeItem')}
+                    >
+                      <DeleteOutlineIcon fontSize="small" />
+                    </IconButton>
+                  </Stack>
+                </Box>
               )
             })}
 
-            <Button variant="outlined" startIcon={<AddIcon />} onClick={addItem}>
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={addItem}
+              disabled={isPending}
+            >
               {t('stock.operation.addItem')}
             </Button>
 
@@ -222,7 +263,9 @@ export function StockEntryFormDialog({ open, onClose, shopId }: StockEntryFormDi
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} disabled={isPending}>{t('common.cancel')}</Button>
+          <Button onClick={onClose} disabled={isPending}>
+            {t('common.cancel')}
+          </Button>
           <Button type="submit" variant="contained" disabled={isPending || !canSubmit}>
             {isPending ? t('common.loading') : t('common.save')}
           </Button>

@@ -26,11 +26,11 @@ export function createResourceHooks<T, LT, C, U, ID extends string | number>(
         refetchOnWindowFocus: options?.refetchOnWindowFocus,
       }),
 
-    useOne: (id: ID | undefined) =>
+    useOne: (id: ID | undefined, options?: { enabled?: boolean }) =>
       useQuery({
         queryKey: oneKey(id as ID),
         queryFn: () => client.getOne(id as ID),
-        enabled: id !== undefined,
+        enabled: id !== undefined && options?.enabled !== false,
       }),
 
     useCreate: () => {

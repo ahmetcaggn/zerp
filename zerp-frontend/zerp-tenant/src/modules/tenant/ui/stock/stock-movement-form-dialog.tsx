@@ -1,5 +1,6 @@
 'use client'
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -10,14 +11,21 @@ import {
   MenuItem,
   Select,
   TextField,
-  Box,
 } from '@mui/material'
 import { useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
+import {
+  type PermissionAction,
+  PermissionActions,
+  useCurrentUserPermissions,
+} from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
-import { useCreateStockMovement, useStockMovements } from '../../hooks/use-stock-movements'
+
+import { useCreateStockMovement } from '../../hooks/use-stock-movements'
 import { useStockResources } from '../../hooks/use-stock-resources'
+import { shopParents, targetWithParents } from '../../permissions/permission-targets'
 import type { CreateStockMovementRequestDto, StockMovementType } from '../../types/stock'
 
 interface StockMovementFormDialogProps {
@@ -27,9 +35,13 @@ interface StockMovementFormDialogProps {
   preselectedType?: StockMovementType
 }
 
-const MOVEMENT_TYPES: StockMovementType[] = [
-  'SALE', 'WASTE', 'RETURN',
-]
+const MOVEMENT_TYPES: StockMovementType[] = ['SALE', 'WASTE', 'RETURN']
+
+function movementCreateAction(type: StockMovementType): PermissionAction {
+  if (type === 'WASTE') return PermissionActions.CREATE_STOCK_WASTE
+  if (type === 'RETURN') return PermissionActions.CREATE_STOCK_RETURN
+  return PermissionActions.CREATE_STOCK_MOVEMENT
+}
 
 function parseQuantityInput(value: string): number {
   const normalized = value.replace(',', '.').trim()
@@ -44,21 +56,31 @@ function normalizeQuantityForPayload(value: string): number {
   return Math.round(parsed * 1_000_000) / 1_000_000
 }
 
-export function StockMovementFormDialog({ open, onClose, preselectedResourceId, preselectedType }: StockMovementFormDialogProps) {
+export function StockMovementFormDialog({
+  open,
+  onClose,
+  preselectedResourceId,
+  preselectedType,
+}: StockMovementFormDialogProps) {
   const { t } = useI18n()
   const { showToast } = useToast()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
-  
-  const createMutation = useCreateStockMovement()
-  const { refetch: refetchMovements } = useStockMovements()
-  const { data: resourcesResponse, refetch: refetchResources } = useStockResources({
-    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
-  })
+  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
 
-  const initialType = preselectedType && MOVEMENT_TYPES.includes(preselectedType)
-    ? preselectedType
-    : 'WASTE'
+  const createMutation = useCreateStockMovement()
+  const canReadResources = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_STOCK_RESOURCE, selectedShopId),
+  )
+  const { data: resourcesResponse, refetch: refetchResources } = useStockResources(
+    {
+      ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+    },
+    { enabled: canReadResources },
+  )
+
+  const initialType =
+    preselectedType && MOVEMENT_TYPES.includes(preselectedType) ? preselectedType : 'WASTE'
 
   const [formData, setFormData] = useState<{
     stockResourceId: string
@@ -83,6 +105,10 @@ export function StockMovementFormDialog({ open, onClose, preselectedResourceId, 
       showToast(t('stock.operation.invalidItems'), { severity: 'warning' })
       return
     }
+    if (!canCreateMovement) {
+      showToast(t('common.unauthorized'), { severity: 'warning' })
+      return
+    }
 
     const payload: CreateStockMovementRequestDto = {
       stockResourceId: formData.stockResourceId,
@@ -94,8 +120,9 @@ export function StockMovementFormDialog({ open, onClose, preselectedResourceId, 
     try {
       await createMutation.mutateAsync(payload)
       showToast('Movement saved successfully', { severity: 'success' })
-      refetchMovements()
-      refetchResources()
+      if (canReadResources) {
+        refetchResources()
+      }
       onClose()
     } catch (err: any) {
       showToast(err?.message || 'Error saving movement', { severity: 'error' })
@@ -103,6 +130,21 @@ export function StockMovementFormDialog({ open, onClose, preselectedResourceId, 
   }
 
   const isPending = createMutation.isPending
+  const selectedResource = resourcesResponse?.data?.find(
+    (resource) => resource.id === formData.stockResourceId,
+  )
+  const canCreateMovement = Boolean(
+    formData.stockResourceId &&
+    hasPermissionForTarget(
+      movementCreateAction(formData.type),
+      targetWithParents(
+        'STOCK_RESOURCE',
+        formData.stockResourceId,
+        currentTenantId,
+        shopParents(selectedResource?.shopId ?? selectedShopId, currentTenantId),
+      ),
+    ),
+  )
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -110,7 +152,11 @@ export function StockMovementFormDialog({ open, onClose, preselectedResourceId, 
         <DialogTitle>{t('stock.movement.createButton')}</DialogTitle>
         <DialogContent dividers>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-            <FormControl fullWidth required disabled={!!preselectedResourceId}>
+            <FormControl
+              fullWidth
+              required
+              disabled={!!preselectedResourceId || !canReadResources || isPending}
+            >
               <InputLabel>{t('stock.tabs.resources')}</InputLabel>
               <Select
                 value={formData.stockResourceId}
@@ -125,7 +171,7 @@ export function StockMovementFormDialog({ open, onClose, preselectedResourceId, 
               </Select>
             </FormControl>
 
-            <FormControl fullWidth required>
+            <FormControl fullWidth required disabled={isPending}>
               <InputLabel>{t('stock.movement.type')}</InputLabel>
               <Select
                 value={formData.type}
@@ -149,8 +195,9 @@ export function StockMovementFormDialog({ open, onClose, preselectedResourceId, 
               inputProps={{ inputMode: 'decimal' }}
               required
               fullWidth
+              disabled={isPending}
             />
-            
+
             <TextField
               label={t('stock.movement.notes')}
               value={formData.notes}
@@ -158,12 +205,15 @@ export function StockMovementFormDialog({ open, onClose, preselectedResourceId, 
               multiline
               rows={3}
               fullWidth
+              disabled={isPending}
             />
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} disabled={isPending}>{t('common.cancel')}</Button>
-          <Button type="submit" variant="contained" disabled={isPending}>
+          <Button onClick={onClose} disabled={isPending}>
+            {t('common.cancel')}
+          </Button>
+          <Button type="submit" variant="contained" disabled={isPending || !canCreateMovement}>
             {isPending ? t('common.loading') : t('common.save')}
           </Button>
         </DialogActions>

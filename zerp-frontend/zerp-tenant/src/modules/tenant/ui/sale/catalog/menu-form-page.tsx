@@ -2,6 +2,7 @@
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -14,6 +15,7 @@ import {
   Select,
   Switch,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import type { Route } from 'next'
@@ -22,11 +24,13 @@ import { useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
 import { useCreateMenu, useMenu, useUpdateMenu } from '../../../hooks/use-menus'
+import { shopParents, targetWithParents } from '../../../permissions/permission-targets'
 import type { MenuLanguage, MenuResponseDto } from '../../../types/sale'
 
 interface Props {
@@ -45,12 +49,16 @@ function MenuFormCard({
   title,
   initial,
   isPending,
+  disabled,
+  disabledReason,
   onCancel,
   onSubmit,
 }: {
   title: string
   initial: MenuFormValue
   isPending: boolean
+  disabled: boolean
+  disabledReason?: string
   onCancel: () => void
   onSubmit: (value: MenuFormValue) => void
 }) {
@@ -70,6 +78,7 @@ function MenuFormCard({
         <form
           onSubmit={(e) => {
             e.preventDefault()
+            if (disabled) return
             if (!name.trim()) return
             onSubmit({ name: name.trim(), description, language, active })
           }}
@@ -81,6 +90,7 @@ function MenuFormCard({
               onChange={(e) => setName(e.target.value)}
               required
               fullWidth
+              disabled={disabled}
             />
             <TextField
               label={t('sale.menu.form.description')}
@@ -89,8 +99,9 @@ function MenuFormCard({
               multiline
               rows={3}
               fullWidth
+              disabled={disabled}
             />
-            <FormControl fullWidth>
+            <FormControl fullWidth disabled={disabled}>
               <InputLabel>{t('sale.menu.form.language')}</InputLabel>
               <Select
                 value={language}
@@ -103,7 +114,13 @@ function MenuFormCard({
             </FormControl>
 
             <FormControlLabel
-              control={<Switch checked={active} onChange={(e) => setActive(e.target.checked)} />}
+              control={
+                <Switch
+                  checked={active}
+                  disabled={disabled}
+                  onChange={(e) => setActive(e.target.checked)}
+                />
+              }
               label={t('sale.menu.form.isActive')}
             />
 
@@ -111,9 +128,13 @@ function MenuFormCard({
               <Button onClick={onCancel} disabled={isPending}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" variant="contained" disabled={isPending}>
-                {isPending ? t('common.loading') : t('common.save')}
-              </Button>
+              <Tooltip title={disabledReason ?? ''}>
+                <span>
+                  <Button type="submit" variant="contained" disabled={isPending || disabled}>
+                    {isPending ? t('common.loading') : t('common.save')}
+                  </Button>
+                </span>
+              </Tooltip>
             </Box>
           </Box>
         </form>
@@ -127,8 +148,29 @@ export function MenuFormPage({ mode, menuId }: Props) {
   const router = useRouter()
   const { showToast } = useToast()
   const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
 
-  const { data: menu, isLoading: isLoadingMenu } = useMenu(mode === 'edit' ? menuId : undefined)
+  const canCreateMenu = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.CREATE_MENU, selectedShopId),
+  )
+  const canReadMenu =
+    mode === 'edit'
+      ? hasPermissionForTarget(
+          PermissionActions.READ_MENU,
+          targetWithParents(
+            'MENU',
+            menuId,
+            currentTenantId,
+            shopParents(selectedShopId, currentTenantId),
+          ),
+        )
+      : true
+
+  const { data: menu, isLoading: isLoadingMenu } = useMenu(mode === 'edit' ? menuId : undefined, {
+    enabled: canReadMenu,
+  })
 
   const { mutate: createMenu, isPending: isCreating } = useCreateMenu()
   const { mutate: updateMenu, isPending: isUpdating } = useUpdateMenu()
@@ -141,6 +183,10 @@ export function MenuFormPage({ mode, menuId }: Props) {
   function handleCreate(value: MenuFormValue) {
     if (scope.mode !== 'SHOP') {
       showToast(t('sale.catalog.selectShopWarning'), { severity: 'warning' })
+      return
+    }
+    if (!canCreateMenu) {
+      showToast(unauthorizedReason, { severity: 'warning' })
       return
     }
 
@@ -163,6 +209,20 @@ export function MenuFormPage({ mode, menuId }: Props) {
   }
 
   function handleUpdate(currentMenu: MenuResponseDto, value: MenuFormValue) {
+    const canUpdateMenu = hasPermissionForTarget(
+      PermissionActions.UPDATE_MENU,
+      targetWithParents(
+        'MENU',
+        currentMenu.id,
+        currentTenantId,
+        shopParents(currentMenu.shopId, currentTenantId),
+      ),
+    )
+    if (!canUpdateMenu) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     updateMenu(
       {
         id: currentMenu.id,
@@ -184,6 +244,14 @@ export function MenuFormPage({ mode, menuId }: Props) {
   }
 
   if (mode === 'edit') {
+    if (!canReadMenu) {
+      return (
+        <Box sx={{ p: 4 }}>
+          <Alert severity="warning">{unauthorizedReason}</Alert>
+        </Box>
+      )
+    }
+
     if (isLoadingMenu) {
       return (
         <Box sx={{ py: 8, display: 'flex', justifyContent: 'center' }}>
@@ -199,6 +267,16 @@ export function MenuFormPage({ mode, menuId }: Props) {
         </Box>
       )
     }
+
+    const canUpdateMenu = hasPermissionForTarget(
+      PermissionActions.UPDATE_MENU,
+      targetWithParents(
+        'MENU',
+        menu.id,
+        currentTenantId,
+        shopParents(menu.shopId, currentTenantId),
+      ),
+    )
 
     return (
       <Box sx={{ p: { xs: 2, md: 4 }, width: '100%' }}>
@@ -217,6 +295,8 @@ export function MenuFormPage({ mode, menuId }: Props) {
             active: menu.active,
           }}
           isPending={isPending}
+          disabled={!canUpdateMenu}
+          disabledReason={unauthorizedReason}
           onCancel={() => goTo(`${ROUTES.catalog}/menus/${menu.id}`)}
           onSubmit={(value) => handleUpdate(menu, value)}
         />
@@ -236,6 +316,8 @@ export function MenuFormPage({ mode, menuId }: Props) {
         title={t('sale.catalog.menuCreateTitle')}
         initial={{ name: '', description: '', language: 'TR', active: false }}
         isPending={isPending}
+        disabled={!selectedShopId || !canCreateMenu}
+        disabledReason={!selectedShopId ? t('sale.catalog.selectShopWarning') : unauthorizedReason}
         onCancel={() => goTo(ROUTES.catalog)}
         onSubmit={handleCreate}
       />

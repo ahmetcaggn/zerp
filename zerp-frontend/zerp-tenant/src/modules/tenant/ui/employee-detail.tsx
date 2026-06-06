@@ -12,6 +12,7 @@ import FingerprintIcon from '@mui/icons-material/Fingerprint'
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn'
 import PersonIcon from '@mui/icons-material/Person'
 import {
+  Alert,
   Avatar,
   Box,
   Button,
@@ -30,6 +31,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
@@ -51,6 +53,8 @@ interface EmployeeDetailViewProps {
   id?: string
   mode?: 'detail' | 'profile'
   showBackButton?: boolean
+  canUpdate?: boolean
+  disabledReason?: string
 }
 
 function InfoRow({
@@ -77,13 +81,7 @@ function InfoRow({
   )
 }
 
-function SectionCard({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
+function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <Card variant="outlined" sx={{ height: '100%' }}>
       <CardContent>
@@ -114,6 +112,8 @@ export function EmployeeDetailView({
   id,
   mode = 'detail',
   showBackButton = true,
+  canUpdate = true,
+  disabledReason,
 }: EmployeeDetailViewProps) {
   const { t, locale } = useI18n()
   const router = useRouter()
@@ -123,12 +123,12 @@ export function EmployeeDetailView({
     EmploymentStatusValue,
     { color: 'success' | 'info' | 'warning' | 'error' | 'default'; label: string }
   > = {
-    ACTIVE:     { color: 'success', label: t('employees.statusActive') },
-    PROBATION:  { color: 'info',    label: t('employees.statusProbation') },
-    ON_LEAVE:   { color: 'warning', label: t('employees.statusOnLeave') },
-    SUSPENDED:  { color: 'error',   label: t('employees.statusSuspended') },
+    ACTIVE: { color: 'success', label: t('employees.statusActive') },
+    PROBATION: { color: 'info', label: t('employees.statusProbation') },
+    ON_LEAVE: { color: 'warning', label: t('employees.statusOnLeave') },
+    SUSPENDED: { color: 'error', label: t('employees.statusSuspended') },
     TERMINATED: { color: 'default', label: t('employees.statusTerminated') },
-    RETIRED:    { color: 'default', label: t('employees.statusRetired') },
+    RETIRED: { color: 'default', label: t('employees.statusRetired') },
   }
 
   const fullName =
@@ -160,10 +160,12 @@ export function EmployeeDetailView({
           <Box />
         )}
         {!isProfileMode && (
-          <Tooltip title={t('employees.editButton')}>
-            <IconButton onClick={() => setEditOpen(true)} color="primary">
-              <EditIcon />
-            </IconButton>
+          <Tooltip title={disabledReason ?? t('employees.editButton')}>
+            <span>
+              <IconButton onClick={() => setEditOpen(true)} color="primary" disabled={!canUpdate}>
+                <EditIcon />
+              </IconButton>
+            </span>
           </Tooltip>
         )}
       </Box>
@@ -363,6 +365,8 @@ export function EmployeeDetailView({
             mode="edit"
             employee={employee as EmployeeResponseDto}
             onClose={() => setEditOpen(false)}
+            disabled={!canUpdate}
+            disabledReason={disabledReason}
           />
         </>
       )}
@@ -371,10 +375,31 @@ export function EmployeeDetailView({
 }
 
 export function EmployeeDetail({ id }: Props) {
+  const { t } = useI18n()
   const { showToast } = useToast()
-  const { data: employee, isLoading, error } = useEmployee(id)
+  const { currentTenantId, hasPermissionForTarget, getDisabledReason, isLoadingPermissions } =
+    useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
+  const loadingReason = t('common.loading')
+  const employeeTarget = {
+    targetType: 'EMPLOYEE',
+    targetId: id,
+    tenantId: currentTenantId,
+    parentTargets: currentTenantId
+      ? [{ targetType: 'TENANT', targetId: currentTenantId }]
+      : undefined,
+  }
+  const canReadEmployee = hasPermissionForTarget(PermissionActions.READ_EMPLOYEE, employeeTarget)
+  const canUpdateEmployee = hasPermissionForTarget(
+    PermissionActions.UPDATE_EMPLOYEE,
+    employeeTarget,
+  )
+  const disabledReason = isLoadingPermissions
+    ? loadingReason
+    : getDisabledReason(canUpdateEmployee, unauthorizedReason)
+  const { data: employee, isLoading, error } = useEmployee(id, { enabled: canReadEmployee })
 
-  if (isLoading) {
+  if (isLoadingPermissions || isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}>
         <CircularProgress />
@@ -387,7 +412,18 @@ export function EmployeeDetail({ id }: Props) {
     return null
   }
 
+  if (!canReadEmployee) {
+    return <Alert severity="warning">{unauthorizedReason}</Alert>
+  }
+
   if (!employee) return null
 
-  return <EmployeeDetailView employee={employee} id={id} />
+  return (
+    <EmployeeDetailView
+      employee={employee}
+      id={id}
+      canUpdate={canUpdateEmployee}
+      disabledReason={disabledReason}
+    />
+  )
 }

@@ -352,7 +352,8 @@ export const enMessages = {
     requiredName: 'Shop name is required.',
     latitudeValidation: 'Latitude must be between -90 and 90.',
     longitudeValidation: 'Longitude must be between -180 and 180.',
-    workingHoursValidation: 'Opening time must be before closing time unless the day is open 24 hours.',
+    workingHoursValidation:
+      'Opening time must be before closing time unless the day is open 24 hours.',
     updatedToast: 'Shop details updated.',
     imageUploadedToast: 'Shop image updated.',
     imageUploadError: 'Image upload failed.',
@@ -658,12 +659,6 @@ export const enMessages = {
   },
   stock: {
     title: 'Stock Management',
-    kpi: {
-      totalVariance: 'Total Variance',
-      negativeVarianceSku: 'Negative Variance SKU',
-      topRisky5: 'Top 5 Risky Items',
-      lastCountVariance: 'Last Count Variance',
-    },
     tabs: {
       resources: 'Current Stock',
       movements: 'Movements',

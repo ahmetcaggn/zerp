@@ -14,9 +14,10 @@ interface Props {
   cart: CartItem[]
   onAdd: (item: MenuItemResponseDto) => void
   isLoading: boolean
+  disabled?: boolean
 }
 
-export function ProductGrid({ items, cart, onAdd, isLoading }: Props) {
+export function ProductGrid({ items, cart, onAdd, isLoading, disabled = false }: Props) {
   const { t } = useI18n()
   function getQty(id: string): number {
     return cart
@@ -82,6 +83,7 @@ export function ProductGrid({ items, cart, onAdd, isLoading }: Props) {
         return (
           <ButtonBase
             key={item.id}
+            disabled={disabled}
             onClick={() => onAdd(item)}
             sx={{
               display: 'flex',
@@ -102,10 +104,13 @@ export function ProductGrid({ items, cart, onAdd, isLoading }: Props) {
               boxShadow: inCart ? 0 : '0 1px 3px rgba(0,0,0,0.07)',
               transition: 'all 0.12s',
               '&:active': { transform: 'scale(0.96)' },
-              '&:hover': {
-                borderColor: 'primary.main',
-                boxShadow: 2,
-              },
+              '&:hover': disabled
+                ? {}
+                : {
+                    borderColor: 'primary.main',
+                    boxShadow: 2,
+                  },
+              opacity: disabled ? 0.55 : 1,
               textAlign: 'left',
             }}
           >

@@ -1,26 +1,38 @@
 'use client'
-import { useState } from 'react'
-import {
-  Box, Card, CardActionArea, Chip, IconButton,
-  Menu, MenuItem, Divider, Typography,
-} from '@mui/material'
+import LayersIcon from '@mui/icons-material/Layers'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline'
-import LayersIcon from '@mui/icons-material/Layers'
+import {
+  Box,
+  Card,
+  CardActionArea,
+  Chip,
+  Divider,
+  IconButton,
+  Menu,
+  MenuItem,
+  Typography,
+} from '@mui/material'
+import { useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
+
 import type { ShopTableResponseDto, ShopTableStatus } from '../../types/sale'
 
-const STATUS_STYLE: Record<ShopTableStatus, { bg: string; border: string; chip: 'success' | 'error' | 'warning' | 'default' }> = {
-  AVAILABLE:    { bg: 'rgba(22,163,74,0.09)',    border: '#16a34a', chip: 'success'  },
-  OCCUPIED:     { bg: 'rgba(220,38,38,0.09)',    border: '#dc2626', chip: 'error'    },
-  RESERVED:     { bg: 'rgba(217,119,6,0.09)',    border: '#d97706', chip: 'warning'  },
-  OUT_OF_ORDER: { bg: 'rgba(107,114,128,0.09)', border: '#9ca3af', chip: 'default'  },
+const STATUS_STYLE: Record<
+  ShopTableStatus,
+  { bg: string; border: string; chip: 'success' | 'error' | 'warning' | 'default' }
+> = {
+  AVAILABLE: { bg: 'rgba(22,163,74,0.09)', border: '#16a34a', chip: 'success' },
+  OCCUPIED: { bg: 'rgba(220,38,38,0.09)', border: '#dc2626', chip: 'error' },
+  RESERVED: { bg: 'rgba(217,119,6,0.09)', border: '#d97706', chip: 'warning' },
+  OUT_OF_ORDER: { bg: 'rgba(107,114,128,0.09)', border: '#9ca3af', chip: 'default' },
 }
 
 const STATUS_KEY: Record<ShopTableStatus, string> = {
-  AVAILABLE:    'pos.statusAvailable',
-  OCCUPIED:     'pos.statusOccupied',
-  RESERVED:     'pos.statusReserved',
+  AVAILABLE: 'pos.statusAvailable',
+  OCCUPIED: 'pos.statusOccupied',
+  RESERVED: 'pos.statusReserved',
   OUT_OF_ORDER: 'pos.statusOutOfOrder',
 }
 
@@ -30,9 +42,23 @@ interface Props {
   onEdit: (table: ShopTableResponseDto) => void
   onDelete: (id: string) => void
   onChangeStatus: (table: ShopTableResponseDto, status: ShopTableStatus) => void
+  canOpen: boolean
+  canEdit: boolean
+  canDelete: boolean
+  canUpdateStatus: boolean
 }
 
-export function TableCard({ table, onTap, onEdit, onDelete, onChangeStatus }: Props) {
+export function TableCard({
+  table,
+  onTap,
+  onEdit,
+  onDelete,
+  onChangeStatus,
+  canOpen,
+  canEdit,
+  canDelete,
+  canUpdateStatus,
+}: Props) {
   const { t } = useI18n()
   const style = STATUS_STYLE[table.status]
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
@@ -52,10 +78,14 @@ export function TableCard({ table, onTap, onEdit, onDelete, onChangeStatus }: Pr
     >
       <CardActionArea
         onClick={() => onTap(table.id)}
+        disabled={!canOpen}
         sx={{
-          p: 2, minHeight: 160,
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'flex-start', justifyContent: 'space-between',
+          p: 2,
+          minHeight: 160,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
         }}
       >
         <Typography
@@ -95,10 +125,16 @@ export function TableCard({ table, onTap, onEdit, onDelete, onChangeStatus }: Pr
 
       <IconButton
         size="small"
-        onClick={(e) => { e.stopPropagation(); setAnchor(e.currentTarget) }}
+        onClick={(e) => {
+          e.stopPropagation()
+          setAnchor(e.currentTarget)
+        }}
         sx={{
-          position: 'absolute', top: 8, right: 8,
-          width: 28, height: 28,
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          width: 28,
+          height: 28,
           bgcolor: 'background.paper',
           border: '1px solid',
           borderColor: 'divider',
@@ -109,31 +145,56 @@ export function TableCard({ table, onTap, onEdit, onDelete, onChangeStatus }: Pr
       </IconButton>
 
       <Menu anchorEl={anchor} open={!!anchor} onClose={() => setAnchor(null)}>
-        <MenuItem dense onClick={() => { setAnchor(null); onTap(table.id) }}>
+        <MenuItem
+          dense
+          disabled={!canOpen}
+          onClick={() => {
+            setAnchor(null)
+            onTap(table.id)
+          }}
+        >
           {t('pos.openOrderMenu')}
         </MenuItem>
         <Divider />
         <MenuItem dense disabled>
           {t('pos.changeStatusMenu')}
         </MenuItem>
-        {(['AVAILABLE', 'RESERVED', 'OCCUPIED', 'OUT_OF_ORDER'] as ShopTableStatus[]).map(status => (
-          <MenuItem
-            key={status}
-            dense
-            selected={table.status === status}
-            onClick={() => {
-              setAnchor(null)
-              onChangeStatus(table, status)
-            }}
-          >
-            {t(STATUS_KEY[status])}
-          </MenuItem>
-        ))}
+        {(['AVAILABLE', 'RESERVED', 'OCCUPIED', 'OUT_OF_ORDER'] as ShopTableStatus[]).map(
+          (status) => (
+            <MenuItem
+              key={status}
+              dense
+              selected={table.status === status}
+              disabled={!canUpdateStatus}
+              onClick={() => {
+                setAnchor(null)
+                onChangeStatus(table, status)
+              }}
+            >
+              {t(STATUS_KEY[status])}
+            </MenuItem>
+          ),
+        )}
         <Divider />
-        <MenuItem dense onClick={() => { setAnchor(null); onEdit(table) }}>
+        <MenuItem
+          dense
+          disabled={!canEdit}
+          onClick={() => {
+            setAnchor(null)
+            onEdit(table)
+          }}
+        >
           {t('common.edit')}
         </MenuItem>
-        <MenuItem dense sx={{ color: 'error.main' }} onClick={() => { setAnchor(null); onDelete(table.id) }}>
+        <MenuItem
+          dense
+          disabled={!canDelete}
+          sx={{ color: 'error.main' }}
+          onClick={() => {
+            setAnchor(null)
+            onDelete(table.id)
+          }}
+        >
           {t('common.delete')}
         </MenuItem>
       </Menu>

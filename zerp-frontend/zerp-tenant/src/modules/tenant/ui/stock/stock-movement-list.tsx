@@ -1,4 +1,7 @@
 'use client'
+
+/* eslint-disable react-hooks/set-state-in-effect */
+
 import AddIcon from '@mui/icons-material/Add'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -13,22 +16,28 @@ import {
   Paper,
   Select,
   type SelectChangeEvent,
-  TextField,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TablePagination,
   TableRow,
+  TextField,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
-import { formatDate } from '@/core/utils/date-formatter'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
-import { useStockMovementDrillDown, useStockMovementTimeline } from '../../hooks/use-stock-movements'
+import { formatDate } from '@/core/utils/date-formatter'
+
+import {
+  useStockMovementDrillDown,
+  useStockMovementTimeline,
+} from '../../hooks/use-stock-movements'
 import { useStockOverview, useStockResources } from '../../hooks/use-stock-resources'
 import type {
   StockMovementResponseDto,
@@ -62,7 +71,8 @@ function getSignedMovement(movement: StockMovementResponseDto): number {
   if (movement.direction === 'OUT') return roundQuantity(-quantity)
 
   if (movement.type === 'PURCHASE' || movement.type === 'RETURN') return roundQuantity(quantity)
-  if (movement.type === 'SALE' || movement.type === 'WASTE' || movement.type === 'TRANSFER') return roundQuantity(-quantity)
+  if (movement.type === 'SALE' || movement.type === 'WASTE' || movement.type === 'TRANSFER')
+    return roundQuantity(-quantity)
 
   return roundQuantity(toNumber(movement.newQuantity) - toNumber(movement.previousQuantity))
 }
@@ -72,12 +82,16 @@ function formatSignedQuantity(value: number, localeCode: string): string {
   if (normalized === 0) {
     return '0'
   }
-  const formatted = new Intl.NumberFormat(localeCode, { maximumFractionDigits: 6 }).format(Math.abs(normalized))
+  const formatted = new Intl.NumberFormat(localeCode, { maximumFractionDigits: 6 }).format(
+    Math.abs(normalized),
+  )
   return normalized > 0 ? `+${formatted}` : `-${formatted}`
 }
 
 function formatQuantity(value: number | string | null | undefined, localeCode: string): string {
-  return new Intl.NumberFormat(localeCode, { maximumFractionDigits: 6 }).format(roundQuantity(toNumber(value)))
+  return new Intl.NumberFormat(localeCode, { maximumFractionDigits: 6 }).format(
+    roundQuantity(toNumber(value)),
+  )
 }
 
 function formatDateTime(value: string, locale: string): string {
@@ -123,7 +137,10 @@ function addMonths(date: Date, months: number): Date {
   return next
 }
 
-function getPeriodRange(period: StockMovementTimelineBucket, cursor: Date): { from: Date; to: Date } {
+function getPeriodRange(
+  period: StockMovementTimelineBucket,
+  cursor: Date,
+): { from: Date; to: Date } {
   if (period === 'DAY') {
     const from = startOfDay(cursor)
     return { from, to: addDays(from, 1) }
@@ -172,10 +189,17 @@ function resolveTimelineBucket(period: StockMovementTimelineBucket): StockMoveme
   return 'DAY'
 }
 
-function formatBucketLabel(bucket: StockMovementTimelineBucketResponseDto, period: StockMovementTimelineBucket, locale: 'tr' | 'en'): string {
+function formatBucketLabel(
+  bucket: StockMovementTimelineBucketResponseDto,
+  period: StockMovementTimelineBucket,
+  locale: 'tr' | 'en',
+): string {
   const start = new Date(bucket.bucketStart)
   if (period === 'MONTH') {
-    return new Intl.DateTimeFormat(locale === 'tr' ? 'tr-TR' : 'en-US', { month: 'short', year: 'numeric' }).format(start)
+    return new Intl.DateTimeFormat(locale === 'tr' ? 'tr-TR' : 'en-US', {
+      month: 'short',
+      year: 'numeric',
+    }).format(start)
   }
   if (period === 'WEEK') {
     const end = new Date(bucket.bucketEnd)
@@ -209,12 +233,16 @@ function formatBucketLabelParts(
 
   if (bucketType === 'DAY') {
     const dayName = new Intl.DateTimeFormat(localeCode, { weekday: 'short' }).format(start)
-    const dayDate = new Intl.DateTimeFormat(localeCode, { day: '2-digit', month: 'short' }).format(start)
+    const dayDate = new Intl.DateTimeFormat(localeCode, { day: '2-digit', month: 'short' }).format(
+      start,
+    )
     return { top: dayName, bottom: dayDate }
   }
 
   const top = `${String(start.getDate()).padStart(2, '0')}-${String(endInclusive.getDate()).padStart(2, '0')}`
-  const bottom = new Intl.DateTimeFormat(localeCode, { month: 'short', year: '2-digit' }).format(start)
+  const bottom = new Intl.DateTimeFormat(localeCode, { month: 'short', year: '2-digit' }).format(
+    start,
+  )
   return { top, bottom }
 }
 
@@ -226,6 +254,19 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
   const { t, locale } = useI18n()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+  const { hasShopPermission } = useCurrentUserPermissions()
+  const canReadResources = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_STOCK_RESOURCE, selectedShopId),
+  )
+  const canReadMovements = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_STOCK_MOVEMENT, selectedShopId),
+  )
+  const canCreateMovement = Boolean(
+    selectedShopId &&
+    (hasShopPermission(PermissionActions.CREATE_STOCK_MOVEMENT, selectedShopId) ||
+      hasShopPermission(PermissionActions.CREATE_STOCK_WASTE, selectedShopId) ||
+      hasShopPermission(PermissionActions.CREATE_STOCK_RETURN, selectedShopId)),
+  )
   const isTrackingMode = mode === 'tracking'
 
   const [period, setPeriod] = useState<StockMovementTimelineBucket>('WEEK')
@@ -240,14 +281,18 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
   const rangeFromIso = toApiLocalDateTime(periodRange.from)
   const rangeToIso = toApiLocalDateTime(periodRange.to)
   const timelineBucket = useMemo(() => resolveTimelineBucket(period), [period])
-  const selectedStockResourceId = selectedStockType === ALL_STOCK_TYPES ? undefined : selectedStockType
+  const selectedStockResourceId =
+    selectedStockType === ALL_STOCK_TYPES ? undefined : selectedStockType
 
-  const { data: resourcesData } = useStockResources({
-    pagination: { page: 1, perPage: 300 },
-    sort: { field: 'name', order: 'ASC' },
-    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
-  })
-  const { data: overviewData } = useStockOverview(selectedShopId)
+  const { data: resourcesData } = useStockResources(
+    {
+      pagination: { page: 1, perPage: 300 },
+      sort: { field: 'name', order: 'ASC' },
+      ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+    },
+    { enabled: canReadResources },
+  )
+  const { data: overviewData } = useStockOverview(selectedShopId, { enabled: canReadResources })
 
   const {
     data: timeline,
@@ -259,6 +304,7 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
     from: rangeFromIso,
     to: rangeToIso,
     bucket: timelineBucket,
+    enabled: canReadMovements,
   })
 
   const selectedBucket = useMemo(
@@ -279,18 +325,18 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
     from: drillDownFrom,
     to: drillDownTo,
     limit: 1000,
+    enabled: canReadMovements,
   })
 
-  const {
-    data: chartRangeMovements,
-    isLoading: isLoadingChartRangeMovements,
-  } = useStockMovementDrillDown({
-    shopId: selectedShopId,
-    stockResourceId: selectedStockResourceId,
-    from: rangeFromIso,
-    to: rangeToIso,
-    limit: 3000,
-  })
+  const { data: chartRangeMovements, isLoading: isLoadingChartRangeMovements } =
+    useStockMovementDrillDown({
+      shopId: selectedShopId,
+      stockResourceId: selectedStockResourceId,
+      from: rangeFromIso,
+      to: rangeToIso,
+      limit: 3000,
+      enabled: canReadMovements,
+    })
 
   useEffect(() => {
     setSelectedBucketStart(null)
@@ -322,7 +368,9 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
       const createdAtMs = new Date(movement.createdAt).getTime()
       if (!Number.isFinite(createdAtMs)) continue
 
-      const bucketIndex = ranges.findIndex((range) => createdAtMs >= range.startMs && createdAtMs < range.endMs)
+      const bucketIndex = ranges.findIndex(
+        (range) => createdAtMs >= range.startMs && createdAtMs < range.endMs,
+      )
       if (bucketIndex < 0) continue
 
       const signed = getSignedMovement(movement)
@@ -379,7 +427,10 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
     return values
   }, [yMinMax.max, yMinMax.min])
 
-  const handlePeriodChange = (_: React.MouseEvent<HTMLElement>, nextValue: StockMovementTimelineBucket | null) => {
+  const handlePeriodChange = (
+    _: React.MouseEvent<HTMLElement>,
+    nextValue: StockMovementTimelineBucket | null,
+  ) => {
     if (nextValue) {
       setPeriod(nextValue)
     }
@@ -443,11 +494,14 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6">{isTrackingMode ? t('stock.tabs.graphTracking') : t('stock.tabs.movements')}</Typography>
+        <Typography variant="h6">
+          {isTrackingMode ? t('stock.tabs.graphTracking') : t('stock.tabs.movements')}
+        </Typography>
         {!isTrackingMode && (
           <Button
             variant="contained"
             startIcon={<AddIcon />}
+            disabled={!canCreateMovement}
             onClick={() => setFormOpen(true)}
           >
             {t('stock.movement.createButton')}
@@ -461,18 +515,19 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
         </Alert>
       )}
 
+      {!canReadMovements && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          {t('common.unauthorized')}
+        </Alert>
+      )}
+
       <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2 }}>
           <Box>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               {t('stock.movement.filters.period')}
             </Typography>
-            <ToggleButtonGroup
-              size="small"
-              exclusive
-              value={period}
-              onChange={handlePeriodChange}
-            >
+            <ToggleButtonGroup size="small" exclusive value={period} onChange={handlePeriodChange}>
               <ToggleButton value="DAY">{t('stock.movement.filters.periods.DAY')}</ToggleButton>
               <ToggleButton value="WEEK">{t('stock.movement.filters.periods.WEEK')}</ToggleButton>
               <ToggleButton value="MONTH">{t('stock.movement.filters.periods.MONTH')}</ToggleButton>
@@ -486,7 +541,9 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
               value={selectedStockType}
               onChange={handleStockTypeChange}
             >
-              <MenuItem value={ALL_STOCK_TYPES}>{t('stock.movement.filters.allStockTypes')}</MenuItem>
+              <MenuItem value={ALL_STOCK_TYPES}>
+                {t('stock.movement.filters.allStockTypes')}
+              </MenuItem>
               {resourcesData?.data?.map((resource) => (
                 <MenuItem key={resource.id} value={resource.id}>
                   {resource.name}
@@ -495,7 +552,10 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
             </Select>
           </FormControl>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Button size="small" onClick={() => setCursorDate((prev) => shiftCursor(period, prev, -1))}>
+            <Button
+              size="small"
+              onClick={() => setCursorDate((prev) => shiftCursor(period, prev, -1))}
+            >
               <ChevronLeftIcon fontSize="small" />
               {t('stock.movement.filters.previous')}
             </Button>
@@ -516,7 +576,11 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
               <TextField
                 size="small"
                 type="date"
-                label={period === 'DAY' ? t('stock.movement.filters.selectedDay') : t('stock.movement.filters.selectedWeek')}
+                label={
+                  period === 'DAY'
+                    ? t('stock.movement.filters.selectedDay')
+                    : t('stock.movement.filters.selectedWeek')
+                }
                 value={formatDateInputValue(cursorDate)}
                 onChange={(e) => {
                   const parsed = parseDateInputValue(e.target.value)
@@ -526,7 +590,10 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
                 sx={{ minWidth: 170 }}
               />
             )}
-            <Button size="small" onClick={() => setCursorDate((prev) => shiftCursor(period, prev, 1))}>
+            <Button
+              size="small"
+              onClick={() => setCursorDate((prev) => shiftCursor(period, prev, 1))}
+            >
               {t('stock.movement.filters.next')}
               <ChevronRightIcon fontSize="small" />
             </Button>
@@ -543,7 +610,9 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
       </Paper>
 
       <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2, backgroundColor: '#f8fbf8' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+        <Box
+          sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}
+        >
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
             {t('stock.movement.chart.title')}
           </Typography>
@@ -561,7 +630,10 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
                   }}
                 >
                   <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                    {t('stock.resource.table.realStock')}: {new Intl.NumberFormat(localeCode, { maximumFractionDigits: 2 }).format(selectedOverview.real)}
+                    {t('stock.resource.table.realStock')}:{' '}
+                    {new Intl.NumberFormat(localeCode, { maximumFractionDigits: 2 }).format(
+                      selectedOverview.real,
+                    )}
                   </Typography>
                 </Box>
                 <Box
@@ -575,7 +647,10 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
                   }}
                 >
                   <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                    {t('stock.resource.table.expectedStock')}: {new Intl.NumberFormat(localeCode, { maximumFractionDigits: 2 }).format(selectedOverview.expected)}
+                    {t('stock.resource.table.expectedStock')}:{' '}
+                    {new Intl.NumberFormat(localeCode, { maximumFractionDigits: 2 }).format(
+                      selectedOverview.expected,
+                    )}
                   </Typography>
                 </Box>
               </>
@@ -591,7 +666,15 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
             {t('stock.movement.chart.emptyState')}
           </Typography>
         ) : (
-          <Box sx={{ width: '100%', overflowX: 'auto', borderRadius: 2, bgcolor: 'background.paper', p: 1 }}>
+          <Box
+            sx={{
+              width: '100%',
+              overflowX: 'auto',
+              borderRadius: 2,
+              bgcolor: 'background.paper',
+              p: 1,
+            }}
+          >
             <svg
               viewBox={`0 0 ${chartWidth} ${CHART_HEIGHT}`}
               width="100%"
@@ -631,7 +714,9 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
                       fill="#5f6f68"
                       fontSize={11}
                     >
-                      {new Intl.NumberFormat(localeCode, { maximumFractionDigits: 2 }).format(tickValue)}
+                      {new Intl.NumberFormat(localeCode, { maximumFractionDigits: 2 }).format(
+                        tickValue,
+                      )}
                     </text>
                   </g>
                 )
@@ -651,14 +736,21 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
                 const outflow = point.outflow
                 const yInflow = chartLayout.scaleY(inflow)
                 const yOutflow = chartLayout.scaleY(-outflow)
-                const flowBarWidth = Math.max(6, Math.min(16, chartLayout.plotWidth / Math.max(chartLayout.pointCount * 5.4, 18)))
+                const flowBarWidth = Math.max(
+                  6,
+                  Math.min(16, chartLayout.plotWidth / Math.max(chartLayout.pointCount * 5.4, 18)),
+                )
                 const flowGap = Math.max(3, Math.min(8, flowBarWidth * 0.6))
                 const leftBarX = x - flowGap / 2 - flowBarWidth
                 const rightBarX = x + flowGap / 2
                 const isSelected = selectedBucketStart === point.bucketStart
                 const labelParts = formatBucketLabelParts(point, timelineBucket, locale)
-                const inflowLabel = new Intl.NumberFormat(localeCode, { maximumFractionDigits: 2 }).format(inflow)
-                const outflowLabel = new Intl.NumberFormat(localeCode, { maximumFractionDigits: 2 }).format(outflow)
+                const inflowLabel = new Intl.NumberFormat(localeCode, {
+                  maximumFractionDigits: 2,
+                }).format(inflow)
+                const outflowLabel = new Intl.NumberFormat(localeCode, {
+                  maximumFractionDigits: 2,
+                }).format(outflow)
                 return (
                   <g key={`${point.bucketStart}-${index}`}>
                     <rect
@@ -716,9 +808,19 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
                         </text>
                       </>
                     )}
-                    <text x={x} y={CHART_HEIGHT - 32} textAnchor="middle" fill="#5f6f68" fontSize={10}>
-                      <tspan x={x} dy="0">{labelParts.top}</tspan>
-                      <tspan x={x} dy="12">{labelParts.bottom}</tspan>
+                    <text
+                      x={x}
+                      y={CHART_HEIGHT - 32}
+                      textAnchor="middle"
+                      fill="#5f6f68"
+                      fontSize={10}
+                    >
+                      <tspan x={x} dy="0">
+                        {labelParts.top}
+                      </tspan>
+                      <tspan x={x} dy="12">
+                        {labelParts.bottom}
+                      </tspan>
                     </text>
                   </g>
                 )
@@ -737,87 +839,102 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
       </Paper>
 
       {!isTrackingMode && (
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            {t('stock.movement.drillDown.title')}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {listRangeLabel}
-          </Typography>
-        </Box>
+        <Paper variant="outlined" sx={{ p: 2 }}>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}
+          >
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              {t('stock.movement.drillDown.title')}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {listRangeLabel}
+            </Typography>
+          </Box>
 
-        {isLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <Box sx={{ overflowX: 'auto' }}>
-            {isFetching && (
-              <Typography variant="caption" color="text.secondary">
-                {t('common.loading')}
-              </Typography>
-            )}
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>{t('stock.movement.date')}</TableCell>
-                  <TableCell>{t('stock.resource.form.name')}</TableCell>
-                  <TableCell>{t('stock.movement.type')}</TableCell>
-                  <TableCell align="right">{t('stock.movement.quantity')}</TableCell>
-                  <TableCell align="right">{t('stock.movement.expectedBefore')}</TableCell>
-                  <TableCell align="right">{t('stock.movement.expectedAfter')}</TableCell>
-                  <TableCell>{t('stock.movement.reference')}</TableCell>
-                  <TableCell>{t('stock.movement.notes')}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {!movements.length ? (
+          {isLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Box sx={{ overflowX: 'auto' }}>
+              {isFetching && (
+                <Typography variant="caption" color="text.secondary">
+                  {t('common.loading')}
+                </Typography>
+              )}
+              <Table>
+                <TableHead>
                   <TableRow>
-                    <TableCell colSpan={8} align="center">
-                      {t('stock.movement.emptyState')}
-                    </TableCell>
+                    <TableCell>{t('stock.movement.date')}</TableCell>
+                    <TableCell>{t('stock.resource.form.name')}</TableCell>
+                    <TableCell>{t('stock.movement.type')}</TableCell>
+                    <TableCell align="right">{t('stock.movement.quantity')}</TableCell>
+                    <TableCell align="right">{t('stock.movement.expectedBefore')}</TableCell>
+                    <TableCell align="right">{t('stock.movement.expectedAfter')}</TableCell>
+                    <TableCell>{t('stock.movement.reference')}</TableCell>
+                    <TableCell>{t('stock.movement.notes')}</TableCell>
                   </TableRow>
-                ) : (
-                  pagedMovements.map((movement) => {
-                    const signedQuantity = getSignedMovement(movement)
-                    return (
-                      <TableRow key={movement.id}>
-                        <TableCell>{movement.createdAt ? formatDateTime(movement.createdAt, locale) : '-'}</TableCell>
-                        <TableCell>{movement.stockResourceName || movement.stockResourceId}</TableCell>
-                        <TableCell>{t(`stock.movement.types.${movement.type}` as any) || movement.type}</TableCell>
-                        <TableCell align="right">{formatSignedQuantity(signedQuantity, localeCode)}</TableCell>
-                        <TableCell align="right">{formatQuantity(movement.previousQuantity, localeCode)}</TableCell>
-                        <TableCell align="right">{formatQuantity(movement.newQuantity, localeCode)}</TableCell>
-                        <TableCell>{movement.referenceType ? `${movement.referenceType}${movement.referenceId ? ` #${movement.referenceId}` : ''}` : '-'}</TableCell>
-                        <TableCell>{movement.notes || '-'}</TableCell>
-                      </TableRow>
-                    )
-                  })
-                )}
-              </TableBody>
-            </Table>
-            <TablePagination
-              component="div"
-              count={movements.length}
-              page={page}
-              onPageChange={(_, newPage) => setPage(newPage)}
-              rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={(e) => {
-                setRowsPerPage(parseInt(e.target.value, 10))
-                setPage(0)
-              }}
-            />
-          </Box>
-        )}
-      </Paper>
+                </TableHead>
+                <TableBody>
+                  {!movements.length ? (
+                    <TableRow>
+                      <TableCell colSpan={8} align="center">
+                        {t('stock.movement.emptyState')}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    pagedMovements.map((movement) => {
+                      const signedQuantity = getSignedMovement(movement)
+                      return (
+                        <TableRow key={movement.id}>
+                          <TableCell>
+                            {movement.createdAt ? formatDateTime(movement.createdAt, locale) : '-'}
+                          </TableCell>
+                          <TableCell>
+                            {movement.stockResourceName || movement.stockResourceId}
+                          </TableCell>
+                          <TableCell>
+                            {t(`stock.movement.types.${movement.type}` as any) || movement.type}
+                          </TableCell>
+                          <TableCell align="right">
+                            {formatSignedQuantity(signedQuantity, localeCode)}
+                          </TableCell>
+                          <TableCell align="right">
+                            {formatQuantity(movement.previousQuantity, localeCode)}
+                          </TableCell>
+                          <TableCell align="right">
+                            {formatQuantity(movement.newQuantity, localeCode)}
+                          </TableCell>
+                          <TableCell>
+                            {movement.referenceType
+                              ? `${movement.referenceType}${movement.referenceId ? ` #${movement.referenceId}` : ''}`
+                              : '-'}
+                          </TableCell>
+                          <TableCell>{movement.notes || '-'}</TableCell>
+                        </TableRow>
+                      )
+                    })
+                  )}
+                </TableBody>
+              </Table>
+              <TablePagination
+                component="div"
+                count={movements.length}
+                page={page}
+                onPageChange={(_, newPage) => setPage(newPage)}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={(e) => {
+                  setRowsPerPage(parseInt(e.target.value, 10))
+                  setPage(0)
+                }}
+              />
+            </Box>
+          )}
+        </Paper>
       )}
 
       {!isTrackingMode && formOpen && (
-        <StockMovementFormDialog
-          open={formOpen}
-          onClose={() => setFormOpen(false)}
-        />
+        <StockMovementFormDialog open={formOpen} onClose={() => setFormOpen(false)} />
       )}
     </Box>
   )

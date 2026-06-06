@@ -4,6 +4,7 @@ import ClearIcon from '@mui/icons-material/Clear'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import SearchIcon from '@mui/icons-material/Search'
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -34,6 +35,7 @@ import { useCallback, useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
@@ -79,6 +81,17 @@ export function TicketList() {
   const { t, locale } = useI18n()
   const { showToast } = useToast()
   const router = useRouter()
+  const { hasPermission, hasTenantPermission, getDisabledReason, isLoadingPermissions } =
+    useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
+  const loadingReason = t('common.loading')
+  const canReadTickets =
+    hasPermission(PermissionActions.READ_TICKET) ||
+    hasTenantPermission(PermissionActions.READ_TICKET)
+  const canCreateTicket = hasTenantPermission(PermissionActions.CREATE_TICKET)
+  const createDisabledReason = isLoadingPermissions
+    ? loadingReason
+    : getDisabledReason(canCreateTicket, unauthorizedReason)
 
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -103,7 +116,7 @@ export function TicketList() {
     filter,
   }
 
-  const { data, isLoading, error } = useTickets(params)
+  const { data, isLoading, error } = useTickets(params, { enabled: canReadTickets })
 
   if (error) showToast(getUserFriendlyError(error), { severity: 'error' })
 
@@ -144,21 +157,32 @@ export function TicketList() {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5">{t('tickets.title')}</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setCreateOpen(true)}
-        >
-          {t('tickets.createButton')}
-        </Button>
+        <Tooltip title={createDisabledReason ?? ''}>
+          <span>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setCreateOpen(true)}
+              disabled={isLoadingPermissions || !canCreateTicket}
+            >
+              {t('tickets.createButton')}
+            </Button>
+          </span>
+        </Tooltip>
       </Box>
 
       {/* Filter toolbar */}
       <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+        {!canReadTickets && !isLoadingPermissions ? (
+          <Alert severity="warning" sx={{ width: '100%' }}>
+            {unauthorizedReason}
+          </Alert>
+        ) : null}
         <TextField
           size="small"
           placeholder={t('tickets.listSearchPlaceholder')}
           value={searchInput}
+          disabled={isLoadingPermissions || !canReadTickets}
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           sx={{ width: 260 }}
@@ -187,11 +211,20 @@ export function TicketList() {
           }}
         />
 
-        <Button variant="outlined" size="small" onClick={handleSearch}>
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={handleSearch}
+          disabled={isLoadingPermissions || !canReadTickets}
+        >
           {t('tickets.searchButton')}
         </Button>
 
-        <FormControl size="small" sx={{ minWidth: 130 }}>
+        <FormControl
+          size="small"
+          sx={{ minWidth: 130 }}
+          disabled={isLoadingPermissions || !canReadTickets}
+        >
           <InputLabel>{t('tickets.statusLabel')}</InputLabel>
           <Select
             value={statusFilter}
@@ -215,7 +248,11 @@ export function TicketList() {
           </Select>
         </FormControl>
 
-        <FormControl size="small" sx={{ minWidth: 130 }}>
+        <FormControl
+          size="small"
+          sx={{ minWidth: 130 }}
+          disabled={isLoadingPermissions || !canReadTickets}
+        >
           <InputLabel>{t('tickets.priorityLabel')}</InputLabel>
           <Select
             value={priorityFilter}
@@ -239,7 +276,11 @@ export function TicketList() {
           </Select>
         </FormControl>
 
-        <FormControl size="small" sx={{ minWidth: 140 }}>
+        <FormControl
+          size="small"
+          sx={{ minWidth: 140 }}
+          disabled={isLoadingPermissions || !canReadTickets}
+        >
           <InputLabel>{t('tickets.typeLabel')}</InputLabel>
           <Select
             value={typeFilter}
@@ -259,7 +300,12 @@ export function TicketList() {
         </FormControl>
 
         {hasActiveFilters && (
-          <Button size="small" color="inherit" onClick={clearFilters}>
+          <Button
+            size="small"
+            color="inherit"
+            onClick={clearFilters}
+            disabled={isLoadingPermissions || !canReadTickets}
+          >
             {t('tickets.clearFiltersButton')}
           </Button>
         )}
@@ -541,7 +587,12 @@ export function TicketList() {
         }
       />
 
-      <TicketCreateDialog open={createOpen} onClose={() => setCreateOpen(false)} />
+      <TicketCreateDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        canCreate={canCreateTicket}
+        disabledReason={createDisabledReason}
+      />
     </Box>
   )
 }

@@ -1,7 +1,9 @@
 'use client'
 import { useQuery } from '@tanstack/react-query'
+
 import { queryKeys } from '@/core/api/query-keys'
 import { createResourceHooks } from '@/core/api/resource-hooks'
+
 import {
   getStockMovementDrillDown,
   getStockMovementTimeline,
@@ -20,13 +22,13 @@ const {
 } = createResourceHooks(queryKeys.tenant.stockMovements, stockMovementClient)
 
 export {
-  useStockMovements,
-  useStockMovement,
   useCreateStockMovement,
-  useUpdateStockMovement,
-  usePatchStockMovement,
-  useDeleteStockMovement,
   useDeleteManyStockMovements,
+  useDeleteStockMovement,
+  usePatchStockMovement,
+  useStockMovement,
+  useStockMovements,
+  useUpdateStockMovement,
 }
 
 interface StockMovementTimelineParams {
@@ -35,6 +37,7 @@ interface StockMovementTimelineParams {
   from?: string
   to?: string
   bucket: StockMovementTimelineBucket
+  enabled?: boolean
 }
 
 interface StockMovementDrillDownParams {
@@ -43,6 +46,7 @@ interface StockMovementDrillDownParams {
   from?: string
   to?: string
   limit?: number
+  enabled?: boolean
 }
 
 export function useStockMovementTimeline(params: StockMovementTimelineParams) {
@@ -55,14 +59,15 @@ export function useStockMovementTimeline(params: StockMovementTimelineParams) {
       params.to,
       params.bucket,
     ] as const,
-    queryFn: () => getStockMovementTimeline({
-      shopId: params.shopId as string,
-      stockResourceId: params.stockResourceId,
-      from: params.from as string,
-      to: params.to as string,
-      bucket: params.bucket,
-    }),
-    enabled: Boolean(params.shopId && params.from && params.to),
+    queryFn: () =>
+      getStockMovementTimeline({
+        shopId: params.shopId as string,
+        stockResourceId: params.stockResourceId,
+        from: params.from as string,
+        to: params.to as string,
+        bucket: params.bucket,
+      }),
+    enabled: Boolean(params.shopId && params.from && params.to) && params.enabled !== false,
     staleTime: 15_000,
   })
 }
@@ -77,14 +82,15 @@ export function useStockMovementDrillDown(params: StockMovementDrillDownParams) 
       params.to,
       params.limit,
     ] as const,
-    queryFn: () => getStockMovementDrillDown({
-      shopId: params.shopId as string,
-      stockResourceId: params.stockResourceId,
-      from: params.from as string,
-      to: params.to as string,
-      limit: params.limit,
-    }),
-    enabled: Boolean(params.shopId && params.from && params.to),
+    queryFn: () =>
+      getStockMovementDrillDown({
+        shopId: params.shopId as string,
+        stockResourceId: params.stockResourceId,
+        from: params.from as string,
+        to: params.to as string,
+        limit: params.limit,
+      }),
+    enabled: Boolean(params.shopId && params.from && params.to) && params.enabled !== false,
     staleTime: 10_000,
   })
 }

@@ -5,6 +5,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -26,6 +27,7 @@ import { useMemo, useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
@@ -33,6 +35,13 @@ import { getUserFriendlyError } from '@/core/utils/error-message'
 import { useMenuCategory } from '../../../hooks/use-menu-categories'
 import { useDeleteMenuItem, useMenuItems } from '../../../hooks/use-menu-items'
 import { useProducts } from '../../../hooks/use-products'
+import {
+  menuCategoryParents,
+  menuParents,
+  shopParents,
+  targetWithParents,
+} from '../../../permissions/permission-targets'
+import type { MenuItemResponseDto } from '../../../types/sale'
 
 interface Props {
   categoryId: string
@@ -44,25 +53,57 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
   const { showToast } = useToast()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
 
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
-  const { data: category, isLoading: isLoadingCategory } = useMenuCategory(categoryId)
+  const canReadCategory = hasPermissionForTarget(
+    PermissionActions.READ_MENU_CATEGORY,
+    targetWithParents(
+      'MENU_CATEGORY',
+      categoryId,
+      currentTenantId,
+      shopParents(selectedShopId, currentTenantId),
+    ),
+  )
+  const canReadItems = hasPermissionForTarget(
+    PermissionActions.READ_MENU_ITEM,
+    targetWithParents(
+      'MENU_CATEGORY',
+      categoryId,
+      currentTenantId,
+      shopParents(selectedShopId, currentTenantId),
+    ),
+  )
+  const canReadProducts = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_PRODUCT, selectedShopId),
+  )
 
-  const { data: menuItemsResult, isLoading: isLoadingItems } = useMenuItems({
-    pagination: { page: page + 1, perPage: rowsPerPage },
-    sort: { field: 'name', order: 'ASC' },
-    filter: {
-      ...(selectedShopId ? { 'category.menu.shop.id': selectedShopId } : {}),
-      'category.id': categoryId,
+  const { data: category, isLoading: isLoadingCategory } = useMenuCategory(categoryId, {
+    enabled: canReadCategory,
+  })
+
+  const { data: menuItemsResult, isLoading: isLoadingItems } = useMenuItems(
+    {
+      pagination: { page: page + 1, perPage: rowsPerPage },
+      sort: { field: 'name', order: 'ASC' },
+      filter: {
+        ...(selectedShopId ? { 'category.menu.shop.id': selectedShopId } : {}),
+        'category.id': categoryId,
+      },
     },
-  })
+    { enabled: canReadItems },
+  )
 
-  const { data: productsResult } = useProducts({
-    pagination: { page: 1, perPage: 1000 },
-    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
-  })
+  const { data: productsResult } = useProducts(
+    {
+      pagination: { page: 1, perPage: 1000 },
+      ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+    },
+    { enabled: canReadProducts },
+  )
 
   const productNameMap = useMemo(
     () => new Map((productsResult?.data ?? []).map((product) => [product.id, product.name])),
@@ -75,8 +116,78 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
     router.push(withLocale(locale, path) as Route)
   }
 
-  function handleDelete(id: string) {
-    deleteMenuItem(id, {
+  function canUpdateCategory(): boolean {
+    return Boolean(
+      category &&
+      hasPermissionForTarget(
+        PermissionActions.UPDATE_MENU_CATEGORY,
+        targetWithParents(
+          'MENU_CATEGORY',
+          category.id,
+          currentTenantId,
+          menuParents(category.menuId, selectedShopId, currentTenantId),
+        ),
+      ),
+    )
+  }
+
+  function canCreateMenuItem(): boolean {
+    return hasPermissionForTarget(
+      PermissionActions.CREATE_MENU_ITEM,
+      targetWithParents(
+        'MENU_CATEGORY',
+        categoryId,
+        currentTenantId,
+        category
+          ? menuParents(category.menuId, selectedShopId, currentTenantId)
+          : shopParents(selectedShopId, currentTenantId),
+      ),
+    )
+  }
+
+  function canReadMenuItem(item: MenuItemResponseDto): boolean {
+    return hasPermissionForTarget(
+      PermissionActions.READ_MENU_ITEM,
+      targetWithParents(
+        'MENU_ITEM',
+        item.id,
+        currentTenantId,
+        menuCategoryParents(item.categoryId, category?.menuId, selectedShopId, currentTenantId),
+      ),
+    )
+  }
+
+  function canUpdateMenuItem(item: MenuItemResponseDto): boolean {
+    return hasPermissionForTarget(
+      PermissionActions.UPDATE_MENU_ITEM,
+      targetWithParents(
+        'MENU_ITEM',
+        item.id,
+        currentTenantId,
+        menuCategoryParents(item.categoryId, category?.menuId, selectedShopId, currentTenantId),
+      ),
+    )
+  }
+
+  function canDeleteMenuItem(item: MenuItemResponseDto): boolean {
+    return hasPermissionForTarget(
+      PermissionActions.DELETE_MENU_ITEM,
+      targetWithParents(
+        'MENU_ITEM',
+        item.id,
+        currentTenantId,
+        menuCategoryParents(item.categoryId, category?.menuId, selectedShopId, currentTenantId),
+      ),
+    )
+  }
+
+  function handleDelete(item: MenuItemResponseDto) {
+    if (!canDeleteMenuItem(item)) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
+    deleteMenuItem(item.id, {
       onSuccess: () => showToast(t('sale.menuItem.deletedToast')),
       onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
     })
@@ -86,6 +197,14 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
     return (
       <Box sx={{ py: 8, display: 'flex', justifyContent: 'center' }}>
         <CircularProgress />
+      </Box>
+    )
+  }
+
+  if (!canReadCategory || !canReadItems) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <Alert severity="warning">{unauthorizedReason}</Alert>
       </Box>
     )
   }
@@ -102,7 +221,15 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, width: '100%', display: 'grid', gap: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 1,
+          flexWrap: 'wrap',
+        }}
+      >
         <Button
           startIcon={<ArrowBackIcon />}
           onClick={() => goTo(`${ROUTES.catalog}/menus/${category.menuId}`)}
@@ -111,16 +238,29 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
         </Button>
 
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="outlined" onClick={() => goTo(`${ROUTES.catalog}/categories/${category.id}/edit`)}>
-            {t('sale.category.editButton')}
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => goTo(`${ROUTES.catalog}/menu-items/new?categoryId=${category.id}`)}
-          >
-            {t('sale.menuItem.createButton')}
-          </Button>
+          <Tooltip title={canUpdateCategory() ? '' : unauthorizedReason}>
+            <span>
+              <Button
+                variant="outlined"
+                disabled={!canUpdateCategory()}
+                onClick={() => goTo(`${ROUTES.catalog}/categories/${category.id}/edit`)}
+              >
+                {t('sale.category.editButton')}
+              </Button>
+            </span>
+          </Tooltip>
+          <Tooltip title={canCreateMenuItem() ? '' : unauthorizedReason}>
+            <span>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                disabled={!canCreateMenuItem()}
+                onClick={() => goTo(`${ROUTES.catalog}/menu-items/new?categoryId=${category.id}`)}
+              >
+                {t('sale.menuItem.createButton')}
+              </Button>
+            </span>
+          </Tooltip>
         </Box>
       </Box>
 
@@ -163,7 +303,10 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
                     const productLabel =
                       item.productItems && item.productItems.length > 0
                         ? item.productItems
-                            .map((entry) => `${productNameMap.get(entry.productId) ?? entry.productId} x${entry.quantity}`)
+                            .map(
+                              (entry) =>
+                                `${productNameMap.get(entry.productId) ?? entry.productId} x${entry.quantity}`,
+                            )
                             .join(', ')
                         : '—'
 
@@ -171,8 +314,12 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
                       <TableRow
                         key={item.id}
                         hover
-                        sx={{ cursor: 'pointer' }}
-                        onClick={() => goTo(`${ROUTES.catalog}/menu-items/${item.id}`)}
+                        sx={{ cursor: canReadMenuItem(item) ? 'pointer' : 'default' }}
+                        onClick={() => {
+                          if (canReadMenuItem(item)) {
+                            goTo(`${ROUTES.catalog}/menu-items/${item.id}`)
+                          }
+                        }}
                       >
                         <TableCell>
                           <Typography fontWeight={600}>{item.name}</Typography>
@@ -185,18 +332,34 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
                         <TableCell>₺{item.price}</TableCell>
                         <TableCell>{productLabel}</TableCell>
                         <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                          <Tooltip title={t('common.edit')}>
-                            <IconButton
-                              size="small"
-                              onClick={() => goTo(`${ROUTES.catalog}/menu-items/${item.id}`)}
-                            >
-                              <EditIcon fontSize="small" />
-                            </IconButton>
+                          <Tooltip
+                            title={canUpdateMenuItem(item) ? t('common.edit') : unauthorizedReason}
+                          >
+                            <span>
+                              <IconButton
+                                size="small"
+                                disabled={!canUpdateMenuItem(item)}
+                                onClick={() => goTo(`${ROUTES.catalog}/menu-items/${item.id}`)}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            </span>
                           </Tooltip>
-                          <Tooltip title={t('common.delete')}>
-                            <IconButton size="small" color="error" onClick={() => handleDelete(item.id)}>
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
+                          <Tooltip
+                            title={
+                              canDeleteMenuItem(item) ? t('common.delete') : unauthorizedReason
+                            }
+                          >
+                            <span>
+                              <IconButton
+                                size="small"
+                                color="error"
+                                disabled={!canDeleteMenuItem(item)}
+                                onClick={() => handleDelete(item)}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </span>
                           </Tooltip>
                         </TableCell>
                       </TableRow>

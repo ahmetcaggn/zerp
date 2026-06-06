@@ -4,6 +4,7 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import DeleteIcon from '@mui/icons-material/Delete'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -34,6 +35,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
@@ -62,6 +64,14 @@ export function EmployeeList() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const {
+    currentTenantId,
+    hasPermission,
+    hasPermissionForTarget,
+    hasTenantPermission,
+    getDisabledReason,
+    isLoadingPermissions,
+  } = useCurrentUserPermissions()
 
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -97,9 +107,36 @@ export function EmployeeList() {
     filter: { 'deleted.eq': 'false' },
   }
 
+  const unauthorizedReason = t('common.unauthorized')
+  const loadingReason = t('common.loading')
+  const canReadEmployees =
+    hasPermission(PermissionActions.READ_EMPLOYEE) ||
+    hasTenantPermission(PermissionActions.READ_EMPLOYEE)
+  const canCreateEmployee = hasTenantPermission(PermissionActions.CREATE_EMPLOYEE)
+  const canManagePermissions = hasTenantPermission(PermissionActions.ADMIN)
+  const createDisabledReason = isLoadingPermissions
+    ? loadingReason
+    : getDisabledReason(canCreateEmployee, unauthorizedReason)
+  const permissionDialogDisabledReason = isLoadingPermissions
+    ? loadingReason
+    : getDisabledReason(canManagePermissions, unauthorizedReason)
+
+  function hasEmployeePermission(action: keyof typeof PermissionActions, employeeId?: number) {
+    return hasPermissionForTarget(PermissionActions[action], {
+      targetType: 'EMPLOYEE',
+      targetId: employeeId !== undefined ? String(employeeId) : undefined,
+      tenantId: currentTenantId,
+      parentTargets: currentTenantId
+        ? [{ targetType: 'TENANT', targetId: currentTenantId }]
+        : undefined,
+    })
+  }
+
   const isSearching = debouncedKeyword.length >= 2
-  const listResult = useEmployees(params, { enabled: !isSearching })
-  const searchResult = useEmployeeSearch(debouncedKeyword, params)
+  const listResult = useEmployees(isSearching ? undefined : params, {
+    enabled: !isSearching && canReadEmployees,
+  })
+  const searchResult = useEmployeeSearch(debouncedKeyword, params, canReadEmployees)
 
   const { data, isLoading, error } = isSearching ? searchResult : listResult
   const { mutate: deleteEmployee } = useDeleteEmployee()
@@ -111,17 +148,20 @@ export function EmployeeList() {
 
   return (
     <Box>
-      <Box
-        sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
-      >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5">{t('employees.title')}</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => router.push(withLocale(locale, `${ROUTES.employees}/new`) as Route)}
-        >
-          {t('employees.createButton')}
-        </Button>
+        <Tooltip title={createDisabledReason ?? ''}>
+          <span>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => router.push(withLocale(locale, `${ROUTES.employees}/new`) as Route)}
+              disabled={isLoadingPermissions || !canCreateEmployee}
+            >
+              {t('employees.createButton')}
+            </Button>
+          </span>
+        </Tooltip>
       </Box>
 
       <Tabs value={tab} onChange={(_, v) => handleTabChange(v)} sx={{ mb: 2 }}>
@@ -130,13 +170,19 @@ export function EmployeeList() {
       </Tabs>
 
       {tab === 1 ? (
-        <DeletedEmployees />
+        <DeletedEmployees canRead={canReadEmployees} />
       ) : (
         <>
+          {!canReadEmployees && !isLoadingPermissions ? (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              {unauthorizedReason}
+            </Alert>
+          ) : null}
           <TextField
             size="small"
             placeholder={t('employees.searchPlaceholder')}
             value={searchInput}
+            disabled={isLoadingPermissions || !canReadEmployees}
             onChange={(e) => {
               setSearchInput(e.target.value)
               setPage(0)
@@ -154,58 +200,82 @@ export function EmployeeList() {
             </Typography>
           ) : (
             <>
-              {/* Desktop Table View */}
-              <TableContainer sx={{ display: { xs: 'none', md: 'block' } }}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>{t('employees.fullNameColumnHeader')}</TableCell>
-                      <TableCell>{t('employees.emailColumnHeader')}</TableCell>
-                      <TableCell>{t('employees.phoneColumnHeader')}</TableCell>
-                      <TableCell>{t('employees.statusColumnHeader')}</TableCell>
-                      <TableCell align="right">{t('common.actions')}</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {rows.map((emp) => (
-                      <TableRow key={emp.id} hover>
-                        <TableCell>{`${emp.firstName ?? ''} ${emp.lastName ?? ''}`}</TableCell>
-                        <TableCell>{emp.email}</TableCell>
-                        <TableCell>{emp.phoneNumber ?? '—'}</TableCell>
-                        <TableCell>
-                          {emp.status && (
-                            <Chip
-                              label={emp.status}
-                              color={STATUS_COLOR[emp.status] ?? 'default'}
-                              size="small"
-                            />
-                          )}
-                        </TableCell>
-                        <TableCell align="right">
-                          <Tooltip title={t('employees.editButton')}>
+            {/* Desktop Table View */}
+            <TableContainer sx={{ display: { xs: 'none', md: 'block' } }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>{t('employees.fullNameColumnHeader')}</TableCell>
+                  <TableCell>{t('employees.emailColumnHeader')}</TableCell>
+                  <TableCell>{t('employees.phoneColumnHeader')}</TableCell>
+                  <TableCell>{t('employees.statusColumnHeader')}</TableCell>
+                  <TableCell align="right">{t('common.actions')}</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows.map((emp) => {
+                  const canReadEmployee = hasEmployeePermission('READ_EMPLOYEE', emp.id)
+                  const canDeleteEmployee = hasEmployeePermission('DELETE_EMPLOYEE', emp.id)
+                  const detailDisabledReason = isLoadingPermissions
+                    ? loadingReason
+                    : getDisabledReason(canReadEmployee, unauthorizedReason)
+                  const deleteDisabledReason = isLoadingPermissions
+                    ? loadingReason
+                    : getDisabledReason(canDeleteEmployee, unauthorizedReason)
+
+                  return (
+                    <TableRow key={emp.id} hover>
+                      <TableCell>{`${emp.firstName ?? ''} ${emp.lastName ?? ''}`}</TableCell>
+                      <TableCell>{emp.email}</TableCell>
+                      <TableCell>{emp.phoneNumber ?? '—'}</TableCell>
+                      <TableCell>
+                        {emp.status && (
+                          <Chip
+                            label={emp.status}
+                            color={STATUS_COLOR[emp.status] ?? 'default'}
+                            size="small"
+                          />
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Tooltip title={detailDisabledReason ?? t('employees.editButton')}>
+                          <span>
                             <IconButton
                               size="small"
+                              disabled={!canReadEmployee}
                               onClick={() => {
                                 if (emp.id !== undefined) {
-                                  router.push(withLocale(locale, `${ROUTES.employees}/${emp.id}`) as Route)
+                                  router.push(
+                                    withLocale(locale, `${ROUTES.employees}/${emp.id}`) as Route,
+                                  )
                                 }
                               }}
                             >
                               <VisibilityIcon fontSize="small" />
                             </IconButton>
-                          </Tooltip>
-                          <Tooltip title={t('employees.permissionsDialogTitle')}>
+                          </span>
+                        </Tooltip>
+                        <Tooltip
+                          title={
+                            permissionDialogDisabledReason ?? t('employees.permissionsDialogTitle')
+                          }
+                        >
+                          <span>
                             <IconButton
                               size="small"
+                              disabled={!canManagePermissions}
                               onClick={() => setPermissionDialogEmployee(emp)}
                             >
                               <AdminPanelSettingsIcon fontSize="small" />
                             </IconButton>
-                          </Tooltip>
-                          <Tooltip title={t('employees.deleteButton')}>
+                          </span>
+                        </Tooltip>
+                        <Tooltip title={deleteDisabledReason ?? t('employees.deleteButton')}>
+                          <span>
                             <IconButton
                               size="small"
                               color="error"
+                              disabled={!canDeleteEmployee}
                               onClick={() => {
                                 if (emp.id !== undefined) {
                                   setDeleteConfirmId(String(emp.id))
@@ -214,13 +284,16 @@ export function EmployeeList() {
                             >
                               <DeleteIcon fontSize="small" />
                             </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                          </span>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+            </TableContainer>
+
 
               {/* Mobile Card View */}
               <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 2 }}>
@@ -280,7 +353,7 @@ export function EmployeeList() {
                             borderColor: 'divider',
                             justifyContent: 'flex-end',
                             alignItems: 'center',
-                      }}
+                          }}
                         >
                           <Tooltip title={t('employees.editButton')}>
                             <IconButton
@@ -321,7 +394,7 @@ export function EmployeeList() {
                   </Card>
                 ))}
               </Box>
-            </>
+              </>
           )}
 
           <TablePagination

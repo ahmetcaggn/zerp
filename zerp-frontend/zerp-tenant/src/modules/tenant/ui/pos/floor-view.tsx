@@ -1,17 +1,22 @@
 'use client'
 import AddIcon from '@mui/icons-material/Add'
 import TableRestaurantIcon from '@mui/icons-material/TableRestaurant'
-import { Box, Chip, CircularProgress, Fab, Stack, Typography } from '@mui/material'
+import { Alert, Box, Chip, CircularProgress, Fab, Stack, Tooltip,Typography } from '@mui/material'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
-import { useDeleteShopTable, usePatchShopTable, useShopTables } from '../../hooks/use-shop-tables'
+import { useDeleteShopTable, usePatchShopTable,useShopTables } from '../../hooks/use-shop-tables'
+import {
+  shopParents,
+  targetWithParents,
+} from '../../permissions/permission-targets'
 import type { ShopTableResponseDto, ShopTableStatus } from '../../types/sale'
 import { ShopTableFormDialog } from '../sale/tables/shop-table-form-dialog'
 import { TableCard } from './table-card'
@@ -22,6 +27,15 @@ export function FloorView() {
   const { locale, t } = useI18n()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+  const { currentTenantId, hasShopPermission, hasPermissionForTarget, hasAnyPermissionForTarget } =
+    useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
+  const canReadTables = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_SHOP_TABLE, selectedShopId),
+  )
+  const canCreateTable = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.CREATE_SHOP_TABLE, selectedShopId),
+  )
 
   const FILTERS: {
     label: string
@@ -41,11 +55,14 @@ export function FloorView() {
   const [formOpen, setFormOpen] = useState(false)
   const [editTable, setEditTable] = useState<ShopTableResponseDto | null>(null)
 
-  const { data, isLoading } = useShopTables({
-    pagination: { page: 1, perPage: 200 },
-    sort: { field: 'name', order: 'ASC' },
-    ...(selectedShopId ? { filter: { shopId: selectedShopId, 'shop.id': selectedShopId } } : {}),
-  })
+  const { data, isLoading } = useShopTables(
+    {
+      pagination: { page: 1, perPage: 200 },
+      sort: { field: 'name', order: 'ASC' },
+      ...(selectedShopId ? { filter: { shopId: selectedShopId, 'shop.id': selectedShopId } } : {}),
+    },
+    { enabled: canReadTables },
+  )
   const { mutate: deleteTable } = useDeleteShopTable()
   const { mutate: patchTable } = usePatchShopTable()
 
@@ -67,15 +84,30 @@ export function FloorView() {
   const isMultiFloor = floors.length > 1
 
   function handleTap(id: string) {
+    const table = all.find((item) => item.id === id)
+    if (table && !canOpenTable(table)) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
     router.push(`/${locale}/tables?tableId=${id}` as Route)
   }
 
   function handleEdit(table: ShopTableResponseDto) {
+    if (!canUpdateTable(table)) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
     setEditTable(table)
     setFormOpen(true)
   }
 
   function handleDelete(id: string) {
+    const table = all.find((item) => item.id === id)
+    if (table && !canDeleteTable(table)) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     deleteTable(id, {
       onSuccess: () => showToast(t('pos.tableDeletedToast')),
       onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
@@ -84,6 +116,10 @@ export function FloorView() {
 
   function handleChangeStatus(table: ShopTableResponseDto, status: ShopTableStatus) {
     if (table.status === status) return
+    if (!canUpdateTable(table)) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
     patchTable(
       { id: table.id, fields: { status } },
       {
@@ -91,6 +127,34 @@ export function FloorView() {
         onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
       },
     )
+  }
+
+  function tableTarget(table: ShopTableResponseDto) {
+    return targetWithParents(
+      'SHOP_TABLE',
+      table.id,
+      currentTenantId,
+      shopParents(table.shopId, currentTenantId),
+    )
+  }
+
+  function canOpenTable(table: ShopTableResponseDto): boolean {
+    return hasAnyPermissionForTarget(
+      [
+        PermissionActions.READ_TABLE_ORDER,
+        PermissionActions.CREATE_TABLE_ORDER,
+        PermissionActions.UPDATE_TABLE_ORDER,
+      ],
+      tableTarget(table),
+    )
+  }
+
+  function canUpdateTable(table: ShopTableResponseDto): boolean {
+    return hasPermissionForTarget(PermissionActions.UPDATE_SHOP_TABLE, tableTarget(table))
+  }
+
+  function canDeleteTable(table: ShopTableResponseDto): boolean {
+    return hasPermissionForTarget(PermissionActions.DELETE_SHOP_TABLE, tableTarget(table))
   }
 
   return (
@@ -146,6 +210,8 @@ export function FloorView() {
           >
             <CircularProgress size={48} thickness={3} />
           </Box>
+        ) : !canReadTables ? (
+          <Alert severity="warning">{unauthorizedReason}</Alert>
         ) : filtered.length === 0 ? (
           <Box
             sx={{
@@ -197,6 +263,10 @@ export function FloorView() {
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onChangeStatus={handleChangeStatus}
+                    canOpen={canOpenTable(t)}
+                    canEdit={canUpdateTable(t)}
+                    canDelete={canDeleteTable(t)}
+                    canUpdateStatus={canUpdateTable(t)}
                   />
                 ))}
               </Box>
@@ -218,6 +288,10 @@ export function FloorView() {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onChangeStatus={handleChangeStatus}
+                canOpen={canOpenTable(t)}
+                canEdit={canUpdateTable(t)}
+                canDelete={canDeleteTable(t)}
+                canUpdateStatus={canUpdateTable(t)}
               />
             ))}
           </Box>
@@ -225,17 +299,22 @@ export function FloorView() {
       </Box>
 
       {/* FAB — add table */}
-      <Fab
-        color="primary"
-        aria-label={t('sale.table.createButton')}
-        onClick={() => {
-          setEditTable(null)
-          setFormOpen(true)
-        }}
-        sx={{ position: 'fixed', bottom: 32, right: 32, width: 60, height: 60, boxShadow: 8 }}
-      >
-        <AddIcon sx={{ fontSize: 28 }} />
-      </Fab>
+      <Tooltip title={canCreateTable ? '' : unauthorizedReason}>
+        <span style={{ position: 'fixed', bottom: 32, right: 32 }}>
+          <Fab
+            color="primary"
+            aria-label={t('sale.table.createButton')}
+            disabled={!canCreateTable}
+            onClick={() => {
+              setEditTable(null)
+              setFormOpen(true)
+            }}
+            sx={{ position: 'fixed', bottom: 32, right: 32, width: 60, height: 60, boxShadow: 8 }}
+          >
+            <AddIcon sx={{ fontSize: 28 }} />
+          </Fab>
+        </span>
+      </Tooltip>
 
       {formOpen && (
         <ShopTableFormDialog

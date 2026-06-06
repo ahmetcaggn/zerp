@@ -26,12 +26,14 @@ import {
   Select,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
 
 import { getCountryLabel, getCountryOptions, resolveCountryCode } from '@/core/data/countries'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
@@ -42,7 +44,12 @@ import {
   type CuisineCategory,
   cuisineCategoryLabelKey,
 } from '../data/cuisine-categories'
-import { getDistrictOptions, resolveCityName, resolveDistrictName, TURKEY_CITY_OPTIONS } from '../data/tr-city-district-data'
+import {
+  getDistrictOptions,
+  resolveCityName,
+  resolveDistrictName,
+  TURKEY_CITY_OPTIONS,
+} from '../data/tr-city-district-data'
 import { useShop, useShops, useUpdateShop, useUploadShopImage } from '../hooks/use-shops'
 import type {
   MenuLanguage,
@@ -91,8 +98,8 @@ interface ShopFormState {
 }
 
 function toFormState(shop: ShopResponseDto): ShopFormState {
-  const resolvedCity = resolveCityName(shop.city) ?? (shop.city?.trim() ?? '')
-  const resolvedDistrict = resolveDistrictName(resolvedCity, shop.state) ?? (shop.state?.trim() ?? '')
+  const resolvedCity = resolveCityName(shop.city) ?? shop.city?.trim() ?? ''
+  const resolvedDistrict = resolveDistrictName(resolvedCity, shop.state) ?? shop.state?.trim() ?? ''
 
   return {
     name: shop.name ?? '',
@@ -192,6 +199,17 @@ export function ShopManagementView() {
   const previewByShopIdRef = useRef<Record<string, string>>({})
 
   const selectedScopeShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+  const {
+    hasPermission,
+    hasShopPermission,
+    hasTenantPermission,
+    getDisabledReason,
+    isLoadingPermissions,
+  } = useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
+  const loadingReason = t('common.loading')
+  const canReadShops =
+    hasPermission(PermissionActions.READ_SHOP) || hasTenantPermission(PermissionActions.READ_SHOP)
 
   const params = useMemo(() => {
     const filter: Record<string, string> = {}
@@ -209,7 +227,7 @@ export function ShopManagementView() {
     }
   }, [searchQuery, selectedScopeShopId])
 
-  const { data, isLoading, error } = useShops(params)
+  const { data, isLoading, error } = useShops(params, canReadShops)
   const { mutateAsync: updateShop, isPending: isSaving } = useUpdateShop()
   const { mutateAsync: uploadShopImage, isPending: isUploadingImage } = useUploadShopImage()
 
@@ -221,7 +239,9 @@ export function ShopManagementView() {
       return ''
     }
     if (selectedScopeShopId) {
-      return shops.some((shop) => shop.id === selectedScopeShopId) ? selectedScopeShopId : shops[0].id
+      return shops.some((shop) => shop.id === selectedScopeShopId)
+        ? selectedScopeShopId
+        : shops[0].id
     }
     if (selectedShopId && shops.some((shop) => shop.id === selectedShopId)) {
       return selectedShopId
@@ -229,7 +249,18 @@ export function ShopManagementView() {
     return shops[0].id
   }, [selectedScopeShopId, selectedShopId, shops])
 
-  const { data: selectedShopDetail, error: selectedShopDetailError } = useShop(resolvedSelectedShopId)
+  const canUpdateSelectedShop = Boolean(
+    resolvedSelectedShopId &&
+    hasShopPermission(PermissionActions.UPDATE_SHOP, resolvedSelectedShopId),
+  )
+  const actionDisabledReason = isLoadingPermissions
+    ? loadingReason
+    : getDisabledReason(canUpdateSelectedShop, unauthorizedReason)
+
+  const { data: selectedShopDetail, error: selectedShopDetailError } = useShop(
+    resolvedSelectedShopId,
+    Boolean(resolvedSelectedShopId && canReadShops),
+  )
 
   const selectedShop = useMemo(
     () => selectedShopDetail ?? shops.find((shop) => shop.id === resolvedSelectedShopId),
@@ -248,7 +279,9 @@ export function ShopManagementView() {
     if (!currentCity) {
       return TURKEY_CITY_OPTIONS
     }
-    return TURKEY_CITY_OPTIONS.some((city) => city.localeCompare(currentCity, 'tr-TR', { sensitivity: 'base' }) === 0)
+    return TURKEY_CITY_OPTIONS.some(
+      (city) => city.localeCompare(currentCity, 'tr-TR', { sensitivity: 'base' }) === 0,
+    )
       ? TURKEY_CITY_OPTIONS
       : [currentCity, ...TURKEY_CITY_OPTIONS]
   }, [form?.city])
@@ -259,8 +292,8 @@ export function ShopManagementView() {
     if (!currentDistrict) {
       return baseOptions
     }
-    return baseOptions.some((district) =>
-      district.localeCompare(currentDistrict, 'tr-TR', { sensitivity: 'base' }) === 0,
+    return baseOptions.some(
+      (district) => district.localeCompare(currentDistrict, 'tr-TR', { sensitivity: 'base' }) === 0,
     )
       ? baseOptions
       : [currentDistrict, ...baseOptions]
@@ -310,6 +343,10 @@ export function ShopManagementView() {
   }, [])
 
   function handleSearch() {
+    if (!canReadShops) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
     setSearchQuery(searchInput.trim())
   }
 
@@ -339,6 +376,11 @@ export function ShopManagementView() {
 
   async function handleSave() {
     if (!resolvedSelectedShopId || !form) {
+      return
+    }
+
+    if (!canUpdateSelectedShop) {
+      showToast(unauthorizedReason, { severity: 'warning' })
       return
     }
 
@@ -409,6 +451,11 @@ export function ShopManagementView() {
       return
     }
 
+    if (!canUpdateSelectedShop) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
       showToast(t('shops.unsupportedImageType'), { severity: 'warning' })
       return
@@ -476,10 +523,10 @@ export function ShopManagementView() {
 
   function getGeolocationErrorMessage(error: unknown): string {
     if (
-      typeof error === 'object'
-      && error !== null
-      && 'code' in error
-      && (error as { code?: number }).code === 1
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error as { code?: number }).code === 1
     ) {
       return t('shops.locationPermissionDenied')
     }
@@ -489,6 +536,11 @@ export function ShopManagementView() {
   async function handleUseCurrentLocation() {
     const targetShopId = resolvedSelectedShopId
     if (!targetShopId) {
+      return
+    }
+
+    if (!canUpdateSelectedShop) {
+      showToast(unauthorizedReason, { severity: 'warning' })
       return
     }
 
@@ -540,7 +592,10 @@ export function ShopManagementView() {
 
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 4 }}>
-          <Card variant="outlined" sx={{ borderRadius: 4, borderColor: 'rgba(148, 163, 184, 0.24)', height: '100%' }}>
+          <Card
+            variant="outlined"
+            sx={{ borderRadius: 4, borderColor: 'rgba(148, 163, 184, 0.24)', height: '100%' }}
+          >
             <CardContent sx={{ display: 'grid', gap: 2.25 }}>
               <Typography variant="h6" fontWeight={700}>
                 {t('shops.selectShopLabel')}
@@ -552,6 +607,7 @@ export function ShopManagementView() {
                   size="small"
                   value={searchInput}
                   placeholder={t('shops.searchPlaceholder')}
+                  disabled={isLoadingPermissions || !canReadShops}
                   onChange={(event) => setSearchInput(event.target.value)}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter') {
@@ -568,18 +624,40 @@ export function ShopManagementView() {
                     },
                   }}
                 />
-                <Button variant="outlined" onClick={handleSearch}>
-                  {t('shops.searchButton')}
-                </Button>
+                <Tooltip
+                  title={
+                    isLoadingPermissions
+                      ? loadingReason
+                      : (getDisabledReason(canReadShops, unauthorizedReason) ?? '')
+                  }
+                >
+                  <span>
+                    <Button
+                      variant="outlined"
+                      onClick={handleSearch}
+                      disabled={isLoadingPermissions || !canReadShops}
+                    >
+                      {t('shops.searchButton')}
+                    </Button>
+                  </span>
+                </Tooltip>
               </Stack>
 
               {searchQuery ? (
-                <Button variant="text" size="small" onClick={handleClearSearch} sx={{ justifySelf: 'start' }}>
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={handleClearSearch}
+                  disabled={isLoadingPermissions || !canReadShops}
+                  sx={{ justifySelf: 'start' }}
+                >
                   {t('shops.clearButton')}
                 </Button>
               ) : null}
 
-              {isLoading ? (
+              {!canReadShops && !isLoadingPermissions ? (
+                <Alert severity="warning">{unauthorizedReason}</Alert>
+              ) : isLoading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
                   <CircularProgress size={28} />
                 </Box>
@@ -597,7 +675,9 @@ export function ShopManagementView() {
                       <ListItemText
                         primary={shop.name}
                         secondary={
-                          [shop.city, getCountryLabel(locale, shop.country)].filter(Boolean).join(' / ') || '—'
+                          [shop.city, getCountryLabel(locale, shop.country)]
+                            .filter(Boolean)
+                            .join(' / ') || '—'
                         }
                       />
                     </ListItemButton>
@@ -609,7 +689,10 @@ export function ShopManagementView() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 8 }}>
-          <Card variant="outlined" sx={{ borderRadius: 4, borderColor: 'rgba(148, 163, 184, 0.24)' }}>
+          <Card
+            variant="outlined"
+            sx={{ borderRadius: 4, borderColor: 'rgba(148, 163, 184, 0.24)' }}
+          >
             <CardContent sx={{ display: 'grid', gap: 2.25 }}>
               <Box>
                 <Typography variant="h6" fontWeight={700}>
@@ -678,14 +761,18 @@ export function ShopManagementView() {
                       onChange={handleFileSelected}
                     />
                     <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                      <Button
-                        variant="outlined"
-                        startIcon={<CloudUploadRoundedIcon />}
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploadingImage}
-                      >
-                        {isUploadingImage ? t('shops.uploading') : t('shops.uploadButton')}
-                      </Button>
+                      <Tooltip title={actionDisabledReason ?? ''}>
+                        <span>
+                          <Button
+                            variant="outlined"
+                            startIcon={<CloudUploadRoundedIcon />}
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploadingImage || !canUpdateSelectedShop}
+                          >
+                            {isUploadingImage ? t('shops.uploading') : t('shops.uploadButton')}
+                          </Button>
+                        </span>
+                      </Tooltip>
                       <Typography variant="caption" color="text.secondary">
                         {t('shops.imageGuideline')} {t('shops.maxImageSizeHint')}
                       </Typography>
@@ -705,7 +792,9 @@ export function ShopManagementView() {
                         fullWidth
                         size="small"
                         value={form.name}
-                        onChange={(event) => updateCurrentForm((current) => ({ ...current, name: event.target.value }))}
+                        onChange={(event) =>
+                          updateCurrentForm((current) => ({ ...current, name: event.target.value }))
+                        }
                       />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
@@ -758,7 +847,11 @@ export function ShopManagementView() {
                           <TextField
                             {...params}
                             label={t('shops.cuisineCategoriesLabel')}
-                            placeholder={form.cuisineCategories.length === 0 ? t('shops.noCuisineCategories') : ''}
+                            placeholder={
+                              form.cuisineCategories.length === 0
+                                ? t('shops.noCuisineCategories')
+                                : ''
+                            }
                             size="small"
                           />
                         )}
@@ -774,7 +867,10 @@ export function ShopManagementView() {
                         minRows={3}
                         value={form.description}
                         onChange={(event) =>
-                          updateCurrentForm((current) => ({ ...current, description: event.target.value }))
+                          updateCurrentForm((current) => ({
+                            ...current,
+                            description: event.target.value,
+                          }))
                         }
                       />
                     </Grid>
@@ -834,8 +930,12 @@ export function ShopManagementView() {
                                               ? {
                                                   ...item,
                                                   openAllDay: event.target.checked,
-                                                  opensAt: event.target.checked ? '00:00' : item.opensAt,
-                                                  closesAt: event.target.checked ? '23:59' : item.closesAt,
+                                                  opensAt: event.target.checked
+                                                    ? '00:00'
+                                                    : item.opensAt,
+                                                  closesAt: event.target.checked
+                                                    ? '23:59'
+                                                    : item.closesAt,
                                                 }
                                               : item,
                                           ),
@@ -901,7 +1001,12 @@ export function ShopManagementView() {
                         fullWidth
                         size="small"
                         value={form.email}
-                        onChange={(event) => updateCurrentForm((current) => ({ ...current, email: event.target.value }))}
+                        onChange={(event) =>
+                          updateCurrentForm((current) => ({
+                            ...current,
+                            email: event.target.value,
+                          }))
+                        }
                       />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
@@ -910,7 +1015,12 @@ export function ShopManagementView() {
                         fullWidth
                         size="small"
                         value={form.phone}
-                        onChange={(event) => updateCurrentForm((current) => ({ ...current, phone: event.target.value }))}
+                        onChange={(event) =>
+                          updateCurrentForm((current) => ({
+                            ...current,
+                            phone: event.target.value,
+                          }))
+                        }
                       />
                     </Grid>
                     <Grid size={{ xs: 12 }}>
@@ -920,7 +1030,10 @@ export function ShopManagementView() {
                         size="small"
                         value={form.website}
                         onChange={(event) =>
-                          updateCurrentForm((current) => ({ ...current, website: event.target.value }))
+                          updateCurrentForm((current) => ({
+                            ...current,
+                            website: event.target.value,
+                          }))
                         }
                       />
                     </Grid>
@@ -931,7 +1044,10 @@ export function ShopManagementView() {
                         size="small"
                         value={form.address}
                         onChange={(event) =>
-                          updateCurrentForm((current) => ({ ...current, address: event.target.value }))
+                          updateCurrentForm((current) => ({
+                            ...current,
+                            address: event.target.value,
+                          }))
                         }
                       />
                     </Grid>
@@ -945,7 +1061,9 @@ export function ShopManagementView() {
                             const nextCity = event.target.value
                             updateCurrentForm((current) => {
                               const nextDistrictOptions = getDistrictOptions(nextCity)
-                              const keepCurrentDistrict = nextDistrictOptions.includes(current.state)
+                              const keepCurrentDistrict = nextDistrictOptions.includes(
+                                current.state,
+                              )
                               return {
                                 ...current,
                                 city: nextCity,
@@ -972,7 +1090,10 @@ export function ShopManagementView() {
                           label={t('shops.stateLabel')}
                           value={form.state}
                           onChange={(event) =>
-                            updateCurrentForm((current) => ({ ...current, state: event.target.value }))
+                            updateCurrentForm((current) => ({
+                              ...current,
+                              state: event.target.value,
+                            }))
                           }
                           disabled={!form.city}
                         >
@@ -994,7 +1115,10 @@ export function ShopManagementView() {
                           label={t('shops.countryLabel')}
                           value={form.country}
                           onChange={(event) =>
-                            updateCurrentForm((current) => ({ ...current, country: String(event.target.value) }))
+                            updateCurrentForm((current) => ({
+                              ...current,
+                              country: String(event.target.value),
+                            }))
                           }
                         >
                           <MenuItem value="">
@@ -1015,7 +1139,10 @@ export function ShopManagementView() {
                         size="small"
                         value={form.postalCode}
                         onChange={(event) =>
-                          updateCurrentForm((current) => ({ ...current, postalCode: event.target.value }))
+                          updateCurrentForm((current) => ({
+                            ...current,
+                            postalCode: event.target.value,
+                          }))
                         }
                       />
                     </Grid>
@@ -1027,7 +1154,10 @@ export function ShopManagementView() {
                         type="number"
                         value={form.latitude}
                         onChange={(event) =>
-                          updateCurrentForm((current) => ({ ...current, latitude: event.target.value }))
+                          updateCurrentForm((current) => ({
+                            ...current,
+                            latitude: event.target.value,
+                          }))
                         }
                         slotProps={{ htmlInput: { step: 'any' } }}
                       />
@@ -1040,36 +1170,57 @@ export function ShopManagementView() {
                         type="number"
                         value={form.longitude}
                         onChange={(event) =>
-                          updateCurrentForm((current) => ({ ...current, longitude: event.target.value }))
+                          updateCurrentForm((current) => ({
+                            ...current,
+                            longitude: event.target.value,
+                          }))
                         }
                         slotProps={{ htmlInput: { step: 'any' } }}
                       />
                     </Grid>
                     <Grid size={{ xs: 12 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <Button
-                          size="small"
-                          variant="text"
-                          onClick={() => void handleUseCurrentLocation()}
-                          disabled={isResolvingLocation}
-                          startIcon={
-                            isResolvingLocation ? <CircularProgress size={14} color="inherit" /> : <MyLocationRoundedIcon />
-                          }
-                        >
-                          {isResolvingLocation ? t('shops.locating') : t('shops.useCurrentLocationButton')}
-                        </Button>
+                        <Tooltip title={actionDisabledReason ?? ''}>
+                          <span>
+                            <Button
+                              size="small"
+                              variant="text"
+                              onClick={() => void handleUseCurrentLocation()}
+                              disabled={isResolvingLocation || !canUpdateSelectedShop}
+                              startIcon={
+                                isResolvingLocation ? (
+                                  <CircularProgress size={14} color="inherit" />
+                                ) : (
+                                  <MyLocationRoundedIcon />
+                                )
+                              }
+                            >
+                              {isResolvingLocation
+                                ? t('shops.locating')
+                                : t('shops.useCurrentLocationButton')}
+                            </Button>
+                          </span>
+                        </Tooltip>
                       </Box>
                     </Grid>
                   </Grid>
 
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button
-                      variant="contained"
-                      onClick={() => void handleSave()}
-                      disabled={isSaving || isUploadingImage}
-                    >
-                      {isSaving ? <CircularProgress size={20} color="inherit" /> : t('shops.saveButton')}
-                    </Button>
+                    <Tooltip title={actionDisabledReason ?? ''}>
+                      <span>
+                        <Button
+                          variant="contained"
+                          onClick={() => void handleSave()}
+                          disabled={isSaving || isUploadingImage || !canUpdateSelectedShop}
+                        >
+                          {isSaving ? (
+                            <CircularProgress size={20} color="inherit" />
+                          ) : (
+                            t('shops.saveButton')
+                          )}
+                        </Button>
+                      </span>
+                    </Tooltip>
                   </Box>
                 </>
               )}

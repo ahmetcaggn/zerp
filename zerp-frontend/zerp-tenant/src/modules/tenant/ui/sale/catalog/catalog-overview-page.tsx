@@ -37,6 +37,7 @@ import { useMemo, useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
@@ -44,7 +45,8 @@ import { getUserFriendlyError } from '@/core/utils/error-message'
 import { useDeleteMenu, useMenus, usePatchMenu } from '../../../hooks/use-menus'
 import { useDeleteProduct, useProducts } from '../../../hooks/use-products'
 import { useUpdateShopDefaultMenuLanguage } from '../../../hooks/use-shops'
-import type { MenuLanguage, MenuResponseDto } from '../../../types/sale'
+import { shopParents, targetWithParents } from '../../../permissions/permission-targets'
+import type { MenuLanguage, MenuResponseDto, ProductResponseDto } from '../../../types/sale'
 
 export function CatalogOverviewPage() {
   const { t, locale } = useI18n()
@@ -52,6 +54,25 @@ export function CatalogOverviewPage() {
   const router = useRouter()
   const { scope, shops, refreshShops } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+  const { currentTenantId, hasShopPermission, hasPermissionForTarget, getDisabledReason } =
+    useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
+
+  const canReadMenus = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_MENU, selectedShopId),
+  )
+  const canCreateMenu = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.CREATE_MENU, selectedShopId),
+  )
+  const canReadProducts = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_PRODUCT, selectedShopId),
+  )
+  const canCreateProduct = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.CREATE_PRODUCT, selectedShopId),
+  )
+  const canUpdateShop = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.UPDATE_SHOP, selectedShopId),
+  )
 
   const [activationModalMenu, setActivationModalMenu] = useState<MenuResponseDto | null>(null)
   const [productPage, setProductPage] = useState(0)
@@ -64,25 +85,33 @@ export function CatalogOverviewPage() {
 
   const defaultLanguageValue: MenuLanguage = selectedShop?.defaultMenuLanguage ?? 'TR'
 
-  const { data: menusResult, isLoading: isMenusLoading, refetch: refetchMenus } = useMenus({
-    pagination: { page: 1, perPage: 200 },
-    sort: { field: 'name', order: 'ASC' },
-    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
-  })
+  const {
+    data: menusResult,
+    isLoading: isMenusLoading,
+    refetch: refetchMenus,
+  } = useMenus(
+    {
+      pagination: { page: 1, perPage: 200 },
+      sort: { field: 'name', order: 'ASC' },
+      ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+    },
+    { enabled: canReadMenus },
+  )
 
-  const { data: productsResult, isLoading: isProductsLoading } = useProducts({
-    pagination: { page: productPage + 1, perPage: productRowsPerPage },
-    sort: { field: 'name', order: 'ASC' },
-    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
-  })
+  const { data: productsResult, isLoading: isProductsLoading } = useProducts(
+    {
+      pagination: { page: productPage + 1, perPage: productRowsPerPage },
+      sort: { field: 'name', order: 'ASC' },
+      ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+    },
+    { enabled: canReadProducts },
+  )
 
   const { mutate: deleteMenu } = useDeleteMenu()
   const { mutate: patchMenu, isPending: isUpdatingMenu } = usePatchMenu()
   const { mutate: deleteProduct } = useDeleteProduct()
-  const {
-    mutateAsync: updateShopDefaultMenuLanguage,
-    isPending: isUpdatingDefaultLanguage,
-  } = useUpdateShopDefaultMenuLanguage()
+  const { mutateAsync: updateShopDefaultMenuLanguage, isPending: isUpdatingDefaultLanguage } =
+    useUpdateShopDefaultMenuLanguage()
 
   const menus = menusResult?.data ?? []
   const products = productsResult?.data ?? []
@@ -91,8 +120,43 @@ export function CatalogOverviewPage() {
     router.push(withLocale(locale, path) as Route)
   }
 
-  function handleDeleteMenu(id: string) {
-    deleteMenu(id, {
+  function canUseMenuAction(
+    menu: MenuResponseDto,
+    action: keyof typeof PermissionActions,
+  ): boolean {
+    return hasPermissionForTarget(
+      PermissionActions[action],
+      targetWithParents(
+        'MENU',
+        menu.id,
+        currentTenantId,
+        shopParents(menu.shopId ?? selectedShopId, currentTenantId),
+      ),
+    )
+  }
+
+  function canUseProductAction(
+    product: ProductResponseDto,
+    action: keyof typeof PermissionActions,
+  ): boolean {
+    return hasPermissionForTarget(
+      PermissionActions[action],
+      targetWithParents(
+        'PRODUCT',
+        product.id,
+        currentTenantId,
+        shopParents(product.shopId ?? selectedShopId, currentTenantId),
+      ),
+    )
+  }
+
+  function handleDeleteMenu(menu: MenuResponseDto) {
+    if (!canUseMenuAction(menu, 'DELETE_MENU')) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
+    deleteMenu(menu.id, {
       onSuccess: () => {
         showToast(t('sale.menu.deletedToast'))
         void refetchMenus()
@@ -101,14 +165,24 @@ export function CatalogOverviewPage() {
     })
   }
 
-  function handleDeleteProduct(id: string) {
-    deleteProduct(id, {
+  function handleDeleteProduct(product: ProductResponseDto) {
+    if (!canUseProductAction(product, 'DELETE_PRODUCT')) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
+    deleteProduct(product.id, {
       onSuccess: () => showToast(t('sale.product.deletedToast')),
       onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
     })
   }
 
   function applyMenuActiveState(menu: MenuResponseDto, nextActive: boolean) {
+    if (!canUseMenuAction(menu, 'UPDATE_MENU')) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     patchMenu(
       {
         id: menu.id,
@@ -134,6 +208,10 @@ export function CatalogOverviewPage() {
 
   async function handleChangeDefaultLanguage(language: MenuLanguage) {
     if (!selectedShopId) return
+    if (!canUpdateShop) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
 
     try {
       await updateShopDefaultMenuLanguage({
@@ -160,7 +238,15 @@ export function CatalogOverviewPage() {
 
       <Card variant="outlined">
         <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap', mb: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: 2,
+              flexWrap: 'wrap',
+              mb: 2,
+            }}
+          >
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
                 {t('sale.catalog.menusSectionTitle')}
@@ -174,32 +260,45 @@ export function CatalogOverviewPage() {
               <FormControl
                 size="small"
                 sx={{ minWidth: 240 }}
-                disabled={scope.mode !== 'SHOP' || isUpdatingDefaultLanguage}
+                disabled={scope.mode !== 'SHOP' || isUpdatingDefaultLanguage || !canUpdateShop}
               >
                 <InputLabel>{t('sale.menu.defaultLanguage.label')}</InputLabel>
                 <Select
                   value={defaultLanguageValue}
                   label={t('sale.menu.defaultLanguage.label')}
-                  onChange={(event) => void handleChangeDefaultLanguage(event.target.value as MenuLanguage)}
+                  onChange={(event) =>
+                    void handleChangeDefaultLanguage(event.target.value as MenuLanguage)
+                  }
                 >
                   <MenuItem value="TR">{t('sale.menu.language.tr')}</MenuItem>
                   <MenuItem value="EN">{t('sale.menu.language.en')}</MenuItem>
                 </Select>
               </FormControl>
 
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => goTo(`${ROUTES.catalog}/menus/new`)}
-              >
-                {t('sale.menu.createButton')}
-              </Button>
+              <Tooltip title={getDisabledReason(canCreateMenu, unauthorizedReason) ?? ''}>
+                <span>
+                  <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    disabled={!canCreateMenu}
+                    onClick={() => goTo(`${ROUTES.catalog}/menus/new`)}
+                  >
+                    {t('sale.menu.createButton')}
+                  </Button>
+                </span>
+              </Tooltip>
             </Box>
           </Box>
 
           {scope.mode !== 'SHOP' && (
             <Alert severity="warning" sx={{ mb: 2 }}>
               {t('sale.catalog.selectShopWarning')}
+            </Alert>
+          )}
+
+          {scope.mode === 'SHOP' && !canReadMenus && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              {unauthorizedReason}
             </Alert>
           )}
 
@@ -220,37 +319,78 @@ export function CatalogOverviewPage() {
                       border: menu.active ? '2px solid #16a34a' : '2px solid #dc2626',
                       bgcolor: menu.active ? 'rgba(22,163,74,0.09)' : 'rgba(220,38,38,0.09)',
                       borderRadius: 3,
-                      transition: 'transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, background-color 0.12s ease',
+                      transition:
+                        'transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, background-color 0.12s ease',
                       '&:hover': { boxShadow: 6, transform: 'translateY(-2px)' },
                       '&:active': { transform: 'scale(0.98)' },
                     }}
                   >
                     <CardContent sx={{ display: 'grid', gap: 1, p: 2, '&:last-child': { pb: 2 } }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="h6" sx={{ fontSize: '0.95rem', fontWeight: 700, lineHeight: 1.2 }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          gap: 1,
+                        }}
+                      >
+                        <Typography
+                          variant="h6"
+                          sx={{ fontSize: '0.95rem', fontWeight: 700, lineHeight: 1.2 }}
+                        >
                           {menu.name}
                         </Typography>
                         <Switch
                           size="small"
                           checked={menu.active}
-                          disabled={isUpdatingMenu}
+                          disabled={isUpdatingMenu || !canUseMenuAction(menu, 'UPDATE_MENU')}
                           onChange={(e) => handleActiveToggle(menu, e.target.checked)}
                           inputProps={{ 'aria-label': `toggle-menu-active-${menu.id}` }}
                         />
                       </Box>
 
-                      <Typography variant="body2" color="text.secondary" sx={{ minHeight: 32, fontSize: '0.8rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                          minHeight: 32,
+                          fontSize: '0.8rem',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
+                      >
                         {menu.description || '—'}
                       </Typography>
 
-                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-                        {menu.language === 'EN' ? t('sale.menu.language.en') : t('sale.menu.language.tr')}
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ fontSize: '0.7rem' }}
+                      >
+                        {menu.language === 'EN'
+                          ? t('sale.menu.language.en')
+                          : t('sale.menu.language.tr')}
                       </Typography>
 
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, pt: 0.5 }}>
+                      <Box
+                        sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, pt: 0.5 }}
+                      >
                         <Button
                           size="small"
                           endIcon={<LaunchIcon sx={{ fontSize: '0.8rem !important' }} />}
+                          disabled={
+                            !hasPermissionForTarget(
+                              PermissionActions.READ_MENU_CATEGORY,
+                              targetWithParents(
+                                'MENU',
+                                menu.id,
+                                currentTenantId,
+                                shopParents(menu.shopId ?? selectedShopId, currentTenantId),
+                              ),
+                            )
+                          }
                           onClick={() => goTo(`${ROUTES.catalog}/menus/${menu.id}`)}
                           sx={{ fontSize: '0.75rem', py: 0 }}
                         >
@@ -258,18 +398,40 @@ export function CatalogOverviewPage() {
                         </Button>
 
                         <Box sx={{ display: 'flex' }}>
-                          <Tooltip title={t('common.edit')}>
-                            <IconButton
-                              size="small"
-                              onClick={() => goTo(`${ROUTES.catalog}/menus/${menu.id}/edit`)}
-                            >
-                              <EditIcon sx={{ fontSize: '1.1rem' }} />
-                            </IconButton>
+                          <Tooltip
+                            title={
+                              canUseMenuAction(menu, 'UPDATE_MENU')
+                                ? t('common.edit')
+                                : unauthorizedReason
+                            }
+                          >
+                            <span>
+                              <IconButton
+                                size="small"
+                                disabled={!canUseMenuAction(menu, 'UPDATE_MENU')}
+                                onClick={() => goTo(`${ROUTES.catalog}/menus/${menu.id}/edit`)}
+                              >
+                                <EditIcon sx={{ fontSize: '1.1rem' }} />
+                              </IconButton>
+                            </span>
                           </Tooltip>
-                          <Tooltip title={t('common.delete')}>
-                            <IconButton size="small" color="error" onClick={() => handleDeleteMenu(menu.id)}>
-                              <DeleteIcon sx={{ fontSize: '1.1rem' }} />
-                            </IconButton>
+                          <Tooltip
+                            title={
+                              canUseMenuAction(menu, 'DELETE_MENU')
+                                ? t('common.delete')
+                                : unauthorizedReason
+                            }
+                          >
+                            <span>
+                              <IconButton
+                                size="small"
+                                color="error"
+                                disabled={!canUseMenuAction(menu, 'DELETE_MENU')}
+                                onClick={() => handleDeleteMenu(menu)}
+                              >
+                                <DeleteIcon sx={{ fontSize: '1.1rem' }} />
+                              </IconButton>
+                            </span>
                           </Tooltip>
                         </Box>
                       </Box>
@@ -284,7 +446,15 @@ export function CatalogOverviewPage() {
 
       <Card variant="outlined">
         <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap', mb: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: 2,
+              flexWrap: 'wrap',
+              mb: 2,
+            }}
+          >
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
                 {t('sale.catalog.productsSectionTitle')}
@@ -294,14 +464,25 @@ export function CatalogOverviewPage() {
               </Typography>
             </Box>
 
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => goTo(`${ROUTES.catalog}/products/new`)}
-            >
-              {t('sale.product.createButton')}
-            </Button>
+            <Tooltip title={getDisabledReason(canCreateProduct, unauthorizedReason) ?? ''}>
+              <span>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  disabled={!canCreateProduct}
+                  onClick={() => goTo(`${ROUTES.catalog}/products/new`)}
+                >
+                  {t('sale.product.createButton')}
+                </Button>
+              </span>
+            </Tooltip>
           </Box>
+
+          {scope.mode === 'SHOP' && !canReadProducts && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              {unauthorizedReason}
+            </Alert>
+          )}
 
           {isProductsLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
@@ -331,8 +512,16 @@ export function CatalogOverviewPage() {
                         <TableRow
                           key={product.id}
                           hover
-                          sx={{ cursor: 'pointer' }}
-                          onClick={() => goTo(`${ROUTES.catalog}/products/${product.id}`)}
+                          sx={{
+                            cursor: canUseProductAction(product, 'READ_PRODUCT')
+                              ? 'pointer'
+                              : 'default',
+                          }}
+                          onClick={() => {
+                            if (canUseProductAction(product, 'READ_PRODUCT')) {
+                              goTo(`${ROUTES.catalog}/products/${product.id}`)
+                            }
+                          }}
                         >
                           <TableCell>
                             <Typography fontWeight={600}>{product.name}</Typography>
@@ -342,25 +531,49 @@ export function CatalogOverviewPage() {
                               </Typography>
                             )}
                           </TableCell>
-                          <TableCell>{product.preparationTime != null ? `${product.preparationTime} dk` : '—'}</TableCell>
-                          <TableCell>{product.isActive ? t('common.active') : t('common.passive')}</TableCell>
+                          <TableCell>
+                            {product.preparationTime != null
+                              ? `${product.preparationTime} dk`
+                              : '—'}
+                          </TableCell>
+                          <TableCell>
+                            {product.isActive ? t('common.active') : t('common.passive')}
+                          </TableCell>
                           <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                            <Tooltip title={t('common.edit')}>
-                              <IconButton
-                                size="small"
-                                onClick={() => goTo(`${ROUTES.catalog}/products/${product.id}`)}
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
+                            <Tooltip
+                              title={
+                                canUseProductAction(product, 'UPDATE_PRODUCT')
+                                  ? t('common.edit')
+                                  : unauthorizedReason
+                              }
+                            >
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  disabled={!canUseProductAction(product, 'UPDATE_PRODUCT')}
+                                  onClick={() => goTo(`${ROUTES.catalog}/products/${product.id}`)}
+                                >
+                                  <EditIcon fontSize="small" />
+                                </IconButton>
+                              </span>
                             </Tooltip>
-                            <Tooltip title={t('common.delete')}>
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() => handleDeleteProduct(product.id)}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
+                            <Tooltip
+                              title={
+                                canUseProductAction(product, 'DELETE_PRODUCT')
+                                  ? t('common.delete')
+                                  : unauthorizedReason
+                              }
+                            >
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  disabled={!canUseProductAction(product, 'DELETE_PRODUCT')}
+                                  onClick={() => handleDeleteProduct(product)}
+                                >
+                                  <DeleteIcon fontSize="small" />
+                                </IconButton>
+                              </span>
                             </Tooltip>
                           </TableCell>
                         </TableRow>
@@ -386,7 +599,12 @@ export function CatalogOverviewPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={!!activationModalMenu} onClose={() => setActivationModalMenu(null)} fullWidth maxWidth="sm">
+      <Dialog
+        open={!!activationModalMenu}
+        onClose={() => setActivationModalMenu(null)}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>{t('sale.menu.activationModal.title')}</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary">

@@ -1,9 +1,11 @@
 'use client'
+import AddIcon from '@mui/icons-material/Add'
 import {
+  Alert,
   Box,
   Button,
-  CircularProgress,
   Chip,
+  CircularProgress,
   Table,
   TableBody,
   TableCell,
@@ -12,12 +14,15 @@ import {
   TableRow,
   Typography,
 } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
 import { useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
+
 import { useApproveStockCount, useStockCounts } from '../../hooks/use-stock-counts'
+import { shopParents, targetWithParents } from '../../permissions/permission-targets'
 import type { StockCountResponseDto } from '../../types/stock'
 import { StockCountEntryDialog } from './stock-count-entry-dialog'
 import { StockCountFormDialog } from './stock-count-form-dialog'
@@ -27,6 +32,14 @@ export function StockCountList() {
   const { showToast } = useToast()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
+  const canReadCounts = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_STOCK_COUNT, selectedShopId),
+  )
+  const canCreateCount = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.CREATE_STOCK_COUNT, selectedShopId),
+  )
 
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -35,12 +48,21 @@ export function StockCountList() {
   const [selectedCount, setSelectedCount] = useState<StockCountResponseDto | null>(null)
   const approveMutation = useApproveStockCount()
 
-  const { data, isLoading } = useStockCounts({
-    pagination: { page: page + 1, perPage: rowsPerPage },
-    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
-  })
+  const { data, isLoading } = useStockCounts(
+    {
+      pagination: { page: page + 1, perPage: rowsPerPage },
+      ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+    },
+    { enabled: canReadCounts },
+  )
 
   const handleApprove = async (countId: string) => {
+    const count = data?.data?.find((item) => item.id === countId)
+    if (!count || !canApproveCount(count)) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     try {
       await approveMutation.mutateAsync(countId)
       showToast('Count approved successfully', { severity: 'success' })
@@ -50,8 +72,29 @@ export function StockCountList() {
   }
 
   const handleOpenEntry = (count: StockCountResponseDto) => {
+    if (!canUpdateCount(count)) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
     setSelectedCount(count)
     setEntryOpen(true)
+  }
+
+  function countTarget(count: StockCountResponseDto) {
+    return targetWithParents(
+      'STOCK_COUNT',
+      count.id,
+      currentTenantId,
+      shopParents(count.shopId, currentTenantId),
+    )
+  }
+
+  function canUpdateCount(count: StockCountResponseDto): boolean {
+    return hasPermissionForTarget(PermissionActions.UPDATE_STOCK_COUNT, countTarget(count))
+  }
+
+  function canApproveCount(count: StockCountResponseDto): boolean {
+    return hasPermissionForTarget(PermissionActions.APPROVE_STOCK_COUNT, countTarget(count))
   }
 
   return (
@@ -61,6 +104,7 @@ export function StockCountList() {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
+          disabled={!canCreateCount}
           onClick={() => setFormOpen(true)}
         >
           {t('stock.count.createButton')}
@@ -71,6 +115,8 @@ export function StockCountList() {
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
           <CircularProgress />
         </Box>
+      ) : !canReadCounts ? (
+        <Alert severity="warning">{unauthorizedReason}</Alert>
       ) : (
         <Box sx={{ overflowX: 'auto' }}>
           <Table>
@@ -93,13 +139,16 @@ export function StockCountList() {
                 data.data.map((count) => (
                   <TableRow key={count.id}>
                     <TableCell>{count.countDate}</TableCell>
-                    <TableCell>{t(`stock.count.statuses.${count.status}` as any) || count.status}</TableCell>
+                    <TableCell>
+                      {t(`stock.count.statuses.${count.status}` as any) || count.status}
+                    </TableCell>
                     <TableCell>{count.notes}</TableCell>
                     <TableCell align="right">
                       {count.status !== 'COMPLETED' && count.status !== 'CANCELLED' && (
                         <Button
                           size="small"
                           variant="text"
+                          disabled={!canUpdateCount(count)}
                           onClick={() => handleOpenEntry(count)}
                           sx={{ mr: 1 }}
                         >
@@ -107,14 +156,26 @@ export function StockCountList() {
                         </Button>
                       )}
                       {count.status === 'COMPLETED' ? (
-                        <Chip size="small" label={t('stock.count.statuses.COMPLETED')} color="success" />
+                        <Chip
+                          size="small"
+                          label={t('stock.count.statuses.COMPLETED')}
+                          color="success"
+                        />
                       ) : count.status === 'CANCELLED' ? (
-                        <Chip size="small" label={t('stock.count.statuses.CANCELLED')} color="default" />
+                        <Chip
+                          size="small"
+                          label={t('stock.count.statuses.CANCELLED')}
+                          color="default"
+                        />
                       ) : (
                         <Button
                           size="small"
                           variant="outlined"
-                          disabled={approveMutation.isPending || count.status !== 'READY_FOR_APPROVAL'}
+                          disabled={
+                            approveMutation.isPending ||
+                            count.status !== 'READY_FOR_APPROVAL' ||
+                            !canApproveCount(count)
+                          }
                           onClick={() => handleApprove(count.id)}
                         >
                           Approve
@@ -140,12 +201,7 @@ export function StockCountList() {
         </Box>
       )}
 
-      {formOpen && (
-        <StockCountFormDialog
-          open={formOpen}
-          onClose={() => setFormOpen(false)}
-        />
-      )}
+      {formOpen && <StockCountFormDialog open={formOpen} onClose={() => setFormOpen(false)} />}
 
       {entryOpen && (
         <StockCountEntryDialog

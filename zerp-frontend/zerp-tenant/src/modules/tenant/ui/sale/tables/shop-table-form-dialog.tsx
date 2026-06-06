@@ -1,5 +1,6 @@
 'use client'
 import {
+  Alert,
   Box,
   Button,
   Dialog,
@@ -13,11 +14,15 @@ import {
   TextField,
 } from '@mui/material'
 import { useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
+
 import { useCreateShopTable, useUpdateShopTable } from '../../../hooks/use-shop-tables'
+import { shopParents, targetWithParents } from '../../../permissions/permission-targets'
 import type { ShopTableResponseDto, ShopTableStatus } from '../../../types/sale'
 
 const TABLE_STATUSES: ShopTableStatus[] = ['AVAILABLE', 'RESERVED', 'OCCUPIED', 'OUT_OF_ORDER']
@@ -33,6 +38,9 @@ export function ShopTableFormDialog({ open, mode, table, onClose }: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
   const { scope } = useShopScope()
+  const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
 
   const [name, setName] = useState(table?.name ?? '')
   const [description, setDescription] = useState(table?.description ?? '')
@@ -43,10 +51,29 @@ export function ShopTableFormDialog({ open, mode, table, onClose }: Props) {
   const { mutate: createTable, isPending: isCreating } = useCreateShopTable()
   const { mutate: updateTable, isPending: isUpdating } = useUpdateShopTable()
   const isPending = isCreating || isUpdating
+  const canCreateTable = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.CREATE_SHOP_TABLE, selectedShopId),
+  )
+  const canUpdateTable = table
+    ? hasPermissionForTarget(
+        PermissionActions.UPDATE_SHOP_TABLE,
+        targetWithParents(
+          'SHOP_TABLE',
+          table.id,
+          currentTenantId,
+          shopParents(table.shopId, currentTenantId),
+        ),
+      )
+    : false
+  const canSubmit = mode === 'create' ? canCreateTable : canUpdateTable
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
+    if (!canSubmit) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
 
     if (mode === 'create') {
       if (scope.mode !== 'SHOP') {
@@ -102,12 +129,14 @@ export function ShopTableFormDialog({ open, mode, table, onClose }: Props) {
         </DialogTitle>
         <DialogContent dividers>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            {!canSubmit && <Alert severity="warning">{unauthorizedReason}</Alert>}
             <TextField
               label={t('sale.table.form.name')}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
               fullWidth
+              disabled={!canSubmit}
             />
             <TextField
               label={t('sale.table.form.description')}
@@ -116,6 +145,7 @@ export function ShopTableFormDialog({ open, mode, table, onClose }: Props) {
               multiline
               rows={2}
               fullWidth
+              disabled={!canSubmit}
             />
             <Box sx={{ display: 'flex', gap: 2 }}>
               <TextField
@@ -126,6 +156,7 @@ export function ShopTableFormDialog({ open, mode, table, onClose }: Props) {
                 required
                 fullWidth
                 inputProps={{ min: 1 }}
+                disabled={!canSubmit}
               />
               <TextField
                 label={t('sale.table.form.floor')}
@@ -134,9 +165,10 @@ export function ShopTableFormDialog({ open, mode, table, onClose }: Props) {
                 onChange={(e) => setFloor(e.target.value)}
                 required
                 fullWidth
+                disabled={!canSubmit}
               />
             </Box>
-            <FormControl fullWidth required>
+            <FormControl fullWidth required disabled={!canSubmit}>
               <InputLabel>{t('sale.table.form.status')}</InputLabel>
               <Select
                 value={status}
@@ -156,7 +188,7 @@ export function ShopTableFormDialog({ open, mode, table, onClose }: Props) {
           <Button onClick={onClose} disabled={isPending}>
             {t('common.cancel')}
           </Button>
-          <Button type="submit" variant="contained" disabled={isPending}>
+          <Button type="submit" variant="contained" disabled={isPending || !canSubmit}>
             {isPending ? t('common.loading') : t('common.save')}
           </Button>
         </DialogActions>

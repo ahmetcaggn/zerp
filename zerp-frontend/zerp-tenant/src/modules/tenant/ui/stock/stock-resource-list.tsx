@@ -1,4 +1,6 @@
 'use client'
+import AddIcon from '@mui/icons-material/Add'
+import EditIcon from '@mui/icons-material/Edit'
 import {
   Alert,
   Box,
@@ -20,15 +22,21 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
-import EditIcon from '@mui/icons-material/Edit'
 import { useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
-import { formatDate } from '@/core/utils/date-formatter'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
+import { formatDate } from '@/core/utils/date-formatter'
+
 import { useStockOperationHistory } from '../../hooks/use-stock-operations'
 import { useStockOverview, useStockResources } from '../../hooks/use-stock-resources'
-import type { StockOperationResponseDto, StockOperationType, StockResourceResponseDto } from '../../types/stock'
+import { shopParents, targetWithParents } from '../../permissions/permission-targets'
+import type {
+  StockOperationResponseDto,
+  StockOperationType,
+  StockResourceResponseDto,
+} from '../../types/stock'
 import { StockAdjustmentFormDialog } from './stock-adjustment-form-dialog'
 import { StockEntryFormDialog } from './stock-entry-form-dialog'
 import { StockOperationDetailDialog } from './stock-operation-detail-dialog'
@@ -50,6 +58,23 @@ export function StockResourceList() {
   const { t, locale } = useI18n()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
+  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
+  const canReadResources = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_STOCK_RESOURCE, selectedShopId),
+  )
+  const canCreateResource = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.CREATE_STOCK_RESOURCE, selectedShopId),
+  )
+  const canCreateEntry = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.CREATE_STOCK_ENTRY, selectedShopId),
+  )
+  const canCreateAdjustment = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.CREATE_STOCK_ADJUSTMENT, selectedShopId),
+  )
+  const canReadMovements = Boolean(
+    selectedShopId && hasShopPermission(PermissionActions.READ_STOCK_MOVEMENT, selectedShopId),
+  )
 
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -63,14 +88,17 @@ export function StockResourceList() {
   const [fromFilter, setFromFilter] = useState('')
   const [toFilter, setToFilter] = useState('')
 
-  const { data, isLoading } = useStockResources({
-    pagination: { page: page + 1, perPage: rowsPerPage },
-    sort: { field: 'name', order: 'ASC' },
-    ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
-  })
-  const { data: overviewData } = useStockOverview(selectedShopId)
+  const { data, isLoading } = useStockResources(
+    {
+      pagination: { page: page + 1, perPage: rowsPerPage },
+      sort: { field: 'name', order: 'ASC' },
+      ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
+    },
+    { enabled: canReadResources },
+  )
+  const { data: overviewData } = useStockOverview(selectedShopId, { enabled: canReadResources })
   const { data: operationHistory } = useStockOperationHistory({
-    shopId: selectedShopId,
+    shopId: canReadMovements ? selectedShopId : undefined,
     limit: 100,
     operationType: operationTypeFilter === 'ALL' ? undefined : operationTypeFilter,
     from: toApiDateTime(fromFilter),
@@ -80,8 +108,23 @@ export function StockResourceList() {
   const overviewById = new Map((overviewData ?? []).map((item) => [item.stockResourceId, item]))
 
   const handleEdit = (resource: StockResourceResponseDto) => {
+    if (!canUpdateResource(resource)) {
+      return
+    }
     setSelectedResource(resource)
     setFormOpen(true)
+  }
+
+  function canUpdateResource(resource: StockResourceResponseDto): boolean {
+    return hasPermissionForTarget(
+      PermissionActions.UPDATE_STOCK_RESOURCE,
+      targetWithParents(
+        'STOCK_RESOURCE',
+        resource.id,
+        currentTenantId,
+        shopParents(resource.shopId, currentTenantId),
+      ),
+    )
   }
 
   return (
@@ -89,15 +132,24 @@ export function StockResourceList() {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h6">{t('stock.tabs.resources')}</Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          <Button variant="outlined" onClick={() => setEntryFormOpen(true)} disabled={!selectedShopId}>
+          <Button
+            variant="outlined"
+            onClick={() => setEntryFormOpen(true)}
+            disabled={!selectedShopId || !canCreateEntry}
+          >
             {t('stock.operation.entryButton')}
           </Button>
-          <Button variant="outlined" onClick={() => setAdjustmentFormOpen(true)} disabled={!selectedShopId}>
+          <Button
+            variant="outlined"
+            onClick={() => setAdjustmentFormOpen(true)}
+            disabled={!selectedShopId || !canCreateAdjustment}
+          >
             {t('stock.operation.adjustmentButton')}
           </Button>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
+            disabled={!canCreateResource}
             onClick={() => {
               setSelectedResource(null)
               setFormOpen(true)
@@ -115,6 +167,8 @@ export function StockResourceList() {
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
           <CircularProgress />
         </Box>
+      ) : !canReadResources ? (
+        <Alert severity="warning">{unauthorizedReason}</Alert>
       ) : (
         <Box sx={{ overflowX: 'auto' }}>
           <Table>
@@ -148,24 +202,39 @@ export function StockResourceList() {
                   const variance = overview?.variance ?? 0
                   const lastExpectedStock = overview?.lastExpectedQuantity
                   const isVarianceNegative = Number(variance) < 0
-                  const varianceColor = variance === 0 ? 'text.primary' : isVarianceNegative ? 'error.main' : 'success.main'
+                  const varianceColor =
+                    variance === 0
+                      ? 'text.primary'
+                      : isVarianceNegative
+                        ? 'error.main'
+                        : 'success.main'
 
                   return (
                     <TableRow key={resource.id}>
-                    <TableCell>{resource.name}</TableCell>
-                    <TableCell>{real}</TableCell>
-                    <TableCell>{expected}</TableCell>
-                    <TableCell>{resource.unitType}</TableCell>
-                    <TableCell>{overview?.reorderThreshold ?? resource.reorderThreshold}</TableCell>
-                    <TableCell>{lastCountStock ?? '-'}</TableCell>
-                    <TableCell sx={{ color: varianceColor, fontWeight: 600 }}>{variance}</TableCell>
-                    <TableCell>{lastExpectedStock ?? '-'}</TableCell>
-                    <TableCell>{overview?.lastCountedAt ? formatDate(overview.lastCountedAt, locale) : '-'}</TableCell>
-                    <TableCell align="right">
-                      <IconButton size="small" onClick={() => handleEdit(resource)}>
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </TableCell>
+                      <TableCell>{resource.name}</TableCell>
+                      <TableCell>{real}</TableCell>
+                      <TableCell>{expected}</TableCell>
+                      <TableCell>{resource.unitType}</TableCell>
+                      <TableCell>
+                        {overview?.reorderThreshold ?? resource.reorderThreshold}
+                      </TableCell>
+                      <TableCell>{lastCountStock ?? '-'}</TableCell>
+                      <TableCell sx={{ color: varianceColor, fontWeight: 600 }}>
+                        {variance}
+                      </TableCell>
+                      <TableCell>{lastExpectedStock ?? '-'}</TableCell>
+                      <TableCell>
+                        {overview?.lastCountedAt ? formatDate(overview.lastCountedAt, locale) : '-'}
+                      </TableCell>
+                      <TableCell align="right">
+                        <IconButton
+                          size="small"
+                          disabled={!canUpdateResource(resource)}
+                          onClick={() => handleEdit(resource)}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </TableCell>
                     </TableRow>
                   )
                 })
@@ -186,7 +255,7 @@ export function StockResourceList() {
         </Box>
       )}
 
-      {selectedShopId && (
+      {selectedShopId && canReadMovements && (
         <Paper variant="outlined" sx={{ mt: 3, p: 2 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
             {t('stock.operation.historyTitle')}
@@ -197,7 +266,9 @@ export function StockResourceList() {
               <Select
                 label={t('stock.operation.filters.type')}
                 value={operationTypeFilter}
-                onChange={(e) => setOperationTypeFilter(e.target.value as 'ALL' | StockOperationType)}
+                onChange={(e) =>
+                  setOperationTypeFilter(e.target.value as 'ALL' | StockOperationType)
+                }
               >
                 <MenuItem value="ALL">{t('stock.operation.filters.allTypes')}</MenuItem>
                 <MenuItem value="ENTRY">{t('stock.operation.types.ENTRY')}</MenuItem>
@@ -265,11 +336,19 @@ export function StockResourceList() {
                       sx={{ cursor: 'pointer' }}
                       onClick={() => setSelectedOperation(operation)}
                     >
-                      <TableCell>{operation.createdAt ? formatDateTime(operation.createdAt, locale) : '-'}</TableCell>
-                      <TableCell>{t(`stock.operation.types.${operation.operationType}` as any) || operation.operationType}</TableCell>
+                      <TableCell>
+                        {operation.createdAt ? formatDateTime(operation.createdAt, locale) : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {t(`stock.operation.types.${operation.operationType}` as any) ||
+                          operation.operationType}
+                      </TableCell>
                       <TableCell align="right">{operation.itemCount}</TableCell>
                       <TableCell>{operation.referenceNo || '-'}</TableCell>
-                      <TableCell>{t(`stock.operation.statuses.${operation.status}` as any) || operation.status}</TableCell>
+                      <TableCell>
+                        {t(`stock.operation.statuses.${operation.status}` as any) ||
+                          operation.status}
+                      </TableCell>
                       <TableCell>{operation.notes || '-'}</TableCell>
                     </TableRow>
                   ))

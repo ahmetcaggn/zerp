@@ -4,6 +4,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
+  Alert,
   Autocomplete,
   Box,
   Button,
@@ -24,6 +25,7 @@ import { useMemo, useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
@@ -52,7 +54,9 @@ interface FormState {
   actions: string[]
 }
 
-function parseGroupKey(groupKey: string):
+function parseGroupKey(
+  groupKey: string,
+):
   | { type: 'predefined'; code: PredefinedPermissionGroupCode }
   | { type: 'custom'; id: string }
   | null {
@@ -94,6 +98,9 @@ export function PermissionGroupDetail({ groupKey }: Props) {
   const { t, locale } = useI18n()
   const { showToast } = useToast()
   const router = useRouter()
+  const { hasTenantPermission, isLoadingPermissions } = useCurrentUserPermissions()
+  const unauthorizedReason = t('common.unauthorized')
+  const canManageGroups = hasTenantPermission(PermissionActions.ADMIN)
 
   const parsed = parseGroupKey(groupKey)
   const isPredefined = parsed?.type === 'predefined'
@@ -104,13 +111,13 @@ export function PermissionGroupDetail({ groupKey }: Props) {
     data: predefinedGroup,
     isLoading: isPredefinedLoading,
     error: predefinedError,
-  } = usePredefinedPermissionGroup(predefinedCode, Boolean(predefinedCode))
+  } = usePredefinedPermissionGroup(predefinedCode, Boolean(predefinedCode) && canManageGroups)
 
   const {
     data: customGroup,
     isLoading: isCustomLoading,
     error: customError,
-  } = useCustomPermissionGroup(customId, Boolean(customId))
+  } = useCustomPermissionGroup(customId, Boolean(customId) && canManageGroups)
 
   const group = isPredefined ? predefinedGroup : customGroup
   const isLoading = isPredefined ? isPredefinedLoading : isCustomLoading
@@ -122,7 +129,7 @@ export function PermissionGroupDetail({ groupKey }: Props) {
   const { mutate: patchGroup, isPending: isPatchPending } = usePatchPermissionGroup()
   const { mutate: deleteGroup, isPending: isDeletePending } = useDeletePermissionGroup()
 
-  const { data: actionHierarchy } = usePermissionActionHierarchy(editOpen)
+  const { data: actionHierarchy } = usePermissionActionHierarchy(editOpen && canManageGroups)
   const actionOptions = useMemo(
     () => buildActionOptions(actionHierarchy, form?.scopeType ?? 'TENANT'),
     [actionHierarchy, form?.scopeType],
@@ -132,12 +139,16 @@ export function PermissionGroupDetail({ groupKey }: Props) {
     return <Typography color="text.secondary">{t('permissionGroups.notFound')}</Typography>
   }
 
-  if (isLoading) {
+  if (isLoadingPermissions || isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
         <CircularProgress />
       </Box>
     )
+  }
+
+  if (!canManageGroups) {
+    return <Alert severity="warning">{unauthorizedReason}</Alert>
   }
 
   if (error || !group) {
@@ -146,12 +157,22 @@ export function PermissionGroupDetail({ groupKey }: Props) {
   const resolvedGroup = group
 
   function openEdit() {
+    if (!canManageGroups) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     if (!resolvedGroup.id) return
     setForm(buildForm(resolvedGroup))
     setEditOpen(true)
   }
 
   function handleSave() {
+    if (!canManageGroups) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     if (!form || !resolvedGroup.id) return
 
     const name = form.name.trim()
@@ -179,7 +200,9 @@ export function PermissionGroupDetail({ groupKey }: Props) {
         onError: (err) => {
           const message = getUserFriendlyError(err)
           if (message.includes('Cannot change scopeType while group has active assignments')) {
-            showToast(t('permissionGroups.propagationScopeConflictWarning'), { severity: 'warning' })
+            showToast(t('permissionGroups.propagationScopeConflictWarning'), {
+              severity: 'warning',
+            })
             return
           }
           showToast(message, { severity: 'error' })
@@ -189,6 +212,11 @@ export function PermissionGroupDetail({ groupKey }: Props) {
   }
 
   function handleDelete() {
+    if (!canManageGroups) {
+      showToast(unauthorizedReason, { severity: 'warning' })
+      return
+    }
+
     if (resolvedGroup.source !== 'CUSTOM' || !resolvedGroup.id) return
 
     deleteGroup(resolvedGroup.id, {
@@ -211,7 +239,11 @@ export function PermissionGroupDetail({ groupKey }: Props) {
         </Button>
 
         <Stack direction="row" spacing={1}>
-          <Button startIcon={<EditIcon />} onClick={openEdit} disabled={!resolvedGroup.id}>
+          <Button
+            startIcon={<EditIcon />}
+            onClick={openEdit}
+            disabled={!resolvedGroup.id || !canManageGroups}
+          >
             {t('permissionGroups.editButton')}
           </Button>
           {resolvedGroup.source === 'CUSTOM' && (
@@ -219,7 +251,7 @@ export function PermissionGroupDetail({ groupKey }: Props) {
               startIcon={<DeleteIcon />}
               color="error"
               onClick={handleDelete}
-              disabled={isDeletePending}
+              disabled={isDeletePending || !canManageGroups}
             >
               {t('permissionGroups.deleteButton')}
             </Button>
@@ -245,7 +277,11 @@ export function PermissionGroupDetail({ groupKey }: Props) {
           color="primary"
           variant="outlined"
         />
-        <Chip label={prettifyPermissionEnumName(resolvedGroup.scopeType)} size="small" variant="outlined" />
+        <Chip
+          label={prettifyPermissionEnumName(resolvedGroup.scopeType)}
+          size="small"
+          variant="outlined"
+        />
       </Stack>
 
       <Box>
@@ -270,6 +306,7 @@ export function PermissionGroupDetail({ groupKey }: Props) {
               onChange={(event) =>
                 setForm((prev) => (prev ? { ...prev, name: event.target.value } : prev))
               }
+              disabled={!canManageGroups}
             />
 
             <TextField
@@ -281,6 +318,7 @@ export function PermissionGroupDetail({ groupKey }: Props) {
               }
               multiline
               rows={3}
+              disabled={!canManageGroups}
             />
 
             <TextField
@@ -288,6 +326,7 @@ export function PermissionGroupDetail({ groupKey }: Props) {
               select
               label={t('permissionGroups.scopeField')}
               value={form?.scopeType ?? 'TENANT'}
+              disabled={!canManageGroups}
               onChange={(event) =>
                 setForm((prev) =>
                   prev
@@ -312,6 +351,7 @@ export function PermissionGroupDetail({ groupKey }: Props) {
                 setForm((prev) => (prev ? { ...prev, actions: values } : prev))
               }
               disableCloseOnSelect
+              disabled={!canManageGroups}
               renderTags={(value, getTagProps) =>
                 value.map((action, index) => (
                   <Chip
@@ -332,7 +372,11 @@ export function PermissionGroupDetail({ groupKey }: Props) {
           <Button onClick={() => setEditOpen(false)} disabled={isPatchPending}>
             {t('common.cancel')}
           </Button>
-          <Button variant="contained" onClick={handleSave} disabled={isPatchPending}>
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            disabled={isPatchPending || !canManageGroups}
+          >
             {isPatchPending ? <CircularProgress size={16} /> : t('common.save')}
           </Button>
         </DialogActions>
