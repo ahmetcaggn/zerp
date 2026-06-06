@@ -1,6 +1,8 @@
 package org.zerp.common.entity.sale;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -28,9 +30,18 @@ public class TableOrderItem extends BaseEntity {
     @JoinColumn(name = "order_id", nullable = false)
     private TableOrder order;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "menu_item_id", nullable = false)
     private MenuItem menuItem;
+
+    @Column(name = "menu_item_id", insertable = false, updatable = false)
+    private UUID menuItemId;
+
+    private String menuItemName;
+
+    private UUID categoryId;
+
+    private String categoryName;
 
     private int quantity;
 

@@ -296,6 +296,7 @@ public class PublicSaleService {
             PublicCartOrderItem item = new PublicCartOrderItem();
             item.setPublicCartOrder(order);
             item.setMenuItem(menuItem);
+            item.setMenuItemName(menuItem.getName());
             item.setQuantity(itemRequest.getQuantity());
             item.setUnitPrice(menuItem.getPrice());
             item.setCreatedAt(now);

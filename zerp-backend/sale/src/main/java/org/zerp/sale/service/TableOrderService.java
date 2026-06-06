@@ -332,6 +332,11 @@ public class TableOrderService implements
         TableOrderItem item = new TableOrderItem();
         item.setOrder(order);
         item.setMenuItem(menuItem);
+        item.setMenuItemName(menuItem.getName());
+        if (menuItem.getCategory() != null) {
+            item.setCategoryId(menuItem.getCategory().getId());
+            item.setCategoryName(menuItem.getCategory().getName());
+        }
         item.setQuantity(dto.getQuantity());
         item.setUnitPrice(menuItem.getPrice().add(extraTotal));
         item.setNotes(dto.getNotes());
@@ -460,8 +465,8 @@ public class TableOrderService implements
         TableOrderPaymentItem snapshot = new TableOrderPaymentItem();
         snapshot.setPayment(payment);
         snapshot.setTenantId(payment.getTenantId());
-        snapshot.setMenuItemId(source.getMenuItem().getId());
-        snapshot.setMenuItemName(source.getMenuItem().getName());
+        snapshot.setMenuItemId(resolveSourceMenuItemId(source));
+        snapshot.setMenuItemName(resolveSourceMenuItemName(source));
         snapshot.setQuantity(quantity);
         snapshot.setUnitPrice(source.getUnitPrice());
         snapshot.setNotes(source.getNotes());
@@ -477,6 +482,20 @@ public class TableOrderService implements
         }
 
         return snapshot;
+    }
+
+    private UUID resolveSourceMenuItemId(TableOrderItem source) {
+        if (source.getMenuItemId() != null) {
+            return source.getMenuItemId();
+        }
+        return source.getMenuItem() == null ? null : source.getMenuItem().getId();
+    }
+
+    private String resolveSourceMenuItemName(TableOrderItem source) {
+        if (source.getMenuItemName() != null) {
+            return source.getMenuItemName();
+        }
+        return source.getMenuItem() == null ? null : source.getMenuItem().getName();
     }
 
     @SuppressWarnings("unchecked")
@@ -536,7 +555,7 @@ public class TableOrderService implements
     }
 
     private PublicCartOrderPreviewItemDTO toPublicCartOrderPreviewItem(PublicCartOrderItem item) {
-        if (item == null || item.getMenuItem() == null) {
+        if (item == null || resolvePublicCartMenuItemId(item) == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PublicCartOrder has an invalid item");
         }
         if (item.getQuantity() <= 0) {
@@ -547,12 +566,26 @@ public class TableOrderService implements
         }
 
         PublicCartOrderPreviewItemDTO dto = new PublicCartOrderPreviewItemDTO();
-        dto.setMenuItemId(item.getMenuItem().getId());
-        dto.setMenuItemName(item.getMenuItem().getName());
+        dto.setMenuItemId(resolvePublicCartMenuItemId(item));
+        dto.setMenuItemName(resolvePublicCartMenuItemName(item));
         dto.setQuantity(item.getQuantity());
         dto.setUnitPrice(item.getUnitPrice());
         dto.setNotes(item.getNotes());
         return dto;
+    }
+
+    private UUID resolvePublicCartMenuItemId(PublicCartOrderItem item) {
+        if (item.getMenuItemId() != null) {
+            return item.getMenuItemId();
+        }
+        return item.getMenuItem() == null ? null : item.getMenuItem().getId();
+    }
+
+    private String resolvePublicCartMenuItemName(PublicCartOrderItem item) {
+        if (item.getMenuItemName() != null) {
+            return item.getMenuItemName();
+        }
+        return item.getMenuItem() == null ? null : item.getMenuItem().getName();
     }
 
     private List<TableOrderItemSelectedExtraOption> resolveSelectedExtraOptions(
@@ -645,7 +678,7 @@ public class TableOrderService implements
 
         Map<UUID, MenuItem> menuItemById = new HashMap<>();
         if (!menuItemIds.isEmpty()) {
-            for (MenuItem menuItem : menuItemRepository.findAllById(menuItemIds)) {
+            for (MenuItem menuItem : menuItemRepository.findAllIncludingDeletedByIdIn(menuItemIds)) {
                 menuItemById.put(menuItem.getId(), menuItem);
             }
         }
@@ -673,18 +706,35 @@ public class TableOrderService implements
     private List<StockMovementFeignRequest> buildStockMovementRequestsFromOpenItems(TableOrder order) {
         List<StockMovementFeignRequest> requests = new ArrayList<>();
         Set<UUID> selectedExtraOptionIds = new HashSet<>();
+        Set<UUID> menuItemIds = new HashSet<>();
         for (TableOrderItem item : order.getItems()) {
+            UUID menuItemId = resolveSourceMenuItemId(item);
+            if (menuItemId != null) {
+                menuItemIds.add(menuItemId);
+            }
             for (TableOrderItemSelectedExtraOption selectedExtraOption : item.getSelectedExtraOptions()) {
                 selectedExtraOptionIds.add(selectedExtraOption.getExtraOptionId());
             }
         }
+        Map<UUID, MenuItem> menuItemById = resolveMenuItemsIncludingDeleted(menuItemIds);
         Map<UUID, ProductExtraOption> extraOptionById = resolveExtraOptionsById(selectedExtraOptionIds);
 
         for (TableOrderItem item : order.getItems()) {
-            appendMenuItemStockRequests(requests, order, item.getMenuItem(), item.getQuantity(),
+            MenuItem menuItem = menuItemById.get(resolveSourceMenuItemId(item));
+            appendMenuItemStockRequests(requests, order, menuItem, item.getQuantity(),
                     item.getSelectedExtraOptions(), extraOptionById);
         }
         return requests;
+    }
+
+    private Map<UUID, MenuItem> resolveMenuItemsIncludingDeleted(Set<UUID> menuItemIds) {
+        Map<UUID, MenuItem> menuItemById = new HashMap<>();
+        if (!menuItemIds.isEmpty()) {
+            for (MenuItem menuItem : menuItemRepository.findAllIncludingDeletedByIdIn(menuItemIds)) {
+                menuItemById.put(menuItem.getId(), menuItem);
+            }
+        }
+        return menuItemById;
     }
 
     private Map<UUID, ProductExtraOption> resolveExtraOptionsById(Set<UUID> selectedExtraOptionIds) {

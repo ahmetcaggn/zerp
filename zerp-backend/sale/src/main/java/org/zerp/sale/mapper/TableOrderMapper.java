@@ -25,8 +25,6 @@ public interface TableOrderMapper {
     @Mapping(source = "tenantId", target = "tenantId")
     TableOrderDTO toDTO(TableOrder entity);
 
-    @Mapping(source = "menuItem.id", target = "menuItemId")
-    @Mapping(source = "menuItem.name", target = "menuItemName")
     TableOrderItemDTO toItemDTO(TableOrderItem item);
 
     @Mapping(source = "nameSnapshot", target = "name")

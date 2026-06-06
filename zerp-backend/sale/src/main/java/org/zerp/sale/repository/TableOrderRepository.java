@@ -62,17 +62,20 @@ public interface TableOrderRepository extends JpaRepository<TableOrder, UUID>, J
 
     @Query("""
             select
-                oi.menuItem.category.id as categoryId,
-                oi.menuItem.category.name as categoryName,
+                coalesce(oi.categoryId, category.id) as categoryId,
+                coalesce(oi.categoryName, category.name) as categoryName,
                 sum(oi.unitPrice * oi.quantity) as revenue
             from TableOrder o
             join o.items oi
+            left join oi.menuItem menuItem
+            left join menuItem.category category
             where o.shop.id = :shopId
               and o.tenantId = :tenantId
               and o.status = :status
               and o.createdAt >= :startInclusive
               and o.createdAt < :endExclusive
-            group by oi.menuItem.category.id, oi.menuItem.category.name
+              and coalesce(oi.categoryId, category.id) is not null
+            group by coalesce(oi.categoryId, category.id), coalesce(oi.categoryName, category.name)
             order by sum(oi.unitPrice * oi.quantity) desc
             """)
     List<CategorySalesAggregateRow> findCategorySalesForDashboard(
@@ -85,18 +88,20 @@ public interface TableOrderRepository extends JpaRepository<TableOrder, UUID>, J
 
     @Query("""
             select
-                oi.menuItem.id as menuItemId,
-                oi.menuItem.name as menuItemName,
+                coalesce(oi.menuItemId, menuItem.id) as menuItemId,
+                coalesce(oi.menuItemName, menuItem.name) as menuItemName,
                 sum(oi.quantity) as soldCount,
                 sum(oi.unitPrice * oi.quantity) as revenue
             from TableOrder o
             join o.items oi
+            left join oi.menuItem menuItem
             where o.shop.id = :shopId
               and o.tenantId = :tenantId
               and o.status = :status
               and o.createdAt >= :startInclusive
               and o.createdAt < :endExclusive
-            group by oi.menuItem.id, oi.menuItem.name
+              and coalesce(oi.menuItemId, menuItem.id) is not null
+            group by coalesce(oi.menuItemId, menuItem.id), coalesce(oi.menuItemName, menuItem.name)
             order by sum(oi.quantity) desc, sum(oi.unitPrice * oi.quantity) desc
             """)
     List<TopProductAggregateRow> findTopProductsForDashboard(
@@ -173,17 +178,19 @@ public interface TableOrderRepository extends JpaRepository<TableOrder, UUID>, J
 
     @Query("""
             select
-                oi.menuItem.name as menuItemName,
+                coalesce(oi.menuItemName, menuItem.name) as menuItemName,
                 sum(oi.quantity) as soldCount,
                 sum(oi.unitPrice * oi.quantity) as revenue
             from TableOrder o
             join o.items oi
+            left join oi.menuItem menuItem
             where o.shop.id in :shopIds
               and o.tenantId = :tenantId
               and o.status = :status
               and o.createdAt >= :startInclusive
               and o.createdAt < :endExclusive
-            group by oi.menuItem.id, oi.menuItem.name
+              and coalesce(oi.menuItemId, menuItem.id) is not null
+            group by coalesce(oi.menuItemId, menuItem.id), coalesce(oi.menuItemName, menuItem.name)
             order by sum(oi.quantity) desc, sum(oi.unitPrice * oi.quantity) desc
             """)
     List<TopProductSummaryAggregateRow> findTopProductsForTenantDashboard(

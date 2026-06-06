@@ -28,11 +28,14 @@ import org.zerp.sale.repository.MenuItemRepository;
 import org.zerp.sale.repository.MenuItemProductRepository;
 import org.zerp.sale.repository.MenuCategoryRepository;
 import org.zerp.sale.repository.ProductRepository;
+import org.zerp.sale.repository.PublicCartOrderItemRepository;
+import org.zerp.sale.repository.TableOrderItemRepository;
 import org.zerp.s3repository.dto.S3FileDTO;
 import org.zerp.s3repository.repository.S3ImageRepository;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -50,6 +53,8 @@ public class MenuItemService implements
     private final MenuCategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final MenuItemProductRepository menuItemProductRepository;
+    private final TableOrderItemRepository tableOrderItemRepository;
+    private final PublicCartOrderItemRepository publicCartOrderItemRepository;
     private final MenuItemMapper mapper;
     private final CurrentUserIdResolver currentUserIdResolver;
     private final FilterRefiner filterRefiner;
@@ -196,8 +201,16 @@ public class MenuItemService implements
         if (!permissionEvaluator.canDelete(userId, item)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to delete MenuItem");
         }
-        menuItemProductRepository.deleteByMenuItemId(uuid);
-        repository.delete(item);
+        tableOrderItemRepository.backfillMenuItemSnapshots(
+                item.getId(),
+                item.getName(),
+                item.getCategory() == null ? null : item.getCategory().getId(),
+                item.getCategory() == null ? null : item.getCategory().getName()
+        );
+        publicCartOrderItemRepository.backfillMenuItemSnapshots(item.getId(), item.getName());
+        item.setDeleted(true);
+        item.setDeletedAt(LocalDateTime.now());
+        repository.save(item);
         log.info("Deleted MenuItem with id: {}", uuid);
     }
 
