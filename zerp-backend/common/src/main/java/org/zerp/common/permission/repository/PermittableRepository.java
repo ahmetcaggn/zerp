@@ -32,7 +32,7 @@ public class PermittableRepository {
     public void init() {
         for (EntityType<?> entityType : entityManager.getMetamodel().getEntities()) {
             Class<?> javaType = entityType.getJavaType();
-            PermissionTargetTypeAnnotation annotation = javaType.getAnnotation(PermissionTargetTypeAnnotation.class);
+            PermissionTargetTypeAnnotation annotation = javaType.getDeclaredAnnotation(PermissionTargetTypeAnnotation.class);
             if (annotation != null) {
                 targetTypeToEntityClass.put(annotation.type(), javaType);
             }

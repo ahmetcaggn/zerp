@@ -123,7 +123,7 @@ public class PermittableService
         return PermittableResponseDTO.builder()
                 .id(permittable.getId())
                 .title(permittable.getTitle())
-                .targetType(PermissionTargetType.fromType(permittable.getClass()))
+                .targetType(PermissionTargetType.fromType(permittable))
                 .build();
     }
 }

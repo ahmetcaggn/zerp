@@ -53,10 +53,23 @@ public enum PermissionTargetType {
         this.parentIdFilter = parentIdFilter;
     }
 
-    public static PermissionTargetType fromType(Class<? extends Permittable> type) {
-        final var annotation = type.getAnnotation(PermissionTargetTypeAnnotation.class);
+    private static Class<?> resolveActualClass(Object entity) {
+        if (entity instanceof org.hibernate.proxy.HibernateProxy proxy) {
+            return proxy.getHibernateLazyInitializer().getPersistentClass();
+        }
+        return entity.getClass();
+    }
+
+    public static PermissionTargetType fromType(Object entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("Entity cannot be null");
+        }
+
+        Class<?> actualClass = resolveActualClass(entity);
+        final var annotation = actualClass.getDeclaredAnnotation(PermissionTargetTypeAnnotation.class);
+
         if (annotation == null) {
-            throw new IllegalArgumentException("Class " + type.getName() +
+            throw new IllegalArgumentException("Class " + actualClass.getName() +
                     " does not have PermissionTargetTypeAnnotation");
         }
         return annotation.type();
