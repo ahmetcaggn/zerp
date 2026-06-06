@@ -16,6 +16,7 @@ import {
 import { responsiveLayout } from '@/core/theme/layout'
 
 const TEAM_PERMISSION_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.ADMIN,
   PermissionActions.READ_TEAM,
   PermissionActions.CREATE_TEAM,
   PermissionActions.UPDATE_TEAM,
@@ -27,6 +28,7 @@ const TEAM_PERMISSION_ACTIONS: readonly PermissionAction[] = [
 ]
 
 const TICKET_MANAGEMENT_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.ADMIN,
   PermissionActions.READ_TICKET,
   PermissionActions.READ_TICKET_ASSIGNMENT,
   PermissionActions.READ_TICKET_COMMENT,
@@ -44,53 +46,45 @@ const TICKET_MANAGEMENT_ACTIONS: readonly PermissionAction[] = [
 export function AdminDashboard() {
   const { t } = useI18n()
   const router = useRouter()
-  const { hasPermission, hasAnyPermission, isLoadingPermissions } = useCurrentUserPermissions()
+  const { hasAnyPermission, isLoadingPermissions } = useCurrentUserPermissions()
   const canOpenTeamManagement = hasAnyPermission(TEAM_PERMISSION_ACTIONS)
   const canOpenTicketManagement = hasAnyPermission(TICKET_MANAGEMENT_ACTIONS)
-  const canOpenAssignedTickets = hasPermission(PermissionActions.READ_TICKET)
+  const canOpenAssignedTickets = hasAnyPermission([
+    PermissionActions.READ_TICKET,
+    PermissionActions.ADMIN,
+  ])
 
   return (
     <Stack spacing={responsiveLayout.sectionGap}>
       <Typography variant="h2">{t('dashboard.title')}</Typography>
       <Typography color="text.secondary">{t('dashboard.subtitle')}</Typography>
-      {isLoadingPermissions ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-          <CircularProgress size={24} />
-        </Box>
-      ) : (
-        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-          {canOpenTeamManagement && (
-            <Button
-              variant="outlined"
-              startIcon={<GroupsRoundedIcon />}
-              onClick={() => router.push(ROUTES.teams)}
-            >
-              {t('nav.teamManagement')}
-            </Button>
-          )}
-          {canOpenTicketManagement && (
-            <Button
-              variant="outlined"
-              startIcon={<SupportAgentRoundedIcon />}
-              onClick={() => router.push(ROUTES.teamTickets)}
-            >
-              {t('nav.ticketManagement')}
-            </Button>
-          )}
-          {canOpenAssignedTickets && (
-            <Button
-              variant="outlined"
-              startIcon={<AssignmentTurnedInRoundedIcon />}
-              onClick={() => router.push(ROUTES.assignedTickets)}
-            >
-              {t('nav.assignedTickets')}
-            </Button>
-          )}
-          {!canOpenTeamManagement && !canOpenTicketManagement && !canOpenAssignedTickets && (
-            <Typography color="text.secondary">Bu alanda görüntüleme yetkiniz yok.</Typography>
-          )}
-        </Box>
-      )}
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
+        {isLoadingPermissions && <CircularProgress size={20} />}
+        <Button
+          variant="outlined"
+          startIcon={<GroupsRoundedIcon />}
+          onClick={() => router.push(ROUTES.teams)}
+          disabled={isLoadingPermissions || !canOpenTeamManagement}
+        >
+          {t('nav.teamManagement')}
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<SupportAgentRoundedIcon />}
+          onClick={() => router.push(ROUTES.teamTickets)}
+          disabled={isLoadingPermissions || !canOpenTicketManagement}
+        >
+          {t('nav.ticketManagement')}
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<AssignmentTurnedInRoundedIcon />}
+          onClick={() => router.push(ROUTES.assignedTickets)}
+          disabled={isLoadingPermissions || !canOpenAssignedTickets}
+        >
+          {t('nav.assignedTickets')}
+        </Button>
+      </Box>
     </Stack>
   )
 }

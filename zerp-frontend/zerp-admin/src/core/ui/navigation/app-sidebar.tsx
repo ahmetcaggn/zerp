@@ -8,7 +8,6 @@ import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded'
 import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded'
 import {
   Box,
-  CircularProgress,
   Divider,
   Drawer,
   IconButton,
@@ -30,7 +29,11 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { appConfig } from '@/core/config/app-config'
 import { ROUTES } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
-import { type PermissionAction, PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
+import {
+  type PermissionAction,
+  PermissionActions,
+  useCurrentUserPermissions,
+} from '@/core/permissions/use-permissions'
 
 const DRAWER_WIDTH = 240
 const COLLAPSED_DRAWER_WIDTH = 64
@@ -49,6 +52,8 @@ interface SidebarAction {
   labelKey: SidebarLabelKey
   icon: ReactElement
   href: string
+  disabled?: boolean
+  disabledReason?: string
 }
 
 interface SidebarSection {
@@ -58,6 +63,7 @@ interface SidebarSection {
 }
 
 const TEAM_PERMISSION_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.ADMIN,
   PermissionActions.READ_TEAM,
   PermissionActions.CREATE_TEAM,
   PermissionActions.UPDATE_TEAM,
@@ -75,6 +81,7 @@ const TENANT_PERMISSION_ACTIONS: readonly PermissionAction[] = [
 ]
 
 const TICKET_MANAGEMENT_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.ADMIN,
   PermissionActions.READ_TICKET,
   PermissionActions.READ_TICKET_ASSIGNMENT,
   PermissionActions.READ_TICKET_COMMENT,
@@ -96,12 +103,16 @@ export function AppSidebar({ locale }: { locale: 'tr' | 'en' }) {
   const router = useRouter()
   const pathname = usePathname()
   const { t } = useI18n()
-  const { hasPermission, hasAnyPermission, isLoadingPermissions } = useCurrentUserPermissions()
+  const { hasAnyPermission, isLoadingPermissions } = useCurrentUserPermissions()
 
   const canViewTenants = hasAnyPermission(TENANT_PERMISSION_ACTIONS)
   const canViewTeamManagement = hasAnyPermission(TEAM_PERMISSION_ACTIONS)
   const canViewTicketManagement = hasAnyPermission(TICKET_MANAGEMENT_ACTIONS)
-  const canViewAssignedTickets = hasPermission(PermissionActions.READ_TICKET)
+  const canViewAssignedTickets = hasAnyPermission([
+    PermissionActions.READ_TICKET,
+    PermissionActions.ADMIN,
+  ])
+  const unauthorizedReason = t('common.unauthorized')
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -111,59 +122,52 @@ export function AppSidebar({ locale }: { locale: 'tr' | 'en' }) {
   const handleToggle = () => setIsExpanded((prev) => !prev)
 
   const sidebarSections = useMemo<SidebarSection[]>(() => {
-    const sections: SidebarSection[] = []
-
-    // 1. Management Section
-    const managementActions: SidebarAction[] = []
-    if (canViewTenants) {
-      managementActions.push({
-        id: 'tenants',
-        labelKey: 'nav.tenants',
-        icon: <ApartmentRoundedIcon />,
-        href: ROUTES.tenants,
-      })
-    }
-    if (managementActions.length > 0) {
-      sections.push({
+    const sections: SidebarSection[] = [
+      {
         id: 'management',
         labelKey: 'nav.management',
-        actions: managementActions,
-      })
-    }
-
-    // 2. CRM Section
-    const crmActionsList: SidebarAction[] = []
-    if (canViewTeamManagement) {
-      crmActionsList.push({
-        id: 'teams',
-        labelKey: 'nav.teamManagement',
-        icon: <GroupsRoundedIcon />,
-        href: ROUTES.teams,
-      })
-    }
-    if (canViewTicketManagement) {
-      crmActionsList.push({
-        id: 'teamTickets',
-        labelKey: 'nav.ticketManagement',
-        icon: <SupportAgentRoundedIcon />,
-        href: ROUTES.teamTickets,
-      })
-    }
-    if (canViewAssignedTickets) {
-      crmActionsList.push({
-        id: 'assignedTickets',
-        labelKey: 'nav.assignedTickets',
-        icon: <AssignmentTurnedInRoundedIcon />,
-        href: ROUTES.assignedTickets,
-      })
-    }
-    if (crmActionsList.length > 0) {
-      sections.push({
+        actions: [
+          {
+            id: 'tenants',
+            labelKey: 'nav.tenants',
+            icon: <ApartmentRoundedIcon />,
+            href: ROUTES.tenants,
+            disabled: isLoadingPermissions || !canViewTenants,
+            disabledReason: unauthorizedReason,
+          },
+        ],
+      },
+      {
         id: 'crm',
         labelKey: 'nav.crm',
-        actions: crmActionsList,
-      })
-    }
+        actions: [
+          {
+            id: 'teams',
+            labelKey: 'nav.teamManagement',
+            icon: <GroupsRoundedIcon />,
+            href: ROUTES.teams,
+            disabled: isLoadingPermissions || !canViewTeamManagement,
+            disabledReason: unauthorizedReason,
+          },
+          {
+            id: 'teamTickets',
+            labelKey: 'nav.ticketManagement',
+            icon: <SupportAgentRoundedIcon />,
+            href: ROUTES.teamTickets,
+            disabled: isLoadingPermissions || !canViewTicketManagement,
+            disabledReason: unauthorizedReason,
+          },
+          {
+            id: 'assignedTickets',
+            labelKey: 'nav.assignedTickets',
+            icon: <AssignmentTurnedInRoundedIcon />,
+            href: ROUTES.assignedTickets,
+            disabled: isLoadingPermissions || !canViewAssignedTickets,
+            disabledReason: unauthorizedReason,
+          },
+        ],
+      },
+    ]
 
     return sections
   }, [
@@ -171,6 +175,8 @@ export function AppSidebar({ locale }: { locale: 'tr' | 'en' }) {
     canViewTeamManagement,
     canViewTicketManagement,
     canViewAssignedTickets,
+    isLoadingPermissions,
+    unauthorizedReason,
   ])
 
   const baseActions: SidebarAction[] = [
@@ -185,11 +191,16 @@ export function AppSidebar({ locale }: { locale: 'tr' | 'en' }) {
   const renderAction = (action: SidebarAction, nested = false) => {
     const hrefWithLocale = `/${locale}${action.href}`
     const isSelected = pathname === hrefWithLocale || pathname.startsWith(`${hrefWithLocale}/`)
+    const isDisabled = Boolean(action.disabled)
+    const tooltipTitle = isDisabled ? action.disabledReason : t(action.labelKey)
 
     const listItemButton = (
       <ListItemButton
-        onClick={() => router.push(hrefWithLocale as Route)}
-        selected={isSelected}
+        disabled={isDisabled}
+        onClick={() => {
+          if (!isDisabled) router.push(hrefWithLocale as Route)
+        }}
+        selected={!isDisabled && isSelected}
         sx={{
           minHeight: 48,
           justifyContent: 'flex-start',
@@ -202,7 +213,7 @@ export function AppSidebar({ locale }: { locale: 'tr' | 'en' }) {
             minWidth: 64,
             display: 'flex',
             justifyContent: 'center',
-            color: isSelected ? 'primary.main' : 'inherit',
+            color: !isDisabled && isSelected ? 'primary.main' : 'inherit',
           }}
         >
           {action.icon}
@@ -214,9 +225,9 @@ export function AppSidebar({ locale }: { locale: 'tr' | 'en' }) {
             transition: theme.transitions.create('opacity', {
               duration: theme.transitions.duration.shorter,
             }),
-            color: isSelected ? 'primary.main' : 'inherit',
+            color: !isDisabled && isSelected ? 'primary.main' : 'inherit',
             '& .MuiTypography-root': {
-              fontWeight: isSelected ? 600 : 400,
+              fontWeight: !isDisabled && isSelected ? 600 : 400,
               whiteSpace: 'nowrap',
             },
           }}
@@ -226,11 +237,11 @@ export function AppSidebar({ locale }: { locale: 'tr' | 'en' }) {
 
     return (
       <ListItem key={action.id} disablePadding sx={{ display: 'block' }}>
-        {isExpanded ? (
+        {isExpanded && !isDisabled ? (
           listItemButton
         ) : (
-          <Tooltip title={t(action.labelKey)} placement="right">
-            {listItemButton}
+          <Tooltip title={tooltipTitle} placement="right">
+            <span style={{ display: 'block' }}>{listItemButton}</span>
           </Tooltip>
         )}
       </ListItem>
@@ -327,32 +338,24 @@ export function AppSidebar({ locale }: { locale: 'tr' | 'en' }) {
         </Box>
       </Box>
 
-      <List sx={{ pt: 1 }}>
-        {baseActions.map((action) => renderAction(action))}
-      </List>
+      <List sx={{ pt: 1 }}>{baseActions.map((action) => renderAction(action))}</List>
 
       <Divider sx={{ my: 1 }} />
 
-      {isLoadingPermissions ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-          <CircularProgress size={20} />
-        </Box>
-      ) : (
-        sidebarSections.map((section) => (
-          <List key={section.id} sx={{ pt: 0 }}>
-            {isExpanded && (
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ px: 3, py: 1.25, display: 'block' }}
-              >
-                {t(section.labelKey)}
-              </Typography>
-            )}
-            {section.actions.map((action) => renderAction(action, true))}
-          </List>
-        ))
-      )}
+      {sidebarSections.map((section) => (
+        <List key={section.id} sx={{ pt: 0 }}>
+          {isExpanded && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ px: 3, py: 1.25, display: 'block' }}
+            >
+              {t(section.labelKey)}
+            </Typography>
+          )}
+          {section.actions.map((action) => renderAction(action, true))}
+        </List>
+      ))}
     </Drawer>
   )
 }

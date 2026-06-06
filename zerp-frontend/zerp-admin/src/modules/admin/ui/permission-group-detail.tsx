@@ -24,6 +24,7 @@ import { useMemo, useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
@@ -53,7 +54,9 @@ interface FormState {
   actions: string[]
 }
 
-function parseGroupKey(groupKey: string):
+function parseGroupKey(
+  groupKey: string,
+):
   | { type: 'predefined'; code: PredefinedPermissionGroupCode }
   | { type: 'custom'; id: string }
   | null {
@@ -95,6 +98,12 @@ export function PermissionGroupDetail({ tenantId, groupKey }: Props) {
   const { t, locale } = useI18n()
   const { showToast } = useToast()
   const router = useRouter()
+  const { hasPermissionForTarget } = useCurrentUserPermissions()
+  const canManagePermissionGroup = hasPermissionForTarget(PermissionActions.ADMIN, {
+    targetType: 'TENANT',
+    targetId: tenantId,
+    tenantId,
+  })
 
   const parsed = parseGroupKey(groupKey)
   const isPredefined = parsed?.type === 'predefined'
@@ -148,12 +157,17 @@ export function PermissionGroupDetail({ tenantId, groupKey }: Props) {
   const resolvedGroup = group
 
   function openEdit() {
-    if (!resolvedGroup.id) return
+    if (!resolvedGroup.id || !canManagePermissionGroup) return
     setForm(buildForm(resolvedGroup))
     setEditOpen(true)
   }
 
   function handleSave() {
+    if (!canManagePermissionGroup) {
+      showToast(t('common.unauthorized'), { severity: 'warning' })
+      return
+    }
+
     if (!form || !resolvedGroup.id) return
 
     const name = form.name.trim()
@@ -181,7 +195,9 @@ export function PermissionGroupDetail({ tenantId, groupKey }: Props) {
         onError: (err) => {
           const message = getUserFriendlyError(err)
           if (message.includes('Cannot change scopeType while group has active assignments')) {
-            showToast(t('permissionGroups.propagationScopeConflictWarning'), { severity: 'warning' })
+            showToast(t('permissionGroups.propagationScopeConflictWarning'), {
+              severity: 'warning',
+            })
             return
           }
           showToast(message, { severity: 'error' })
@@ -191,7 +207,7 @@ export function PermissionGroupDetail({ tenantId, groupKey }: Props) {
   }
 
   function handleDelete() {
-    if (resolvedGroup.source !== 'CUSTOM' || !resolvedGroup.id) return
+    if (resolvedGroup.source !== 'CUSTOM' || !resolvedGroup.id || !canManagePermissionGroup) return
 
     deleteGroup(resolvedGroup.id, {
       onSuccess: () => {
@@ -207,17 +223,30 @@ export function PermissionGroupDetail({ tenantId, groupKey }: Props) {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Button
           startIcon={<ArrowBackIcon />}
-          onClick={() => router.push(withLocale(locale, `${ROUTES.tenants}/${tenantId}/permission-groups`) as Route)}
+          onClick={() =>
+            router.push(
+              withLocale(locale, `${ROUTES.tenants}/${tenantId}/permission-groups`) as Route,
+            )
+          }
         >
           {t('tenants.backButton')}
         </Button>
 
         <Stack direction="row" spacing={1}>
-          <Button startIcon={<EditIcon />} onClick={openEdit} disabled={!resolvedGroup.id}>
+          <Button
+            startIcon={<EditIcon />}
+            onClick={openEdit}
+            disabled={!resolvedGroup.id || !canManagePermissionGroup}
+          >
             {t('permissionGroups.editButton')}
           </Button>
           {resolvedGroup.source === 'CUSTOM' && (
-            <Button startIcon={<DeleteIcon />} color="error" onClick={handleDelete} disabled={isDeletePending}>
+            <Button
+              startIcon={<DeleteIcon />}
+              color="error"
+              onClick={handleDelete}
+              disabled={isDeletePending || !canManagePermissionGroup}
+            >
               {t('permissionGroups.deleteButton')}
             </Button>
           )}
@@ -226,7 +255,9 @@ export function PermissionGroupDetail({ tenantId, groupKey }: Props) {
 
       <Box>
         <Typography variant="h5">{resolvedGroup.name}</Typography>
-        <Typography color="text.secondary">{resolvedGroup.description || t('permissionGroups.noDescription')}</Typography>
+        <Typography color="text.secondary">
+          {resolvedGroup.description || t('permissionGroups.noDescription')}
+        </Typography>
       </Box>
 
       <Stack direction="row" spacing={1}>
@@ -240,7 +271,11 @@ export function PermissionGroupDetail({ tenantId, groupKey }: Props) {
           color="primary"
           variant="outlined"
         />
-        <Chip label={prettifyPermissionEnumName(resolvedGroup.scopeType)} size="small" variant="outlined" />
+        <Chip
+          label={prettifyPermissionEnumName(resolvedGroup.scopeType)}
+          size="small"
+          variant="outlined"
+        />
       </Stack>
 
       <Box>
@@ -262,14 +297,18 @@ export function PermissionGroupDetail({ tenantId, groupKey }: Props) {
               size="small"
               label={t('permissionGroups.nameField')}
               value={form?.name ?? ''}
-              onChange={(event) => setForm((prev) => (prev ? { ...prev, name: event.target.value } : prev))}
+              onChange={(event) =>
+                setForm((prev) => (prev ? { ...prev, name: event.target.value } : prev))
+              }
             />
 
             <TextField
               size="small"
               label={t('permissionGroups.descriptionField')}
               value={form?.description ?? ''}
-              onChange={(event) => setForm((prev) => (prev ? { ...prev, description: event.target.value } : prev))}
+              onChange={(event) =>
+                setForm((prev) => (prev ? { ...prev, description: event.target.value } : prev))
+              }
               multiline
               rows={3}
             />
@@ -299,14 +338,23 @@ export function PermissionGroupDetail({ tenantId, groupKey }: Props) {
               multiple
               options={actionOptions}
               value={form?.actions ?? []}
-              onChange={(_, values) => setForm((prev) => (prev ? { ...prev, actions: values } : prev))}
+              onChange={(_, values) =>
+                setForm((prev) => (prev ? { ...prev, actions: values } : prev))
+              }
               disableCloseOnSelect
               renderTags={(value, getTagProps) =>
                 value.map((action, index) => (
-                  <Chip {...getTagProps({ index })} key={action} label={prettifyPermissionEnumName(action)} size="small" />
+                  <Chip
+                    {...getTagProps({ index })}
+                    key={action}
+                    label={prettifyPermissionEnumName(action)}
+                    size="small"
+                  />
                 ))
               }
-              renderInput={(params) => <TextField {...params} size="small" label={t('permissionGroups.actionsField')} />}
+              renderInput={(params) => (
+                <TextField {...params} size="small" label={t('permissionGroups.actionsField')} />
+              )}
             />
           </Stack>
         </DialogContent>
@@ -314,7 +362,11 @@ export function PermissionGroupDetail({ tenantId, groupKey }: Props) {
           <Button onClick={() => setEditOpen(false)} disabled={isPatchPending}>
             {t('permissionGroups.cancelButton')}
           </Button>
-          <Button variant="contained" onClick={handleSave} disabled={isPatchPending}>
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            disabled={isPatchPending || !canManagePermissionGroup}
+          >
             {isPatchPending ? <CircularProgress size={16} /> : t('permissionGroups.saveButton')}
           </Button>
         </DialogActions>

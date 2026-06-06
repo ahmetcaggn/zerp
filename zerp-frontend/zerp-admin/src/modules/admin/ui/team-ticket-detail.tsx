@@ -135,23 +135,63 @@ export function TeamTicketDetail({ id }: Props) {
   const { mutate: changeStatus, isPending: isChangingStatus } = useChangeTeamTicketStatus()
   const { mutate: changePriority, isPending: isChangingPriority } = useChangeTeamTicketPriority()
   const { mutate: assignTicket, isPending: isAssigning } = useAssignTeamTicket()
-  const { mutate: uploadAttachment, isPending: isUploadingAttachment } = useUploadTeamTicketAttachment()
-  const { hasPermission, isLoadingPermissions } = useCurrentUserPermissions()
-  const canReadTicket = hasPermission(PermissionActions.READ_TICKET)
-  const { data: ticket, isLoading, error } = useTeamTicket(id, {
-    enabled: canReadTicket && !isLoadingPermissions,
+  const { mutate: uploadAttachment, isPending: isUploadingAttachment } =
+    useUploadTeamTicketAttachment()
+  const { hasAnyPermission, hasTicketPermission, isLoadingPermissions } =
+    useCurrentUserPermissions()
+  const canQueryTicket = hasAnyPermission([PermissionActions.READ_TICKET, PermissionActions.ADMIN])
+  const {
+    data: ticket,
+    isLoading,
+    error,
+  } = useTeamTicket(id, {
+    enabled: canQueryTicket && !isLoadingPermissions,
   })
-  const canUpdateTicket = hasPermission(PermissionActions.UPDATE_TICKET)
-  const canReadTicketComment = hasPermission(PermissionActions.READ_TICKET_COMMENT)
-  const canCreateTicketComment = hasPermission(PermissionActions.CREATE_TICKET_COMMENT)
-  const canReadTicketAssignment = hasPermission(PermissionActions.READ_TICKET_ASSIGNMENT)
-  const canCreateTicketAssignment = hasPermission(PermissionActions.CREATE_TICKET_ASSIGNMENT)
-  const canUpdateTicketAssignment = hasPermission(PermissionActions.UPDATE_TICKET_ASSIGNMENT)
-  const canReadTicketSlaTracking = hasPermission(PermissionActions.READ_TICKET_SLA_TRACKING)
-  const canReadTicketAttachment = hasPermission(PermissionActions.READ_TICKET_ATTACHMENT)
-  const canCreateTicketAttachment = hasPermission(PermissionActions.CREATE_TICKET_ATTACHMENT)
-  const canChangeAssignmentByPermission =
-    canCreateTicketAssignment || canUpdateTicketAssignment
+  const ticketPermissionTarget = {
+    ticketId: ticket?.id ?? id,
+    tenantId: ticket?.tenantId,
+    assignedTeamId: ticket?.currentAssignment?.active ? ticket.currentAssignment.teamId : undefined,
+    assignedAgentId: ticket?.currentAssignment?.active
+      ? ticket.currentAssignment.agentPartyId
+      : undefined,
+  }
+  const activeAssignment = ticket?.currentAssignment?.active ? ticket.currentAssignment : undefined
+  const hasCurrentAssignment = Boolean(activeAssignment)
+  const canReadTicket = canQueryTicket
+  const canUpdateTicket = ticket
+    ? hasTicketPermission(PermissionActions.UPDATE_TICKET, ticketPermissionTarget)
+    : false
+  const canReadTicketComment = ticket
+    ? hasTicketPermission(PermissionActions.READ_TICKET_COMMENT, ticketPermissionTarget)
+    : false
+  const canCreateTicketComment = ticket
+    ? hasTicketPermission(PermissionActions.CREATE_TICKET_COMMENT, ticketPermissionTarget)
+    : false
+  const canReadTicketAssignment = ticket
+    ? hasTicketPermission(PermissionActions.READ_TICKET_ASSIGNMENT, ticketPermissionTarget)
+    : false
+  const canCreateTicketAssignment = ticket
+    ? hasTicketPermission(PermissionActions.CREATE_TICKET_ASSIGNMENT, ticketPermissionTarget)
+    : false
+  const canUpdateTicketAssignment = ticket
+    ? hasTicketPermission(PermissionActions.UPDATE_TICKET_ASSIGNMENT, {
+        ...ticketPermissionTarget,
+        childTargetType: 'TICKET_ASSIGNMENT',
+        childId: activeAssignment?.id,
+      })
+    : false
+  const canReadTicketSlaTracking = ticket
+    ? hasTicketPermission(PermissionActions.READ_TICKET_SLA_TRACKING, ticketPermissionTarget)
+    : false
+  const canReadTicketAttachment = ticket
+    ? hasTicketPermission(PermissionActions.READ_TICKET_ATTACHMENT, ticketPermissionTarget)
+    : false
+  const canCreateTicketAttachment = ticket
+    ? hasTicketPermission(PermissionActions.CREATE_TICKET_ATTACHMENT, ticketPermissionTarget)
+    : false
+  const canChangeAssignmentByPermission = hasCurrentAssignment
+    ? canUpdateTicketAssignment
+    : canCreateTicketAssignment
   const normalizedAssignTeamQuery = assignTeamQuery.trim()
   const normalizedAssignAgentQuery = assignAgentQuery.trim()
   const {
@@ -167,7 +207,8 @@ export function TeamTicketDetail({ id }: Props) {
     },
     {
       enabled:
-        canReadTicket &&
+        canQueryTicket &&
+        Boolean(ticket) &&
         !isLoadingPermissions &&
         canChangeAssignmentByPermission &&
         showAssignForm,
@@ -196,7 +237,8 @@ export function TeamTicketDetail({ id }: Props) {
       : undefined,
     {
       enabled:
-        canReadTicket &&
+        canQueryTicket &&
+        Boolean(ticket) &&
         !isLoadingPermissions &&
         canChangeAssignmentByPermission &&
         showAssignForm &&
@@ -241,19 +283,29 @@ export function TeamTicketDetail({ id }: Props) {
   const status = ticket.status as TicketStatusString | undefined
   const priority = ticket.priority as TicketPriorityString | undefined
   const isClosed = status !== undefined && TERMINAL_STATUSES.includes(status)
-  const activeAssignment = ticket.currentAssignment?.active
-    ? ticket.currentAssignment
-    : undefined
-  const hasCurrentAssignment = Boolean(activeAssignment)
   const canChangeAssignment = hasCurrentAssignment
     ? canUpdateTicketAssignment
     : canCreateTicketAssignment
   const assignmentActionBlockedReason = isClosed
     ? 'Talep kapalı olduğu için atama işlemi yapılamaz.'
-    : null
-  const attachmentUploadBlockedReason = isClosed
-    ? 'Talep kapalı olduğu için ek yüklenemez.'
-    : null
+    : !canChangeAssignment
+      ? 'Talep atama yetkiniz yok.'
+      : null
+  const ticketUpdateBlockedReason = !canUpdateTicket
+    ? 'Durum ve öncelik güncelleme yetkiniz yok.'
+    : isClosed
+      ? 'Kapalı taleplerde durum ve öncelik güncellenemez.'
+      : null
+  const commentBlockedReason = !canCreateTicketComment
+    ? 'Mesaj yazma yetkiniz yok.'
+    : isClosed
+      ? 'Talep kapalı olduğu için mesaj yazılamaz.'
+      : null
+  const attachmentUploadBlockedReason = !canCreateTicketAttachment
+    ? 'Ek yükleme yetkiniz yok.'
+    : isClosed
+      ? 'Talep kapalı olduğu için ek yüklenemez.'
+      : null
   const ticketAttachments = canReadTicketAttachment
     ? [...(ticket.attachments ?? [])].sort((left, right) => {
         return toTimestamp(right.uploadedAt) - toTimestamp(left.uploadedAt)
@@ -455,7 +507,11 @@ export function TeamTicketDetail({ id }: Props) {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => router.back()} sx={{ color: 'text.secondary' }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => router.back()}
+          sx={{ color: 'text.secondary' }}
+        >
           Geri
         </Button>
       </Box>
@@ -465,12 +521,12 @@ export function TeamTicketDetail({ id }: Props) {
       </Typography>
 
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3, alignItems: 'center' }}>
-        {canUpdateTicket ? (
-          <>
+        <Tooltip title={ticketUpdateBlockedReason ?? ''}>
+          <span>
             <FormControl
               size="small"
               sx={{ minWidth: 180 }}
-              disabled={isChangingStatus || isClosed}
+              disabled={!canUpdateTicket || isChangingStatus || isClosed}
             >
               <InputLabel>Durum</InputLabel>
               <Select
@@ -492,17 +548,23 @@ export function TeamTicketDetail({ id }: Props) {
                 ))}
               </Select>
             </FormControl>
+          </span>
+        </Tooltip>
 
+        <Tooltip title={ticketUpdateBlockedReason ?? ''}>
+          <span>
             <FormControl
               size="small"
               sx={{ minWidth: 160 }}
-              disabled={isChangingPriority || isClosed}
+              disabled={!canUpdateTicket || isChangingPriority || isClosed}
             >
               <InputLabel>Öncelik</InputLabel>
               <Select
                 value={priority ?? ''}
                 label="Öncelik"
-                onChange={(event) => handlePriorityChange(event.target.value as TicketPriorityString)}
+                onChange={(event) =>
+                  handlePriorityChange(event.target.value as TicketPriorityString)
+                }
                 renderValue={(value) => (
                   <Chip
                     label={value}
@@ -524,29 +586,17 @@ export function TeamTicketDetail({ id }: Props) {
                 ))}
               </Select>
             </FormControl>
-          </>
-        ) : (
-          <>
-            {status && <Chip label={status} color={STATUS_COLOR[status] ?? 'default'} size="small" />}
-            {priority && (
-              <Chip
-                label={priority}
-                color={PRIORITY_COLOR[priority] ?? 'default'}
-                size="small"
-                variant="outlined"
-              />
-            )}
-          </>
-        )}
+          </span>
+        </Tooltip>
 
         {ticket.type && <Chip label={ticket.type} size="small" variant="outlined" />}
         <Typography variant="caption" color="text.secondary">
           {ticket.createdAt}
         </Typography>
       </Box>
-      {canUpdateTicket && isClosed && (
+      {ticketUpdateBlockedReason && (
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 3 }}>
-          Kapalı taleplerde durum ve öncelik güncellenemez.
+          {ticketUpdateBlockedReason}
         </Typography>
       )}
 
@@ -559,26 +609,24 @@ export function TeamTicketDetail({ id }: Props) {
       <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography variant="subtitle2">Ekler ({ticketAttachments.length})</Typography>
-          {canCreateTicketAttachment && (
-            <Tooltip title={attachmentUploadBlockedReason ?? ''}>
-              <span>
-                <Button
-                  size="small"
-                  component="label"
-                  startIcon={<CloudUploadIcon fontSize="small" />}
-                  disabled={isUploadingAttachment || Boolean(attachmentUploadBlockedReason)}
-                >
-                  Ek Yükle
-                  <input
-                    hidden
-                    type="file"
-                    accept="image/jpeg,image/png,image/gif,image/webp"
-                    onChange={handleAttachmentSelected}
-                  />
-                </Button>
-              </span>
-            </Tooltip>
-          )}
+          <Tooltip title={attachmentUploadBlockedReason ?? ''}>
+            <span>
+              <Button
+                size="small"
+                component="label"
+                startIcon={<CloudUploadIcon fontSize="small" />}
+                disabled={isUploadingAttachment || Boolean(attachmentUploadBlockedReason)}
+              >
+                Ek Yükle
+                <input
+                  hidden
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  onChange={handleAttachmentSelected}
+                />
+              </Button>
+            </span>
+          </Tooltip>
         </Box>
 
         {!canReadTicketAttachment ? (
@@ -601,7 +649,14 @@ export function TeamTicketDetail({ id }: Props) {
                   variant="outlined"
                   sx={{ p: 1.5, borderStyle: 'dashed' }}
                 >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'center' }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      gap: 2,
+                      alignItems: 'center',
+                    }}
+                  >
                     <Box sx={{ minWidth: 0 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                         <AttachFileIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
@@ -650,19 +705,17 @@ export function TeamTicketDetail({ id }: Props) {
         >
           <Typography variant="subtitle2">Atama</Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            {canChangeAssignment && (
-              <Tooltip title={assignmentActionBlockedReason ?? ''}>
-                <span>
-                  <Button
-                    size="small"
-                    onClick={handleOpenAssignmentEditor}
-                    disabled={Boolean(assignmentActionBlockedReason)}
-                  >
-                    {activeAssignment ? 'Atamayı Düzenle' : 'Ata'}
-                  </Button>
-                </span>
-              </Tooltip>
-            )}
+            <Tooltip title={assignmentActionBlockedReason ?? ''}>
+              <span>
+                <Button
+                  size="small"
+                  onClick={handleOpenAssignmentEditor}
+                  disabled={Boolean(assignmentActionBlockedReason)}
+                >
+                  {activeAssignment ? 'Atamayı Düzenle' : 'Ata'}
+                </Button>
+              </span>
+            </Tooltip>
           </Box>
         </Box>
 
@@ -781,7 +834,11 @@ export function TeamTicketDetail({ id }: Props) {
                   fullWidth
                   disabled={!effectiveAssignTeamId}
                 />
-                <FormControl size="small" sx={{ mt: 1, width: '100%' }} disabled={!effectiveAssignTeamId || isLoadingAssignmentMembers}>
+                <FormControl
+                  size="small"
+                  sx={{ mt: 1, width: '100%' }}
+                  disabled={!effectiveAssignTeamId || isLoadingAssignmentMembers}
+                >
                   <InputLabel>Ajan (Opsiyonel)</InputLabel>
                   <Select
                     value={effectiveAssignAgentId}
@@ -795,9 +852,7 @@ export function TeamTicketDetail({ id }: Props) {
                     }}
                     onChange={(event) => setAssignAgentId(event.target.value)}
                   >
-                    <MenuItem value="">
-                      Sadece takıma ata
-                    </MenuItem>
+                    <MenuItem value="">Sadece takıma ata</MenuItem>
                     {assignmentMemberCandidates.map((memberCandidate) => (
                       <MenuItem key={memberCandidate.userId} value={memberCandidate.userId}>
                         {memberCandidate.displayLabel}
@@ -847,13 +902,17 @@ export function TeamTicketDetail({ id }: Props) {
                   pt: { xs: 0.5, md: 0 },
                 }}
               >
-                {activeAssignment?.agentPartyId && canUpdateTicketAssignment && (
+                {activeAssignment?.agentPartyId && (
                   <Button
                     variant="outlined"
                     color="warning"
                     size="small"
                     onClick={handleClearAssignedAgent}
-                    disabled={isAssigning || Boolean(assignmentActionBlockedReason)}
+                    disabled={
+                      isAssigning ||
+                      !canUpdateTicketAssignment ||
+                      Boolean(assignmentActionBlockedReason)
+                    }
                   >
                     Ajan Atamasını Kaldır
                   </Button>
@@ -863,9 +922,7 @@ export function TeamTicketDetail({ id }: Props) {
                   size="small"
                   onClick={handleAssign}
                   disabled={
-                    isAssigning ||
-                    Boolean(assignmentActionBlockedReason) ||
-                    !effectiveAssignTeamId
+                    isAssigning || Boolean(assignmentActionBlockedReason) || !effectiveAssignTeamId
                   }
                 >
                   Kaydet
@@ -936,9 +993,9 @@ export function TeamTicketDetail({ id }: Props) {
           Mesajları görüntüleme yetkiniz yok.
         </Typography>
       ) : externalComments.length === 0 ? (
-          <Typography color="text.secondary" sx={{ mb: 3 }}>
-            {t('teamTickets.emptyState')}
-          </Typography>
+        <Typography color="text.secondary" sx={{ mb: 3 }}>
+          {t('teamTickets.emptyState')}
+        </Typography>
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
           {externalComments.map((comment, index) => {
@@ -964,18 +1021,14 @@ export function TeamTicketDetail({ id }: Props) {
                       : { borderBottomLeftRadius: 0.75 }),
                     bgcolor: (theme) => {
                       if (isAdminMessage) {
-                        return theme.palette.mode === 'dark'
-                          ? 'rgba(46, 125, 50, 0.28)'
-                          : '#DCF8C6'
+                        return theme.palette.mode === 'dark' ? 'rgba(46, 125, 50, 0.28)' : '#DCF8C6'
                       }
                       if (isTenantMessage) {
                         return theme.palette.mode === 'dark'
                           ? 'rgba(66, 165, 245, 0.20)'
                           : '#E3F2FD'
                       }
-                      return theme.palette.mode === 'dark'
-                        ? 'rgba(255, 213, 79, 0.22)'
-                        : '#FFF8E1'
+                      return theme.palette.mode === 'dark' ? 'rgba(255, 213, 79, 0.22)' : '#FFF8E1'
                     },
                     borderColor: (theme) => {
                       if (isAdminMessage) {
@@ -984,13 +1037,9 @@ export function TeamTicketDetail({ id }: Props) {
                           : '#B7E1A1'
                       }
                       if (isTenantMessage) {
-                        return theme.palette.mode === 'dark'
-                          ? 'rgba(66, 165, 245, 0.5)'
-                          : '#BBDEFB'
+                        return theme.palette.mode === 'dark' ? 'rgba(66, 165, 245, 0.5)' : '#BBDEFB'
                       }
-                      return theme.palette.mode === 'dark'
-                        ? 'rgba(255, 213, 79, 0.55)'
-                        : '#FFE082'
+                      return theme.palette.mode === 'dark' ? 'rgba(255, 213, 79, 0.55)' : '#FFE082'
                     },
                   }}
                 >
@@ -1002,7 +1051,10 @@ export function TeamTicketDetail({ id }: Props) {
                       {comment.createdAt}
                     </Typography>
                   </Box>
-                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                  >
                     {comment.content}
                   </Typography>
                 </Paper>
@@ -1012,40 +1064,40 @@ export function TeamTicketDetail({ id }: Props) {
         </Box>
       )}
 
-      {canCreateTicketComment && (
-        <>
-          <Divider sx={{ mb: 2 }} />
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            {t('teamTickets.addComment')}
-          </Typography>
-          {isClosed ? (
-            <Typography variant="body2" color="text.secondary">
-              Talep kapalı olduğu için mesaj yazılamaz.
-            </Typography>
-          ) : (
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
-              <TextField
-                multiline
-                minRows={2}
-                fullWidth
-                placeholder={t('teamTickets.commentPlaceholder')}
-                value={commentText}
-                onChange={(event) => setCommentText(event.target.value)}
-                size="small"
-              />
-              <Button
-                variant="contained"
-                endIcon={<SendIcon />}
-                onClick={handleAddComment}
-                disabled={isCommenting || !commentText.trim()}
-                sx={{ flexShrink: 0 }}
-              >
-                Gönder
-              </Button>
-            </Box>
-          )}
-        </>
+      <Divider sx={{ mb: 2 }} />
+      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+        {t('teamTickets.addComment')}
+      </Typography>
+      {commentBlockedReason && (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          {commentBlockedReason}
+        </Typography>
       )}
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
+        <TextField
+          multiline
+          minRows={2}
+          fullWidth
+          placeholder={t('teamTickets.commentPlaceholder')}
+          value={commentText}
+          onChange={(event) => setCommentText(event.target.value)}
+          size="small"
+          disabled={Boolean(commentBlockedReason) || isCommenting}
+        />
+        <Tooltip title={commentBlockedReason ?? ''}>
+          <span>
+            <Button
+              variant="contained"
+              endIcon={<SendIcon />}
+              onClick={handleAddComment}
+              disabled={Boolean(commentBlockedReason) || isCommenting || !commentText.trim()}
+              sx={{ flexShrink: 0 }}
+            >
+              Gönder
+            </Button>
+          </span>
+        </Tooltip>
+      </Box>
     </Box>
   )
 }

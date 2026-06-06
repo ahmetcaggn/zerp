@@ -98,8 +98,8 @@ export function TeamTicketList({ scope = 'all' }: Props) {
   const [statusFilter, setStatusFilter] = useState('')
   const [priorityFilter, setPriorityFilter] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
-  const { hasPermission, isLoadingPermissions } = useCurrentUserPermissions()
-  const canReadTicket = hasPermission(PermissionActions.READ_TICKET)
+  const { hasAnyPermission, isLoadingPermissions } = useCurrentUserPermissions()
+  const canReadTicket = hasAnyPermission([PermissionActions.READ_TICKET, PermissionActions.ADMIN])
   const resolvedUserId = isUuid(userId) ? userId : undefined
   const isAssignedScope = scope === 'assigned'
   const canQueryAssignedScope = !isAssignedScope || Boolean(resolvedUserId)
@@ -178,261 +178,271 @@ export function TeamTicketList({ scope = 'all' }: Props) {
       ) : (
         <>
           <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-        <TextField
-          size="small"
-          placeholder="Başlık veya açıklamada ara…"
-          value={searchInput}
-          onChange={(event) => setSearchInput(event.target.value)}
-          onKeyDown={(event) => event.key === 'Enter' && handleSearch()}
-          sx={{ width: 260 }}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-              endAdornment: searchInput ? (
-                <InputAdornment position="end">
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setSearchInput('')
-                      setSearchQ('')
-                      setPage(0)
-                    }}
-                  >
-                    <ClearIcon fontSize="small" />
-                  </IconButton>
-                </InputAdornment>
-              ) : null,
-            },
-          }}
-        />
+            <TextField
+              size="small"
+              placeholder="Başlık veya açıklamada ara…"
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
+              onKeyDown={(event) => event.key === 'Enter' && handleSearch()}
+              sx={{ width: 260 }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searchInput ? (
+                    <InputAdornment position="end">
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setSearchInput('')
+                          setSearchQ('')
+                          setPage(0)
+                        }}
+                      >
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  ) : null,
+                },
+              }}
+            />
 
-        <Button variant="outlined" size="small" onClick={handleSearch}>
-          Ara
-        </Button>
+            <Button variant="outlined" size="small" onClick={handleSearch}>
+              Ara
+            </Button>
 
-        <FormControl size="small" sx={{ minWidth: 130 }}>
-          <InputLabel>Durum</InputLabel>
-          <Select
-            value={statusFilter}
-            label="Durum"
-            onChange={(event) => {
-              setStatusFilter(event.target.value)
-              setPage(0)
-            }}
-          >
-            <MenuItem value="">Tümü</MenuItem>
-            {STATUS_OPTIONS.map((status) => (
-              <MenuItem key={status} value={status}>
-                <Chip label={status} color={STATUS_COLOR[status]} size="small" sx={{ cursor: 'pointer' }} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl size="small" sx={{ minWidth: 130 }}>
-          <InputLabel>Öncelik</InputLabel>
-          <Select
-            value={priorityFilter}
-            label="Öncelik"
-            onChange={(event) => {
-              setPriorityFilter(event.target.value)
-              setPage(0)
-            }}
-          >
-            <MenuItem value="">Tümü</MenuItem>
-            {PRIORITY_OPTIONS.map((priority) => (
-              <MenuItem key={priority} value={priority}>
-                <Chip
-                  label={priority}
-                  color={PRIORITY_COLOR[priority]}
-                  size="small"
-                  sx={{ cursor: 'pointer' }}
-                />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl size="small" sx={{ minWidth: 140 }}>
-          <InputLabel>Tür</InputLabel>
-          <Select
-            value={typeFilter}
-            label="Tür"
-            onChange={(event) => {
-              setTypeFilter(event.target.value)
-              setPage(0)
-            }}
-          >
-            <MenuItem value="">Tümü</MenuItem>
-            {TYPE_OPTIONS.map((type) => (
-              <MenuItem key={type} value={type}>
-                {type}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {hasActiveFilters && (
-          <Button size="small" color="inherit" onClick={clearFilters}>
-            Filtreleri Temizle
-          </Button>
-        )}
-      </Box>
-
-      {isLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress />
-        </Box>
-      ) : rows.length === 0 ? (
-        <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-          {isAssignedScope ? t('assignedTickets.emptyState') : t('teamTickets.emptyState')}
-        </Typography>
-      ) : (
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'title'}
-                  direction={sortField === 'title' ? sortDir : 'asc'}
-                  onClick={() => handleSort('title')}
-                >
-                  Başlık
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'status'}
-                  direction={sortField === 'status' ? sortDir : 'asc'}
-                  onClick={() => handleSort('status')}
-                >
-                  Durum
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'priority'}
-                  direction={sortField === 'priority' ? sortDir : 'asc'}
-                  onClick={() => handleSort('priority')}
-                >
-                  Öncelik
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'type'}
-                  direction={sortField === 'type' ? sortDir : 'asc'}
-                  onClick={() => handleSort('type')}
-                >
-                  Tür
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'createdAt'}
-                  direction={sortField === 'createdAt' ? sortDir : 'asc'}
-                  onClick={() => handleSort('createdAt')}
-                >
-                  Oluşturulma
-                </TableSortLabel>
-              </TableCell>
-              <TableCell align="right">İşlemler</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((ticket, index) => (
-              <TableRow
-                key={ticket.id ?? `ticket-${index}`}
-                hover
-                sx={{ cursor: 'pointer' }}
-                onClick={() => {
-                  if (ticket.id) router.push(`${ROUTES.teamTickets}/${ticket.id}` as Route)
+            <FormControl size="small" sx={{ minWidth: 130 }}>
+              <InputLabel>Durum</InputLabel>
+              <Select
+                value={statusFilter}
+                label="Durum"
+                onChange={(event) => {
+                  setStatusFilter(event.target.value)
+                  setPage(0)
                 }}
               >
-                <TableCell>
-                  <Typography variant="body2" fontWeight={500} noWrap sx={{ maxWidth: 320 }}>
-                    {ticket.title ?? '—'}
-                  </Typography>
-                  {ticket.description && (
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      noWrap
-                      sx={{ display: 'block', maxWidth: 320 }}
-                    >
-                      {ticket.description}
-                    </Typography>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {ticket.status ? (
+                <MenuItem value="">Tümü</MenuItem>
+                {STATUS_OPTIONS.map((status) => (
+                  <MenuItem key={status} value={status}>
                     <Chip
-                      label={ticket.status}
-                      color={STATUS_COLOR[ticket.status as TicketStatusString] ?? 'default'}
+                      label={status}
+                      color={STATUS_COLOR[status]}
                       size="small"
+                      sx={{ cursor: 'pointer' }}
                     />
-                  ) : (
-                    '—'
-                  )}
-                </TableCell>
-                <TableCell>
-                  {ticket.priority ? (
-                    <Chip
-                      label={ticket.priority}
-                      color={PRIORITY_COLOR[ticket.priority as TicketPriorityString] ?? 'default'}
-                      size="small"
-                      variant="outlined"
-                    />
-                  ) : (
-                    '—'
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2">{ticket.type ?? '—'}</Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" color="text.secondary">
-                    {ticket.createdAt ? new Date(ticket.createdAt).toLocaleString('tr-TR') : '—'}
-                  </Typography>
-                </TableCell>
-                <TableCell align="right" onClick={(event) => event.stopPropagation()}>
-                  <Tooltip title="Detay">
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        if (ticket.id) router.push(`${ROUTES.teamTickets}/${ticket.id}` as Route)
-                      }}
-                    >
-                      <OpenInNewIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-      <TablePagination
-        component="div"
-        count={total}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={(_, nextPage) => setPage(nextPage)}
-        onRowsPerPageChange={(event) => {
-          setRowsPerPage(Number(event.target.value))
-          setPage(0)
-        }}
-        rowsPerPageOptions={[10, 25, 50]}
-        labelRowsPerPage="Sayfa başına:"
-        labelDisplayedRows={({ from, to, count }) =>
-          `${from}–${to} / ${count !== -1 ? count : `${to}+`}`
-        }
-      />
+            <FormControl size="small" sx={{ minWidth: 130 }}>
+              <InputLabel>Öncelik</InputLabel>
+              <Select
+                value={priorityFilter}
+                label="Öncelik"
+                onChange={(event) => {
+                  setPriorityFilter(event.target.value)
+                  setPage(0)
+                }}
+              >
+                <MenuItem value="">Tümü</MenuItem>
+                {PRIORITY_OPTIONS.map((priority) => (
+                  <MenuItem key={priority} value={priority}>
+                    <Chip
+                      label={priority}
+                      color={PRIORITY_COLOR[priority]}
+                      size="small"
+                      sx={{ cursor: 'pointer' }}
+                    />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <InputLabel>Tür</InputLabel>
+              <Select
+                value={typeFilter}
+                label="Tür"
+                onChange={(event) => {
+                  setTypeFilter(event.target.value)
+                  setPage(0)
+                }}
+              >
+                <MenuItem value="">Tümü</MenuItem>
+                {TYPE_OPTIONS.map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {type}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {hasActiveFilters && (
+              <Button size="small" color="inherit" onClick={clearFilters}>
+                Filtreleri Temizle
+              </Button>
+            )}
+          </Box>
+
+          {isLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+              <CircularProgress />
+            </Box>
+          ) : rows.length === 0 ? (
+            <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+              {isAssignedScope ? t('assignedTickets.emptyState') : t('teamTickets.emptyState')}
+            </Typography>
+          ) : (
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>
+                    <TableSortLabel
+                      active={sortField === 'title'}
+                      direction={sortField === 'title' ? sortDir : 'asc'}
+                      onClick={() => handleSort('title')}
+                    >
+                      Başlık
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={sortField === 'status'}
+                      direction={sortField === 'status' ? sortDir : 'asc'}
+                      onClick={() => handleSort('status')}
+                    >
+                      Durum
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={sortField === 'priority'}
+                      direction={sortField === 'priority' ? sortDir : 'asc'}
+                      onClick={() => handleSort('priority')}
+                    >
+                      Öncelik
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={sortField === 'type'}
+                      direction={sortField === 'type' ? sortDir : 'asc'}
+                      onClick={() => handleSort('type')}
+                    >
+                      Tür
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={sortField === 'createdAt'}
+                      direction={sortField === 'createdAt' ? sortDir : 'asc'}
+                      onClick={() => handleSort('createdAt')}
+                    >
+                      Oluşturulma
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell align="right">İşlemler</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows.map((ticket, index) => (
+                  <TableRow
+                    key={ticket.id ?? `ticket-${index}`}
+                    hover
+                    sx={{ cursor: 'pointer' }}
+                    onClick={() => {
+                      if (ticket.id) router.push(`${ROUTES.teamTickets}/${ticket.id}` as Route)
+                    }}
+                  >
+                    <TableCell>
+                      <Typography variant="body2" fontWeight={500} noWrap sx={{ maxWidth: 320 }}>
+                        {ticket.title ?? '—'}
+                      </Typography>
+                      {ticket.description && (
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          noWrap
+                          sx={{ display: 'block', maxWidth: 320 }}
+                        >
+                          {ticket.description}
+                        </Typography>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {ticket.status ? (
+                        <Chip
+                          label={ticket.status}
+                          color={STATUS_COLOR[ticket.status as TicketStatusString] ?? 'default'}
+                          size="small"
+                        />
+                      ) : (
+                        '—'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {ticket.priority ? (
+                        <Chip
+                          label={ticket.priority}
+                          color={
+                            PRIORITY_COLOR[ticket.priority as TicketPriorityString] ?? 'default'
+                          }
+                          size="small"
+                          variant="outlined"
+                        />
+                      ) : (
+                        '—'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">{ticket.type ?? '—'}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="text.secondary">
+                        {ticket.createdAt
+                          ? new Date(ticket.createdAt).toLocaleString('tr-TR')
+                          : '—'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right" onClick={(event) => event.stopPropagation()}>
+                      <Tooltip title="Detay">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            if (ticket.id)
+                              router.push(`${ROUTES.teamTickets}/${ticket.id}` as Route)
+                          }}
+                        >
+                          <OpenInNewIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+
+          <TablePagination
+            component="div"
+            count={total}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            onPageChange={(_, nextPage) => setPage(nextPage)}
+            onRowsPerPageChange={(event) => {
+              setRowsPerPage(Number(event.target.value))
+              setPage(0)
+            }}
+            rowsPerPageOptions={[10, 25, 50]}
+            labelRowsPerPage="Sayfa başına:"
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}–${to} / ${count !== -1 ? count : `${to}+`}`
+            }
+          />
         </>
       )}
     </Box>

@@ -27,18 +27,24 @@ export function TenantDetail({ id }: Props) {
   const { showToast } = useToast()
   const [editOpen, setEditOpen] = useState(false)
 
-  const { hasAnyPermission, isLoadingPermissions } = useCurrentUserPermissions()
+  const { hasAnyPermission, hasPermissionForTarget, isLoadingPermissions } =
+    useCurrentUserPermissions()
   const canReadTenant = hasAnyPermission([
     PermissionActions.READ_TENANT,
     PermissionActions.UPDATE_TENANT,
     PermissionActions.ADMIN,
   ])
-  const canUpdateTenant = hasAnyPermission([
-    PermissionActions.UPDATE_TENANT,
-    PermissionActions.ADMIN,
-  ])
+  const canUpdateTenant = hasPermissionForTarget(PermissionActions.UPDATE_TENANT, {
+    targetType: 'TENANT',
+    targetId: id,
+    tenantId: id,
+  })
 
-  const { data: tenant, isLoading, error } = useTenant(id, {
+  const {
+    data: tenant,
+    isLoading,
+    error,
+  } = useTenant(id, {
     enabled: canReadTenant && !isLoadingPermissions,
   })
 
@@ -88,14 +94,21 @@ export function TenantDetail({ id }: Props) {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => router.back()} sx={{ color: 'text.secondary' }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => router.back()}
+          sx={{ color: 'text.secondary' }}
+        >
           {t('tenants.backButton')}
         </Button>
-        {canUpdateTenant && (
-          <Button variant="outlined" startIcon={<EditIcon />} onClick={() => setEditOpen(true)}>
-            {t('tenants.editButton')}
-          </Button>
-        )}
+        <Button
+          variant="outlined"
+          startIcon={<EditIcon />}
+          onClick={() => setEditOpen(true)}
+          disabled={!canUpdateTenant}
+        >
+          {t('tenants.editButton')}
+        </Button>
       </Box>
 
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', mb: 2 }}>

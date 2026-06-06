@@ -42,18 +42,15 @@ export function TenantList() {
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create')
   const [selectedTenant, setSelectedTenant] = useState<TenantResponse | undefined>(undefined)
 
-  const { hasPermission, hasAnyPermission, isLoadingPermissions } = useCurrentUserPermissions()
+  const { hasAnyPermission, hasGrant, hasPermissionForTarget, isLoadingPermissions } =
+    useCurrentUserPermissions()
   const canReadTenant = hasAnyPermission([
     PermissionActions.READ_TENANT,
     PermissionActions.UPDATE_TENANT,
     PermissionActions.ADMIN,
   ])
-  const canCreateTenant = hasPermission(PermissionActions.ADMIN)
-  const canUpdateTenant = hasAnyPermission([
-    PermissionActions.UPDATE_TENANT,
-    PermissionActions.ADMIN,
-  ])
-  const canDeleteTenant = hasPermission(PermissionActions.ADMIN)
+  const canCreateTenant = hasGrant(PermissionActions.ADMIN, 'TENANT_ROOT')
+  const unauthorizedReason = t('common.unauthorized')
 
   const params = {
     pagination: { page: page + 1, perPage: rowsPerPage },
@@ -100,11 +97,14 @@ export function TenantList() {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5">{t('tenants.title')}</Typography>
-        {canCreateTenant && (
-          <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateDialog}>
-            {t('tenants.createButton')}
-          </Button>
-        )}
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={openCreateDialog}
+          disabled={isLoadingPermissions || !canCreateTenant}
+        >
+          {t('tenants.createButton')}
+        </Button>
       </Box>
 
       {isLoadingPermissions ? (
@@ -137,72 +137,94 @@ export function TenantList() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((tenant, index) => (
-              <TableRow
-                key={tenant.id ?? `tenant-${index}`}
-                hover
-                sx={tenant.id ? { cursor: 'pointer' } : undefined}
-                onClick={() => {
-                  if (tenant.id) {
-                    goTenantDetail(tenant.id)
-                  }
-                }}
-              >
-                <TableCell>{tenant.name ?? '—'}</TableCell>
-                <TableCell>{tenant.email ?? '—'}</TableCell>
-                <TableCell>{tenant.phone ?? '—'}</TableCell>
-                <TableCell>{tenant.city ?? '—'}</TableCell>
-                <TableCell>{tenant.country ?? '—'}</TableCell>
-                <TableCell>{tenant.website ?? '—'}</TableCell>
-                <TableCell align="right">
-                  {tenant.id && (
-                    <Tooltip title={t('tenants.detailButton')}>
-                      <IconButton
-                        size="small"
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          goTenantDetail(tenant.id as string)
-                        }}
-                      >
-                        <VisibilityIcon fontSize="small" />
-                      </IconButton>
+            {rows.map((tenant, index) => {
+              const tenantTarget = {
+                targetType: 'TENANT',
+                targetId: tenant.id,
+                tenantId: tenant.id,
+              }
+              const canUpdateThisTenant = Boolean(
+                tenant.id && hasPermissionForTarget(PermissionActions.UPDATE_TENANT, tenantTarget),
+              )
+              const canDeleteThisTenant = Boolean(
+                tenant.id && hasPermissionForTarget(PermissionActions.ADMIN, tenantTarget),
+              )
+
+              return (
+                <TableRow
+                  key={tenant.id ?? `tenant-${index}`}
+                  hover
+                  sx={tenant.id ? { cursor: 'pointer' } : undefined}
+                  onClick={() => {
+                    if (tenant.id) {
+                      goTenantDetail(tenant.id)
+                    }
+                  }}
+                >
+                  <TableCell>{tenant.name ?? '—'}</TableCell>
+                  <TableCell>{tenant.email ?? '—'}</TableCell>
+                  <TableCell>{tenant.phone ?? '—'}</TableCell>
+                  <TableCell>{tenant.city ?? '—'}</TableCell>
+                  <TableCell>{tenant.country ?? '—'}</TableCell>
+                  <TableCell>{tenant.website ?? '—'}</TableCell>
+                  <TableCell align="right">
+                    {tenant.id && (
+                      <Tooltip title={t('tenants.detailButton')}>
+                        <IconButton
+                          size="small"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            goTenantDetail(tenant.id as string)
+                          }}
+                        >
+                          <VisibilityIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    <Tooltip
+                      title={canUpdateThisTenant ? t('tenants.editButton') : unauthorizedReason}
+                    >
+                      <span>
+                        <IconButton
+                          size="small"
+                          disabled={!canUpdateThisTenant}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            if (!canUpdateThisTenant) return
+                            openEditDialog(tenant)
+                          }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </span>
                     </Tooltip>
-                  )}
-                  {canUpdateTenant && (
-                    <Tooltip title={t('tenants.editButton')}>
-                      <IconButton
-                        size="small"
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          openEditDialog(tenant)
-                        }}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
+                    <Tooltip
+                      title={canDeleteThisTenant ? t('tenants.deleteButton') : unauthorizedReason}
+                    >
+                      <span>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          disabled={!canDeleteThisTenant}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            if (!tenant.id || !canDeleteThisTenant) return
+                            deleteTenant(tenant.id, {
+                              onSuccess: () =>
+                                showToast(t('tenants.deletedToast'), { severity: 'success' }),
+                              onError: (err) =>
+                                showToast(getUserFriendlyError(err), { severity: 'error' }),
+                            })
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </span>
                     </Tooltip>
-                  )}
-                  {canDeleteTenant && tenant.id && (
-                    <Tooltip title={t('tenants.deleteButton')}>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          deleteTenant(tenant.id as string, {
-                            onSuccess: () =>
-                              showToast(t('tenants.deletedToast'), { severity: 'success' }),
-                            onError: (err) =>
-                              showToast(getUserFriendlyError(err), { severity: 'error' }),
-                          })
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       )}

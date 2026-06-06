@@ -71,12 +71,15 @@ export function TenantFormDialog({ open, mode, tenant, onClose }: Props) {
 
   const { mutateAsync: createTenant, isPending: isCreating } = useCreateTenant()
   const { mutateAsync: updateTenant, isPending: isUpdating } = useUpdateTenant()
-  const { hasPermission, hasAnyPermission } = useCurrentUserPermissions()
-  const canCreateTenant = hasPermission(PermissionActions.ADMIN)
-  const canUpdateTenant = hasAnyPermission([
-    PermissionActions.UPDATE_TENANT,
-    PermissionActions.ADMIN,
-  ])
+  const { hasGrant, hasPermission, hasPermissionForTarget } = useCurrentUserPermissions()
+  const canCreateTenant = hasGrant(PermissionActions.ADMIN, 'TENANT_ROOT')
+  const canUpdateTenant = tenant?.id
+    ? hasPermissionForTarget(PermissionActions.UPDATE_TENANT, {
+        targetType: 'TENANT',
+        targetId: tenant.id,
+        tenantId: tenant.id,
+      })
+    : hasPermission(PermissionActions.UPDATE_TENANT)
   const canSubmit = mode === 'create' ? canCreateTenant : canUpdateTenant
   const isPending = isCreating || isUpdating || isUploadingImage
   const isNameAvailableForCreate = mode === 'create' ? tenantNameStatus === 'available' : true
@@ -233,7 +236,10 @@ export function TenantFormDialog({ open, mode, tenant, onClose }: Props) {
             onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
             size="small"
             fullWidth
-            error={mode === 'create' && (tenantNameStatus === 'unavailable' || tenantNameStatus === 'error')}
+            error={
+              mode === 'create' &&
+              (tenantNameStatus === 'unavailable' || tenantNameStatus === 'error')
+            }
             helperText={
               mode !== 'create'
                 ? undefined
@@ -263,7 +269,9 @@ export function TenantFormDialog({ open, mode, tenant, onClose }: Props) {
               input: {
                 endAdornment: (
                   <InputAdornment position="end">
-                    {mode === 'create' && tenantNameStatus === 'checking' && <CircularProgress size={16} />}
+                    {mode === 'create' && tenantNameStatus === 'checking' && (
+                      <CircularProgress size={16} />
+                    )}
                     {mode === 'create' && tenantNameStatus === 'available' && (
                       <CheckCircleOutlineIcon color="success" fontSize="small" />
                     )}

@@ -45,12 +45,15 @@ export function TeamList() {
     sort: { field: 'id', order: 'ASC' as const },
   }
 
-  const { hasPermission, isLoadingPermissions } = useCurrentUserPermissions()
-  const canReadTeam = hasPermission(PermissionActions.READ_TEAM)
-  const canCreateTeam = hasPermission(PermissionActions.CREATE_TEAM)
-  const canUpdateTeam = hasPermission(PermissionActions.UPDATE_TEAM)
-  const canDeleteTeam = hasPermission(PermissionActions.DELETE_TEAM)
-  const canReadTeamMember = hasPermission(PermissionActions.READ_TEAM_MEMBER)
+  const { hasAnyPermission, hasPermissionForTarget, isLoadingPermissions } =
+    useCurrentUserPermissions()
+  const canReadTeam = hasAnyPermission([PermissionActions.READ_TEAM, PermissionActions.ADMIN])
+  const canCreateTeam = hasAnyPermission([PermissionActions.CREATE_TEAM, PermissionActions.ADMIN])
+  const canReadTeamMember = hasAnyPermission([
+    PermissionActions.READ_TEAM_MEMBER,
+    PermissionActions.ADMIN,
+  ])
+  const unauthorizedReason = t('common.unauthorized')
   const { data, isLoading, error } = useTeams(params, {
     enabled: canReadTeam && !isLoadingPermissions,
   })
@@ -67,11 +70,14 @@ export function TeamList() {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5">{t('teams.title')}</Typography>
-        {canCreateTeam && (
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setFormOpen(true)}>
-            {t('teams.createButton')}
-          </Button>
-        )}
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setFormOpen(true)}
+          disabled={isLoadingPermissions || !canCreateTeam}
+        >
+          {t('teams.createButton')}
+        </Button>
       </Box>
 
       {isLoadingPermissions ? (
@@ -103,73 +109,109 @@ export function TeamList() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((team, index) => (
-              <TableRow key={team.id ?? `team-${index}`} hover>
-                <TableCell>{team.name ?? '—'}</TableCell>
-                <TableCell>{team.description ?? '—'}</TableCell>
-                <TableCell>{team.type ?? '—'}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={team.isActive ? t('teams.activeLabel') : t('teams.inactiveLabel')}
-                    color={team.isActive ? 'success' : 'default'}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>{canReadTeamMember ? (team.members?.length ?? 0) : '—'}</TableCell>
-                <TableCell align="right">
-                  <Tooltip title={t('teams.editButton')}>
-                    <IconButton
+            {rows.map((team, index) => {
+              const teamTarget = {
+                targetType: 'TEAM',
+                targetId: team.id,
+                tenantId: team.tenantId,
+                parentTargets: team.tenantId
+                  ? [{ targetType: 'TENANT', targetId: team.tenantId }]
+                  : [],
+              }
+              const canUpdateThisTeam = Boolean(
+                team.id && hasPermissionForTarget(PermissionActions.UPDATE_TEAM, teamTarget),
+              )
+              const canDeleteThisTeam = Boolean(
+                team.id && hasPermissionForTarget(PermissionActions.DELETE_TEAM, teamTarget),
+              )
+
+              return (
+                <TableRow key={team.id ?? `team-${index}`} hover>
+                  <TableCell>{team.name ?? '—'}</TableCell>
+                  <TableCell>{team.description ?? '—'}</TableCell>
+                  <TableCell>{team.type ?? '—'}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={team.isActive ? t('teams.activeLabel') : t('teams.inactiveLabel')}
+                      color={team.isActive ? 'success' : 'default'}
                       size="small"
-                      onClick={() => {
-                        if (team.id) router.push(`${ROUTES.teams}/${team.id}` as Route)
-                      }}
+                    />
+                  </TableCell>
+                  <TableCell>{canReadTeamMember ? (team.members?.length ?? 0) : '—'}</TableCell>
+                  <TableCell align="right">
+                    <Tooltip title={t('teams.editButton')}>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          if (team.id) router.push(`${ROUTES.teams}/${team.id}` as Route)
+                        }}
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip
+                      title={
+                        canUpdateThisTeam
+                          ? team.isActive
+                            ? t('teams.deactivateButton')
+                            : t('teams.activateButton')
+                          : unauthorizedReason
+                      }
                     >
-                      <VisibilityIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                  {canUpdateTeam && (
-                    <Tooltip title={team.isActive ? t('teams.deactivateButton') : t('teams.activateButton')}>
-                      <IconButton
-                        size="small"
-                        color={team.isActive ? 'warning' : 'success'}
-                        onClick={() => {
-                          if (!team.id) return
-                          const mutateFn = team.isActive ? deactivateTeam : activateTeam
-                          mutateFn(team.id, {
-                            onSuccess: () =>
-                              showToast(
-                                team.isActive ? 'Takım pasifleştirildi.' : 'Takım aktifleştirildi.',
-                                { severity: 'success' },
-                              ),
-                            onError: (err) =>
-                              showToast(getUserFriendlyError(err), { severity: 'error' }),
-                          })
-                        }}
-                      >
-                        {team.isActive ? <PauseIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
-                      </IconButton>
+                      <span>
+                        <IconButton
+                          size="small"
+                          color={team.isActive ? 'warning' : 'success'}
+                          disabled={!canUpdateThisTeam}
+                          onClick={() => {
+                            if (!team.id || !canUpdateThisTeam) return
+                            const mutateFn = team.isActive ? deactivateTeam : activateTeam
+                            mutateFn(team.id, {
+                              onSuccess: () =>
+                                showToast(
+                                  team.isActive
+                                    ? 'Takım pasifleştirildi.'
+                                    : 'Takım aktifleştirildi.',
+                                  { severity: 'success' },
+                                ),
+                              onError: (err) =>
+                                showToast(getUserFriendlyError(err), { severity: 'error' }),
+                            })
+                          }}
+                        >
+                          {team.isActive ? (
+                            <PauseIcon fontSize="small" />
+                          ) : (
+                            <PlayArrowIcon fontSize="small" />
+                          )}
+                        </IconButton>
+                      </span>
                     </Tooltip>
-                  )}
-                  {canDeleteTeam && (
-                    <Tooltip title={t('teams.deleteButton')}>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => {
-                          if (!team.id) return
-                          deleteTeam(team.id, {
-                            onSuccess: () => showToast('Takım silindi.', { severity: 'success' }),
-                            onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-                          })
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                    <Tooltip
+                      title={canDeleteThisTeam ? t('teams.deleteButton') : unauthorizedReason}
+                    >
+                      <span>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          disabled={!canDeleteThisTeam}
+                          onClick={() => {
+                            if (!team.id || !canDeleteThisTeam) return
+                            deleteTeam(team.id, {
+                              onSuccess: () => showToast('Takım silindi.', { severity: 'success' }),
+                              onError: (err) =>
+                                showToast(getUserFriendlyError(err), { severity: 'error' }),
+                            })
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </span>
                     </Tooltip>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       )}

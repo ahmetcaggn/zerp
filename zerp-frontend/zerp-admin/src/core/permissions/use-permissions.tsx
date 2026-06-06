@@ -8,6 +8,14 @@ import { queryKeys } from '@/core/api/query-keys'
 import { toRaQueryString } from '@/core/api/resource-types'
 import { useAuth } from '@/core/auth/client/use-auth'
 
+import {
+  createPermissionEvaluator,
+  type PermissionCheckTarget,
+  type PermissionGrant,
+  type PermissionTargetType,
+  type TicketPermissionTarget,
+} from './permission-evaluator'
+
 export const PermissionActions = {
   READ_TENANT: 'READ_TENANT',
   READ_SHOP: 'READ_SHOP',
@@ -18,6 +26,7 @@ export const PermissionActions = {
   READ_EMPLOYEE: 'READ_EMPLOYEE',
   UPDATE_EMPLOYEE: 'UPDATE_EMPLOYEE',
   DELETE_EMPLOYEE: 'DELETE_EMPLOYEE',
+  READ_PERMISSION: 'READ_PERMISSION',
   READ_TEAM: 'READ_TEAM',
   CREATE_TEAM: 'CREATE_TEAM',
   UPDATE_TEAM: 'UPDATE_TEAM',
@@ -59,21 +68,25 @@ export const PermissionActions = {
 
 export type PermissionAction = (typeof PermissionActions)[keyof typeof PermissionActions]
 
-interface PermissionResponse {
-  id?: number
-  userId?: string
-  targetType?: string
-  targetId?: string
-  action?: string
-}
-
 interface CurrentUserPermissionContextValue {
   isLoadingPermissions: boolean
   permissionsError: unknown
   permissionActions: ReadonlySet<string>
+  permissionGrants: readonly PermissionGrant[]
   hasPermission: (action: PermissionAction) => boolean
   hasAnyPermission: (actions: readonly PermissionAction[]) => boolean
   hasAllPermissions: (actions: readonly PermissionAction[]) => boolean
+  hasGrant: (
+    action: PermissionAction,
+    targetType: PermissionTargetType,
+    targetId?: string | null,
+  ) => boolean
+  hasPermissionForTarget: (action: PermissionAction, target: PermissionCheckTarget) => boolean
+  hasAnyPermissionForTarget: (
+    actions: readonly PermissionAction[],
+    target: PermissionCheckTarget,
+  ) => boolean
+  hasTicketPermission: (action: PermissionAction, target: TicketPermissionTarget) => boolean
 }
 
 const EMPTY_PERMISSIONS = new Set<string>()
@@ -82,9 +95,14 @@ const defaultContextValue: CurrentUserPermissionContextValue = {
   isLoadingPermissions: false,
   permissionsError: null,
   permissionActions: EMPTY_PERMISSIONS,
+  permissionGrants: [],
   hasPermission: () => false,
   hasAnyPermission: () => false,
   hasAllPermissions: () => false,
+  hasGrant: () => false,
+  hasPermissionForTarget: () => false,
+  hasAnyPermissionForTarget: () => false,
+  hasTicketPermission: () => false,
 }
 
 const CurrentUserPermissionContext =
@@ -98,12 +116,12 @@ function isUuid(value: string | undefined): value is string {
   return Boolean(value && UUID_REGEX.test(value))
 }
 
-async function fetchCurrentUserPermissionActions(userId: string): Promise<string[]> {
-  const permissions: PermissionResponse[] = []
+async function fetchCurrentUserPermissions(userId: string): Promise<PermissionGrant[]> {
+  const permissions: PermissionGrant[] = []
   const maxPages = 20
 
   for (let page = 1; page <= maxPages; page += 1) {
-    const result = await httpClient.requestList<PermissionResponse>(
+    const result = await httpClient.requestList<PermissionGrant>(
       `/user/permissions?${toRaQueryString({
         pagination: { page, perPage: MAX_PERMISSION_PAGE_SIZE },
         sort: { field: 'id', order: 'ASC' },
@@ -120,8 +138,6 @@ async function fetchCurrentUserPermissionActions(userId: string): Promise<string
   }
 
   return permissions
-    .map((permission) => permission.action)
-    .filter((action): action is string => typeof action === 'string' && action.length > 0)
 }
 
 export function CurrentUserPermissionsProvider({ children }: { children: React.ReactNode }) {
@@ -132,30 +148,36 @@ export function CurrentUserPermissionsProvider({ children }: { children: React.R
     queryKey: [...queryKeys.admin.permissions, 'me', resolvedUserId ?? 'anonymous'],
     enabled: Boolean(isAuthenticated && resolvedUserId),
     staleTime: 60_000,
-    queryFn: () => fetchCurrentUserPermissionActions(resolvedUserId!),
+    queryFn: () => fetchCurrentUserPermissions(resolvedUserId!),
   })
 
-  const permissionActions = useMemo<Set<string>>(() => new Set(query.data ?? []), [query.data])
+  const evaluator = useMemo(() => createPermissionEvaluator(query.data ?? []), [query.data])
+  const permissionActions = evaluator.permissionActions
 
   function hasPermission(action: PermissionAction): boolean {
-    return permissionActions.has(action)
+    return evaluator.hasAction(action)
   }
 
   function hasAnyPermission(actions: readonly PermissionAction[]): boolean {
-    return actions.some((action) => hasPermission(action))
+    return evaluator.hasAnyAction(actions)
   }
 
   function hasAllPermissions(actions: readonly PermissionAction[]): boolean {
-    return actions.every((action) => hasPermission(action))
+    return evaluator.hasAllActions(actions)
   }
 
   const contextValue: CurrentUserPermissionContextValue = {
     isLoadingPermissions: status === 'loading' || (status === 'authenticated' && query.isLoading),
     permissionsError: query.error,
     permissionActions,
+    permissionGrants: evaluator.permissionGrants,
     hasPermission,
     hasAnyPermission,
     hasAllPermissions,
+    hasGrant: evaluator.hasGrant,
+    hasPermissionForTarget: evaluator.hasPermissionForTarget,
+    hasAnyPermissionForTarget: evaluator.hasAnyPermissionForTarget,
+    hasTicketPermission: evaluator.hasTicketPermission,
   }
 
   return (

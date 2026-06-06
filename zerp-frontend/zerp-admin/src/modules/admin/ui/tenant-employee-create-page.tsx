@@ -29,6 +29,7 @@ import { useMemo, useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
@@ -65,6 +66,8 @@ export function TenantEmployeeCreatePage({ tenantId }: Props) {
   const { showToast } = useToast()
   const router = useRouter()
   const { data: tenant } = useTenant(tenantId)
+  const { hasPermission } = useCurrentUserPermissions()
+  const canCreateEmployee = hasPermission(PermissionActions.CREATE_EMPLOYEE_ANY_TENANT)
 
   const [username, setUsername] = useState('')
   const [tempPassword, setTempPassword] = useState('')
@@ -90,15 +93,18 @@ export function TenantEmployeeCreatePage({ tenantId }: Props) {
   const { data: managersResult } = useTenantEmployees(
     tenantId,
     { pagination: { page: 1, perPage: 100 }, sort: { field: 'id', order: 'ASC' } },
-    { enabled: true },
+    { enabled: canCreateEmployee },
   )
   const managerOptions = managersResult?.data ?? []
 
-  const { data: shopsResult } = useShops({
-    pagination: { page: 1, perPage: 100 },
-    sort: { field: 'name', order: 'ASC' },
-    filter: { 'tenantId.eq': tenantId },
-  })
+  const { data: shopsResult } = useShops(
+    {
+      pagination: { page: 1, perPage: 100 },
+      sort: { field: 'name', order: 'ASC' },
+      filter: { 'tenantId.eq': tenantId },
+    },
+    { enabled: canCreateEmployee },
+  )
 
   const shopOptions = useMemo(
     () =>
@@ -173,7 +179,9 @@ export function TenantEmployeeCreatePage({ tenantId }: Props) {
   }
 
   function updateContact(index: number, field: keyof EmployeeContactDto, value: string) {
-    setContacts((prev) => prev.map((contact, i) => (i === index ? { ...contact, [field]: value } : contact)))
+    setContacts((prev) =>
+      prev.map((contact, i) => (i === index ? { ...contact, [field]: value } : contact)),
+    )
   }
 
   function addDraftPermission(permission: PermissionAssignmentInput) {
@@ -193,6 +201,11 @@ export function TenantEmployeeCreatePage({ tenantId }: Props) {
   }
 
   async function handleSubmit() {
+    if (!canCreateEmployee) {
+      showToast(t('employees.unauthorized'), { severity: 'warning' })
+      return
+    }
+
     if (!firstName.trim() || !lastName.trim() || !email.trim() || !hireDate || !username.trim()) {
       showToast(t('employees.requiredFieldsWarning'), { severity: 'warning' })
       return
@@ -270,7 +283,10 @@ export function TenantEmployeeCreatePage({ tenantId }: Props) {
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, width: '100%', display: 'grid', gap: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(withLocale(locale, `${ROUTES.tenants}/${tenantId}`) as Route)}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => router.push(withLocale(locale, `${ROUTES.tenants}/${tenantId}`) as Route)}
+        >
           {t('tenants.backButton')}
         </Button>
       </Box>
@@ -319,7 +335,9 @@ export function TenantEmployeeCreatePage({ tenantId }: Props) {
                 endAdornment: (
                   <InputAdornment position="end">
                     {usernameStatus === 'checking' && <CircularProgress size={16} />}
-                    {usernameStatus === 'available' && <CheckCircleOutlineIcon color="success" fontSize="small" />}
+                    {usernameStatus === 'available' && (
+                      <CheckCircleOutlineIcon color="success" fontSize="small" />
+                    )}
                     {(usernameStatus === 'unavailable' || usernameStatus === 'error') && (
                       <ErrorOutlineIcon color="error" fontSize="small" />
                     )}
@@ -424,11 +442,13 @@ export function TenantEmployeeCreatePage({ tenantId }: Props) {
                 onChange={(event) => setManagerId(event.target.value)}
               >
                 <MenuItem value="">—</MenuItem>
-                {managerOptions.filter((manager) => Boolean(manager.id)).map((manager) => (
-                  <MenuItem key={manager.id} value={manager.id}>
-                    {`${manager.firstName ?? ''} ${manager.lastName ?? ''}`.trim()}
-                  </MenuItem>
-                ))}
+                {managerOptions
+                  .filter((manager) => Boolean(manager.id))
+                  .map((manager) => (
+                    <MenuItem key={manager.id} value={manager.id}>
+                      {`${manager.firstName ?? ''} ${manager.lastName ?? ''}`.trim()}
+                    </MenuItem>
+                  ))}
               </Select>
             </FormControl>
           </Box>
@@ -444,7 +464,11 @@ export function TenantEmployeeCreatePage({ tenantId }: Props) {
           <Typography variant="subtitle2">{t('employees.contactInfoSection')}</Typography>
           <List disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             {contacts.map((contact, index) => (
-              <ListItem key={`${contact.type}-${index}`} disableGutters sx={{ display: 'grid', gridTemplateColumns: '160px 1fr auto', gap: 1 }}>
+              <ListItem
+                key={`${contact.type}-${index}`}
+                disableGutters
+                sx={{ display: 'grid', gridTemplateColumns: '160px 1fr auto', gap: 1 }}
+              >
                 <FormControl size="small">
                   <InputLabel>{t('employees.contactTypeLabel')}</InputLabel>
                   <Select
@@ -465,21 +489,36 @@ export function TenantEmployeeCreatePage({ tenantId }: Props) {
                   value={contact.value}
                   onChange={(event) => updateContact(index, 'value', event.target.value)}
                 />
-                <IconButton color="error" onClick={() => removeContact(index)}>
+                <IconButton
+                  color="error"
+                  onClick={() => removeContact(index)}
+                  disabled={!canCreateEmployee || isSubmitting}
+                >
                   <RemoveCircleOutlineIcon />
                 </IconButton>
               </ListItem>
             ))}
           </List>
-          <Button variant="text" size="small" startIcon={<AddIcon />} onClick={addContact}>
+          <Button
+            variant="text"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={addContact}
+            disabled={!canCreateEmployee || isSubmitting}
+          >
             {t('employees.addContactButton')}
           </Button>
 
           <PermissionAssignmentBuilder
+            disabled={!canCreateEmployee || isSubmitting}
             existingKeys={existingDraftPermissionKeys}
             onAdd={addDraftPermission}
             i18nPrefix="employees"
-            prefilledTargets={tenantId && tenant?.name ? { TENANT: { id: tenantId, title: tenant.name } } : undefined}
+            prefilledTargets={
+              tenantId && tenant?.name
+                ? { TENANT: { id: tenantId, title: tenant.name } }
+                : undefined
+            }
           />
 
           {draftPermissions.length > 0 && (
@@ -488,7 +527,12 @@ export function TenantEmployeeCreatePage({ tenantId }: Props) {
                 <ListItem
                   key={`${permission.action}-${permission.targetType}-${permission.targetId}-${index}`}
                   secondaryAction={
-                    <IconButton edge="end" size="small" onClick={() => removeDraftPermission(index)}>
+                    <IconButton
+                      edge="end"
+                      size="small"
+                      onClick={() => removeDraftPermission(index)}
+                      disabled={!canCreateEmployee || isSubmitting}
+                    >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   }
@@ -514,11 +558,15 @@ export function TenantEmployeeCreatePage({ tenantId }: Props) {
             selectedShopId={selectedGroupShopId}
             onSelectedShopIdChange={setSelectedGroupShopId}
             shopOptions={shopOptions}
-            disabled={isSubmitting}
+            disabled={!canCreateEmployee || isSubmitting}
           />
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button variant="contained" onClick={() => void handleSubmit()} disabled={isSubmitting}>
+            <Button
+              variant="contained"
+              onClick={() => void handleSubmit()}
+              disabled={isSubmitting || !canCreateEmployee}
+            >
               {isSubmitting ? <CircularProgress size={18} /> : t('employees.createButton')}
             </Button>
           </Box>

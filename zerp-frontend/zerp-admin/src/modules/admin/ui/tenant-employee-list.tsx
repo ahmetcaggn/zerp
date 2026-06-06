@@ -57,10 +57,12 @@ export function TenantEmployeeList({ tenantId, tenantName }: Props) {
   const router = useRouter()
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
-  const [permissionDialogEmployee, setPermissionDialogEmployee] =
-    useState<EmployeeListResponse | undefined>(undefined)
+  const [permissionDialogEmployee, setPermissionDialogEmployee] = useState<
+    EmployeeListResponse | undefined
+  >(undefined)
 
-  const { hasAnyPermission, isLoadingPermissions } = useCurrentUserPermissions()
+  const { hasAnyPermission, hasPermissionForTarget, isLoadingPermissions } =
+    useCurrentUserPermissions()
   const canReadEmployees = hasAnyPermission([
     PermissionActions.READ_EMPLOYEE,
     PermissionActions.UPDATE_EMPLOYEE,
@@ -70,8 +72,15 @@ export function TenantEmployeeList({ tenantId, tenantName }: Props) {
     PermissionActions.ADMIN,
     PermissionActions.CREATE_EMPLOYEE_ANY_TENANT,
   ])
-  const canCreateEmployeeForTenant = hasAnyPermission([PermissionActions.CREATE_EMPLOYEE_ANY_TENANT])
-  const canDeleteEmployee = hasAnyPermission([PermissionActions.DELETE_EMPLOYEE])
+  const canCreateEmployeeForTenant = hasAnyPermission([
+    PermissionActions.CREATE_EMPLOYEE_ANY_TENANT,
+  ])
+  const canManageEmployeePermissions = hasPermissionForTarget(PermissionActions.ADMIN, {
+    targetType: 'TENANT',
+    targetId: tenantId,
+    tenantId,
+  })
+  const unauthorizedReason = t('common.unauthorized')
 
   const params = {
     pagination: { page: page + 1, perPage: rowsPerPage },
@@ -98,30 +107,30 @@ export function TenantEmployeeList({ tenantId, tenantName }: Props) {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5">{t('employees.title')}</Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          {canReadEmployees && (
-            <Button
-              variant="outlined"
-              startIcon={<RuleFolderRoundedIcon />}
-              onClick={() =>
-                router.push(
-                  withLocale(locale, `${ROUTES.tenants}/${tenantId}/permission-groups`) as Route,
-                )
-              }
-            >
-              {t('permissionGroups.title')}
-            </Button>
-          )}
-          {canCreateEmployeeForTenant && (
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() =>
-                router.push(withLocale(locale, `${ROUTES.tenants}/${tenantId}/employees/new`) as Route)
-              }
-            >
-              {t('employees.createButton')}
-            </Button>
-          )}
+          <Button
+            variant="outlined"
+            startIcon={<RuleFolderRoundedIcon />}
+            disabled={isLoadingPermissions || !canManageEmployeePermissions}
+            onClick={() =>
+              router.push(
+                withLocale(locale, `${ROUTES.tenants}/${tenantId}/permission-groups`) as Route,
+              )
+            }
+          >
+            {t('permissionGroups.title')}
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            disabled={isLoadingPermissions || !canCreateEmployeeForTenant}
+            onClick={() =>
+              router.push(
+                withLocale(locale, `${ROUTES.tenants}/${tenantId}/employees/new`) as Route,
+              )
+            }
+          >
+            {t('employees.createButton')}
+          </Button>
         </Box>
       </Box>
 
@@ -155,10 +164,22 @@ export function TenantEmployeeList({ tenantId, tenantName }: Props) {
           <TableBody>
             {rows.map((employee) => {
               const employeeId = employee.id
+              const employeeTarget = {
+                targetType: 'EMPLOYEE',
+                targetId: employeeId,
+                tenantId,
+                parentTargets: [{ targetType: 'TENANT', targetId: tenantId }],
+              }
+              const canDeleteThisEmployee = Boolean(
+                employeeId &&
+                hasPermissionForTarget(PermissionActions.DELETE_EMPLOYEE, employeeTarget),
+              )
 
               return (
                 <TableRow key={employeeId} hover>
-                  <TableCell>{`${employee.firstName ?? ''} ${employee.lastName ?? ''}`.trim() || '—'}</TableCell>
+                  <TableCell>
+                    {`${employee.firstName ?? ''} ${employee.lastName ?? ''}`.trim() || '—'}
+                  </TableCell>
                   <TableCell>{employee.email ?? '—'}</TableCell>
                   <TableCell>{employee.phoneNumber ?? '—'}</TableCell>
                   <TableCell>
@@ -173,26 +194,43 @@ export function TenantEmployeeList({ tenantId, tenantName }: Props) {
                     )}
                   </TableCell>
                   <TableCell align="right">
-                    <Tooltip title={t('employees.permissionsDialogTitle')}>
+                    <Tooltip
+                      title={
+                        canManageEmployeePermissions
+                          ? t('employees.permissionsDialogTitle')
+                          : unauthorizedReason
+                      }
+                    >
                       <span>
                         <IconButton
                           size="small"
-                          onClick={() => setPermissionDialogEmployee(employee)}
-                          disabled={!employeeId}
+                          onClick={() => {
+                            if (!canManageEmployeePermissions) return
+                            setPermissionDialogEmployee(employee)
+                          }}
+                          disabled={!employeeId || !canManageEmployeePermissions}
                         >
                           <AdminPanelSettingsIcon fontSize="small" />
                         </IconButton>
                       </span>
                     </Tooltip>
-                    {canDeleteEmployee && employeeId && (
-                      <Tooltip title={t('employees.deleteButton')}>
+                    <Tooltip
+                      title={
+                        canDeleteThisEmployee ? t('employees.deleteButton') : unauthorizedReason
+                      }
+                    >
+                      <span>
                         <IconButton
                           size="small"
                           color="error"
+                          disabled={!canDeleteThisEmployee}
                           onClick={() => {
+                            if (!employeeId || !canDeleteThisEmployee) return
                             deleteEmployee(employeeId, {
                               onSuccess: () =>
-                                showToast(t('employees.employeeDeletedToast'), { severity: 'success' }),
+                                showToast(t('employees.employeeDeletedToast'), {
+                                  severity: 'success',
+                                }),
                               onError: (err) =>
                                 showToast(getUserFriendlyError(err), { severity: 'error' }),
                             })
@@ -200,8 +238,8 @@ export function TenantEmployeeList({ tenantId, tenantName }: Props) {
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
-                      </Tooltip>
-                    )}
+                      </span>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               )
@@ -230,6 +268,7 @@ export function TenantEmployeeList({ tenantId, tenantName }: Props) {
         employee={permissionDialogEmployee}
         tenantId={tenantId}
         tenantName={tenantName}
+        canManagePermissions={canManageEmployeePermissions}
         onClose={() => setPermissionDialogEmployee(undefined)}
       />
     </Box>

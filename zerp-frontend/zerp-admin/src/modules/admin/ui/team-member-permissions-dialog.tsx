@@ -39,8 +39,8 @@ import {
 import { useShops } from '../hooks/use-shops'
 import { prettifyPermissionEnumName, toPermissionKey } from '../types/permission'
 import type { TeamMemberResponse } from '../types/team'
-import { buildRevokeGroupToast } from './permission-group-revoke-toast'
 import { PermissionAssignmentBuilder } from './permission-assignment-builder'
+import { buildRevokeGroupToast } from './permission-group-revoke-toast'
 import {
   type PermissionGroupSelectionValue,
   PermissionGroupSelector,
@@ -50,10 +50,17 @@ interface Props {
   open: boolean
   member?: TeamMemberResponse
   tenantId?: string
+  canManagePermissions?: boolean
   onClose: () => void
 }
 
-export function TeamMemberPermissionsDialog({ open, member, tenantId, onClose }: Props) {
+export function TeamMemberPermissionsDialog({
+  open,
+  member,
+  tenantId,
+  canManagePermissions = false,
+  onClose,
+}: Props) {
   const { t } = useI18n()
   const { showToast } = useToast()
   const [searchInput, setSearchInput] = useState('')
@@ -70,15 +77,16 @@ export function TeamMemberPermissionsDialog({ open, member, tenantId, onClose }:
   } = useMemberPermissions(memberUserId, open && Boolean(memberUserId))
   const { mutate: createPermission, isPending: isCreatePending } = useCreatePermission()
   const { mutate: deletePermission, isPending: isDeletePending } = useDeletePermission()
-  const { mutateAsync: assignPermissionGroup, isPending: isAssignPending } = useAssignPermissionGroup(
-    tenantId ?? '',
-  )
+  const { mutateAsync: assignPermissionGroup, isPending: isAssignPending } =
+    useAssignPermissionGroup(tenantId ?? '')
   const { mutateAsync: revokePermissionGroupAssignment, isPending: isRevokeAssignPending } =
     useRevokePermissionGroupAssignment(tenantId ?? '')
-  const {
-    data: groupAssignments = [],
-    isLoading: isGroupAssignmentsLoading,
-  } = usePermissionGroupAssignments(tenantId ?? '', memberUserId, open && Boolean(memberUserId && tenantId))
+  const { data: groupAssignments = [], isLoading: isGroupAssignmentsLoading } =
+    usePermissionGroupAssignments(
+      tenantId ?? '',
+      memberUserId,
+      open && Boolean(memberUserId && tenantId),
+    )
   const { data: shopsResult } = useShops({
     pagination: { page: 1, perPage: 100 },
     sort: { field: 'name', order: 'ASC' },
@@ -129,7 +137,7 @@ export function TeamMemberPermissionsDialog({ open, member, tenantId, onClose }:
   }, [permissions, searchInput])
 
   function handleAddPermission(input: { action: string; targetType: string; targetId: string }) {
-    if (!memberUserId) return
+    if (!memberUserId || !canManagePermissions) return
 
     createPermission(
       {
@@ -146,7 +154,7 @@ export function TeamMemberPermissionsDialog({ open, member, tenantId, onClose }:
   }
 
   function handleDeletePermission(permissionId: number | undefined) {
-    if (!memberUserId || permissionId === undefined) return
+    if (!memberUserId || permissionId === undefined || !canManagePermissions) return
 
     deletePermission(
       { id: permissionId, memberUserId },
@@ -158,7 +166,7 @@ export function TeamMemberPermissionsDialog({ open, member, tenantId, onClose }:
   }
 
   async function handleApplyGroup() {
-    if (!memberUserId || !selectedGroup || !tenantId) return
+    if (!memberUserId || !selectedGroup || !tenantId || !canManagePermissions) return
 
     if (selectedGroup.scopeType === 'SHOP' && !selectedGroupShopId) {
       showToast(t('permissionGroups.scopeTargetRequired'), { severity: 'warning' })
@@ -187,7 +195,7 @@ export function TeamMemberPermissionsDialog({ open, member, tenantId, onClose }:
   }
 
   async function handleRevokeGroupAssignment(assignmentId: string) {
-    if (!memberUserId || !tenantId) return
+    if (!memberUserId || !tenantId || !canManagePermissions) return
 
     try {
       const response = await revokePermissionGroupAssignment({
@@ -211,14 +219,10 @@ export function TeamMemberPermissionsDialog({ open, member, tenantId, onClose }:
           </Typography>
 
           <PermissionAssignmentBuilder
-            disabled={!memberUserId || isCreatePending || isAssignPending}
+            disabled={!memberUserId || !canManagePermissions || isCreatePending || isAssignPending}
             existingKeys={existingKeys}
             onAdd={handleAddPermission}
-            prefilledTargets={
-              tenantId
-                ? { TENANT: { id: tenantId, title: tenantId } }
-                : undefined
-            }
+            prefilledTargets={tenantId ? { TENANT: { id: tenantId, title: tenantId } } : undefined}
           />
 
           {tenantId && (
@@ -235,7 +239,7 @@ export function TeamMemberPermissionsDialog({ open, member, tenantId, onClose }:
                 selectedShopId={selectedGroupShopId}
                 onSelectedShopIdChange={setSelectedGroupShopId}
                 shopOptions={shopOptions}
-                disabled={!memberUserId || isAssignPending}
+                disabled={!memberUserId || !canManagePermissions || isAssignPending}
               />
 
               <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -245,9 +249,15 @@ export function TeamMemberPermissionsDialog({ open, member, tenantId, onClose }:
                   onClick={() => {
                     void handleApplyGroup()
                   }}
-                  disabled={!memberUserId || !selectedGroup || isAssignPending}
+                  disabled={
+                    !memberUserId || !canManagePermissions || !selectedGroup || isAssignPending
+                  }
                 >
-                  {isAssignPending ? <CircularProgress size={14} /> : t('permissionGroups.applyButton')}
+                  {isAssignPending ? (
+                    <CircularProgress size={14} />
+                  ) : (
+                    t('permissionGroups.applyButton')
+                  )}
                 </Button>
               </Box>
 
@@ -277,7 +287,9 @@ export function TeamMemberPermissionsDialog({ open, member, tenantId, onClose }:
                       {groupAssignments.map((assignment) => (
                         <TableRow key={assignment.id}>
                           <TableCell>{assignment.groupName}</TableCell>
-                          <TableCell>{prettifyPermissionEnumName(assignment.groupScopeType ?? '')}</TableCell>
+                          <TableCell>
+                            {prettifyPermissionEnumName(assignment.groupScopeType ?? '')}
+                          </TableCell>
                           <TableCell>{assignment.targetId}</TableCell>
                           <TableCell align="right">
                             <Tooltip title={t('permissionGroups.revokeButton')}>
@@ -285,7 +297,7 @@ export function TeamMemberPermissionsDialog({ open, member, tenantId, onClose }:
                                 <IconButton
                                   size="small"
                                   color="error"
-                                  disabled={isRevokeAssignPending}
+                                  disabled={!canManagePermissions || isRevokeAssignPending}
                                   onClick={() => {
                                     void handleRevokeGroupAssignment(assignment.id)
                                   }}
@@ -341,7 +353,11 @@ export function TeamMemberPermissionsDialog({ open, member, tenantId, onClose }:
                           <IconButton
                             size="small"
                             color="error"
-                            disabled={isDeletePending || permission.id === undefined}
+                            disabled={
+                              !canManagePermissions ||
+                              isDeletePending ||
+                              permission.id === undefined
+                            }
                             onClick={() => handleDeletePermission(permission.id)}
                           >
                             <DeleteIcon fontSize="small" />

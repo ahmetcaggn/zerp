@@ -176,7 +176,7 @@ export function PermissionAssignmentBuilder({
 
   function handleTargetTypeChange(targetType: PermissionTargetType | null) {
     setSelectedTargetType(targetType)
-    
+
     if (targetType) {
       const chain = getSelectableTargetChain(targetType)
       const newSelections: Record<string, PermittableOption | null> = {}

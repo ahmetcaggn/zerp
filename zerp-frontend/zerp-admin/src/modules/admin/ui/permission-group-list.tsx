@@ -32,6 +32,7 @@ import { useMemo, useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
@@ -101,6 +102,7 @@ function GroupFormDialog({
   onClose,
   onSubmit,
   isPending,
+  canSubmit,
 }: {
   open: boolean
   mode: 'create' | 'edit'
@@ -109,6 +111,7 @@ function GroupFormDialog({
   onClose: () => void
   onSubmit: () => void
   isPending: boolean
+  canSubmit: boolean
 }) {
   const { t } = useI18n()
   const { data: actionHierarchy } = usePermissionActionHierarchy(open)
@@ -120,7 +123,9 @@ function GroupFormDialog({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{mode === 'create' ? t('permissionGroups.createButton') : t('permissionGroups.editButton')}</DialogTitle>
+      <DialogTitle>
+        {mode === 'create' ? t('permissionGroups.createButton') : t('permissionGroups.editButton')}
+      </DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ pt: 1 }}>
           <TextField
@@ -164,10 +169,17 @@ function GroupFormDialog({
             disableCloseOnSelect
             renderTags={(value, getTagProps) =>
               value.map((action, index) => (
-                <Chip {...getTagProps({ index })} key={action} label={prettifyPermissionEnumName(action)} size="small" />
+                <Chip
+                  {...getTagProps({ index })}
+                  key={action}
+                  label={prettifyPermissionEnumName(action)}
+                  size="small"
+                />
               ))
             }
-            renderInput={(params) => <TextField {...params} size="small" label={t('permissionGroups.actionsField')} />}
+            renderInput={(params) => (
+              <TextField {...params} size="small" label={t('permissionGroups.actionsField')} />
+            )}
           />
         </Stack>
       </DialogContent>
@@ -175,7 +187,7 @@ function GroupFormDialog({
         <Button onClick={onClose} disabled={isPending}>
           {t('permissionGroups.cancelButton')}
         </Button>
-        <Button variant="contained" onClick={onSubmit} disabled={isPending}>
+        <Button variant="contained" onClick={onSubmit} disabled={isPending || !canSubmit}>
           {isPending ? <CircularProgress size={16} /> : t('permissionGroups.saveButton')}
         </Button>
       </DialogActions>
@@ -191,8 +203,16 @@ export function PermissionGroupList({ tenantId }: Props) {
   const { t, locale } = useI18n()
   const { showToast } = useToast()
   const router = useRouter()
+  const { hasPermissionForTarget } = useCurrentUserPermissions()
+  const canManagePermissionGroups = hasPermissionForTarget(PermissionActions.ADMIN, {
+    targetType: 'TENANT',
+    targetId: tenantId,
+    tenantId,
+  })
+  const unauthorizedReason = t('common.unauthorized')
 
-  const { data: predefined = [], isLoading: isPredefinedLoading } = usePredefinedPermissionGroups(tenantId)
+  const { data: predefined = [], isLoading: isPredefinedLoading } =
+    usePredefinedPermissionGroups(tenantId)
   const { data: custom = [], isLoading: isCustomLoading } = useCustomPermissionGroups(tenantId)
 
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -219,6 +239,7 @@ export function PermissionGroupList({ tenantId }: Props) {
   }, [custom, predefined])
 
   function openCreateDialog() {
+    if (!canManagePermissionGroups) return
     setDialogMode('create')
     setEditingGroup(null)
     setForm(EMPTY_FORM)
@@ -226,6 +247,7 @@ export function PermissionGroupList({ tenantId }: Props) {
   }
 
   function openEditDialog(group: PermissionGroupResponse) {
+    if (!canManagePermissionGroups) return
     setDialogMode('edit')
     setEditingGroup(group)
     setForm(buildPrefillForm(group))
@@ -253,6 +275,11 @@ export function PermissionGroupList({ tenantId }: Props) {
   }
 
   function handleSubmit() {
+    if (!canManagePermissionGroups) {
+      showToast(t('common.unauthorized'), { severity: 'warning' })
+      return
+    }
+
     const payload = validateForm()
     if (!payload) return
 
@@ -282,7 +309,7 @@ export function PermissionGroupList({ tenantId }: Props) {
   }
 
   function handleDelete(groupId: string | undefined) {
-    if (!groupId) return
+    if (!groupId || !canManagePermissionGroups) return
     deleteGroup(groupId, {
       onSuccess: () => showToast(t('permissionGroups.deletedToast')),
       onError: (error) => showToast(getUserFriendlyError(error), { severity: 'error' }),
@@ -304,7 +331,12 @@ export function PermissionGroupList({ tenantId }: Props) {
           <Typography variant="h5">{t('permissionGroups.title')}</Typography>
           <Typography color="text.secondary">{t('permissionGroups.subtitle')}</Typography>
         </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateDialog}>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={openCreateDialog}
+          disabled={!canManagePermissionGroups}
+        >
           {t('permissionGroups.createButton')}
         </Button>
       </Box>
@@ -362,20 +394,40 @@ export function PermissionGroupList({ tenantId }: Props) {
                   </Tooltip>
                   {group.source === 'CUSTOM' && (
                     <>
-                      <Tooltip title={t('permissionGroups.editButton')}>
-                        <IconButton size="small" onClick={() => openEditDialog(group)}>
-                          <EditIcon fontSize="small" />
-                        </IconButton>
+                      <Tooltip
+                        title={
+                          canManagePermissionGroups
+                            ? t('permissionGroups.editButton')
+                            : unauthorizedReason
+                        }
+                      >
+                        <span>
+                          <IconButton
+                            size="small"
+                            onClick={() => openEditDialog(group)}
+                            disabled={!canManagePermissionGroups}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </span>
                       </Tooltip>
-                      <Tooltip title={t('permissionGroups.deleteButton')}>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          disabled={isDeletePending}
-                          onClick={() => handleDelete(group.id)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
+                      <Tooltip
+                        title={
+                          canManagePermissionGroups
+                            ? t('permissionGroups.deleteButton')
+                            : unauthorizedReason
+                        }
+                      >
+                        <span>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            disabled={isDeletePending || !canManagePermissionGroups}
+                            onClick={() => handleDelete(group.id)}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </span>
                       </Tooltip>
                     </>
                   )}
@@ -394,6 +446,7 @@ export function PermissionGroupList({ tenantId }: Props) {
         onClose={closeDialog}
         onSubmit={handleSubmit}
         isPending={isPending}
+        canSubmit={canManagePermissionGroups}
       />
     </Box>
   )

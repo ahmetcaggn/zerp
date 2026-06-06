@@ -93,8 +93,9 @@ export function TeamDetail({ id }: Props) {
     return keys
   }, [draftPermissions])
 
-  const { hasPermission, isLoadingPermissions } = useCurrentUserPermissions()
-  const canReadTeam = hasPermission(PermissionActions.READ_TEAM)
+  const { hasAnyPermission, hasPermission, hasPermissionForTarget, isLoadingPermissions } =
+    useCurrentUserPermissions()
+  const canReadTeam = hasAnyPermission([PermissionActions.READ_TEAM, PermissionActions.ADMIN])
   const {
     data: team,
     isLoading,
@@ -107,13 +108,33 @@ export function TeamDetail({ id }: Props) {
   const { mutate: addMember, isPending: isAddingMember } = useAddTeamMember()
   const { mutate: removeMember } = useRemoveTeamMember()
   const { mutate: changeMemberRole } = useChangeTeamMemberRole()
-  const canUpdateTeam = hasPermission(PermissionActions.UPDATE_TEAM)
-  const canReadTeamMember = hasPermission(PermissionActions.READ_TEAM_MEMBER)
-  const canCreateTeamMember = hasPermission(PermissionActions.CREATE_TEAM_MEMBER)
-  const canUpdateTeamMember = hasPermission(PermissionActions.UPDATE_TEAM_MEMBER)
-  const canDeleteTeamMember = hasPermission(PermissionActions.DELETE_TEAM_MEMBER)
+  const canReadTeamMember = hasAnyPermission([
+    PermissionActions.READ_TEAM_MEMBER,
+    PermissionActions.ADMIN,
+  ])
   const canReadUser = hasPermission(PermissionActions.READ_USER)
+  const teamPermissionTarget = {
+    targetType: 'TEAM',
+    targetId: team?.id ?? id,
+    tenantId: team?.tenantId,
+    parentTargets: team?.tenantId ? [{ targetType: 'TENANT', targetId: team.tenantId }] : [],
+  }
+  const canUpdateTeam = Boolean(
+    team && hasPermissionForTarget(PermissionActions.UPDATE_TEAM, teamPermissionTarget),
+  )
+  const canCreateTeamMember = Boolean(
+    team && hasPermissionForTarget(PermissionActions.CREATE_TEAM_MEMBER, teamPermissionTarget),
+  )
   const canCreateTeamMemberWithUserList = canCreateTeamMember && canReadUser
+  const canManageTeamMemberPermissions = Boolean(
+    team?.tenantId &&
+    hasPermissionForTarget(PermissionActions.ADMIN, {
+      targetType: 'TENANT',
+      targetId: team.tenantId,
+      tenantId: team.tenantId,
+    }),
+  )
+  const unauthorizedReason = t('common.unauthorized')
 
   useEffect(() => {
     const normalizedInput = candidateSearch.trim()
@@ -270,22 +291,23 @@ export function TeamDetail({ id }: Props) {
           Geri
         </Button>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          {canUpdateTeam && (
-            <>
-              <Button
-                variant="outlined"
-                color={team.isActive ? 'warning' : 'success'}
-                startIcon={team.isActive ? <PauseIcon /> : <PlayArrowIcon />}
-                onClick={handleToggleActive}
-                disabled={isTogglePending}
-              >
-                {team.isActive ? t('teams.deactivateButton') : t('teams.activateButton')}
-              </Button>
-              <Button variant="outlined" startIcon={<EditIcon />} onClick={() => setEditOpen(true)}>
-                {t('teams.editButton')}
-              </Button>
-            </>
-          )}
+          <Button
+            variant="outlined"
+            color={team.isActive ? 'warning' : 'success'}
+            startIcon={team.isActive ? <PauseIcon /> : <PlayArrowIcon />}
+            onClick={handleToggleActive}
+            disabled={!canUpdateTeam || isTogglePending}
+          >
+            {team.isActive ? t('teams.deactivateButton') : t('teams.activateButton')}
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<EditIcon />}
+            onClick={() => setEditOpen(true)}
+            disabled={!canUpdateTeam}
+          >
+            {t('teams.editButton')}
+          </Button>
         </Box>
       </Box>
 
@@ -311,27 +333,26 @@ export function TeamDetail({ id }: Props) {
         <Typography variant="subtitle1">
           {t('teams.membersLabel')} ({canReadTeamMember ? (team.members?.length ?? 0) : '—'})
         </Typography>
-        {canCreateTeamMemberWithUserList && (
-          <Button
-            size="small"
-            startIcon={<AddIcon />}
-            onClick={() => {
-              setShowAddMember((prev) => {
-                const next = !prev
-                if (!next) {
-                  setSelectedCandidateId('')
-                  setCandidateSearch('')
-                  setDebouncedCandidateSearch('')
-                  setCandidatePage(1)
-                  setDraftPermissions([])
-                }
-                return next
-              })
-            }}
-          >
-            {t('teams.addMemberButton')}
-          </Button>
-        )}
+        <Button
+          size="small"
+          startIcon={<AddIcon />}
+          disabled={!canCreateTeamMemberWithUserList}
+          onClick={() => {
+            setShowAddMember((prev) => {
+              const next = !prev
+              if (!next) {
+                setSelectedCandidateId('')
+                setCandidateSearch('')
+                setDebouncedCandidateSearch('')
+                setCandidatePage(1)
+                setDraftPermissions([])
+              }
+              return next
+            })
+          }}
+        >
+          {t('teams.addMemberButton')}
+        </Button>
       </Box>
 
       {canCreateTeamMember && !canReadUser && (
@@ -517,19 +538,49 @@ export function TeamDetail({ id }: Props) {
                 const memberPrimary = member.displayName ?? member.username ?? member.userId ?? '—'
                 const normalizedPrimary = memberPrimary.trim().toLowerCase()
                 const normalizedUsername = member.username?.trim().toLowerCase()
-                const shouldShowUsername = Boolean(normalizedUsername) && normalizedUsername !== normalizedPrimary
+                const shouldShowUsername =
+                  Boolean(normalizedUsername) && normalizedUsername !== normalizedPrimary
+                const memberTarget = {
+                  targetType: 'TEAM_MEMBER',
+                  targetId: member.id,
+                  tenantId: currentTeam.tenantId,
+                  parentTargets: [
+                    { targetType: 'TEAM', targetId: currentTeam.id ?? id },
+                    ...(currentTeam.tenantId
+                      ? [{ targetType: 'TENANT', targetId: currentTeam.tenantId }]
+                      : []),
+                  ],
+                }
+                const canUpdateThisMember = Boolean(
+                  member.id &&
+                  member.userId &&
+                  hasPermissionForTarget(PermissionActions.UPDATE_TEAM_MEMBER, memberTarget),
+                )
+                const canDeleteThisMember = Boolean(
+                  member.id &&
+                  member.userId &&
+                  hasPermissionForTarget(PermissionActions.DELETE_TEAM_MEMBER, memberTarget),
+                )
 
                 return (
                   <TableRow key={member.id ?? `${member.userId ?? 'member'}-${index}`} hover>
                     <TableCell>
                       <Typography variant="body2">{memberPrimary}</Typography>
                       {shouldShowUsername && (
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ display: 'block' }}
+                        >
                           @{member.username}
                         </Typography>
                       )}
                       {member.userId && (
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ display: 'block' }}
+                        >
                           {member.userId}
                         </Typography>
                       )}
@@ -554,31 +605,41 @@ export function TeamDetail({ id }: Props) {
                     </TableCell>
                     <TableCell>{member.joinedAt ?? '—'}</TableCell>
                     <TableCell align="right">
-                      {canUpdateTeamMember && (
-                        <Tooltip title={t('teams.permissionsDialogTitle')}>
+                      <Tooltip
+                        title={
+                          canManageTeamMemberPermissions
+                            ? t('teams.permissionsDialogTitle')
+                            : unauthorizedReason
+                        }
+                      >
+                        <span>
                           <IconButton
                             size="small"
+                            disabled={!member.userId || !canManageTeamMemberPermissions}
                             onClick={() => {
-                              if (!member.userId) return
+                              if (!member.userId || !canManageTeamMemberPermissions) return
                               setPermissionDialogMember(member)
                             }}
                           >
                             <AdminPanelSettingsIcon fontSize="small" />
                           </IconButton>
-                        </Tooltip>
-                      )}
-                      {canUpdateTeamMember && (
-                        <Tooltip
-                          title={
-                            member.role === 'LEADER'
+                        </span>
+                      </Tooltip>
+                      <Tooltip
+                        title={
+                          canUpdateThisMember
+                            ? member.role === 'LEADER'
                               ? `${t('teams.roleMember')} yap`
                               : `${t('teams.roleLeader')} yap`
-                          }
-                        >
+                            : unauthorizedReason
+                        }
+                      >
+                        <span>
                           <IconButton
                             size="small"
+                            disabled={!canUpdateThisMember}
                             onClick={() => {
-                              if (!member.userId) return
+                              if (!member.userId || !canUpdateThisMember) return
                               const nextRole =
                                 member.role === 'LEADER' ? ('MEMBER' as const) : ('LEADER' as const)
                               changeMemberRole(
@@ -594,15 +655,20 @@ export function TeamDetail({ id }: Props) {
                           >
                             <EditIcon fontSize="small" />
                           </IconButton>
-                        </Tooltip>
-                      )}
-                      {canDeleteTeamMember && (
-                        <Tooltip title={t('teams.removeMemberButton')}>
+                        </span>
+                      </Tooltip>
+                      <Tooltip
+                        title={
+                          canDeleteThisMember ? t('teams.removeMemberButton') : unauthorizedReason
+                        }
+                      >
+                        <span>
                           <IconButton
                             size="small"
                             color="error"
+                            disabled={!canDeleteThisMember}
                             onClick={() => {
-                              if (!member.userId) return
+                              if (!member.userId || !canDeleteThisMember) return
                               removeMember(
                                 { id, userId: member.userId },
                                 {
@@ -616,8 +682,8 @@ export function TeamDetail({ id }: Props) {
                           >
                             <PersonRemoveIcon fontSize="small" />
                           </IconButton>
-                        </Tooltip>
-                      )}
+                        </span>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 )
@@ -635,6 +701,7 @@ export function TeamDetail({ id }: Props) {
         open={Boolean(permissionDialogMember)}
         member={permissionDialogMember}
         tenantId={currentTeam.tenantId}
+        canManagePermissions={canManageTeamMemberPermissions}
         onClose={() => setPermissionDialogMember(undefined)}
       />
 

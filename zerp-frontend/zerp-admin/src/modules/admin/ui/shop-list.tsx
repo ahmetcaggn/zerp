@@ -58,7 +58,8 @@ export function ShopList({ fixedTenantId, fixedTenantName }: ShopListProps = {})
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create')
   const [selectedShop, setSelectedShop] = useState<ShopResponse | undefined>(undefined)
 
-  const { hasPermission, hasAnyPermission, isLoadingPermissions } = useCurrentUserPermissions()
+  const { hasPermission, hasAnyPermission, hasPermissionForTarget, isLoadingPermissions } =
+    useCurrentUserPermissions()
   const canReadShop = hasAnyPermission([
     PermissionActions.READ_SHOP,
     PermissionActions.READ_TENANT,
@@ -66,8 +67,6 @@ export function ShopList({ fixedTenantId, fixedTenantName }: ShopListProps = {})
     PermissionActions.ADMIN,
   ])
   const canCreateShop = hasAnyPermission([PermissionActions.UPDATE_TENANT, PermissionActions.ADMIN])
-  const canUpdateShop = hasAnyPermission([PermissionActions.UPDATE_TENANT, PermissionActions.ADMIN])
-  const canDeleteShop = hasPermission(PermissionActions.ADMIN)
   const canReadTenantsForFilter =
     !hasTenantScope &&
     hasAnyPermission([
@@ -105,11 +104,19 @@ export function ShopList({ fixedTenantId, fixedTenantName }: ShopListProps = {})
   const hasActiveFilters = searchQ || (!hasTenantScope && tenantFilter)
   const sortDir = sortOrder === 'ASC' ? 'asc' : 'desc'
   const showTenantColumn = !hasTenantScope
+  const canCreateShopForScope = hasTenantScope
+    ? hasPermissionForTarget(PermissionActions.UPDATE_TENANT, {
+        targetType: 'TENANT',
+        targetId: scopedTenantId,
+        tenantId: scopedTenantId,
+      })
+    : canCreateShop
+  const unauthorizedReason = t('common.unauthorized')
 
   const handleSearch = useCallback(() => {
     setSearchQ(searchInput.trim())
     setPage(0)
-  }, [searchInput])
+  }, [searchInput, setPage, setSearchQ])
 
   function handleSort(field: ShopSortField) {
     if (sortField === field) {
@@ -151,11 +158,14 @@ export function ShopList({ fixedTenantId, fixedTenantName }: ShopListProps = {})
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5">{t('shops.title')}</Typography>
-        {canCreateShop && (
-          <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateDialog}>
-            {t('shops.createButton')}
-          </Button>
-        )}
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={openCreateDialog}
+          disabled={isLoadingPermissions || !canCreateShopForScope}
+        >
+          {t('shops.createButton')}
+        </Button>
       </Box>
 
       {canReadShop && (
@@ -283,42 +293,76 @@ export function ShopList({ fixedTenantId, fixedTenantName }: ShopListProps = {})
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((shop, index) => (
-              <TableRow key={shop.id ?? `shop-${index}`} hover>
-                {showTenantColumn && <TableCell>{shop.tenantName ?? '—'}</TableCell>}
-                <TableCell>{shop.name ?? '—'}</TableCell>
-                <TableCell>{shop.email ?? '—'}</TableCell>
-                <TableCell>{shop.phone ?? '—'}</TableCell>
-                <TableCell>{shop.city ?? '—'}</TableCell>
-                <TableCell>{getCountryLabel(locale, shop.country) || '—'}</TableCell>
-                <TableCell>{shop.website ?? '—'}</TableCell>
-                <TableCell align="right">
-                  {canUpdateShop && (
-                    <Tooltip title={t('shops.editButton')}>
-                      <IconButton size="small" onClick={() => openEditDialog(shop)}>
-                        <EditIcon fontSize="small" />
-                      </IconButton>
+            {rows.map((shop, index) => {
+              const shopTarget = {
+                targetType: 'SHOP',
+                targetId: shop.id,
+                tenantId: shop.tenantId,
+                parentTargets: shop.tenantId
+                  ? [{ targetType: 'TENANT', targetId: shop.tenantId }]
+                  : [],
+              }
+              const canUpdateThisShop = Boolean(
+                shop.id &&
+                shop.tenantId &&
+                hasPermissionForTarget(PermissionActions.UPDATE_TENANT, shopTarget),
+              )
+              const canDeleteThisShop = Boolean(
+                shop.id &&
+                shop.tenantId &&
+                hasPermissionForTarget(PermissionActions.ADMIN, shopTarget),
+              )
+
+              return (
+                <TableRow key={shop.id ?? `shop-${index}`} hover>
+                  {showTenantColumn && <TableCell>{shop.tenantName ?? '—'}</TableCell>}
+                  <TableCell>{shop.name ?? '—'}</TableCell>
+                  <TableCell>{shop.email ?? '—'}</TableCell>
+                  <TableCell>{shop.phone ?? '—'}</TableCell>
+                  <TableCell>{shop.city ?? '—'}</TableCell>
+                  <TableCell>{getCountryLabel(locale, shop.country) || '—'}</TableCell>
+                  <TableCell>{shop.website ?? '—'}</TableCell>
+                  <TableCell align="right">
+                    <Tooltip title={canUpdateThisShop ? t('shops.editButton') : unauthorizedReason}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          disabled={!canUpdateThisShop}
+                          onClick={() => {
+                            if (!canUpdateThisShop) return
+                            openEditDialog(shop)
+                          }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </span>
                     </Tooltip>
-                  )}
-                  {canDeleteShop && shop.id && (
-                    <Tooltip title={t('shops.deleteButton')}>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => {
-                          deleteShop(shop.id as string, {
-                            onSuccess: () => showToast(t('shops.deletedToast'), { severity: 'success' }),
-                            onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-                          })
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                    <Tooltip
+                      title={canDeleteThisShop ? t('shops.deleteButton') : unauthorizedReason}
+                    >
+                      <span>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          disabled={!canDeleteThisShop}
+                          onClick={() => {
+                            if (!shop.id || !canDeleteThisShop) return
+                            deleteShop(shop.id, {
+                              onSuccess: () =>
+                                showToast(t('shops.deletedToast'), { severity: 'success' }),
+                              onError: (err) =>
+                                showToast(getUserFriendlyError(err), { severity: 'error' }),
+                            })
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </span>
                     </Tooltip>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       )}

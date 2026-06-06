@@ -46,9 +46,16 @@ export function TeamFormDialog({ open, mode, team, onClose }: Props) {
 
   const { mutate: createTeam, isPending: isCreating } = useCreateTeam()
   const { mutate: updateTeam, isPending: isUpdating } = useUpdateTeam()
-  const { hasPermission } = useCurrentUserPermissions()
-  const canCreateTeam = hasPermission(PermissionActions.CREATE_TEAM)
-  const canUpdateTeam = hasPermission(PermissionActions.UPDATE_TEAM)
+  const { hasAnyPermission, hasPermission, hasPermissionForTarget } = useCurrentUserPermissions()
+  const canCreateTeam = hasAnyPermission([PermissionActions.CREATE_TEAM, PermissionActions.ADMIN])
+  const canUpdateTeam = team
+    ? hasPermissionForTarget(PermissionActions.UPDATE_TEAM, {
+        targetType: 'TEAM',
+        targetId: team.id,
+        tenantId: team.tenantId,
+        parentTargets: team.tenantId ? [{ targetType: 'TENANT', targetId: team.tenantId }] : [],
+      })
+    : hasPermission(PermissionActions.UPDATE_TEAM)
   const canSubmit = mode === 'create' ? canCreateTeam : canUpdateTeam
   const isPending = isCreating || isUpdating
 
@@ -119,7 +126,9 @@ export function TeamFormDialog({ open, mode, team, onClose }: Props) {
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth onTransitionEnter={seedForm}>
-      <DialogTitle>{mode === 'create' ? t('teams.createButton') : t('teams.editButton')}</DialogTitle>
+      <DialogTitle>
+        {mode === 'create' ? t('teams.createButton') : t('teams.editButton')}
+      </DialogTitle>
 
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>

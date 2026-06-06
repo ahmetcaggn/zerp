@@ -92,10 +92,9 @@ export function ShopFormDialog({
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const countryOptions = getCountryOptions(locale)
 
-  const { hasAnyPermission } = useCurrentUserPermissions()
+  const { hasAnyPermission, hasPermissionForTarget } = useCurrentUserPermissions()
   const canCreateShop = hasAnyPermission([PermissionActions.UPDATE_TENANT, PermissionActions.ADMIN])
   const canUpdateShop = hasAnyPermission([PermissionActions.UPDATE_TENANT, PermissionActions.ADMIN])
-  const canSubmit = mode === 'create' ? canCreateShop : canUpdateShop
 
   const selectedTenantId =
     mode === 'edit'
@@ -103,6 +102,18 @@ export function ShopFormDialog({
       : lockTenantOnCreate
         ? (defaultTenantId ?? form.tenantId)
         : form.tenantId
+  const canSubmitForSelectedTenant = selectedTenantId
+    ? hasPermissionForTarget(PermissionActions.UPDATE_TENANT, {
+        targetType: 'TENANT',
+        targetId: selectedTenantId,
+        tenantId: selectedTenantId,
+      })
+    : false
+  const canSubmit = selectedTenantId
+    ? canSubmitForSelectedTenant
+    : mode === 'create'
+      ? canCreateShop
+      : canUpdateShop
   const isTenantFieldLocked = mode === 'edit' || (mode === 'create' && lockTenantOnCreate)
   const lockedTenantLabel =
     mode === 'edit'
@@ -168,7 +179,10 @@ export function ShopFormDialog({
     return normalized ? normalized : undefined
   }
 
-  function parseOptionalCoordinate(rawValue: string, field: 'latitude' | 'longitude'): number | undefined {
+  function parseOptionalCoordinate(
+    rawValue: string,
+    field: 'latitude' | 'longitude',
+  ): number | undefined {
     const normalized = rawValue.trim()
     if (!normalized) {
       return undefined
@@ -387,7 +401,10 @@ export function ShopFormDialog({
             onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
             size="small"
             fullWidth
-            error={isNameCheckRelevant && (shopNameStatus === 'unavailable' || shopNameStatus === 'error')}
+            error={
+              isNameCheckRelevant &&
+              (shopNameStatus === 'unavailable' || shopNameStatus === 'error')
+            }
             helperText={
               !isNameCheckRelevant
                 ? undefined
@@ -475,7 +492,9 @@ export function ShopFormDialog({
             <Select
               label={t('shops.countryLabel')}
               value={form.country}
-              onChange={(event) => setForm((prev) => ({ ...prev, country: String(event.target.value) }))}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, country: String(event.target.value) }))
+              }
             >
               <MenuItem value="">—</MenuItem>
               {countryOptions.map((country) => (
