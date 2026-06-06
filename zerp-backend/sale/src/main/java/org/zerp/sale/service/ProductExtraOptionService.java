@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.zerp.common.entity.resource.StockResource;
 import org.zerp.common.entity.sale.Product;
 import org.zerp.common.entity.sale.ProductExtraOption;
 import org.zerp.common.entity.sale.ProductExtraOptionItem;
@@ -17,6 +18,7 @@ import org.zerp.common.resource.util.filter.FilterRefiner;
 import org.zerp.common.util.header.CurrentUserIdResolver;
 import org.zerp.sale.dto.productextraoption.ProductExtraOptionCreateDTO;
 import org.zerp.sale.dto.productextraoption.ProductExtraOptionDTO;
+import org.zerp.sale.dto.productextraoption.ProductExtraOptionItemCreateDTO;
 import org.zerp.sale.dto.productextraoption.ProductExtraOptionUpdateDTO;
 import org.zerp.sale.mapper.ProductExtraOptionMapper;
 import org.zerp.sale.permission.ProductExtraOptionPermissionEvaluator;
@@ -100,11 +102,7 @@ public class ProductExtraOptionService implements
 
         if (data.getItems() != null) {
             data.getItems().forEach(itemDTO -> {
-                ProductExtraOptionItem item = mapper.toItemEntity(itemDTO);
-                item.setStockResource(stockResourceRepository.getReferenceById(itemDTO.getStockResourceId()));
-                item.setExtraOption(option);
-                item.setTenantId(tenantId);
-                option.getItems().add(item);
+                option.getItems().add(buildOptionItem(option, itemDTO, tenantId));
             });
         }
 
@@ -145,10 +143,7 @@ public class ProductExtraOptionService implements
         if (data.getItems() != null) {
             option.getItems().clear();
             data.getItems().forEach(itemDTO -> {
-                ProductExtraOptionItem item = mapper.toItemEntity(itemDTO);
-                item.setStockResource(stockResourceRepository.getReferenceById(itemDTO.getStockResourceId()));
-                item.setExtraOption(option);
-                option.getItems().add(item);
+                option.getItems().add(buildOptionItem(option, itemDTO, option.getTenantId()));
             });
         }
 
@@ -204,5 +199,28 @@ public class ProductExtraOptionService implements
         ProductExtraOptionDTO dto = mapper.toDTO(option);
         dto.setItems(option.getItems().stream().map(mapper::toItemDTO).toList());
         return dto;
+    }
+
+    private ProductExtraOptionItem buildOptionItem(
+            ProductExtraOption option,
+            ProductExtraOptionItemCreateDTO itemDTO,
+            UUID tenantId
+    ) {
+        if (itemDTO.getStockResourceId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "stockResourceId is required");
+        }
+
+        StockResource stockResource = stockResourceRepository.findById(itemDTO.getStockResourceId()).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.BAD_REQUEST, "StockResource not found: " + itemDTO.getStockResourceId()));
+
+        if (!tenantId.equals(stockResource.getTenantId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "StockResource tenant mismatch");
+        }
+
+        ProductExtraOptionItem item = mapper.toItemEntity(itemDTO);
+        item.setStockResource(stockResource);
+        item.setExtraOption(option);
+        item.setTenantId(tenantId);
+        return item;
     }
 }
