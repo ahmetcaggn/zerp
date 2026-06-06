@@ -98,8 +98,13 @@ export function PermissionGroupDetail({ groupKey }: Props) {
   const { t, locale } = useI18n()
   const { showToast } = useToast()
   const router = useRouter()
-  const { hasTenantPermission, isLoadingPermissions } = useCurrentUserPermissions()
+  const { hasAnyPermission, hasTenantPermission, isLoadingPermissions } =
+    useCurrentUserPermissions()
   const unauthorizedReason = t('common.unauthorized')
+  const canReadGroups =
+    hasTenantPermission(PermissionActions.ADMIN) ||
+    hasTenantPermission(PermissionActions.READ_PERMISSION) ||
+    hasAnyPermission([PermissionActions.ADMIN, PermissionActions.READ_PERMISSION])
   const canManageGroups = hasTenantPermission(PermissionActions.ADMIN)
 
   const parsed = parseGroupKey(groupKey)
@@ -111,13 +116,13 @@ export function PermissionGroupDetail({ groupKey }: Props) {
     data: predefinedGroup,
     isLoading: isPredefinedLoading,
     error: predefinedError,
-  } = usePredefinedPermissionGroup(predefinedCode, Boolean(predefinedCode) && canManageGroups)
+  } = usePredefinedPermissionGroup(predefinedCode, Boolean(predefinedCode) && canReadGroups)
 
   const {
     data: customGroup,
     isLoading: isCustomLoading,
     error: customError,
-  } = useCustomPermissionGroup(customId, Boolean(customId) && canManageGroups)
+  } = useCustomPermissionGroup(customId, Boolean(customId) && canReadGroups)
 
   const group = isPredefined ? predefinedGroup : customGroup
   const isLoading = isPredefined ? isPredefinedLoading : isCustomLoading
@@ -147,7 +152,7 @@ export function PermissionGroupDetail({ groupKey }: Props) {
     )
   }
 
-  if (!canManageGroups) {
+  if (!canReadGroups) {
     return <Alert severity="warning">{unauthorizedReason}</Alert>
   }
 

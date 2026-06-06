@@ -63,10 +63,13 @@ function normalizeQuantityForPayload(value: string): number {
 export function StockEntryFormDialog({ open, onClose, shopId }: StockEntryFormDialogProps) {
   const { t } = useI18n()
   const { showToast } = useToast()
-  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
+  const { currentTenantId, hasAnyPermission, hasShopPermission, hasPermissionForTarget } =
+    useCurrentUserPermissions()
   const createMutation = useCreateStockEntry()
   const canReadResources = Boolean(
-    shopId && hasShopPermission(PermissionActions.READ_STOCK_RESOURCE, shopId),
+    shopId &&
+    (hasShopPermission(PermissionActions.READ_STOCK_RESOURCE, shopId) ||
+      hasAnyPermission([PermissionActions.CREATE_STOCK_ENTRY])),
   )
   const { data: resourcesData } = useStockResources(
     {

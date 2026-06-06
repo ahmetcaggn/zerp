@@ -24,8 +24,13 @@ export function PermissionRouteGuard({
   const router = useRouter()
   const { t } = useI18n()
   const { scope, isScopeReady, isScopeSwitching } = useShopScope()
-  const { hasAnyPermission, hasTenantPermission, hasAnyShopPermission, isLoadingPermissions } =
-    useCurrentUserPermissions()
+  const {
+    hasAnyPermission,
+    hasTenantPermission,
+    hasShopPermission,
+    hasAnyShopPermission,
+    isLoadingPermissions,
+  } = useCurrentUserPermissions()
 
   const routePath = useMemo(() => removeLocalePrefix(pathname, locale), [locale, pathname])
   const currentShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
@@ -36,9 +41,17 @@ export function PermissionRouteGuard({
         currentShopId,
         hasAnyPermission,
         hasTenantPermission,
+        hasShopPermission,
         hasAnyShopPermission,
       }),
-    [currentShopId, hasAnyPermission, hasAnyShopPermission, hasTenantPermission, routePath],
+    [
+      currentShopId,
+      hasAnyPermission,
+      hasAnyShopPermission,
+      hasShopPermission,
+      hasTenantPermission,
+      routePath,
+    ],
   )
 
   useEffect(() => {

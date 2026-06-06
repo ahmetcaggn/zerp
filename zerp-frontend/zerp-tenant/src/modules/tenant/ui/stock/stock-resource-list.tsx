@@ -58,7 +58,8 @@ export function StockResourceList() {
   const { t, locale } = useI18n()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
-  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
+  const { currentTenantId, hasAnyPermission, hasShopPermission, hasPermissionForTarget } =
+    useCurrentUserPermissions()
   const unauthorizedReason = t('common.unauthorized')
   const canReadResources = Boolean(
     selectedShopId && hasShopPermission(PermissionActions.READ_STOCK_RESOURCE, selectedShopId),
@@ -67,14 +68,19 @@ export function StockResourceList() {
     selectedShopId && hasShopPermission(PermissionActions.CREATE_STOCK_RESOURCE, selectedShopId),
   )
   const canCreateEntry = Boolean(
-    selectedShopId && hasShopPermission(PermissionActions.CREATE_STOCK_ENTRY, selectedShopId),
+    selectedShopId &&
+    (hasShopPermission(PermissionActions.CREATE_STOCK_ENTRY, selectedShopId) ||
+      hasAnyPermission([PermissionActions.CREATE_STOCK_ENTRY])),
   )
   const canCreateAdjustment = Boolean(
-    selectedShopId && hasShopPermission(PermissionActions.CREATE_STOCK_ADJUSTMENT, selectedShopId),
+    selectedShopId &&
+    (hasShopPermission(PermissionActions.CREATE_STOCK_ADJUSTMENT, selectedShopId) ||
+      hasAnyPermission([PermissionActions.CREATE_STOCK_ADJUSTMENT])),
   )
   const canReadMovements = Boolean(
     selectedShopId && hasShopPermission(PermissionActions.READ_STOCK_MOVEMENT, selectedShopId),
   )
+  const canAccessResources = canReadResources || canCreateEntry || canCreateAdjustment
 
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -94,7 +100,7 @@ export function StockResourceList() {
       sort: { field: 'name', order: 'ASC' },
       ...(selectedShopId ? { filter: { 'shop.id': selectedShopId } } : {}),
     },
-    { enabled: canReadResources },
+    { enabled: canAccessResources },
   )
   const { data: overviewData } = useStockOverview(selectedShopId, { enabled: canReadResources })
   const { data: operationHistory } = useStockOperationHistory({
@@ -167,7 +173,7 @@ export function StockResourceList() {
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
           <CircularProgress />
         </Box>
-      ) : !canReadResources ? (
+      ) : !canAccessResources ? (
         <Alert severity="warning">{unauthorizedReason}</Alert>
       ) : (
         <Box sx={{ overflowX: 'auto' }}>

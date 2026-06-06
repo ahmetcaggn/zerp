@@ -4,6 +4,7 @@ interface RoutePermissionChecks {
   currentShopId?: string | null
   hasAnyPermission: (actions: readonly PermissionAction[]) => boolean
   hasTenantPermission: (action: PermissionAction) => boolean
+  hasShopPermission: (action: PermissionAction, shopId?: string | null) => boolean
   hasAnyShopPermission: (actions: readonly PermissionAction[], shopId?: string | null) => boolean
 }
 
@@ -63,17 +64,9 @@ const TABLE_PAGE_ACTIONS: readonly PermissionAction[] = [
   PermissionActions.READ_TABLE_ORDER,
 ]
 
-const SALE_PAGE_ACTIONS: readonly PermissionAction[] = [
-  PermissionActions.READ_SHOP_TABLE,
+const SALE_PAGE_ORDER_ACTIONS: readonly PermissionAction[] = [
   PermissionActions.READ_TABLE_ORDER,
-  PermissionActions.CREATE_TABLE_ORDER,
   PermissionActions.UPDATE_TABLE_ORDER,
-  PermissionActions.READ_MENU,
-  PermissionActions.READ_MENU_CATEGORY,
-  PermissionActions.READ_MENU_ITEM,
-  PermissionActions.READ_PRODUCT,
-  PermissionActions.READ_PRODUCT_RECIPE,
-  PermissionActions.READ_PRODUCT_EXTRA_OPTION,
 ]
 
 const SALE_HISTORY_PAGE_ACTIONS: readonly PermissionAction[] = [
@@ -97,6 +90,11 @@ const STOCK_PAGE_ACTIONS: readonly PermissionAction[] = [
   PermissionActions.UPDATE_STOCK_COUNT,
 ]
 
+const PERMISSION_GROUP_PAGE_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.ADMIN,
+  PermissionActions.READ_PERMISSION,
+]
+
 const ROUTE_PERMISSION_RULES: readonly RoutePermissionMatch[] = [
   { pattern: /^\/dashboard\/?$/, allow: true },
   { pattern: /^\/profile\/?$/, allow: true },
@@ -111,13 +109,13 @@ const ROUTE_PERMISSION_RULES: readonly RoutePermissionMatch[] = [
   {
     pattern: /^\/permission-groups(?:\/[^/]+)?\/?$/,
     scope: 'TENANT',
-    actions: [PermissionActions.ADMIN],
+    actions: PERMISSION_GROUP_PAGE_ACTIONS,
   },
   { pattern: /^\/tickets(?:\/[^/]+)?\/?$/, scope: 'ACTION', actions: TICKET_PAGE_ACTIONS },
   { pattern: /^\/notifications\/?$/, allow: true },
   { pattern: /^\/catalog(?:\/.*)?$/, scope: 'SHOP', actions: CATALOG_PAGE_ACTIONS },
   { pattern: /^\/tables\/?$/, scope: 'SHOP', actions: TABLE_PAGE_ACTIONS },
-  { pattern: /^\/sale\/?$/, scope: 'SHOP', actions: SALE_PAGE_ACTIONS },
+  { pattern: /^\/sale\/?$/, scope: 'SHOP', actions: SALE_PAGE_ORDER_ACTIONS },
   { pattern: /^\/sale-history(?:\/[^/]+)?\/?$/, scope: 'SHOP', actions: SALE_HISTORY_PAGE_ACTIONS },
   { pattern: /^\/shop-qr\/?$/, scope: 'SHOP', actions: SHOP_READ_ACTIONS },
   { pattern: /^\/stock\/?$/, scope: 'SHOP', actions: STOCK_PAGE_ACTIONS },
@@ -153,12 +151,27 @@ export function canAccessProtectedRoute(routePath: string, checks: RoutePermissi
   const actions = matchedRule.actions ?? []
 
   if (matchedRule.scope === 'TENANT') {
-    return actions.some((action) => checks.hasTenantPermission(action))
+    return (
+      actions.some((action) => checks.hasTenantPermission(action)) ||
+      checks.hasAnyPermission(actions)
+    )
   }
 
   if (matchedRule.scope === 'SHOP') {
+    if (normalizedRoutePath === '/sale') {
+      return Boolean(
+        checks.currentShopId &&
+        (checks.hasShopPermission(PermissionActions.READ_SHOP_TABLE, checks.currentShopId) ||
+          checks.hasAnyPermission([PermissionActions.READ_SHOP_TABLE])) &&
+        (checks.hasAnyShopPermission(actions, checks.currentShopId) ||
+          checks.hasAnyPermission(actions)),
+      )
+    }
+
     return Boolean(
-      checks.currentShopId && checks.hasAnyShopPermission(actions, checks.currentShopId),
+      checks.currentShopId &&
+      (checks.hasAnyShopPermission(actions, checks.currentShopId) ||
+        checks.hasAnyPermission(actions)),
     )
   }
 

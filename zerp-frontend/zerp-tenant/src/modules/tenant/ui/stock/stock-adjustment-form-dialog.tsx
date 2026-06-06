@@ -72,10 +72,13 @@ export function StockAdjustmentFormDialog({
 }: StockAdjustmentFormDialogProps) {
   const { t } = useI18n()
   const { showToast } = useToast()
-  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
+  const { currentTenantId, hasAnyPermission, hasShopPermission, hasPermissionForTarget } =
+    useCurrentUserPermissions()
   const createMutation = useCreateStockAdjustment()
   const canReadResources = Boolean(
-    shopId && hasShopPermission(PermissionActions.READ_STOCK_RESOURCE, shopId),
+    shopId &&
+    (hasShopPermission(PermissionActions.READ_STOCK_RESOURCE, shopId) ||
+      hasAnyPermission([PermissionActions.CREATE_STOCK_ADJUSTMENT])),
   )
   const { data: resourcesData } = useStockResources(
     {

@@ -1,7 +1,7 @@
 'use client'
 import AddIcon from '@mui/icons-material/Add'
 import TableRestaurantIcon from '@mui/icons-material/TableRestaurant'
-import { Alert, Box, Chip, CircularProgress, Fab, Stack, Tooltip,Typography } from '@mui/material'
+import { Alert, Box, Chip, CircularProgress, Fab, Stack, Tooltip, Typography } from '@mui/material'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -12,11 +12,8 @@ import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
-import { useDeleteShopTable, usePatchShopTable,useShopTables } from '../../hooks/use-shop-tables'
-import {
-  shopParents,
-  targetWithParents,
-} from '../../permissions/permission-targets'
+import { useDeleteShopTable, usePatchShopTable, useShopTables } from '../../hooks/use-shop-tables'
+import { shopParents, targetWithParents } from '../../permissions/permission-targets'
 import type { ShopTableResponseDto, ShopTableStatus } from '../../types/sale'
 import { ShopTableFormDialog } from '../sale/tables/shop-table-form-dialog'
 import { TableCard } from './table-card'
@@ -27,11 +24,18 @@ export function FloorView() {
   const { locale, t } = useI18n()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
-  const { currentTenantId, hasShopPermission, hasPermissionForTarget, hasAnyPermissionForTarget } =
-    useCurrentUserPermissions()
+  const {
+    currentTenantId,
+    hasAnyPermission,
+    hasShopPermission,
+    hasPermissionForTarget,
+    hasAnyPermissionForTarget,
+  } = useCurrentUserPermissions()
   const unauthorizedReason = t('common.unauthorized')
   const canReadTables = Boolean(
-    selectedShopId && hasShopPermission(PermissionActions.READ_SHOP_TABLE, selectedShopId),
+    selectedShopId &&
+    (hasShopPermission(PermissionActions.READ_SHOP_TABLE, selectedShopId) ||
+      hasAnyPermission([PermissionActions.READ_SHOP_TABLE])),
   )
   const canCreateTable = Boolean(
     selectedShopId && hasShopPermission(PermissionActions.CREATE_SHOP_TABLE, selectedShopId),

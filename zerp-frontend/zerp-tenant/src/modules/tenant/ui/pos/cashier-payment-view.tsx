@@ -1023,10 +1023,13 @@ export function CashierPaymentView() {
   const { t } = useI18n()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
-  const { currentTenantId, hasShopPermission, hasPermissionForTarget } = useCurrentUserPermissions()
+  const { currentTenantId, hasAnyPermission, hasShopPermission, hasPermissionForTarget } =
+    useCurrentUserPermissions()
   const [selectedTable, setSelectedTable] = useState<ShopTableResponseDto | null>(null)
   const canReadTables = Boolean(
-    selectedShopId && hasShopPermission(PermissionActions.READ_SHOP_TABLE, selectedShopId),
+    selectedShopId &&
+    (hasShopPermission(PermissionActions.READ_SHOP_TABLE, selectedShopId) ||
+      hasAnyPermission([PermissionActions.READ_SHOP_TABLE])),
   )
 
   const { data: tablesData, isLoading } = useShopTables(

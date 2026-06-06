@@ -206,19 +206,22 @@ export function PermissionGroupList() {
   const { t, locale } = useI18n()
   const { showToast } = useToast()
   const router = useRouter()
-  const { hasTenantPermission, getDisabledReason, isLoadingPermissions } =
+  const { hasAnyPermission, hasTenantPermission, getDisabledReason, isLoadingPermissions } =
     useCurrentUserPermissions()
   const unauthorizedReason = t('common.unauthorized')
   const loadingReason = t('common.loading')
+  const canReadGroups =
+    hasTenantPermission(PermissionActions.ADMIN) ||
+    hasTenantPermission(PermissionActions.READ_PERMISSION) ||
+    hasAnyPermission([PermissionActions.ADMIN, PermissionActions.READ_PERMISSION])
   const canManageGroups = hasTenantPermission(PermissionActions.ADMIN)
   const adminDisabledReason = isLoadingPermissions
     ? loadingReason
     : getDisabledReason(canManageGroups, unauthorizedReason)
 
   const { data: predefined = [], isLoading: isPredefinedLoading } =
-    usePredefinedPermissionGroups(canManageGroups)
-  const { data: custom = [], isLoading: isCustomLoading } =
-    useCustomPermissionGroups(canManageGroups)
+    usePredefinedPermissionGroups(canReadGroups)
+  const { data: custom = [], isLoading: isCustomLoading } = useCustomPermissionGroups(canReadGroups)
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create')
@@ -363,7 +366,7 @@ export function PermissionGroupList() {
         </Tooltip>
       </Box>
 
-      {!canManageGroups ? (
+      {!canReadGroups ? (
         <Alert severity="warning">{unauthorizedReason}</Alert>
       ) : mergedGroups.length === 0 ? (
         <Typography color="text.secondary">{t('permissionGroups.emptyState')}</Typography>
@@ -389,62 +392,62 @@ export function PermissionGroupList() {
                       ? t('permissionGroups.predefinedBadge')
                       : t('permissionGroups.customBadge')
 
-                    return (
-                      <TableRow key={`${group.source}:${group.code ?? group.id}`} hover>
-                        <TableCell>{group.name}</TableCell>
-                        <TableCell>{sourceLabel}</TableCell>
-                        <TableCell>{prettifyPermissionEnumName(group.scopeType)}</TableCell>
-                        <TableCell>{group.actions.length}</TableCell>
-                        <TableCell align="right">
-                          <Tooltip title={t('permissionGroups.openDetailButton')}>
-                            <span>
-                              <IconButton
-                                size="small"
-                                disabled={!canManageGroups}
-                                onClick={() =>
-                                  router.push(
-                                    withLocale(
-                                      locale,
-                                      `${ROUTES.permissionGroups}/${routeId}`,
-                                    ) as Route,
-                                  )
-                                }
-                              >
-                                <OpenInNewIcon fontSize="small" />
-                              </IconButton>
-                            </span>
-                          </Tooltip>
+                  return (
+                    <TableRow key={`${group.source}:${group.code ?? group.id}`} hover>
+                      <TableCell>{group.name}</TableCell>
+                      <TableCell>{sourceLabel}</TableCell>
+                      <TableCell>{prettifyPermissionEnumName(group.scopeType)}</TableCell>
+                      <TableCell>{group.actions.length}</TableCell>
+                      <TableCell align="right">
+                        <Tooltip title={t('permissionGroups.openDetailButton')}>
+                          <span>
+                            <IconButton
+                              size="small"
+                              disabled={!canReadGroups}
+                              onClick={() =>
+                                router.push(
+                                  withLocale(
+                                    locale,
+                                    `${ROUTES.permissionGroups}/${routeId}`,
+                                  ) as Route,
+                                )
+                              }
+                            >
+                              <OpenInNewIcon fontSize="small" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
 
-                          {group.source === 'CUSTOM' && (
-                            <>
-                              <Tooltip title={t('permissionGroups.editButton')}>
-                                <span>
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => openEditDialog(group)}
-                                    disabled={!canManageGroups}
-                                  >
-                                    <EditIcon fontSize="small" />
-                                  </IconButton>
-                                </span>
-                              </Tooltip>
-                              <Tooltip title={t('permissionGroups.deleteButton')}>
-                                <span>
-                                  <IconButton
-                                    size="small"
-                                    color="error"
-                                    disabled={isDeletePending || !canManageGroups}
-                                    onClick={() => handleDelete(group.id)}
-                                  >
-                                    <DeleteIcon fontSize="small" />
-                                  </IconButton>
-                                </span>
-                              </Tooltip>
-                            </>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    )
+                        {group.source === 'CUSTOM' && (
+                          <>
+                            <Tooltip title={t('permissionGroups.editButton')}>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => openEditDialog(group)}
+                                  disabled={!canManageGroups}
+                                >
+                                  <EditIcon fontSize="small" />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                            <Tooltip title={t('permissionGroups.deleteButton')}>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  disabled={isDeletePending || !canManageGroups}
+                                  onClick={() => handleDelete(group.id)}
+                                >
+                                  <DeleteIcon fontSize="small" />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                          </>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  )
                 })}
               </TableBody>
             </Table>
@@ -550,6 +553,7 @@ export function PermissionGroupList() {
                           <Tooltip title={t('permissionGroups.openDetailButton')}>
                             <IconButton
                               size="small"
+                              disabled={!canReadGroups}
                               onClick={() =>
                                 router.push(
                                   withLocale(
@@ -566,7 +570,11 @@ export function PermissionGroupList() {
                           {group.source === 'CUSTOM' && (
                             <>
                               <Tooltip title={t('permissionGroups.editButton')}>
-                                <IconButton size="small" onClick={() => openEditDialog(group)}>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => openEditDialog(group)}
+                                  disabled={!canManageGroups}
+                                >
                                   <EditIcon fontSize="small" />
                                 </IconButton>
                               </Tooltip>
@@ -574,7 +582,7 @@ export function PermissionGroupList() {
                                 <IconButton
                                   size="small"
                                   color="error"
-                                  disabled={isDeletePending}
+                                  disabled={isDeletePending || !canManageGroups}
                                   onClick={() => handleDelete(group.id)}
                                 >
                                   <DeleteIcon fontSize="small" />

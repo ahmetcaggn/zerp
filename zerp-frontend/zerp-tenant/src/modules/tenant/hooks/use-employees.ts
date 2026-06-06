@@ -35,13 +35,15 @@ export function useEmployeeSearch(keyword: string, params: RaListParams = {}, en
   })
 }
 
-// todo use enabled in function
 export function useDeletedEmployees(params: RaListParams = {}, enabled = true) {
-  return useEmployees({
-    ...params,
-    filter: {
-      ...params.filter,
-      'deleted.eq': 'true',
+  return useEmployees(
+    {
+      ...params,
+      filter: {
+        ...params.filter,
+        'deleted.eq': 'true',
+      },
     },
-  })
+    { enabled },
+  )
 }

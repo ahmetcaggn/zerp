@@ -185,6 +185,11 @@ const GLOBAL_TICKET_ACTIONS: readonly PermissionAction[] = [
   PermissionActions.READ_TICKET_SLA_TRACKING,
 ]
 
+const GLOBAL_PERMISSION_GROUP_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.ADMIN,
+  PermissionActions.READ_PERMISSION,
+]
+
 const SHOP_CATALOG_ACTIONS: readonly PermissionAction[] = [
   PermissionActions.READ_PRODUCT,
   PermissionActions.CREATE_PRODUCT,
@@ -204,17 +209,9 @@ const SHOP_TABLE_ACTIONS: readonly PermissionAction[] = [
   PermissionActions.READ_TABLE_ORDER,
 ]
 
-const SHOP_SALE_ACTIONS: readonly PermissionAction[] = [
-  PermissionActions.READ_SHOP_TABLE,
+const SHOP_SALE_ORDER_ACTIONS: readonly PermissionAction[] = [
   PermissionActions.READ_TABLE_ORDER,
-  PermissionActions.CREATE_TABLE_ORDER,
   PermissionActions.UPDATE_TABLE_ORDER,
-  PermissionActions.READ_MENU,
-  PermissionActions.READ_MENU_CATEGORY,
-  PermissionActions.READ_MENU_ITEM,
-  PermissionActions.READ_PRODUCT,
-  PermissionActions.READ_PRODUCT_RECIPE,
-  PermissionActions.READ_PRODUCT_EXTRA_OPTION,
 ]
 
 const SHOP_SALE_HISTORY_ACTIONS: readonly PermissionAction[] = [
@@ -266,6 +263,15 @@ export function AppSidebar({ locale }: { locale: string }) {
 
   const handleToggle = () => setIsExpanded((prev) => !prev)
 
+  const hasAnyShopScopedOrTargetPermission = React.useCallback(
+    (actions: readonly PermissionAction[]) =>
+      Boolean(
+        currentShopId &&
+        (hasAnyShopPermission(actions, currentShopId) || hasAnyPermission(actions)),
+      ),
+    [currentShopId, hasAnyPermission, hasAnyShopPermission],
+  )
+
   const withPermissionState = React.useCallback(
     (action: SidebarAction, canAccess: boolean): SidebarAction => ({
       ...action,
@@ -296,7 +302,12 @@ export function AppSidebar({ locale }: { locale: string }) {
                   hasTenantPermission(PermissionActions.ADMIN),
               )
             case 'permission-groups':
-              return withPermissionState(action, hasTenantPermission(PermissionActions.ADMIN))
+              return withPermissionState(
+                action,
+                hasTenantPermission(PermissionActions.ADMIN) ||
+                  hasTenantPermission(PermissionActions.READ_PERMISSION) ||
+                  hasAnyPermission(GLOBAL_PERMISSION_GROUP_ACTIONS),
+              )
             case 'tickets':
               return withPermissionState(
                 action,
@@ -317,22 +328,27 @@ export function AppSidebar({ locale }: { locale: string }) {
           case 'catalog':
             return withPermissionState(
               action,
-              hasAnyShopPermission(SHOP_CATALOG_ACTIONS, currentShopId),
+              hasAnyShopScopedOrTargetPermission(SHOP_CATALOG_ACTIONS),
             )
           case 'tables':
             return withPermissionState(
               action,
-              hasAnyShopPermission(SHOP_TABLE_ACTIONS, currentShopId),
+              hasAnyShopScopedOrTargetPermission(SHOP_TABLE_ACTIONS),
             )
           case 'sale':
             return withPermissionState(
               action,
-              hasAnyShopPermission(SHOP_SALE_ACTIONS, currentShopId),
+              Boolean(
+                currentShopId &&
+                (hasShopPermission(PermissionActions.READ_SHOP_TABLE, currentShopId) ||
+                  hasAnyPermission([PermissionActions.READ_SHOP_TABLE])) &&
+                hasAnyShopScopedOrTargetPermission(SHOP_SALE_ORDER_ACTIONS),
+              ),
             )
           case 'sale-history':
             return withPermissionState(
               action,
-              hasAnyShopPermission(SHOP_SALE_HISTORY_ACTIONS, currentShopId),
+              hasAnyShopScopedOrTargetPermission(SHOP_SALE_HISTORY_ACTIONS),
             )
           case 'shop-qr':
             return withPermissionState(
@@ -342,7 +358,7 @@ export function AppSidebar({ locale }: { locale: string }) {
           case 'stock':
             return withPermissionState(
               action,
-              hasAnyShopPermission(SHOP_STOCK_ACTIONS, currentShopId),
+              hasAnyShopScopedOrTargetPermission(SHOP_STOCK_ACTIONS),
             )
           default:
             return action
@@ -352,7 +368,7 @@ export function AppSidebar({ locale }: { locale: string }) {
   }, [
     currentShopId,
     hasAnyPermission,
-    hasAnyShopPermission,
+    hasAnyShopScopedOrTargetPermission,
     hasShopPermission,
     hasTenantPermission,
     isShopScope,
