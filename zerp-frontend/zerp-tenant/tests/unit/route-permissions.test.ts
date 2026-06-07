@@ -111,4 +111,19 @@ describe('route permissions', () => {
       ),
     ).toBe(true)
   })
+
+  it('allows the announcements route with read/create announcement grants', () => {
+    expect(
+      canAccessProtectedRoute(
+        '/announcements',
+        createChecks([PermissionActions.READ_ANNOUNCEMENT]),
+      ),
+    ).toBe(true)
+    expect(
+      canAccessProtectedRoute(
+        '/announcements/new',
+        createChecks([PermissionActions.CREATE_ANNOUNCEMENT]),
+      ),
+    ).toBe(true)
+  })
 })

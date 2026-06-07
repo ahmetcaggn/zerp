@@ -190,6 +190,11 @@ const GLOBAL_PERMISSION_GROUP_ACTIONS: readonly PermissionAction[] = [
   PermissionActions.READ_PERMISSION,
 ]
 
+const GLOBAL_ANNOUNCEMENT_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.READ_ANNOUNCEMENT,
+  PermissionActions.CREATE_ANNOUNCEMENT,
+]
+
 const SHOP_CATALOG_ACTIONS: readonly PermissionAction[] = [
   PermissionActions.READ_PRODUCT,
   PermissionActions.CREATE_PRODUCT,
@@ -336,6 +341,12 @@ export function AppSidebar({ locale }: { locale: string }) {
               return withPermissionState(
                 action,
                 hasAnyPermission(GLOBAL_TICKET_ACTIONS) ||
+                  hasTenantPermission(PermissionActions.ADMIN),
+              )
+            case 'announcements':
+              return withPermissionState(
+                action,
+                hasAnyPermission(GLOBAL_ANNOUNCEMENT_ACTIONS) ||
                   hasTenantPermission(PermissionActions.ADMIN),
               )
             default:

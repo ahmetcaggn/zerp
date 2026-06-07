@@ -97,6 +97,11 @@ const PERMISSION_GROUP_PAGE_ACTIONS: readonly PermissionAction[] = [
   PermissionActions.READ_PERMISSION,
 ]
 
+const ANNOUNCEMENT_PAGE_ACTIONS: readonly PermissionAction[] = [
+  PermissionActions.READ_ANNOUNCEMENT,
+  PermissionActions.CREATE_ANNOUNCEMENT,
+]
+
 const ROUTE_PERMISSION_RULES: readonly RoutePermissionMatch[] = [
   {
     pattern: /^\/dashboard\/?$/,
@@ -118,6 +123,11 @@ const ROUTE_PERMISSION_RULES: readonly RoutePermissionMatch[] = [
     actions: PERMISSION_GROUP_PAGE_ACTIONS,
   },
   { pattern: /^\/tickets(?:\/[^/]+)?\/?$/, scope: 'ACTION', actions: TICKET_PAGE_ACTIONS },
+  {
+    pattern: /^\/announcements(?:\/.*)?$/,
+    scope: 'TENANT',
+    actions: ANNOUNCEMENT_PAGE_ACTIONS,
+  },
   { pattern: /^\/notifications\/?$/, allow: true },
   { pattern: /^\/catalog(?:\/.*)?$/, scope: 'SHOP', actions: CATALOG_PAGE_ACTIONS },
   { pattern: /^\/tables\/?$/, scope: 'SHOP', actions: TABLE_PAGE_ACTIONS },

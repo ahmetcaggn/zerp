@@ -22,6 +22,7 @@ import { useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
 
@@ -32,6 +33,8 @@ export function AnnouncementList() {
   const { t, locale } = useI18n()
   const { showToast } = useToast()
   const router = useRouter()
+  const { hasTenantPermission } = useCurrentUserPermissions()
+  const canCreateAnnouncement = hasTenantPermission(PermissionActions.CREATE_ANNOUNCEMENT)
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
@@ -59,14 +62,16 @@ export function AnnouncementList() {
         }}
       >
         <Typography variant="h5">{t('announcements.title')}</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => router.push(withLocale(locale, `${ROUTES.announcements}/new`) as Route)}
-          sx={{ alignSelf: { xs: 'stretch', sm: 'center' } }}
-        >
-          {t('announcements.createButton')}
-        </Button>
+        {canCreateAnnouncement && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => router.push(withLocale(locale, `${ROUTES.announcements}/new`) as Route)}
+            sx={{ alignSelf: { xs: 'stretch', sm: 'center' } }}
+          >
+            {t('announcements.createButton')}
+          </Button>
+        )}
       </Box>
 
       {isLoading ? (
