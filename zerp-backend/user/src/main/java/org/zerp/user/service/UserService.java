@@ -48,13 +48,13 @@ public class UserService implements IResourceService<UserResponseDTO, UserRespon
             return userRepository.findAll(spec, pageable).map(userMapper::toUserResponseDTO);
         } catch (DataAccessException e) {
             if (e.getCause() instanceof FilterError.Runtime fe) {
-                log.warn("Filter error while processing filters {}: {}", filters, fe.getMessage(), e);
+                log.warn("Filter error while processing AppUser filters {}: {}", filters, fe.getMessage(), e);
                 throw FilterErrorUtils.toResponseStatusException(fe.getError());
             }
-            log.error("Unexpected error while processing filters {}: {}", filters, e.getMessage(), e);
+            log.error("Unexpected error while processing AppUser filters {}: {}", filters, e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + e.getMessage(), e);
         } catch (IllegalArgumentException e) {
-            log.error("Unexpected error while processing filters {}: {}", filters, e.getMessage(), e);
+            log.error("Unexpected error while processing AppUser filters {}: {}", filters, e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filter parameters: " + e.getMessage(), e);
         }
     }
@@ -86,21 +86,11 @@ public class UserService implements IResourceService<UserResponseDTO, UserRespon
         return userMapper.toUserResponseDTO(user);
     }
 
-    public UserResponseDTO findCurrentUser() {
-        UUID requesterId = userIdResolver.resolve();
-        return findById(requesterId);
-    }
-
     @Transactional(readOnly = true)
     public CurrentUserProfileDTO findCurrentUserProfile() {
         UUID requesterId = userIdResolver.resolve();
         AppUser user = userRepository.findById(requesterId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id: " + requesterId));
-
-        if (!permissionEvaluator.canRead(requesterId, user)) {
-            log.warn("User {} does not have permission to read current profile", requesterId);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id: " + requesterId);
-        }
 
         return toCurrentUserProfile(user);
     }

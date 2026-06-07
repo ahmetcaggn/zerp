@@ -57,13 +57,13 @@ public class PermissionService implements IResourceService<PermissionResponse, P
             return repository.findAll(spec, pageable).map(permissionMapper::toResponse);
         } catch (DataAccessException e) {
             if (e.getCause() instanceof FilterError.Runtime fe) {
-                log.warn("Filter error while processing filters {}: {}", filters, fe.getMessage(), e);
+                log.warn("Filter error while processing Permission filters {}: {}", filters, fe.getMessage(), e);
                 throw FilterErrorUtils.toResponseStatusException(fe.getError());
             }
-            log.error("Unexpected error while processing filters {}: {}", filters, e.getMessage(), e);
+            log.error("Unexpected error while processing Permission filters {}: {}", filters, e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + e.getMessage(), e);
         } catch (IllegalArgumentException e) {
-            log.error("Unexpected error while processing filters {}: {}", filters, e.getMessage(), e);
+            log.error("Unexpected error while processing Permission filters {}: {}", filters, e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filter parameters: " + e.getMessage(), e);
         }
     }
