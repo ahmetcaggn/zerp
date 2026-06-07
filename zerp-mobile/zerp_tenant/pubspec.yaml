@@ -2,7 +2,7 @@ name: zerp_tenant
 description: "The mobile application for zerp firms."
 publish_to: 'none'
 
-version: 0.1.6+7
+version: 0.1.7+8
 
 environment:
   sdk: ^3.11.4
