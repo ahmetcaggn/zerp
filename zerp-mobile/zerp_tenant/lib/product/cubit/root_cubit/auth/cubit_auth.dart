@@ -37,6 +37,20 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
     }
   }
 
+  Future<void> checkAuthLocal() async {
+    try {
+      final claims = await _authStorageService.authClaimsIfValid;
+      if (claims != null) {
+        emit(StateAuthAuthenticated(
+          username: claims.preferredUsername,
+          email: claims.email,
+        ));
+      }
+    } on Object catch (e, s) {
+      log.shout('Error while checking local auth', e, s);
+    }
+  }
+
   Future<void> checkAuthRemote() async {
     if (_ongoingCheck != null) {
       await _ongoingCheck;
