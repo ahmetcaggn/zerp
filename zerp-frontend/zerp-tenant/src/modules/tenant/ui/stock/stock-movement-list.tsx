@@ -27,6 +27,7 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material'
+import { alpha, useTheme } from '@mui/material/styles'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useI18n } from '@/core/i18n/i18n-provider'
@@ -252,6 +253,7 @@ interface StockMovementListProps {
 
 export function StockMovementList({ mode = 'movement' }: StockMovementListProps) {
   const { t, locale } = useI18n()
+  const theme = useTheme()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
   const { hasShopPermission } = useCurrentUserPermissions()
@@ -268,6 +270,26 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
       hasShopPermission(PermissionActions.CREATE_STOCK_RETURN, selectedShopId)),
   )
   const isTrackingMode = mode === 'tracking'
+  const chartColors = useMemo(
+    () => ({
+      paper:
+        theme.palette.mode === 'dark'
+          ? alpha(theme.palette.background.paper, 0.86)
+          : '#f8fbf8',
+      plot:
+        theme.palette.mode === 'dark'
+          ? alpha(theme.palette.common.white, 0.03)
+          : theme.palette.background.paper,
+      grid: alpha(theme.palette.text.secondary, theme.palette.mode === 'dark' ? 0.34 : 0.28),
+      axis: alpha(theme.palette.text.secondary, theme.palette.mode === 'dark' ? 0.58 : 0.5),
+      label: theme.palette.text.secondary,
+      inflow: theme.palette.mode === 'dark' ? '#4ade80' : '#2E7D32',
+      inflowText: theme.palette.mode === 'dark' ? '#86efac' : '#1f5a24',
+      outflow: theme.palette.mode === 'dark' ? '#f87171' : '#C62828',
+      outflowText: theme.palette.mode === 'dark' ? '#fca5a5' : '#7a1b1b',
+    }),
+    [theme],
+  )
 
   const [period, setPeriod] = useState<StockMovementTimelineBucket>('WEEK')
   const [selectedStockType, setSelectedStockType] = useState<string>(ALL_STOCK_TYPES)
@@ -609,7 +631,15 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
         </Box>
       </Paper>
 
-      <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2, backgroundColor: '#f8fbf8' }}>
+      <Paper
+        variant="outlined"
+        sx={{
+          p: 2,
+          mb: 2,
+          borderRadius: 2,
+          backgroundColor: chartColors.paper,
+        }}
+      >
         <Box
           sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}
         >
@@ -671,7 +701,7 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
               width: '100%',
               overflowX: 'auto',
               borderRadius: 2,
-              bgcolor: 'background.paper',
+              bgcolor: chartColors.plot,
               p: 1,
             }}
           >
@@ -690,7 +720,7 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
                     y1={chartLayout.padding.top}
                     x2={x}
                     y2={CHART_HEIGHT - chartLayout.padding.bottom}
-                    stroke="#E3EAE1"
+                    stroke={chartColors.grid}
                     strokeDasharray="4 4"
                   />
                 )
@@ -704,14 +734,14 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
                       y1={y}
                       x2={chartWidth - chartLayout.padding.right}
                       y2={y}
-                      stroke="#E3EAE1"
+                      stroke={chartColors.grid}
                       strokeDasharray="4 4"
                     />
                     <text
                       x={chartLayout.padding.left - 12}
                       y={y + 4}
                       textAnchor="end"
-                      fill="#5f6f68"
+                      fill={chartColors.label}
                       fontSize={11}
                     >
                       {new Intl.NumberFormat(localeCode, { maximumFractionDigits: 2 }).format(
@@ -726,7 +756,7 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
                 y1={chartLayout.scaleY(0)}
                 x2={chartWidth - chartLayout.padding.right}
                 y2={chartLayout.scaleY(0)}
-                stroke="#9AAEA4"
+                stroke={chartColors.axis}
                 strokeDasharray="4 4"
               />
               {chartPointsWithFlows.map((point, index) => {
@@ -770,14 +800,14 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
                           width={flowBarWidth}
                           height={Math.max(2, Math.abs(yOutflow - y0))}
                           rx={6}
-                          fill="#C62828"
-                          opacity={isSelected ? 0.92 : 0.78}
+                          fill={chartColors.outflow}
+                          opacity={isSelected ? 0.98 : 0.86}
                         />
                         <text
                           x={leftBarX + flowBarWidth / 2}
                           y={Math.max(yOutflow + 12, y0 + 12)}
                           textAnchor="middle"
-                          fill="#7a1b1b"
+                          fill={chartColors.outflowText}
                           fontSize={10}
                           fontWeight={600}
                         >
@@ -793,14 +823,14 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
                           width={flowBarWidth}
                           height={Math.max(2, Math.abs(yInflow - y0))}
                           rx={6}
-                          fill="#2E7D32"
-                          opacity={isSelected ? 0.92 : 0.78}
+                          fill={chartColors.inflow}
+                          opacity={isSelected ? 0.98 : 0.86}
                         />
                         <text
                           x={rightBarX + flowBarWidth / 2}
                           y={Math.min(yInflow - 8, y0 - 8)}
                           textAnchor="middle"
-                          fill="#1f5a24"
+                          fill={chartColors.inflowText}
                           fontSize={10}
                           fontWeight={600}
                         >
@@ -812,7 +842,7 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
                       x={x}
                       y={CHART_HEIGHT - 32}
                       textAnchor="middle"
-                      fill="#5f6f68"
+                      fill={chartColors.label}
                       fontSize={10}
                     >
                       <tspan x={x} dy="0">
@@ -827,10 +857,10 @@ export function StockMovementList({ mode = 'movement' }: StockMovementListProps)
               })}
             </svg>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 1 }}>
-              <Typography variant="caption" sx={{ color: '#C62828', fontWeight: 600 }}>
+              <Typography variant="caption" sx={{ color: chartColors.outflow, fontWeight: 600 }}>
                 {t('stock.movement.chart.legend.outflow')}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#2E7D32', fontWeight: 600 }}>
+              <Typography variant="caption" sx={{ color: chartColors.inflow, fontWeight: 600 }}>
                 {t('stock.movement.chart.legend.inflow')}
               </Typography>
             </Box>
