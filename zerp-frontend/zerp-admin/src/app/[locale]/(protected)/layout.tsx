@@ -34,8 +34,19 @@ export default async function ProtectedLayout({
       <AppSidebar locale={locale as Locale} />
       <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <AppTopbar locale={locale as Locale} />
-        <Box component="main" sx={{ flexGrow: 1, overflow: 'auto' }}>
-          <Container sx={responsivePageSx.protectedContainer}>
+        <Box
+          component="main"
+          sx={{ flexGrow: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}
+        >
+          <Container
+            maxWidth={false}
+            sx={{
+              ...responsivePageSx.protectedContainer,
+              flexGrow: 1,
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
             <PermissionRouteGuard locale={locale as Locale}>{children}</PermissionRouteGuard>
           </Container>
         </Box>

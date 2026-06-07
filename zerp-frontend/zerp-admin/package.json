@@ -22,6 +22,7 @@
     "@mui/material": "^7.3.4",
     "@tanstack/react-query": "^5.90.3",
     "axios": "^1.15.0",
+    "echarts": "^6.1.0",
     "jose": "^6.2.0",
     "next": "16.1.2",
     "next-auth": "4.24.13",

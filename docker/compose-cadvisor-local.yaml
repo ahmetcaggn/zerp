@@ -1,0 +1,34 @@
+services:
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+
+    ports:
+      - "127.0.0.1:9898:8080"
+
+    volumes:
+      - /:/rootfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /run/containerd/containerd.sock:/run/containerd/containerd.sock:ro
+      - /sys:/sys:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /dev/disk/:/dev/disk:ro
+
+    privileged: true
+
+    devices:
+      - /dev/kmsg
+
+    command:
+      - --disable_metrics=disk
+
+    mem_limit: 128m
+
+    networks:
+      - default
+
+networks:
+  default:
+    name: zerp-net
+    external: true

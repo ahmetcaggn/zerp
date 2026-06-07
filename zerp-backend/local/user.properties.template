@@ -18,3 +18,5 @@ s3.repository.username=
 s3.repository.password=
 
 user.thumbor.host=
+app.prometheus.base-url=http://localhost:9095
+app.prometheus.max-range-seconds=604800

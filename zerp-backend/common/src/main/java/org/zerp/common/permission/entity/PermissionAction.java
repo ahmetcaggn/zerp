@@ -5,6 +5,7 @@ import static org.zerp.common.permission.entity.PermissionTargetType.*;
 public enum PermissionAction {
     // TENANT_ROOT level
     CREATE_EMPLOYEE_ANY_TENANT(TENANT_ROOT),
+    READ_SYSTEM_METRICS(TENANT_ROOT),
 
     // TENANT level
     ADMIN(TENANT),

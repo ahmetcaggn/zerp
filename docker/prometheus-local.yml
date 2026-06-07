@@ -24,3 +24,7 @@ scrape_configs:
           - 'host.docker.internal:8085' # sale
           # - 'host.docker.internal:8086' # suggestion
           - 'host.docker.internal:8087' # user
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']

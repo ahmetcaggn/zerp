@@ -58,6 +58,53 @@ export interface MessageDictionary {
   dashboard: {
     title: string
     subtitle: string
+    dockerTab: string
+    servicesTab: string
+    refreshTooltip: string
+    noPermissionSystem: string
+    noPermissionServices: string
+    allServices: string
+    serviceLabel: string
+    time5m: string
+    time15m: string
+    time30m: string
+    time1h: string
+    time3h: string
+    time6h: string
+    time12h: string
+    time24h: string
+    time2d: string
+    time7d: string
+    refreshOff: string
+    refresh15s: string
+    refresh30s: string
+    refresh1m: string
+    refresh5m: string
+    docker: {
+      containerUp: string
+      totalCpu: string
+      totalMemory: string
+      cpuUsageTitle: string
+      memoryUsageTitle: string
+      containerStatusTitle: string
+      networkTitle: string
+      networkReceived: string
+      networkSent: string
+      diskIoTitle: string
+      diskIoRead: string
+      diskIoWrite: string
+      errorTooltip: string
+      errorData: string
+      noData: string
+    }
+    services: {
+      requestRateTitle: string
+      errorRateTitle: string
+      jvmHeapTitle: string
+      cpuUsageTitle: string
+      dbConnectionsTitle: string
+      jvmThreadsTitle: string
+    }
   }
   teams: {
     title: string

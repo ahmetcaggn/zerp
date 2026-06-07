@@ -19,5 +19,6 @@ export const queryKeys = {
     ticketAssignmentTeamMembers: ['admin', 'ticket-assignment-team-members'] as const,
     permissions: ['admin', 'permissions'] as const,
     permissionGroups: ['admin', 'permission-groups'] as const,
+    prometheusMetrics: ['admin', 'prometheus-metrics'] as const,
   },
 }

@@ -10,6 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.zerp.s3repository.configuration.S3RepositoryProperties;
+import org.zerp.user.config.PrometheusProperties;
 
 @SpringBootApplication(scanBasePackages = {
         "org.zerp.common",
@@ -19,7 +20,7 @@ import org.zerp.s3repository.configuration.S3RepositoryProperties;
 @EntityScan("org.zerp.common")
 @EnableJpaRepositories(basePackages = {"org.zerp.user.repository", "org.zerp.common.permission.repository"})
 @EnableJpaAuditing
-@EnableConfigurationProperties(value = {S3RepositoryProperties.class})
+@EnableConfigurationProperties(value = {S3RepositoryProperties.class, PrometheusProperties.class})
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = {"org.zerp.user.feign"})
 public class UserApplication {
