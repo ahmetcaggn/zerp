@@ -16,6 +16,7 @@ import { useMemo, useState } from 'react'
 
 import { queryKeys } from '@/core/api/query-keys'
 import { useI18n } from '@/core/i18n/i18n-provider'
+import { useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 
 import { permittableClient } from '../api/permittable-client'
 import { usePermissionActionHierarchy } from '../hooks/use-permissions'
@@ -56,6 +57,19 @@ function toPermittableOption(item: PermittableResponseDto): PermittableOption | 
 
 export function PermissionAssignmentBuilder({ onAdd, existingKeys, disabled = false }: Props) {
   const { t } = useI18n()
+  const { currentTenantId } = useCurrentUserPermissions()
+
+  const effectivePrefilledTargets = useMemo(() => {
+    const defaults: Record<string, PermittableOption> = {}
+    if (currentTenantId && currentTenantId !== '00000000-0000-0000-0000-000000000000') {
+      defaults.TENANT = {
+        id: currentTenantId,
+        title: currentTenantId,
+      }
+    }
+    return defaults
+  }, [currentTenantId])
+
   const { data: actionHierarchy, isLoading: isActionsLoading, error: actionsError } =
     usePermissionActionHierarchy(!disabled)
 
@@ -163,7 +177,22 @@ export function PermissionAssignmentBuilder({ onAdd, existingKeys, disabled = fa
 
   function handleTargetTypeChange(targetType: PermissionTargetType | null) {
     setSelectedTargetType(targetType)
-    resetTargetSelections()
+
+    if (targetType) {
+      const chain = getSelectableTargetChain(targetType)
+      const newSelections: Record<string, PermittableOption | null> = {}
+      for (const t of chain) {
+        if (effectivePrefilledTargets?.[t]) {
+          newSelections[t] = effectivePrefilledTargets[t] as PermittableOption
+        } else {
+          break
+        }
+      }
+      setSelectedTargetsByType(newSelections)
+    } else {
+      setSelectedTargetsByType({})
+    }
+    setSearchByType({})
   }
 
   function handleTargetSelection(type: PermissionTargetType, index: number, value: PermittableOption | null) {
@@ -229,6 +258,13 @@ export function PermissionAssignmentBuilder({ onAdd, existingKeys, disabled = fa
       />
 
       {selectableTargetChain.map((targetType, index) => {
+        const isHidden =
+          targetType === 'TENANT' &&
+          Boolean(currentTenantId) &&
+          currentTenantId !== '00000000-0000-0000-0000-000000000000'
+
+        if (isHidden) return null
+
         const options = targetOptionsByType[targetType] ?? []
         const query = targetQueries[index]
         const parentType = index > 0 ? selectableTargetChain[index - 1] : undefined
