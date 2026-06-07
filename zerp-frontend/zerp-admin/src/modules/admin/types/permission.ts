@@ -69,6 +69,7 @@ export const TARGET_TYPE_PARENT: Record<string, string | null> = {
 }
 
 export const PERMITTABLE_TARGET_TYPES = new Set<string>([
+  'TENANT_ROOT',
   'TENANT',
   'USER',
   'EMPLOYEE',

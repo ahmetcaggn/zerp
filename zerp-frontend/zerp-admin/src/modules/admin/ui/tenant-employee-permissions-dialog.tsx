@@ -242,6 +242,7 @@ export function TenantEmployeePermissionsDialog({
             prefilledTargets={
               tenantId ? { TENANT: { id: tenantId, title: tenantName ?? tenantId } } : undefined
             }
+            tenantId={tenantId}
           />
 
           {tenantId && (

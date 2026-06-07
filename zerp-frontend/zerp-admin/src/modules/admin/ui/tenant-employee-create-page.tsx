@@ -519,6 +519,7 @@ export function TenantEmployeeCreatePage({ tenantId }: Props) {
                 ? { TENANT: { id: tenantId, title: tenant.name } }
                 : undefined
             }
+            tenantId={tenantId}
           />
 
           {draftPermissions.length > 0 && (

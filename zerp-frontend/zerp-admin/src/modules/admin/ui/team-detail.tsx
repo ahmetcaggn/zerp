@@ -493,6 +493,7 @@ export function TeamDetail({ id }: Props) {
               disabled={isAddingMember}
               existingKeys={existingDraftPermissionKeys}
               onAdd={addDraftPermission}
+              tenantId={currentTeam.tenantId}
             />
 
             {draftPermissions.length > 0 && (

@@ -42,6 +42,7 @@ interface Props {
   disabled?: boolean
   i18nPrefix?: 'teams' | 'employees'
   prefilledTargets?: Partial<Record<string, PermittableOption>>
+  tenantId?: string
 }
 
 function formatTargetOptionLabel(option: PermittableOption): string {
@@ -62,8 +63,22 @@ export function PermissionAssignmentBuilder({
   disabled = false,
   i18nPrefix = 'teams',
   prefilledTargets,
+  tenantId,
 }: Props) {
   const { t } = useI18n()
+  const effectivePrefilledTargets = useMemo(() => {
+    const defaults: Record<string, PermittableOption> = {
+      TENANT_ROOT: {
+        id: '00000000-0000-0000-0000-000000000000',
+        title: 'ROOT',
+      },
+    }
+    return {
+      ...defaults,
+      ...prefilledTargets,
+    }
+  }, [prefilledTargets])
+
   const {
     data: actionHierarchy,
     isLoading: isActionsLoading,
@@ -77,17 +92,32 @@ export function PermissionAssignmentBuilder({
   >({})
   const [searchByType, setSearchByType] = useState<Record<string, string>>({})
 
-  const actionOptions = useMemo(
-    () => Object.keys(actionHierarchy ?? {}).sort((a, b) => a.localeCompare(b)),
-    [actionHierarchy],
-  )
+  const actionOptions = useMemo(() => {
+    if (!actionHierarchy) return []
+    return Object.keys(actionHierarchy)
+      .filter((action) => {
+        const targetTypes = actionHierarchy[action] ?? []
+        return targetTypes.some((targetType) => {
+          if (targetType === 'TENANT_ROOT' && tenantId !== '00000000-0000-0000-0000-000000000000') {
+            return false
+          }
+          return getSelectableTargetChain(targetType).length > 0
+        })
+      })
+      .sort((a, b) => a.localeCompare(b))
+  }, [actionHierarchy, tenantId])
 
   const availableTargetTypes = useMemo(() => {
     if (!selectedAction || !actionHierarchy) return []
     return (actionHierarchy[selectedAction] ?? []).filter(
-      (targetType) => getSelectableTargetChain(targetType).length > 0,
+      (targetType) => {
+        if (targetType === 'TENANT_ROOT' && tenantId !== '00000000-0000-0000-0000-000000000000') {
+          return false
+        }
+        return getSelectableTargetChain(targetType).length > 0
+      },
     )
-  }, [actionHierarchy, selectedAction])
+  }, [actionHierarchy, selectedAction, tenantId])
 
   const selectableTargetChain = useMemo(() => {
     if (!selectedTargetType) return []
@@ -181,8 +211,8 @@ export function PermissionAssignmentBuilder({
       const chain = getSelectableTargetChain(targetType)
       const newSelections: Record<string, PermittableOption | null> = {}
       for (const t of chain) {
-        if (prefilledTargets?.[t]) {
-          newSelections[t] = prefilledTargets[t] as PermittableOption
+        if (effectivePrefilledTargets?.[t]) {
+          newSelections[t] = effectivePrefilledTargets[t] as PermittableOption
         } else {
           break
         }
@@ -212,6 +242,10 @@ export function PermissionAssignmentBuilder({
 
   function handleAdd() {
     if (!selectedAction || !selectedTargetType || !finalTarget || isDuplicate) return
+
+    if (selectedTargetType === 'TENANT_ROOT' && tenantId !== '00000000-0000-0000-0000-000000000000') {
+      return
+    }
 
     onAdd({
       action: selectedAction,
@@ -263,6 +297,12 @@ export function PermissionAssignmentBuilder({
       />
 
       {selectableTargetChain.map((targetType, index) => {
+        const isHidden =
+          targetType === 'TENANT_ROOT' ||
+          (targetType === 'TENANT' && Boolean(tenantId) && tenantId !== '00000000-0000-0000-0000-000000000000')
+
+        if (isHidden) return null
+
         const options = targetOptionsByType[targetType] ?? []
         const query = targetQueries[index]
         const parentType = index > 0 ? selectableTargetChain[index - 1] : undefined

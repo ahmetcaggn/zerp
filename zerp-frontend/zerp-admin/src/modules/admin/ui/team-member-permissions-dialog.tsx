@@ -223,6 +223,7 @@ export function TeamMemberPermissionsDialog({
             existingKeys={existingKeys}
             onAdd={handleAddPermission}
             prefilledTargets={tenantId ? { TENANT: { id: tenantId, title: tenantId } } : undefined}
+            tenantId={tenantId}
           />
 
           {tenantId && (

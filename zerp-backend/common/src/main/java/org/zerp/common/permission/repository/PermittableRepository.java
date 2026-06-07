@@ -17,6 +17,8 @@ import org.zerp.common.permission.entity.PermissionTargetTypeAnnotation;
 import org.zerp.common.entity.base.BaseEntity;
 import org.zerp.common.permission.entity.Permittable;
 
+import org.zerp.common.entity.TenantRoot;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,6 +39,7 @@ public class PermittableRepository {
                 targetTypeToEntityClass.put(annotation.type(), javaType);
             }
         }
+        targetTypeToEntityClass.put(PermissionTargetType.TENANT_ROOT, TenantRoot.class);
     }
 
     /**
@@ -83,6 +86,9 @@ public class PermittableRepository {
             PermissionTargetType targetType,
             @SuppressWarnings("rawtypes") Specification spec,
             Pageable pageable) {
+        if (targetType == PermissionTargetType.TENANT_ROOT) {
+            return new PageImpl<>(List.of(TenantRoot.INSTANCE), pageable, 1);
+        }
         Class<?> entityClass = targetTypeToEntityClass.get(targetType);
         if (entityClass == null || !Permittable.class.isAssignableFrom(entityClass)) {
             return Page.empty();
@@ -151,6 +157,12 @@ public class PermittableRepository {
             PermissionTargetType targetType,
             Collection<UUID> ids) {
         if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        if (targetType == PermissionTargetType.TENANT_ROOT) {
+            if (ids.contains(TenantRoot.ID)) {
+                return List.of(TenantRoot.INSTANCE);
+            }
             return Collections.emptyList();
         }
         Class<?> entityClass = targetTypeToEntityClass.get(targetType);

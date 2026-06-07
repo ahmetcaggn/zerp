@@ -52,6 +52,15 @@ public class PermittableService
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid targetType: " + targetTypeStr);
         }
 
+        if (targetType == PermissionTargetType.TENANT_ROOT) {
+            List<PermittableResponseDTO> dtos = List.of(PermittableResponseDTO.builder()
+                    .id(org.zerp.common.entity.TenantRoot.INSTANCE.getId())
+                    .title(org.zerp.common.entity.TenantRoot.INSTANCE.getTitle())
+                    .targetType(PermissionTargetType.TENANT_ROOT)
+                    .build());
+            return new PageImpl<>(dtos, pageable, 1);
+        }
+
         // Remove targetType from filters before passing to FilterRefiner to avoid mapping errors
         Map<String, String> entityFilters = new HashMap<>(filters);
         entityFilters.remove("targetType");

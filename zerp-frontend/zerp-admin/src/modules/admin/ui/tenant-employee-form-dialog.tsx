@@ -431,6 +431,7 @@ export function TenantEmployeeFormDialog({ open, tenantId, tenantName, onClose }
               onAdd={addDraftPermission}
               i18nPrefix="employees"
               prefilledTargets={tenantName ? { TENANT: { id: tenantId, title: tenantName } } : undefined}
+              tenantId={tenantId}
             />
 
             {draftPermissions.length > 0 && (
