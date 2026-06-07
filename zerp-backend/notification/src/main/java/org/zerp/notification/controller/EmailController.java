@@ -1,5 +1,6 @@
 package org.zerp.notification.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.zerp.notification.dtos.request.EmailEmployeeListRequestDto;
 import org.zerp.notification.dtos.request.EmailListHtmlRequestDto;
 import org.zerp.notification.dtos.request.EmailListRequestDto;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/notification/email")
 @RequiredArgsConstructor
+@Tag(name = "Emails", description = "API for sending emails")
 public class EmailController {
     private final EmailService emailService;
 

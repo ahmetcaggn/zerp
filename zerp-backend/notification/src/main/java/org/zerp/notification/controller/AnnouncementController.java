@@ -1,5 +1,6 @@
 package org.zerp.notification.controller;
  
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +14,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/notification/announcements")
 @RequiredArgsConstructor
+@Tag(name = "Announcements", description = "API for managing announcements")
 public class AnnouncementController extends ResourceController<AnnouncementResponseDto, AnnouncementResponseDto,
         CreateAnnouncementRequestDto, CreateAnnouncementRequestDto, UUID> {
     private final AnnouncementService announcementService;
