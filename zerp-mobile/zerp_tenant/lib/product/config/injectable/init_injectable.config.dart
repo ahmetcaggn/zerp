@@ -81,6 +81,7 @@ import '../../service/shop/shop_service.dart' as _i750;
 import '../../service/stock/stock_service.dart' as _i551;
 import '../../service/tenant/tenant_service.dart' as _i105;
 import '../../service/user/permission_service.dart' as _i545;
+import '../../service/user/user_profile_service.dart' as _i85;
 import '../../service/user/username_service.dart' as _i868;
 import '../../storage/operator/auth_claims.operator.dart' as _i301;
 import '../../storage/operator/auth_token.operator.dart' as _i145;
@@ -97,7 +98,6 @@ extension GetItInjectableX on _i174.GetIt {
   }) {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final serviceModule = _$ServiceModule();
-    gh.factory<_i477.CubitProfile>(() => _i477.CubitProfile());
     gh.factory<_i40.CubitStock>(() => _i40.CubitStock());
     gh.singleton<_i770.PermissionRouteGuard>(
       () => _i770.PermissionRouteGuard(),
@@ -224,6 +224,14 @@ extension GetItInjectableX on _i174.GetIt {
         cubitAuth: gh<_i200.CubitAuth>(),
       ),
     );
+    gh.lazySingleton<_i85.UserProfileService>(
+      () => _i85.UserProfileService(
+        invoker: gh<_i1073.ApiNetworkInvoker>(),
+        authStorageService: gh<_i40.AuthStorageService>(),
+        cubitError: gh<_i139.CubitError>(),
+        cubitAuth: gh<_i200.CubitAuth>(),
+      ),
+    );
     gh.lazySingleton<_i868.UsernameService>(
       () => _i868.UsernameService(
         invoker: gh<_i1073.ApiNetworkInvoker>(),
@@ -323,6 +331,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i102.CubitSectionStock>(
       () => _i102.CubitSectionStock(gh<_i551.StockService>()),
+    );
+    gh.factory<_i477.CubitProfile>(
+      () => _i477.CubitProfile(gh<_i85.UserProfileService>()),
     );
     gh.factory<_i229.CubitEmployeeUsername>(
       () => _i229.CubitEmployeeUsername(gh<_i868.UsernameService>()),
