@@ -87,7 +87,12 @@ public class PermittableService
         return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
 
-    private <T> Page<Permittable> fetchWithSecurity(PermissionTargetType targetType, Class<T> entityClass, Map<String, String> filters, UUID userId, Pageable pageable) {
+    private <T> Page<Permittable> fetchWithSecurity(
+            PermissionTargetType targetType,
+            Class<T> entityClass,
+            Map<String, String> filters,
+            UUID userId,
+            Pageable pageable) {
         Specification<T> spec = filterRefiner.refinedOrBadRequest(filters, entityClass);
         spec = spec.and(permissionEvaluator.filterRead(userId));
         return permittableRepository.findAllByTargetType(targetType, spec, pageable);

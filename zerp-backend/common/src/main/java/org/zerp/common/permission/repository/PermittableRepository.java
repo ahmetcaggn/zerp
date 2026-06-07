@@ -86,12 +86,24 @@ public class PermittableRepository {
             PermissionTargetType targetType,
             @SuppressWarnings("rawtypes") Specification spec,
             Pageable pageable) {
+        if (spec == null) {
+            log.error("Specification is null for targetType: {}", targetType);
+            throw new IllegalArgumentException("Specification cannot be null");
+        }
+
         if (targetType == PermissionTargetType.TENANT_ROOT) {
             return new PageImpl<>(List.of(TenantRoot.INSTANCE), pageable, 1);
         }
         Class<?> entityClass = targetTypeToEntityClass.get(targetType);
         if (entityClass == null || !Permittable.class.isAssignableFrom(entityClass)) {
+            log.error("No Permittable entity mapped to targetType: {}", targetType);
             return Page.empty();
+        }
+
+        // remove tenant root from tenant responses.
+        if (targetType == PermissionTargetType.TENANT) {
+            spec = spec.and((root, _, cb) ->
+                    cb.notEqual(root.get("id"), TenantRoot.ID));
         }
 
         try {
@@ -101,9 +113,7 @@ public class PermittableRepository {
             var countQuery = cb.createQuery(Long.class);
             var countRoot = countQuery.from(entityClass);
             countQuery.select(cb.count(countRoot));
-            if (spec != null) {
-                countQuery.where(spec.toPredicate(countRoot, countQuery, cb));
-            }
+            countQuery.where(spec.toPredicate(countRoot, countQuery, cb));
             Long total = entityManager.createQuery(countQuery).getSingleResult();
 
             // Data query
@@ -112,9 +122,7 @@ public class PermittableRepository {
             //noinspection rawtypes
             query.select((Selection) root);
 
-            if (spec != null) {
-                query.where(spec.toPredicate(root, query, cb));
-            }
+            query.where(spec.toPredicate(root, query, cb));
 
             // Apply sorting from pageable
             if (pageable.getSort().isSorted()) {
