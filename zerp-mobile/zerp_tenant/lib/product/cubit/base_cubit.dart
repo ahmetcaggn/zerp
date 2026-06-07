@@ -9,6 +9,10 @@ abstract class BaseCubit<T> extends Cubit<T> {
   @override
   void emit(T state) {
     _log.fine('Emitting new state: $state');
+    if (isClosed) {
+      _log.warning('Attempted to emit state on closed Cubit: $state');
+      return;
+    }
     super.emit(state);
   }
 }

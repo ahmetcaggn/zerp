@@ -13,8 +13,8 @@ class SectionStock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<CubitSectionStock>(),
+    return BlocProvider.value(
+      value: getIt<CubitSectionStock>(),
       child: BlocBuilder<CubitOrganizationScope, StateOrganizationScope>(
         builder: (context, state) {
           final enabled = state is StateOrganizationScopeShop;

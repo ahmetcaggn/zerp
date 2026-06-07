@@ -8,7 +8,9 @@ import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/state_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
+import 'package:zerp_tenant/product/service/user/permission_service.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
+import 'package:zerp_tenant/product/ui/widget/permission/permission_guard.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -126,24 +128,57 @@ class AppDrawer extends StatelessWidget {
                 ),
 
                 ListTile(
-                  leading: const Icon(Icons.people),
-                  title: Text(context.t.employee.title),
-                  onTap: () => _navigate(context, const RouteEmployee()),
+                  leading: const Icon(Icons.home),
+                  title: Text(context.t.dashboard.title),
+                  onTap: () => _navigate(context, const RouteDashboard()),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.table_restaurant),
-                  title: Text(context.t.sale.dashboard.tables),
-                  onTap: () => _navigate(context, const RouteTables()),
+                PermissionGuard(
+                  action: PermittableAction.READ_EMPLOYEE,
+                  hideIfUnpermitted: false,
+                  disabledTooltip: context.t.permission.requiredTooltip(
+                    permission: 'READ_EMPLOYEE',
+                  ),
+                  child: ListTile(
+                    leading: const Icon(Icons.people),
+                    title: Text(context.t.employee.title),
+                    onTap: () => _navigate(context, const RouteEmployee()),
+                  ),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.point_of_sale),
-                  title: Text(context.t.sale.dashboard.cash),
-                  onTap: () => _navigate(context, const RouteCashTables()),
+                PermissionGuard(
+                  action: PermittableAction.READ_SHOP_TABLE,
+                  hideIfUnpermitted: false,
+                  disabledTooltip: context.t.permission.requiredTooltip(
+                    permission: 'READ_SHOP_TABLE',
+                  ),
+                  child: ListTile(
+                    leading: const Icon(Icons.table_restaurant),
+                    title: Text(context.t.sale.dashboard.tables),
+                    onTap: () => _navigate(context, const RouteTables()),
+                  ),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.inventory),
-                  title: Text(context.t.stock.title),
-                  onTap: () => _navigate(context, const RouteStock()),
+                PermissionGuard(
+                  action: PermittableAction.READ_SHOP_TABLE,
+                  hideIfUnpermitted: false,
+                  disabledTooltip: context.t.permission.requiredTooltip(
+                    permission: 'READ_SHOP_TABLE',
+                  ),
+                  child: ListTile(
+                    leading: const Icon(Icons.point_of_sale),
+                    title: Text(context.t.sale.dashboard.cash),
+                    onTap: () => _navigate(context, const RouteCashTables()),
+                  ),
+                ),
+                PermissionGuard(
+                  action: PermittableAction.READ_STOCK_RESOURCE,
+                  hideIfUnpermitted: false,
+                  disabledTooltip: context.t.permission.requiredTooltip(
+                    permission: 'READ_STOCK_RESOURCE',
+                  ),
+                  child: ListTile(
+                    leading: const Icon(Icons.inventory),
+                    title: Text(context.t.stock.title),
+                    onTap: () => _navigate(context, const RouteStock()),
+                  ),
                 ),
                 const Divider(),
                 ListTile(

@@ -1,15 +1,19 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:openapi_sale/api.dart';
+import 'package:openapi_user/api.dart';
 import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/cash_section/cubit_section_cash.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/employee_section/cubit_section_employee.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/stock_section/cubit_section_stock.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/tables_section/cubit_section_tables.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/permission/cubit_permission.dart';
 import 'package:zerp_tenant/product/network/page_response.dart';
 import 'package:zerp_tenant/product/service/sale/sale_service.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
+
+typedef PermittableAction = PermittableTreeNodeDTOActionsEnum;
 
 @lazySingleton
 class CubitDashboard extends Cubit<StateDashboard>
@@ -21,6 +25,7 @@ class CubitDashboard extends Cubit<StateDashboard>
     this._cubitSectionTables,
     this._saleService,
     this._cubitOrganizationScope,
+    this._cubitPermission,
   ) : super(const StateDashboardInitial());
 
   final CubitSectionEmployee _cubitSectionEmployee;
@@ -29,15 +34,21 @@ class CubitDashboard extends Cubit<StateDashboard>
   final CubitSectionTables _cubitSectionTables;
   final SaleService _saleService;
   final CubitOrganizationScope _cubitOrganizationScope;
+  final CubitPermission _cubitPermission;
 
   Future<void> load() async {
     emit(const StateDashboardLoading());
 
     try {
+      final permState = _cubitPermission.state;
+      final canReadEmployee =
+          permState is StatePermissionLoaded &&
+          permState.hasActionInScope(PermittableAction.READ_EMPLOYEE, null);
+
       late final PageResponse<ShopDTO> shopsResponse;
       await Future.wait<dynamic>([
         _cubitOrganizationScope.loadTenantIfNeeded(),
-        _cubitSectionEmployee.load(),
+        if (canReadEmployee) _cubitSectionEmployee.load(),
         _saleService.getShops().then((value) => shopsResponse = value),
       ]);
       final shops = shopsResponse.items;
@@ -45,10 +56,23 @@ class CubitDashboard extends Cubit<StateDashboard>
       if (orgState is StateOrganizationScopeShop) {
         final shopId = orgState.shop.id;
         if (shopId != null) {
+          final canReadTables =
+              permState is StatePermissionLoaded &&
+              permState.hasActionInScope(
+                PermittableAction.READ_SHOP_TABLE,
+                shopId,
+              );
+          final canReadStock =
+              permState is StatePermissionLoaded &&
+              permState.hasActionInScope(
+                PermittableAction.READ_STOCK_RESOURCE,
+                shopId,
+              );
+
           await Future.wait([
-            _cubitSectionCash.load(shopId),
-            _cubitSectionTables.load(shopId),
-            _cubitSectionStock.load(shopId),
+            if (canReadTables) _cubitSectionCash.load(shopId),
+            if (canReadTables) _cubitSectionTables.load(shopId),
+            if (canReadStock) _cubitSectionStock.load(shopId),
           ]);
         }
       } else if (shops.isNotEmpty) {
@@ -67,10 +91,22 @@ class CubitDashboard extends Cubit<StateDashboard>
   }
 
   Future<void> notifyShopChanged(ShopDTO shop) async {
+    final shopId = shop.id ?? '';
+    final permState = _cubitPermission.state;
+    final canReadTables =
+        permState is StatePermissionLoaded &&
+        permState.hasActionInScope(PermittableAction.READ_SHOP_TABLE, shopId);
+    final canReadStock =
+        permState is StatePermissionLoaded &&
+        permState.hasActionInScope(
+          PermittableAction.READ_STOCK_RESOURCE,
+          shopId,
+        );
+
     await Future.wait([
-      _cubitSectionCash.load(shop.id ?? ''),
-      _cubitSectionTables.load(shop.id ?? ''),
-      _cubitSectionStock.load(shop.id ?? ''),
+      if (canReadTables) _cubitSectionCash.load(shopId),
+      if (canReadTables) _cubitSectionTables.load(shopId),
+      if (canReadStock) _cubitSectionStock.load(shopId),
     ]);
   }
 }

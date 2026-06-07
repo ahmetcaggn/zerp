@@ -3,6 +3,7 @@ import 'package:openapi_user/api.dart';
 import 'package:remote_logging/remote_logging.dart';
 import 'package:zerp_tenant/product/cubit/base_cubit.dart';
 import 'package:zerp_tenant/product/service/user/permission_service.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @lazySingleton
 final class CubitPermission extends BaseCubit<StatePermission>
@@ -82,7 +83,7 @@ final class CubitPermission extends BaseCubit<StatePermission>
 
     try {
       final tree = await _permissionService.getPermittableTree();
-      final flatActions = _flatten(tree);
+      final flatActions = StatePermissionLoaded._flatten(tree);
       log.info(
         'Permission tree loaded. Flat action count: ${flatActions.length}',
       );
@@ -92,7 +93,7 @@ final class CubitPermission extends BaseCubit<StatePermission>
       emit(
         StatePermissionError(
           previousState: state,
-          message: 'Failed to load permissions: $e',
+          message: t.permission.errorLoad(error: e.toString()),
         ),
       );
     } finally {
@@ -126,17 +127,6 @@ final class CubitPermission extends BaseCubit<StatePermission>
   void reset() {
     log.fine('Resetting permission state to initial');
     emit(const StatePermissionInitial());
-  }
-
-  // ---------------------------------------------------------------------------
-  // Private helpers
-  // ---------------------------------------------------------------------------
-
-  Set<PermittableAction> _flatten(PermittableTreeNodeDTO node) {
-    return {
-      ...node.actions,
-      for (final child in node.children) ..._flatten(child),
-    };
   }
 }
 
@@ -173,7 +163,85 @@ final class StatePermissionLoaded extends StatePermission {
   final Set<PermittableAction> flatActions;
 
   /// Convenience: returns true when [action] is present in the flat set.
-  bool hasAction(PermittableAction action) => flatActions.contains(action);
+  bool hasAction(PermittableAction action) {
+    if (flatActions.contains(PermittableAction.ADMIN)) {
+      return true;
+    }
+    return flatActions.contains(action);
+  }
+
+  /// Returns true when [action] is present in the scope of [targetId].
+  /// This checks if the action is in the path to the target node or in the
+  /// target node's subtree.
+  bool hasActionInScope(PermittableAction action, String? targetId) {
+    if (targetId == null) {
+      return hasAction(action);
+    }
+
+    // If the user has ADMIN permission over the tenant globally,
+    // they are allowed to perform any action on any target.
+    final globalActions = _getGlobalAncestorActions(tree);
+    if (globalActions.contains(PermittableAction.ADMIN)) {
+      return true;
+    }
+
+    final actionsInScope = _getActionsInScope(tree, targetId);
+    if (actionsInScope != null) {
+      if (actionsInScope.contains(PermittableAction.ADMIN)) {
+        return true;
+      }
+      return actionsInScope.contains(action);
+    }
+
+    // If targetId is not found in the tree, it means there are no specific
+    // permissions for it. However, global/tenant-wide permissions still apply.
+    return globalActions.contains(action);
+  }
+
+  Set<PermittableAction> _getGlobalAncestorActions(
+    PermittableTreeNodeDTO node,
+  ) {
+    final actions = <PermittableAction>{};
+
+    if (node.targetType == null ||
+        node.targetType == PermittableTreeNodeDTOTargetTypeEnum.TENANT_ROOT ||
+        node.targetType == PermittableTreeNodeDTOTargetTypeEnum.TENANT) {
+      actions.addAll(node.actions);
+      for (final child in node.children) {
+        actions.addAll(_getGlobalAncestorActions(child));
+      }
+    }
+
+    return actions;
+  }
+
+  Set<PermittableAction>? _getActionsInScope(
+    PermittableTreeNodeDTO node,
+    String targetId,
+  ) {
+    if (node.id == targetId) {
+      return _flatten(node);
+    }
+
+    for (final child in node.children) {
+      final childResult = _getActionsInScope(child, targetId);
+      if (childResult != null) {
+        return {
+          ...node.actions,
+          ...childResult,
+        };
+      }
+    }
+
+    return null;
+  }
+
+  static Set<PermittableAction> _flatten(PermittableTreeNodeDTO node) {
+    return {
+      ...node.actions,
+      for (final child in node.children) ..._flatten(child),
+    };
+  }
 
   @override
   String toString() => 'StatePermissionLoaded(actions: ${flatActions.length})';

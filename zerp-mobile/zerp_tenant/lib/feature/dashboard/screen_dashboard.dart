@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart' hide RouteSettings;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:openapi_sale/api.dart';
+import 'package:openapi_user/api.dart';
 import 'package:zerp_tenant/feature/dashboard/cubit/cubit_dashboard.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/cash_section/section_cash.dart';
 import 'package:zerp_tenant/feature/dashboard/sections/employee_section/section_employee.dart';
@@ -14,6 +15,9 @@ import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_or
 import 'package:zerp_tenant/product/ui/layout/app_drawer.dart';
 import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
+import 'package:zerp_tenant/product/ui/widget/permission/permission_guard.dart';
+
+typedef PermittableAction = PermittableTreeNodeDTOActionsEnum;
 
 @RoutePage()
 class ScreenDashboard extends StatelessWidget {
@@ -60,7 +64,14 @@ class ScreenDashboard extends StatelessWidget {
                   children: [
                     const _TenantInfoSection(),
                     const SizedBox(height: 16),
-                    const SectionEmployee(),
+                    PermissionGuard(
+                      action: PermittableAction.READ_EMPLOYEE,
+                      hideIfUnpermitted: false,
+                      disabledTooltip: context.t.permission.requiredTooltip(
+                        permission: 'READ_EMPLOYEE',
+                      ),
+                      child: const SectionEmployee(),
+                    ),
                     const SizedBox(height: 16),
                     const _ShopSelectorSection(),
                     const SizedBox(height: 12),
@@ -68,20 +79,56 @@ class ScreenDashboard extends StatelessWidget {
                     LayoutBuilder(
                       builder: (context, constraints) {
                         if (constraints.maxWidth >= 600) {
-                          return const Row(
+                          return Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(child: SectionTables()),
-                              SizedBox(width: 12),
-                              Expanded(child: SectionCash()),
+                              Expanded(
+                                child: PermissionGuard(
+                                  action: PermittableAction.READ_SHOP_TABLE,
+                                  hideIfUnpermitted: false,
+                                  disabledTooltip: context.t.permission
+                                      .requiredTooltip(
+                                        permission: 'READ_SHOP_TABLE',
+                                      ),
+                                  child: const SectionTables(),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: PermissionGuard(
+                                  action: PermittableAction.READ_SHOP_TABLE,
+                                  hideIfUnpermitted: false,
+                                  disabledTooltip: context.t.permission
+                                      .requiredTooltip(
+                                        permission: 'READ_SHOP_TABLE',
+                                      ),
+                                  child: const SectionCash(),
+                                ),
+                              ),
                             ],
                           );
                         } else {
-                          return const Column(
+                          return Column(
                             children: [
-                              SectionTables(),
-                              SizedBox(height: 12),
-                              SectionCash(),
+                              PermissionGuard(
+                                action: PermittableAction.READ_SHOP_TABLE,
+                                hideIfUnpermitted: false,
+                                disabledTooltip: context.t.permission
+                                    .requiredTooltip(
+                                      permission: 'READ_SHOP_TABLE',
+                                    ),
+                                child: const SectionTables(),
+                              ),
+                              const SizedBox(height: 12),
+                              PermissionGuard(
+                                action: PermittableAction.READ_SHOP_TABLE,
+                                hideIfUnpermitted: false,
+                                disabledTooltip: context.t.permission
+                                    .requiredTooltip(
+                                      permission: 'READ_SHOP_TABLE',
+                                    ),
+                                child: const SectionCash(),
+                              ),
                             ],
                           );
                         }
@@ -89,7 +136,13 @@ class ScreenDashboard extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 12),
-                    const SectionStock(),
+                    PermissionGuard(
+                      action: PermittableAction.READ_STOCK_RESOURCE,
+                      disabledTooltip: context.t.permission.requiredTooltip(
+                        permission: 'READ_STOCK_RESOURCE',
+                      ),
+                      child: const SectionStock(),
+                    ),
                   ],
                 ),
               );

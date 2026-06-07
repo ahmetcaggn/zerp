@@ -4,13 +4,14 @@ import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/state_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/permission/cubit_permission.dart';
 import 'package:zerp_tenant/product/service/user/permission_service.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 // ─── InheritedWidget ─────────────────────────────────────────────────────────
 
 /// Provides the current [StatePermission] to the subtree.
 ///
 /// Use [PermissionScope.hasAction] anywhere in the tree for O(1) permission
-/// checks. Use [PermissionScope.of] to access the full state.
+/// checks. Use [PermissionScope.maybeOf] to access the full state safely.
 class PermissionScope extends InheritedWidget {
   const PermissionScope({
     required this.state,
@@ -19,6 +20,14 @@ class PermissionScope extends InheritedWidget {
   });
 
   final StatePermission state;
+
+  /// Returns the nearest [StatePermission] from the widget tree.
+  ///
+  /// Returns null if no [PermissionScope] ancestor is found.
+  static StatePermission? maybeOf(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<PermissionScope>();
+    return scope?.state;
+  }
 
   /// Returns the nearest [StatePermission] from the widget tree.
   ///
@@ -36,13 +45,35 @@ class PermissionScope extends InheritedWidget {
   /// Returns `true` only when the current state is [StatePermissionLoaded] and
   /// [action] is present in the flattened permission set.
   ///
-  /// Returns `false` when the state is not [StatePermissionLoaded] (fail-safe).
+  /// Returns `false` when the state is not [StatePermissionLoaded] or if no
+  /// [PermissionScope] is found in the context (e.g. during logout animations).
   static bool hasAction(
     BuildContext context,
     PermittableAction action,
   ) {
-    final state = of(context);
+    final scope = context.dependOnInheritedWidgetOfExactType<PermissionScope>();
+    if (scope == null) return false;
+
+    final state = scope.state;
     return state is StatePermissionLoaded && state.hasAction(action);
+  }
+
+  /// Returns `true` only when the current state is [StatePermissionLoaded] and
+  /// [action] is present in the permission subtree for [targetId].
+  ///
+  /// Returns `false` when the state is not [StatePermissionLoaded] or if no
+  /// [PermissionScope] is found in the context.
+  static bool hasActionInScope(
+    BuildContext context,
+    PermittableAction action,
+    String? targetId,
+  ) {
+    final scope = context.dependOnInheritedWidgetOfExactType<PermissionScope>();
+    if (scope == null) return false;
+
+    final state = scope.state;
+    return state is StatePermissionLoaded &&
+        state.hasActionInScope(action, targetId);
   }
 
   @override
@@ -83,17 +114,23 @@ class PermissionScopeProvider extends StatelessWidget {
         // Authenticated — gate on permission state.
         return BlocBuilder<CubitPermission, StatePermission>(
           builder: (context, permState) {
-            return switch (permState) {
-              StatePermissionInitial() ||
-              StatePermissionLoading() => const _PermissionLoadingScreen(),
-              StatePermissionError(:final message) => _PermissionErrorScreen(
-                message: message,
+            return PermissionScope(
+              state: permState,
+              child: Stack(
+                children: [
+                  // Always keep the router mounted
+                  // so navigation state isn't lost
+                  child,
+
+                  if (permState is StatePermissionInitial ||
+                      permState is StatePermissionLoading)
+                    const _PermissionLoadingScreen(),
+
+                  if (permState is StatePermissionError)
+                    _PermissionErrorScreen(message: permState.message),
+                ],
               ),
-              StatePermissionLoaded() => PermissionScope(
-                state: permState,
-                child: child,
-              ),
-            };
+            );
           },
         );
       },
@@ -108,9 +145,16 @@ class _PermissionLoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
-        child: CircularProgressIndicator(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(context.t.permission.loading),
+          ],
+        ),
       ),
     );
   }
@@ -139,7 +183,7 @@ class _PermissionErrorScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Failed to load permissions',
+                context.t.permission.failedToLoad,
                 style: Theme.of(context).textTheme.titleLarge,
                 textAlign: TextAlign.center,
               ),
@@ -156,7 +200,7 @@ class _PermissionErrorScreen extends StatelessWidget {
                 onPressed: () =>
                     context.read<CubitPermission>().loadPermissionsForced(),
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                label: Text(context.t.permission.retry),
               ),
             ],
           ),

@@ -15,8 +15,8 @@ class SectionCash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<CubitSectionCash>(),
+    return BlocProvider.value(
+      value: getIt<CubitSectionCash>(),
       child: BlocBuilder<CubitOrganizationScope, StateOrganizationScope>(
         builder: (context, state) {
           final enabled = state is StateOrganizationScopeShop;

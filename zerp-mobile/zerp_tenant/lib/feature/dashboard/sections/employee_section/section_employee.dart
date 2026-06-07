@@ -11,8 +11,8 @@ class SectionEmployee extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<CubitSectionEmployee>(),
+    return BlocProvider.value(
+      value: getIt<CubitSectionEmployee>(),
       child: BlocBuilder<CubitSectionEmployee, StateSectionEmployee>(
         builder: (context, state) {
           Widget? extra;

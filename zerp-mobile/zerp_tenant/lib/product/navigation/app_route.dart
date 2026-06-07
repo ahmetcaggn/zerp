@@ -2,20 +2,25 @@ import 'package:auto_route/auto_route.dart';
 import 'package:injectable/injectable.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/navigation/auth_guard.dart';
+import 'package:zerp_tenant/product/navigation/permission_route_guard.dart';
 
 const String _replaceInRouteName = 'Screen,Route';
 
 @singleton
 @AutoRouterConfig(replaceInRouteName: _replaceInRouteName)
 class AppRoute extends RootStackRouter {
-  AppRoute(this.authGuard);
+  AppRoute(this.authGuard, this.permissionRouteGuard);
 
   final AuthGuard authGuard;
+  final PermissionRouteGuard permissionRouteGuard;
 
   @override
   List<AutoRoute> get routes => [
     // Main page
     AutoRoute(page: RouteDashboard.page, initial: true),
+
+    // Access denied
+    AutoRoute(page: RouteAccessDenied.page),
 
     // employee routes
     AutoRoute(page: RouteEmployee.page),
@@ -55,5 +60,5 @@ class AppRoute extends RootStackRouter {
   ];
 
   @override
-  List<AutoRouteGuard> get guards => [authGuard];
+  List<AutoRouteGuard> get guards => [authGuard, permissionRouteGuard];
 }

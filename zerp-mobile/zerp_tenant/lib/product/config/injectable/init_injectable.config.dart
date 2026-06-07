@@ -65,10 +65,11 @@ import '../../cubit/root_cubit/network_indicator/cubit_network_indicator.dart'
     as _i591;
 import '../../cubit/root_cubit/organization_scope/cubit_organization_scope.dart'
     as _i829;
-import '../../cubit/root_cubit/permission/cubit_permission.dart' as _i912;
+import '../../cubit/root_cubit/permission/cubit_permission.dart' as _i281;
 import '../../cubit/root_cubit/settings/cubit_settings.dart' as _i657;
 import '../../navigation/app_route.dart' as _i795;
 import '../../navigation/auth_guard.dart' as _i84;
+import '../../navigation/permission_route_guard.dart' as _i770;
 import '../../network/network_invoker/api_network_invoker.dart' as _i1073;
 import '../../network/network_invoker/remote_log_network_invoker.dart' as _i693;
 import '../../service/api_status/api_status_service.dart' as _i371;
@@ -98,6 +99,9 @@ extension GetItInjectableX on _i174.GetIt {
     final serviceModule = _$ServiceModule();
     gh.factory<_i477.CubitProfile>(() => _i477.CubitProfile());
     gh.factory<_i40.CubitStock>(() => _i40.CubitStock());
+    gh.singleton<_i770.PermissionRouteGuard>(
+      () => _i770.PermissionRouteGuard(),
+    );
     gh.lazySingleton<_i337.FlutterAppAuth>(() => serviceModule.appAuth);
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => serviceModule.secureStorage,
@@ -136,7 +140,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i238.AuthService>(),
       ),
     );
-    gh.singleton<_i795.AppRoute>(() => _i795.AppRoute(gh<_i84.AuthGuard>()));
+    gh.singleton<_i795.AppRoute>(
+      () => _i795.AppRoute(
+        gh<_i84.AuthGuard>(),
+        gh<_i770.PermissionRouteGuard>(),
+      ),
+    );
     gh.lazySingleton<_i200.CubitAuth>(
       () => _i200.CubitAuth(
         gh<_i795.AppRoute>(),
@@ -215,9 +224,6 @@ extension GetItInjectableX on _i174.GetIt {
         cubitAuth: gh<_i200.CubitAuth>(),
       ),
     );
-    gh.lazySingleton<_i912.CubitPermission>(
-      () => _i912.CubitPermission(gh<_i545.PermissionService>()),
-    );
     gh.lazySingleton<_i868.UsernameService>(
       () => _i868.UsernameService(
         invoker: gh<_i1073.ApiNetworkInvoker>(),
@@ -258,6 +264,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i545.PermissionService>(),
         cubitPermissions,
       ),
+    );
+    gh.lazySingleton<_i281.CubitPermission>(
+      () => _i281.CubitPermission(gh<_i545.PermissionService>()),
     );
     gh.factory<_i102.CubitPermissionViewer>(
       () => _i102.CubitPermissionViewer(gh<_i545.PermissionService>()),
@@ -334,6 +343,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i285.CubitSectionTables>(),
         gh<_i16.SaleService>(),
         gh<_i829.CubitOrganizationScope>(),
+        gh<_i281.CubitPermission>(),
       ),
     );
     gh.factory<_i782.CubitCashTables>(

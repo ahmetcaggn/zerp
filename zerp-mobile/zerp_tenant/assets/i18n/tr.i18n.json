@@ -514,9 +514,26 @@
       "empty": "Henüz yetki yok",
       "target": "Hedef: $targetType",
       "id": "ID: $targetId",
-      "searchHint": "Yetkilerde ara...",
+      "searchHint": "Yetkileri ara...",
       "noResults": "Aramanızla eşleşen yetki bulunamadı",
-      "filtered": "Filtrelenen: $count"
+      "filtered": "Filtrelenen: $count",
+      "listView": "Liste Görünümü",
+      "treeView": "Ağaç Görünümü"
     }
+  },
+  "permission": {
+    "accessDenied": {
+      "title": "Erişim Reddedildi",
+      "description": "Bu sayfayı görüntülemek için gerekli izinlere sahip değilsiniz. Erişim talep etmek için yöneticinizle iletişime geçin.",
+      "requiredPermissions": "Bu izinlerden en az biri gereklidir:",
+      "goToDashboard": "Ana Sayfaya Git"
+    },
+    "loading": "Yetkiler yükleniyor...",
+    "failedToLoad": "Yetkiler yüklenemedi",
+    "retry": "Yeniden Dene",
+    "globalNode": "Global Düğüm",
+    "notLoaded": "Yetkiler yüklenmedi",
+    "requiredTooltip": "$permission yetkisi gerekli",
+    "errorLoad": "Yetkiler yüklenemedi: $error"
   }
 }

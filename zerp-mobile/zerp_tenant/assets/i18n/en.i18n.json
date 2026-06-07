@@ -516,7 +516,24 @@
       "id": "ID: $targetId",
       "searchHint": "Search permissions...",
       "noResults": "No permissions found matching your search",
-      "filtered": "Filtered: $count"
+      "filtered": "Filtered: $count",
+      "listView": "List View",
+      "treeView": "Tree View"
     }
+  },
+  "permission": {
+    "accessDenied": {
+      "title": "Access Denied",
+      "description": "You do not have the required permissions to view this page. Contact your administrator to request access.",
+      "requiredPermissions": "At least one of these permissions is required:",
+      "goToDashboard": "Go to Dashboard"
+    },
+    "loading": "Loading permissions...",
+    "failedToLoad": "Failed to load permissions",
+    "retry": "Retry",
+    "globalNode": "Global Node",
+    "notLoaded": "Permissions not loaded",
+    "requiredTooltip": "$permission permission required",
+    "errorLoad": "Failed to load permissions: $error"
   }
 }

@@ -23,6 +23,7 @@ class AppScaffold extends StatelessWidget {
     required this.body,
     required this.title,
     this.titleWidget,
+    this.appBarBottom,
     this.actions = const [],
     this.drawer,
     this.floatingActionButton,
@@ -44,6 +45,9 @@ class AppScaffold extends StatelessWidget {
 
   /// The title widget displayed in the AppBar (dynamic)
   final Widget? titleWidget;
+
+  /// Optional widget to display at the bottom of the AppBar (e.g., TabBar)
+  final PreferredSizeWidget? appBarBottom;
 
   /// Optional list of action widgets for the AppBar, which defaults to empty.
   final List<Widget> actions;
@@ -78,16 +82,17 @@ class AppScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: titleWidget ?? Text(title),
+        bottom: appBarBottom,
+        actions: [
+          const _NetworkIndicatorButton(),
+          ...actions,
+        ],
+        elevation: 2,
+      ),
       body: Column(
         children: [
-          AppBar(
-            title: titleWidget ?? Text(title),
-            actions: [
-              const _NetworkIndicatorButton(),
-              ...actions,
-            ],
-            elevation: 2,
-          ),
           const _OrganizationScopeError(),
           const AppMessageBar(),
           Expanded(child: body),

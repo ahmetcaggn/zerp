@@ -1,13 +1,13 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:openapi_employee/api.dart';
 import 'package:remote_logging/remote_logging.dart';
+import 'package:zerp_tenant/product/cubit/base_cubit.dart';
 import 'package:zerp_tenant/product/network/page_response.dart';
 import 'package:zerp_tenant/product/service/employee/employee_service.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @lazySingleton
-class CubitSectionEmployee extends Cubit<StateSectionEmployee>
+class CubitSectionEmployee extends BaseCubit<StateSectionEmployee>
     with LoggerMixin<CubitSectionEmployee> {
   CubitSectionEmployee(this._employeeService)
     : super(const StateSectionEmployeeInitial());

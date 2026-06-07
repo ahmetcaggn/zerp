@@ -6,8 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:openapi_user/api.dart';
 import 'package:zerp_tenant/feature/profile/permission/cubit_profile_permissions.dart';
 import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/permission/cubit_permission.dart';
 import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
+import 'package:zerp_tenant/product/ui/widget/permission/permission_scope.dart';
 
 @RoutePage()
 class ScreenProfilePermissions extends StatelessWidget {
@@ -33,23 +35,146 @@ class _ProfilePermissionsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
-      title: context.t.profile.permissions.title,
-      body: BlocBuilder<CubitProfilePermissions, StateProfilePermissions>(
-        builder: (context, state) {
-          return switch (state) {
-            StateProfilePermissionsInitial() ||
-            StateProfilePermissionsLoading() => const Center(
-              child: CircularProgressIndicator(),
+    return DefaultTabController(
+      length: 2,
+      child: AppScaffold(
+        title: context.t.profile.permissions.title,
+        actions: [
+          IconButton(
+            tooltip: context.t.common.refresh,
+            onPressed: () {
+              // Refresh the flat list used by the List view
+              unawaited(
+                context.read<CubitProfilePermissions>().loadPermissions(),
+              );
+              // Refresh the main permission tree used by the Tree view and
+              // guards
+              unawaited(
+                context.read<CubitPermission>().loadPermissionsForced(),
+              );
+            },
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
+        appBarBottom: TabBar(
+          tabs: [
+            Tab(text: context.t.profile.permissions.listView),
+            Tab(text: context.t.profile.permissions.treeView),
+          ],
+        ),
+        body: TabBarView(
+          children: [
+            BlocBuilder<CubitProfilePermissions, StateProfilePermissions>(
+              builder: (context, state) {
+                return switch (state) {
+                  StateProfilePermissionsInitial() ||
+                  StateProfilePermissionsLoading() => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  StateProfilePermissionsError(:final message) => Center(
+                    child: Text(message),
+                  ),
+                  StateProfilePermissionsLoaded() => _ListSection(
+                    state: state,
+                  ),
+                };
+              },
             ),
-            StateProfilePermissionsError(:final message) => Center(
-              child: Text(message),
-            ),
-            StateProfilePermissionsLoaded() => _ListSection(
-              state: state,
-            ),
-          };
-        },
+            const _TreeSection(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TreeSection extends StatelessWidget {
+  const _TreeSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final state = PermissionScope.maybeOf(context);
+    if (state is! StatePermissionLoaded) {
+      return Center(child: Text(context.t.permission.notLoaded));
+    }
+
+    final tree = state.tree;
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      children: [
+        _TreeNodeWidget(node: tree),
+      ],
+    );
+  }
+}
+
+class _TreeNodeWidget extends StatelessWidget {
+  const _TreeNodeWidget({required this.node});
+
+  final PermittableTreeNodeDTO node;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = node.title ??
+        node.targetType?.value ??
+        node.id ??
+        context.t.permission.globalNode;
+    final hasActions = node.actions.isNotEmpty;
+    final hasChildren = node.children.isNotEmpty;
+
+    if (!hasActions && !hasChildren) {
+      return const SizedBox.shrink();
+    }
+
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: Theme.of(
+            context,
+          ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: true,
+          shape: const Border(),
+          collapsedShape: const Border(),
+          leading: Icon(
+            hasChildren
+                ? Icons.folder_outlined
+                : Icons.insert_drive_file_outlined,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          title: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          subtitle: hasActions
+              ? Text(
+                  node.actions.map((e) => e.value).join(', '),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                )
+              : null,
+          children: [
+            if (hasChildren)
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Column(
+                  children: node.children
+                      .map((child) => _TreeNodeWidget(node: child))
+                      .toList(),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

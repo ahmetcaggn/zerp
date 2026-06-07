@@ -82,14 +82,17 @@ final class ApiNetworkInvoker extends DioNetworkInvoker
             final accessToken = await _authStorageService.accessToken;
             if (accessToken != null) {
               options.headers['Authorization'] = 'Bearer $accessToken';
-            }
+              // Prevent infinite loops if the retry also fails with 401
+              options.extra[_kSkipAuthRetry] = true;
 
-            try {
-              final response = await dio.fetch<dynamic>(options);
-              return handler.resolve(response);
-            } on DioException catch (e) {
-              return handler.next(e);
+              try {
+                final response = await dio.fetch<dynamic>(options);
+                return handler.resolve(response);
+              } on DioException catch (e) {
+                return handler.next(e);
+              }
             }
+            // If accessToken is null, we cannot retry. Fall through to reject.
           }
           handler.next(error);
         },
