@@ -153,6 +153,27 @@ export type TicketStatusString =
   | 'CLOSED'
   | 'CANCELLED'
 
+export const TICKET_STATUS_TRANSITIONS: Record<TicketStatusString, readonly TicketStatusString[]> =
+  {
+    OPEN: ['IN_PROGRESS', 'RESOLVED', 'CLOSED', 'CANCELLED'],
+    IN_PROGRESS: ['WAITING_CUSTOMER', 'RESOLVED', 'CLOSED', 'CANCELLED', 'OPEN'],
+    WAITING_CUSTOMER: ['IN_PROGRESS', 'RESOLVED', 'CLOSED', 'CANCELLED', 'OPEN'],
+    RESOLVED: [],
+    CLOSED: [],
+    CANCELLED: [],
+  } as const
+
+export function canTransitionTicketStatus(
+  currentStatus: TicketStatusString | undefined,
+  newStatus: TicketStatusString,
+): boolean {
+  if (!currentStatus) {
+    return false
+  }
+
+  return TICKET_STATUS_TRANSITIONS[currentStatus]?.includes(newStatus) ?? false
+}
+
 export type TicketPriorityString = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
 
 export type TicketTypeString = IssueTypeValue

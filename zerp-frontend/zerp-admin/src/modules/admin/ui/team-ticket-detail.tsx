@@ -44,6 +44,7 @@ import {
 } from '../hooks/use-team-tickets'
 import type { AttachmentResponse } from '../types/ticket'
 import type { TicketPriorityString, TicketStatusString } from '../types/ticket'
+import { canTransitionTicketStatus } from '../types/ticket'
 
 const STATUS_COLOR: Record<
   TicketStatusString,
@@ -338,8 +339,8 @@ export function TeamTicketDetail({ id }: Props) {
       showToast('Durum güncelleme yetkiniz yok.', { severity: 'warning' })
       return
     }
-    if (isClosed) {
-      showToast('Kapanmış taleplerde durum güncellenemez.', { severity: 'warning' })
+    if (!canTransitionTicketStatus(status, newStatus)) {
+      showToast('Bu durum geçişine izin verilmiyor.', { severity: 'warning' })
       return
     }
     changeStatus(
@@ -526,7 +527,7 @@ export function TeamTicketDetail({ id }: Props) {
             <FormControl
               size="small"
               sx={{ minWidth: 180 }}
-              disabled={!canUpdateTicket || isChangingStatus || isClosed}
+              disabled={!canUpdateTicket || isChangingStatus}
             >
               <InputLabel>Durum</InputLabel>
               <Select
@@ -542,7 +543,11 @@ export function TeamTicketDetail({ id }: Props) {
                 )}
               >
                 {STATUS_OPTIONS.map((value) => (
-                  <MenuItem key={value} value={value}>
+                  <MenuItem
+                    key={value}
+                    value={value}
+                    disabled={!canTransitionTicketStatus(status, value)}
+                  >
                     <Chip label={value} color={STATUS_COLOR[value] ?? 'default'} size="small" />
                   </MenuItem>
                 ))}
