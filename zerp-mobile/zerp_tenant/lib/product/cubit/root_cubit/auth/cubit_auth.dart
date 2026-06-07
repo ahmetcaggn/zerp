@@ -6,6 +6,7 @@ import 'package:zerp_tenant/product/config/injectable/init_injectable.dart';
 import 'package:zerp_tenant/product/cubit/base_cubit.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/auth/state_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/permission/cubit_permission.dart';
 import 'package:zerp_tenant/product/navigation/app_route.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
 import 'package:zerp_tenant/product/service/auth/auth_service.dart';
@@ -32,6 +33,7 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
     if (state is StateAuthAuthenticated) {
       log.info('emit: User authenticated: ${state.username}');
       unawaited(getIt<CubitOrganizationScope>().loadTenantForced());
+      unawaited(getIt<CubitPermission>().loadPermissionsForced());
     }
   }
 
@@ -119,6 +121,7 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
       );
     } finally {
       getIt<CubitOrganizationScope>().reset();
+      getIt<CubitPermission>().reset();
     }
   }
 

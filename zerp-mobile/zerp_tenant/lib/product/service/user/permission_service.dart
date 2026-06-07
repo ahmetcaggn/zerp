@@ -11,6 +11,7 @@ typedef PermissionTargetType =
     ApiResponseMapPermissionActionListPermissionTargetType;
 typedef PermissionTargetTypeEnum =
     ApiResponseMapPermissionActionListPermissionTargetTypeDataEnum;
+typedef PermittableAction = PermittableTreeNodeDTOActionsEnum;
 
 @lazySingleton
 class PermissionService extends ServiceBase
@@ -120,6 +121,26 @@ class PermissionService extends ServiceBase
       case NetworkErrorResult<ApiResponseListPermittableResponseDTO>():
         throw onNetworkError(res);
       case SpecifiedResponseResult<ApiResponseListPermittableResponseDTO>():
+        throw onUnsuccessfulResponse(res);
+    }
+  }
+
+  Future<PermittableTreeNodeDTO> getPermittableTree() async {
+    final command = GetTreeCommand();
+    final res = await invoker.send(command);
+
+    switch (res) {
+      case SuccessResponseResult<ApiResponsePermittableTreeNodeDTO>():
+        final data = res.data.data;
+        if (data == null) {
+          log.severe('Permittable tree data is null in response');
+          throw Exception('Permittable tree data is null');
+        }
+        log.info('Successfully fetched permittable tree');
+        return data;
+      case NetworkErrorResult<ApiResponsePermittableTreeNodeDTO>():
+        throw onNetworkError(res);
+      case SpecifiedResponseResult<ApiResponsePermittableTreeNodeDTO>():
         throw onUnsuccessfulResponse(res);
     }
   }

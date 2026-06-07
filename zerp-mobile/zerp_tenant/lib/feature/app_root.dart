@@ -8,11 +8,13 @@ import 'package:zerp_tenant/product/cubit/root_cubit/auth/cubit_auth.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/error/cubit_error.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/network_indicator/cubit_network_indicator.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_organization_scope.dart';
+import 'package:zerp_tenant/product/cubit/root_cubit/permission/cubit_permission.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/settings/cubit_settings.dart';
 import 'package:zerp_tenant/product/navigation/app_route.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 import 'package:zerp_tenant/product/ui/theme/app_theme.dart';
 import 'package:zerp_tenant/product/ui/widget/error_overlay.dart';
+import 'package:zerp_tenant/product/ui/widget/permission/permission_scope.dart';
 
 class AppRoot extends StatelessWidget with LoggerMixinConst<AppRoot> {
   const AppRoot({super.key});
@@ -29,6 +31,7 @@ class AppRoot extends StatelessWidget with LoggerMixinConst<AppRoot> {
           BlocProvider(create: (_) => getIt<CubitAppMessenger>()),
           BlocProvider(create: (_) => getIt<CubitSettings>()),
           BlocProvider(create: (_) => getIt<CubitOrganizationScope>()),
+          BlocProvider(create: (_) => getIt<CubitPermission>()),
           BlocProvider(create: (_) => getIt<CubitNetworkIndicator>()),
         ],
         child: Builder(
@@ -45,7 +48,9 @@ class AppRoot extends StatelessWidget with LoggerMixinConst<AppRoot> {
               builder: (context, child) {
                 return Stack(
                   children: [
-                    ?child,
+                    PermissionScopeProvider(
+                      child: child ?? const SizedBox.shrink(),
+                    ),
                     const ErrorOverlay(),
                   ],
                 );

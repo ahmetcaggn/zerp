@@ -48,7 +48,9 @@ class AppDrawer extends StatelessWidget {
                       Row(
                         children: [
                           CircleAvatar(
-                            backgroundColor: Colors.white.withValues(alpha: 0.2),
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.2,
+                            ),
                             radius: 24,
                             child: Text(
                               (username != null && username.isNotEmpty)
@@ -69,9 +71,7 @@ class AppDrawer extends StatelessWidget {
                               children: [
                                 Text(
                                   username ?? '',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
+                                  style: Theme.of(context).textTheme.titleMedium
                                       ?.copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -83,9 +83,7 @@ class AppDrawer extends StatelessWidget {
                                   const SizedBox(height: 2),
                                   Text(
                                     email,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
+                                    style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(
                                           color: Colors.white70,
                                         ),
@@ -111,9 +109,7 @@ class AppDrawer extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 firmName,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
+                                style: Theme.of(context).textTheme.bodyMedium
                                     ?.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w500,

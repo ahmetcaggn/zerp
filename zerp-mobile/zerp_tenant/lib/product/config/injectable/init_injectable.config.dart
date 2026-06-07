@@ -65,6 +65,7 @@ import '../../cubit/root_cubit/network_indicator/cubit_network_indicator.dart'
     as _i591;
 import '../../cubit/root_cubit/organization_scope/cubit_organization_scope.dart'
     as _i829;
+import '../../cubit/root_cubit/permission/cubit_permission.dart' as _i912;
 import '../../cubit/root_cubit/settings/cubit_settings.dart' as _i657;
 import '../../navigation/app_route.dart' as _i795;
 import '../../navigation/auth_guard.dart' as _i84;
@@ -213,6 +214,9 @@ extension GetItInjectableX on _i174.GetIt {
         cubitError: gh<_i139.CubitError>(),
         cubitAuth: gh<_i200.CubitAuth>(),
       ),
+    );
+    gh.lazySingleton<_i912.CubitPermission>(
+      () => _i912.CubitPermission(gh<_i545.PermissionService>()),
     );
     gh.lazySingleton<_i868.UsernameService>(
       () => _i868.UsernameService(

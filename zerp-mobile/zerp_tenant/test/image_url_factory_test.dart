@@ -13,26 +13,38 @@ void main() {
       ImageUrlFactory.testBaseUrl = null;
     });
 
-    test('Fallback to default base URL and logs warning when GetIt is not initialized', () {
-      final logRecords = <LogRecord>[];
-      final subscription = Logger.root.onRecord.listen(logRecords.add);
+    test(
+      'Fallback to default base URL and '
+      'logs warning when GetIt is not initialized',
+      () async {
+        final logRecords = <LogRecord>[];
+        final subscription = Logger.root.onRecord.listen(logRecords.add);
 
-      const factory = MenuItemImageUrlFactory('img123');
-      final normalizedDefault = ApiUrlHelper.defaultBaseUrl.endsWith('/')
-          ? ApiUrlHelper.defaultBaseUrl.substring(0, ApiUrlHelper.defaultBaseUrl.length - 1)
-          : ApiUrlHelper.defaultBaseUrl;
+        const factory = MenuItemImageUrlFactory('img123');
+        final normalizedDefault = ApiUrlHelper.defaultBaseUrl.endsWith('/')
+            ? ApiUrlHelper.defaultBaseUrl.substring(
+                0,
+                ApiUrlHelper.defaultBaseUrl.length - 1,
+              )
+            : ApiUrlHelper.defaultBaseUrl;
 
-      expect(factory.baseUrl, normalizedDefault);
-      expect(logRecords, isNotEmpty);
-      expect(
-        logRecords.any((record) =>
-            record.level == Level.WARNING &&
-            record.message.contains('Failed to retrieve baseUrl from ApiNetworkInvoker using GetIt')),
-        isTrue,
-      );
+        expect(factory.baseUrl, normalizedDefault);
+        expect(logRecords, isNotEmpty);
+        expect(
+          logRecords.any(
+            (record) =>
+                record.level == Level.WARNING &&
+                record.message.contains(
+                  'Failed to retrieve baseUrl from '
+                  'ApiNetworkInvoker using GetIt',
+                ),
+          ),
+          isTrue,
+        );
 
-      subscription.cancel();
-    });
+        await subscription.cancel();
+      },
+    );
 
     test('Uses testBaseUrl when provided and normalizes trailing slash', () {
       ImageUrlFactory.testBaseUrl = 'https://custom-api.example.com/';
@@ -56,10 +68,22 @@ void main() {
       test('Generates correct URLs for all sizes', () {
         const factory = MenuItemImageUrlFactory('item456');
 
-        expect(factory.urlOriginal, 'https://api.test.com/sale/public/images/item456?size=original');
-        expect(factory.urlSmall, 'https://api.test.com/sale/public/images/item456?size=small');
-        expect(factory.urlMedium, 'https://api.test.com/sale/public/images/item456?size=medium');
-        expect(factory.urlLarge, 'https://api.test.com/sale/public/images/item456?size=large');
+        expect(
+          factory.urlOriginal,
+          'https://api.test.com/sale/public/images/item456?size=original',
+        );
+        expect(
+          factory.urlSmall,
+          'https://api.test.com/sale/public/images/item456?size=small',
+        );
+        expect(
+          factory.urlMedium,
+          'https://api.test.com/sale/public/images/item456?size=medium',
+        );
+        expect(
+          factory.urlLarge,
+          'https://api.test.com/sale/public/images/item456?size=large',
+        );
       });
 
       test('url() selector method returns correct URL for each ImageSize', () {
@@ -80,10 +104,22 @@ void main() {
       test('Generates correct URLs for all sizes', () {
         const factory = ShopImageUrlFactory('shop789');
 
-        expect(factory.urlOriginal, 'https://api.test.com/sale/shops/shop789/image?size=original');
-        expect(factory.urlSmall, 'https://api.test.com/sale/shops/shop789/image?size=small');
-        expect(factory.urlMedium, 'https://api.test.com/sale/shops/shop789/image?size=medium');
-        expect(factory.urlLarge, 'https://api.test.com/sale/shops/shop789/image?size=large');
+        expect(
+          factory.urlOriginal,
+          'https://api.test.com/sale/shops/shop789/image?size=original',
+        );
+        expect(
+          factory.urlSmall,
+          'https://api.test.com/sale/shops/shop789/image?size=small',
+        );
+        expect(
+          factory.urlMedium,
+          'https://api.test.com/sale/shops/shop789/image?size=medium',
+        );
+        expect(
+          factory.urlLarge,
+          'https://api.test.com/sale/shops/shop789/image?size=large',
+        );
       });
 
       test('url() selector method returns correct URL for each ImageSize', () {
