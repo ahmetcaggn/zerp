@@ -9,10 +9,10 @@ services:
         EXPOSE_PORT: 8761
     container_name: zerp-eureka
     hostname: eureka
-    deploy:
-      resources:
-        limits:
-          memory: "256M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: "256M"
     environment:
       TZ: Europe/Istanbul
       SERVICE: eureka
@@ -39,10 +39,10 @@ services:
         JAR_FILE: zerp-backend/crm/target/*-exec.jar
     container_name: zerp-crm
     hostname: crm
-    deploy:
-      resources:
-        limits:
-          memory: "512M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: "512M"
     environment:
       TZ: Europe/Istanbul
       SERVICE: crm
@@ -85,10 +85,10 @@ services:
         JAR_FILE: zerp-backend/employee/target/*-exec.jar
     container_name: zerp-employee
     hostname: employee
-    deploy:
-      resources:
-        limits:
-          memory: "512M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: "512M"
     environment:
       TZ: Europe/Istanbul
       SERVICE: employee
@@ -125,10 +125,10 @@ services:
         JAR_FILE: zerp-backend/notification/target/*-exec.jar
     container_name: zerp-notification
     hostname: notification
-    deploy:
-      resources:
-        limits:
-          memory: "384M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: "384M"
     environment:
       TZ: Europe/Istanbul
       SERVICE: notification
@@ -171,10 +171,10 @@ services:
         JAR_FILE: zerp-backend/resource/target/*-exec.jar
     container_name: zerp-resource
     hostname: resource
-    deploy:
-      resources:
-        limits:
-          memory: "512M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: "512M"
     environment:
       TZ: Europe/Istanbul
       SERVICE: resource
@@ -211,10 +211,10 @@ services:
         JAR_FILE: zerp-backend/sale/target/*-exec.jar
     container_name: zerp-sale
     hostname: sale
-    deploy:
-      resources:
-        limits:
-          memory: "512M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: "512M"
     environment:
       TZ: Europe/Istanbul
       SERVICE: sale
@@ -256,10 +256,10 @@ services:
         JAR_FILE: zerp-backend/user/target/*-exec.jar
     container_name: zerp-user
     hostname: user
-    deploy:
-      resources:
-        limits:
-          memory: "512M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: "512M"
     environment:
       TZ: Europe/Istanbul
       SERVICE: user
@@ -307,10 +307,10 @@ services:
         SERVICE: gateway
     container_name: zerp-gateway
     hostname: gateway
-    deploy:
-      resources:
-        limits:
-          memory: "512M"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: "512M"
     environment:
       TZ: Europe/Istanbul
       SERVICE: gateway
