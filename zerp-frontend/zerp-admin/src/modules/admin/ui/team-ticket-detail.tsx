@@ -527,7 +527,7 @@ export function TeamTicketDetail({ id }: Props) {
             <FormControl
               size="small"
               sx={{ minWidth: 180 }}
-              disabled={!canUpdateTicket || isChangingStatus}
+              disabled={!canUpdateTicket || isChangingStatus || isClosed}
             >
               <InputLabel>Durum</InputLabel>
               <Select
