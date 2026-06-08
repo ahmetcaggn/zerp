@@ -103,7 +103,6 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
           username: claims.preferredUsername,
           email: claims.email,
         ));
-        await _popLoginIfNeeded();
       } else {
         log.warning('Login failed: No claims returned');
         emit(
@@ -147,15 +146,4 @@ class CubitAuth extends BaseCubit<StateAuth> with LoggerMixin<CubitAuth> {
     await _appRoute.push(RouteAuth(callerRoute: currentPath));
   }
 
-  Future<void> _popLoginIfNeeded() async {
-    if (_appRoute.current.name != RouteAuth.name) {
-      return;
-    }
-    while (_appRoute.current.name == RouteAuth.name && _appRoute.canPop()) {
-      _appRoute.pop();
-    }
-    if (_appRoute.current.name == RouteAuth.name) {
-      await _appRoute.replaceAll([const RouteDashboard()]);
-    }
-  }
 }

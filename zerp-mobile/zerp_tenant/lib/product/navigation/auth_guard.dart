@@ -38,6 +38,11 @@ class AuthGuard extends AutoRouteGuard {
       return;
     }
 
-    resolver.redirectUntil(RouteAuth(callerRoute: resolver.route.path));
+    resolver.redirectUntil(
+      RouteAuth(
+        callerRoute: resolver.route.path,
+        afterAuthCallback: () => resolver.next(),
+      ),
+    );
   }
 }
