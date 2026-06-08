@@ -29,8 +29,9 @@ final class CubitSettings extends Cubit<StateSettings> {
       final savedLevel = _parseLogLevel(data.remoteLogLevel!);
       try {
         final remoteLogging = getIt<RemoteLogging>();
-        remoteLogging.config =
-            remoteLogging.config.copyWith(logSendLevel: savedLevel);
+        remoteLogging.config = remoteLogging.config.copyWith(
+          logSendLevel: savedLevel,
+        );
       } on Object catch (_) {
         // RemoteLogging instance might not be initialized yet (will be
         // initialized right after settings in AppInitializer)
@@ -64,8 +65,7 @@ final class CubitSettings extends Cubit<StateSettings> {
     final level = _parseLogLevel(levelName);
     try {
       final remoteLogging = getIt<RemoteLogging>();
-      remoteLogging.config =
-          remoteLogging.config.copyWith(logSendLevel: level);
+      remoteLogging.config = remoteLogging.config.copyWith(logSendLevel: level);
     } on Object catch (_) {
       // Ignore if RemoteLogging is not initialized yet
     }
@@ -85,6 +85,14 @@ final class CubitSettings extends Cubit<StateSettings> {
     _emitSettings(saved);
   }
 
+  Future<void> updateTheme(AppThemeMode themeMode) async {
+    final currentData = await _getSavedSettingsOrDefault();
+    final saved = await _settingsOperator.put(
+      currentData.copyWith(theme: themeMode),
+    );
+    _emitSettings(saved);
+  }
+
   Level _parseLogLevel(String name) {
     return Level.LEVELS.firstWhere(
       (l) => l.name == name,
@@ -98,6 +106,7 @@ final class CubitSettings extends Cubit<StateSettings> {
         currentApiHost: data.apiHost,
         currentRemoteLogLevel: data.remoteLogLevel ?? 'CONFIG',
         currentLanguage: data.language ?? 'system',
+        currentThemeMode: data.theme ?? AppThemeMode.system,
       ),
     );
   }
@@ -124,6 +133,7 @@ final class StateSettingsInitial extends StateSettings {
 
 final class StateSettingsLoaded extends StateSettings {
   const StateSettingsLoaded({
+    required this.currentThemeMode,
     this.currentApiHost,
     this.currentRemoteLogLevel,
     this.currentLanguage,
@@ -132,17 +142,20 @@ final class StateSettingsLoaded extends StateSettings {
   final String? currentApiHost;
   final String? currentRemoteLogLevel;
   final String? currentLanguage;
+  final AppThemeMode currentThemeMode;
 
   StateSettingsLoaded copyWith({
     String? currentApiHost,
     String? currentRemoteLogLevel,
     String? currentLanguage,
+    AppThemeMode? currentThemeMode,
   }) {
     return StateSettingsLoaded(
       currentApiHost: currentApiHost ?? this.currentApiHost,
       currentRemoteLogLevel:
           currentRemoteLogLevel ?? this.currentRemoteLogLevel,
       currentLanguage: currentLanguage ?? this.currentLanguage,
+      currentThemeMode: currentThemeMode ?? this.currentThemeMode,
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/settings/cubit_settings.dart';
 import 'package:zerp_tenant/product/navigation/app_route.gr.dart';
+import 'package:zerp_tenant/product/storage/model/settings.storage_model.dart';
 import 'package:zerp_tenant/product/ui/layout/app_scaffold.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
@@ -175,6 +176,63 @@ class ScreenSettings extends StatelessWidget {
                                   state.currentLanguage == 'en'
                               ? 'English'
                               : t.settings.languages.system,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.textTheme.bodyMedium?.color?.withAlpha(
+                          180,
+                        ),
+                      ),
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right_rounded,
+                    color: theme.iconTheme.color?.withAlpha(150),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: theme.dividerColor.withAlpha(50),
+                  ),
+                ),
+                color: theme.cardColor,
+                clipBehavior: Clip.antiAlias,
+                child: ListTile(
+                  onTap: () {
+                    unawaited(
+                      context.router.push(const RouteSettingsTheme()),
+                    );
+                  },
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  leading: CircleAvatar(
+                    backgroundColor: theme.colorScheme.primary.withAlpha(20),
+                    child: Icon(
+                      Icons.palette_rounded,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  title: Text(
+                    t.settings.theme,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      state is StateSettingsLoaded &&
+                              state.currentThemeMode == AppThemeMode.light
+                          ? t.settings.themes.light
+                          : state is StateSettingsLoaded &&
+                                  state.currentThemeMode == AppThemeMode.dark
+                              ? t.settings.themes.dark
+                              : t.settings.themes.system,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.textTheme.bodyMedium?.color?.withAlpha(
                           180,

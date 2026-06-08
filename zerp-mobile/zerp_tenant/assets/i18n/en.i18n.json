@@ -388,6 +388,15 @@
       "system": "System Language",
       "en": "English",
       "tr": "Türkçe"
+    },
+    "themeTitle": "Theme Settings",
+    "themeSubtitle": "Change the application theme.",
+    "theme": "Theme",
+    "themeSaveSuccess": "Theme changed successfully!",
+    "themes": {
+      "system": "System Theme",
+      "light": "Light Theme",
+      "dark": "Dark Theme"
     }
   },
   "common": {

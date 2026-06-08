@@ -4,6 +4,12 @@ import 'package:zerp_tenant/product/storage/core/model_base/base_storage_model.d
 part 'settings.storage_model.freezed.dart';
 part 'settings.storage_model.g.dart';
 
+enum AppThemeMode {
+  system,
+  light,
+  dark,
+}
+
 @freezed
 abstract class SettingsStorageModel extends StorageBaseModel
     with _$SettingsStorageModel {
@@ -11,6 +17,7 @@ abstract class SettingsStorageModel extends StorageBaseModel
     String? apiHost,
     String? remoteLogLevel,
     String? language,
+    AppThemeMode? theme,
   }) = _SettingsStorageModel;
 
   const SettingsStorageModel._();

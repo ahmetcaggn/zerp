@@ -11,6 +11,7 @@ import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_or
 import 'package:zerp_tenant/product/cubit/root_cubit/permission/cubit_permission.dart';
 import 'package:zerp_tenant/product/cubit/root_cubit/settings/cubit_settings.dart';
 import 'package:zerp_tenant/product/navigation/app_route.dart';
+import 'package:zerp_tenant/product/storage/model/settings.storage_model.dart';
 import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 import 'package:zerp_tenant/product/ui/theme/app_theme.dart';
 import 'package:zerp_tenant/product/ui/widget/error_overlay.dart';
@@ -34,8 +35,22 @@ class AppRoot extends StatelessWidget with LoggerMixinConst<AppRoot> {
           BlocProvider(create: (_) => getIt<CubitPermission>()),
           BlocProvider(create: (_) => getIt<CubitNetworkIndicator>()),
         ],
-        child: Builder(
-          builder: (context) {
+        child: BlocBuilder<CubitSettings, StateSettings>(
+          builder: (context, state) {
+            final ThemeMode themeMode;
+            if (state is StateSettingsLoaded) {
+              switch (state.currentThemeMode) {
+                case AppThemeMode.light:
+                  themeMode = ThemeMode.light;
+                case AppThemeMode.dark:
+                  themeMode = ThemeMode.dark;
+                case AppThemeMode.system:
+                  themeMode = ThemeMode.system;
+              }
+            } else {
+              themeMode = ThemeMode.system;
+            }
+
             return MaterialApp.router(
               locale: TranslationProvider.of(context).flutterLocale,
               supportedLocales: AppLocaleUtils.supportedLocales,
@@ -44,6 +59,7 @@ class AppRoot extends StatelessWidget with LoggerMixinConst<AppRoot> {
               debugShowCheckedModeBanner: false,
               theme: AppTheme.light(),
               darkTheme: AppTheme.dark(),
+              themeMode: themeMode,
               routerConfig: appRouter.config(),
               builder: (context, child) {
                 return Stack(

@@ -388,6 +388,15 @@
       "system": "Sistem Dili",
       "en": "English",
       "tr": "Türkçe"
+    },
+    "themeTitle": "Tema Ayarı",
+    "themeSubtitle": "Uygulama temasını değiştirin.",
+    "theme": "Uygulama Teması",
+    "themeSaveSuccess": "Tema başarıyla değiştirildi!",
+    "themes": {
+      "system": "Sistem Teması",
+      "light": "Açık Tema",
+      "dark": "Koyu Tema"
     }
   },
   "common": {
