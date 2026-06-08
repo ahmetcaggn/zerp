@@ -27,7 +27,9 @@ final class UserProfileService extends ServiceBase
             statusCode: res.statusCode,
           );
         }
-        log.info('Successfully fetched current user profile for: ${profile.username}');
+        log.info(
+          'Successfully fetched current user profile for: ${profile.username}',
+        );
         return profile;
       case NetworkErrorResult<ApiResponseCurrentUserProfileDTO>():
         throw onNetworkError(res);

@@ -379,7 +379,16 @@
     "loggingLevelDescWarning": "WARNING: Log warnings, severe errors, and shout messages.",
     "loggingLevelDescSevere": "SEVERE: Log severe errors and shout messages.",
     "loggingLevelDescShout": "SHOUT: Only log critical shout messages.",
-    "loggingLevelDescOff": "OFF: Turn off all remote logging."
+    "loggingLevelDescOff": "OFF: Turn off all remote logging.",
+    "languageTitle": "Language Settings",
+    "languageSubtitle": "Change the application language.",
+    "language": "Language",
+    "languageSaveSuccess": "Language changed successfully!",
+    "languages": {
+      "system": "System Language",
+      "en": "English",
+      "tr": "Türkçe"
+    }
   },
   "common": {
     "hello": "Hello $name",

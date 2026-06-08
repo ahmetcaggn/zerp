@@ -8,7 +8,6 @@ import 'package:zerp_tenant/product/cubit/root_cubit/organization_scope/cubit_or
 import 'package:zerp_tenant/product/cubit/root_cubit/settings/cubit_settings.dart';
 import 'package:zerp_tenant/product/network/network_invoker/remote_log_network_invoker.dart';
 import 'package:zerp_tenant/product/storage/storage_initializer.dart';
-import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 abstract final class AppInitializer {
   const AppInitializer._();
@@ -22,14 +21,11 @@ abstract final class AppInitializer {
 
     // load base URL settings from storage
     await getIt<CubitSettings>().init();
-    
+
     // Check local auth to populate user data (username, email) in state
     await getIt<CubitAuth>().checkAuthLocal();
 
     unawaited(getIt<CubitOrganizationScope>().loadTenant());
-
-    // localization
-    await LocaleSettings.useDeviceLocale();
 
     // logging
     final settingsCubit = getIt<CubitSettings>();

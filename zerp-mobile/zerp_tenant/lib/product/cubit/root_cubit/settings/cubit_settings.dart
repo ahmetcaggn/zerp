@@ -8,6 +8,7 @@ import 'package:zerp_tenant/product/network/api_url_helper.dart';
 import 'package:zerp_tenant/product/network/network_invoker/api_network_invoker.dart';
 import 'package:zerp_tenant/product/storage/model/settings.storage_model.dart';
 import 'package:zerp_tenant/product/storage/operator/settings.operator.dart';
+import 'package:zerp_tenant/product/ui/localization/gen/strings.g.dart';
 
 @lazySingleton
 final class CubitSettings extends Cubit<StateSettings> {
@@ -34,6 +35,11 @@ final class CubitSettings extends Cubit<StateSettings> {
         // RemoteLogging instance might not be initialized yet (will be
         // initialized right after settings in AppInitializer)
       }
+    }
+    if (data.language != null && data.language != 'system') {
+      await LocaleSettings.setLocaleRaw(data.language!);
+    } else {
+      await LocaleSettings.useDeviceLocale();
     }
     _emitSettings(data);
   }
@@ -66,6 +72,19 @@ final class CubitSettings extends Cubit<StateSettings> {
     _emitSettings(saved);
   }
 
+  Future<void> updateLanguage(String languageCode) async {
+    final currentData = await _getSavedSettingsOrDefault();
+    final saved = await _settingsOperator.put(
+      currentData.copyWith(language: languageCode),
+    );
+    if (languageCode == 'system') {
+      await LocaleSettings.useDeviceLocale();
+    } else {
+      await LocaleSettings.setLocaleRaw(languageCode);
+    }
+    _emitSettings(saved);
+  }
+
   Level _parseLogLevel(String name) {
     return Level.LEVELS.firstWhere(
       (l) => l.name == name,
@@ -78,6 +97,7 @@ final class CubitSettings extends Cubit<StateSettings> {
       StateSettingsLoaded(
         currentApiHost: data.apiHost,
         currentRemoteLogLevel: data.remoteLogLevel ?? 'CONFIG',
+        currentLanguage: data.language ?? 'system',
       ),
     );
   }
@@ -106,19 +126,23 @@ final class StateSettingsLoaded extends StateSettings {
   const StateSettingsLoaded({
     this.currentApiHost,
     this.currentRemoteLogLevel,
+    this.currentLanguage,
   });
 
   final String? currentApiHost;
   final String? currentRemoteLogLevel;
+  final String? currentLanguage;
 
   StateSettingsLoaded copyWith({
     String? currentApiHost,
     String? currentRemoteLogLevel,
+    String? currentLanguage,
   }) {
     return StateSettingsLoaded(
       currentApiHost: currentApiHost ?? this.currentApiHost,
       currentRemoteLogLevel:
           currentRemoteLogLevel ?? this.currentRemoteLogLevel,
+      currentLanguage: currentLanguage ?? this.currentLanguage,
     );
   }
 }

@@ -54,6 +54,7 @@ class AppRoute extends RootStackRouter {
     AutoRoute(page: RouteSettings.page),
     AutoRoute(page: RouteSettingsApiBaseUrl.page),
     AutoRoute(page: RouteSettingsLoggingLevel.page),
+    AutoRoute(page: RouteSettingsLanguage.page),
 
     // Auth
     AutoRoute(page: RouteAuth.page),

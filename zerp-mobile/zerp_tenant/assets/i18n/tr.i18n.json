@@ -379,7 +379,16 @@
     "loggingLevelDescWarning": "WARNING: Uyarıları, ciddi hataları ve shout mesajlarını kaydet.",
     "loggingLevelDescSevere": "SEVERE: Ciddi hataları ve shout mesajlarını kaydet.",
     "loggingLevelDescShout": "SHOUT: Yalnızca kritik shout mesajlarını kaydet.",
-    "loggingLevelDescOff": "OFF: Tüm uzak günlüklemeyi kapat."
+    "loggingLevelDescOff": "OFF: Tüm uzak günlüklemeyi kapat.",
+    "languageTitle": "Dil Ayarı",
+    "languageSubtitle": "Uygulama dilini değiştirin.",
+    "language": "Uygulama Dili",
+    "languageSaveSuccess": "Dil başarıyla değiştirildi!",
+    "languages": {
+      "system": "Sistem Dili",
+      "en": "English",
+      "tr": "Türkçe"
+    }
   },
   "common": {
     "hello": "Merhaba $name",
