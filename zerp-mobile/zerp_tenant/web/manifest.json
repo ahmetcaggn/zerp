@@ -1,6 +1,6 @@
 {
-    "name": "zerp_tenant",
-    "short_name": "zerp_tenant",
+    "name": "ERP Mobile",
+    "short_name": "ERP Mobile",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
