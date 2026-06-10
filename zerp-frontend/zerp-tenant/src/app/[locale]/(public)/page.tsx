@@ -1,4 +1,5 @@
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
+import EastRoundedIcon from '@mui/icons-material/EastRounded'
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded'
 import Inventory2RoundedIcon from '@mui/icons-material/Inventory2Rounded'
 import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded'
@@ -72,7 +73,9 @@ const workflowTones: AccentTone[] = ['teal', 'blue', 'amber', 'rose']
 const landingImagePath = '/zerp-tenant-landing-page-images'
 const playStoreUrl = 'https://play.google.com/store/apps/details?id=org.zerp.tenant'
 const playStoreBadgeSrc = `${landingImagePath}/GetItOnGooglePlay_Badge_Web_color_Turkish.svg`
+const zerpClientUrl = process.env.NEXT_PUBLIC_ZERP_CLIENT_URL ?? 'https://client.zerp.app'
 const demoRequestEmail = process.env.DEMO_REQUEST_EMAIL ?? 'pomocra@gmail.com'
+const clientMockupSrc = `${landingImagePath}/zerp-client-app-mockup.webp`
 const moduleImageFiles = [
   ['table-and-addition-tracking.webp', 'table-and-addition-tracking_1.webp'],
   ['menu-and-recipe-management_1.webp', 'menu-and-recipe-management_2.webp'],
@@ -96,6 +99,21 @@ const serviceFlowImageFiles = [
 
 function imageSrc(fileName: string) {
   return `${landingImagePath}/${fileName}`
+}
+
+function withClientLocale(baseUrl: string, locale: string) {
+  const url = new URL(baseUrl)
+  const pathSegments = url.pathname.split('/').filter(Boolean)
+  const lastSegment = pathSegments.at(-1)
+
+  if (lastSegment === 'tr' || lastSegment === 'en') {
+    pathSegments[pathSegments.length - 1] = locale
+  } else {
+    pathSegments.push(locale)
+  }
+
+  url.pathname = `/${pathSegments.join('/')}`
+  return url.toString()
 }
 
 function landingImages(files: readonly string[], altBase: string): LandingImageSource[] {
@@ -254,6 +272,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   const messages = getMessages(locale)
   const home = messages.home
+  const localizedZerpClientUrl = withClientLocale(zerpClientUrl, locale)
   const heroImage: LandingImageSource = {
     alt: home.mockup.ariaLabel,
     src: imageSrc('zerp-tenant-operation-panel.webp'),
@@ -433,7 +452,83 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </Box>
           </Box>
 
-          {/* 2. LOGo STRIP / PROBLEM STRIP */}
+          {/* 2. CLIENT APP SECTION */}
+          <Box
+            component="section"
+            sx={{
+              alignItems: 'center',
+              backgroundColor: 'background.paper',
+              border: '1px solid',
+              borderColor: accentByTone.blue.border,
+              borderRadius: { xs: 3, md: 4 },
+              display: 'grid',
+              gap: { xs: 3, md: 5, lg: 7 },
+              gridTemplateColumns: { xs: '1fr', md: 'minmax(220px, 1fr) minmax(0, 3fr)' },
+              overflow: 'hidden',
+              p: { xs: 2.5, sm: 3, md: 5 },
+            }}
+          >
+            <Box
+              sx={{
+                background: `linear-gradient(145deg, ${accentByTone.blue.surface}, ${accentByTone.teal.surface})`,
+                borderRadius: { xs: 2.5, md: 3.5 },
+                display: 'flex',
+                justifyContent: 'center',
+                minHeight: { xs: 320, sm: 390, md: 460 },
+                overflow: 'hidden',
+                px: { xs: 2, sm: 3 },
+                pt: { xs: 3, sm: 4 },
+              }}
+            >
+              <Box
+                component="img"
+                alt={home.clientApp.mockupAlt}
+                src={clientMockupSrc}
+                sx={{
+                  alignSelf: 'flex-end',
+                  display: 'block',
+                  height: 'auto',
+                  maxHeight: { xs: 390, sm: 470, md: 540 },
+                  maxWidth: { xs: 220, sm: 260, md: 280 },
+                  objectFit: 'contain',
+                  width: '100%',
+                }}
+              />
+            </Box>
+
+            <Stack spacing={{ xs: 2.5, md: 3 }} sx={{ minWidth: 0 }}>
+              <SectionHeading
+                eyebrow={home.clientApp.eyebrow}
+                title={home.clientApp.title}
+                description={home.clientApp.description}
+              />
+              <Stack spacing={1.5}>
+                {home.clientApp.benefits.map((benefit) => (
+                  <Stack key={benefit} direction="row" spacing={1.5} alignItems="center">
+                    <CheckCircleRoundedIcon
+                      sx={{ color: accentByTone.teal.main, flex: '0 0 auto', fontSize: 20 }}
+                    />
+                    <Typography sx={{ color: 'text.secondary', fontWeight: 650, lineHeight: 1.6 }}>
+                      {benefit}
+                    </Typography>
+                  </Stack>
+                ))}
+              </Stack>
+              <Button
+                endIcon={<EastRoundedIcon />}
+                href={localizedZerpClientUrl}
+                rel="noopener noreferrer"
+                target="_blank"
+                variant="contained"
+                size="large"
+                sx={{ alignSelf: { xs: 'stretch', sm: 'flex-start' }, mt: 1 }}
+              >
+                {home.clientApp.cta}
+              </Button>
+            </Stack>
+          </Box>
+
+          {/* 3. LOGo STRIP / PROBLEM STRIP */}
           <Box
             component="section"
             sx={{
@@ -485,7 +580,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </Grid>
           </Box>
 
-          {/* 3. ALTERNATING FEATURE HIGHLIGHTS */}
+          {/* 4. ALTERNATING FEATURE HIGHLIGHTS */}
           {home.modules.length > 0 && (
             <Box component="section">
               <Stack spacing={{ xs: 8, md: 12 }}>
@@ -608,7 +703,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </Box>
           )}
 
-          {/* 4. MODULES CARDS GRID */}
+          {/* 5. MODULES CARDS GRID */}
           <Box component="section" sx={{ py: 4 }}>
             <Stack spacing={{ xs: 4, md: 6 }}>
               <SectionHeading
@@ -633,7 +728,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </Stack>
           </Box>
 
-          {/* 5. WORKFLOW SECTION with full width image space */}
+          {/* 6. WORKFLOW SECTION with full width image space */}
           <Box
             component="section"
             sx={{
@@ -656,7 +751,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </Stack>
           </Box>
 
-          {/* 6. DIFFERENCES */}
+          {/* 7. DIFFERENCES */}
           <Box
             component="section"
             sx={{

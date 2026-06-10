@@ -198,6 +198,14 @@ export interface MessageDictionary {
       title: string
       description: string
     }>
+    clientApp: {
+      eyebrow: string
+      title: string
+      description: string
+      benefits: readonly string[]
+      cta: string
+      mockupAlt: string
+    }
     modulesEyebrow: string
     modulesTitle: string
     modulesDescription: string

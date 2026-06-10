@@ -111,6 +111,20 @@ export const enMessages = {
           'Revenue, channel, staff, and menu performance reach managers in a clean view.',
       },
     ],
+    clientApp: {
+      eyebrow: 'Guest App',
+      title: 'Transfer your order to the table easily with a QR code',
+      description:
+        'ZERP Client lets users view restaurants, browse menus, and create their orders quickly. Users can list all businesses or discover nearby restaurants by location. A dedicated QR code is generated for the created order. The waiter scans this QR code to transfer the order to the relevant table and can process it directly with customer approval.',
+      benefits: [
+        'List restaurants and discover by location',
+        'View menus and create orders quickly',
+        'Fast order transfer with QR code',
+        'More organized and faster service flow',
+      ],
+      cta: 'Explore businesses',
+      mockupAlt: 'ZERP Client customer app mockup',
+    },
     modulesEyebrow: 'Operation Modules',
     modulesTitle: 'Front of house and back office on the same backbone',
     modulesDescription:

@@ -110,6 +110,20 @@ export const trMessages = {
         description: 'Ciro, kanal, personel ve menü performansı yöneticiye sade biçimde akar.',
       },
     ],
+    clientApp: {
+      eyebrow: 'Müşteri Uygulaması',
+      title: 'Siparişinizi QR kod ile kolayca masaya aktarın',
+      description:
+        'ZERP Client, kullanıcıların restoranları görüntülemesini, menüleri incelemesini ve siparişlerini hızlıca oluşturmasını sağlar. Kullanıcılar tüm işletmeleri listeleyebilir, isterlerse konuma göre yakın restoranları da keşfedebilir. Oluşturulan sipariş için özel bir QR kod üretilir. Garson, bu QR kodu okutarak siparişi ilgili masaya aktarır ve müşteri onayıyla siparişi doğrudan işleme alabilir.',
+      benefits: [
+        'Restoranları listeleme ve konuma göre keşfetme',
+        'Menü görüntüleme ve hızlı sipariş oluşturma',
+        'QR kod ile hızlı sipariş aktarımı',
+        'Daha düzenli ve hızlı servis süreci',
+      ],
+      cta: 'İşletmeleri keşfedin',
+      mockupAlt: 'ZERP Client müşteri uygulaması mockup görseli',
+    },
     modulesEyebrow: 'Operasyon Modülleri',
     modulesTitle: 'Restoranın ön tarafı ve arka ofisi aynı omurgada',
     modulesDescription:
