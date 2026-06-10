@@ -220,6 +220,22 @@ export function ProductRecipeManager({ productId, productName, productShopId }: 
     setForm((prev) => ({ ...prev, items: prev.items.filter((_, current) => current !== index) }))
   }
 
+  function updateIsDefault(isDefault: boolean) {
+    setForm((prev) => ({
+      ...prev,
+      isDefault,
+      ...(isDefault ? { name: productName } : {}),
+    }))
+  }
+
+  function updateRecipeName(name: string) {
+    setForm((prev) => ({
+      ...prev,
+      name,
+      isDefault: prev.isDefault && name !== productName ? false : prev.isDefault,
+    }))
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!form.name.trim()) return
@@ -433,7 +449,7 @@ export function ProductRecipeManager({ productId, productName, productShopId }: 
                   <TextField
                     label={t('sale.recipe.form.name')}
                     value={form.name}
-                    onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) => updateRecipeName(e.target.value)}
                     required
                     fullWidth
                     disabled={isPending}
@@ -443,9 +459,7 @@ export function ProductRecipeManager({ productId, productName, productShopId }: 
                       <Checkbox
                         checked={form.isDefault}
                         disabled={isPending}
-                        onChange={(e) =>
-                          setForm((prev) => ({ ...prev, isDefault: e.target.checked }))
-                        }
+                        onChange={(e) => updateIsDefault(e.target.checked)}
                       />
                     }
                     label={t('sale.recipe.form.isDefault')}

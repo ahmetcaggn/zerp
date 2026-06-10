@@ -17,12 +17,10 @@ import {
   DialogTitle,
   Divider,
   FormControl,
-  FormControlLabel,
   IconButton,
   InputLabel,
   MenuItem,
   Select,
-  Switch,
   TextField,
   Tooltip,
   Typography,
@@ -65,7 +63,6 @@ type OptionFormState = {
   name: string
   description: string
   price: string
-  isActive: boolean
   items: ProductExtraOptionItemCreateDto[]
 }
 
@@ -73,7 +70,6 @@ const EMPTY_FORM = (): OptionFormState => ({
   name: '',
   description: '',
   price: '0',
-  isActive: true,
   items: [EMPTY_ITEM()],
 })
 
@@ -84,7 +80,7 @@ interface Props {
 }
 
 export function ProductExtraOptionManager({ productId, productName, productShopId }: Props) {
-  const { t, locale } = useI18n()
+  const { t } = useI18n()
   const { showToast } = useToast()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
@@ -186,7 +182,6 @@ export function ProductExtraOptionManager({ productId, productName, productShopI
       name: option.name,
       description: option.description ?? '',
       price: String(option.price),
-      isActive: option.isActive,
       items:
         option.items.length > 0
           ? option.items.map((item) => ({
@@ -223,7 +218,7 @@ export function ProductExtraOptionManager({ productId, productName, productShopI
       name: form.name.trim(),
       ...(form.description.trim() && { description: form.description.trim() }),
       price: Number(form.price),
-      isActive: form.isActive,
+      isActive: true,
       items: validItems,
     }
 
@@ -350,13 +345,6 @@ export function ProductExtraOptionManager({ productId, productName, productShopI
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                     <Typography fontWeight={600}>{option.name}</Typography>
                     <Chip label={`₺${option.price}`} size="small" variant="outlined" />
-                    {!option.isActive && (
-                      <Chip
-                        label={locale === 'tr' ? 'Pasif' : 'Inactive'}
-                        size="small"
-                        color="default"
-                      />
-                    )}
                   </Box>
                   <Box>
                     <Tooltip
@@ -439,19 +427,6 @@ export function ProductExtraOptionManager({ productId, productName, productShopI
                     sx={{ width: 140 }}
                     inputProps={{ min: 0, step: '0.01' }}
                     disabled={isPending}
-                  />
-
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={form.isActive}
-                        disabled={isPending}
-                        onChange={(e) =>
-                          setForm((prev) => ({ ...prev, isActive: e.target.checked }))
-                        }
-                      />
-                    }
-                    label={t('sale.extraOption.form.isActive')}
                   />
                 </Box>
 

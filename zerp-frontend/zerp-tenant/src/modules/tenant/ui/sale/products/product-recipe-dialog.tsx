@@ -164,6 +164,22 @@ export function ProductRecipeDialog({ open, product, onClose }: Props) {
     setForm((prev) => ({ ...prev, items: prev.items.filter((_, i) => i !== index) }))
   }
 
+  function updateIsDefault(isDefault: boolean) {
+    setForm((prev) => ({
+      ...prev,
+      isDefault,
+      ...(isDefault ? { name: product.name } : {}),
+    }))
+  }
+
+  function updateRecipeName(name: string) {
+    setForm((prev) => ({
+      ...prev,
+      name,
+      isDefault: prev.isDefault && name !== product.name ? false : prev.isDefault,
+    }))
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!form.name.trim()) return
@@ -304,7 +320,7 @@ export function ProductRecipeDialog({ open, product, onClose }: Props) {
                   <TextField
                     label={t('sale.recipe.form.name')}
                     value={form.name}
-                    onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                    onChange={(e) => updateRecipeName(e.target.value)}
                     required
                     fullWidth
                   />
@@ -312,7 +328,7 @@ export function ProductRecipeDialog({ open, product, onClose }: Props) {
                     control={
                       <Checkbox
                         checked={form.isDefault}
-                        onChange={(e) => setForm((p) => ({ ...p, isDefault: e.target.checked }))}
+                        onChange={(e) => updateIsDefault(e.target.checked)}
                       />
                     }
                     label={t('sale.recipe.form.isDefault')}
