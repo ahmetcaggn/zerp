@@ -34,6 +34,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
 import { useAuth } from '@/core/auth/client/use-auth'
+import { useCurrentUserProfile } from '@/core/auth/client/use-current-user-profile'
 import { appConfig } from '@/core/config/app-config'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import {
@@ -42,7 +43,6 @@ import {
   useCurrentUserPermissions,
 } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
-import { useTenant } from '@/modules/tenant/hooks/use-tenant'
 
 const DRAWER_WIDTH = 240
 const COLLAPSED_DRAWER_WIDTH = 64
@@ -251,9 +251,8 @@ export function AppSidebar({ locale }: { locale: string }) {
   const pathname = usePathname()
   const { t } = useI18n()
   const { scope } = useShopScope()
-  const { tenantId } = useAuth()
-  const { data: tenant } = useTenant(tenantId)
-  const tenantName = tenant?.name || ''
+  const { data: profile } = useCurrentUserProfile()
+  const tenantName = profile?.tenantName || ''
   const organizationLabel = locale === 'tr' ? 'Organizasyon' : 'Organization'
   const {
     hasAnyPermission,

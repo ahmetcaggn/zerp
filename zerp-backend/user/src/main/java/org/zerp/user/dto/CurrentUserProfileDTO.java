@@ -23,6 +23,7 @@ public class CurrentUserProfileDTO {
     private EmploymentStatus status;
     private ManagerDTO manager;
     private List<EmployeeContactDTO> contacts;
+    private String tenantName;
 
     @Data
     @JsonInclude(JsonInclude.Include.NON_EMPTY)

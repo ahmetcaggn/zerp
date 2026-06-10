@@ -102,6 +102,10 @@ public class UserService implements IResourceService<UserResponseDTO, UserRespon
         dto.setFirstName(user.getUsername());
         dto.setEmail(user.getEmail());
 
+        if (user.getTenant() != null) {
+            dto.setTenantName(user.getTenant().getName());
+        }
+
         if (user instanceof Employee employee) {
             dto.setFirstName(firstNonBlank(employee.getFirstName(), user.getUsername()));
             dto.setLastName(employee.getLastName());

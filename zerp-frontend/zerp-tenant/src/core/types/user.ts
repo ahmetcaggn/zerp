@@ -6,4 +6,5 @@ export type CurrentUserEmployeeProfile = Omit<
 > & {
   id?: string
   username?: string
+  tenantName?: string
 }
