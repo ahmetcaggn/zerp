@@ -44,7 +44,6 @@ final class AuthService with LoggerMixin<AuthService> {
           issuer: _issuer,
           discoveryUrl: _discoveryUrl,
           scopes: _scopes,
-          promptValues: ['login'],
         ),
       );
 
@@ -63,42 +62,6 @@ final class AuthService with LoggerMixin<AuthService> {
       return claims;
     } on Object catch (e, s) {
       log.severe('Login process failed', e, s);
-      rethrow;
-    }
-  }
-
-  /// Sign up using Keycloak registration flow.
-  /// Uses kc_action=register to trigger Keycloak's registration page.
-  Future<AuthClaims?> signUp() async {
-    log.fine('Starting sign-up process');
-
-    try {
-      final result = await _appAuth.authorizeAndExchangeCode(
-        AuthorizationTokenRequest(
-          _clientId,
-          _redirectUrl,
-          issuer: _issuer,
-          discoveryUrl: _discoveryUrl,
-          scopes: _scopes,
-          additionalParameters: {'kc_action': 'register'},
-        ),
-      );
-
-      await _authStorageService.saveAuthTokensResponse(result);
-
-      if (result.accessToken == null ||
-          JwtDecoder.isExpired(result.accessToken!)) {
-        await _authStorageService.clearTokens();
-        throw Exception(
-          'Access token is invalid or expired immediately after sign-up',
-        );
-      }
-
-      final claims = await _authStorageService.authClaims;
-      log.info('Sign-up successful for user: ${claims?.preferredUsername}');
-      return claims;
-    } on Object catch (e, s) {
-      log.severe('Sign-up process failed', e, s);
       rethrow;
     }
   }
@@ -143,7 +106,23 @@ final class AuthService with LoggerMixin<AuthService> {
     return refreshStatus == _RefreshAttemptStatus.refreshed;
   }
 
+  Future<_RefreshAttemptStatus>? _ongoingRefresh;
+
   Future<_RefreshAttemptStatus> _tryRefreshTokenInternal() async {
+    if (_ongoingRefresh != null) {
+      log.fine('Token refresh already in progress, awaiting result');
+      return _ongoingRefresh!;
+    }
+
+    _ongoingRefresh = _doTryRefreshTokenInternal();
+    try {
+      return await _ongoingRefresh!;
+    } finally {
+      _ongoingRefresh = null;
+    }
+  }
+
+  Future<_RefreshAttemptStatus> _doTryRefreshTokenInternal() async {
     log.fine('Attempting to refresh access token silently');
 
     try {
