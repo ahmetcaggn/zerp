@@ -755,6 +755,20 @@ export interface MessageDictionary {
     teamDeletedToast: string
     nameRequiredWarning: string
   }
+  restaurants: {
+    addToCart: string
+    price: string
+  }
+  productDetail: {
+    title: string
+    ingredients: string
+    calories: string
+    weight: string
+    allergens: string
+    notAvailable: string
+    close: string
+    kcal: string
+  }
 }
 
 export const messagesByLocale: Record<Locale, MessageDictionary> = {

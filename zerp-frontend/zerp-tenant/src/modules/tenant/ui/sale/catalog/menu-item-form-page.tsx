@@ -1,7 +1,10 @@
 'use client'
 
+import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import LocalFireDepartmentRoundedIcon from '@mui/icons-material/LocalFireDepartmentRounded'
+import MonitorWeightRoundedIcon from '@mui/icons-material/MonitorWeightRounded'
 import {
   Alert,
   Box,
@@ -10,11 +13,17 @@ import {
   CardContent,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
   FormControl,
   FormHelperText,
   InputLabel,
   MenuItem,
   Select,
+  Stack,
   TextField,
   Tooltip,
   Typography,
@@ -51,6 +60,7 @@ import type {
   ProductResponseDto,
 } from '../../../types/sale'
 import { MenuItemProductMultiSelectField } from '../shared/menu-item-product-multi-select-field'
+import { ProductImagePlaceholder } from '../shared/product-image-placeholder'
 
 interface Props {
   mode: 'create' | 'edit'
@@ -74,6 +84,8 @@ type MenuItemFormValue = {
 
 const ACCEPTED_IMAGE_TYPES = 'image/jpeg,image/png,image/gif,image/webp'
 const PREVIEW_IMAGE_FALLBACK = 'https://via.placeholder.com/400x260?text=No+Image'
+const CARD_IMAGE_FALLBACK = 'https://via.placeholder.com/150?text=No+Image'
+const DETAIL_IMAGE_FALLBACK = 'https://via.placeholder.com/600x400?text=No+Image'
 
 function parseCommaSeparatedList(value: string): string[] {
   return value
@@ -101,66 +113,147 @@ function MenuItemPreviewCard({
   description,
   price,
   imageSrc,
+  calories,
+  weight,
+  ingredients,
+  allergens,
   selectedProducts,
+  isAvailable = true,
 }: {
   name: string
   description: string
   price: string
   imageSrc: string
+  calories: string
+  weight: string
+  ingredients: string[]
+  allergens: string[]
   selectedProducts: string[]
+  isAvailable?: boolean
 }) {
   const { t } = useI18n()
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null)
+  const [failedDetailImageSrc, setFailedDetailImageSrc] = useState<string | null>(null)
+  const [isDetailOpen, setIsDetailOpen] = useState(false)
 
-  const resolvedImage = failedImageSrc === imageSrc ? PREVIEW_IMAGE_FALLBACK : imageSrc
+  const hasNoImage = !imageSrc || imageSrc === PREVIEW_IMAGE_FALLBACK || failedImageSrc === imageSrc
+  const hasNoDetailImage = !imageSrc || imageSrc === PREVIEW_IMAGE_FALLBACK || failedDetailImageSrc === imageSrc
+
   const displayName = name.trim() || t('sale.menuItem.form.name')
   const displayDescription = description.trim() || t('sale.menuItem.form.description')
   const numericPrice = Number(price)
-  const displayPrice =
-    Number.isFinite(numericPrice) && numericPrice > 0 ? `₺${numericPrice.toFixed(2)}` : '₺0.00'
+  const formattedPrice = Number.isFinite(numericPrice) ? numericPrice.toFixed(2) : '0.00'
+  const displayPrice = t('restaurants.price', { price: formattedPrice })
 
   return (
-    <Card variant="outlined" sx={{ position: { md: 'sticky' }, top: { md: 24 } }}>
-      <CardContent>
-        <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-          {t('sale.menuItem.preview.title')}
-        </Typography>
+    <>
+      <Card variant="outlined" sx={{ position: { md: 'sticky' }, top: { md: 24 } }}>
+        <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            {t('sale.menuItem.preview.title')}
+          </Typography>
 
-        <Card variant="outlined" sx={{ p: 1 }}>
-          <Box
-            component="img"
-            src={resolvedImage}
-            alt={displayName}
-            onError={() => setFailedImageSrc(imageSrc)}
-            sx={{ width: '100%', height: 220, objectFit: 'cover', borderRadius: 1 }}
-          />
+          <Card
+            elevation={1}
+            onClick={() => setIsDetailOpen(true)}
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'stretch',
+              p: 1,
+              cursor: 'pointer',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: 3,
+              },
+            }}
+          >
+            {hasNoImage ? (
+              <ProductImagePlaceholder
+                sx={{
+                  width: { xs: 104, sm: 100 },
+                  height: { xs: 104, sm: 100 },
+                  borderRadius: 2,
+                }}
+              />
+            ) : (
+              <Box
+                component="img"
+                src={imageSrc}
+                alt={displayName}
+                onError={() => setFailedImageSrc(imageSrc)}
+                sx={{
+                  width: { xs: 104, sm: 100 },
+                  height: { xs: 104, sm: 100 },
+                  flexShrink: 0,
+                  borderRadius: 2,
+                  objectFit: 'contain',
+                  bgcolor: 'background.default',
+                }}
+              />
+            )}
 
-          <Box sx={{ p: 1 }}>
             <Box
               sx={{
                 display: 'flex',
-                justifyContent: 'space-between',
-                gap: 1,
-                alignItems: 'flex-start',
+                flexDirection: 'column',
+                flexGrow: 1,
+                minWidth: 0,
+                ml: { xs: 1.5, sm: 2 },
               }}
             >
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, wordBreak: 'break-word' }}>
-                {displayName}
-              </Typography>
-              <Typography
-                variant="subtitle1"
-                color="primary.main"
-                sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}
+              <CardContent
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  p: 0,
+                  '&:last-child': { pb: 0 },
+                }}
               >
-                {displayPrice}
-              </Typography>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    mb: 0.5,
+                    gap: 1,
+                  }}
+                >
+                  <Typography variant="subtitle1" fontWeight="bold" sx={{ wordBreak: 'break-word' }}>
+                    {displayName}
+                  </Typography>
+                  <Typography
+                    variant="subtitle1"
+                    color="primary.main"
+                    fontWeight="bold"
+                    sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+                  >
+                    {displayPrice}
+                  </Typography>
+                </Box>
+
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                  {displayDescription}
+                </Typography>
+
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 'auto' }}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<AddShoppingCartRoundedIcon />}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    {t('restaurants.addToCart')}
+                  </Button>
+                </Box>
+              </CardContent>
             </Box>
+          </Card>
 
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 1.5 }}>
-              {displayDescription}
-            </Typography>
-
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+          <Box sx={{ mt: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1, fontWeight: 600 }}>
               {t('sale.menuItem.preview.products')}: {selectedProducts.length}
             </Typography>
 
@@ -178,9 +271,122 @@ function MenuItemPreviewCard({
               )}
             </Box>
           </Box>
-        </Card>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <Dialog open={isDetailOpen} onClose={() => setIsDetailOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ pb: 1, fontWeight: 800 }}>
+          {t('productDetail.title')}
+        </DialogTitle>
+        <DialogContent>
+          {hasNoDetailImage ? (
+            <ProductImagePlaceholder
+              sx={{
+                width: '100%',
+                height: { xs: 220, sm: 280 },
+                borderRadius: 1.5,
+                mb: 2,
+              }}
+            />
+          ) : (
+            <Box
+              component="img"
+              src={imageSrc}
+              alt={displayName}
+              onError={() => setFailedDetailImageSrc(imageSrc)}
+              sx={{
+                width: '100%',
+                height: { xs: 220, sm: 280 },
+                objectFit: 'contain',
+                borderRadius: 1.5,
+                mb: 2,
+                bgcolor: 'background.default',
+              }}
+            />
+          )}
+
+          <Stack spacing={2}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>
+              <Typography variant="h5" fontWeight={800}>
+                {displayName}
+              </Typography>
+              <Typography variant="h6" color="primary.main" fontWeight={800} sx={{ whiteSpace: 'nowrap' }}>
+                {displayPrice}
+              </Typography>
+            </Box>
+
+            {displayDescription ? (
+              <Typography color="text.secondary">
+                {displayDescription}
+              </Typography>
+            ) : null}
+
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              <Chip
+                icon={<MonitorWeightRoundedIcon fontSize="small" />}
+                label={weight || t('productDetail.notAvailable')}
+                variant="outlined"
+              />
+              <Chip
+                icon={<LocalFireDepartmentRoundedIcon fontSize="small" />}
+                label={calories !== undefined && calories !== null && calories !== ''
+                  ? t('productDetail.kcal', { value: calories })
+                  : t('productDetail.notAvailable')}
+                variant="outlined"
+              />
+            </Stack>
+
+            <Divider />
+
+            <Box>
+              <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+                {t('productDetail.ingredients')}
+              </Typography>
+              {ingredients && ingredients.length > 0 ? (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  {ingredients.map((ingredient) => (
+                    <Chip key={ingredient} label={ingredient} size="small" variant="outlined" />
+                  ))}
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  {t('productDetail.notAvailable')}
+                </Typography>
+              )}
+            </Box>
+
+            <Box>
+              <Typography variant="subtitle2" fontWeight={700} color="error.main" gutterBottom>
+                {t('productDetail.allergens')}
+              </Typography>
+              {allergens && allergens.length > 0 ? (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  {allergens.map((allergen) => (
+                    <Chip key={allergen} label={allergen} size="small" color="error" variant="outlined" />
+                  ))}
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  {t('productDetail.notAvailable')}
+                </Typography>
+              )}
+            </Box>
+          </Stack>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => setIsDetailOpen(false)} color="inherit">
+            {t('productDetail.close')}
+          </Button>
+          <Button
+            variant="contained"
+            disabled={!isAvailable}
+          >
+            {t('restaurants.addToCart')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   )
 }
 
@@ -589,6 +795,10 @@ function MenuItemFormCard({
         description={description}
         price={price}
         imageSrc={previewImageSrc}
+        calories={calories}
+        weight={weight}
+        ingredients={parseCommaSeparatedList(ingredientsInput)}
+        allergens={parseCommaSeparatedList(allergensInput)}
         selectedProducts={selectedProductNames}
       />
     </Box>

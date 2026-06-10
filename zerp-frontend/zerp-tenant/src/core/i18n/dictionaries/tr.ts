@@ -1298,4 +1298,18 @@ export const trMessages = {
     teamDeletedToast: 'Takım silindi.',
     nameRequiredWarning: 'Takım adı zorunludur.',
   },
+  restaurants: {
+    addToCart: 'Sepete Ekle',
+    price: '{price} ₺',
+  },
+  productDetail: {
+    title: 'Ürün Detayı',
+    ingredients: 'İçindekiler',
+    calories: 'Kalori',
+    weight: 'Gramaj / Ölçü',
+    allergens: 'Alerjen Uyarıları',
+    notAvailable: 'Bilgi yok',
+    close: 'Kapat',
+    kcal: '{value} kcal',
+  },
 } as const

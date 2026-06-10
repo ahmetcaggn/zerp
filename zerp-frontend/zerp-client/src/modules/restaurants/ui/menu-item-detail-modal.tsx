@@ -18,6 +18,7 @@ import {
 import { useI18n } from '@/core/i18n/i18n-provider'
 
 import type { Product as MenuItem } from '../types'
+import { ProductImagePlaceholder } from './product-image-placeholder'
 
 interface MenuItemDetailModalProps {
   open: boolean
@@ -37,10 +38,11 @@ export function MenuItemDetailModal({ open, onClose, menuItem, onAddToCart }: Me
   const { t } = useI18n()
 
   if (!menuItem) return null
-  const imageSrc =
-    buildOriginalImageUrl(menuItem.imageId) ??
-    menuItem.imageUrl ??
-    'https://via.placeholder.com/600x400?text=No+Image'
+  const imageSrc = buildOriginalImageUrl(menuItem.imageId) ?? menuItem.imageUrl
+  const hasNoImage =
+    !imageSrc ||
+    imageSrc.includes('placeholder') ||
+    imageSrc.includes('placehold.co')
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -48,19 +50,30 @@ export function MenuItemDetailModal({ open, onClose, menuItem, onAddToCart }: Me
         {t('productDetail.title')}
       </DialogTitle>
       <DialogContent>
-        <Box
-          component="img"
-          src={imageSrc}
-          alt={menuItem.name}
-          sx={{
-            width: '100%',
-            height: { xs: 220, sm: 280 },
-            objectFit: 'contain',
-            borderRadius: 1.5,
-            mb: 2,
-            bgcolor: 'background.default',
-          }}
-        />
+        {hasNoImage ? (
+          <ProductImagePlaceholder
+            sx={{
+              width: '100%',
+              height: { xs: 220, sm: 280 },
+              borderRadius: 1.5,
+              mb: 2,
+            }}
+          />
+        ) : (
+          <Box
+            component="img"
+            src={imageSrc}
+            alt={menuItem.name}
+            sx={{
+              width: '100%',
+              height: { xs: 220, sm: 280 },
+              objectFit: 'contain',
+              borderRadius: 1.5,
+              mb: 2,
+              bgcolor: 'background.default',
+            }}
+          />
+        )}
 
         <Stack spacing={2}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>

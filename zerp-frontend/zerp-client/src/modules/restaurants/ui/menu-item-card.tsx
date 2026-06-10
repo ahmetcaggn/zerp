@@ -7,6 +7,7 @@ import { useI18n } from '@/core/i18n/i18n-provider'
 
 import type { Product as MenuItem } from '../types'
 import { FadeInImage } from './fade-in-image'
+import { ProductImagePlaceholder } from './product-image-placeholder'
 
 interface MenuItemCardProps {
   menuItem: MenuItem
@@ -16,6 +17,10 @@ interface MenuItemCardProps {
 
 export function MenuItemCard({ menuItem, onClick, onAddToCart }: MenuItemCardProps) {
   const { t } = useI18n()
+  const hasNoImage =
+    !menuItem.imageUrl ||
+    menuItem.imageUrl.includes('placeholder') ||
+    menuItem.imageUrl.includes('placehold.co')
 
   return (
     <Card
@@ -37,17 +42,27 @@ export function MenuItemCard({ menuItem, onClick, onAddToCart }: MenuItemCardPro
       }}
       onClick={onClick}
     >
-      <FadeInImage
-        src={menuItem.imageUrl || 'https://via.placeholder.com/150?text=No+Image'}
-        alt={menuItem.name}
-        objectFit="contain"
-        sx={{
-          width: { xs: 104, sm: 100 },
-          height: { xs: 104, sm: 100 },
-          flexShrink: 0,
-          borderRadius: 2,
-        }}
-      />
+      {hasNoImage ? (
+        <ProductImagePlaceholder
+          sx={{
+            width: { xs: 104, sm: 100 },
+            height: { xs: 104, sm: 100 },
+            borderRadius: 2,
+          }}
+        />
+      ) : (
+        <FadeInImage
+          src={menuItem.imageUrl!}
+          alt={menuItem.name}
+          objectFit="contain"
+          sx={{
+            width: { xs: 104, sm: 100 },
+            height: { xs: 104, sm: 100 },
+            flexShrink: 0,
+            borderRadius: 2,
+          }}
+        />
+      )}
 
       <Box
         sx={{

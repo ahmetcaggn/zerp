@@ -1307,4 +1307,18 @@ export const enMessages = {
     scanToViewMenu: 'Scan to view our menu',
     poweredBy: 'Powered by ZERP',
   },
+  restaurants: {
+    addToCart: 'Add to Cart',
+    price: '{price} ₺',
+  },
+  productDetail: {
+    title: 'Product Details',
+    ingredients: 'Ingredients',
+    calories: 'Calories',
+    weight: 'Weight / Portion',
+    allergens: 'Allergen Warnings',
+    notAvailable: 'Not available',
+    close: 'Close',
+    kcal: '{value} kcal',
+  },
 } as const
