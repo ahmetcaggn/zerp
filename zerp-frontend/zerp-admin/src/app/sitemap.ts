@@ -7,15 +7,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return appConfig.locale.supportedLocales.flatMap((locale) => [
     {
-      url: `${baseUrl}/${locale}`,
-      changeFrequency: 'daily',
-      priority: 1,
-      lastModified: new Date(),
-    },
-    {
       url: `${baseUrl}/${locale}/login`,
       changeFrequency: 'weekly',
-      priority: 0.7,
+      priority: 1,
       lastModified: new Date(),
     },
     {
