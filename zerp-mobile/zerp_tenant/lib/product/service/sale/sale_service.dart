@@ -61,6 +61,8 @@ class SaleService extends ServiceBase with LoggerMixin<SaleService> {
     final request = GetListShopTableCommand(
       start: pageRequest.start,
       end: pageRequest.end,
+      sort: 'name',
+      order: 'ASC',
       allParams: queryParams,
     );
 
