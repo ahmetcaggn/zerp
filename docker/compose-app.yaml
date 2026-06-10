@@ -8,18 +8,23 @@ services:
         SERVICE: eureka
         EXPOSE_PORT: 8761
     container_name: zerp-eureka
+    restart: unless-stopped
     hostname: eureka
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: "256M"
+    mem_limit: ${EUREKA_MEM_LIMIT:-384m}
+    mem_reservation: ${EUREKA_MEM_RESERVATION:-256m}
+    deploy:
+      resources:
+        limits:
+          memory: ${EUREKA_MEM_LIMIT:-384m}
+        reservations:
+          memory: ${EUREKA_MEM_RESERVATION:-256m}
     environment:
       TZ: Europe/Istanbul
       SERVICE: eureka
       MODULE_NAME: eureka
       SPRING_PROFILES_ACTIVE: ${EUREKA_SPRING_PROFILES_ACTIVE}
       LOG4J2_CONFIG_PATH: ${EUREKA_LOG4J2_CONFIG_PATH}
-      JAVA_OPTS: ${EUREKA_JAVA_OPTS}
+      JAVA_OPTS: ${EUREKA_JAVA_OPTS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=25.0 -XX:+ExitOnOutOfMemoryError}
       spring.config.import: optional:file:/config/eureka.properties
     volumes:
       - ../zerp-backend/local/docker-config/eureka.docker.properties:/config/eureka.properties:ro
@@ -38,11 +43,16 @@ services:
         SERVICE: crm
         JAR_FILE: zerp-backend/crm/target/*-exec.jar
     container_name: zerp-crm
+    restart: unless-stopped
     hostname: crm
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: "512M"
+    mem_limit: ${CRM_MEM_LIMIT:-768m}
+    mem_reservation: ${CRM_MEM_RESERVATION:-512m}
+    deploy:
+      resources:
+        limits:
+          memory: ${CRM_MEM_LIMIT:-768m}
+        reservations:
+          memory: ${CRM_MEM_RESERVATION:-512m}
     environment:
       SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:-50MB}
       SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:-50MB}
@@ -51,7 +61,7 @@ services:
       MODULE_NAME: crm
       SPRING_PROFILES_ACTIVE: ${CRM_SPRING_PROFILES_ACTIVE}
       LOG4J2_CONFIG_PATH: ${CRM_LOG4J2_CONFIG_PATH}
-      JAVA_OPTS: ${CRM_JAVA_OPTS}
+      JAVA_OPTS: ${CRM_JAVA_OPTS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=25.0 -XX:+ExitOnOutOfMemoryError}
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -86,11 +96,16 @@ services:
         SERVICE: employee
         JAR_FILE: zerp-backend/employee/target/*-exec.jar
     container_name: zerp-employee
+    restart: unless-stopped
     hostname: employee
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: "512M"
+    mem_limit: ${EMPLOYEE_MEM_LIMIT:-768m}
+    mem_reservation: ${EMPLOYEE_MEM_RESERVATION:-512m}
+    deploy:
+      resources:
+        limits:
+          memory: ${EMPLOYEE_MEM_LIMIT:-768m}
+        reservations:
+          memory: ${EMPLOYEE_MEM_RESERVATION:-512m}
     environment:
       SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:-50MB}
       SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:-50MB}
@@ -99,7 +114,7 @@ services:
       MODULE_NAME: employee
       SPRING_PROFILES_ACTIVE: ${EMPLOYEE_SPRING_PROFILES_ACTIVE}
       LOG4J2_CONFIG_PATH: ${EMPLOYEE_LOG4J2_CONFIG_PATH}
-      JAVA_OPTS: ${EMPLOYEE_JAVA_OPTS}
+      JAVA_OPTS: ${EMPLOYEE_JAVA_OPTS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=25.0 -XX:+ExitOnOutOfMemoryError}
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -128,11 +143,16 @@ services:
         SERVICE: notification
         JAR_FILE: zerp-backend/notification/target/*-exec.jar
     container_name: zerp-notification
+    restart: unless-stopped
     hostname: notification
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: "384M"
+    mem_limit: ${NOTIFICATION_MEM_LIMIT:-512m}
+    mem_reservation: ${NOTIFICATION_MEM_RESERVATION:-384m}
+    deploy:
+      resources:
+        limits:
+          memory: ${NOTIFICATION_MEM_LIMIT:-512m}
+        reservations:
+          memory: ${NOTIFICATION_MEM_RESERVATION:-384m}
     environment:
       SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:-50MB}
       SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:-50MB}
@@ -141,7 +161,7 @@ services:
       MODULE_NAME: notification
       SPRING_PROFILES_ACTIVE: ${NOTIFICATION_SPRING_PROFILES_ACTIVE}
       LOG4J2_CONFIG_PATH: ${NOTIFICATION_LOG4J2_CONFIG_PATH}
-      JAVA_OPTS: ${NOTIFICATION_JAVA_OPTS}
+      JAVA_OPTS: ${NOTIFICATION_JAVA_OPTS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=25.0 -XX:+ExitOnOutOfMemoryError}
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -176,11 +196,16 @@ services:
         SERVICE: resource
         JAR_FILE: zerp-backend/resource/target/*-exec.jar
     container_name: zerp-resource
+    restart: unless-stopped
     hostname: resource
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: "512M"
+    mem_limit: ${RESOURCE_MEM_LIMIT:-768m}
+    mem_reservation: ${RESOURCE_MEM_RESERVATION:-512m}
+    deploy:
+      resources:
+        limits:
+          memory: ${RESOURCE_MEM_LIMIT:-768m}
+        reservations:
+          memory: ${RESOURCE_MEM_RESERVATION:-512m}
     environment:
       SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:-50MB}
       SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:-50MB}
@@ -189,7 +214,7 @@ services:
       MODULE_NAME: resource
       SPRING_PROFILES_ACTIVE: ${RESOURCE_SPRING_PROFILES_ACTIVE}
       LOG4J2_CONFIG_PATH: ${RESOURCE_LOG4J2_CONFIG_PATH}
-      JAVA_OPTS: ${RESOURCE_JAVA_OPTS}
+      JAVA_OPTS: ${RESOURCE_JAVA_OPTS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=25.0 -XX:+ExitOnOutOfMemoryError}
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -218,11 +243,16 @@ services:
         SERVICE: sale
         JAR_FILE: zerp-backend/sale/target/*-exec.jar
     container_name: zerp-sale
+    restart: unless-stopped
     hostname: sale
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: "512M"
+    mem_limit: ${SALE_MEM_LIMIT:-768m}
+    mem_reservation: ${SALE_MEM_RESERVATION:-512m}
+    deploy:
+      resources:
+        limits:
+          memory: ${SALE_MEM_LIMIT:-768m}
+        reservations:
+          memory: ${SALE_MEM_RESERVATION:-512m}
     environment:
       SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:-50MB}
       SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:-50MB}
@@ -231,7 +261,7 @@ services:
       MODULE_NAME: sale
       SPRING_PROFILES_ACTIVE: ${SALE_SPRING_PROFILES_ACTIVE}
       LOG4J2_CONFIG_PATH: ${SALE_LOG4J2_CONFIG_PATH}
-      JAVA_OPTS: ${SALE_JAVA_OPTS}
+      JAVA_OPTS: ${SALE_JAVA_OPTS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=25.0 -XX:+ExitOnOutOfMemoryError}
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -265,11 +295,16 @@ services:
         SERVICE: user
         JAR_FILE: zerp-backend/user/target/*-exec.jar
     container_name: zerp-user
+    restart: unless-stopped
     hostname: user
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: "512M"
+    mem_limit: ${USER_MEM_LIMIT:-768m}
+    mem_reservation: ${USER_MEM_RESERVATION:-512m}
+    deploy:
+      resources:
+        limits:
+          memory: ${USER_MEM_LIMIT:-768m}
+        reservations:
+          memory: ${USER_MEM_RESERVATION:-512m}
     environment:
       SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:-50MB}
       SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:-50MB}
@@ -278,7 +313,7 @@ services:
       MODULE_NAME: user
       SPRING_PROFILES_ACTIVE: ${USER_SPRING_PROFILES_ACTIVE}
       LOG4J2_CONFIG_PATH: ${USER_LOG4J2_CONFIG_PATH}
-      JAVA_OPTS: ${USER_JAVA_OPTS}
+      JAVA_OPTS: ${USER_JAVA_OPTS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=25.0 -XX:+ExitOnOutOfMemoryError}
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -318,11 +353,16 @@ services:
       args:
         SERVICE: gateway
     container_name: zerp-gateway
+    restart: unless-stopped
     hostname: gateway
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: "512M"
+    mem_limit: ${GATEWAY_MEM_LIMIT:-768m}
+    mem_reservation: ${GATEWAY_MEM_RESERVATION:-512m}
+    deploy:
+      resources:
+        limits:
+          memory: ${GATEWAY_MEM_LIMIT:-768m}
+        reservations:
+          memory: ${GATEWAY_MEM_RESERVATION:-512m}
     environment:
       SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:-50MB}
       SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:-50MB}
@@ -331,7 +371,7 @@ services:
       MODULE_NAME: gateway
       SPRING_PROFILES_ACTIVE: ${GATEWAY_SPRING_PROFILES_ACTIVE}
       LOG4J2_CONFIG_PATH: ${GATEWAY_LOG4J2_CONFIG_PATH}
-      JAVA_OPTS: ${GATEWAY_JAVA_OPTS}
+      JAVA_OPTS: ${GATEWAY_JAVA_OPTS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=25.0 -XX:+ExitOnOutOfMemoryError}
       EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE}
       KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
       CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN}
