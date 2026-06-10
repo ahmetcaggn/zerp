@@ -37,6 +37,7 @@ import { useMemo, useState } from 'react'
 
 import { logoutToLanding } from '@/core/auth/client/logout'
 import { useCurrentUserProfile } from '@/core/auth/client/use-current-user-profile'
+import { appConfig } from '@/core/config/app-config'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { responsiveLayout } from '@/core/theme/layout'
@@ -73,9 +74,11 @@ const TOPBAR_ACTIONS: readonly TopbarAction[] = [
 export function AppTopbar({
   contentWidth = 'fluid',
   locale,
+  showLogo = contentWidth === 'container',
 }: {
   contentWidth?: 'fluid' | 'container'
   locale: 'tr' | 'en'
+  showLogo?: boolean
 }) {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -180,9 +183,58 @@ export function AppTopbar({
         px: contentWidth === 'container' ? 0 : responsiveLayout.toolbarPaddingX,
       }}
     >
-      <Stack direction="row" alignItems="center" sx={{ minWidth: { xs: 160, sm: 260 } }}>
+      <Stack direction="row" alignItems="center" gap={1.5}>
+        {showLogo && (
+          <Box
+            onClick={() => router.push(`/${locale}` as Route)}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+              cursor: 'pointer',
+              mr: { xs: 1, sm: 2 },
+              '&:hover': {
+                '& img': {
+                  transform: 'scale(1.05) rotate(5deg)',
+                },
+                '& .MuiTypography-root': {
+                  opacity: 0.9,
+                },
+              },
+            }}
+          >
+            <Box
+              component="img"
+              src="/zerp_icon_foreground.svg"
+              alt="ZERP"
+              sx={{
+                width: 32,
+                height: 32,
+                display: 'block',
+                transition: 'transform 0.2s ease-in-out',
+              }}
+            />
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              sx={{
+                letterSpacing: '-0.02em',
+                transition: 'opacity 0.2s ease-in-out',
+                background: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'linear-gradient(45deg, #ffffff 30%, #a0a0a0 90%)'
+                    : 'linear-gradient(45deg, #111111 30%, #555555 90%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              {appConfig.app.name}
+            </Typography>
+          </Box>
+        )}
+
         {isAuthenticated && (
-          <FormControl size="small" fullWidth>
+          <FormControl size="small" sx={{ minWidth: { xs: 160, sm: 260 } }}>
             <InputLabel>{shopLabel}</InputLabel>
             <Select
               label={shopLabel}
