@@ -3,8 +3,8 @@
 # ==========================================
 # Input Validation & Configuration
 # ==========================================
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <SHOP_ID> <BEARER_TOKEN>"
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <SHOP_ID> <MENU_ID> <BEARER_TOKEN>"
     echo "Example: $0 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000 eyJhbGciOi..."
     exit 1
 fi
