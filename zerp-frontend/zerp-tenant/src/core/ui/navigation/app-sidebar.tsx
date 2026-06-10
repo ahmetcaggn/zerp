@@ -14,6 +14,7 @@ import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded'
 import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded'
 import TableRestaurantRoundedIcon from '@mui/icons-material/TableRestaurantRounded'
 import {
+  alpha,
   Box,
   Divider,
   Drawer,
@@ -32,6 +33,7 @@ import type { Route } from 'next'
 import { usePathname, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
+import { useAuth } from '@/core/auth/client/use-auth'
 import { appConfig } from '@/core/config/app-config'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import {
@@ -40,6 +42,7 @@ import {
   useCurrentUserPermissions,
 } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
+import { useTenant } from '@/modules/tenant/hooks/use-tenant'
 
 const DRAWER_WIDTH = 240
 const COLLAPSED_DRAWER_WIDTH = 64
@@ -248,6 +251,10 @@ export function AppSidebar({ locale }: { locale: string }) {
   const pathname = usePathname()
   const { t } = useI18n()
   const { scope } = useShopScope()
+  const { tenantId } = useAuth()
+  const { data: tenant } = useTenant(tenantId)
+  const tenantName = tenant?.name || ''
+  const organizationLabel = locale === 'tr' ? 'Organizasyon' : 'Organization'
   const {
     hasAnyPermission,
     hasTenantPermission,
@@ -296,8 +303,7 @@ export function AppSidebar({ locale }: { locale: string }) {
           ? hasAnyShopPermission(
               [PermissionActions.READ_DASHBOARD, PermissionActions.READ_SHOP],
               currentShopId,
-            ) ||
-              hasAnyPermission([PermissionActions.READ_DASHBOARD, PermissionActions.READ_SHOP])
+            ) || hasAnyPermission([PermissionActions.READ_DASHBOARD, PermissionActions.READ_SHOP])
           : hasTenantPermission(PermissionActions.READ_DASHBOARD) ||
               hasTenantPermission(PermissionActions.READ_SHOP) ||
               hasAnyPermission([PermissionActions.READ_DASHBOARD, PermissionActions.READ_SHOP]),
@@ -485,13 +491,18 @@ export function AppSidebar({ locale }: { locale: string }) {
             ? theme.transitions.duration.enteringScreen
             : theme.transitions.duration.leavingScreen,
         }),
+        position: 'sticky',
+        top: 0,
+        height: '100vh',
       }}
       PaperProps={{
         sx: {
           position: 'relative',
           height: '100%',
           minHeight: '100%',
-          overflowX: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
           width: isExpanded ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
           borderRight: '2px solid',
           borderRightColor: isShopScope ? 'primary.main' : 'divider',
@@ -504,8 +515,10 @@ export function AppSidebar({ locale }: { locale: string }) {
         },
       }}
     >
+      {/* Header Section (Fixed) */}
       <Box
         sx={{
+          flexShrink: 0,
           display: 'flex',
           alignItems: 'center',
           minHeight: 64,
@@ -560,24 +573,101 @@ export function AppSidebar({ locale }: { locale: string }) {
         </Box>
       </Box>
 
-      <List sx={{ pt: 1 }}>{renderAction(dashboardAction)}</List>
+      {/* Menu Items Section (Scrollable) */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          '&::-webkit-scrollbar': {
+            width: '6px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'transparent',
+            borderRadius: '4px',
+          },
+          '&:hover::-webkit-scrollbar-thumb': {
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)',
+          },
+        }}
+      >
+        <List sx={{ pt: 1 }}>{renderAction(dashboardAction)}</List>
 
-      <Divider sx={{ my: 1 }} />
+        <Divider sx={{ my: 1 }} />
 
-      {sidebarSections.map((section) => (
-        <List key={section.id} sx={{ pt: 0 }}>
-          {isExpanded && (
+        {sidebarSections.map((section) => (
+          <List key={section.id} sx={{ pt: 0 }}>
+            {isExpanded && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ px: 3, py: 1.25, display: 'block' }}
+              >
+                {t(section.labelKey)}
+              </Typography>
+            )}
+            {section.actions.map((action) => renderAction(action, true))}
+          </List>
+        ))}
+      </Box>
+
+      {/* Footer Section (Fixed at Bottom) */}
+      {isExpanded && tenantName && (
+        <Box
+          sx={{
+            flexShrink: 0,
+            mt: 'auto',
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            px: 3,
+            py: 2,
+            background: (theme) =>
+              `linear-gradient(180deg, ${alpha(theme.palette.background.paper, 0)} 0%, ${alpha(
+                theme.palette.primary.main,
+                theme.palette.mode === 'dark' ? 0.08 : 0.04,
+              )} 100%)`,
+            transition: theme.transitions.create('background-color', {
+              duration: theme.transitions.duration.shorter,
+            }),
+            '&:hover': {
+              backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.06),
+            },
+          }}
+        >
+          <Box sx={{ minHeight: 52, minWidth: 0 }}>
             <Typography
               variant="caption"
               color="text.secondary"
-              sx={{ px: 3, py: 1.25, display: 'block' }}
+              fontWeight={700}
+              sx={{
+                display: 'block',
+                fontSize: '0.62rem',
+                lineHeight: 1,
+                mb: 0.65,
+                textTransform: 'uppercase',
+              }}
             >
-              {t(section.labelKey)}
+              {organizationLabel}
             </Typography>
-          )}
-          {section.actions.map((action) => renderAction(action, true))}
-        </List>
-      ))}
+            <Typography
+              variant="body2"
+              fontWeight={700}
+              noWrap
+              sx={{
+                color: 'text.primary',
+                fontSize: '0.88rem',
+                lineHeight: 1.25,
+                letterSpacing: 0,
+              }}
+            >
+              {tenantName}
+            </Typography>
+          </Box>
+        </Box>
+      )}
     </Drawer>
   )
 }
