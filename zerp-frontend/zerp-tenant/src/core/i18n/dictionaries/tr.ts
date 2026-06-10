@@ -1090,6 +1090,7 @@ export const trMessages = {
       paidButton: 'Ödendi',
       cancelButton: 'İptal Et',
       newOrderButton: 'Yeni Sipariş',
+      goToCashierButton: 'Kasaya Git',
       emptyState: 'Bu masada aktif sipariş yok.',
       createdToast: 'Sipariş oluşturuldu.',
       updatedToast: 'Sipariş güncellendi.',

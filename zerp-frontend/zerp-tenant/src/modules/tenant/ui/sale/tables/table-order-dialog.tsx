@@ -1,4 +1,10 @@
 'use client'
+import AddIcon from '@mui/icons-material/Add'
+import CheckIcon from '@mui/icons-material/Check'
+import CloseIcon from '@mui/icons-material/Close'
+import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
 import {
   Box,
   Button,
@@ -23,24 +29,27 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
-import CheckIcon from '@mui/icons-material/Check'
-import CloseIcon from '@mui/icons-material/Close'
+import NextLink from 'next/link'
 import { useState } from 'react'
+
+import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
-import { useTableOrders, useCreateTableOrder, usePatchTableOrder } from '../../../hooks/use-table-orders'
+
 import { useMenuItems } from '../../../hooks/use-menu-items'
-import { getBaseUnitPrice } from '../shared/order-pricing'
+import {
+  useCreateTableOrder,
+  usePatchTableOrder,
+  useTableOrders,
+} from '../../../hooks/use-table-orders'
 import type {
   ShopTableResponseDto,
   TableOrderItemCreateDto,
   TableOrderItemDto,
   TableOrderResponseDto,
 } from '../../../types/sale'
+import { getBaseUnitPrice } from '../shared/order-pricing'
 
 interface Props {
   open: boolean
@@ -49,7 +58,7 @@ interface Props {
 }
 
 export function TableOrderDialog({ open, table, onClose }: Props) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { showToast } = useToast()
 
   const [newItems, setNewItems] = useState<TableOrderItemCreateDto[]>([])
@@ -87,7 +96,11 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
     if (!selectedMenuItemId || parseInt(selectedQty, 10) < 1) return
     setNewItems((prev) => [
       ...prev,
-      { menuItemId: selectedMenuItemId, quantity: parseInt(selectedQty, 10), notes: itemNote || undefined },
+      {
+        menuItemId: selectedMenuItemId,
+        quantity: parseInt(selectedQty, 10),
+        notes: itemNote || undefined,
+      },
     ])
     setSelectedMenuItemId('')
     setSelectedQty('1')
@@ -139,17 +152,21 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
     const updatedItems = order.items.map((item) =>
       item.id === editingItemId
         ? {
-          menuItemId: item.menuItemId,
-          quantity: qty,
-          notes: editNotes || undefined,
-          selectedExtraOptionIds: item.selectedExtraOptions?.map(option => option.extraOptionId),
-        }
+            menuItemId: item.menuItemId,
+            quantity: qty,
+            notes: editNotes || undefined,
+            selectedExtraOptionIds: item.selectedExtraOptions?.map(
+              (option) => option.extraOptionId,
+            ),
+          }
         : {
-          menuItemId: item.menuItemId,
-          quantity: item.quantity,
-          notes: item.notes || undefined,
-          selectedExtraOptionIds: item.selectedExtraOptions?.map(option => option.extraOptionId),
-        },
+            menuItemId: item.menuItemId,
+            quantity: item.quantity,
+            notes: item.notes || undefined,
+            selectedExtraOptionIds: item.selectedExtraOptions?.map(
+              (option) => option.extraOptionId,
+            ),
+          },
     )
     patchOrder(
       { id: order.id, fields: { items: updatedItems } },
@@ -170,7 +187,7 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
         menuItemId: item.menuItemId,
         quantity: item.quantity,
         notes: item.notes || undefined,
-        selectedExtraOptionIds: item.selectedExtraOptions?.map(option => option.extraOptionId),
+        selectedExtraOptionIds: item.selectedExtraOptions?.map((option) => option.extraOptionId),
       }))
     patchOrder(
       { id: order.id, fields: { items: updatedItems } },
@@ -182,6 +199,7 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
   }
 
   const menuItems = menuItemsData?.data ?? []
+  const cashierHref = `${withLocale(locale, ROUTES.sale)}?tableId=${encodeURIComponent(table.id)}`
 
   function getMenuItemName(id: string) {
     return menuItems.find((m) => m.id === id)?.name ?? id
@@ -190,7 +208,23 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>
-        {t('sale.tableOrder.title')} — {table.name}
+        <Box
+          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}
+        >
+          <Typography component="span" variant="inherit">
+            {t('sale.tableOrder.title')} — {table.name}
+          </Typography>
+          <Button
+            component={NextLink}
+            href={cashierHref}
+            size="small"
+            variant="outlined"
+            startIcon={<PointOfSaleIcon />}
+            sx={{ flexShrink: 0 }}
+          >
+            {t('sale.tableOrder.goToCashierButton')}
+          </Button>
+        </Box>
       </DialogTitle>
       <DialogContent dividers>
         {/* Mevcut açık siparişler */}
@@ -208,17 +242,37 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
           </Typography>
         ) : (
           openOrders.map((order) => (
-            <Box key={order.id} sx={{ mb: 2, p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Box
+              key={order.id}
+              sx={{ mb: 2, p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 1,
+                }}
+              >
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                  <Chip label={t(`sale.tableOrder.status.${order.status}`)} color="primary" size="small" />
+                  <Chip
+                    label={t(`sale.tableOrder.status.${order.status}`)}
+                    color="primary"
+                    size="small"
+                  />
                   {order.note && (
                     <Typography variant="body2" color="text.secondary">
                       {order.note}
                     </Typography>
                   )}
                 </Box>
-                <Button size="small" variant="outlined" color="error" disabled={isPending} onClick={() => handleCancelOrder(order)}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="error"
+                  disabled={isPending}
+                  onClick={() => handleCancelOrder(order)}
+                >
                   {t('sale.tableOrder.cancelButton')}
                 </Button>
               </Box>
@@ -242,8 +296,13 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
                           </Typography>
                           {item.selectedExtraOptions && item.selectedExtraOptions.length > 0 && (
                             <Box sx={{ mt: 0.25 }}>
-                              {item.selectedExtraOptions.map(option => (
-                                <Typography key={option.extraOptionId} variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                              {item.selectedExtraOptions.map((option) => (
+                                <Typography
+                                  key={option.extraOptionId}
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{ display: 'block' }}
+                                >
                                   + {option.name} ({option.price.toFixed(2)} ₺)
                                 </Typography>
                               ))}
@@ -260,7 +319,9 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
                             sx={{ width: 70 }}
                           />
                         </TableCell>
-                        <TableCell>{getBaseUnitPrice(item.unitPrice, item.selectedExtraOptions).toFixed(2)} ₺</TableCell>
+                        <TableCell>
+                          {getBaseUnitPrice(item.unitPrice, item.selectedExtraOptions).toFixed(2)} ₺
+                        </TableCell>
                         <TableCell>
                           <TextField
                             size="small"
@@ -271,7 +332,12 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
                         </TableCell>
                         <TableCell>
                           <Tooltip title={t('common.save')}>
-                            <IconButton size="small" color="primary" disabled={isPending} onClick={() => saveEdit(order)}>
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              disabled={isPending}
+                              onClick={() => saveEdit(order)}
+                            >
                               <CheckIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
@@ -290,8 +356,13 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
                           </Typography>
                           {item.selectedExtraOptions && item.selectedExtraOptions.length > 0 && (
                             <Box sx={{ mt: 0.25 }}>
-                              {item.selectedExtraOptions.map(option => (
-                                <Typography key={option.extraOptionId} variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                              {item.selectedExtraOptions.map((option) => (
+                                <Typography
+                                  key={option.extraOptionId}
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{ display: 'block' }}
+                                >
                                   + {option.name} ({option.price.toFixed(2)} ₺)
                                 </Typography>
                               ))}
@@ -299,7 +370,9 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
                           )}
                         </TableCell>
                         <TableCell>{item.quantity}</TableCell>
-                        <TableCell>{getBaseUnitPrice(item.unitPrice, item.selectedExtraOptions).toFixed(2)} ₺</TableCell>
+                        <TableCell>
+                          {getBaseUnitPrice(item.unitPrice, item.selectedExtraOptions).toFixed(2)} ₺
+                        </TableCell>
                         <TableCell>{item.notes ?? '—'}</TableCell>
                         <TableCell>
                           <Tooltip title={t('common.edit')}>
@@ -308,7 +381,12 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
                             </IconButton>
                           </Tooltip>
                           <Tooltip title={t('common.delete')}>
-                            <IconButton size="small" color="error" disabled={isPending} onClick={() => deleteItem(order, item.id)}>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              disabled={isPending}
+                              onClick={() => deleteItem(order, item.id)}
+                            >
                               <DeleteIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
@@ -360,7 +438,12 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
             onChange={(e) => setItemNote(e.target.value)}
             sx={{ flexGrow: 1 }}
           />
-          <Button variant="outlined" startIcon={<AddIcon />} onClick={addItemToList} disabled={!selectedMenuItemId}>
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={addItemToList}
+            disabled={!selectedMenuItemId}
+          >
             {t('sale.tableOrder.form.addItem')}
           </Button>
         </Box>
@@ -384,7 +467,11 @@ export function TableOrderDialog({ open, table, onClose }: Props) {
                     <TableCell>{item.notes ?? '—'}</TableCell>
                     <TableCell>
                       <Tooltip title={t('common.delete')}>
-                        <IconButton size="small" color="error" onClick={() => removeItemFromList(idx)}>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => removeItemFromList(idx)}
+                        >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>

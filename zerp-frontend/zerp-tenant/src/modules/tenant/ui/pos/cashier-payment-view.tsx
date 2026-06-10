@@ -404,9 +404,18 @@ function PaymentStage({
 }) {
   const { t } = useI18n()
   const { showToast } = useToast()
-  const { mutate: patchOrder, isPending: isPatchPending } = usePatchTableOrder()
-  const { mutate: updateOrder, isPending: isUpdatePending } = useUpdateTableOrder()
-  const isPending = isPatchPending || isUpdatePending
+  const {
+    mutate: patchOrder,
+    mutateAsync: patchOrderAsync,
+    isPending: isPatchPending,
+  } = usePatchTableOrder()
+  const {
+    mutate: updateOrder,
+    mutateAsync: updateOrderAsync,
+    isPending: isUpdatePending,
+  } = useUpdateTableOrder()
+  const [isClosingPayment, setIsClosingPayment] = useState(false)
+  const isPending = isPatchPending || isUpdatePending || isClosingPayment
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH')
   const [splitInput, setSplitInput] = useState('')
@@ -538,42 +547,32 @@ function PaymentStage({
     return paymentsByOrder
   }
 
-  function executeClosingPayment(paymentsByOrder: Map<string, TableOrderPaymentCreateDto[]>) {
-    let completed = 0
-    const total = paymentPlan.length
+  async function executeClosingPayment(paymentsByOrder: Map<string, TableOrderPaymentCreateDto[]>) {
+    setIsClosingPayment(true)
+    let hasPartialOrder = false
 
-    paymentPlan.forEach(({ order, isFullOrder, remainingItems }) => {
-      const payments = paymentsByOrder.get(order.id) ?? []
-      if (isFullOrder) {
-        patchOrder(
-          { id: order.id, fields: { status: 'PAID', payments } },
-          {
-            onSuccess: () => {
-              completed++
-              if (completed === total) {
-                showToast(t('sale.cashier.paymentReceivedToast'))
-                onSuccess()
-              }
-            },
-            onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-          },
-        )
-      } else {
-        updateOrder(
-          { id: order.id, data: { items: remainingItems, payments } },
-          {
-            onSuccess: () => {
-              completed++
-              if (completed === total) {
-                showToast(t('sale.cashier.partialItemsUpdatedToast'))
-                onSuccess()
-              }
-            },
-            onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
-          },
-        )
+    try {
+      for (const { order, isFullOrder, remainingItems } of paymentPlan) {
+        const payments = paymentsByOrder.get(order.id) ?? []
+        if (isFullOrder) {
+          await patchOrderAsync({ id: order.id, fields: { status: 'PAID', payments } })
+        } else {
+          hasPartialOrder = true
+          await updateOrderAsync({ id: order.id, data: { items: remainingItems, payments } })
+        }
       }
-    })
+
+      showToast(
+        hasPartialOrder
+          ? t('sale.cashier.partialItemsUpdatedToast')
+          : t('sale.cashier.paymentReceivedToast'),
+      )
+      onSuccess()
+    } catch (err) {
+      showToast(getUserFriendlyError(err), { severity: 'error' })
+    } finally {
+      setIsClosingPayment(false)
+    }
   }
 
   function executeOpenSplitPayment(paymentsByOrder: Map<string, TableOrderPaymentCreateDto[]>) {
@@ -599,7 +598,7 @@ function PaymentStage({
 
   function executePayment() {
     if (!canPay) return
-    executeClosingPayment(buildFullPaymentsByOrder())
+    void executeClosingPayment(buildFullPaymentsByOrder())
   }
 
   function handlePaySplitAmount() {
@@ -611,7 +610,7 @@ function PaymentStage({
     if (paymentsByOrder.size === 0) return
 
     if (isFinalSplitPayment) {
-      executeClosingPayment(paymentsByOrder)
+      void executeClosingPayment(paymentsByOrder)
       return
     }
 
@@ -646,7 +645,11 @@ function PaymentStage({
             >
               {t('sale.cashier.orderLabel', { value: idx + 1 })}
               {!paymentPlan[idx].isFullOrder && (
-                <Chip label={t('sale.cashier.partial')} size="small" sx={{ ml: 1, height: 16, fontSize: '0.6rem' }} />
+                <Chip
+                  label={t('sale.cashier.partial')}
+                  size="small"
+                  sx={{ ml: 1, height: 16, fontSize: '0.6rem' }}
+                />
               )}
             </Typography>
             {selectedItems.map(({ item, selectedQty }) => {
@@ -1019,13 +1022,13 @@ function TableOrderDetails({ table }: { table: ShopTableResponseDto }) {
 
 // ─── CashierPaymentView ───────────────────────────────────────────────────────
 
-export function CashierPaymentView() {
+export function CashierPaymentView({ initialTableId }: { initialTableId?: string }) {
   const { t } = useI18n()
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
   const { currentTenantId, hasAnyPermission, hasShopPermission, hasPermissionForTarget } =
     useCurrentUserPermissions()
-  const [selectedTable, setSelectedTable] = useState<ShopTableResponseDto | null>(null)
+  const [selectedTableId, setSelectedTableId] = useState<string | null>(null)
   const canReadTables = Boolean(
     selectedShopId &&
     (hasShopPermission(PermissionActions.READ_SHOP_TABLE, selectedShopId) ||
@@ -1066,6 +1069,15 @@ export function CashierPaymentView() {
       ),
     )
   }
+
+  const selectedTableCandidate =
+    tables.find((item) => item.id === (selectedTableId ?? initialTableId)) ?? null
+  const selectedTable =
+    selectedTableCandidate &&
+    isSelectable(selectedTableCandidate.status) &&
+    canReadTableOrders(selectedTableCandidate)
+      ? selectedTableCandidate
+      : null
 
   return (
     <Box sx={{ height: '100%', display: 'flex', overflow: 'hidden' }}>
@@ -1153,7 +1165,7 @@ export function CashierPaymentView() {
                   }}
                 >
                   <CardActionArea
-                    onClick={() => selectable && setSelectedTable(table)}
+                    onClick={() => selectable && setSelectedTableId(table.id)}
                     disabled={!selectable}
                     sx={{ p: 1.5, cursor: selectable ? 'pointer' : 'default' }}
                   >

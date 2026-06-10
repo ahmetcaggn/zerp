@@ -1137,6 +1137,7 @@ export const enMessages = {
       paidButton: 'Mark as Paid',
       cancelButton: 'Cancel Order',
       newOrderButton: 'New Order',
+      goToCashierButton: 'Go to Cashier',
       emptyState: 'No active orders for this table.',
       createdToast: 'Order created.',
       updatedToast: 'Order updated.',

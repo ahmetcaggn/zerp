@@ -1,10 +1,13 @@
 'use client'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { Box, Chip, IconButton, Typography } from '@mui/material'
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
+import { Box, Button, Chip, IconButton, Typography } from '@mui/material'
 import type { Route } from 'next'
+import NextLink from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useMemo, useState } from 'react'
 
+import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
@@ -190,6 +193,9 @@ export function PosView() {
   const { mutate: previewPublicCartOrder, isPending: isImportPending } = usePreviewPublicCartOrder()
 
   const table = tablesData?.data?.find((t) => t.id === tableId)
+  const cashierHref = tableId
+    ? `${withLocale(locale, ROUTES.sale)}?tableId=${encodeURIComponent(tableId)}`
+    : withLocale(locale, ROUTES.sale)
   const categories = catData?.data ?? []
   const menuItems = itemsData?.data ?? []
   const existingOrders = useMemo(() => ordersData?.data ?? [], [ordersData?.data])
@@ -518,6 +524,18 @@ export function PosView() {
           <Typography variant="h6" fontWeight={700}>
             {t('nav.cashier')}
           </Typography>
+        )}
+        {tableId && (
+          <Button
+            component={NextLink}
+            href={cashierHref}
+            size="small"
+            variant="outlined"
+            startIcon={<PointOfSaleIcon />}
+            sx={{ ml: 'auto', flexShrink: 0 }}
+          >
+            {t('sale.tableOrder.goToCashierButton')}
+          </Button>
         )}
       </Box>
 

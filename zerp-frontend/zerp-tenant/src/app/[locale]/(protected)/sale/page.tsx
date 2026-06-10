@@ -8,9 +8,17 @@ import { CashierPaymentView } from '@/modules/tenant/ui/pos/cashier-payment-view
 
 export const metadata: Metadata = buildMetadata({ title: 'Sales' })
 
-export default async function SalePage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function SalePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>
+  searchParams: Promise<{ tableId?: string | string[] }>
+}) {
   const { locale } = await params
+  const { tableId } = await searchParams
   const m = getMessages(locale as Locale)
+  const initialTableId = typeof tableId === 'string' ? tableId : undefined
 
   return (
     <Box
@@ -43,7 +51,7 @@ export default async function SalePage({ params }: { params: Promise<{ locale: s
       </Box>
 
       <Box sx={{ flex: 1, overflow: 'hidden' }}>
-        <CashierPaymentView />
+        <CashierPaymentView initialTableId={initialTableId} />
       </Box>
     </Box>
   )

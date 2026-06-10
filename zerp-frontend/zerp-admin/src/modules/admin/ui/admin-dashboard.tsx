@@ -148,7 +148,7 @@ export function AdminDashboard() {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const { hasGrant, isLoadingPermissions } = useCurrentUserPermissions()
-  const [activeMetricsTab, setActiveMetricsTab] = useState<MetricsTab>('docker')
+  const [activeMetricsTab, setActiveMetricsTab] = useState<MetricsTab>('services')
   const [durationMs, setDurationMs] = useState<number>(15 * 60 * 1000)
   const [refetchInterval, setRefetchInterval] = useState<number | false>(15_000)
   const [selectedService, setSelectedService] = useState<string | 'ALL'>('ALL')
@@ -193,7 +193,7 @@ export function AdminDashboard() {
                 width: { xs: '100%', md: 'auto' }
               }}
             >
-              <Tab value="docker" label={t('dashboard.dockerTab')} sx={{ fontWeight: 700, minHeight: 40 }} />
+              {/* <Tab value="docker" label={t('dashboard.dockerTab')} sx={{ fontWeight: 700, minHeight: 40 }} /> */}
               <Tab value="services" label={t('dashboard.servicesTab')} sx={{ fontWeight: 700, minHeight: 40 }} />
             </Tabs>
 
