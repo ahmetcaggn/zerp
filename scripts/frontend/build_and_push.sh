@@ -74,7 +74,7 @@ done
 # ── 3. Docker Compose Build ──────────────────────────────────────────────────
 echo -e "${BLUE}=== Step 3/5: Running Docker Compose Build ===${NC}"
 export DOCKER_DEFAULT_PLATFORM=linux/amd64
-docker compose -f "${REPO_ROOT}/docker/compose-frontend-build.yaml" build
+docker compose -f "${REPO_ROOT}/docker/compose-frontend-build.yaml" build --no-cache
 
 # ── 4. Tag Images for Docker Hub ─────────────────────────────────────────────
 echo -e "${BLUE}=== Step 4/5: Tagging Docker Images ===${NC}"
