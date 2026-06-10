@@ -197,7 +197,7 @@ export function createPermissionEvaluator(grants: readonly PermissionGrant[]): P
   }
 
   function hasAction(action: PermissionAction): boolean {
-    return permissionActions.has(normalizeType(action) ?? '')
+    return hasTenantRootAdmin() || permissionActions.has(normalizeType(action) ?? '')
   }
 
   function hasAnyAction(actions: readonly PermissionAction[]): boolean {

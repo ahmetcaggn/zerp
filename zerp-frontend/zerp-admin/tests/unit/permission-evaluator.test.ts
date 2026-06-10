@@ -18,6 +18,16 @@ describe('createPermissionEvaluator', () => {
     expect(evaluator.hasAction('READ_TICKET')).toBe(false)
   })
 
+  it('treats tenant root admin as an action-level override', () => {
+    const evaluator = createPermissionEvaluator([
+      { action: 'ADMIN', targetType: 'TENANT_ROOT', targetId: TENANT_ROOT_ID },
+    ])
+
+    expect(evaluator.hasAction('READ_USER')).toBe(true)
+    expect(evaluator.hasAnyAction(['READ_USER', 'READ_TEAM'])).toBe(true)
+    expect(evaluator.hasAllActions(['READ_USER', 'READ_TEAM'])).toBe(true)
+  })
+
   it('grants ticket access from exact ticket, tenant, team, user, and root grants', () => {
     const target = {
       ticketId,
