@@ -7,6 +7,7 @@ import { httpClient } from '@/core/api/http-client'
 import { queryKeys } from '@/core/api/query-keys'
 import { toRaQueryString } from '@/core/api/resource-types'
 import { useAuth } from '@/core/auth/client/use-auth'
+import { ApiError } from '@/core/types/api'
 
 import {
   createPermissionEvaluator,
@@ -149,6 +150,13 @@ export function CurrentUserPermissionsProvider({ children }: { children: React.R
     queryKey: [...queryKeys.admin.permissions, 'me', resolvedUserId ?? 'anonymous'],
     enabled: Boolean(isAuthenticated && resolvedUserId),
     staleTime: 60_000,
+    retry: (failureCount, error) => {
+      if (error instanceof ApiError && (error.statusCode === 401 || error.statusCode === 403)) {
+        return false
+      }
+
+      return failureCount < 2
+    },
     queryFn: () => fetchCurrentUserPermissions(resolvedUserId!),
   })
 

@@ -146,7 +146,7 @@ export function AppTopbar({
     setDrawerOpen(false)
 
     if (action.id === 'logout') {
-      void logoutToLanding(locale, (path) => router.replace(path as Route))
+      void logoutToLanding(locale)
       return
     }
 
@@ -170,7 +170,7 @@ export function AppTopbar({
 
   const handleLogoutClick = () => {
     handleMenuClose()
-    void logoutToLanding(locale, (path) => router.replace(path as Route))
+    void logoutToLanding(locale)
   }
 
   const toolbar = (

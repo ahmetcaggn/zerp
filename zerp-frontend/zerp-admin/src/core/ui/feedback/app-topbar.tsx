@@ -119,7 +119,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
     setDrawerOpen(false)
 
     if (action.id === 'logout') {
-      void logoutToLogin(locale, (path) => router.replace(path as Route))
+      void logoutToLogin(locale)
       return
     }
 
@@ -143,7 +143,7 @@ export function AppTopbar({ locale }: { locale: 'tr' | 'en' }) {
 
   const handleLogoutClick = () => {
     handleMenuClose()
-    void logoutToLogin(locale, (path) => router.replace(path as Route))
+    void logoutToLogin(locale)
   }
 
   return (

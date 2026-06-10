@@ -95,7 +95,7 @@ describe('AppTopbar', () => {
     })
   })
 
-  it('shows logout in authenticated mobile menu and redirects locally after signOut', async () => {
+  it('shows logout in authenticated mobile menu and lets NextAuth redirect after signOut', async () => {
     sessionStatus = 'authenticated'
     mediaQueryMock.mockReturnValue(true)
 
@@ -106,8 +106,8 @@ describe('AppTopbar', () => {
 
     await waitFor(() => {
       expect(signOut).toHaveBeenCalledTimes(1)
-      expect(signOut).toHaveBeenCalledWith({ redirect: false })
-      expect(replace).toHaveBeenCalledWith('/tr')
+      expect(signOut).toHaveBeenCalledWith({ callbackUrl: '/tr', redirect: true })
+      expect(replace).not.toHaveBeenCalled()
     })
   })
 })

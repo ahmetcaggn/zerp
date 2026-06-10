@@ -15,7 +15,8 @@ import type { Locale } from '@/core/types/common'
 export function ShopScopeGuard({ locale }: { locale: Locale }) {
   const router = useRouter()
   const pathname = usePathname()
-  const { scope, isScopeReady, isScopeSwitching, scopeSwitchTransaction, completeScopeSwitch } = useShopScope()
+  const { scope, isScopeReady, isScopeSwitching, scopeSwitchTransaction, completeScopeSwitch, scopeError } =
+    useShopScope()
   const {
     hasAnyPermission,
     hasTenantPermission,
@@ -26,7 +27,14 @@ export function ShopScopeGuard({ locale }: { locale: Locale }) {
   const shopSwitchingLabel = t('common.switchingBranch')
 
   useEffect(() => {
-    if (!isScopeReady || !scopeSwitchTransaction?.isCommitted) return
+    if (!scopeSwitchTransaction?.isCommitted) return
+
+    if (scopeError) {
+      completeScopeSwitch()
+      return
+    }
+
+    if (!isScopeReady) return
 
     const currentShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
     const targetRoute =
@@ -60,6 +68,7 @@ export function ShopScopeGuard({ locale }: { locale: Locale }) {
     pathname,
     router,
     scope,
+    scopeError,
     scopeSwitchTransaction,
   ])
 

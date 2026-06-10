@@ -44,7 +44,6 @@ export function DeletedEmployees({ canRead }: Props) {
   const unauthorizedReason = t('common.unauthorized')
   const loadingReason = t('common.loading')
 
-
   const [restoreConfirmId, setRestoreConfirmId] = useState<string | null>(null)
 
   const { data, isLoading, error } = useDeletedEmployees(
@@ -148,7 +147,9 @@ export function DeletedEmployees({ canRead }: Props) {
                           variant="outlined"
                           startIcon={<RestoreIcon />}
                           disabled={!canRestore}
-                          onClick={() => emp.id !== undefined && setRestoreConfirmId(String(emp.id))}
+                          onClick={() =>
+                            emp.id !== undefined && setRestoreConfirmId(String(emp.id))
+                          }
                         >
                           {t('employees.restoreButton')}
                         </Button>
@@ -164,72 +165,86 @@ export function DeletedEmployees({ canRead }: Props) {
 
       {/* Mobile Card View */}
       <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 2 }}>
-        {rows.map((emp) => (
-          <Card
-            key={emp.id}
-            variant="outlined"
-            sx={{
-              borderRadius: 2,
-              borderColor: 'divider',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-              '&:hover': {
-                transform: 'translateY(-2px)',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-                borderColor: 'primary.light',
-              },
-            }}
-          >
-            <Box sx={{ p: 2 }}>
-              <Stack spacing={1.5}>
-                <Box
-                  sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                >
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight={700}
-                    color="text.primary"
-                    sx={{ lineHeight: 1.3 }}
-                  >
-                    {`${emp.firstName ?? ''} ${emp.lastName ?? ''}`}
-                  </Typography>
-                </Box>
+        {rows.map((emp) => {
+          const canRestore = canRestoreEmployee(emp.id)
+          const restoreDisabledReason = isLoadingPermissions
+            ? loadingReason
+            : getDisabledReason(canRestore, unauthorizedReason)
 
-                <Stack spacing={0.5}>
-                  <Typography variant="body2" color="text.secondary">
-                    {emp.email}
-                  </Typography>
-                  {emp.phoneNumber && (
-                    <Typography variant="body2" color="text.secondary">
-                      {emp.phoneNumber}
+          return (
+            <Card
+              key={emp.id}
+              variant="outlined"
+              sx={{
+                borderRadius: 2,
+                borderColor: 'divider',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  borderColor: 'primary.light',
+                },
+              }}
+            >
+              <Box sx={{ p: 2 }}>
+                <Stack spacing={1.5}>
+                  <Box
+                    sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight={700}
+                      color="text.primary"
+                      sx={{ lineHeight: 1.3 }}
+                    >
+                      {`${emp.firstName ?? ''} ${emp.lastName ?? ''}`}
                     </Typography>
-                  )}
-                </Stack>
+                  </Box>
 
-                <Box
-                  sx={{
-                    display: 'flex',
-                    gap: 1.5,
-                    pt: 1.5,
-                    borderTop: '1px solid',
-                    borderColor: 'divider',
-                    justifyContent: 'flex-end',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<RestoreIcon />}
-                    onClick={() => emp.id !== undefined && setRestoreConfirmId(String(emp.id))}
+                  <Stack spacing={0.5}>
+                    <Typography variant="body2" color="text.secondary">
+                      {emp.email}
+                    </Typography>
+                    {emp.phoneNumber && (
+                      <Typography variant="body2" color="text.secondary">
+                        {emp.phoneNumber}
+                      </Typography>
+                    )}
+                  </Stack>
+
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      gap: 1.5,
+                      pt: 1.5,
+                      borderTop: '1px solid',
+                      borderColor: 'divider',
+                      justifyContent: 'flex-end',
+                      alignItems: 'center',
+                    }}
                   >
-                    {t('employees.restoreButton')}
-                  </Button>
-                </Box>
-              </Stack>
-            </Box>
-          </Card>
-        ))}
+                    <Tooltip title={restoreDisabledReason ?? ''}>
+                      <span>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          startIcon={<RestoreIcon />}
+                          disabled={!canRestore}
+                          onClick={() =>
+                            emp.id !== undefined && setRestoreConfirmId(String(emp.id))
+                          }
+                        >
+                          {t('employees.restoreButton')}
+                        </Button>
+                      </span>
+                    </Tooltip>
+                  </Box>
+                </Stack>
+              </Box>
+            </Card>
+          )
+        })}
       </Box>
 
       <TablePagination

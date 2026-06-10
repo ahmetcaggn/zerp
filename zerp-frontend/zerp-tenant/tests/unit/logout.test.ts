@@ -20,13 +20,10 @@ describe('logoutToLanding', () => {
     expect(getLandingPath('tr')).toBe('/tr')
   })
 
-  it('clears the NextAuth session without using a server redirect and navigates locally', async () => {
-    const navigate = vi.fn()
-
-    await logoutToLanding('tr', navigate)
+  it('clears the NextAuth session and redirects through NextAuth callbackUrl', async () => {
+    await logoutToLanding('tr')
 
     expect(signOut).toHaveBeenCalledTimes(1)
-    expect(signOut).toHaveBeenCalledWith({ redirect: false })
-    expect(navigate).toHaveBeenCalledWith('/tr')
+    expect(signOut).toHaveBeenCalledWith({ callbackUrl: '/tr', redirect: true })
   })
 })

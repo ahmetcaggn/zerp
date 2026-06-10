@@ -22,6 +22,7 @@ interface ShopScopeContextValue {
   shops: ShopResponseDto[]
   isLoading: boolean
   isScopeReady: boolean
+  scopeError: unknown
   refreshShops: () => Promise<unknown>
   completeScopeSwitch: () => void
   setGlobalScope: () => void
@@ -61,7 +62,7 @@ export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
   const [persistedShopId, setPersistedShopId] = useState<string | null>(() => tryReadPersistedShopId())
   const nextTransactionIdRef = useRef(0)
   const isAuthenticated = status === 'authenticated'
-  const { data, isLoading, refetch } = useShops(
+  const { data, isLoading, error, refetch } = useShops(
     {
       pagination: { page: 1, perPage: 500 },
       sort: { field: 'name', order: 'ASC' },
@@ -147,6 +148,7 @@ export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
       shops,
       isLoading,
       isScopeReady,
+      scopeError: error,
       refreshShops: () => refetch(),
       completeScopeSwitch,
       setGlobalScope: () => {
@@ -163,6 +165,7 @@ export function ShopScopeProvider({ children }: { children: React.ReactNode }) {
       shops,
       isLoading,
       isScopeReady,
+      error,
       refetch,
       completeScopeSwitch,
       startScopeSwitch,
