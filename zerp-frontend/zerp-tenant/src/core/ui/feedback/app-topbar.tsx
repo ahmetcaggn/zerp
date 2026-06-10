@@ -295,16 +295,42 @@ export function AppTopbar({
         </Stack>
       ) : (
         <Stack alignItems="center" direction="row" gap={1}>
-          {visibleActions.map((action) => (
-            <Button
-              key={action.id}
-              onClick={() => handleActionClick(action)}
-              size="small"
-              variant="text"
-            >
-              {t(action.labelKey)}
-            </Button>
-          ))}
+          {visibleActions.map((action) => {
+            const isLogin = action.id === 'login'
+            return (
+              <Button
+                key={action.id}
+                onClick={() => handleActionClick(action)}
+                size="small"
+                variant={isLogin ? 'outlined' : 'text'}
+                startIcon={action.icon}
+                sx={
+                  isLogin
+                    ? {
+                        borderRadius: 2,
+                        px: 2,
+                        py: 0.5,
+                        fontWeight: 600,
+                        borderColor: 'primary.main',
+                        color: 'primary.main',
+                        transition: 'all 0.2s ease-in-out',
+                        '&:hover': {
+                          backgroundColor: 'primary.main',
+                          color: 'primary.contrastText',
+                          transform: 'translateY(-1px)',
+                          boxShadow: (theme) =>
+                            theme.palette.mode === 'dark'
+                              ? '0 4px 12px rgba(144, 202, 249, 0.2)'
+                              : '0 4px 12px rgba(25, 118, 210, 0.2)',
+                        },
+                      }
+                    : {}
+                }
+              >
+                {t(action.labelKey)}
+              </Button>
+            )
+          })}
           {isAuthenticated && (
             <Stack alignItems="center" direction="row" gap={0.5} sx={{ maxWidth: 260 }}>
               <Typography variant="body2" noWrap>
