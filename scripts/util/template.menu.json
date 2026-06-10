@@ -1,0 +1,536 @@
+{
+  "menu": {
+    "categories": [
+      {
+        "title": "Espresso-Based Coffees",
+        "description": "Our foundation. Crafted using our signature house blend, pulled to perfection for a balanced, rich, and aromatic experience.",
+        "items": [
+          {
+            "id": 1,
+            "title": "Classic Espresso",
+            "price_try": 110,
+            "description": "A concentrated, bold shot of our house blend with a thick, golden crema.",
+            "ingredients": ["Finely ground espresso beans", "filtered water"],
+            "calories_kcal": 5,
+            "allergens": [],
+            "prep_time": "2 mins"
+          },
+          {
+            "id": 2,
+            "title": "Espresso Macchiato",
+            "price_try": 125,
+            "description": "A classic espresso shot gently marked with a dollop of textured milk foam.",
+            "ingredients": ["Espresso", "steamed milk foam"],
+            "calories_kcal": 15,
+            "allergens": ["Dairy"],
+            "prep_time": "2 mins"
+          },
+          {
+            "id": 3,
+            "title": "Cortado",
+            "price_try": 140,
+            "description": "Equal parts espresso and lightly textured steamed milk to cut the acidity.",
+            "ingredients": ["Espresso", "whole milk"],
+            "calories_kcal": 60,
+            "allergens": ["Dairy"],
+            "prep_time": "3 mins"
+          },
+          {
+            "id": 4,
+            "title": "Flat White",
+            "price_try": 150,
+            "description": "A double shot of espresso smoothed out with velvety micro-foamed milk.",
+            "ingredients": ["Double espresso", "micro-foamed milk"],
+            "calories_kcal": 110,
+            "allergens": ["Dairy"],
+            "prep_time": "3 mins"
+          },
+          {
+            "id": 5,
+            "title": "Cappuccino",
+            "price_try": 150,
+            "description": "A balanced trifecta of espresso, steamed milk, and a thick layer of airy foam.",
+            "ingredients": ["Espresso", "milk", "milk foam"],
+            "calories_kcal": 120,
+            "allergens": ["Dairy"],
+            "prep_time": "3 mins"
+          },
+          {
+            "id": 6,
+            "title": "Caffè Latte",
+            "price_try": 160,
+            "description": "A mild and creamy classic, featuring a single shot of espresso and plenty of steamed milk.",
+            "ingredients": ["Espresso", "steamed milk", "light foam"],
+            "calories_kcal": 150,
+            "allergens": ["Dairy"],
+            "prep_time": "3 mins"
+          },
+          {
+            "id": 7,
+            "title": "Americano",
+            "price_try": 130,
+            "description": "Hot water poured over a double shot of espresso for a smooth, lingering finish.",
+            "ingredients": ["Double espresso", "hot filtered water"],
+            "calories_kcal": 10,
+            "allergens": [],
+            "prep_time": "2 mins"
+          },
+          {
+            "id": 8,
+            "title": "Café Mocha",
+            "price_try": 175,
+            "description": "A comforting blend of espresso, dark chocolate syrup, and steamed milk.",
+            "ingredients": ["Espresso", "dark chocolate sauce", "steamed milk"],
+            "calories_kcal": 250,
+            "allergens": ["Dairy", "Soy (in chocolate)"],
+            "prep_time": "4 mins"
+          },
+          {
+            "id": 9,
+            "title": "White Chocolate Mocha",
+            "price_try": 180,
+            "description": "Sweet and rich white chocolate melted into hot espresso and creamy milk.",
+            "ingredients": ["Espresso", "white chocolate sauce", "steamed milk"],
+            "calories_kcal": 280,
+            "allergens": ["Dairy", "Soy"],
+            "prep_time": "4 mins"
+          },
+          {
+            "id": 10,
+            "title": "Caramel Macchiato",
+            "price_try": 180,
+            "description": "Vanilla-sweetened milk marked with espresso and finished with a caramel drizzle.",
+            "ingredients": ["Espresso", "milk", "vanilla syrup", "caramel sauce"],
+            "calories_kcal": 240,
+            "allergens": ["Dairy"],
+            "prep_time": "4 mins"
+          }
+        ]
+      },
+      {
+        "title": "Single Origin Pour-Overs",
+        "description": "Hand-brewed filter coffees prepared via V60 or Chemex to highlight the unique terroir and flavor notes of each bean.",
+        "items": [
+          {
+            "id": 1,
+            "title": "Ethiopia Yirgacheffe",
+            "price_try": 165,
+            "description": "A bright, floral cup with delicate notes of jasmine, bergamot, and black tea.",
+            "ingredients": ["Light roast Ethiopian coffee beans", "filtered water"],
+            "calories_kcal": 5,
+            "allergens": [],
+            "prep_time": "5 mins"
+          },
+          {
+            "id": 2,
+            "title": "Colombia Supremo",
+            "price_try": 160,
+            "description": "Smooth and well-balanced with tasting notes of milk chocolate, cherry, and almond.",
+            "ingredients": ["Medium roast Colombian coffee beans", "filtered water"],
+            "calories_kcal": 5,
+            "allergens": [],
+            "prep_time": "5 mins"
+          },
+          {
+            "id": 3,
+            "title": "Kenya AA",
+            "price_try": 170,
+            "description": "A bold, juicy coffee known for its wine-like acidity and notes of blackcurrant.",
+            "ingredients": ["Light-medium roast Kenyan coffee beans", "filtered water"],
+            "calories_kcal": 5,
+            "allergens": [],
+            "prep_time": "5 mins"
+          },
+          {
+            "id": 4,
+            "title": "Guatemala Antigua",
+            "price_try": 160,
+            "description": "A complex, full-bodied cup with a spicy, smoky character and a cocoa finish.",
+            "ingredients": ["Medium roast Guatemalan coffee beans", "filtered water"],
+            "calories_kcal": 5,
+            "allergens": [],
+            "prep_time": "5 mins"
+          },
+          {
+            "id": 5,
+            "title": "Costa Rica Tarrazu",
+            "price_try": 165,
+            "description": "Crisp and clean, offering a vibrant acidity with notes of citrus and honey.",
+            "ingredients": ["Light roast Costa Rican coffee beans", "filtered water"],
+            "calories_kcal": 5,
+            "allergens": [],
+            "prep_time": "5 mins"
+          },
+          {
+            "id": 6,
+            "title": "Brazil Cerrado",
+            "price_try": 150,
+            "description": "Low acidity and heavy body, featuring deep flavors of roasted peanuts and caramel.",
+            "ingredients": ["Medium-dark roast Brazilian coffee beans", "filtered water"],
+            "calories_kcal": 5,
+            "allergens": [],
+            "prep_time": "5 mins"
+          },
+          {
+            "id": 7,
+            "title": "Sumatra Mandheling",
+            "price_try": 160,
+            "description": "Earthy and herbaceous with a heavy, syrupy body and dark chocolate undertones.",
+            "ingredients": ["Dark roast Sumatran coffee beans", "filtered water"],
+            "calories_kcal": 5,
+            "allergens": [],
+            "prep_time": "5 mins"
+          },
+          {
+            "id": 8,
+            "title": "Rwanda Hingakawa",
+            "price_try": 175,
+            "description": "Sweet and fruity, presenting notes of red apple, brown sugar, and floral hints.",
+            "ingredients": ["Light roast Rwandan coffee beans", "filtered water"],
+            "calories_kcal": 5,
+            "allergens": [],
+            "prep_time": "5 mins"
+          },
+          {
+            "id": 9,
+            "title": "Panama Geisha",
+            "price_try": 290,
+            "description": "A rare, world-class bean with an incredibly complex profile of peach, mango, and honeysuckle.",
+            "ingredients": ["Premium light roast Panama Geisha beans", "filtered water"],
+            "calories_kcal": 5,
+            "allergens": [],
+            "prep_time": "5 mins"
+          },
+          {
+            "id": 10,
+            "title": "Burundi Kayanza",
+            "price_try": 165,
+            "description": "A vibrant cup with a sweet, syrupy mouthfeel and notes of fig and dark berries.",
+            "ingredients": ["Light-medium roast Burundi coffee beans", "filtered water"],
+            "calories_kcal": 5,
+            "allergens": [],
+            "prep_time": "5 mins"
+          }
+        ]
+      },
+      {
+        "title": "Cold Brews & Iced Coffees",
+        "description": "Refreshing, chilled coffee beverages perfect for warm days or a crisp afternoon pick-me-up.",
+        "items": [
+          {
+            "id": 1,
+            "title": "Classic Cold Brew",
+            "price_try": 155,
+            "description": "Coarse ground coffee steeped in cold water for 18 hours for a smooth, acid-free finish.",
+            "ingredients": ["House-blend coffee", "cold filtered water", "ice"],
+            "calories_kcal": 5,
+            "allergens": [],
+            "prep_time": "1 min (Ready to pour)"
+          },
+          {
+            "id": 2,
+            "title": "Nitro Cold Brew",
+            "price_try": 175,
+            "description": "Our classic cold brew infused with nitrogen for a creamy, cascading texture.",
+            "ingredients": ["Cold brew coffee", "nitrogen gas"],
+            "calories_kcal": 5,
+            "allergens": [],
+            "prep_time": "1 min (Ready to pour)"
+          },
+          {
+            "id": 3,
+            "title": "Iced Latte",
+            "price_try": 165,
+            "description": "Chilled milk and espresso poured over ice.",
+            "ingredients": ["Espresso", "cold milk", "ice"],
+            "calories_kcal": 120,
+            "allergens": ["Dairy"],
+            "prep_time": "2 mins"
+          },
+          {
+            "id": 4,
+            "title": "Iced Americano",
+            "price_try": 135,
+            "description": "A crisp double shot of espresso poured over cold water and ice.",
+            "ingredients": ["Double espresso", "cold water", "ice"],
+            "calories_kcal": 10,
+            "allergens": [],
+            "prep_time": "2 mins"
+          },
+          {
+            "id": 5,
+            "title": "Iced Mocha",
+            "price_try": 180,
+            "description": "Espresso and rich dark chocolate mixed with cold milk and poured over ice.",
+            "ingredients": ["Espresso", "cold milk", "dark chocolate sauce", "ice"],
+            "calories_kcal": 210,
+            "allergens": ["Dairy", "Soy"],
+            "prep_time": "3 mins"
+          },
+          {
+            "id": 6,
+            "title": "Cold Brew Lemonade",
+            "price_try": 165,
+            "description": "A refreshing, zesty mix of our 18-hour cold brew and house-made lemonade.",
+            "ingredients": ["Cold brew coffee", "fresh lemon juice", "simple syrup", "ice"],
+            "calories_kcal": 95,
+            "allergens": [],
+            "prep_time": "2 mins"
+          },
+          {
+            "id": 7,
+            "title": "Vanilla Sweet Cream Cold Brew",
+            "price_try": 185,
+            "description": "Cold brew coffee topped with a floating layer of house-made vanilla sweet cream.",
+            "ingredients": ["Cold brew coffee", "heavy cream", "milk", "vanilla syrup", "ice"],
+            "calories_kcal": 180,
+            "allergens": ["Dairy"],
+            "prep_time": "2 mins"
+          },
+          {
+            "id": 8,
+            "title": "Iced Caramel Macchiato",
+            "price_try": 185,
+            "description": "Cold vanilla milk poured over ice, topped with an espresso float and caramel drizzle.",
+            "ingredients": ["Espresso", "cold milk", "vanilla syrup", "caramel sauce", "ice"],
+            "calories_kcal": 220,
+            "allergens": ["Dairy"],
+            "prep_time": "3 mins"
+          },
+          {
+            "id": 9,
+            "title": "Shakerato",
+            "price_try": 150,
+            "description": "A traditional Italian iced coffee, violently shaken with ice and simple syrup until frothy.",
+            "ingredients": ["Double espresso", "simple syrup", "ice"],
+            "calories_kcal": 45,
+            "allergens": [],
+            "prep_time": "3 mins"
+          },
+          {
+            "id": 10,
+            "title": "Mint Iced Coffee",
+            "price_try": 165,
+            "description": "A refreshing blend of iced coffee mixed with a hint of fresh muddled mint and sweet syrup.",
+            "ingredients": ["Iced filter coffee", "fresh mint leaves", "simple syrup", "ice"],
+            "calories_kcal": 50,
+            "allergens": [],
+            "prep_time": "2 mins"
+          }
+        ]
+      },
+      {
+        "title": "Signature Coffee Specialties",
+        "description": "Our barista's creative playground. Unique flavor combinations that elevate the standard coffee experience.",
+        "items": [
+          {
+            "id": 1,
+            "title": "Pistachio Rose Latte",
+            "price_try": 195,
+            "description": "An elegant latte infused with real pistachio paste and a subtle hint of rose water.",
+            "ingredients": ["Espresso", "milk", "pistachio paste", "rose water", "crushed pistachios"],
+            "calories_kcal": 260,
+            "allergens": ["Dairy", "Tree Nuts (Pistachio)"],
+            "prep_time": "4 mins"
+          },
+          {
+            "id": 2,
+            "title": "Hazelnut Praline Mocha",
+            "price_try": 190,
+            "description": "A sweet, nutty mocha topped with whipped cream and caramelized hazelnut dust.",
+            "ingredients": ["Espresso", "milk", "chocolate sauce", "hazelnut syrup", "whipped cream", "praline dust"],
+            "calories_kcal": 310,
+            "allergens": ["Dairy", "Tree Nuts (Hazelnut)", "Soy"],
+            "prep_time": "4 mins"
+          },
+          {
+            "id": 3,
+            "title": "Lavender Honey Cortado",
+            "price_try": 175,
+            "description": "A strong, smooth cortado sweetened with organic honey and steeped lavender flowers.",
+            "ingredients": ["Espresso", "milk", "organic honey", "culinary lavender"],
+            "calories_kcal": 95,
+            "allergens": ["Dairy"],
+            "prep_time": "3 mins"
+          },
+          {
+            "id": 4,
+            "title": "Orange Zest Espresso Tonic",
+            "price_try": 170,
+            "description": "A bubbly, refreshing mocktail of premium tonic water, double espresso, and fresh orange peel.",
+            "ingredients": ["Double espresso", "tonic water", "fresh orange zest", "ice"],
+            "calories_kcal": 65,
+            "allergens": [],
+            "prep_time": "3 mins"
+          },
+          {
+            "id": 5,
+            "title": "Cinnamon Maple Latte",
+            "price_try": 185,
+            "description": "A cozy, warming latte made with pure Canadian maple syrup and dusted with Ceylon cinnamon.",
+            "ingredients": ["Espresso", "milk", "pure maple syrup", "cinnamon powder"],
+            "calories_kcal": 190,
+            "allergens": ["Dairy"],
+            "prep_time": "3 mins"
+          },
+          {
+            "id": 6,
+            "title": "Tiramisu Latte",
+            "price_try": 195,
+            "description": "A dessert in a cup. Espresso and milk mixed with mascarpone flavor and dusted with cocoa.",
+            "ingredients": ["Espresso", "milk", "tiramisu syrup", "cocoa powder"],
+            "calories_kcal": 230,
+            "allergens": ["Dairy"],
+            "prep_time": "4 mins"
+          },
+          {
+            "id": 7,
+            "title": "Coconut Cloud Macchiato",
+            "price_try": 185,
+            "description": "A dairy-free delight featuring layered coconut milk, espresso, and toasted coconut flakes.",
+            "ingredients": ["Espresso", "coconut milk", "vanilla syrup", "toasted coconut flakes"],
+            "calories_kcal": 140,
+            "allergens": ["Tree Nuts (Coconut)"],
+            "prep_time": "3 mins"
+          },
+          {
+            "id": 8,
+            "title": "Spiced Cardamom Coffee",
+            "price_try": 165,
+            "description": "A traditional Middle Eastern-inspired brew infused with crushed green cardamom pods.",
+            "ingredients": ["Single origin coffee", "green cardamom", "brown sugar"],
+            "calories_kcal": 30,
+            "allergens": [],
+            "prep_time": "4 mins"
+          },
+          {
+            "id": 9,
+            "title": "Matcha Espresso Fusion",
+            "price_try": 210,
+            "description": "A striking visual and flavor gradient of premium ceremonial matcha, milk, and an espresso shot.",
+            "ingredients": ["Ceremonial grade matcha powder", "espresso", "milk", "water"],
+            "calories_kcal": 150,
+            "allergens": ["Dairy"],
+            "prep_time": "5 mins"
+          },
+          {
+            "id": 10,
+            "title": "Smoked Sea Salt Mocha",
+            "price_try": 190,
+            "description": "Rich dark chocolate mocha elevated by a pinch of savory smoked sea salt.",
+            "ingredients": ["Espresso", "milk", "dark chocolate sauce", "smoked sea salt"],
+            "calories_kcal": 240,
+            "allergens": ["Dairy", "Soy"],
+            "prep_time": "4 mins"
+          }
+        ]
+      },
+      {
+        "title": "Artisanal Desserts",
+        "description": "Baked fresh daily. The perfect sweet companions to our coffee selection.",
+        "items": [
+          {
+            "id": 1,
+            "title": "Classic Tiramisu",
+            "price_try": 220,
+            "description": "Authentic Italian dessert made with espresso-soaked ladyfingers and creamy mascarpone.",
+            "ingredients": ["Mascarpone cheese", "eggs", "sugar", "ladyfingers", "espresso", "cocoa powder"],
+            "calories_kcal": 450,
+            "allergens": ["Dairy", "Eggs", "Gluten"],
+            "prep_time": "1 min (Plating)"
+          },
+          {
+            "id": 2,
+            "title": "New York Cheesecake",
+            "price_try": 230,
+            "description": "Dense, rich, and creamy vanilla cheesecake on a buttery graham cracker crust.",
+            "ingredients": ["Cream cheese", "sugar", "eggs", "graham crackers", "butter", "vanilla extract"],
+            "calories_kcal": 520,
+            "allergens": ["Dairy", "Eggs", "Gluten"],
+            "prep_time": "1 min (Plating)"
+          },
+          {
+            "id": 3,
+            "title": "Dark Chocolate Brownie",
+            "price_try": 180,
+            "description": "A fudgy, decadent brownie packed with chunks of 70% dark chocolate.",
+            "ingredients": ["Dark chocolate", "butter", "sugar", "eggs", "flour", "cocoa powder"],
+            "calories_kcal": 380,
+            "allergens": ["Dairy", "Eggs", "Gluten", "Soy"],
+            "prep_time": "2 mins (Warming & plating)"
+          },
+          {
+            "id": 4,
+            "title": "Lemon Poppy Seed Loaf",
+            "price_try": 160,
+            "description": "A moist, citrusy slice of pound cake finished with a tangy lemon glaze.",
+            "ingredients": ["Flour", "sugar", "butter", "eggs", "lemon juice", "lemon zest", "poppy seeds"],
+            "calories_kcal": 310,
+            "allergens": ["Dairy", "Eggs", "Gluten"],
+            "prep_time": "1 min (Plating)"
+          },
+          {
+            "id": 5,
+            "title": "Butter Croissant",
+            "price_try": 120,
+            "description": "A flaky, golden French pastry baked to a perfect crisp with a soft, airy center.",
+            "ingredients": ["Flour", "French butter", "yeast", "sugar", "salt", "milk"],
+            "calories_kcal": 280,
+            "allergens": ["Dairy", "Gluten"],
+            "prep_time": "2 mins (Warming)"
+          },
+          {
+            "id": 6,
+            "title": "Almond Croissant",
+            "price_try": 150,
+            "description": "A twice-baked croissant filled with sweet almond frangipane and topped with sliced almonds.",
+            "ingredients": ["Flour", "butter", "almond meal", "sugar", "eggs", "sliced almonds", "powdered sugar"],
+            "calories_kcal": 410,
+            "allergens": ["Dairy", "Eggs", "Gluten", "Tree Nuts (Almond)"],
+            "prep_time": "2 mins (Warming)"
+          },
+          {
+            "id": 7,
+            "title": "Pistachio Éclair",
+            "price_try": 190,
+            "description": "Delicate choux pastry filled with a silky pistachio pastry cream and topped with glaze.",
+            "ingredients": ["Choux pastry (flour, butter, eggs)", "milk", "egg yolks", "sugar", "pistachio paste"],
+            "calories_kcal": 340,
+            "allergens": ["Dairy", "Eggs", "Gluten", "Tree Nuts (Pistachio)"],
+            "prep_time": "1 min (Plating)"
+          },
+          {
+            "id": 8,
+            "title": "Macadamia Nut Cookie",
+            "price_try": 110,
+            "description": "A large, chewy, and soft-baked cookie loaded with roasted macadamia nuts and white chocolate.",
+            "ingredients": ["Flour", "butter", "brown sugar", "eggs", "white chocolate chips", "macadamia nuts"],
+            "calories_kcal": 360,
+            "allergens": ["Dairy", "Eggs", "Gluten", "Tree Nuts (Macadamia)", "Soy"],
+            "prep_time": "1 min (Plating)"
+          },
+          {
+            "id": 9,
+            "title": "Carrot Cake",
+            "price_try": 210,
+            "description": "A spiced, moist carrot cake dotted with walnuts and enveloped in a cream cheese frosting.",
+            "ingredients": ["Carrots", "flour", "sugar", "oil", "eggs", "walnuts", "cinnamon", "cream cheese", "butter"],
+            "calories_kcal": 480,
+            "allergens": ["Dairy", "Eggs", "Gluten", "Tree Nuts (Walnut)"],
+            "prep_time": "1 min (Plating)"
+          },
+          {
+            "id": 10,
+            "title": "Vegan Banana Bread",
+            "price_try": 150,
+            "description": "A wholesome, plant-based treat naturally sweetened with ripe bananas and a hint of cinnamon.",
+            "ingredients": ["Ripe bananas", "flour", "coconut oil", "brown sugar", "almond milk", "cinnamon"],
+            "calories_kcal": 290,
+            "allergens": ["Gluten", "Tree Nuts (Almond)"],
+            "prep_time": "2 mins (Warming & plating)"
+          }
+        ]
+      }
+    ]
+  }
+}
