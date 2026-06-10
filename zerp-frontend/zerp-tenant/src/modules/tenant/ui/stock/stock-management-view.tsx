@@ -13,12 +13,12 @@ export function StockManagementView() {
   const [tab, setTab] = useState(0)
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', p: 4, boxSizing: 'border-box' }}>
-      <Typography variant="h4" sx={{ mb: 4, fontWeight: 700 }}>
+    <Box sx={{ p: { xs: 2, md: 4 }, width: '100%', display: 'grid', gap: 3 }}>
+      <Typography variant="h4" sx={{ fontWeight: 800 }}>
         {t('stock.title')}
       </Typography>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs
           value={tab}
           onChange={(_, newTab) => setTab(newTab)}
@@ -35,7 +35,7 @@ export function StockManagementView() {
         </Tabs>
       </Box>
 
-      <Box sx={{ mt: 2, width: '100%' }}>
+      <Box sx={{ width: '100%' }}>
         {tab === 0 && <StockResourceList />}
         {tab === 1 && <StockMovementList />}
         {tab === 2 && <StockCountList />}
