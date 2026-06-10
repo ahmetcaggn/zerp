@@ -1,0 +1,46 @@
+name: zerp-frontend
+
+services:
+  zerp-admin:
+    container_name: zerp-admin
+    image: ahmetcaggn/zerp-admin:latest
+    build:
+      context: ../zerp-frontend/zerp-admin
+      dockerfile: Dockerfile
+    env_file:
+      - ../zerp-frontend/zerp-admin/.env
+    expose:
+      - "3000"
+    networks:
+      - cloudflare_tunnel_network
+
+  zerp-tenant:
+    container_name: zerp-tenant
+    image: ahmetcaggn/zerp-tenant:latest
+    build:
+      context: ../zerp-frontend/zerp-tenant
+      dockerfile: Dockerfile
+    env_file:
+      - ../zerp-frontend/zerp-tenant/.env
+    expose:
+      - "3000"
+    networks:
+      - cloudflare_tunnel_network
+
+  zerp-client:
+    container_name: zerp-client
+    image: ahmetcaggn/zerp-client:latest
+    build:
+      context: ../zerp-frontend/zerp-client
+      dockerfile: Dockerfile
+    env_file:
+      - ../zerp-frontend/zerp-client/.env
+    expose:
+      - "3000"
+    networks:
+      - cloudflare_tunnel_network
+
+
+networks:
+  cloudflare_tunnel_network:
+    external: true

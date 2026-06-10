@@ -74,11 +74,11 @@ done
 # ── 3. Docker Compose Build ──────────────────────────────────────────────────
 echo -e "${BLUE}=== Step 3/5: Running Docker Compose Build ===${NC}"
 export DOCKER_DEFAULT_PLATFORM=linux/amd64
-docker compose -f "${REPO_ROOT}/docker/compose-frontend.yaml" build
+docker compose -f "${REPO_ROOT}/docker/compose-frontend-build.yaml" build
 
 # ── 4. Tag Images for Docker Hub ─────────────────────────────────────────────
 echo -e "${BLUE}=== Step 4/5: Tagging Docker Images ===${NC}"
-LOCAL_IMAGES=("zerp-frontend-zerp-admin:latest" "zerp-frontend-zerp-tenant:latest" "zerp-frontend-zerp-client:latest")
+LOCAL_IMAGES=("ahmetcaggn/zerp-admin:latest" "ahmetcaggn/zerp-tenant:latest" "ahmetcaggn/zerp-client:latest")
 REMOTE_REPOS=("zerp-admin" "zerp-tenant" "zerp-client")
 
 for i in "${!LOCAL_IMAGES[@]}"; do
