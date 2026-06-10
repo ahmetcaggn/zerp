@@ -1,6 +1,7 @@
 'use client'
 import { Box, ButtonBase, Skeleton, Typography } from '@mui/material'
 import GridViewIcon from '@mui/icons-material/GridView'
+import { useI18n } from '@/core/i18n/i18n-provider'
 import type { MenuCategoryResponseDto } from '../../types/sale'
 
 interface Props {
@@ -11,8 +12,9 @@ interface Props {
 }
 
 export function CategorySidebar({ categories, selectedId, onSelect, isLoading }: Props) {
+  const { t } = useI18n()
   const items: { id: string | null; name: string }[] = [
-    { id: null, name: 'Tümü' },
+    { id: null, name: t('pos.filterAll') },
     ...categories.map(c => ({ id: c.id, name: c.name })),
   ]
 

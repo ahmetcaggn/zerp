@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
+import { useI18n } from '@/core/i18n/i18n-provider'
 import { getFirstAccessibleProtectedRoute } from '@/core/permissions/route-permissions'
 import { useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
@@ -21,7 +22,8 @@ export function ShopScopeGuard({ locale }: { locale: Locale }) {
     hasShopPermission,
     hasAnyShopPermission,
   } = useCurrentUserPermissions()
-  const shopSwitchingLabel = locale === 'tr' ? 'Şube değiştiriliyor...' : 'Switching branch...'
+  const { t } = useI18n()
+  const shopSwitchingLabel = t('common.switchingBranch')
 
   useEffect(() => {
     if (!isScopeReady || !scopeSwitchTransaction?.isCommitted) return
@@ -74,3 +76,4 @@ export function ShopScopeGuard({ locale }: { locale: Locale }) {
     </Backdrop>
   )
 }
+

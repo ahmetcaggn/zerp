@@ -7,6 +7,8 @@ import { alpha, type SxProps, type Theme } from '@mui/material/styles'
 import Image from 'next/image'
 import { useState } from 'react'
 
+import { useI18n } from '@/core/i18n/i18n-provider'
+
 export type LandingImageSource = {
   alt: string
   src: string
@@ -108,6 +110,7 @@ export function LandingImageAlbum({
   sizes,
   sx,
 }: LandingImageAlbumProps) {
+  const { t } = useI18n()
   const [activeIndex, setActiveIndex] = useState(0)
 
   if (images.length === 0) {
@@ -187,8 +190,8 @@ export function LandingImageAlbum({
         ))}
       </Box>
 
-      <CarouselButton direction="left" label="Önceki görsel" onClick={goPrevious} />
-      <CarouselButton direction="right" label="Sonraki görsel" onClick={goNext} />
+      <CarouselButton direction="left" label={t('home.previousImage')} onClick={goPrevious} />
+      <CarouselButton direction="right" label={t('home.nextImage')} onClick={goNext} />
 
       <Box
         aria-hidden
@@ -222,6 +225,7 @@ export function LandingImageAlbum({
 }
 
 export function LandingWorkflowAlbum({ steps }: { steps: LandingWorkflowStep[] }) {
+  const { t } = useI18n()
   const [activeIndex, setActiveIndex] = useState(0)
 
   if (steps.length === 0) {
@@ -324,8 +328,8 @@ export function LandingWorkflowAlbum({ steps }: { steps: LandingWorkflowStep[] }
 
       {steps.length > 1 ? (
         <>
-          <CarouselButton direction="left" label="Önceki servis akışı adımı" onClick={goPrevious} />
-          <CarouselButton direction="right" label="Sonraki servis akışı adımı" onClick={goNext} />
+          <CarouselButton direction="left" label={t('home.previousWorkflowStep')} onClick={goPrevious} />
+          <CarouselButton direction="right" label={t('home.nextWorkflowStep')} onClick={goNext} />
 
           <Box
             aria-hidden

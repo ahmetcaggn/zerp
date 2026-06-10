@@ -95,9 +95,9 @@ export function AppTopbar({
     setGlobalScope,
     setShopScope,
   } = useShopScope()
-  const shopLabel = locale === 'tr' ? 'Mağaza' : 'Shop'
-  const allShopsLabel = locale === 'tr' ? 'Tüm Mağazalar' : 'All Shops'
-  const pendingShopLabel = locale === 'tr' ? 'Seçili Mağaza' : 'Selected Shop'
+  const shopLabel = t('common.shop')
+  const allShopsLabel = t('common.allShops')
+  const pendingShopLabel = t('common.selectedShop')
   const scopeValue = scope.mode === 'SHOP' ? scope.shopId : 'GLOBAL'
   const isScopeShopInList = scope.mode !== 'SHOP' || shops.some((shop) => shop.id === scope.shopId)
   const resolvedUsername = useMemo(() => {
@@ -233,7 +233,7 @@ export function AppTopbar({
           <LocaleSwitcher locale={locale} />
           <ThemeToggle />
           <IconButton
-            aria-label="Open menu"
+            aria-label={t('common.openMenu')}
             color="inherit"
             size="small"
             onClick={() => setDrawerOpen(true)}
@@ -368,7 +368,7 @@ export function AppTopbar({
       >
         <Stack direction="row" alignItems="center" justifyContent="space-between" px={1.5} py={1}>
           <Typography fontWeight={700}>{t('nav.menu')}</Typography>
-          <IconButton aria-label="Close menu" size="small" onClick={() => setDrawerOpen(false)}>
+          <IconButton aria-label={t('common.closeMenu')} size="small" onClick={() => setDrawerOpen(false)}>
             <CloseRoundedIcon />
           </IconButton>
         </Stack>

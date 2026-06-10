@@ -2,6 +2,7 @@
 
 import { Alert, Stack } from '@mui/material'
 
+import { useI18n } from '@/core/i18n/i18n-provider'
 import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 
@@ -9,6 +10,7 @@ import { ShopDashboard } from './shop-dashboard'
 import { TenantDashboard } from './tenant-dashboard'
 
 export function DashboardPageContent() {
+  const { t } = useI18n()
   const { scope } = useShopScope()
   const { hasAnyPermission, hasTenantPermission, hasShopPermission } = useCurrentUserPermissions()
   const canReadDashboard =
@@ -21,7 +23,7 @@ export function DashboardPageContent() {
   if (!canReadDashboard) {
     return (
       <Stack spacing={3}>
-        <Alert severity="warning">Bu sayfayı görüntüleme yetkiniz yok.</Alert>
+        <Alert severity="warning">{t('common.unauthorized')}</Alert>
       </Stack>
     )
   }

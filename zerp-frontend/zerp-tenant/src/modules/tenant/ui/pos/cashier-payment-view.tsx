@@ -214,7 +214,7 @@ function SelectionStage({
               <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ minHeight: 48, px: 2 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%', pr: 1 }}>
                   <Chip
-                    label={`Sipariş ${idx + 1}`}
+                    label={t('sale.cashier.orderLabel', { value: idx + 1 })}
                     color="warning"
                     size="small"
                     sx={{ fontWeight: 700, fontSize: '0.7rem' }}
@@ -355,7 +355,7 @@ function SelectionStage({
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="body2" color="text.secondary">
-              Seçili: <strong>{totalSelectedQty} ürün</strong>
+              {t('sale.cashier.selectedItemsQty', { qty: totalSelectedQty })}
             </Typography>
             <Button
               size="small"
@@ -363,7 +363,7 @@ function SelectionStage({
               onClick={isAllSelected ? onClearAll : onSelectAll}
               sx={{ fontSize: '0.7rem', py: 0, px: 0.75, minWidth: 0, fontWeight: 700 }}
             >
-              {isAllSelected ? 'Temizle' : 'Tümünü Seç'}
+              {isAllSelected ? t('sale.cashier.clearSelection') : t('sale.cashier.selectAll')}
             </Button>
           </Box>
           <Typography variant="h6" fontWeight={800} color="primary.main">
@@ -380,7 +380,7 @@ function SelectionStage({
           disabled={totalSelectedQty === 0 || !canProceed}
           sx={{ fontWeight: 700, py: 1.25, borderRadius: 2 }}
         >
-          Ödemeye Geç
+          {t('sale.cashier.proceedToPayment')}
         </Button>
       </Paper>
     </Box>
@@ -631,7 +631,7 @@ function PaymentStage({
           <ArrowBackIcon />
         </IconButton>
         <Typography variant="h6" fontWeight={700}>
-          Ödeme
+          {t('sale.cashier.payment')}
         </Typography>
       </Box>
 
@@ -644,9 +644,9 @@ function PaymentStage({
               color="text.secondary"
               sx={{ fontSize: '0.65rem', letterSpacing: 1 }}
             >
-              Sipariş {idx + 1}
+              {t('sale.cashier.orderLabel', { value: idx + 1 })}
               {!paymentPlan[idx].isFullOrder && (
-                <Chip label="Kısmi" size="small" sx={{ ml: 1, height: 16, fontSize: '0.6rem' }} />
+                <Chip label={t('sale.cashier.partial')} size="small" sx={{ ml: 1, height: 16, fontSize: '0.6rem' }} />
               )}
             </Typography>
             {selectedItems.map(({ item, selectedQty }) => {

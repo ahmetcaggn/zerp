@@ -7,18 +7,20 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { appConfig } from '@/core/config/app-config'
+import { useI18n } from '@/core/i18n/i18n-provider'
 import { getPathWithoutLocale, toLocalizedPath } from '@/core/utils/route-helpers'
 
 export function LocaleSwitcher({ locale }: { locale: 'tr' | 'en' }) {
   const router = useRouter()
   const pathname = usePathname()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const { t } = useI18n()
 
   const currentPathWithoutLocale = getPathWithoutLocale(pathname, locale)
 
   return (
     <>
-      <Tooltip title="Change language">
+      <Tooltip title={t('common.changeLanguage')}>
         <IconButton
           color="inherit"
           size="small"
@@ -45,3 +47,4 @@ export function LocaleSwitcher({ locale }: { locale: 'tr' | 'en' }) {
     </>
   )
 }
+

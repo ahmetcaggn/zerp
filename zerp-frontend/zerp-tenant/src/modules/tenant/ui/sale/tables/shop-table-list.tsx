@@ -69,11 +69,11 @@ export function ShopTableList() {
   return (
     <Box>
       <Alert severity="info" sx={{ mb: 2 }}>
-        Masalara sipariş girmek için{' '}
+        {t('pos.tablesOrderHintPrefix')}
         <Link href={`/${locale}/sale`} underline="hover" fontWeight={600}>
-          Satış
-        </Link>{' '}
-        sayfasını kullanın.
+          {t('pos.salesPageName')}
+        </Link>
+        {t('pos.tablesOrderHintSuffix')}
       </Alert>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>

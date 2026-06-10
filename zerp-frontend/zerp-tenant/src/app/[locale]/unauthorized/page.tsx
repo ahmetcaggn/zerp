@@ -1,12 +1,15 @@
 import LockRoundedIcon from '@mui/icons-material/LockRounded'
 import { Box, Button, Paper, Stack, Typography } from '@mui/material'
 
+import { getMessages } from '@/core/i18n/messages'
+
 export default async function UnauthorizedPage({
   params,
 }: {
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const messages = getMessages(locale as any)
 
   return (
     <Box
@@ -36,15 +39,16 @@ export default async function UnauthorizedPage({
         </Typography>
         <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.75} mb={1.5}>
           <LockRoundedIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
-          <Typography variant="h3">Access Denied</Typography>
+          <Typography variant="h3">{messages.common.accessDenied}</Typography>
         </Stack>
         <Typography color="text.secondary" mb={4}>
-          You don&apos;t have permission to view this page.
+          {messages.common.unauthorized}
         </Typography>
         <Button href={`/${locale}`} variant="contained" size="large" fullWidth>
-          Return Home
+          {messages.nav.home}
         </Button>
       </Paper>
     </Box>
   )
 }
+

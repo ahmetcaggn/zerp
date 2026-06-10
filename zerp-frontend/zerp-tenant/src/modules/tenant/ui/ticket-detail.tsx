@@ -26,6 +26,7 @@ import { useRouter } from 'next/navigation'
 import type { ChangeEvent } from 'react'
 import { useState } from 'react'
 
+import { useI18n } from '@/core/i18n/i18n-provider'
 import { PermissionActions, useCurrentUserPermissions } from '@/core/permissions/use-permissions'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
@@ -116,6 +117,7 @@ function resolveCommentAuthorType(authorType?: string): CommentAuthorType {
 export function TicketDetail({ id }: Props) {
   const router = useRouter()
   const { showToast } = useToast()
+  const { t } = useI18n()
 
   const [editOpen, setEditOpen] = useState(false)
   const [editTitle, setEditTitle] = useState('')
@@ -133,7 +135,7 @@ export function TicketDetail({ id }: Props) {
     getDisabledReason,
     isLoadingPermissions,
   } = useCurrentUserPermissions()
-  const unauthorizedReason = 'Bu işlem için yetkiniz yok.'
+  const unauthorizedReason = t('common.unauthorized')
   const canFetchTicket =
     hasPermission(PermissionActions.READ_TICKET) ||
     hasTenantPermission(PermissionActions.READ_TICKET)
@@ -204,14 +206,14 @@ export function TicketDetail({ id }: Props) {
   const updateDeniedReason = getDisabledReason(canUpdateTicket, unauthorizedReason)
   const editDisabledReason = isEditLocked
     ? isClosed
-      ? 'Kapanmış talepler düzenlenemez.'
-      : 'IN_PROGRESS durumundaki talepler düzenlenemez.'
+      ? t('tickets.errorClosedCannotEdit')
+      : t('tickets.errorInProgressCannotEdit')
     : updateDeniedReason
   const attachmentUploadBlockedReason = isClosed
-    ? 'Kapalı taleplere ek yüklenemez.'
+    ? t('tickets.errorClosedCannotUpload')
     : getDisabledReason(canCreateTicketAttachment, unauthorizedReason)
   const commentCreateBlockedReason = isClosed
-    ? 'Kapalı taleplere mesaj yazılamaz.'
+    ? t('tickets.errorClosedCannotComment')
     : getDisabledReason(canCreateTicketComment, unauthorizedReason)
   const comments = canReadTicketComment
     ? (currentTicket.comments ?? [])
@@ -237,8 +239,8 @@ export function TicketDetail({ id }: Props) {
     if (isEditLocked) {
       showToast(
         isClosed
-          ? 'Kapanmış talepler düzenlenemez.'
-          : 'IN_PROGRESS durumundaki talepler düzenlenemez.',
+          ? t('tickets.errorClosedCannotEdit')
+          : t('tickets.errorInProgressCannotEdit'),
         { severity: 'warning' },
       )
       return
@@ -260,8 +262,8 @@ export function TicketDetail({ id }: Props) {
     if (isEditLocked) {
       showToast(
         isClosed
-          ? 'Kapanmış talepler düzenlenemez.'
-          : 'IN_PROGRESS durumundaki talepler düzenlenemez.',
+          ? t('tickets.errorClosedCannotEdit')
+          : t('tickets.errorInProgressCannotEdit'),
         { severity: 'warning' },
       )
       setEditOpen(false)
@@ -270,7 +272,7 @@ export function TicketDetail({ id }: Props) {
 
     const title = editTitle.trim()
     if (!title) {
-      showToast('Başlık zorunludur.', { severity: 'warning' })
+      showToast(t('tickets.titleRequiredWarning'), { severity: 'warning' })
       return
     }
 
@@ -278,12 +280,12 @@ export function TicketDetail({ id }: Props) {
     try {
       const parsed = JSON.parse(editCustomAttributes || '{}') as unknown
       if (parsed === null || Array.isArray(parsed) || typeof parsed !== 'object') {
-        showToast('Özel alanlar geçerli bir JSON nesnesi olmalı.', { severity: 'warning' })
+        showToast(t('tickets.errorCustomAttributesInvalidObject'), { severity: 'warning' })
         return
       }
       customAttributes = parsed as Record<string, unknown>
     } catch {
-      showToast('Özel alanlar geçerli JSON formatında olmalı.', { severity: 'warning' })
+      showToast(t('tickets.errorCustomAttributesInvalidJson'), { severity: 'warning' })
       return
     }
 
@@ -305,7 +307,7 @@ export function TicketDetail({ id }: Props) {
       {
         onSuccess: () => {
           setEditOpen(false)
-          showToast('Talep güncellendi.', { severity: 'success' })
+          showToast(t('tickets.ticketUpdatedToast'), { severity: 'success' })
         },
         onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
       },
@@ -321,7 +323,7 @@ export function TicketDetail({ id }: Props) {
     }
 
     if (isClosed) {
-      showToast('Kapalı taleplere mesaj yazılamaz.', { severity: 'warning' })
+      showToast(t('tickets.errorClosedCannotComment'), { severity: 'warning' })
       return
     }
 
@@ -330,7 +332,7 @@ export function TicketDetail({ id }: Props) {
       {
         onSuccess: () => {
           setCommentText('')
-          showToast('Mesaj gönderildi.', { severity: 'success' })
+          showToast(t('tickets.commentAddedToast'), { severity: 'success' })
         },
         onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
       },
@@ -346,19 +348,19 @@ export function TicketDetail({ id }: Props) {
     }
 
     if (!canCreateTicketAttachment) {
-      showToast('Ek yükleme yetkiniz yok.', { severity: 'warning' })
+      showToast(t('tickets.errorCannotReadAttachments'), { severity: 'warning' })
       return
     }
 
     if (isClosed) {
-      showToast('Kapalı taleplere ek yüklenemez.', { severity: 'warning' })
+      showToast(t('tickets.errorClosedCannotUpload'), { severity: 'warning' })
       return
     }
 
     uploadAttachment(
       { id, file: selectedFile },
       {
-        onSuccess: () => showToast('Ek yüklendi.', { severity: 'success' }),
+        onSuccess: () => showToast(t('tickets.attachmentUploadedToast'), { severity: 'success' }),
         onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
       },
     )
@@ -379,7 +381,7 @@ export function TicketDetail({ id }: Props) {
           onClick={() => router.back()}
           sx={{ color: 'text.secondary' }}
         >
-          Geri
+          {t('common.back')}
         </Button>
         <Tooltip title={editDisabledReason ?? ''}>
           <span>
@@ -389,7 +391,7 @@ export function TicketDetail({ id }: Props) {
               onClick={openEditDialog}
               disabled={isEditLocked || !canUpdateTicket}
             >
-              Düzenle
+              {t('common.edit')}
             </Button>
           </span>
         </Tooltip>
@@ -417,23 +419,23 @@ export function TicketDetail({ id }: Props) {
 
         <Stack spacing={1}>
           <Typography variant="body2" color="text.secondary">
-            Oluşturulma: {formatDate(currentTicket.createdAt)}
+            {t('tickets.createdAtLabel', { value: formatDate(currentTicket.createdAt) })}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Son Güncelleme: {formatDate(currentTicket.updatedAt)}
+            {t('tickets.updatedAtLabel', { value: formatDate(currentTicket.updatedAt) })}
           </Typography>
         </Stack>
 
         <Box sx={{ mt: 2 }}>
           <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-            Açıklama
+            {t('tickets.descriptionField')}
           </Typography>
           <Typography variant="body2">{currentTicket.description || '—'}</Typography>
         </Box>
 
         <Box sx={{ mt: 2 }}>
           <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-            Etiketler
+            {t('tickets.tagsLabel')}
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {tags.length > 0 ? (
@@ -448,7 +450,7 @@ export function TicketDetail({ id }: Props) {
 
         <Box sx={{ mt: 2 }}>
           <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-            Özel Alanlar
+            {t('tickets.customFields')}
           </Typography>
           <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'background.default' }}>
             <Typography
@@ -464,7 +466,7 @@ export function TicketDetail({ id }: Props) {
 
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Typography variant="subtitle1">Ekler ({ticketAttachments.length})</Typography>
+          <Typography variant="subtitle1">{t('tickets.attachmentsLabel')} ({ticketAttachments.length})</Typography>
           <Tooltip title={attachmentUploadBlockedReason ?? ''}>
             <span>
               <Button
@@ -473,7 +475,7 @@ export function TicketDetail({ id }: Props) {
                 startIcon={<CloudUploadIcon fontSize="small" />}
                 disabled={isUploadingAttachment || Boolean(attachmentUploadBlockedReason)}
               >
-                Ek Yükle
+                {t('tickets.uploadAttachment')}
                 <input
                   hidden
                   type="file"
@@ -487,20 +489,20 @@ export function TicketDetail({ id }: Props) {
 
         {isLoadingPermissions ? (
           <Typography color="text.secondary" variant="body2">
-            Ek yetkileri yükleniyor...
+            {t('tickets.loadingAttachmentPermissions')}
           </Typography>
         ) : !canReadTicketAttachment ? (
           <Typography color="text.secondary" variant="body2">
-            Ekleri görüntüleme yetkiniz yok.
+            {t('tickets.errorCannotReadAttachments')}
           </Typography>
         ) : ticketAttachments.length === 0 ? (
           <Typography color="text.secondary" variant="body2">
-            Ek bulunmuyor.
+            {t('tickets.noAttachments')}
           </Typography>
         ) : (
           <Stack spacing={1.25}>
             {ticketAttachments.map((attachment, index) => {
-              const fileLabel = attachment.fileName?.trim() || attachment.storageKey || 'Dosya'
+              const fileLabel = attachment.fileName?.trim() || attachment.storageKey || t('tickets.defaultFileLabel')
               const attachmentUrl = buildAttachmentUrl(attachment)
 
               return (
@@ -539,11 +541,11 @@ export function TicketDetail({ id }: Props) {
                         size="small"
                         startIcon={<DownloadIcon fontSize="small" />}
                       >
-                        Aç
+                        {t('tickets.openAttachment')}
                       </Button>
                     ) : (
                       <Button size="small" disabled>
-                        Aç
+                        {t('tickets.openAttachment')}
                       </Button>
                     )}
                   </Box>
@@ -556,16 +558,16 @@ export function TicketDetail({ id }: Props) {
 
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography variant="subtitle1" sx={{ mb: 1.5 }}>
-          Mesajlar ({comments.length})
+          {t('tickets.commentsLabel')} ({comments.length})
         </Typography>
 
         {!canReadTicketComment ? (
           <Typography color="text.secondary" variant="body2">
-            Mesajları görüntüleme yetkiniz yok.
+            {t('tickets.errorCannotReadComments')}
           </Typography>
         ) : comments.length === 0 ? (
           <Typography color="text.secondary" variant="body2">
-            Mesaj yok.
+            {t('tickets.noComments')}
           </Typography>
         ) : (
           <Stack spacing={1.5}>
@@ -628,7 +630,7 @@ export function TicketDetail({ id }: Props) {
                       sx={{ display: 'flex', justifyContent: 'space-between', gap: 1.5, mb: 0.5 }}
                     >
                       <Typography variant="caption" color="text.secondary">
-                        {comment.authorName ?? comment.authorId ?? 'Bilinmeyen'}
+                        {comment.authorName ?? comment.authorId ?? t('tickets.unknownAuthor')}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         {formatDate(comment.createdAt)}
@@ -650,14 +652,14 @@ export function TicketDetail({ id }: Props) {
 
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography variant="subtitle2" sx={{ mb: 1 }}>
-          Mesaj Yaz
+          {t('tickets.addComment')}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
           <TextField
             multiline
             minRows={2}
             fullWidth
-            placeholder="Mesajınızı yazın..."
+            placeholder={t('tickets.commentPlaceholder')}
             value={commentText}
             onChange={(event) => setCommentText(event.target.value)}
             size="small"
@@ -674,7 +676,7 @@ export function TicketDetail({ id }: Props) {
                 }
                 sx={{ flexShrink: 0 }}
               >
-                Gönder
+                {t('common.send')}
               </Button>
             </span>
           </Tooltip>
@@ -682,11 +684,11 @@ export function TicketDetail({ id }: Props) {
       </Paper>
 
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Talebi Düzenle</DialogTitle>
+        <DialogTitle>{t('tickets.editDialogTitle')}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ pt: 1 }}>
             <TextField
-              label="Başlık *"
+              label={t('tickets.titleField')}
               value={editTitle}
               onChange={(event) => setEditTitle(event.target.value)}
               size="small"
@@ -694,7 +696,7 @@ export function TicketDetail({ id }: Props) {
               disabled={!canUpdateTicket}
             />
             <TextField
-              label="Açıklama"
+              label={t('tickets.descriptionField')}
               value={editDescription}
               onChange={(event) => setEditDescription(event.target.value)}
               size="small"
@@ -705,7 +707,7 @@ export function TicketDetail({ id }: Props) {
             />
             <TextField
               select
-              label="Tür"
+              label={t('tickets.typeLabel')}
               value={editType}
               onChange={(event) => setEditType(event.target.value as TicketTypeString)}
               size="small"
@@ -719,16 +721,16 @@ export function TicketDetail({ id }: Props) {
               ))}
             </TextField>
             <TextField
-              label="Etiketler"
+              label={t('tickets.tagsLabel')}
               value={editTags}
               onChange={(event) => setEditTags(event.target.value)}
               size="small"
               fullWidth
-              helperText="Virgülle ayırın. Örn: ödeme, acil, teknik"
+              helperText={t('tickets.tagsHelperText')}
               disabled={!canUpdateTicket}
             />
             <TextField
-              label="Özel Alanlar (JSON)"
+              label={t('tickets.customFieldsJsonLabel')}
               value={editCustomAttributes}
               onChange={(event) => setEditCustomAttributes(event.target.value)}
               size="small"
@@ -741,10 +743,10 @@ export function TicketDetail({ id }: Props) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditOpen(false)} disabled={isSaving}>
-            İptal
+            {t('common.cancel')}
           </Button>
           <Button variant="contained" onClick={handleSave} disabled={isSaving || !canUpdateTicket}>
-            {isSaving ? <CircularProgress size={20} /> : 'Kaydet'}
+            {isSaving ? <CircularProgress size={20} /> : t('common.save')}
           </Button>
         </DialogActions>
       </Dialog>

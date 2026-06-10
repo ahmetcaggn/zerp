@@ -102,7 +102,7 @@ export function StockCountEntryDialog({ open, count, onClose }: StockCountEntryD
       (it) => !Number.isFinite(parseDecimalInput(it.actualQuantityInput)),
     )
     if (hasMissingActual) {
-      showToast('Please fill actual quantity for all items.', { severity: 'warning' })
+      showToast(t('stock.count.validationFillAll'), { severity: 'warning' })
       return
     }
 
@@ -118,10 +118,10 @@ export function StockCountEntryDialog({ open, count, onClose }: StockCountEntryD
           })),
         },
       })
-      showToast('Count entries saved and marked ready for approval.', { severity: 'success' })
+      showToast(t('stock.count.saveSuccess'), { severity: 'success' })
       onClose()
     } catch (err: any) {
-      showToast(err?.message ?? 'Failed to save count entries', { severity: 'error' })
+      showToast(err?.message ?? t('stock.count.saveFailed'), { severity: 'error' })
     }
   }
 
@@ -155,10 +155,10 @@ export function StockCountEntryDialog({ open, count, onClose }: StockCountEntryD
             <TableHead>
               <TableRow>
                 <TableCell>{t('stock.resource.form.name')}</TableCell>
-                <TableCell align="right">Previous Actual</TableCell>
-                <TableCell align="right">Expected</TableCell>
-                <TableCell align="right">Actual</TableCell>
-                <TableCell align="right">Difference</TableCell>
+                <TableCell align="right">{t('stock.count.previousActual')}</TableCell>
+                <TableCell align="right">{t('stock.count.expected')}</TableCell>
+                <TableCell align="right">{t('stock.count.actual')}</TableCell>
+                <TableCell align="right">{t('stock.count.difference')}</TableCell>
                 <TableCell>{t('stock.count.notes')}</TableCell>
               </TableRow>
             </TableHead>

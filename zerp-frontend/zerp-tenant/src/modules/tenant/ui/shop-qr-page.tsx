@@ -146,12 +146,12 @@ export function ShopQrPage() {
           <body>
             <div class="print-container">
               <div class="shop-name">${shopName}</div>
-              <div class="shop-subtitle">ZERP Digital Menu</div>
+              <div class="shop-subtitle">${t('shopQr.digitalMenuTitle')}</div>
               <div class="qr-wrapper">
                 ${svgElement.outerHTML}
               </div>
-              <div class="footer-text">Scan to view our menu</div>
-              <div class="brand">Powered by ZERP</div>
+              <div class="footer-text">${t('shopQr.scanToViewMenu')}</div>
+              <div class="brand">${t('shopQr.poweredBy')}</div>
             </div>
             <script>
               window.onload = function() {

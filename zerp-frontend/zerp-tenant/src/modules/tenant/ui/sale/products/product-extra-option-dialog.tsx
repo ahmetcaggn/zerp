@@ -226,7 +226,7 @@ export function ProductExtraOptionDialog({ open, product, onClose }: Props) {
                       variant="outlined"
                     />
                     {!opt.isActive && (
-                      <Chip label="Pasif" size="small" color="error" />
+                      <Chip label={t('common.passive')} size="small" color="error" />
                     )}
                   </Box>
                   <Box>

@@ -51,6 +51,9 @@ export interface MessageDictionary {
     importQrCameraError: string
     importQrInvalid: string
     importQrSuccess: string
+    tablesOrderHintPrefix: string
+    tablesOrderHintSuffix: string
+    salesPageName: string
   }
   sale: {
     cashier: {
@@ -87,6 +90,13 @@ export interface MessageDictionary {
       recordPayment: string
       completePayment: string
       partialItemsUpdatedToast: string
+      orderLabel: string
+      selectedItemsQty: string
+      clearSelection: string
+      selectAll: string
+      proceedToPayment: string
+      payment: string
+      partial: string
     }
     [key: string]: unknown
   }
@@ -105,6 +115,18 @@ export interface MessageDictionary {
     create: string
     edit: string
     delete: string
+    somethingWentWrong: string
+    pageNotFound: string
+    accessDenied: string
+    shop: string
+    allShops: string
+    selectedShop: string
+    switchingBranch: string
+    openMenu: string
+    closeMenu: string
+    changeLanguage: string
+    active: string
+    passive: string
   }
   nav: {
     home: string
@@ -146,6 +168,10 @@ export interface MessageDictionary {
     primaryCta: string
     secondaryCta: string
     playStoreCta: string
+    previousImage: string
+    nextImage: string
+    previousWorkflowStep: string
+    nextWorkflowStep: string
     demoRequest: {
       title: string
       description: string
@@ -253,6 +279,10 @@ export interface MessageDictionary {
     addEmployeeAction: string
     createAnnouncementAction: string
     newTicketAction: string
+    viewStockAction: string
+    openCashierAction: string
+    shop: Record<string, unknown>
+    tenant: Record<string, unknown>
   }
   shops: {
     title: string
@@ -478,6 +508,28 @@ export interface MessageDictionary {
     ticketUpdatedToast: string
     ticketDeletedToast: string
     ticketCreatedToast: string
+    errorClosedCannotEdit: string
+    errorInProgressCannotEdit: string
+    errorClosedCannotUpload: string
+    errorClosedCannotComment: string
+    errorCannotReadComments: string
+    errorCannotReadAttachments: string
+    loadingAttachmentPermissions: string
+    noAttachments: string
+    noComments: string
+    defaultFileLabel: string
+    openAttachment: string
+    errorCustomAttributesInvalidObject: string
+    errorCustomAttributesInvalidJson: string
+    createdAtLabel: string
+    updatedAtLabel: string
+    tagsLabel: string
+    tagsHelperText: string
+    customFieldsJsonLabel: string
+    uploadAttachment: string
+    customFields: string
+    attachmentsLabel: string
+    attachmentUploadedToast: string
   }
   announcements: {
     title: string
@@ -515,6 +567,193 @@ export interface MessageDictionary {
     downloadButton: string
     targetUrlLabel: string
     copySuccessToast: string
+    digitalMenuTitle: string
+    scanToViewMenu: string
+    poweredBy: string
+  }
+  stock: {
+    title: string
+    tabs: {
+      resources: string
+      movements: string
+      graphTracking: string
+      counts: string
+    }
+    resource: {
+      createButton: string
+      defineButton: string
+      editButton: string
+      emptyState: string
+      searchPlaceholder: string
+      form: {
+        name: string
+        description: string
+        unitType: string
+        quantity: string
+        reorderThreshold: string
+        costPerUnit: string
+      }
+      quickActions: {
+        waste: string
+        restock: string
+        adjust: string
+      }
+      table: {
+        realStock: string
+        expectedStock: string
+        lastCountStock: string
+        varianceFromLastCount: string
+        lastExpectedStock: string
+        lastCountDate: string
+      }
+      varianceInfo: string
+    }
+    operation: {
+      entryButton: string
+      adjustmentButton: string
+      historyTitle: string
+      emptyState: string
+      type: string
+      itemCount: string
+      status: string
+      referenceNo: string
+      referenceNoOperation: string
+      referenceNoItem: string
+      referenceNoOperationHelp: string
+      referenceNoGuide: string
+      notes: string
+      quantity: string
+      unitHint: string
+      unitCost: string
+      reason: string
+      direction: string
+      detailTitle: string
+      emptyDetailItems: string
+      addItem: string
+      removeItem: string
+      shopRequired: string
+      invalidItems: string
+      entryCreated: string
+      adjustmentCreated: string
+      operationError: string
+      types: {
+        ENTRY: string
+        ADJUSTMENT: string
+      }
+      statuses: {
+        DRAFT: string
+        POSTED: string
+        CANCELLED: string
+      }
+      directions: {
+        INCREASE: string
+        DECREASE: string
+      }
+      filters: {
+        type: string
+        allTypes: string
+        referenceNo: string
+        from: string
+        to: string
+        clear: string
+      }
+    }
+    movement: {
+      createButton: string
+      emptyState: string
+      type: string
+      date: string
+      types: {
+        PURCHASE: string
+        SALE: string
+        WASTE: string
+        ADJUSTMENT: string
+        TRANSFER: string
+        RETURN: string
+        STOCK_COUNT_CORRECTION: string
+      }
+      quantity: string
+      expectedBefore: string
+      expectedAfter: string
+      reference: string
+      notes: string
+      filters: {
+        period: string
+        stockType: string
+        allStockTypes: string
+        selectedDay: string
+        selectedWeek: string
+        selectedMonth: string
+        previous: string
+        next: string
+        periods: {
+          DAY: string
+          WEEK: string
+          MONTH: string
+        }
+      }
+      chart: {
+        title: string
+        emptyState: string
+        legend: {
+          movement: string
+          outflow: string
+          inflow: string
+          previous: string
+          current: string
+        }
+        totalLabel: string
+      }
+    }
+    count: {
+      createButton: string
+      notes: string
+      previousActual: string
+      expected: string
+      actual: string
+      difference: string
+      validationFillAll: string
+      saveSuccess: string
+      saveFailed: string
+    }
+  }
+  teams: {
+    title: string
+    createButton: string
+    editButton: string
+    deleteButton: string
+    activateButton: string
+    deactivateButton: string
+    addMemberButton: string
+    removeMemberButton: string
+    emptyState: string
+    membersLabel: string
+    activeLabel: string
+    inactiveLabel: string
+    roleLeader: string
+    roleMember: string
+    nameColumnHeader: string
+    descriptionColumnHeader: string
+    statusColumnHeader: string
+    memberCountColumnHeader: string
+    userIdColumnHeader: string
+    roleColumnHeader: string
+    joinedDateColumnHeader: string
+    nameField: string
+    descriptionField: string
+    userIdField: string
+    roleLabel: string
+    makeLeaderButton: string
+    makeMemberButton: string
+    teamActivatedToast: string
+    teamDeactivatedToast: string
+    memberAddedToast: string
+    memberRemovedToast: string
+    roleUpdatedToast: string
+    teamCreatedToast: string
+    teamUpdatedToast: string
+    teamDeletedToast: string
+    nameRequiredWarning: string
   }
 }
 

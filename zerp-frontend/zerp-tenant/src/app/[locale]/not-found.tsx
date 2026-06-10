@@ -1,7 +1,13 @@
+'use client'
+
 import SearchOffRoundedIcon from '@mui/icons-material/SearchOffRounded'
 import { Box, Button, Paper, Stack, Typography } from '@mui/material'
 
+import { useI18n } from '@/core/i18n/i18n-provider'
+
 export default function LocaleNotFound() {
+  const { t } = useI18n()
+
   return (
     <Box
       sx={{
@@ -30,13 +36,13 @@ export default function LocaleNotFound() {
         </Typography>
         <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.75} mb={1.5}>
           <SearchOffRoundedIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
-          <Typography variant="h3">Page Not Found</Typography>
+          <Typography variant="h3">{t('common.pageNotFound')}</Typography>
         </Stack>
         <Typography color="text.secondary" mb={4}>
-          The page you&apos;re looking for doesn&apos;t exist or has been moved.
+          {t('common.pageNotFound')}
         </Typography>
         <Button href="/" variant="contained" size="large" fullWidth>
-          Go Home
+          {t('nav.home')}
         </Button>
       </Paper>
     </Box>

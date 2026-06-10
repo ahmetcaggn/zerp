@@ -4,6 +4,8 @@ import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded'
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import { Box, Button, Paper, Stack, Typography } from '@mui/material'
 
+import { useI18n } from '@/core/i18n/i18n-provider'
+
 export default function LocaleError({
   error,
   reset,
@@ -11,6 +13,8 @@ export default function LocaleError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const { t } = useI18n()
+
   return (
     <Box
       sx={{
@@ -39,10 +43,10 @@ export default function LocaleError({
         </Typography>
         <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.75} mb={1.5}>
           <ErrorOutlineRoundedIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
-          <Typography variant="h3">Something Went Wrong</Typography>
+          <Typography variant="h3">{t('common.somethingWentWrong')}</Typography>
         </Stack>
         <Typography color="text.secondary" mb={4}>
-          {error.message || 'An unexpected error occurred. Please try again.'}
+          {error.message || t('common.somethingWentWrong')}
         </Typography>
         <Button
           onClick={reset}
@@ -51,9 +55,10 @@ export default function LocaleError({
           fullWidth
           startIcon={<RefreshRoundedIcon />}
         >
-          Try Again
+          {t('common.back')}
         </Button>
       </Paper>
     </Box>
   )
 }
+

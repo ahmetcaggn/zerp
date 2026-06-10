@@ -127,38 +127,7 @@ const quickActionStyles: Record<
 
 const cityDistributionColors = ['#20b486', '#3b82f6', '#f59e0b', '#8b5cf6', '#fb7185', '#94a3b8'] as const
 
-const quickActions: SalesDashboardQuickAction[] = [
-  {
-    id: 'add-employee',
-    label: 'Çalışan Ekle',
-    description: 'Ekip yönetim ekranına gidip yeni çalışan tanımla.',
-    href: ROUTES.employees,
-  },
-  {
-    id: 'create-announcement',
-    label: 'Duyuru Oluştur',
-    description: 'Mağazalara veya ekiplere hızlı duyuru oluştur.',
-    href: ROUTES.announcements,
-  },
-  {
-    id: 'new-ticket',
-    label: 'Yeni Talep',
-    description: 'Destek veya operasyon için yeni talep akışı başlat.',
-    href: ROUTES.tickets,
-  },
-  {
-    id: 'view-stock',
-    label: 'Stoku Görüntüle',
-    description: 'Kritik stok seviyelerini ve hareketleri incele.',
-    href: ROUTES.stock,
-  },
-  {
-    id: 'open-cashier',
-    label: 'Kasaya Git',
-    description: 'Anlık sipariş ve ödeme operasyonuna geç.',
-    href: ROUTES.sale,
-  },
-]
+
 
 function resolveIntlLocale(locale: string) {
   return locale === 'tr' ? 'tr-TR' : 'en-US'
@@ -249,44 +218,78 @@ function toDelta(value: number | null, comparisonLabel: string): SalesDashboardM
 function buildTenantSalesDashboard(
   dto: TenantSalesDashboardOverviewResponseDto,
   intlLocale: string,
+  t: (key: string, params?: Record<string, string | number>) => string,
 ): TenantSalesDashboardData {
   const cityDistribution = dto.cityDistribution.map((item, index) => ({
     ...item,
     color: cityDistributionColors[index % cityDistributionColors.length],
   }))
 
+  const quickActions: SalesDashboardQuickAction[] = [
+    {
+      id: 'add-employee',
+      label: t('dashboard.addEmployeeAction'),
+      description: t('dashboard.tenant.addEmployeeDescription'),
+      href: ROUTES.employees,
+    },
+    {
+      id: 'create-announcement',
+      label: t('dashboard.createAnnouncementAction'),
+      description: t('dashboard.tenant.createAnnouncementDescription'),
+      href: ROUTES.announcements,
+    },
+    {
+      id: 'new-ticket',
+      label: t('dashboard.newTicketAction'),
+      description: t('dashboard.tenant.newTicketDescription'),
+      href: ROUTES.tickets,
+    },
+    {
+      id: 'view-stock',
+      label: t('dashboard.viewStockAction'),
+      description: t('dashboard.tenant.viewStockDescription'),
+      href: ROUTES.stock,
+    },
+    {
+      id: 'open-cashier',
+      label: t('dashboard.openCashierAction'),
+      description: t('dashboard.tenant.openCashierDescription'),
+      href: ROUTES.sale,
+    },
+  ]
+
   return {
-    title: 'Satış Paneli',
-    subtitle: 'Tüm mağazalara ait satış performansı ve özet metrikler.',
-    scopeLabel: 'Tüm Mağazalar',
-    rangeLabel: 'Son 6 Ay',
+    title: t('dashboard.tenant.title'),
+    subtitle: t('dashboard.tenant.subtitle'),
+    scopeLabel: t('dashboard.tenant.scopeLabel'),
+    rangeLabel: t('dashboard.tenant.rangeLabel'),
     reportDateLabel: formatReportDate(dto.lastUpdatedAt, intlLocale),
     lastUpdatedAt: dto.lastUpdatedAt,
     metrics: [
       {
         id: 'totalSales',
-        label: 'Toplam Satış',
+        label: t('dashboard.tenant.totalSalesLabel'),
         value: dto.totalSales,
         unit: 'currency',
-        delta: toDelta(dto.metricsDelta.totalSalesDeltaPercentage, 'Geçen aya göre'),
+        delta: toDelta(dto.metricsDelta.totalSalesDeltaPercentage, t('dashboard.tenant.comparisonLabel')),
       },
       {
         id: 'averageBasket',
-        label: 'Ortalama Sepet Tutarı',
+        label: t('dashboard.tenant.averageBasketLabel'),
         value: dto.averageBasket,
         unit: 'currency',
-        delta: toDelta(dto.metricsDelta.averageBasketDeltaPercentage, 'Geçen aya göre'),
+        delta: toDelta(dto.metricsDelta.averageBasketDeltaPercentage, t('dashboard.tenant.comparisonLabel')),
       },
       {
         id: 'totalOrders',
-        label: 'Toplam Sipariş',
+        label: t('dashboard.tenant.totalOrdersLabel'),
         value: dto.totalOrders,
         unit: 'count',
-        delta: toDelta(dto.metricsDelta.totalOrdersDeltaPercentage, 'Geçen aya göre'),
+        delta: toDelta(dto.metricsDelta.totalOrdersDeltaPercentage, t('dashboard.tenant.comparisonLabel')),
       },
       {
         id: 'totalStores',
-        label: 'Toplam Mağaza',
+        label: t('dashboard.tenant.totalStoresLabel'),
         value: dto.totalStores,
         unit: 'count',
       },
@@ -297,31 +300,31 @@ function buildTenantSalesDashboard(
     summary: [
       {
         id: 'summary-total-sales',
-        label: 'Toplam Satış',
+        label: t('dashboard.tenant.summaryTotalSales'),
         value: dto.summary.totalSales,
         unit: 'currency',
       },
       {
         id: 'summary-total-orders',
-        label: 'Toplam Sipariş',
+        label: t('dashboard.tenant.summaryTotalOrders'),
         value: dto.summary.totalOrders,
         unit: 'count',
       },
       {
         id: 'summary-average-order',
-        label: 'Ortalama Sipariş Değeri',
+        label: t('dashboard.tenant.summaryAverageOrder'),
         value: dto.summary.averageOrderValue,
         unit: 'currency',
       },
       {
         id: 'summary-top-product',
-        label: 'En Çok Satılan Ürün',
+        label: t('dashboard.tenant.summaryTopProduct'),
         value: dto.summary.topProductName ?? '-',
         unit: 'text',
       },
       {
         id: 'summary-top-store',
-        label: 'En Yüksek Satış Yapan Mağaza',
+        label: t('dashboard.tenant.summaryTopStore'),
         value: dto.summary.topStoreName ?? '-',
         unit: 'text',
       },
@@ -595,7 +598,7 @@ function SalesTooltip({
 }
 
 export function TenantDashboard() {
-  const { locale } = useI18n()
+  const { t, locale } = useI18n()
   const router = useRouter()
   const { data: overviewData, isLoading } = useSalesDashboard()
   const intlLocale = resolveIntlLocale(locale)
@@ -604,7 +607,7 @@ export function TenantDashboard() {
     return <DashboardSkeleton />
   }
 
-  const data = buildTenantSalesDashboard(overviewData, intlLocale)
+  const data = buildTenantSalesDashboard(overviewData, intlLocale, t)
   const totalStores = data.cityDistribution.reduce((sum, item) => sum + item.storeCount, 0)
   const maxStoreSales = Math.max(1, ...data.storePerformance.map((item) => item.sales))
 
@@ -633,7 +636,7 @@ export function TenantDashboard() {
             color: 'text.primary',
           }}
         >
-          Satış Paneli
+          {data.title}
         </Typography>
       </Box>
 
@@ -648,21 +651,21 @@ export function TenantDashboard() {
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, lg: 7 }}>
           <SectionCard
-            title="Satış İstatistikleri"
-            subtitle="Son 6 aya ait toplam satış ve sipariş performansı"
+            title={t('dashboard.tenant.statisticsTitle')}
+            subtitle={t('dashboard.tenant.statisticsSubtitle')}
             action={<Chip label={data.rangeLabel} variant="outlined" sx={{ borderRadius: 3 }} />}
           >
             <Stack direction="row" spacing={2.5} sx={{ mb: 2.5 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box sx={{ width: 28, height: 3, borderRadius: 99, backgroundColor: '#20b486' }} />
                 <Typography variant="caption" color="text.secondary">
-                  Toplam Satış (₺)
+                  {t('dashboard.tenant.totalSalesChartLabel')}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box sx={{ width: 28, height: 3, borderRadius: 99, backgroundColor: '#3b82f6' }} />
                 <Typography variant="caption" color="text.secondary">
-                  Sipariş Sayısı
+                  {t('dashboard.tenant.orderCountChartLabel')}
                 </Typography>
               </Box>
             </Stack>
@@ -703,7 +706,7 @@ export function TenantDashboard() {
                     yAxisId="sales"
                     type="monotone"
                     dataKey="sales"
-                    name="Toplam Satış"
+                    name={t('dashboard.tenant.totalSalesSeriesName')}
                     stroke="#20b486"
                     strokeWidth={2.5}
                     fill="url(#sales-fill)"
@@ -714,7 +717,7 @@ export function TenantDashboard() {
                     yAxisId="orders"
                     type="monotone"
                     dataKey="orders"
-                    name="Sipariş Sayısı"
+                    name={t('dashboard.tenant.orderCountSeriesName')}
                     stroke="#3b82f6"
                     strokeWidth={2.5}
                     dot={{ r: 4, fill: '#3b82f6', strokeWidth: 0 }}
@@ -728,9 +731,9 @@ export function TenantDashboard() {
 
         <Grid size={{ xs: 12, lg: 5 }}>
           <SectionCard
-            title="Mağazaların Şehirlere Göre Dağılımı"
-            subtitle={`Toplam ${formatCount(totalStores, intlLocale)} mağaza`}
-            action={<Chip label="Şehirlere Göre" variant="outlined" sx={{ borderRadius: 3 }} />}
+            title={t('dashboard.tenant.cityDistributionTitle')}
+            subtitle={t('dashboard.tenant.cityDistributionSubtitle', { count: totalStores })}
+            action={<Chip label={t('dashboard.tenant.cityDistributionLabel')} variant="outlined" sx={{ borderRadius: 3 }} />}
           >
             <Stack direction="column" spacing={2} alignItems="stretch">
               <Box
@@ -778,7 +781,7 @@ export function TenantDashboard() {
                     {formatCount(totalStores, intlLocale)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Toplam Mağaza
+                    {t('dashboard.tenant.totalStoresLabel')}
                   </Typography>
                 </Box>
               </Box>
@@ -806,7 +809,11 @@ export function TenantDashboard() {
                       fontWeight={700}
                       sx={{ flexShrink: 0, whiteSpace: 'nowrap', fontSize: { xs: 12, sm: 14 } }}
                     >
-                      {`${item.storeCount} (%${item.percentage.toFixed(1).replace('.0', '')})`}
+                      {`${item.storeCount} (${
+                        locale === 'tr'
+                          ? `%${item.percentage.toFixed(1).replace('.0', '')}`
+                          : `${item.percentage.toFixed(1).replace('.0', '')}%`
+                      })`}
                     </Typography>
                   </Box>
                 ))}
@@ -819,9 +826,9 @@ export function TenantDashboard() {
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <SectionCard
-            title="Mağazalara Göre Toplam Satışlar"
-            subtitle="Bu aya ait toplam satış performansı"
-            action={<Chip label="Bu Ay" variant="outlined" sx={{ borderRadius: 3 }} />}
+            title={t('dashboard.tenant.storeSalesPerformanceTitle')}
+            subtitle={t('dashboard.tenant.storeSalesPerformanceSubtitle')}
+            action={<Chip label={t('dashboard.tenant.thisMonthBadge')} variant="outlined" sx={{ borderRadius: 3 }} />}
           >
             <Stack spacing={2}>
               {data.storePerformance.map((store) => (
@@ -835,7 +842,7 @@ export function TenantDashboard() {
                     </Typography>
                   </Box>
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25, mb: 0.75 }}>
-                    {`${formatCount(store.orderCount, intlLocale)} sipariş`}
+                    {`${formatCount(store.orderCount, intlLocale)} ${t('dashboard.tenant.ordersUnit')}`}
                   </Typography>
                   <Box
                     sx={{
@@ -861,7 +868,7 @@ export function TenantDashboard() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <SectionCard title="Aylık Satış Özeti" subtitle="Bu aya ait özet bilgiler">
+          <SectionCard title={t('dashboard.tenant.monthlySummaryTitle')} subtitle={t('dashboard.tenant.monthlySummarySubtitle')}>
             <Stack divider={<Divider flexItem />} spacing={0}>
               {data.summary.map((item) => (
                 <Box
@@ -904,7 +911,7 @@ export function TenantDashboard() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 12, lg: 4 }}>
-          <SectionCard title="Hızlı İşlemler" subtitle="Satış operasyonları için kısayollar">
+          <SectionCard title={t('dashboard.tenant.quickActionsTitle')} subtitle={t('dashboard.tenant.quickActionsSubtitle')}>
             <Stack spacing={1.1}>
               {data.quickActions.map((action) => {
                 const actionStyle = quickActionStyles[action.id] ?? {
