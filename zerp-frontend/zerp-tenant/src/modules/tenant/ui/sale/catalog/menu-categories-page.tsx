@@ -14,6 +14,10 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   Table,
   TableBody,
@@ -25,6 +29,7 @@ import {
 } from '@mui/material'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 import { ROUTES, withLocale } from '@/core/constants/routes'
 import { useI18n } from '@/core/i18n/i18n-provider'
@@ -57,6 +62,7 @@ export function MenuCategoriesPage({ menuId }: Props) {
   const { scope } = useShopScope()
   const selectedShopId = scope.mode === 'SHOP' ? scope.shopId : undefined
   const { currentTenantId, hasPermissionForTarget } = useCurrentUserPermissions()
+  const [categoryDeleteConfirm, setCategoryDeleteConfirm] = useState<MenuCategoryResponseDto | null>(null)
   const unauthorizedReason = t('common.unauthorized')
 
   const canReadMenu = hasPermissionForTarget(
@@ -168,8 +174,14 @@ export function MenuCategoriesPage({ menuId }: Props) {
     }
 
     deleteCategory(category.id, {
-      onSuccess: () => showToast(t('sale.category.deletedToast')),
-      onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      onSuccess: () => {
+        showToast(t('sale.category.deletedToast'))
+        setCategoryDeleteConfirm(null)
+      },
+      onError: (err) => {
+        showToast(getUserFriendlyError(err), { severity: 'error' })
+        setCategoryDeleteConfirm(null)
+      },
     })
   }
 
@@ -367,7 +379,7 @@ export function MenuCategoriesPage({ menuId }: Props) {
                               size="small"
                               color="error"
                               disabled={!canDeleteCategory(category)}
-                              onClick={() => handleDelete(category)}
+                              onClick={() => setCategoryDeleteConfirm(category)}
                             >
                               <DeleteIcon fontSize="small" />
                             </IconButton>
@@ -382,6 +394,33 @@ export function MenuCategoriesPage({ menuId }: Props) {
           )}
         </CardContent>
       </Card>
+
+      <Dialog
+        open={Boolean(categoryDeleteConfirm)}
+        onClose={() => setCategoryDeleteConfirm(null)}
+      >
+        <DialogTitle>{t('sale.category.deleteConfirmTitle')}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            {t('sale.category.deleteConfirmText')}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCategoryDeleteConfirm(null)}>{t('common.cancel')}</Button>
+          <Button
+            onClick={() => {
+              if (categoryDeleteConfirm) {
+                handleDelete(categoryDeleteConfirm)
+              }
+            }}
+            variant="contained"
+            color="error"
+            autoFocus
+          >
+            {t('common.delete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

@@ -1,9 +1,16 @@
 'use client'
+import AddIcon from '@mui/icons-material/Add'
+import DeleteIcon from '@mui/icons-material/Delete'
+import MenuBookIcon from '@mui/icons-material/MenuBook'
+import TuneIcon from '@mui/icons-material/Tune'
 import {
   Box,
   Button,
-  Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   Table,
   TableBody,
@@ -14,21 +21,18 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
-import MenuBookIcon from '@mui/icons-material/MenuBook'
-import TuneIcon from '@mui/icons-material/Tune'
 import { useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
-import { useProducts, useDeleteProduct } from '../../../hooks/use-products'
+
+import { useDeleteProduct,useProducts } from '../../../hooks/use-products'
 import type { ProductResponseDto } from '../../../types/sale'
+import { ProductExtraOptionDialog } from './product-extra-option-dialog'
 import { ProductFormDialog } from './product-form-dialog'
 import { ProductRecipeDialog } from './product-recipe-dialog'
-import { ProductExtraOptionDialog } from './product-extra-option-dialog'
 
 export function ProductList() {
   const { t } = useI18n()
@@ -41,6 +45,7 @@ export function ProductList() {
 
   const [formOpen, setFormOpen] = useState(false)
   const [editProduct, setEditProduct] = useState<ProductResponseDto | null>(null)
+  const [deleteConfirmProduct, setDeleteConfirmProduct] = useState<ProductResponseDto | null>(null)
 
   const [recipeProduct, setRecipeProduct] = useState<ProductResponseDto | null>(null)
   const [extraOptionProduct, setExtraOptionProduct] = useState<ProductResponseDto | null>(null)
@@ -53,15 +58,16 @@ export function ProductList() {
 
   const { mutate: deleteProduct } = useDeleteProduct()
 
-  function handleEdit(product: ProductResponseDto) {
-    setEditProduct(product)
-    setFormOpen(true)
-  }
-
   function handleDelete(id: string) {
     deleteProduct(id, {
-      onSuccess: () => showToast(t('sale.product.deletedToast')),
-      onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      onSuccess: () => {
+        showToast(t('sale.product.deletedToast'))
+        setDeleteConfirmProduct(null)
+      },
+      onError: (err) => {
+        showToast(getUserFriendlyError(err), { severity: 'error' })
+        setDeleteConfirmProduct(null)
+      },
     })
   }
 
@@ -92,14 +98,13 @@ export function ProductList() {
               <TableRow>
                 <TableCell>{t('sale.product.form.name')}</TableCell>
                 <TableCell>{t('sale.product.form.preparationTime')}</TableCell>
-                <TableCell>{t('sale.product.form.isActive')}</TableCell>
                 <TableCell align="right">{t('common.actions')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {!data?.data?.length ? (
                 <TableRow>
-                  <TableCell colSpan={4} align="center">
+                  <TableCell colSpan={3} align="center">
                     {t('sale.product.emptyState')}
                   </TableCell>
                 </TableRow>
@@ -116,13 +121,6 @@ export function ProductList() {
                     </TableCell>
                     <TableCell>
                       {product.preparationTime != null ? `${product.preparationTime} dk` : '—'}
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={product.isActive ? 'Aktif' : 'Pasif'}
-                        size="small"
-                        color={product.isActive ? 'success' : 'default'}
-                      />
                     </TableCell>
                     <TableCell align="right">
                       <Tooltip title={t('sale.product.recipeButton')}>
@@ -143,16 +141,11 @@ export function ProductList() {
                           <TuneIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title={t('common.edit')}>
-                        <IconButton size="small" onClick={() => handleEdit(product)}>
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
                       <Tooltip title={t('common.delete')}>
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() => setDeleteConfirmProduct(product)}
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
@@ -201,6 +194,33 @@ export function ProductList() {
           onClose={() => setExtraOptionProduct(null)}
         />
       )}
+
+      <Dialog
+        open={Boolean(deleteConfirmProduct)}
+        onClose={() => setDeleteConfirmProduct(null)}
+      >
+        <DialogTitle>{t('sale.product.deleteConfirmTitle')}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            {t('sale.product.deleteConfirmText')}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConfirmProduct(null)}>{t('common.cancel')}</Button>
+          <Button
+            onClick={() => {
+              if (deleteConfirmProduct) {
+                handleDelete(deleteConfirmProduct.id)
+              }
+            }}
+            variant="contained"
+            color="error"
+            autoFocus
+          >
+            {t('common.delete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

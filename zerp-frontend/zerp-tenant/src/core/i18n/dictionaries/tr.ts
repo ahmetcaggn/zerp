@@ -918,6 +918,8 @@ export const trMessages = {
       createdToast: 'Ürün oluşturuldu.',
       updatedToast: 'Ürün güncellendi.',
       deletedToast: 'Ürün silindi.',
+      deleteConfirmTitle: 'Ürünü Sil',
+      deleteConfirmText: 'Bu ürünü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
       form: {
         name: 'Ürün Adı',
         description: 'Açıklama',
@@ -935,6 +937,8 @@ export const trMessages = {
       createdToast: 'Reçete oluşturuldu.',
       updatedToast: 'Reçete güncellendi.',
       deletedToast: 'Reçete silindi.',
+      deleteConfirmTitle: 'Reçeteyi Sil',
+      deleteConfirmText: 'Bu reçeteyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
       form: {
         name: 'Reçete Adı',
         isDefault: 'Varsayılan',
@@ -955,6 +959,8 @@ export const trMessages = {
       createdToast: 'Ekstra seçenek oluşturuldu.',
       updatedToast: 'Ekstra seçenek güncellendi.',
       deletedToast: 'Ekstra seçenek silindi.',
+      deleteConfirmTitle: 'Ekstra Seçeneği Sil',
+      deleteConfirmText: 'Bu ekstra seçeneği silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
       form: {
         name: 'Seçenek Adı',
         description: 'Açıklama',
@@ -973,6 +979,8 @@ export const trMessages = {
       createdToast: 'Menü oluşturuldu.',
       updatedToast: 'Menü güncellendi.',
       deletedToast: 'Menü silindi.',
+      deleteConfirmTitle: 'Menüyü Sil',
+      deleteConfirmText: 'Bu menüyü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
       language: {
         tr: 'Türkçe',
         en: 'İngilizce',
@@ -1003,6 +1011,8 @@ export const trMessages = {
       createdToast: 'Kategori oluşturuldu.',
       updatedToast: 'Kategori güncellendi.',
       deletedToast: 'Kategori silindi.',
+      deleteConfirmTitle: 'Kategoriyi Sil',
+      deleteConfirmText: 'Bu kategoriyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
       reorderedToast: 'Kategori sırası güncellendi.',
       moveUpButton: 'Yukarı Taşı',
       moveDownButton: 'Aşağı Taşı',
@@ -1021,6 +1031,8 @@ export const trMessages = {
       createdToast: 'Menü öğesi oluşturuldu.',
       updatedToast: 'Menü öğesi güncellendi.',
       deletedToast: 'Menü öğesi silindi.',
+      deleteConfirmTitle: 'Menü Öğesini Sil',
+      deleteConfirmText: 'Bu menü öğesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
       form: {
         name: 'Ad',
         description: 'Açıklama',

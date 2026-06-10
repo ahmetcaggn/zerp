@@ -75,6 +75,8 @@ export function CatalogOverviewPage() {
   )
 
   const [activationModalMenu, setActivationModalMenu] = useState<MenuResponseDto | null>(null)
+  const [menuDeleteConfirm, setMenuDeleteConfirm] = useState<MenuResponseDto | null>(null)
+  const [productDeleteConfirm, setProductDeleteConfirm] = useState<ProductResponseDto | null>(null)
   const [productPage, setProductPage] = useState(0)
   const [productRowsPerPage, setProductRowsPerPage] = useState(10)
 
@@ -159,9 +161,13 @@ export function CatalogOverviewPage() {
     deleteMenu(menu.id, {
       onSuccess: () => {
         showToast(t('sale.menu.deletedToast'))
+        setMenuDeleteConfirm(null)
         void refetchMenus()
       },
-      onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      onError: (err) => {
+        showToast(getUserFriendlyError(err), { severity: 'error' })
+        setMenuDeleteConfirm(null)
+      },
     })
   }
 
@@ -172,8 +178,14 @@ export function CatalogOverviewPage() {
     }
 
     deleteProduct(product.id, {
-      onSuccess: () => showToast(t('sale.product.deletedToast')),
-      onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      onSuccess: () => {
+        showToast(t('sale.product.deletedToast'))
+        setProductDeleteConfirm(null)
+      },
+      onError: (err) => {
+        showToast(getUserFriendlyError(err), { severity: 'error' })
+        setProductDeleteConfirm(null)
+      },
     })
   }
 
@@ -427,7 +439,7 @@ export function CatalogOverviewPage() {
                                 size="small"
                                 color="error"
                                 disabled={!canUseMenuAction(menu, 'DELETE_MENU')}
-                                onClick={() => handleDeleteMenu(menu)}
+                                onClick={() => setMenuDeleteConfirm(menu)}
                               >
                                 <DeleteIcon sx={{ fontSize: '1.1rem' }} />
                               </IconButton>
@@ -496,14 +508,13 @@ export function CatalogOverviewPage() {
                     <TableRow>
                       <TableCell>{t('sale.product.form.name')}</TableCell>
                       <TableCell>{t('sale.product.form.preparationTime')}</TableCell>
-                      <TableCell>{t('sale.product.form.isActive')}</TableCell>
                       <TableCell align="right">{t('common.actions')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {products.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={4} align="center">
+                        <TableCell colSpan={3} align="center">
                           {t('sale.product.emptyState')}
                         </TableCell>
                       </TableRow>
@@ -536,27 +547,7 @@ export function CatalogOverviewPage() {
                               ? `${product.preparationTime} dk`
                               : '—'}
                           </TableCell>
-                          <TableCell>
-                            {product.isActive ? t('common.active') : t('common.passive')}
-                          </TableCell>
                           <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                            <Tooltip
-                              title={
-                                canUseProductAction(product, 'UPDATE_PRODUCT')
-                                  ? t('common.edit')
-                                  : unauthorizedReason
-                              }
-                            >
-                              <span>
-                                <IconButton
-                                  size="small"
-                                  disabled={!canUseProductAction(product, 'UPDATE_PRODUCT')}
-                                  onClick={() => goTo(`${ROUTES.catalog}/products/${product.id}`)}
-                                >
-                                  <EditIcon fontSize="small" />
-                                </IconButton>
-                              </span>
-                            </Tooltip>
                             <Tooltip
                               title={
                                 canUseProductAction(product, 'DELETE_PRODUCT')
@@ -569,7 +560,7 @@ export function CatalogOverviewPage() {
                                   size="small"
                                   color="error"
                                   disabled={!canUseProductAction(product, 'DELETE_PRODUCT')}
-                                  onClick={() => handleDeleteProduct(product)}
+                                  onClick={() => setProductDeleteConfirm(product)}
                                 >
                                   <DeleteIcon fontSize="small" />
                                 </IconButton>
@@ -627,6 +618,60 @@ export function CatalogOverviewPage() {
             }}
           >
             {t('sale.menu.activationModal.confirm')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(menuDeleteConfirm)}
+        onClose={() => setMenuDeleteConfirm(null)}
+      >
+        <DialogTitle>{t('sale.menu.deleteConfirmTitle')}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            {t('sale.menu.deleteConfirmText')}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setMenuDeleteConfirm(null)}>{t('common.cancel')}</Button>
+          <Button
+            onClick={() => {
+              if (menuDeleteConfirm) {
+                handleDeleteMenu(menuDeleteConfirm)
+              }
+            }}
+            variant="contained"
+            color="error"
+            autoFocus
+          >
+            {t('common.delete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(productDeleteConfirm)}
+        onClose={() => setProductDeleteConfirm(null)}
+      >
+        <DialogTitle>{t('sale.product.deleteConfirmTitle')}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            {t('sale.product.deleteConfirmText')}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setProductDeleteConfirm(null)}>{t('common.cancel')}</Button>
+          <Button
+            onClick={() => {
+              if (productDeleteConfirm) {
+                handleDeleteProduct(productDeleteConfirm)
+              }
+            }}
+            variant="contained"
+            color="error"
+            autoFocus
+          >
+            {t('common.delete')}
           </Button>
         </DialogActions>
       </Dialog>

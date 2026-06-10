@@ -3,7 +3,6 @@
 import AddIcon from '@mui/icons-material/Add'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
 import {
   Alert,
   Box,
@@ -11,6 +10,10 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   Table,
   TableBody,
@@ -58,6 +61,7 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
 
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [itemDeleteConfirm, setItemDeleteConfirm] = useState<MenuItemResponseDto | null>(null)
 
   const canReadCategory = hasPermissionForTarget(
     PermissionActions.READ_MENU_CATEGORY,
@@ -188,8 +192,14 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
     }
 
     deleteMenuItem(item.id, {
-      onSuccess: () => showToast(t('sale.menuItem.deletedToast')),
-      onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      onSuccess: () => {
+        showToast(t('sale.menuItem.deletedToast'))
+        setItemDeleteConfirm(null)
+      },
+      onError: (err) => {
+        showToast(getUserFriendlyError(err), { severity: 'error' })
+        setItemDeleteConfirm(null)
+      },
     })
   }
 
@@ -332,19 +342,7 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
                         <TableCell>₺{item.price}</TableCell>
                         <TableCell>{productLabel}</TableCell>
                         <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                          <Tooltip
-                            title={canUpdateMenuItem(item) ? t('common.edit') : unauthorizedReason}
-                          >
-                            <span>
-                              <IconButton
-                                size="small"
-                                disabled={!canUpdateMenuItem(item)}
-                                onClick={() => goTo(`${ROUTES.catalog}/menu-items/${item.id}`)}
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
-                            </span>
-                          </Tooltip>
+
                           <Tooltip
                             title={
                               canDeleteMenuItem(item) ? t('common.delete') : unauthorizedReason
@@ -355,7 +353,7 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
                                 size="small"
                                 color="error"
                                 disabled={!canDeleteMenuItem(item)}
-                                onClick={() => handleDelete(item)}
+                                onClick={() => setItemDeleteConfirm(item)}
                               >
                                 <DeleteIcon fontSize="small" />
                               </IconButton>
@@ -383,6 +381,33 @@ export function CategoryMenuItemsPage({ categoryId }: Props) {
           />
         </CardContent>
       </Card>
+
+      <Dialog
+        open={Boolean(itemDeleteConfirm)}
+        onClose={() => setItemDeleteConfirm(null)}
+      >
+        <DialogTitle>{t('sale.menuItem.deleteConfirmTitle')}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            {t('sale.menuItem.deleteConfirmText')}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setItemDeleteConfirm(null)}>{t('common.cancel')}</Button>
+          <Button
+            onClick={() => {
+              if (itemDeleteConfirm) {
+                handleDelete(itemDeleteConfirm)
+              }
+            }}
+            variant="contained"
+            color="error"
+            autoFocus
+          >
+            {t('common.delete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

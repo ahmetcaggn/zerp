@@ -11,6 +11,10 @@ import {
   CardContent,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   FormControl,
   FormControlLabel,
@@ -132,6 +136,7 @@ export function ProductExtraOptionManager({ productId, productName, productShopI
   const { mutate: deleteOption } = useDeleteProductExtraOption()
 
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [deleteConfirmOption, setDeleteConfirmOption] = useState<ProductExtraOptionResponseDto | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState<OptionFormState>(EMPTY_FORM())
 
@@ -265,13 +270,20 @@ export function ProductExtraOptionManager({ productId, productName, productShopI
     }
 
     deleteOption(option.id, {
-      onSuccess: () => showToast(t('sale.extraOption.deletedToast')),
-      onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      onSuccess: () => {
+        showToast(t('sale.extraOption.deletedToast'))
+        setDeleteConfirmOption(null)
+      },
+      onError: (err) => {
+        showToast(getUserFriendlyError(err), { severity: 'error' })
+        setDeleteConfirmOption(null)
+      },
     })
   }
 
   return (
-    <Card variant="outlined">
+    <>
+      <Card variant="outlined">
       <CardContent>
         <Box
           sx={{
@@ -368,7 +380,7 @@ export function ProductExtraOptionManager({ productId, productName, productShopI
                           size="small"
                           color="error"
                           disabled={!canDeleteOption(option)}
-                          onClick={() => handleDelete(option)}
+                          onClick={() => setDeleteConfirmOption(option)}
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
@@ -547,5 +559,33 @@ export function ProductExtraOptionManager({ productId, productName, productShopI
         )}
       </CardContent>
     </Card>
+
+    <Dialog
+      open={Boolean(deleteConfirmOption)}
+      onClose={() => setDeleteConfirmOption(null)}
+    >
+      <DialogTitle>{t('sale.extraOption.deleteConfirmTitle')}</DialogTitle>
+      <DialogContent>
+        <Typography variant="body2">
+          {t('sale.extraOption.deleteConfirmText')}
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setDeleteConfirmOption(null)}>{t('common.cancel')}</Button>
+        <Button
+          onClick={() => {
+            if (deleteConfirmOption) {
+              handleDelete(deleteConfirmOption)
+            }
+          }}
+          variant="contained"
+          color="error"
+          autoFocus
+        >
+          {t('common.delete')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+    </>
   )
 }

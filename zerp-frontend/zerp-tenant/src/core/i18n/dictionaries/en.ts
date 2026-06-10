@@ -965,6 +965,8 @@ export const enMessages = {
       createdToast: 'Product created.',
       updatedToast: 'Product updated.',
       deletedToast: 'Product deleted.',
+      deleteConfirmTitle: 'Delete Product',
+      deleteConfirmText: 'Are you sure you want to delete this product? This action cannot be undone.',
       form: {
         name: 'Product Name',
         description: 'Description',
@@ -982,6 +984,8 @@ export const enMessages = {
       createdToast: 'Recipe created.',
       updatedToast: 'Recipe updated.',
       deletedToast: 'Recipe deleted.',
+      deleteConfirmTitle: 'Delete Recipe',
+      deleteConfirmText: 'Are you sure you want to delete this recipe? This action cannot be undone.',
       form: {
         name: 'Recipe Name',
         isDefault: 'Default',
@@ -1002,6 +1006,8 @@ export const enMessages = {
       createdToast: 'Extra option created.',
       updatedToast: 'Extra option updated.',
       deletedToast: 'Extra option deleted.',
+      deleteConfirmTitle: 'Delete Extra Option',
+      deleteConfirmText: 'Are you sure you want to delete this extra option? This action cannot be undone.',
       form: {
         name: 'Option Name',
         description: 'Description',
@@ -1020,6 +1026,8 @@ export const enMessages = {
       createdToast: 'Menu created.',
       updatedToast: 'Menu updated.',
       deletedToast: 'Menu deleted.',
+      deleteConfirmTitle: 'Delete Menu',
+      deleteConfirmText: 'Are you sure you want to delete this menu? This action cannot be undone.',
       language: {
         tr: 'Turkish',
         en: 'English',
@@ -1050,6 +1058,8 @@ export const enMessages = {
       createdToast: 'Category created.',
       updatedToast: 'Category updated.',
       deletedToast: 'Category deleted.',
+      deleteConfirmTitle: 'Delete Category',
+      deleteConfirmText: 'Are you sure you want to delete this category? This action cannot be undone.',
       reorderedToast: 'Category order updated.',
       moveUpButton: 'Move Up',
       moveDownButton: 'Move Down',
@@ -1068,6 +1078,8 @@ export const enMessages = {
       createdToast: 'Menu item created.',
       updatedToast: 'Menu item updated.',
       deletedToast: 'Menu item deleted.',
+      deleteConfirmTitle: 'Delete Menu Item',
+      deleteConfirmText: 'Are you sure you want to delete this menu item? This action cannot be undone.',
       form: {
         name: 'Name',
         description: 'Description',

@@ -8,8 +8,6 @@ import {
   Card,
   CardContent,
   CircularProgress,
-  FormControlLabel,
-  Switch,
   TextField,
   Tooltip,
   Typography,
@@ -114,16 +112,7 @@ function ProductFormCard({
               />
             </Box>
 
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isActive}
-                  disabled={disabled}
-                  onChange={(e) => setIsActive(e.target.checked)}
-                />
-              }
-              label={t('sale.product.form.isActive')}
-            />
+
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
               <Button onClick={onCancel} disabled={isPending}>

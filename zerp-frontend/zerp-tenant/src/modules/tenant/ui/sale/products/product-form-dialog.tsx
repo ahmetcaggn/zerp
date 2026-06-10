@@ -6,15 +6,15 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
-  Switch,
   TextField,
 } from '@mui/material'
 import { useState } from 'react'
+
 import { useI18n } from '@/core/i18n/i18n-provider'
 import { useShopScope } from '@/core/providers/shop-scope-provider'
 import { useToast } from '@/core/providers/toast-provider'
 import { getUserFriendlyError } from '@/core/utils/error-message'
+
 import { useCreateProduct, useUpdateProduct } from '../../../hooks/use-products'
 import type { ProductResponseDto } from '../../../types/sale'
 
@@ -118,12 +118,7 @@ export function ProductFormDialog({ open, mode, product, onClose }: Props) {
                 inputProps={{ min: 0 }}
               />
             </Box>
-            <FormControlLabel
-              control={
-                <Switch checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-              }
-              label={t('sale.product.form.isActive')}
-            />
+
           </Box>
         </DialogContent>
         <DialogActions>

@@ -12,6 +12,10 @@ import {
   Checkbox,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   FormControl,
   FormControlLabel,
@@ -131,6 +135,7 @@ export function ProductRecipeManager({ productId, productName, productShopId }: 
   const { mutate: deleteRecipe } = useDeleteProductRecipe()
 
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [deleteConfirmRecipe, setDeleteConfirmRecipe] = useState<ProductRecipeResponseDto | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState<RecipeFormState>(EMPTY_FORM())
 
@@ -278,13 +283,20 @@ export function ProductRecipeManager({ productId, productName, productShopId }: 
     }
 
     deleteRecipe(recipe.id, {
-      onSuccess: () => showToast(t('sale.recipe.deletedToast')),
-      onError: (err) => showToast(getUserFriendlyError(err), { severity: 'error' }),
+      onSuccess: () => {
+        showToast(t('sale.recipe.deletedToast'))
+        setDeleteConfirmRecipe(null)
+      },
+      onError: (err) => {
+        showToast(getUserFriendlyError(err), { severity: 'error' })
+        setDeleteConfirmRecipe(null)
+      },
     })
   }
 
   return (
-    <Card variant="outlined">
+    <>
+      <Card variant="outlined">
       <CardContent>
         <Box
           sx={{
@@ -376,7 +388,7 @@ export function ProductRecipeManager({ productId, productName, productShopId }: 
                           size="small"
                           color="error"
                           disabled={!canDeleteRecipe(recipe)}
-                          onClick={() => handleDelete(recipe)}
+                          onClick={() => setDeleteConfirmRecipe(recipe)}
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
@@ -546,5 +558,33 @@ export function ProductRecipeManager({ productId, productName, productShopId }: 
         )}
       </CardContent>
     </Card>
+
+    <Dialog
+      open={Boolean(deleteConfirmRecipe)}
+      onClose={() => setDeleteConfirmRecipe(null)}
+    >
+      <DialogTitle>{t('sale.recipe.deleteConfirmTitle')}</DialogTitle>
+      <DialogContent>
+        <Typography variant="body2">
+          {t('sale.recipe.deleteConfirmText')}
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setDeleteConfirmRecipe(null)}>{t('common.cancel')}</Button>
+        <Button
+          onClick={() => {
+            if (deleteConfirmRecipe) {
+              handleDelete(deleteConfirmRecipe)
+            }
+          }}
+          variant="contained"
+          color="error"
+          autoFocus
+        >
+          {t('common.delete')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+    </>
   )
 }
