@@ -45,7 +45,7 @@ describe('RestaurantCard', () => {
     expect(screen.getByText('North Cafe')).toBeInTheDocument()
     expect(screen.getByText('İstanbul / Kadıköy')).toBeInTheDocument()
     expect(screen.getByText('Third wave coffee and breakfast.')).toBeInTheDocument()
-    expect(screen.getByText('-')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Menüyü Aç/i })).toBeInTheDocument()
     expect(screen.queryByText(/Google Maps/i)).not.toBeInTheDocument()
   })
 })

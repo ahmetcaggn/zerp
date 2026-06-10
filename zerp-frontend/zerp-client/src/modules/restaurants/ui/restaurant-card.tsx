@@ -24,6 +24,7 @@ import type { CuisineCategory } from '../data/cuisine-categories'
 import { cuisineCategoryLabelKey } from '../data/cuisine-categories'
 import type { Restaurant } from '../types'
 import { FadeInImage } from './fade-in-image'
+import { ProductImagePlaceholder } from './product-image-placeholder'
 
 function calculateCrowFlyDistanceKm(
   originLat: number,
@@ -140,7 +141,7 @@ function CuisineCategoryTags({ categories }: { categories: CuisineCategory[] }) 
   }, [labels])
 
   if (categories.length === 0) {
-    return null
+    return <Box aria-hidden="true" sx={{ minHeight: 24 }} />
   }
 
   const chipSx = {
@@ -293,14 +294,11 @@ export function RestaurantCard({ restaurant, userLocation }: RestaurantCardProps
         }}
       >
         <Box sx={{ position: 'relative' }}>
-          <FadeInImage
-            src={
-              restaurant.imageUrl ||
-              `https://placehold.co/900x540?text=${encodeURIComponent(restaurant.name)}`
-            }
-            alt={restaurant.name}
-            sx={{ height: 180 }}
-          />
+          {restaurant.imageUrl ? (
+            <FadeInImage src={restaurant.imageUrl} alt={restaurant.name} sx={{ height: 180 }} />
+          ) : (
+            <ProductImagePlaceholder sx={{ height: 180 }} />
+          )}
           {/* Gradient Overlay */}
           <Box
             sx={{
@@ -309,33 +307,6 @@ export function RestaurantCard({ restaurant, userLocation }: RestaurantCardProps
               background: 'linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 100%)',
             }}
           />
-          {/* Open/Closed Badge */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 14,
-              right: 14,
-              px: 1.5,
-              py: 0.5,
-              borderRadius: '10px',
-              background: restaurant.isOpen
-                ? `linear-gradient(145deg, ${primaryColor} 0%, ${alpha(primaryColor, 0.85)} 100%)`
-                : 'rgba(239,68,68,0.9)',
-              backdropFilter: 'blur(8px)',
-            }}
-          >
-            <Typography
-              sx={{
-                fontSize: 12,
-                fontWeight: 700,
-                color: 'white',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-              }}
-            >
-              {restaurant.isOpen ? t('restaurants.open') : t('restaurants.closed')}
-            </Typography>
-          </Box>
           {/* Distance Badge */}
           {distanceKm !== null && (
             <Box

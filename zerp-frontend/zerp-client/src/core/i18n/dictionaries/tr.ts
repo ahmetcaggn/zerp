@@ -111,6 +111,7 @@ export const trMessages = {
     sortDistanceAscShort: 'Yakın',
     sortDistanceDescShort: 'Uzak',
     applyFilters: 'Filtrele',
+    clearFilters: 'Filtreyi Temizle',
     nearbyFiltersDisabled: 'Yakınımdakiler modunda şehir/mahalle filtreleri kapalıdır.',
     closed: 'Kapalı',
     open: 'Açık',

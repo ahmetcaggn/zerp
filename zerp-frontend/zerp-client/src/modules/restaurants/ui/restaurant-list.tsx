@@ -230,6 +230,17 @@ export function RestaurantList() {
     !cuisineSearchTerm.trim() &&
     !showAllCuisineCategories &&
     filteredCuisineCategories.length > INITIAL_VISIBLE_CUISINE_COUNT
+  const hasActiveFilters =
+    searchTerm.trim().length > 0 ||
+    appliedSearchTerm.trim().length > 0 ||
+    selectedCity.length > 0 ||
+    appliedCity.length > 0 ||
+    selectedDistrict.length > 0 ||
+    appliedDistrict.length > 0 ||
+    selectedCuisineCategories.length > 0 ||
+    appliedCuisineCategories.length > 0 ||
+    sortOrder !== 'ASC' ||
+    appliedSortOrder !== 'ASC'
 
   const resolvedCity = useMemo(() => resolveCityName(appliedCity), [appliedCity])
   const resolvedDistrict = useMemo(
@@ -362,6 +373,22 @@ export function RestaurantList() {
 
   function handleApplySearch() {
     setAppliedSearchTerm(searchTerm.trim())
+  }
+
+  function handleClearFilters() {
+    setSearchTerm('')
+    setAppliedSearchTerm('')
+    setSortOrder('ASC')
+    setAppliedSortOrder('ASC')
+    setSelectedCity('')
+    setAppliedCity('')
+    setSelectedDistrict('')
+    setAppliedDistrict('')
+    setSelectedCuisineCategories([])
+    setAppliedCuisineCategories([])
+    setCuisineSearchTerm('')
+    setShowAllCuisineCategories(false)
+    setIsFilterDrawerOpen(false)
   }
 
   function toggleCuisineCategory(category: CuisineCategory) {
@@ -800,6 +827,24 @@ export function RestaurantList() {
                       },
                     }}
                   />
+
+                  {hasActiveFilters && isNearbyMode && (
+                    <Button
+                      variant="outlined"
+                      onClick={handleClearFilters}
+                      sx={{
+                        flex: '0 0 auto',
+                        minWidth: 136,
+                        height: 40,
+                        px: 2,
+                        borderRadius: '14px',
+                        fontWeight: 700,
+                        textTransform: 'none',
+                      }}
+                    >
+                      {t('restaurants.clearFilters')}
+                    </Button>
+                  )}
                 </Stack>
 
                 {!isNearbyMode && (
@@ -868,6 +913,24 @@ export function RestaurantList() {
                     >
                       {t('restaurants.applyFilters')}
                     </Button>
+
+                    {hasActiveFilters && (
+                      <Button
+                        variant="outlined"
+                        onClick={handleClearFilters}
+                        sx={{
+                          flex: '0 0 auto',
+                          minWidth: 136,
+                          height: 40,
+                          px: 2,
+                          borderRadius: '14px',
+                          fontWeight: 700,
+                          textTransform: 'none',
+                        }}
+                      >
+                        {t('restaurants.clearFilters')}
+                      </Button>
+                    )}
                   </Stack>
                 )}
               </Stack>
@@ -980,6 +1043,21 @@ export function RestaurantList() {
               >
                 {t('restaurants.applyFilters')}
               </Button>
+              {hasActiveFilters && (
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  onClick={handleClearFilters}
+                  sx={{
+                    height: 44,
+                    borderRadius: '12px',
+                    fontWeight: 700,
+                    textTransform: 'none',
+                  }}
+                >
+                  {t('restaurants.clearFilters')}
+                </Button>
+              )}
             </Stack>
           </Drawer>
 

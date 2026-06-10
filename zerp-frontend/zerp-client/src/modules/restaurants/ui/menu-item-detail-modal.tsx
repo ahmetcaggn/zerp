@@ -27,18 +27,18 @@ interface MenuItemDetailModalProps {
   onAddToCart?: (menuItem: MenuItem, sourceRect: DOMRect) => void
 }
 
-function buildOriginalImageUrl(imageId?: string): string | null {
+function buildLargeImageUrl(imageId?: string): string | null {
   if (!imageId) {
     return null
   }
-  return `/api/sale/public/images/${encodeURIComponent(imageId)}?size=ORIGINAL`
+  return `/api/sale/public/images/${encodeURIComponent(imageId)}?size=LARGE`
 }
 
 export function MenuItemDetailModal({ open, onClose, menuItem, onAddToCart }: MenuItemDetailModalProps) {
   const { t } = useI18n()
 
   if (!menuItem) return null
-  const imageSrc = buildOriginalImageUrl(menuItem.imageId) ?? menuItem.imageUrl
+  const imageSrc = buildLargeImageUrl(menuItem.imageId) ?? menuItem.imageUrl
   const hasNoImage =
     !imageSrc ||
     imageSrc.includes('placeholder') ||

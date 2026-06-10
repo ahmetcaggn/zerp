@@ -138,4 +138,44 @@ describe('RestaurantList', () => {
       expect(fetchNextPage).toHaveBeenCalledTimes(1)
     })
   })
+
+  it('clears applied restaurant filters and fetches the unfiltered list', async () => {
+    mockUsePublicShopsFeedInfinite.mockReturnValue({
+      data: { pages: [] },
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: vi.fn(),
+    })
+
+    render(<RestaurantList />)
+
+    const searchInput = screen.getAllByPlaceholderText('restaurants.searchPlaceholder')[0]
+    fireEvent.change(searchInput, { target: { value: 'pizza' } })
+    fireEvent.keyDown(searchInput, { key: 'Enter' })
+
+    await waitFor(() => {
+      expect(mockUsePublicShopsFeedInfinite).toHaveBeenLastCalledWith(
+        expect.objectContaining({ q: 'pizza' }),
+      )
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'restaurants.clearFilters' }))
+
+    await waitFor(() => {
+      expect(mockUsePublicShopsFeedInfinite).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          mode: 'ALL',
+          q: undefined,
+          city: undefined,
+          state: undefined,
+          cuisineCategories: [],
+          sortBy: 'NAME',
+          order: 'ASC',
+        }),
+      )
+    })
+  })
 })

@@ -6,12 +6,11 @@ import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded'
-import LocalOfferRoundedIcon from '@mui/icons-material/LocalOfferRounded'
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded'
+import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded'
 import PhoneRoundedIcon from '@mui/icons-material/PhoneRounded'
 import RemoveIcon from '@mui/icons-material/Remove'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
-import StarRoundedIcon from '@mui/icons-material/StarRounded'
 import {
   Alert,
   Box,
@@ -65,6 +64,7 @@ import {
 import { FadeInImage } from './fade-in-image'
 import { MenuItemCard } from './menu-item-card'
 import { MenuItemDetailModal } from './menu-item-detail-modal'
+import { ProductImagePlaceholder } from './product-image-placeholder'
 
 interface MenuItemListProps {
   restaurantId: string
@@ -74,7 +74,6 @@ const PAGE_SIZE = 12
 const PREVIEW_LIMIT = 4
 const ALL_CATEGORY_ID = '__all__'
 const MENU_IMAGE_FALLBACK_URL = 'https://placehold.co/400'
-const SHOP_IMAGE_FALLBACK_URL = 'https://placehold.co/1400x600?text=Store'
 const SHOP_DAYS: ShopDayOfWeek[] = [
   'MONDAY',
   'TUESDAY',
@@ -399,7 +398,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
       return buildPublicShopImageUrl(restaurant.id, 'LARGE')
     }
 
-    return SHOP_IMAGE_FALLBACK_URL
+    return null
   }, [restaurant])
 
   const shopDescription = useMemo(() => {
@@ -793,18 +792,31 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
               gap: { xs: 2, md: 3 },
             }}
           >
-            <FadeInImage
-              src={shopHeroImage}
-              alt={restaurant?.name || t('restaurants.productsTitle')}
-              sx={{
-                width: '100%',
-                maxWidth: { xs: 280, md: 220 },
-                mx: { xs: 'auto', md: 0 },
-                aspectRatio: '1 / 1',
-                borderRadius: 2,
-                border: (theme) => `1px solid ${theme.palette.divider}`,
-              }}
-            />
+            {shopHeroImage ? (
+              <FadeInImage
+                src={shopHeroImage}
+                alt={restaurant?.name || t('restaurants.productsTitle')}
+                sx={{
+                  width: '100%',
+                  maxWidth: { xs: 280, md: 220 },
+                  mx: { xs: 'auto', md: 0 },
+                  aspectRatio: '1 / 1',
+                  borderRadius: 2,
+                  border: (theme) => `1px solid ${theme.palette.divider}`,
+                }}
+              />
+            ) : (
+              <ProductImagePlaceholder
+                sx={{
+                  width: '100%',
+                  maxWidth: { xs: 280, md: 220 },
+                  mx: { xs: 'auto', md: 0 },
+                  aspectRatio: '1 / 1',
+                  borderRadius: 2,
+                  border: (theme) => `1px solid ${theme.palette.divider}`,
+                }}
+              />
+            )}
 
             <Stack spacing={1.25} sx={{ minWidth: 0, justifyContent: 'flex-start' }}>
               <Typography variant="h2" fontWeight={800} sx={{ lineHeight: 1.15 }}>
@@ -815,18 +827,6 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
 
               <Box sx={{ display: 'grid', gap: 1 }}>
                 <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                  <Chip
-                    icon={<StarRoundedIcon />}
-                    label={`${t('restaurants.ratingLabel')}: ${ratingValue}`}
-                    variant="outlined"
-                    sx={{ fontWeight: 700 }}
-                  />
-                  <Chip
-                    icon={<LocalOfferRoundedIcon />}
-                    label={`${t('restaurants.statusLabel')}: ${statusValue}`}
-                    variant="outlined"
-                    sx={{ fontWeight: 700 }}
-                  />
                   {distanceValue && (
                     <Chip
                       icon={<LocationOnRoundedIcon />}
@@ -841,6 +841,9 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                     variant="outlined"
                     sx={{ fontWeight: 700 }}
                   />
+                </Stack>
+
+                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                   <Button
                     variant="text"
                     startIcon={<AccessTimeRoundedIcon />}
@@ -1033,6 +1036,9 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                       const previewMenuItems = (previewQuery.data?.data ?? []).map((menuItem) =>
                         mapToMenuItem(menuItem, category.name),
                       )
+                      const hasMoreCategoryItems =
+                        typeof previewQuery.data?.total === 'number' &&
+                        previewQuery.data.total > PREVIEW_LIMIT
 
                       return (
                         <Paper
@@ -1047,7 +1053,7 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                           <Box
                             sx={{
                               display: 'flex',
-                              justifyContent: 'space-between',
+                              justifyContent: 'flex-start',
                               alignItems: 'center',
                               gap: 1,
                               mb: 1.5,
@@ -1056,15 +1062,6 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                             <Typography variant="h6" fontWeight={700}>
                               {category.name}
                             </Typography>
-                            <Button
-                              size="small"
-                              onClick={() => {
-                                setSelectedCategoryId(category.id)
-                                setPage(1)
-                              }}
-                            >
-                              {t('restaurants.seeAllCategory')}
-                            </Button>
                           </Box>
 
                           <Divider sx={{ mb: 1.75 }} />
@@ -1079,19 +1076,47 @@ export function MenuItemList({ restaurantId }: MenuItemListProps) {
                           {!previewQuery.isLoading && !previewQuery.isError && (
                             <>
                               {previewMenuItems.length > 0 ? (
-                                <Grid container spacing={1.5}>
-                                  {previewMenuItems.map((menuItem) => (
-                                    <Grid size={{ xs: 12, sm: 6, lg: 6 }} key={menuItem.id}>
-                                      <MenuItemCard
-                                        menuItem={menuItem}
-                                        onClick={() => setSelectedMenuItem(menuItem)}
-                                        onAddToCart={(sourceRect) =>
-                                          handleAddToCart(menuItem, sourceRect)
-                                        }
+                                <Stack spacing={1.75}>
+                                  <Grid container spacing={1.5}>
+                                    {previewMenuItems.map((menuItem) => (
+                                      <Grid size={{ xs: 12, sm: 6, lg: 6 }} key={menuItem.id}>
+                                        <MenuItemCard
+                                          menuItem={menuItem}
+                                          onClick={() => setSelectedMenuItem(menuItem)}
+                                          onAddToCart={(sourceRect) =>
+                                            handleAddToCart(menuItem, sourceRect)
+                                          }
+                                        />
+                                      </Grid>
+                                    ))}
+                                  </Grid>
+
+                                  {hasMoreCategoryItems && (
+                                    <Box
+                                      sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: 0.25,
+                                      }}
+                                    >
+                                      <MoreVertRoundedIcon
+                                        aria-hidden="true"
+                                        sx={{ color: 'text.secondary', fontSize: 22 }}
                                       />
-                                    </Grid>
-                                  ))}
-                                </Grid>
+                                      <Button
+                                        size="small"
+                                        onClick={() => {
+                                          setSelectedCategoryId(category.id)
+                                          setPage(1)
+                                        }}
+                                      >
+                                        {t('restaurants.seeAllCategory')}
+                                      </Button>
+                                    </Box>
+                                  )}
+                                </Stack>
                               ) : (
                                 <Typography color="text.secondary">
                                   {t('restaurants.previewEmpty')}

@@ -111,6 +111,7 @@ export const enMessages = {
     sortDistanceAscShort: 'Near',
     sortDistanceDescShort: 'Far',
     applyFilters: 'Filter',
+    clearFilters: 'Clear Filters',
     nearbyFiltersDisabled: 'City and district filters are disabled in nearby mode.',
     closed: 'Closed',
     open: 'Open',
